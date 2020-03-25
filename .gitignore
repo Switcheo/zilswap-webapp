@@ -1,0 +1,30 @@
+# dependencies
+/node_modules
+
+#deployment
+/build
+/logs
+.ngploy
+
+# misc
+.DS_Store
+
+.env.*.local
+
+production.toml
+local.toml
+stage.toml
+test.toml
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+static/.media/*
+
+.DS_Store
+*.mwb.bak
+
+
+# vs code
+.vscode
