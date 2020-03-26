@@ -5,7 +5,7 @@ export default theme => ({
     color: theme.palette.primary.main,
   },
   text: {
-    padding: theme.spacing(.5, 3),
+    padding: theme.spacing(.5, 2),
   },
   outlined: {
     border: `1px solid ${theme.palette.primary.main}`,

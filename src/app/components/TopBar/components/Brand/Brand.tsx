@@ -1,25 +1,28 @@
-import { Box, Typography } from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import cls from "classnames";
 import React from "react";
-import { ReactComponent as LogoSVG } from "./logo.svg";
+import { ReactComponent as BrandSVG } from "./brand.svg";
+import { BrandProps } from "./types";
 
 const useStyles = makeStyles(theme => ({
-  root: {
+  root: (props: BrandProps) => ({
     position: "relative",
     display: "flex",
     flexDirection: "row",
-  },
+    "& path#brand-text": {
+      fill: props.theme === "dark" ? "#ffffff" : "rgba(0,0,0,.9)",
+    }
+  }),
 }));
 
-const Brand: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
-  const { className } = props;
-  const classes = useStyles();
+const Brand: React.FC<BrandProps> = (props: BrandProps) => {
+  const { className, theme, ...rest } = props;
+  const classes = useStyles(props);
 
   return (
-    <Box className={cls(classes.root, className)}>
-      <LogoSVG />
-      <Typography>zilswap</Typography>
+    <Box className={cls(classes.root, className)} {...rest}>
+      <BrandSVG />
     </Box>
   );
 };

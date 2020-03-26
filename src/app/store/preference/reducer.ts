@@ -1,4 +1,4 @@
-import { TYPES, update } from "./actions";
+import { TYPES } from "./actions";
 import { PreferenceState, PreferenceStateUpdateProps } from "./types";
 
 const LOCAL_STORAGE_KEY_THEME = "zilswap:theme";

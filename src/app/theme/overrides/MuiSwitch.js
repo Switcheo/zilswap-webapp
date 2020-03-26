@@ -4,7 +4,7 @@ export default theme => ({
   root: {
     width: 34 + 12 * 2,
     height: 14 + 12 * 2,
-    overflow: 'hidden',
+    overflow: "hidden",
     padding: 10,
   },
   switchBase: {
@@ -14,29 +14,29 @@ export default theme => ({
     boxShadow: "none",
   },
   track: {
-    backgroundColor: "#CCE7E9",
+    backgroundColor: theme.palette.primary.light,
     opacity: 1,
     borderRadius: 42,
   },
   colorSecondary: {
-    '&$checked': {
+    "&$checked": {
       color: theme.palette.primary.main,
-      '&:hover': {
+      "&:hover": {
         backgroundColor: (0, fade)(theme.palette.primary.main, theme.palette.action.hoverOpacity),
-        '@media (hover: none)': {
-          backgroundColor: 'transparent'
+        "@media (hover: none)": {
+          backgroundColor: "transparent"
         }
       }
     },
-    '&$disabled': {
+    "&$disabled": {
       color: theme.palette.primary.main,
       opacity: 0.2,
     },
-    '&$checked + $track': {
+    "&$checked + $track": {
       backgroundColor: "#295154",
     },
-    '&$disabled + $track': {
-      backgroundColor: "#CCE7E9",
+    "&$disabled + $track": {
+      backgroundColor: theme.palette.primary.light,
       opacity: 0.2,
     }
   },

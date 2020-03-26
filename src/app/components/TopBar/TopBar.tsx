@@ -26,15 +26,21 @@ const BASE_STYLE_TOGGLE_ICON = {
 
 const useStyles = makeStyles(theme => ({
   root: {
+    minWidth: "100%",
   },
   toolBar: {
     paddingLeft: 0,
-    "&>div": {
-      flex: 1,
-      flexBasis: 1,
-      display: "flex",
-      flexDirection: "row",
-    }
+    [theme.breakpoints.up("sm")]: {
+      "&>div": {
+        flex: 1,
+        flexBasis: 1,
+        display: "flex",
+        flexDirection: "row",
+      },
+    },
+    [theme.breakpoints.down("xs")]: {
+      paddingRight: 0,
+    },
   },
   btnConnect: {
 
@@ -52,6 +58,9 @@ const useStyles = makeStyles(theme => ({
       ...BASE_STYLE_TOGGLE_ICON,
       left: 5,
       backgroundImage: `url(${pathLightSvg})`,
+    },
+    [theme.breakpoints.down("xs")]: {
+      display: "none",
     },
   },
   grow: {
@@ -71,7 +80,7 @@ const TopBar: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
 
   return (
-    <AppBar {...rest} elevation={0} className={cls(classes.root, className)}>
+    <AppBar {...rest} elevation={0} position="static" className={cls(classes.root, className)}>
       <Toolbar className={classes.toolBar} variant="dense">
         <Box justifyContent="flex-start">
           <IconButton>
@@ -79,9 +88,9 @@ const TopBar: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           </IconButton>
         </Box>
         <Box justifyContent="center">
-          <Brand />
+          <Brand theme={themeType} />
         </Box>
-        <Box justifyContent="flex-end">
+        <Box display="flex" flex={1} justifyContent="flex-end">
           <Button className={classes.btnConnect}>Connect Wallet</Button>
           <Switch className={classes.switchTheme} color="secondary" checked={themeType === THEME_TOGGLE_SELECTED} onChange={() => onToggleTheme()} />
         </Box>
