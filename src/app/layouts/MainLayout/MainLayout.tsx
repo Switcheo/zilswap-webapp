@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => ({
   content: {
     flex: 1,
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "row",
   },
 }));
 

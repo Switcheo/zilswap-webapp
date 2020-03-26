@@ -16,18 +16,24 @@ const CARD_BORDER_RADIUS = 4;
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    alignSelf: "center",
-    width: 560,
-    marginTop: theme.spacing(8),
+    flex: 1,
+    paddingTop: theme.spacing(8),
+    [theme.breakpoints.down("sm")]: {
+      paddingTop: theme.spacing(6),
+    },
+    [theme.breakpoints.down("xs")]: {
+      paddingTop: theme.spacing(4),
+      paddingLeft: theme.spacing(2),
+      paddingRight: theme.spacing(2),
+    },
+  },
+  card: {
+    maxWidth: 560,
+    margin: "0 auto",
     boxShadow: theme.palette.mainBoxShadow,
     borderRadius: CARD_BORDER_RADIUS,
     [theme.breakpoints.down("sm")]: {
-      width: 450,
-      marginTop: theme.spacing(6),
-    },
-    [theme.breakpoints.down("xs")]: {
-      width: 296,
-      marginTop: theme.spacing(4),
+      maxWidth: 450,
     },
   },
   tabs: {
@@ -56,8 +62,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "&:after": {
       content: "''",
-      width: 0, 
-      height: 0, 
+      width: 0,
+      height: 0,
       borderLeft: "8px solid transparent",
       borderRight: "8px solid transparent",
       borderBottom: `8px solid ${theme.palette.background.paper}`,
@@ -72,27 +78,29 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
   const classes = useStyles();
 
   return (
-    <Paper {...rest} className={classes.root}>
-      <Box className={classes.tabs}>
-        <Button
-          disableElevation
-          color="primary"
-          variant="contained"
-          className={cls(classes.tab, classes.tabCornerLeft)}
-          activeClassName={classes.tabActive}
-          component={CustomRouterLink}
-          to="/swap">Swap</Button>
-        <Button
-          disableElevation
-          color="primary"
-          variant="contained"
-          className={cls(classes.tab, classes.tabCornerRight)}
-          activeClassName={classes.tabActive}
-          component={CustomRouterLink}
-          to="/pool">Pool</Button>
-      </Box>
-      <Box>{children}</Box>
-    </Paper>
+    <Box className={classes.root}>
+      <Paper {...rest} className={classes.card}>
+        <Box className={classes.tabs}>
+          <Button
+            disableElevation
+            color="primary"
+            variant="contained"
+            className={cls(classes.tab, classes.tabCornerLeft)}
+            activeClassName={classes.tabActive}
+            component={CustomRouterLink}
+            to="/swap">Swap</Button>
+          <Button
+            disableElevation
+            color="primary"
+            variant="contained"
+            className={cls(classes.tab, classes.tabCornerRight)}
+            activeClassName={classes.tabActive}
+            component={CustomRouterLink}
+            to="/pool">Pool</Button>
+        </Box>
+        <Box>{children}</Box>
+      </Paper>
+    </Box>
   );
 };
 
