@@ -10,6 +10,7 @@ import { ReactComponent as MenuIcon } from "./menu.svg"
 
 import pathLightSvg from "./light.svg";
 import pathDarkSvg from "./dark.svg";
+import { TopBarProps } from "./types";
 
 const THEME_TOGGLE_SELECTED = "dark";
 const BASE_STYLE_TOGGLE_ICON = {
@@ -68,8 +69,8 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const TopBar: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
-  const { children, className, ...rest } = props;
+const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+  const { children, className, onToggleDrawer, ...rest } = props;
   const classes = useStyles();
   const themeType = useSelector<RootState, string>(state => state.preference.theme);
   const dispatch = useDispatch();
@@ -83,7 +84,7 @@ const TopBar: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     <AppBar {...rest} elevation={0} position="static" className={cls(classes.root, className)}>
       <Toolbar className={classes.toolBar} variant="dense">
         <Box justifyContent="flex-start">
-          <IconButton>
+          <IconButton onClick={onToggleDrawer}>
             <MenuIcon />
           </IconButton>
         </Box>
