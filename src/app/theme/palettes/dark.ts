@@ -37,6 +37,7 @@ export default {
   background: {
     default: zilliqa.neutral[200],
   },
+  navbar: zilliqa.neutral[200],
   switcheoLogo: switcheo.logoDark,
   colors: { zilliqa, switcheo },
 };

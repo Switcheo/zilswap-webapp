@@ -17,7 +17,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Brand: React.FC<BrandProps> = (props: BrandProps) => {
-  const { className, theme, ...rest } = props;
+  const { className, ...rest } = props;
   const classes = useStyles(props);
 
   return (

@@ -1,29 +1,13 @@
-import { Box, AppBar, Switch, Toolbar, Button, IconButton } from "@material-ui/core";
+import { AppBar, Box, Button, IconButton, Toolbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { Brand } from "app/components/TopBar/components";
+import { RootState } from "app/store/types";
 import cls from "classnames";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { actions } from "app/store";
-import { RootState } from "app/store/types";
-import { Brand } from "app/components/TopBar/components";
-import { ReactComponent as MenuIcon } from "./menu.svg"
-
-import pathLightSvg from "./light.svg";
-import pathDarkSvg from "./dark.svg";
+import { useSelector } from "react-redux";
+import { ReactComponent as MenuIcon } from "./menu.svg";
 import { TopBarProps } from "./types";
-
-const THEME_TOGGLE_SELECTED = "dark";
-const BASE_STYLE_TOGGLE_ICON = {
-  content: '""',
-  height: 12,
-  width: 12,
-  display: "block",
-  position: "absolute",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
-  backgroundSize: "contain",
-  top: 3,
-};
+import ThemeSwitch from "../ThemeSwitch";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -46,20 +30,7 @@ const useStyles = makeStyles(theme => ({
   btnConnect: {
 
   },
-  switchTheme: {
-    "& .MuiSwitch-track": {
-      position: "relative",
-    },
-    "& .MuiSwitch-track::after": {
-      ...BASE_STYLE_TOGGLE_ICON,
-      right: 5,
-      backgroundImage: `url(${pathDarkSvg})`,
-    },
-    "& .Mui-checked+.MuiSwitch-track::after": {
-      ...BASE_STYLE_TOGGLE_ICON,
-      left: 5,
-      backgroundImage: `url(${pathLightSvg})`,
-    },
+  themeSwitch: {
     [theme.breakpoints.down("xs")]: {
       display: "none",
     },
@@ -73,12 +44,6 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
   const { children, className, onToggleDrawer, ...rest } = props;
   const classes = useStyles();
   const themeType = useSelector<RootState, string>(state => state.preference.theme);
-  const dispatch = useDispatch();
-
-  const onToggleTheme = () => {
-    const theme = themeType === "light" ? "dark" : "light";
-    dispatch(actions.Preference.update({ theme }));
-  };
 
   return (
     <AppBar {...rest} elevation={0} position="static" className={cls(classes.root, className)}>
@@ -93,7 +58,7 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
         </Box>
         <Box display="flex" flex={1} justifyContent="flex-end">
           <Button className={classes.btnConnect}>Connect Wallet</Button>
-          <Switch className={classes.switchTheme} color="secondary" checked={themeType === THEME_TOGGLE_SELECTED} onChange={() => onToggleTheme()} />
+          <ThemeSwitch className={classes.themeSwitch} />
         </Box>
       </Toolbar>
     </AppBar>

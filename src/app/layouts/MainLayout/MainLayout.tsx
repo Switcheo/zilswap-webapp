@@ -1,9 +1,8 @@
 import { Box, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
-import PropTypes from "prop-types";
+import { FooterBar, NavDrawer, TopBar } from "app/components";
 import React, { Suspense, useState } from "react";
 import { renderRoutes } from "react-router-config";
-import { FooterBar, TopBar, NavDrawer } from "app/components";
 
 const useStyles = makeStyles(theme => ({
   root: {

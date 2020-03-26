@@ -11,6 +11,7 @@ export interface AppPalette extends PaletteOptions {
   toolbar: SimplePaletteColorOptions;
   colors: AppColors;
   switcheoLogo: string,
+  navbar: string,
 }
 
 export interface AppTheme extends ThemeOptions {
