@@ -8,22 +8,20 @@
 }
 
 html {
-  height: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  background-color: #f4f6f8;
-  height: 100%;
+html, body, #root {
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100%;
 }
 
 a {
   text-decoration: none;
-}
-
-#root {
-  height: 100%;
 }
 
 :not(pre) > code {

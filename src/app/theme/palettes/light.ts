@@ -1,5 +1,5 @@
 import { colors } from '@material-ui/core';
-import { zilliqa } from './colors';
+import { zilliqa, switcheo } from './colors';
 
 const TEXT_COLORS = {
   primary: zilliqa.neutral[200],
@@ -33,5 +33,9 @@ export default {
     primary: TEXT_COLORS.primary,
     secondary: TEXT_COLORS.secondary,
   },
-  background: {},
+  background: {
+    default: zilliqa.neutral[100],
+  },
+  switcheoLogo: switcheo.logoLight,
+  colors: { zilliqa, switcheo },
 };
