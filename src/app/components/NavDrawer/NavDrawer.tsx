@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.colors.zilliqa.neutral[140],
   },
   buttonLeafActive: {
-    color: theme.palette.text!.secondary,
+    color: theme.palette.colors.zilliqa.neutral[100],
   },
 }));
 const NavDrawer: React.FC<DrawerProps> = (props: any) => {

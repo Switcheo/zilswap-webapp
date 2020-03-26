@@ -12,8 +12,8 @@ export default {
     main: zilliqa.primary["004"],
   },
   primary: {
-    contrastText: TEXT_COLORS.primary,
-    dark: zilliqa.primary["100"],
+    contrastText: zilliqa.neutral[100],
+    dark: zilliqa.primary["130"],
     main: zilliqa.primary["100"],
     light: zilliqa.primary["020"],
   },
@@ -36,6 +36,7 @@ export default {
   background: {
     default: zilliqa.neutral[100],
   },
+  mainBoxShadow: "0 8px 16px 0 rgba(20,155,163,0.16)",
   navbar: zilliqa.neutral[200],
   switcheoLogo: switcheo.logoLight,
   colors: { zilliqa, switcheo },

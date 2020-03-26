@@ -3,8 +3,8 @@ import { colors } from '@material-ui/core';
 import { zilliqa, switcheo } from "./colors";
 
 const TEXT_COLORS = {
-  primary: zilliqa.neutral[200],
-  secondary: zilliqa.neutral[100],
+  primary: zilliqa.neutral[100],
+  secondary: zilliqa.neutral[200],
 };
 
 export default {
@@ -13,8 +13,8 @@ export default {
     main: zilliqa.neutral[190],
   },
   primary: {
-    contrastText: TEXT_COLORS.primary,
-    dark: zilliqa.primary["100"],
+    contrastText: zilliqa.neutral[100],
+    dark: zilliqa.primary["130"],
     main: zilliqa.primary["100"],
     light: zilliqa.neutral["190"],
   },
@@ -36,7 +36,9 @@ export default {
   },
   background: {
     default: zilliqa.neutral[200],
+    paper: zilliqa.black,
   },
+  mainBoxShadow: "none",
   navbar: zilliqa.neutral[200],
   switcheoLogo: switcheo.logoDark,
   colors: { zilliqa, switcheo },

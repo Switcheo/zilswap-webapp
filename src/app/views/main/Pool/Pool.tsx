@@ -8,7 +8,7 @@ const useStyles = makeStyles(theme => ({
   root: {
   },
 }));
-const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
   return (
@@ -20,4 +20,4 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   );
 };
 
-export default Swap;
+export default Pool;

@@ -14,6 +14,10 @@ const routes: RouteConfig[] = [{
     exact: true,
     component: lazy(() => import('./views/main/Swap'))
   }, {
+    path: '/pool',
+    exact: true,
+    component: lazy(() => import('./views/main/Pool'))
+  }, {
     component: () => <Redirect to="/swap"></Redirect>
   }]
 }];

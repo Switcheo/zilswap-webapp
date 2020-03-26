@@ -4,6 +4,8 @@ export default theme => ({
     textTransform: "none",
     color: theme.palette.primary.main,
   },
+  contained: {
+  },
   text: {
     padding: theme.spacing(.5, 2),
   },

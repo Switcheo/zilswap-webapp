@@ -1,4 +1,5 @@
 export const zilliqa = {
+  black: "#242626",
   accent: "#29CCC4",
   danger: "#CF3F1F",
   warning: "#DCA00E",
@@ -10,6 +11,7 @@ export const zilliqa = {
     "010": "#E4F1F2",
     "020": "#CCE7E9",
     "100": "#149BA3",
+    "130": "#0E828A",
     "170": "#325A5d",
     "180": "#355052",
     "190": "#394747",
