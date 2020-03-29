@@ -78,7 +78,7 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
       </Box>
       <Box className={classes.content}>
         {navigationConfig.map((navigation, index) => (
-          <List>
+          <List key={index}>
             {navigation.pages.map((page, index) => (
               <ListItem className={classes.listItem} disableGutters button key={index}>
                 <Button

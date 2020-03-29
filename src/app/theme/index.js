@@ -15,13 +15,13 @@ const flavour = (overrides, theme) => {
 }
 
 export const lightTheme = createMuiTheme({
-  typography: flavour(typography, lightFlavouringTheme),
   overrides: flavour(overrides, lightFlavouringTheme),
+  typography: typography,
   palette: light,
 });
 
 export const darkTheme = createMuiTheme({
-  typography: flavour(typography, darkFlavouringTheme),
   overrides: flavour(overrides, darkFlavouringTheme),
+  typography: typography,
   palette: dark,
 });

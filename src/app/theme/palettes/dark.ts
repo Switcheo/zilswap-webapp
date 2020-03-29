@@ -4,7 +4,7 @@ import { zilliqa, switcheo } from "./colors";
 
 const TEXT_COLORS = {
   primary: zilliqa.neutral[100],
-  secondary: zilliqa.neutral[200],
+  secondary: zilliqa.neutral[140],
 };
 
 export default {
@@ -16,7 +16,7 @@ export default {
     contrastText: zilliqa.neutral[100],
     dark: zilliqa.primary["130"],
     main: zilliqa.primary["100"],
-    light: zilliqa.neutral["190"],
+    light: zilliqa.neutral["200"],
   },
   error: {
     contrastText: TEXT_COLORS.secondary,
@@ -36,7 +36,8 @@ export default {
   },
   background: {
     default: zilliqa.neutral[200],
-    paper: zilliqa.black,
+    contrast: zilliqa.neutral[200],
+    paper: zilliqa.neutral[190],
   },
   mainBoxShadow: "none",
   navbar: zilliqa.neutral[200],

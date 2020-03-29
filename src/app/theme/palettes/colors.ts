@@ -6,7 +6,7 @@ export const zilliqa = {
   gradient_start: "#7ACAAD",
   gradient_end: "#369587",
   primary: {
-    "002": "#F7FaFa",
+    "002": "#F7FAFA",
     "004": "#F2F8F8",
     "010": "#E4F1F2",
     "020": "#CCE7E9",

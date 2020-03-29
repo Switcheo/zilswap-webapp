@@ -3,7 +3,7 @@ import { zilliqa, switcheo } from './colors';
 
 const TEXT_COLORS = {
   primary: zilliqa.neutral[200],
-  secondary: zilliqa.neutral[100],
+  secondary: zilliqa.neutral[140],
 };
 
 export default {
@@ -35,6 +35,8 @@ export default {
   },
   background: {
     default: zilliqa.neutral[100],
+    contrast: zilliqa.primary["002"],
+    paper: zilliqa.neutral[100],
   },
   mainBoxShadow: "0 8px 16px 0 rgba(20,155,163,0.16)",
   navbar: zilliqa.neutral[200],

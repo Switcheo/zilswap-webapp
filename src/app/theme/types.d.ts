@@ -3,6 +3,10 @@ import { PaletteOptions, TypeBackground } from "@material-ui/core/styles/createP
 import { SpacingOptions } from "@material-ui/core/styles/createSpacing";
 import { Breakpoints } from "@material-ui/core/styles/createBreakpoints";
 
+export type AppTypeBackground = {
+  contrast: string,
+}
+
 export interface AppColors {
   zilliqa: any,
   switcheo: any,
@@ -10,7 +14,7 @@ export interface AppColors {
 export interface AppPalette extends PaletteOptions {
   primary: SimplePaletteColorOptions;
   secondary: SimplePaletteColorOptions;
-  background: Partial<TypeBackground>;
+  background: AppTypeBackground & TypeBackground;
   toolbar: SimplePaletteColorOptions;
   colors: AppColors;
   switcheoLogo: string,

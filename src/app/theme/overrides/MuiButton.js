@@ -5,6 +5,11 @@ export default theme => ({
     color: theme.palette.primary.main,
   },
   contained: {
+    borderRadius: "4px",
+    boxShadow: "none",
+    "&:hover": {
+      boxShadow: "none",
+    },
   },
   text: {
     padding: theme.spacing(.5, 2),
