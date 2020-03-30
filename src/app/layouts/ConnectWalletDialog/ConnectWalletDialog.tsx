@@ -11,6 +11,8 @@ import { ConnectWalletOption } from "./components";
 import { ReactComponent as MoonletIcon } from "./moonlet.svg";
 import { ReactComponent as PrivateKeyIcon } from "./private-key.svg";
 import { RootState } from "app/store/types";
+import { WalletService } from "core/wallet";
+import { ConnectWalletResult } from "core/wallet/wallet";
 
 type ConnectOptionType = "moonlet" | "privateKey";
 
@@ -37,6 +39,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
 }));
+
 const ConnectWalletModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
@@ -48,8 +51,20 @@ const ConnectWalletModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (prop
     dispatch(actions.Layout.toggleConnectWallet(override));
   };
 
-  const onSelect = (type: ConnectOptionType) => {
+  const connectWallet = async (type: ConnectOptionType, args?: any): Promise<ConnectWalletResult> => {
+    switch (type) {
+      case "moonlet": return await WalletService.connectWalletMoonlet();
+      case "privateKey":
+        if (!args || !args.privateKey)
+          throw new Error("invalid private key");
+        return await WalletService.connectWalletPrivateKey(args.privateKey);
+    }
+  };
 
+  const onSelect = async (type: ConnectOptionType, args?: any) => {
+    const wallet = await connectWallet(type, args);
+
+    console.log("connect wallet result", wallet);
   };
 
   return (
@@ -70,7 +85,7 @@ const ConnectWalletModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (prop
       </DialogTitle>
       <DialogContent>
         <ConnectWalletOption label="Moonlet Wallet" icon={MoonletIcon} secureLevel={4} buttonText="Connect Moonlet" onSelect={() => onSelect("moonlet")} />
-        <ConnectWalletOption label="Private Key" icon={PrivateKeyIcon} secureLevel={1} buttonText="Enter Private Key" onSelect={() => onSelect("moonlet")} />
+        <ConnectWalletOption label="Private Key" icon={PrivateKeyIcon} secureLevel={1} buttonText="Enter Private Key" onSelect={() => onSelect("privateKey")} />
       </DialogContent>
       <DialogContent className={classes.extraSpacious}>
         <DialogContentText color="textPrimary">
