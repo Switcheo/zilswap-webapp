@@ -11,6 +11,7 @@ export interface ConnectWalletOptionProps {
   label: string;
   icon?: React.FunctionComponent;
   buttonText: string;
+  onSelect?: () => {}
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -86,7 +87,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 const ConnectWalletOption: React.FC<ConnectWalletOptionProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
-  const { children, className, secureLevel, label, icon: Icon, buttonText, ...rest } = props;
+  const { children, className, secureLevel, label, icon: Icon, buttonText, onSelect, ...rest } = props;
   const classes = useStyles();
   const securityLevelClass = {
     [classes.securityLevel1]: secureLevel >= 1,
@@ -104,8 +105,8 @@ const ConnectWalletOption: React.FC<ConnectWalletOptionProps & React.HTMLAttribu
           <SecurityLevelIcon className={cls(classes.securityLevelIcon, securityLevelClass)} />
         </Typography>
       </Box>
-      <Button className={classes.button} color="primary" variant="contained">{buttonText}</Button>
-      <Button className={classes.iconButton} color="primary" variant="contained">
+      <Button className={classes.button} color="primary" variant="contained" onClick={onSelect}>{buttonText}</Button>
+      <Button className={classes.iconButton} color="primary" variant="contained" onClick={onSelect}>
         <ChevronRightIcon />
       </Button>
     </Box>
