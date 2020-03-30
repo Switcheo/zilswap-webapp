@@ -1,6 +1,7 @@
 import { Box, Button, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import { ContrastBox } from "app/components";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React from "react";
@@ -16,18 +17,8 @@ export interface ConnectWalletOptionProps {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    padding: theme.spacing(3),
-    backgroundColor: theme.palette.background.contrast,
     display: "flex",
     flexDirection: "row",
-    "&+$root": {
-      marginTop: theme.spacing(4),
-    },
-    [theme.breakpoints.down("sm")]: {
-      "&+$root": {
-        marginTop: theme.spacing(1.5),
-      }
-    }
   },
   icon: {
     height: 40,
@@ -96,7 +87,7 @@ const ConnectWalletOption: React.FC<ConnectWalletOptionProps & React.HTMLAttribu
     [classes.securityLevel4]: secureLevel >= 4,
   };
   return (
-    <Box {...rest} className={cls(classes.root, className)}>
+    <ContrastBox {...rest} className={cls(classes.root, className)}>
       <Icon className={classes.icon} />
       <Box className={classes.label}>
         <Typography variant="h3">{label}</Typography>
@@ -109,7 +100,7 @@ const ConnectWalletOption: React.FC<ConnectWalletOptionProps & React.HTMLAttribu
       <Button className={classes.iconButton} color="primary" variant="contained" onClick={onSelect}>
         <ChevronRightIcon />
       </Button>
-    </Box>
+    </ContrastBox>
   );
 };
 

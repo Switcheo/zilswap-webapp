@@ -1,12 +1,12 @@
 import { OpenCloseState } from "./types";
 
 export const TYPES = {
-  TOGGLE_CONNECT_WALLET: "TOGGLE_CONNECT_WALLET",
+  TOGGLE_SHOW_WALLET: "TOGGLE_SHOW_WALLET",
 };
 
-export function toggleConnectWallet(override?: OpenCloseState) {
+export function toggleShowWallet(override?: OpenCloseState) {
   return {
-    type: TYPES.TOGGLE_CONNECT_WALLET,
+    type: TYPES.TOGGLE_SHOW_WALLET,
     override
   }
 };

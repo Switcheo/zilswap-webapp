@@ -2,15 +2,15 @@ import { TYPES } from "./actions";
 import { LayoutState } from "./types";
 
 const initial_state: LayoutState = {
-  showConnectWallet: false,
+  showWalletDialog: false,
 };
 
 const reducer = (state: LayoutState = initial_state, actions: any) => {
   switch (actions.type) {
-    case TYPES.TOGGLE_CONNECT_WALLET:
+    case TYPES.TOGGLE_SHOW_WALLET:
       return {
         ...state,
-        showConnectWallet: !actions.override ? !state.showConnectWallet : actions.override === "open",
+        showWalletDialog: !actions.override ? !state.showWalletDialog : actions.override === "open",
       };
     default:
       return state;

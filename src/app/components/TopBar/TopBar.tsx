@@ -50,7 +50,7 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
   const themeType = useSelector<RootState, string>(state => state.preference.theme);
 
   const onConnectWallet = () => {
-    dispatch(actions.Layout.toggleConnectWallet());
+    dispatch(actions.Layout.toggleShowWallet());
   };
 
   return (

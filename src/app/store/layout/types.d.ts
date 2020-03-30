@@ -1,5 +1,5 @@
 export interface LayoutState {
-  showConnectWallet: boolean;
+  showWalletDialog: boolean;
 };
 
 export type OpenCloseState = "open" | "close";

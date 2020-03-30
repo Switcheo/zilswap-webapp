@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/styles";
 import { FooterBar, NavDrawer, TopBar } from "app/components";
 import React, { Suspense, useState } from "react";
 import { renderRoutes } from "react-router-config";
-import ConnectWalletDialog from "../ConnectWalletDialog";
+import WalletDialog from "../WalletDialog";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -37,7 +37,7 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         </Suspense>
       </main>
       <FooterBar />
-      <ConnectWalletDialog />
+      <WalletDialog />
       <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />
     </Box>
   );
