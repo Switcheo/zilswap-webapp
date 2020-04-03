@@ -4,8 +4,9 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import { ContrastBox } from "app/components";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ConnectWalletManagerViewProps } from "../../types";
+import WalletService from "core/wallet"
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -49,11 +50,35 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, onResult, ...rest } = props;
   const classes = useStyles();
+  const [privateKey, setPrivateKey] = useState("");
 
   const onBack = () => {
     if (typeof onResult === "function")
       onResult(null);
   };
+
+  const onTextChange = (ev:  React.ChangeEvent<HTMLInputElement>) => {
+    setPrivateKey(ev.target.value);
+  }
+
+  const toggleConnect = async () => {
+    let wallet: WalletService.ConnectWalletResult;
+    let connectedWallet: WalletService.ConnectedWallet;
+
+    if(privateKey)
+      wallet = await WalletService.connectWalletPrivateKey(privateKey);
+    else return;
+
+    if(wallet?.wallet) {
+      connectedWallet = wallet.wallet;
+      console.log("current wallet", connectedWallet.getDetail());
+      console.log("balance", await connectedWallet.getBalance());
+      console.log("all wallets",connectedWallet.getAllWallets());
+  
+      let txResult = await connectedWallet.createTransaction({ toAddr: "zil1ct5rnjt7et0fq7y6emnq4y8fn4euss8977llse", amount: 1, gasPrice: 1000 })
+      console.log("tx Result", txResult);
+    }
+  }
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
@@ -61,8 +86,8 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
         <ContrastBox className={classes.container}>
           <form className={classes.form} noValidate autoComplete="off">
             <InputLabel>Enter a Private Key</InputLabel>
-            <OutlinedInput />
-            <Button className={classes.submitButton} variant="contained" color="primary">Connect</Button>
+            <OutlinedInput onChange={onTextChange} />
+            <Button onClick={toggleConnect} className={classes.submitButton} variant="contained" color="primary">Connect</Button>
           </form>
         </ContrastBox>
       </DialogContent>
