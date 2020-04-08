@@ -6,4 +6,6 @@ export { default as NavDrawer } from "./NavDrawer";
 export { default as RandomAsciiEmoji } from "./RandomAsciiEmoji";
 export { default as ScrollReset } from "./ScrollReset";
 export { default as TopBar } from "./TopBar";
+export { default as CurrencyLogo } from "./CurrencyLogo";
+export { default as NotificationBox } from "./NotificationBox";
 

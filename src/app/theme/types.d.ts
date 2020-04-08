@@ -5,6 +5,8 @@ import { Breakpoints } from "@material-ui/core/styles/createBreakpoints";
 
 export type AppTypeBackground = {
   contrast: string,
+  tooltip: string,
+  paperOpposite: string,
 }
 
 export interface AppColors {

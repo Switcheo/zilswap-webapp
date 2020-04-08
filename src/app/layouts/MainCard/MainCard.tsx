@@ -72,9 +72,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       left: "calc(50% - 8px)",
     }
   },
+  tabNoticeOpposite: {
+    "&:after": {
+      borderBottom: `8px solid ${theme.palette.background.paperOpposite!}`,
+    }
+  },
 }));
 const MainCard: React.FC<PaperProps> = (props: any) => {
-  const { children, className, ...rest } = props;
+  const { children, className, hasNotification, ...rest } = props;
   const classes = useStyles();
 
   return (
@@ -86,7 +91,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
             color="primary"
             variant="contained"
             className={cls(classes.tab, classes.tabCornerLeft)}
-            activeClassName={classes.tabActive}
+            activeClassName={cls(classes.tabActive, hasNotification ? classes.tabNoticeOpposite : {})}
             component={CustomRouterLink}
             to="/swap">Swap</Button>
           <Button
@@ -94,7 +99,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
             color="primary"
             variant="contained"
             className={cls(classes.tab, classes.tabCornerRight)}
-            activeClassName={classes.tabActive}
+            activeClassName={cls(classes.tabActive, hasNotification ? classes.tabNoticeOpposite : {})}
             component={CustomRouterLink}
             to="/pool">Pool</Button>
         </Box>

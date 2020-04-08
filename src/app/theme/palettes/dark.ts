@@ -38,6 +38,8 @@ export default {
     default: zilliqa.neutral[200],
     contrast: zilliqa.neutral[200],
     paper: zilliqa.neutral[190],
+    paperOpposite: zilliqa.neutral[100],
+    tooltip: zilliqa.primary["195"]
   },
   mainBoxShadow: "none",
   navbar: zilliqa.neutral[200],
