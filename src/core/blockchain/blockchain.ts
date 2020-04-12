@@ -1,6 +1,6 @@
 import { Transaction } from "@zilliqa-js/account";
 import { BN, Long, units } from "@zilliqa-js/util";
-import { VERSION, zilliqa } from "core/zilliqa";
+import { VERSION, zilliqa, ZilUnits } from "core/zilliqa";
 import { Currency } from "core/currency";
 
 export interface TxRequestProps {
@@ -31,9 +31,9 @@ export const createTransaction = async (txRequest: TxRequestProps): Promise<Tran
   const generatedTxObject = zilliqa.transactions.new({
     version: VERSION,
     toAddr,
-    amount: new BN(units.toQa(amount, units.Units.Zil)),
+    amount: new BN(units.toQa(amount, ZilUnits.Zil)),
     gasLimit: Long.fromNumber(gasLimit),
-    gasPrice: units.toQa(gasPrice, units.Units.Li),
+    gasPrice: units.toQa(gasPrice, ZilUnits.Li),
   }, false)
   const txResult = await zilliqa.blockchain.createTransaction(generatedTxObject);
   return txResult;
