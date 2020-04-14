@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, IconButton, InputLabel } from "@material-ui/core";
+import { Button, ButtonGroup, IconButton, InputLabel, Typography, Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -18,26 +18,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   container: {
-    display: "flex",
-    flexDirection: "column",
-    padding: `${theme.spacing(4)}px ${theme.spacing(8)}px ${theme.spacing(2)}px ${theme.spacing(8)}px`,
+    padding: `${theme.spacing(4)}px ${theme.spacing(8)}px ${theme.spacing(0)}px ${theme.spacing(8)}px`,
     [theme.breakpoints.down("xs")]: {
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(2),
     },
   },
-  give: {
-    // backgroundColor: "red",
-    marginBottom: theme.spacing(3)
-  },
-  swap: {
-    // backgroundColor: "blue",
-    justifyContent: "center",
-    display: "flex",
-    marginBottom: theme.spacing(1)
-  },
-  receive: {
-    marginBottom: theme.spacing(1)
+  swapButton: {
+    padding: 0
   },
   inputRow: {
     paddingLeft: 0
@@ -63,28 +51,21 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   percentageButton: {
     borderRadius: 4,
-    color: theme.palette.text?.secondary
+    color: theme.palette.text?.secondary,
+    paddingTop: 10,
+    paddingBottom: 10
   },
   percentageGroup: {
-    marginTop: theme.spacing(1)
-  },
-  exchangeRow: {
-    marginTop: theme.spacing(1),
-    display: "flex",
-    justifyContent: "space-between"
-  },
-  currencyLogo: {
-    marginRight: theme.spacing(1),
-    paddingTop: theme.spacing(1)
+    marginTop: 12
   },
   actionButton: {
-    marginTop: theme.spacing(2),
+    marginTop: theme.spacing(6),
     borderRadius: 4,
     height: 46
   },
   advanceDetails: {
-    marginTop: theme.spacing(6),
-    marginBottom: theme.spacing(2),
+    marginTop: theme.spacing(9),
+    marginBottom: theme.spacing(4),
     justifyContent: "center",
     alignItems: "center",
     display: "flex",
@@ -180,44 +161,49 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   return (
     <MainCard {...rest} hasNotification={notification} className={cls(classes.root, className)}>
       <NotificationBox notification={notification} setNotification={setNotification} />
-      <div className={classes.container}>
-        <div className={classes.give}>
-          <CurrencyInput
-            label="You Give"
-            currency={formState.values.giveCurrency}
-            amount={formState.values.give}
-            handleAmountChange={changeHandler("give", null, sideEffect)}
-            handleCurrencyChange={changeHandler("giveCurrency")}
-          >
-            <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
-              <Button className={classes.percentageButton}>25%</Button>
-              <Button className={classes.percentageButton}>50%</Button>
-              <Button className={classes.percentageButton}>75%</Button>
-              <Button className={classes.percentageButton}>100%</Button>
-            </ButtonGroup>
-          </CurrencyInput>
-        </div>
-        <div className={classes.swap}>
+      <Box display="flex" flexDirection="column" className={classes.container}>
+        <CurrencyInput
+          label="You Give"
+          currency={formState.values.giveCurrency}
+          amount={formState.values.give}
+          handleAmountChange={changeHandler("give", null, sideEffect)}
+          handleCurrencyChange={changeHandler("giveCurrency")}
+        >
+          <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
+            <Button className={classes.percentageButton}>
+              <Typography variant="button">25%</Typography>
+            </Button>
+            <Button className={classes.percentageButton}>
+              <Typography variant="button">50%</Typography>
+            </Button>
+            <Button className={classes.percentageButton}>
+              <Typography variant="button">75%</Typography>
+            </Button>
+            <Button className={classes.percentageButton}>
+              <Typography variant="button">100%</Typography
+              ></Button>
+          </ButtonGroup>
+        </CurrencyInput>
+        <Box display="flex" mt={4} mb={1} justifyContent="center">
           <IconButton
             onClick={() => onReverse()}
+            className={classes.swapButton}
           >
             <SwapSVG />
           </IconButton>
-        </div>
-        <div className={classes.receive}>
-          <CurrencyInput
-            label="You Receive"
-            currency={formState.values.receiveCurrency}
-            amount={formState.values.receive}
-            handleAmountChange={changeHandler("receive", null, sideEffect)}
-            handleCurrencyChange={changeHandler("receiveCurrency")}
-          >
-            <div className={classes.exchangeRow}>
-              <InputLabel>Exchange Rate</InputLabel>
-              <div>1 {formState.values.giveCurrency} = {formState.values.rate} {formState.values.receiveCurrency}</div>
-            </div>
-          </CurrencyInput>
-        </div>
+        </Box>
+        <CurrencyInput
+          label="You Receive"
+          currency={formState.values.receiveCurrency}
+          amount={formState.values.receive}
+          handleAmountChange={changeHandler("receive", null, sideEffect)}
+          handleCurrencyChange={changeHandler("receiveCurrency")}
+        >
+          <Box mt={1} display="flex" justifyContent="space-between">
+            <InputLabel>Exchange Rate</InputLabel>
+            <Typography variant="body2">1 {formState.values.giveCurrency} = {formState.values.rate} {formState.values.receiveCurrency}</Typography>
+          </Box>
+        </CurrencyInput>
         <Button
           className={classes.actionButton}
           variant="contained"
@@ -225,10 +211,10 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           fullWidth
           onClick={onConnectWallet}
         >Connect Wallet</Button>
-        <div className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
+        <Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
           Advanced Details{showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        </div>
-      </div>
+        </Typography>
+      </Box>
       <ShowAdvanced
         showAdvanced={showAdvanced}
         give={formState.values.give}

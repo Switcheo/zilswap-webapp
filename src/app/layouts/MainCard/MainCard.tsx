@@ -18,6 +18,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     flex: 1,
     paddingTop: theme.spacing(8),
+    paddingBottom: theme.spacing(2),
     [theme.breakpoints.down("sm")]: {
       paddingTop: theme.spacing(6),
     },
@@ -28,7 +29,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   card: {
-    maxWidth: 560,
+    maxWidth: 488,
     margin: "0 auto",
     boxShadow: theme.palette.mainBoxShadow,
     borderRadius: CARD_BORDER_RADIUS,
@@ -42,7 +43,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   tab: {
     position: "relative",
     width: "100%",
-    padding: theme.spacing(1.5),
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
     borderRadius: 0,
     backgroundColor: theme.palette.primary.dark,
     "&:hover": {

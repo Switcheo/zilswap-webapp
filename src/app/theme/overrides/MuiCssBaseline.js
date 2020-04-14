@@ -8,7 +8,6 @@ const RobotoFont = {
   fontDisplay: 'swap',
   fontWeight: 400,
   src: `
-    local('Roboto-Regular'),
     url(${RobotoTtf}) format('ttf')
   `,
 };
@@ -18,7 +17,6 @@ const RobotoMedium = {
   fontDisplay: 'swap',
   fontWeight: 500,
   src: `
-    local('Roboto-Medium'),
     url(${RobotoMediumTtf}) format('ttf')
   `,
 };
@@ -28,7 +26,6 @@ const RobotoBold = {
   fontDisplay: 'swap',
   fontWeight: 700,
   src: `
-    local('Roboto-Bold'),
     url(${RobotoBoldTtf}) format('ttf')
   `,
 };

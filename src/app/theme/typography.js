@@ -34,8 +34,13 @@ export default (palette) => ({
     fontSize: "12px",
     lineHeight: "16px",
     letterSpacing: "-0.2px",
+    fontWeight: 500
   },
   button: {
+    fontSize: "14px",
+    fontFamily: "Avenir Next",
+    fontWeight: 500,
+    lineHeight: "16px"
   },
   caption: {
   },

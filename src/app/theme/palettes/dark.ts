@@ -36,8 +36,8 @@ export default {
   },
   background: {
     default: zilliqa.neutral[200],
-    contrast: zilliqa.neutral[200],
-    paper: zilliqa.neutral[190],
+    contrast: zilliqa.neutral[190],
+    paper: zilliqa.black,
     paperOpposite: zilliqa.neutral[100],
     tooltip: zilliqa.primary["195"]
   },
