@@ -8,4 +8,5 @@ export { default as ScrollReset } from "./ScrollReset";
 export { default as TopBar } from "./TopBar";
 export { default as CurrencyLogo } from "./CurrencyLogo";
 export { default as NotificationBox } from "./NotificationBox";
+export { default as KeyValueDisplay } from "./KeyValueDisplay";
 

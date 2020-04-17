@@ -1,9 +1,12 @@
 import { makeStyles, Divider, InputLabel, Tooltip, TextField, MenuItem, Typography, Box } from "@material-ui/core";
 import { AppTheme } from "app/theme/types";
-import React from "react";
+import React, { useState } from "react";
 import { ReactComponent as TooltipSVG } from "./tooltip.svg";
 import { hexToRGBA } from "app/utils";
 import { ContrastBox } from "app/components";
+import { RootState } from "app/store/types";
+import { useSelector, useDispatch } from "react-redux";
+import { actions } from "app/store";
 
 const tooltipText = `
 Lowering this limit decreases your risk of fronttruning. However, this makes it more likely that your transaction will fail due to normal price movements.
@@ -75,18 +78,25 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const ShowAdvanced = (props: any) => {
-  const { showAdvanced, give, receive,
-    giveCurrency, receiveCurrency, slippage,
-    limitSlippage, handleLimitSlippage, handleExpire,
-    setShowSlippageDropdown, expire, showSlippageDropdown
-  } = props;
+  const { showAdvanced } = props;
   const classes = useStyles();
+  const [showSlippageDropdown, setShowSlippageDropdown] = useState(false);
+  const state = useSelector<RootState, { [key: string]: any }>(state => state.swap.values);
+  const { give, giveCurrency, receive, receiveCurrency, slippage, expire, limitSlippage } = state;
+  const dispatch = useDispatch();
+
+  const onChange = (name: string) => (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    dispatch(actions.Swap.update_extended({
+      key: name,
+      value: e.target.value
+    }))
+  }
 
   if (!showAdvanced) return null;
 
   return (
     <ContrastBox className={classes.showAdvanced}>
-      <Typography className={classes.text} variant="body2">You are giving <span className={classes.bold}>{give} {giveCurrency}</span> for at least <span className={classes.bold}>{receive} {receiveCurrency}</span></Typography>
+      <Typography className={classes.text} variant="body2">You are giving <span className={classes.bold}>{(+give).toLocaleString("en-US", { maximumFractionDigits: 10 })} {giveCurrency}</span> for at least <span className={classes.bold}>{(+receive).toLocaleString("en-US", { maximumFractionDigits: 10 })} {receiveCurrency}</span></Typography>
       <Typography className={classes.text} variant="body2">Expected price slippage <span className={classes.bold}>{slippage}%</span></Typography>
       <Divider className={classes.divider} />
       <Box display="flex" justifyContent="space-between">
@@ -95,7 +105,7 @@ const ShowAdvanced = (props: any) => {
           <TextField
             variant="outlined"
             value={limitSlippage}
-            onChange={handleLimitSlippage}
+            onChange={onChange("limitSlippage")}
             select
             SelectProps={{
               MenuProps: {
@@ -130,7 +140,7 @@ const ShowAdvanced = (props: any) => {
                   textAlign: "center"
                 }
               }}
-              onChange={handleExpire}
+              onChange={onChange("expire")}
             />
             <Typography variant="body2" className={classes.minutes}>Mins</Typography>
           </Box>

@@ -39,7 +39,8 @@ export default {
     contrast: zilliqa.neutral[190],
     paper: zilliqa.black,
     paperOpposite: zilliqa.neutral[100],
-    tooltip: zilliqa.primary["195"]
+    tooltip: zilliqa.primary["195"],
+    readOnly: zilliqa.neutral["195"]
   },
   mainBoxShadow: "none",
   navbar: zilliqa.neutral[200],

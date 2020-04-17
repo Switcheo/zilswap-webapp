@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="18px" height="28px" viewBox="0 0 18 28" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-868.000000, -526.000000)" fill-rule="nonzero">
+            <polygon id="Path" fill="#343434" points="877.425446 526 877.237772 526.63789 877.237772 545.147971 877.425446 545.335309 886.017618 540.256499"></polygon>
+            <polygon id="Path" fill="#8C8C8C" points="877.425506 526 868.833333 540.256499 877.425506 545.335376 877.425506 536.351137"></polygon>
+            <polygon id="Path" fill="#141414" points="877.425446 545.335289 886.017484 540.256546 877.425446 536.351184"></polygon>
+            <polygon id="Path" fill="#393939" points="868.833394 540.256553 877.425432 545.335296 877.425432 536.35119"></polygon>
+            <polygon id="Path" fill="#3C3C3B" points="877.425446 546.96217 877.31969 547.091091 877.31969 553.684788 877.425446 553.993729 886.022721 541.885911"></polygon>
+            <polygon id="Path" fill="#8C8C8C" points="877.425506 553.993635 877.425506 546.962076 868.833333 541.885817"></polygon>
+        </g>
+    </g>
+</svg>

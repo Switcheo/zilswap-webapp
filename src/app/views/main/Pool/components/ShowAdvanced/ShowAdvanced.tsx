@@ -1,32 +1,25 @@
-import { makeStyles, Divider, InputLabel, Tooltip, TextField, MenuItem, Typography } from "@material-ui/core";
+import { Divider, makeStyles, Typography } from "@material-ui/core";
+import { ContrastBox, KeyValueDisplay } from "app/components";
+import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import React from "react";
-import { ReactComponent as TooltipSVG } from "./tooltip.svg";
 import { hexToRGBA } from "app/utils";
-
-const tooltipText = `
-Lowering this limit decreases your risk of fronttruning. However, this makes it more likely that your transaction will fail due to normal price movements.
-`;
+import React from "react";
+import { useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
 
   },
   showAdvanced: {
-    backgroundColor: theme.palette.background.contrast,
-    padding: `${theme.spacing(4)}px ${theme.spacing(6)}px ${theme.spacing(4)}px ${theme.spacing(6)}px`,
+    padding: `20px ${theme.spacing(8)}px 52px ${theme.spacing(8)}px`,
     [theme.breakpoints.down("xs")]: {
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(2),
     },
   },
-  slippageRow: {
-    display: "flex",
-    justifyContent: "space-between"
-  },
   selectRoot: {
     height: 30,
-    display: "table"
+    display: "table",
   },
   select: {
     height: 30,
@@ -43,16 +36,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginRight: theme.spacing(1),
     textAlign: "center"
   },
-  expireRow: {
-    display: "flex"
-  },
-  slippageColumn: {
-  },
-  expireColumn: {
-  },
   selectedDropdown: {
     backgroundColor: `${theme.palette.primary.main} !important`,
-    color: theme.palette.background.default
+    color: theme.palette.background.default,
+    borderRadius: 2
   },
   tooltipSVG: {
     marginLeft: theme.spacing(1),
@@ -71,67 +58,35 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   minutes: {
     display: "flex",
     alignItems: "center"
+  },
+  text: {
+    fontWeight: 400,
+    letterSpacing: 0
+  },
+  bold: {
+    fontWeight: 500
+  },
+  selectMenu: {
+    padding: 2
   }
 }));
 
 const ShowAdvanced = (props: any) => {
-  const { showAdvanced, give, receive,
-    giveCurrency, receiveCurrency, slippage,
-    limitSlippage, handleLimitSlippage, handleExpire,
-    setShowSlippageDropdown, expire, showSlippageDropdown
-  } = props;
+  const { showAdvanced } = props;
   const classes = useStyles();
+  const state = useSelector<RootState, { [key: string]: any }>(state => state.pool.values);
+  const { withdrawCurrency } = state;
 
   if (!showAdvanced) return null;
 
   return (
-    <div className={classes.showAdvanced}>
-      <div>You are giving <span>{give} {giveCurrency}</span> for at least {receive} {receiveCurrency}</div>
-      <div>Expected price slippage {slippage}%</div>
+    <ContrastBox className={classes.showAdvanced}>
+      <Typography className={classes.text} variant="body2">You are removing <span className={classes.bold}>{(0).toLocaleString("en-US", { maximumFractionDigits: 10 })} ZIL{withdrawCurrency && ` + {0} {withdrawCurrency}`}</span> from the liquidity pool. (<span className={classes.bold}>~{(0).toLocaleString("en-US", { maximumFractionDigits: 10 })}</span> Liquidity tokens)</Typography>
       <Divider className={classes.divider} />
-      <div className={classes.slippageRow}>
-        <div className={classes.slippageColumn}>
-          <InputLabel>Set Limit Add. Price Slippage<Tooltip placement="top" classes={{ tooltip: classes.tooltip }} title={tooltipText}><TooltipSVG className={classes.tooltipSVG} /></Tooltip></InputLabel>
-          <TextField
-            variant="outlined"
-            value={limitSlippage}
-            onChange={handleLimitSlippage}
-            select
-            SelectProps={{
-              classes: {
-                root: classes.selectRoot,
-                select: classes.select
-              },
-              onOpen: () => setShowSlippageDropdown(true),
-              onClose: () => setShowSlippageDropdown(false)
-            }}
-          >
-            <MenuItem classes={{ selected: classes.selectedDropdown }} value={0.1}>0.1 %</MenuItem>
-            <MenuItem classes={{ selected: classes.selectedDropdown }} value={0.5}>0.5 % {showSlippageDropdown && "(Suggested)"}</MenuItem>
-            <MenuItem classes={{ selected: classes.selectedDropdown }} value={1}>1 %</MenuItem>
-          </TextField>
-        </div>
-        <div className={classes.expireColumn}>
-          <InputLabel>Set Expire</InputLabel>
-          <div className={classes.expireRow}>
-            <TextField
-              variant="outlined"
-              value={expire}
-              InputProps={{
-                className: classes.expire,
-              }}
-              inputProps={{
-                style: {
-                  textAlign: "center"
-                }
-              }}
-              onChange={handleExpire}
-            />
-            <Typography className={classes.minutes}>Mins</Typography>
-          </div>
-        </div>
-      </div>
-    </div>
+      <KeyValueDisplay mt={"22px"} kkey={"Current Total Supply"} value={`${parseFloat("1508.4904").toLocaleString("en-US", { maximumFractionDigits: 10 })} Liquidity Tokens`} />
+      <KeyValueDisplay mt={"22px"} kkey={"Each Pool Token Value"} value={`${1.12556} ZIL${withdrawCurrency ? ` + ${(parseFloat("0")).toLocaleString("en-US", { maximumFractionDigits: 10 })} ${withdrawCurrency}` : ""}`} />
+
+    </ContrastBox >
   )
 }
 

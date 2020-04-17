@@ -19,6 +19,9 @@ export default (palette) => ({
   h5: {
   },
   h6: {
+    fontFamily: "Roboto",
+    fontWeight: "500",
+    fontSize: "14px"
   },
   subtitle1: {
   },
@@ -29,6 +32,11 @@ export default (palette) => ({
     letterSpacing: 0,
   },
   body1: {
+    fontSize: "12px",
+    lineHeight: "14px",
+    fontWeight: 600,
+    letterSpacing: 0,
+    fontFamily: "Avenir Next"
   },
   body2: {
     fontSize: "12px",
@@ -39,8 +47,9 @@ export default (palette) => ({
   button: {
     fontSize: "14px",
     fontFamily: "Avenir Next",
-    fontWeight: 500,
-    lineHeight: "16px"
+    fontWeight: 600,
+    lineHeight: "16px",
+    textTransform: "none"
   },
   caption: {
   },

@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 const MainCard: React.FC<PaperProps> = (props: any) => {
-  const { children, className, hasNotification, ...rest } = props;
+  const { children, className, hasNotification, staticContext, ...rest } = props;
   const classes = useStyles();
 
   return (

@@ -7,6 +7,7 @@ export type AppTypeBackground = {
   contrast: string,
   tooltip: string,
   paperOpposite: string,
+  readOnly: string
 }
 
 export interface AppColors {
