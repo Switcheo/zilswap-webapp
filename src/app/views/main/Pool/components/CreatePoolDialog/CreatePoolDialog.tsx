@@ -1,4 +1,4 @@
-import { Button, DialogContent, InputLabel, makeStyles, OutlinedInput } from "@material-ui/core";
+import { Button, DialogContent, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
 import { DialogModal, KeyValueDisplay } from "app/components";
 import cls from "classnames";
 import React, { useState } from "react";
@@ -14,6 +14,9 @@ const useStyles = makeStyles(theme => ({
   },
   input: {
     marginBottom: 20,
+  },
+  inputError: {
+    border: `1px solid ${theme.palette.error.main}`
   },
   inputProps: {
     [theme.breakpoints.down("xs")]: {
@@ -49,22 +52,32 @@ const useStyles = makeStyles(theme => ({
     marginTop: 46,
     marginBottom: 48
   },
+  error: {
+    float: "right"
+  },
+  floatLeft: {
+    float: "left"
+  }
 }));
 
 const CreatePoolDialog = (props: any) => {
   const { children, className, open, onCloseDialog, onSelect, ...rest } = props;
   const classes = useStyles();
   const [address, setAddress] = useState("");
+  const [error, setError] = useState("");
 
   return (
     <DialogModal header="Create Pool" open={open} onClose={onCloseDialog} {...rest} className={cls(classes.root, className)}>
       <DialogContent className={classes.content}>
-        <InputLabel>Token Address</InputLabel>
+        <InputLabel className={classes.floatLeft}>Token Address</InputLabel>
+        {error && (
+          <InputLabel className={classes.error}><Typography color="error">{error}</Typography></InputLabel>
+        )}
         <OutlinedInput
           placeholder="Token Address"
           value={address}
           fullWidth
-          className={classes.input}
+          className={cls(classes.input, error ? classes.inputError : {})}
           onChange={(e) => setAddress(e.target.value)}
           inputProps={{
             className: classes.inputProps
