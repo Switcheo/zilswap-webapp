@@ -1,4 +1,4 @@
-import { TYPES } from "./actions";
+import { PreferenceActionTypes } from "./actions";
 import { PreferenceState, PreferenceStateUpdateProps } from "./types";
 
 const LOCAL_STORAGE_KEY_THEME = "zilswap:theme";
@@ -22,12 +22,12 @@ const checkToSaveThemePreference = (currentTheme: string, updatePayload: Prefere
 
 const reducer = (state: PreferenceState = initial_state, actions: any) => {
   switch (actions.type) {
-    case TYPES.INIT:
+    case PreferenceActionTypes.INIT:
       return {
         ...state,
         ...actions.payload,
       };
-    case TYPES.UPDATE:
+    case PreferenceActionTypes.UPDATE:
       checkToSaveThemePreference(state.theme, actions.payload);
       return {
         ...state,

@@ -1,20 +1,19 @@
 import { PoolFormState, PoolUpdateExtendedPayload } from "./types";
 
-export const TYPES = {
-  UPDATE: "UPDATE",
-  UPDATE_EXTENDED: "UPDATE_EXTENDED",
+export enum PoolActionTypes {
+  UPDATE, UPDATE_EXTENDED
 }
 
 export function update(payload: PoolFormState) {
   return {
-    type: TYPES.UPDATE,
+    type: PoolActionTypes.UPDATE,
     payload
   }
 }
 
 export function update_extended(payload: PoolUpdateExtendedPayload) {
   return {
-    type: TYPES.UPDATE_EXTENDED,
+    type: PoolActionTypes.UPDATE_EXTENDED,
     payload
   }
 }

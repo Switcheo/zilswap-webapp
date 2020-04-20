@@ -1,4 +1,4 @@
-import { TYPES } from "./actions";
+import { PoolActionTypes } from "./actions";
 import { PoolFormState } from "./types";
 
 const initial_state: PoolFormState = {
@@ -30,9 +30,9 @@ const reducer = (state: PoolFormState = initial_state, action: any) => {
   const { payload } = action;
 
   switch (action.type) {
-    case TYPES.UPDATE:
+    case PoolActionTypes.UPDATE:
       return { ...state, ...payload }
-    case TYPES.UPDATE_EXTENDED:
+    case PoolActionTypes.UPDATE_EXTENDED:
       const { key, value } = payload;
       let output: PoolFormState = {
         ...state,
