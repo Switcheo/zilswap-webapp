@@ -1,20 +1,19 @@
 import { PreferenceStateInitProps, PreferenceStateUpdateProps } from "./types";
 
-export const TYPES = {
-  INIT: "INIT",
-  UPDATE: "UPDATE",
+export enum PreferenceActionTypes {
+  INIT, UPDATE
 };
 
 export function init(payload: PreferenceStateInitProps) {
   return {
-    type: TYPES.INIT,
+    type: PreferenceActionTypes.INIT,
     payload
   }
 };
 
 export function update(payload: PreferenceStateUpdateProps) {
   return {
-    type: TYPES.UPDATE,
+    type: PreferenceActionTypes.UPDATE,
     payload
   }
 };

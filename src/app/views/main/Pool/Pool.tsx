@@ -71,13 +71,13 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           <ButtonGroup color="primary">
             <Button
               onClick={() => onTypeChange("add")}
-              variant={formState.values.type === "add" ? "contained" : "outlined"}
+              variant={type === "add" ? "contained" : "outlined"}
               className={classes.addRemoveButton}>
               Add
               </Button>
             <Button
               onClick={() => onTypeChange("remove")}
-              variant={formState.values.type === "remove" ? "contained" : "outlined"}
+              variant={type === "remove" ? "contained" : "outlined"}
               className={classes.addRemoveButton}
             >
               Remove

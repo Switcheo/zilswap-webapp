@@ -1,5 +1,5 @@
 import { SwapFormState } from "./types";
-import { TYPES } from "./actions";
+import { SwapActionTypes } from "./actions";
 import Decimal from "decimal.js";
 
 const initial_state: SwapFormState = {
@@ -41,9 +41,9 @@ const reducer = (state: SwapFormState = initial_state, action: any) => {
   const { payload } = action;
 
   switch (action.type) {
-    case TYPES.UPDATE:
+    case SwapActionTypes.UPDATE:
       return { ...state, ...payload }
-    case TYPES.REVERSE:
+    case SwapActionTypes.REVERSE:
       return {
         ...state,
         values: {
@@ -55,7 +55,7 @@ const reducer = (state: SwapFormState = initial_state, action: any) => {
           rate: +(new Decimal(1).dividedBy(new Decimal(rate)).toFixed(10)),
         }
       }
-    case TYPES.UPDATE_EXTENDED:
+    case SwapActionTypes.UPDATE_EXTENDED:
       const { key, value } = payload;
       let output: SwapFormState = {
         ...state,
