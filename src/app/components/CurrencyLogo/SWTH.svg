@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="26px" height="26px" viewBox="0 0 26 26" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <polygon id="path-1" points="157.312351 341.582234 160.299431 341.582234 160.299431 329.976437 160.299431 327.048611 157.312351 327.048611 145.416667 327.048611 145.416667 329.976437 155.08849 329.976437 145.416667 339.419336 147.640528 341.582234 157.312351 332.139336"></polygon>
+    </defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="iPhone-8" transform="translate(-140.000000, -321.000000)">
+            <circle id="Container-Style" fill="#063C4F" cx="153" cy="334" r="13"></circle>
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <use id="Mask" fill="#E2FCA4" xlink:href="#path-1"></use>
+        </g>
+    </g>
+</svg>

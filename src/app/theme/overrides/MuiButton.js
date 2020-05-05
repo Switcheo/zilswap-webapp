@@ -10,6 +10,11 @@ export default theme => ({
     "&:hover": {
       boxShadow: "none",
     },
+    "&$disabled": {
+      color: "#FFFFFF",
+      opacity: .2,
+      backgroundColor: `${theme.palette.primary.main}`
+    }
   },
   text: {
     padding: theme.spacing(.5, 2),

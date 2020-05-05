@@ -18,6 +18,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     flex: 1,
     paddingTop: theme.spacing(8),
+    paddingBottom: theme.spacing(2),
     [theme.breakpoints.down("sm")]: {
       paddingTop: theme.spacing(6),
     },
@@ -28,7 +29,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   card: {
-    maxWidth: 560,
+    maxWidth: 488,
     margin: "0 auto",
     boxShadow: theme.palette.mainBoxShadow,
     borderRadius: CARD_BORDER_RADIUS,
@@ -42,7 +43,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   tab: {
     position: "relative",
     width: "100%",
-    padding: theme.spacing(1.5),
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
     borderRadius: 0,
     backgroundColor: theme.palette.primary.dark,
     "&:hover": {
@@ -72,9 +74,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       left: "calc(50% - 8px)",
     }
   },
+  tabNoticeOpposite: {
+    "&:after": {
+      borderBottom: `8px solid ${theme.palette.background.paperOpposite!}`,
+    }
+  },
 }));
 const MainCard: React.FC<PaperProps> = (props: any) => {
-  const { children, className, ...rest } = props;
+  const { children, className, hasNotification, staticContext, ...rest } = props;
   const classes = useStyles();
 
   return (
@@ -86,7 +93,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
             color="primary"
             variant="contained"
             className={cls(classes.tab, classes.tabCornerLeft)}
-            activeClassName={classes.tabActive}
+            activeClassName={cls(classes.tabActive, hasNotification ? classes.tabNoticeOpposite : {})}
             component={CustomRouterLink}
             to="/swap">Swap</Button>
           <Button
@@ -94,7 +101,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
             color="primary"
             variant="contained"
             className={cls(classes.tab, classes.tabCornerRight)}
-            activeClassName={classes.tabActive}
+            activeClassName={cls(classes.tabActive, hasNotification ? classes.tabNoticeOpposite : {})}
             component={CustomRouterLink}
             to="/pool">Pool</Button>
         </Box>

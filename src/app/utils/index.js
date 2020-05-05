@@ -12,4 +12,6 @@ export { default as useFormHandler } from "./useFormHandler";
 export { default as useMessageSubscriber } from "./useMessageSubscriber";
 export { default as useMoneyFormatter } from "./useMoneyFormatter";
 export { default as useRouter } from "./useRouter";
+export { default as hexToRGB } from "./hexToRGB";
+export { default as hexToRGBA } from "./hexToRGBA";
 

@@ -20,7 +20,6 @@ const DialogModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   return (
     <Dialog
       maxWidth={"md"}
-      fullWidth={"xs"}
       closeAfterTransition
       onClose={onClose}
       BackdropComponent={Backdrop}
