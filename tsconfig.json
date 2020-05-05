@@ -16,6 +16,7 @@
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "preserveSymlinks": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react"
