@@ -6,6 +6,7 @@ import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React, { useState, useEffect } from "react";
 import { ConnectWalletManagerViewProps } from "../../types";
+import { ConnectOptionType, ConnectedWallet, ConnectWalletResult } from "core/wallet/ConnectedWallet";
 import WalletService from "core/wallet"
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -62,22 +63,13 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
   }
 
   const toggleConnect = async () => {
-    let wallet: WalletService.ConnectWalletResult;
-    let connectedWallet: WalletService.ConnectedWallet;
+    let wallet: ConnectWalletResult;
+    let connectedWallet: ConnectedWallet;
 
     if(privateKey)
       wallet = await WalletService.connectWalletPrivateKey(privateKey);
     else return;
 
-    if(wallet?.wallet) {
-      connectedWallet = wallet.wallet;
-      console.log("current wallet", connectedWallet.getDetail());
-      console.log("balance", await connectedWallet.getBalance());
-      console.log("all wallets",connectedWallet.getAllWallets());
-  
-      let txResult = await connectedWallet.createTransaction({ toAddr: "zil1ct5rnjt7et0fq7y6emnq4y8fn4euss8977llse", amount: 1, gasPrice: 1000 })
-      console.log("tx Result", txResult);
-    }
   }
 
   return (

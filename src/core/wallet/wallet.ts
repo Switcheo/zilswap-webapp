@@ -2,8 +2,11 @@ import { zilliqa } from "core/zilliqa";
 import moment from "moment";
 import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
 import { ConnectWalletResult } from "./ConnectedWallet";
+import { dapp } from "dapp-wallet-util";
 
 export const connectWalletMoonlet = async (): Promise<ConnectWalletResult> => {
+  let moonlet = await dapp.getWalletInstance('moonlet');
+  console.log({ moonlet });
   return {};
 }
 

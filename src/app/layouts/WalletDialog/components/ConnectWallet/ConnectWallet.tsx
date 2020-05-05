@@ -1,7 +1,7 @@
 import { Box, DialogContent, Link, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import { ConnectOptionType } from "core/wallet/types";
+import { ConnectOptionType } from "../../../../../core/wallet/ConnectedWallet";
 import React from "react";
 import { ConnectWalletOption } from "./components";
 import { ReactComponent as MoonletIcon } from "./moonlet.svg";

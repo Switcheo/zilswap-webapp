@@ -4,8 +4,13 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import { ContrastBox } from "app/components";
 import { useMessageSubscriber } from "app/utils";
 import cls from "classnames";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { ConnectWalletManagerViewProps } from "../../types";
+import { ConnectOptionType, ConnectedWallet, ConnectWalletResult } from "core/wallet/ConnectedWallet";
+import { Zilliqa } from "@zilliqa-js/zilliqa";
+import { dapp } from "dapp-wallet-util";
+import WalletService from "core/wallet";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -33,10 +38,10 @@ const useStyles = makeStyles(theme => ({
 
 const ConnectWalletMoonlet: React.FC<ConnectWalletManagerViewProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, onResult, ...rest } = props;
-  // const [moonletBridgeReady, setMoonletBridgeReady] = useState(false);
+  const [moonletBridgeReady, setMoonletBridgeReady] = useState(false);
   const classes = useStyles();
-  // const iframeRef = useRef<HTMLIFrameElement>(null);
-  // const dispatch = useDispatch();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const dispatch = useDispatch();
   const subscriber = useMessageSubscriber();
 
   useEffect(() => {
@@ -47,28 +52,32 @@ const ConnectWalletMoonlet: React.FC<ConnectWalletManagerViewProps & React.HTMLA
 
   // const showDialog = useSelector<RootState, boolean>(state => state.layout.showWalletDialog);
 
-  const onMessage = (data: any) => {
+  const onMessage = async (data: any) => {
     if (data.type && data.type === "walletReady") {
-      // setMoonletBridgeReady(true);
+      setMoonletBridgeReady(true);
 
-      // iframeRef.current!.contentWindow!
-      // .postMessage({ type: "grantPermissionRequest", walletId: "moonlet" }, "https://cryptolandtech.github.io/dapp-wallet-util/");
+      iframeRef.current!.contentWindow!
+      .postMessage({ type: "grantPermissionRequest", walletId: "moonlet" }, "https://cryptolandtech.github.io/dapp-wallet-util/");
     }
-    console.log(data);
+    console.log("on mesgg",data,iframeRef.current);
   };
 
   // const onToggleDialog = (override?: OpenCloseState) => {
   //   dispatch(actions.Layout.toggleShowWallet(override));
   // };
 
-  // const onSelect = async (type: ConnectOptionType, args?: any) => {
-  //   const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
-  //   console.log(zilliqa);
-  // };
+  const onSelect = async (type: ConnectOptionType, args?: any) => {
 
-  const onBack = () => {
-    if (typeof onResult === "function")
-      onResult(null);
+    const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
+    console.log(zilliqa);
+  };
+
+  const onBack = async () => {
+    // if (typeof onResult === "function")
+    //   onResult(null);
+    if(WalletService) {
+      await WalletService.connectWalletMoonlet();
+    }
   };
 
   return (
@@ -83,7 +92,7 @@ const ConnectWalletMoonlet: React.FC<ConnectWalletManagerViewProps & React.HTMLA
           <ChevronLeftIcon /> Go Back
         </Button>
       </DialogContent>
-      {/* <iframe ref={iframeRef} height={0} width={0} frameBorder={0} src="https://cryptolandtech.github.io/dapp-wallet-util/" /> */}
+      <iframe ref={iframeRef} height={0} width={0} frameBorder={0} src="https://cryptolandtech.github.io/dapp-wallet-util/" />
     </Box>
   );
 };
