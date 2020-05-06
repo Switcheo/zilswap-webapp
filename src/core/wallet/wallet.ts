@@ -6,7 +6,9 @@ import { dapp } from "dapp-wallet-util";
 
 export const connectWalletMoonlet = async (): Promise<ConnectWalletResult> => {
   let moonlet = await dapp.getWalletInstance('moonlet');
-  console.log({ moonlet });
+  // @ts-ignore
+  let account = await moonlet.providers.zilliqa.getAccounts();
+  console.log({ moonlet }, { account });
   return {};
 }
 
