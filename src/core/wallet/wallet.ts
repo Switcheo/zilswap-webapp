@@ -4,7 +4,7 @@ import moment from "moment";
 import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
 import { MoonletConnectedWallet } from "./MoonletConnectedWallet";
 import { ConnectWalletResult } from "./ConnectedWallet";
-// import { listTransations } from "core/services/TransactionSrv";
+import { listTransations } from "core/services/TransactionSrv";
 import { dapp } from "dapp-wallet-util";
 
 export const connectWalletMoonlet = async (): Promise<ConnectWalletResult> => {
@@ -15,15 +15,15 @@ export const connectWalletMoonlet = async (): Promise<ConnectWalletResult> => {
   if (account.length < 1) return {};
   try {
     // @ts-ignore
-    // const moonletZil = new Zilliqa('', moonlet.providers.zilliqa);
-    const moonletZil = new Zilliqa('https://dev-api.zilliqa.com/');
-    // const transactions = await listTransations({ address: "zil1ct5rnjt7et0fq7y6emnq4y8fn4euss8977llses" });
+    const moonletZil = new Zilliqa(window.net_url || 'https://dev-api.zilliqa.com/', moonlet.providers.zilliqa);
+    // const moonletZil = new Zilliqa('https://dev-api.zilliqa.com/');
+    const transactions = await listTransations({ address: account[0].address || "zil1ct5rnjt7et0fq7y6emnq4y8fn4euss8977llses" });
 
     // moonletZil.blockchain.signer = moonletZil.contracts.signer = {
     //   sign: m => m
     // };
 
-    console.log({ moonletZil })
+    console.log({ moonletZil }, { transactions })
     const balanceResult = await moonletZil.blockchain.getBalance(account[0].address);
     console.log({ balanceResult })
     const balance = balanceResult.result.balance;
