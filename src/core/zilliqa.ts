@@ -1,7 +1,15 @@
 import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { bytes, units } from "@zilliqa-js/util";
 
-export const zilliqa = new Zilliqa('https://dev-api.zilliqa.com/');
+let zilliqa: Zilliqa;
+
+export const setZilliqa = (newZil: Zilliqa) => {
+  zilliqa = newZil
+}
+
+export const getZilliqa = (): Zilliqa => {
+  return zilliqa;
+};
 
 
 // mainnet, it is 65537.

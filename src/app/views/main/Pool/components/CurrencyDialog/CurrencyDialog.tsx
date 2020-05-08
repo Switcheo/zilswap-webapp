@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { ConnectedWallet } from "core/wallet/wallet";
 import { makeStyles, Box, DialogContent, OutlinedInput, InputAdornment, Typography, useTheme, ButtonBase } from "@material-ui/core";
 import { DialogModal, ContrastBox, CurrencyLogo } from "app/components";
 import cls from "classnames";

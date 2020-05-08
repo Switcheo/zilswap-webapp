@@ -9,9 +9,9 @@ export enum WalletConnectType {
 export type ConnectedWallet = {
   type: WalletConnectType;
   balance: string;
-  timestamp: moment.Moment,
-
+  timestamp: moment.Moment;
   reload: () => Promise<void>;
+  getTransaction: () => Promise<void>;
 }
 
 export type ConnectWalletResult = {
