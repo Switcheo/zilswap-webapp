@@ -56,8 +56,10 @@ const ConnectWalletMoonlet: React.FC<ConnectWalletManagerViewProps & React.HTMLA
     if (data.type && data.type === "walletReady") {
       setMoonletBridgeReady(true);
 
-      iframeRef.current!.contentWindow!
-      .postMessage({ type: "grantPermissionRequest", walletId: "moonlet" }, "https://cryptolandtech.github.io/dapp-wallet-util/");
+      if(iframeRef.current) {
+        iframeRef.current!.contentWindow!
+        .postMessage({ type: "grantPermissionRequest", walletId: "moonlet" }, "https://cryptolandtech.github.io/dapp-wallet-util/");
+      }
     }
     console.log("on mesgg",data,iframeRef.current);
   };
@@ -72,18 +74,21 @@ const ConnectWalletMoonlet: React.FC<ConnectWalletManagerViewProps & React.HTMLA
     console.log(zilliqa);
   };
 
-  const onBack = async () => {
-    // if (typeof onResult === "function")
-    //   onResult(null);
+  const onConnect = async () => {
     if(WalletService) {
       await WalletService.connectWalletMoonlet();
     }
+  }
+
+  const onBack = async () => {
+    if (typeof onResult === "function")
+      onResult(null);
   };
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <DialogContent>
-        <ContrastBox className={classes.container}>
+        <ContrastBox className={classes.container} onClick={onConnect}>
           <Typography variant="h2">Connect Moonlet</Typography>
         </ContrastBox>
       </DialogContent>
