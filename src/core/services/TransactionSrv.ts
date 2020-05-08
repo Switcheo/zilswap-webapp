@@ -21,7 +21,5 @@ export const listTransations = async ({ network = "testnet", page = 1, type = "a
 
 	let response = await HTTPSrv.get({ url, headers });
 	response = await response.json();
-
-	console.log({ response });
 	return response;
 }

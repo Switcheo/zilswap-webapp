@@ -10,6 +10,7 @@ export type ConnectedWallet = {
   type: WalletConnectType;
   balance: string;
   timestamp: moment.Moment;
+  transactions: Array<any>;
   reload: () => Promise<void>;
   getTransaction: () => Promise<void>;
 }
