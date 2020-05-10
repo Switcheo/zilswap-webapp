@@ -100,7 +100,7 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           variant="contained"
           color="primary"
           fullWidth
-          disabled={!walletState.wallet}
+          disabled={!walletState.connectedWallet}
           onClick={() => { }}
         >{type === "add" ? "Add Liquidity" : "Remove Liquidity"}</Button>
         {type === "remove" && (<Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>

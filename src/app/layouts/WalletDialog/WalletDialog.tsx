@@ -27,7 +27,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const [connectWalletType, setConnectWalletType] = useState<ConnectOptionType | null>("privateKey");
   const showWalletDialog = useSelector<RootState, boolean>(state => state.layout.showWalletDialog);
   const [moonletBridgeReady, setMoonletBridgeReady] = useState(false);
-  const [connectedWallet, setConnectedWallet] = useState<ConnectWalletResult>({})
+  const connectedWallet = useSelector<RootState, ConnectedWallet>(state => state.wallet.connectedWallet);
   const dispatch = useDispatch();
   const zilliqa = getZilliqa();
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -65,9 +65,8 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     setConnectWalletType(connectType);
     if (connectType === "moonlet") {
       if (WalletService) {
-        const wallet = await WalletService.connectWalletMoonlet();
-        console.log({ wallet })
-        setConnectedWallet(wallet);
+        const { wallet } = await WalletService.connectWalletMoonlet();
+        dispatch(actions.Wallet.updateWallet(wallet));
       }
     }
   };
@@ -79,15 +78,16 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
   const dialogHeader = connectWalletType === null ? "Connect Wallet" : DIALOG_HEADERS[connectWalletType];
 
+
   return (
     <DialogModal header={dialogHeader} open={showWalletDialog} onClose={onCloseDialog} {...rest} className={cls(classes.root, className)}>
-      {zilliqa === undefined && (
+      {connectWalletType === null && zilliqa === undefined && (
         <ConnectWallet onSelectConnectOption={onSelectConnectOption} />
       )}
       {connectWalletType === "moonlet" && zilliqa && (
         <ConnectWalletMoonlet onResult={onConnectWalletResult} />
       )}
-      {connectWalletType === "privateKey" && zilliqa && (
+      {connectWalletType === "privateKey" && (
         <ConnectWalletPrivateKey onResult={onConnectWalletResult} />
       )}
       {connectWalletType === "moonlet" && (

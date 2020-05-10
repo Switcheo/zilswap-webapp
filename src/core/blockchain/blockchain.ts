@@ -24,14 +24,20 @@ export interface TxResult {
 
 export const getTransaction = async (txHash: string): Promise<Transaction> => {
   const zilliqa = getZilliqa();
-  if(!zilliqa) Promise.reject("no wallet");
+  if (!zilliqa) Promise.reject("no wallet");
   return await zilliqa.blockchain.getTransaction(txHash);
 };
 export const createTransaction = async (txRequest: TxRequestProps): Promise<Transaction> => {
   const zilliqa = getZilliqa();
-  if(!zilliqa) Promise.reject("no wallet");
+  if (!zilliqa) Promise.reject("no wallet");
   const { toAddr, gasLimit, gasPrice, amount } = txRequest;
-  const generatedTxObject = zilliqa.transactions.new({
+  // Without this bypass create transaction wont work
+  // apply a hack to disable internal ZilliqaJS autosigning feature
+  zilliqa.blockchain.signer = zilliqa.contracts.signer = {
+    // @ts-ignore
+    sign: m => m
+  };
+  const generatedTxObject = await zilliqa.transactions.new({
     version: VERSION,
     toAddr,
     amount: new BN(units.toQa(amount, ZilUnits.Zil)),

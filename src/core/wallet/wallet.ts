@@ -11,17 +11,21 @@ export const connectWalletMoonlet = async (): Promise<ConnectWalletResult> => {
   let moonlet = await dapp.getWalletInstance('moonlet');
   // @ts-ignore
   let account = await moonlet.providers.zilliqa.getAccounts();
-  console.log({ moonlet }, { account });
   if (account.length < 1) return {};
   try {
     // @ts-ignore
     const moonletZil = new Zilliqa(moonlet.providers.zilliqa.currentNetwork.url, moonlet.providers.zilliqa);
-    const transactions = await listTransations({ address: account[0].address });
+    // @ts-ignore
+    const network = moonlet.providers.zilliqa.currentNetwork.mainNet ? "mainnet" : "testnet"
     const balanceResult = await moonletZil.blockchain.getBalance(account[0].address);
-    const balance = balanceResult.result.balance;
+    const transactions = await listTransations({ address: account[0].address, network });
+
+    let balance = 0;
+    if (!balanceResult.error)
+      balance = balanceResult.result.balance;
     const timestamp = moment();
     // @ts-ignore
-    const wallet = new MoonletConnectedWallet(account, balance, timestamp, moonletZil, transactions);
+    const wallet = new MoonletConnectedWallet(account, balance, timestamp, transactions);
     setZilliqa(moonletZil);
     return { wallet };
   } catch (error) {

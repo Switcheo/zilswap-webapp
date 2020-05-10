@@ -1,4 +1,6 @@
 import moment from "moment";
+import { Transaction } from "@zilliqa-js/account";
+
 
 export type ConnectOptionType = "moonlet" | "privateKey";
 
@@ -12,7 +14,8 @@ export type ConnectedWallet = {
   timestamp: moment.Moment;
   transactions: Array<any>;
   reload: () => Promise<void>;
-  getTransaction: () => Promise<void>;
+  getTransactions: () => Promise<void>;
+  createTransaction: () => Promise<Transaction>;
 }
 
 export type ConnectWalletResult = {

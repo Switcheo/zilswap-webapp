@@ -8,9 +8,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ConnectWalletManagerViewProps } from "../../types";
 import { ConnectOptionType, ConnectedWallet, ConnectWalletResult } from "core/wallet/ConnectedWallet";
-import { Zilliqa } from "@zilliqa-js/zilliqa";
-import { getZilliqa } from "core/zilliqa";
-import WalletService from "core/wallet";
+// import { Zilliqa } from "@zilliqa-js/zilliqa";
+// import { getZilliqa } from "core/zilliqa";
+// import WalletService from "core/wallet";
+import { RootState } from "app/store/types";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -42,6 +43,7 @@ const ConnectWalletMoonlet: React.FC<ConnectWalletManagerViewProps & React.HTMLA
   const classes = useStyles();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const dispatch = useDispatch();
+  const connectedWallet = useSelector<RootState, ConnectedWallet>(state => state.wallet.connectedWallet);
   const subscriber = useMessageSubscriber();
 
   useEffect(() => {
@@ -63,19 +65,11 @@ const ConnectWalletMoonlet: React.FC<ConnectWalletManagerViewProps & React.HTMLA
     }
   };
 
-  // const onToggleDialog = (override?: OpenCloseState) => {
-  //   dispatch(actions.Layout.toggleShowWallet(override));
-  // };
-
-  // const onSelect = async (type: ConnectOptionType, args?: any) => {
-  //   const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
-  //   console.log(zilliqa);
-  // };
-
   const onConnect = async () => {
-    // if(WalletService) {
-    //   await WalletService.connectWalletMoonlet();
-    // }
+    if (connectedWallet) {
+      const result = await connectedWallet.createTransaction();
+    }
+
   }
 
   const onBack = async () => {
