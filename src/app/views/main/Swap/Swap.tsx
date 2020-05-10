@@ -14,6 +14,9 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CurrencyInput, ShowAdvanced } from "./components";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
+import { wallet } from "dapp-wallet-util";
+import { WalletState } from "app/store/wallet/types";
+import { useMoneyFormatter } from "app/utils";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -86,6 +89,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [showAdvanced, setShowAdvanced] = useState(true);
   const [notification, setNotification] = useState<{ type: string; message: string; } | null>({ type: "success", message: "Transaction Submitted." });
   const formState = useSelector<RootState, SwapFormState>(state => state.swap);
+  const wallet = useSelector<RootState, WalletState>(state => state.wallet);
+  const moneyFormat = useMoneyFormatter({ decPlaces: 10 });
 
   const dispatch = useDispatch();
 
@@ -109,6 +114,15 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }));
   }
 
+  const onPercentage = (percentage: number) => {
+    const currency = formState.values.giveCurrency;
+    const balance = wallet.currencies[currency] > 0 ? +(moneyFormat(wallet.currencies[currency], { currency })) : 0;
+    dispatch(actions.Swap.update_extended({
+      key: "give",
+      value: balance * percentage
+    }));
+  }
+
   return (
     <MainCard {...rest} hasNotification={notification} className={cls(classes.root, className)}>
       <NotificationBox notification={notification} setNotification={setNotification} />
@@ -118,16 +132,16 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           name="give"
         >
           <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
-            <Button className={classes.percentageButton}>
+            <Button onClick={() => onPercentage(0.25)} className={classes.percentageButton}>
               <Typography variant="button">25%</Typography>
             </Button>
-            <Button className={classes.percentageButton}>
+            <Button onClick={() => onPercentage(0.5)} className={classes.percentageButton}>
               <Typography variant="button">50%</Typography>
             </Button>
-            <Button className={classes.percentageButton}>
+            <Button onClick={() => onPercentage(0.75)} className={classes.percentageButton}>
               <Typography variant="button">75%</Typography>
             </Button>
-            <Button className={classes.percentageButton}>
+            <Button onClick={() => onPercentage(1)} className={classes.percentageButton}>
               <Typography variant="button">100%</Typography
               ></Button>
           </ButtonGroup>
@@ -146,13 +160,21 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         >
           <KeyValueDisplay mt={"22px"} kkey={"Exchange Rate"} value={`1 ${formState.values.giveCurrency} = ${formState.values.rate} ${formState.values.receiveCurrency}`} />
         </CurrencyInput>
-        <Button
+        {!wallet.wallet && (<Button
           className={classes.actionButton}
           variant="contained"
           color="primary"
           fullWidth
           onClick={onConnectWallet}
-        >Connect Wallet</Button>
+        >Connect Wallet</Button>)}
+        {wallet.wallet && (<Button
+          className={classes.actionButton}
+          variant="contained"
+          color="primary"
+          fullWidth
+          disabled={!(formState.values.give && formState.values.receive)}
+          onClick={onConnectWallet}
+        >Swap</Button>)}
         <Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
           Advanced Details{showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </Typography>

@@ -12,6 +12,11 @@ const currencies = {
     symbol: "USD",
     country_code: "us",
   },
+  ZIL: {
+    name: "Zilliqa",
+    compression: 12,
+    symbol: "ZIL"
+  }
 };
 
 export const active = () => "SGD";

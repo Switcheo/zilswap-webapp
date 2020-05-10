@@ -7,6 +7,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "app/store/types";
 import { actions } from "app/store";
 import CurrencyDialog from "app/components/CurrencyDialog";
+import { WalletState } from "app/store/wallet/types";
+import { useMoneyFormatter } from "app/utils";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -43,6 +45,12 @@ const useStyles = makeStyles(theme => ({
   },
   primaryColor: {
     color: theme.palette.primary.main
+  },
+  floatLeft: {
+    float: "left"
+  },
+  floatRight: {
+    float: "right"
   }
 }));
 
@@ -61,7 +69,9 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: any) => {
   const [showCurrencyDialog, setShowCurrencyDialog] = useState(false);
   const amount = useSelector<RootState, number>(state => state.swap.values[amountKey])
   const currency = useSelector<RootState, string>(state => state.swap.values[currencyKey])
+  const wallet = useSelector<RootState, WalletState>(state => state.wallet)
   const dispatch = useDispatch();
+  const moneyFormat = useMoneyFormatter({ decPlaces: 10 });
 
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     dispatch(actions.Swap.update_extended({
@@ -78,9 +88,14 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: any) => {
     setShowCurrencyDialog(false);
   }
 
+  const showBalance = name === "give";
+
   return (
     <form className={classes.form} noValidate autoComplete="off">
-      <InputLabel>{label}</InputLabel>
+      <Box display="flex" justifyContent="space-between">
+        <InputLabel className={classes.floatLeft}>{label}</InputLabel>
+        {showBalance && wallet && wallet.currencies[currency] >= 0 && (<Typography variant="body2" className={classes.floatRight}>{`Balance: ${wallet.currencies[currency] >= 0 ? `${moneyFormat(wallet.currencies[currency], { currency }).toLocaleString("en-US", { maximumFractionDigits: 10 })} ${currency}` : "-"}`}</Typography>)}
+      </Box>
       <OutlinedInput
         className={classes.inputRow}
         placeholder={"0.00"}

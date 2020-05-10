@@ -1,14 +1,17 @@
-import { AppBar, Box, Button, IconButton, Toolbar } from "@material-ui/core";
+import { AppBar, Box, Button, IconButton, Toolbar, Chip, Badge, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Brand } from "app/components/TopBar/components";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import cls from "classnames";
-import React from "react";
+import React, { Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ThemeSwitch from "../ThemeSwitch";
 import { ReactComponent as MenuIcon } from "./menu.svg";
+import { ReactComponent as DotIcon } from "./dot.svg";
 import { TopBarProps } from "./types";
+import { WalletState } from "app/store/wallet/types";
+import LensIcon from '@material-ui/icons/Lens';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -38,6 +41,12 @@ const useStyles = makeStyles(theme => ({
   },
   grow: {
     flexGrow: 1,
+  },
+  dot: {
+    marginRight: theme.spacing(1)
+  },
+  chipText: {
+    color: theme.palette.text.primary
   }
 }));
 
@@ -46,8 +55,12 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
 
   const classes = useStyles();
   const dispatch = useDispatch();
-
+  const wallet = useSelector<RootState, WalletState>(state => state.wallet);
   const themeType = useSelector<RootState, string>(state => state.preference.theme);
+
+  const shortenAddress = (address: string) => {
+    return `${address.slice(0, 5)}...${address.slice(-5)}`;
+  }
 
   const onConnectWallet = () => {
     dispatch(actions.Layout.toggleShowWallet());
@@ -64,12 +77,13 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
         <Box justifyContent="center">
           <Brand theme={themeType} />
         </Box>
-        <Box display="flex" flex={1} justifyContent="flex-end">
-          <Button className={classes.btnConnect} onClick={onConnectWallet}>Connect Wallet</Button>
-          <ThemeSwitch className={classes.themeSwitch} />
+        <Box display="flex" flex={1} justifyContent="flex-end" alignItems="center">
+          {!wallet.wallet && (<Button className={classes.btnConnect} onClick={onConnectWallet}>Connect Wallet</Button>)}
+          {wallet.wallet && (<Chip color="primary" size="small" variant="outlined" label={<Typography variant="button" color="textPrimary"><DotIcon className={classes.dot} />{shortenAddress(wallet.wallet.account.address)}</Typography>} />)}
+          < ThemeSwitch className={classes.themeSwitch} />
         </Box>
       </Toolbar>
-    </AppBar>
+    </AppBar >
   );
 };
 

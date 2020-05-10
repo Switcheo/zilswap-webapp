@@ -8,6 +8,8 @@ import React, { useState, useEffect } from "react";
 import { ConnectWalletManagerViewProps } from "../../types";
 import { ConnectOptionType, ConnectedWallet, ConnectWalletResult } from "core/wallet/ConnectedWallet";
 import WalletService from "core/wallet"
+import { actions } from "app/store";
+import { useDispatch } from "react-redux";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -32,6 +34,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginTop: theme.spacing(6),
     minWidth: 240,
     alignSelf: "center",
+    height: 46
   },
   extraSpacious: {
     display: "flex",
@@ -52,24 +55,32 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
   const { children, className, onResult, ...rest } = props;
   const classes = useStyles();
   const [privateKey, setPrivateKey] = useState("");
+  const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
 
   const onBack = () => {
     if (typeof onResult === "function")
       onResult(null);
   };
 
-  const onTextChange = (ev:  React.ChangeEvent<HTMLInputElement>) => {
+  const onTextChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     setPrivateKey(ev.target.value);
   }
 
-  const toggleConnect = async () => {
+  const onPasswordChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(ev.target.value);
+  }
+
+  const connect = async () => {
     let wallet: ConnectWalletResult;
     let connectedWallet: ConnectedWallet;
-
-    if(privateKey)
+    if (privateKey)
       wallet = await WalletService.connectWalletPrivateKey(privateKey);
     else return;
-
+    if (wallet) {
+      dispatch(actions.Wallet.update({ ...wallet, currencies: { ZIL: +(wallet.wallet!.balance) }, pk: privateKey }));
+      dispatch(actions.Layout.toggleShowWallet());
+    }
   }
 
   return (
@@ -78,8 +89,10 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
         <ContrastBox className={classes.container}>
           <form className={classes.form} noValidate autoComplete="off">
             <InputLabel>Enter a Private Key</InputLabel>
-            <OutlinedInput onChange={onTextChange} />
-            <Button onClick={toggleConnect} className={classes.submitButton} variant="contained" color="primary">Connect</Button>
+            <OutlinedInput type="password" value={privateKey} onChange={onTextChange} />
+            {/* <InputLabel>Enter a Password</InputLabel>
+            <OutlinedInput type="password" value={password} onChange={onPasswordChange} /> */}
+            <Button onClick={connect} className={classes.submitButton} variant="contained" color="primary">Connect</Button>
           </form>
         </ContrastBox>
       </DialogContent>
