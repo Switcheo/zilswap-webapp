@@ -13,6 +13,7 @@ export default (palette) => ({
   h3: {
     fontSize: "16px",
     lightHeight: "18px",
+    fontWeight: 500
   },
   h4: {
   },

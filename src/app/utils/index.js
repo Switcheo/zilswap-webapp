@@ -1,5 +1,6 @@
 export { default as axios } from "./axios";
 export { default as bytesToSize } from "./bytesToSize";
+export { default as truncate } from "./truncate";
 export { default as constants } from "./constants";
 export { default as getInitials } from "./getInitials";
 export { default as gradients } from "./gradients";

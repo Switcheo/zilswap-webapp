@@ -2,7 +2,7 @@ import { WalletConnectType, ConnectedWallet } from "./ConnectedWallet";
 import moment from "moment";
 import { getZilliqa } from "core/zilliqa";
 import { Account } from "@zilliqa-js/account";
-import { listTransations } from "core/services/TransactionSrv";
+import { listTransactions } from "core/services/TransactionSrv";
 
 export class PrivateKeyConnectedWallet implements ConnectedWallet {
   type = WalletConnectType.PrivateKey;
@@ -30,6 +30,6 @@ export class PrivateKeyConnectedWallet implements ConnectedWallet {
 
   async getTransaction() {
     // @ts-ignore
-    this.transactions = listTransations(this.account.address);
+    this.transactions = await listTransactions({ address: this.account.address });
   }
 }

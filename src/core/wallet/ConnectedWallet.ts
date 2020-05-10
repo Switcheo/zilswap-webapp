@@ -13,8 +13,8 @@ export type ConnectedWallet = {
   transactions: Array<any>;
   reload: () => Promise<void>;
   getTransaction: () => Promise<void>;
-}
+};
 
 export type ConnectWalletResult = {
-  wallet?: ConnectedWallet;
-}
+  wallet: ConnectedWallet;
+} | null;

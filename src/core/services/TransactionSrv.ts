@@ -16,7 +16,8 @@ const getPath = (url: string, route_params?: any, query_params?: any) => {
 	return url;
 }
 
-export const listTransations = async ({ network = "testnet", page = 1, type = "all", address }: any) => {
+export const listTransactions = async ({ network = "testnet", page = 1, type = "all", address }: any) => {
+	console.log(address)
 	const url = getPath(QUERY_PATH, { address }, { network, page, type });
 
 	let response = await HTTPSrv.get({ url, headers });

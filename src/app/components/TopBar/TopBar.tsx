@@ -12,6 +12,7 @@ import { ReactComponent as DotIcon } from "./dot.svg";
 import { TopBarProps } from "./types";
 import { WalletState } from "app/store/wallet/types";
 import LensIcon from '@material-ui/icons/Lens';
+import { truncate } from "app/utils";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -58,10 +59,6 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
   const wallet = useSelector<RootState, WalletState>(state => state.wallet);
   const themeType = useSelector<RootState, string>(state => state.preference.theme);
 
-  const shortenAddress = (address: string) => {
-    return `${address.slice(0, 5)}...${address.slice(-5)}`;
-  }
-
   const onConnectWallet = () => {
     dispatch(actions.Layout.toggleShowWallet());
   };
@@ -79,7 +76,7 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
         </Box>
         <Box display="flex" flex={1} justifyContent="flex-end" alignItems="center">
           {!wallet.wallet && (<Button className={classes.btnConnect} onClick={onConnectWallet}>Connect Wallet</Button>)}
-          {wallet.wallet && (<Chip color="primary" size="small" variant="outlined" label={<Typography variant="button" color="textPrimary"><DotIcon className={classes.dot} />{shortenAddress(wallet.wallet.account.address)}</Typography>} />)}
+          {wallet.wallet && (<Chip onClick={onConnectWallet} color="primary" size="small" variant="outlined" label={<Typography variant="button" color="textPrimary"><DotIcon className={classes.dot} />{truncate(wallet.wallet.account.address)}</Typography>} />)}
           < ThemeSwitch className={classes.themeSwitch} />
         </Box>
       </Toolbar>

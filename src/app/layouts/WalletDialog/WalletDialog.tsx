@@ -1,15 +1,20 @@
 import { makeStyles } from "@material-ui/core/styles";
-import { DialogModal } from "app/components";
+import { DialogModal, ContrastBox } from "app/components";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import cls from "classnames";
 import { useMessageSubscriber } from "app/utils";
-import { ConnectOptionType, ConnectedWallet, ConnectWalletResult } from "../../../core/wallet/ConnectedWallet";
-import React, { useEffect, useState, useRef } from "react";
+import { ConnectOptionType, ConnectedWallet, ConnectWalletResult, WalletConnectType } from "../../../core/wallet/ConnectedWallet";
+import React, { useEffect, useState, useRef, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ConnectWallet, ConnectWalletMoonlet, ConnectWalletPrivateKey } from "./components";
 import { getZilliqa } from "core/zilliqa";
 import WalletService from "core/wallet";
+import { WalletState } from "app/store/wallet/types";
+import { DialogContent } from "@material-ui/core";
+import { ReactComponent as MoonletIcon } from "./components/ConnectWallet/moonlet.svg";
+import { ReactComponent as PrivateKeyIcon } from "./components/ConnectWallet/private-key.svg";
+import ConnectedWalletBox from "./components/ConnectedWalletBox";
 
 const DIALOG_HEADERS: { [key in ConnectOptionType]: string } = {
   moonlet: "Connect Moonlet Wallet",
@@ -27,11 +32,11 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const [connectWalletType, setConnectWalletType] = useState<ConnectOptionType | null>("privateKey");
   const showWalletDialog = useSelector<RootState, boolean>(state => state.layout.showWalletDialog);
   const [moonletBridgeReady, setMoonletBridgeReady] = useState(false);
-  const [connectedWallet, setConnectedWallet] = useState<ConnectWalletResult>({})
   const dispatch = useDispatch();
   const zilliqa = getZilliqa();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const subscriber = useMessageSubscriber();
+  const wallet = useSelector<RootState, WalletState>(state => state.wallet);
 
   useEffect(() => {
     const unsubscriber = subscriber(onMessage);
@@ -66,8 +71,8 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     if (connectType === "moonlet") {
       if (WalletService) {
         const wallet = await WalletService.connectWalletMoonlet();
-        console.log({ wallet })
-        setConnectedWallet(wallet);
+        dispatch(actions.Wallet.update({ wallet, currencies: {} }));
+        dispatch(actions.Layout.toggleShowWallet());
       }
     }
   };
@@ -77,21 +82,40 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       setConnectWalletType(null);
   };
 
-  const dialogHeader = connectWalletType === null ? "Connect Wallet" : DIALOG_HEADERS[connectWalletType];
+  const getDialogHeader = () => {
+    if (wallet.wallet) {
+      return "Connected Wallet"
+    } else if (connectWalletType === null) {
+      return "Connect Wallet"
+    } else {
+      return DIALOG_HEADERS[connectWalletType]
+    }
+  }
 
   return (
-    <DialogModal header={dialogHeader} open={showWalletDialog} onClose={onCloseDialog} {...rest} className={cls(classes.root, className)}>
-      {zilliqa === undefined && (
-        <ConnectWallet onSelectConnectOption={onSelectConnectOption} />
+    <DialogModal header={getDialogHeader()} open={showWalletDialog} onClose={onCloseDialog} {...rest} className={cls(classes.root, className)}>
+      {!wallet.wallet && (
+        <Fragment>
+          {zilliqa === undefined && !connectWalletType && (
+            <ConnectWallet onSelectConnectOption={onSelectConnectOption} />
+          )}
+          {connectWalletType === "moonlet" && zilliqa && (
+            <ConnectWalletMoonlet onResult={onConnectWalletResult} />
+          )}
+          {connectWalletType === "privateKey" && (
+            <ConnectWalletPrivateKey onResult={onConnectWalletResult} />
+          )}
+          {connectWalletType === "moonlet" && (
+            <iframe ref={iframeRef} height={0} width={0} frameBorder={0} src="https://cryptolandtech.github.io/dapp-wallet-util/" />
+          )}
+        </Fragment>
       )}
-      {connectWalletType === "moonlet" && zilliqa && (
-        <ConnectWalletMoonlet onResult={onConnectWalletResult} />
-      )}
-      {connectWalletType === "privateKey" && zilliqa && (
-        <ConnectWalletPrivateKey onResult={onConnectWalletResult} />
-      )}
-      {connectWalletType === "moonlet" && (
-        <iframe ref={iframeRef} height={0} width={0} frameBorder={0} src="https://cryptolandtech.github.io/dapp-wallet-util/" />
+      {wallet.wallet && (
+        <Fragment>
+          <DialogContent>
+            {wallet.wallet.type === WalletConnectType.PrivateKey && <ConnectedWalletBox icon={PrivateKeyIcon} label="Private Key" />}
+          </DialogContent>
+        </Fragment>
       )}
     </DialogModal>
   );
