@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { ConnectWalletManagerViewProps } from "../../types";
 import { ConnectOptionType, ConnectedWallet, ConnectWalletResult } from "core/wallet/ConnectedWallet";
 import { Zilliqa } from "@zilliqa-js/zilliqa";
-import { dapp } from "dapp-wallet-util";
+import { getZilliqa } from "core/zilliqa";
 import WalletService from "core/wallet";
 
 const useStyles = makeStyles(theme => ({
@@ -56,28 +56,26 @@ const ConnectWalletMoonlet: React.FC<ConnectWalletManagerViewProps & React.HTMLA
     if (data.type && data.type === "walletReady") {
       setMoonletBridgeReady(true);
 
-      if(iframeRef.current) {
+      if (iframeRef.current) {
         iframeRef.current!.contentWindow!
-        .postMessage({ type: "grantPermissionRequest", walletId: "moonlet" }, "https://cryptolandtech.github.io/dapp-wallet-util/");
+          .postMessage({ type: "grantPermissionRequest", walletId: "moonlet" }, "https://cryptolandtech.github.io/dapp-wallet-util/");
       }
     }
-    console.log("on mesgg",data,iframeRef.current);
   };
 
   // const onToggleDialog = (override?: OpenCloseState) => {
   //   dispatch(actions.Layout.toggleShowWallet(override));
   // };
 
-  const onSelect = async (type: ConnectOptionType, args?: any) => {
-
-    const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
-    console.log(zilliqa);
-  };
+  // const onSelect = async (type: ConnectOptionType, args?: any) => {
+  //   const zilliqa = new Zilliqa("https://dev-api.zilliqa.com");
+  //   console.log(zilliqa);
+  // };
 
   const onConnect = async () => {
-    if(WalletService) {
-      await WalletService.connectWalletMoonlet();
-    }
+    // if(WalletService) {
+    //   await WalletService.connectWalletMoonlet();
+    // }
   }
 
   const onBack = async () => {
@@ -97,7 +95,6 @@ const ConnectWalletMoonlet: React.FC<ConnectWalletManagerViewProps & React.HTMLA
           <ChevronLeftIcon /> Go Back
         </Button>
       </DialogContent>
-      <iframe ref={iframeRef} height={0} width={0} frameBorder={0} src="https://cryptolandtech.github.io/dapp-wallet-util/" />
     </Box>
   );
 };
