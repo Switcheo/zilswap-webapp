@@ -16,6 +16,7 @@ export type ConnectedWallet = {
   reload: () => Promise<void>;
   getTransactions: () => Promise<void>;
   createTransaction: () => Promise<Transaction>;
+  logout: () => void;
 }
 
 export type ConnectWalletResult = {

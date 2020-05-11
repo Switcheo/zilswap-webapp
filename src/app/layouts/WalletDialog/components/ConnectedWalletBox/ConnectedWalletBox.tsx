@@ -91,7 +91,7 @@ const ConnectedWalletBox = (props: any) => {
             <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=testnet`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
             <IconButton onClick={() => navigator.clipboard.writeText(address)} className={classes.copy} size="small"><CopyIcon /></IconButton>
           </Box>
-          <Typography className={cls(classes.info, classes.logout)} onClick={() => { }} color="primary" variant="body1">Log Out</Typography>
+          <Typography className={cls(classes.info, classes.logout)} onClick={() => { wallet && wallet.logout() }} color="primary" variant="body1">Log Out</Typography>
         </Box>
       </ContrastBox>
       <Box mt={"36px"}>

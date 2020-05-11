@@ -1,8 +1,10 @@
 import * as HTTPSrv from "./httpService";
 import querystring from "query-string";
 
+const API_KEY = process.env.REACT_APP_VIEWBLOCK_API_KEY;
+
 const headers = {
-	"X-APIKEY": "05d219b0475304c1c1f61c564877ceda894ef3ce66202034363e7dca2886af03"
+	"X-APIKEY": API_KEY
 }
 const QUERY_PATH = "https://api.viewblock.io/v1/zilliqa/addresses/:address";
 

@@ -6,11 +6,11 @@ import { ConnectWalletResult, ConnectedWallet } from "core/wallet/ConnectedWalle
 
 export const TYPES = {
   TOGGLE_CONNECT_WALLET: "TOGGLE_CONNECT_WALLET",
-  UPDATE_WALLET: "UPDATE_WALLET"
+  UPDATE_WALLET: "UPDATE_WALLET",
 };
 
 export enum WalletActionTypes {
-  UPDATE
+  UPDATE = "WALLET_UPDATE", LOGOUT = "WALLET_LOGOUT"
 }
 
 export function init(pk: string) {
@@ -39,9 +39,8 @@ export function toggleConnectWallet(override?: OpenCloseState) {
   }
 };
 
-export function updateWallet(payload?: ConnectedWallet) {
+export function logout() {
   return {
-    type: TYPES.UPDATE_WALLET,
-    payload
+    type: WalletActionTypes.LOGOUT
   }
 }
