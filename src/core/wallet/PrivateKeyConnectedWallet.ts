@@ -1,9 +1,10 @@
 import { WalletConnectType, ConnectedWallet } from "./ConnectedWallet";
 import moment from "moment";
-import { getZilliqa } from "core/zilliqa";
+import { getZilliqa, logout } from "core/zilliqa";
 import { Account } from "@zilliqa-js/account";
 import { listTransactions, getBalance } from "core/services/viewblockService";
 import BlockchainService from "core/blockchain";
+import store, { actions } from "app/store";
 
 export class PrivateKeyConnectedWallet implements ConnectedWallet {
   type = WalletConnectType.PrivateKey;
@@ -40,5 +41,10 @@ export class PrivateKeyConnectedWallet implements ConnectedWallet {
   async createTransaction() {
     const result = await BlockchainService.createTransaction({ toAddr: "zil1vg360alka6805ugu027j2mfnuf70ldm2xepu6g", amount: 1, gasPrice: 1000, gasLimit: 1 });
     return result;
+  }
+
+  logout() {
+    logout();
+    store.dispatch(actions.Wallet.logout());
   }
 }
