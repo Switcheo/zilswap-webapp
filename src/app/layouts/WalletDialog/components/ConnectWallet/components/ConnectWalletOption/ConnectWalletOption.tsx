@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@material-ui/core";
+import { Box, Button, Typography, CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import { ContrastBox } from "app/components";
@@ -12,7 +12,9 @@ export interface ConnectWalletOptionProps {
   label: string;
   icon?: React.FunctionComponent;
   buttonText: string;
-  onSelect?: () => {}
+  onSelect?: () => {};
+  loading?: Boolean;
+  disable?: Boolean;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -78,7 +80,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 const ConnectWalletOption: React.FC<ConnectWalletOptionProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
-  const { children, className, secureLevel, label, icon: Icon, buttonText, onSelect, ...rest } = props;
+  const { loading, disable, children, className, secureLevel, label, icon: Icon, buttonText, onSelect, ...rest } = props;
   const classes = useStyles();
   const securityLevelClass = {
     [classes.securityLevel1]: secureLevel >= 1,
@@ -96,8 +98,8 @@ const ConnectWalletOption: React.FC<ConnectWalletOptionProps & React.HTMLAttribu
           <SecurityLevelIcon className={cls(classes.securityLevelIcon, securityLevelClass)} />
         </Typography>
       </Box>
-      <Button className={classes.button} color="primary" variant="contained" onClick={onSelect}>{buttonText}</Button>
-      <Button className={classes.iconButton} color="primary" variant="contained" onClick={onSelect}>
+      <Button disabled={disable} className={classes.button} color="primary" variant="contained" onClick={() => { if (loading) return; onSelect() }}>{loading ? <CircularProgress size={14} color="primary" /> : buttonText}</Button>
+      <Button disabled={disable} className={classes.iconButton} color="primary" variant="contained" onClick={onSelect}>
         <ChevronRightIcon />
       </Button>
     </ContrastBox>

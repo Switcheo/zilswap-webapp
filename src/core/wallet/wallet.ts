@@ -24,7 +24,7 @@ export const connectWalletMoonlet = async (): Promise<ConnectWalletResult> => {
     const balance = accinfo[0].balance;
     const timestamp = moment();
     // @ts-ignore
-    const wallet = new MoonletConnectedWallet(account, balance, timestamp, transactions);
+    const wallet = new MoonletConnectedWallet(account[0], balance, timestamp, transactions);
     setZilliqa(moonletZil);
     return { wallet };
   } catch (error) {

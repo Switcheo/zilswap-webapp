@@ -2,7 +2,7 @@ import { WalletConnectType, ConnectedWallet } from "./ConnectedWallet";
 import moment from "moment";
 import { getZilliqa } from "core/zilliqa";
 import { Account } from "@zilliqa-js/account";
-import { listTransactions } from "core/services/viewblockService";
+import { listTransactions, getBalance } from "core/services/viewblockService";
 import BlockchainService from "core/blockchain";
 
 export class PrivateKeyConnectedWallet implements ConnectedWallet {
@@ -23,8 +23,11 @@ export class PrivateKeyConnectedWallet implements ConnectedWallet {
   async reload() {
     const zilliqa = getZilliqa();
     if (!zilliqa) return;
-    const balanceResult = await zilliqa.blockchain.getBalance(this.account.address);
-    this.balance = balanceResult.result.balance;
+    // @ts-ignore
+    const network = zilliqa.currentNetwork.mainNet ? "mainnet" : "testnet";
+    const accinfo = await getBalance({ network, address: this.account.address });
+    // @ts-ignore
+    this.balance = accinfo.balance;
     this.timestamp = moment();
     await this.getTransactions();
   }

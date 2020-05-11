@@ -9,6 +9,7 @@ import { ReactComponent as PrivateKeyIcon } from "./private-key.svg";
 
 export interface ConnectWalletProps {
   onSelectConnectOption: (option: ConnectOptionType) => void;
+  loading: Boolean;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -25,14 +26,14 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
-  const { children, className, onSelectConnectOption, ...rest } = props;
+  const { loading, children, className, onSelectConnectOption, ...rest } = props;
   const classes = useStyles();
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <DialogContent>
-        <ConnectWalletOption label="Moonlet Wallet" icon={MoonletIcon} secureLevel={4} buttonText="Connect Moonlet" onSelect={() => onSelectConnectOption("moonlet")} />
-        <ConnectWalletOption label="Private Key" icon={PrivateKeyIcon} secureLevel={1} buttonText="Enter Private Key" onSelect={() => onSelectConnectOption("privateKey")} />
+        <ConnectWalletOption loading={loading} label="Moonlet Wallet" icon={MoonletIcon} secureLevel={4} buttonText="Connect Moonlet" onSelect={() => onSelectConnectOption("moonlet")} />
+        <ConnectWalletOption disable={loading} label="Private Key" icon={PrivateKeyIcon} secureLevel={1} buttonText="Enter Private Key" onSelect={() => onSelectConnectOption("privateKey")} />
       </DialogContent>
       <DialogContent className={classes.extraSpacious}>
         <Typography color="textPrimary" variant="body2" align="center">

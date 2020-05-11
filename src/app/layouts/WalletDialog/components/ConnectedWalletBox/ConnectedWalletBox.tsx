@@ -79,7 +79,7 @@ const ConnectedWalletBox = (props: any) => {
     console.log({ wallet });
   }, [])
 
-  address = wallet.account[0] ? wallet.account[0].address : wallet.account.address;
+  address = wallet.account.address;
   return (
     <Box display="flex" flexDirection="column">
       <ContrastBox className={cls(classes.root, className)}>

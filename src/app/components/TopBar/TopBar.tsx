@@ -65,10 +65,7 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
   };
 
   if (wallet && wallet.account) {
-    if (Array.isArray(wallet.account))
-      address = wallet.account[0].address
-    else
-      address = wallet.account.address
+    address = wallet.account.address
   }
 
   return (
