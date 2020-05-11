@@ -37,7 +37,7 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
       </DialogContent>
       <DialogContent className={classes.extraSpacious}>
         <Typography color="textPrimary" variant="body2" align="center">
-          New to Moonlet? Download <Link href="https://chrome.google.com/webstore/detail/moonlet-wallet-legacy/aepcjklheilpnnokjfpgncfcdakhbgci">here</Link> or <Link href="#">contact us</Link>.
+          New to Moonlet? Download <Link target="_blank" href="https://chrome.google.com/webstore/detail/moonlet-wallet-legacy/aepcjklheilpnnokjfpgncfcdakhbgci">here</Link> or <Link href="#">contact us</Link>.
         </Typography>
       </DialogContent>
     </Box>

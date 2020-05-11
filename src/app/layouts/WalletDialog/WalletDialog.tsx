@@ -91,8 +91,6 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       return DIALOG_HEADERS[connectWalletType]
     }
   }
-
-  console.log({ zilliqa }, connectWalletType);
   return (
     <DialogModal header={getDialogHeader()} open={showWalletDialog} onClose={onCloseDialog} {...rest} className={cls(classes.root, className)}>
       {!wallet.wallet && (

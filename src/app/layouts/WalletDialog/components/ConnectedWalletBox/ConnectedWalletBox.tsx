@@ -76,8 +76,6 @@ const ConnectedWalletBox = (props: any) => {
     if (wallet) {
       if (typeof wallet.reload === "function") wallet.reload();
     }
-
-    console.log({ wallet });
   }, [])
 
   address = wallet.account.address;
