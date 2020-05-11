@@ -11,9 +11,10 @@ import { ConnectWallet, ConnectWalletMoonlet, ConnectWalletPrivateKey } from "./
 import { getZilliqa } from "core/zilliqa";
 import WalletService from "core/wallet";
 import { WalletState } from "app/store/wallet/types";
-import { DialogContent } from "@material-ui/core";
+import { DialogContent, useTheme } from "@material-ui/core";
 import { ReactComponent as MoonletIcon } from "./components/ConnectWallet/moonlet.svg";
 import { ReactComponent as PrivateKeyIcon } from "./components/ConnectWallet/private-key.svg";
+import { ReactComponent as PrivateKeyIconDark } from "./components/ConnectWallet/private-key-dark.svg";
 import ConnectedWalletBox from "./components/ConnectedWalletBox";
 
 const DIALOG_HEADERS: { [key in ConnectOptionType]: string } = {
@@ -35,6 +36,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const dispatch = useDispatch();
   const zilliqa = getZilliqa();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const theme = useTheme();
   const subscriber = useMessageSubscriber();
   const wallet = useSelector<RootState, WalletState>(state => state.wallet);
 
@@ -112,7 +114,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       {wallet.wallet && (
         <Fragment>
           <DialogContent>
-            <ConnectedWalletBox onLogout={() => { setConnectWalletType(null) }} icon={PrivateKeyIcon} />
+            <ConnectedWalletBox onLogout={() => { setConnectWalletType(null) }} icon={theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon} />
           </DialogContent>
         </Fragment>
       )}
