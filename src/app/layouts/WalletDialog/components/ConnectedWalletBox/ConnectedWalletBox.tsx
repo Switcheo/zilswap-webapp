@@ -12,6 +12,7 @@ import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
 import { ReactComponent as CheckCompleteIcon } from "./check_complete.svg";
 import { hexToRGBA, truncate } from "app/utils";
+import { actions } from "app/store";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -62,7 +63,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 }));
 const ConnectedWalletBox = (props: any) => {
-  const { children, className, secureLevel, icon: Icon, buttonText, onSelect, ...rest } = props;
+  const { onLogout, children, className, secureLevel, icon: Icon, buttonText, onSelect, ...rest } = props;
   const classes = useStyles();
   const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
   const [includeCompleted, setIncludeCompleted] = useState(true);
@@ -91,7 +92,7 @@ const ConnectedWalletBox = (props: any) => {
             <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=testnet`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
             <IconButton onClick={() => navigator.clipboard.writeText(address)} className={classes.copy} size="small"><CopyIcon /></IconButton>
           </Box>
-          <Typography className={cls(classes.info, classes.logout)} onClick={() => { wallet && wallet.logout() }} color="primary" variant="body1">Log Out</Typography>
+          <Typography className={cls(classes.info, classes.logout)} onClick={() => { wallet && wallet.logout(); onLogout() }} color="primary" variant="body1">Disconnect</Typography>
         </Box>
       </ContrastBox>
       <Box mt={"36px"}>

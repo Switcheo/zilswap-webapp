@@ -114,7 +114,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       {wallet.wallet && (
         <Fragment>
           <DialogContent>
-            <ConnectedWalletBox icon={PrivateKeyIcon} />
+            <ConnectedWalletBox onLogout={() => { setConnectWalletType(null) }} icon={PrivateKeyIcon} />
           </DialogContent>
         </Fragment>
       )}
