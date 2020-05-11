@@ -41,7 +41,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const wallet = useSelector<RootState, WalletState>(state => state.wallet);
 
   const get_icon = () => {
-    if (wallet.wallet.type === "Moonley") return MoonletIcon;
+    if (wallet.wallet.type !== 1) return MoonletIcon;
     return theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon;
   }
 
