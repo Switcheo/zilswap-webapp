@@ -98,7 +98,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     <DialogModal header={getDialogHeader()} open={showWalletDialog} onClose={onCloseDialog} {...rest} className={cls(classes.root, className)}>
       {!wallet.wallet && (
         <Fragment>
-          {zilliqa === undefined && (
+          {zilliqa === undefined && !(connectWalletType === "privateKey") && (
             <ConnectWallet loading={connectWalletType === "moonlet"} onSelectConnectOption={onSelectConnectOption} />
           )}
           {/* {connectWalletType === "moonlet" && zilliqa && (
