@@ -40,6 +40,11 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const subscriber = useMessageSubscriber();
   const wallet = useSelector<RootState, WalletState>(state => state.wallet);
 
+  const get_icon = () => {
+    if (wallet.wallet.type === "Moonley") return MoonletIcon;
+    return theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon;
+  }
+
   useEffect(() => {
     const unsubscriber = subscriber(onMessage);
     return () => unsubscriber();
@@ -114,7 +119,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       {wallet.wallet && (
         <Fragment>
           <DialogContent>
-            <ConnectedWalletBox onLogout={() => { setConnectWalletType(null) }} icon={theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon} />
+            <ConnectedWalletBox onLogout={() => { setConnectWalletType(null) }} icon={get_icon()} />
           </DialogContent>
         </Fragment>
       )}
