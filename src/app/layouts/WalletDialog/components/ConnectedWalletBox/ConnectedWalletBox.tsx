@@ -1,4 +1,4 @@
-import { Box, Button, Typography, Divider, IconButton, useMediaQuery, useTheme } from "@material-ui/core";
+import { Box, Button, Typography, Divider, IconButton, useMediaQuery, useTheme, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ContrastBox } from "app/components";
 import { AppTheme } from "app/theme/types";
@@ -62,11 +62,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   }
 
 }));
+
+type CopyMap = {
+  [key: string]: boolean
+};
+
 const ConnectedWalletBox = (props: any) => {
   const { onLogout, children, className, secureLevel, icon: Icon, buttonText, onSelect, ...rest } = props;
   const classes = useStyles();
   const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
   const [includeCompleted, setIncludeCompleted] = useState(true);
+  const [copyMap, setCopyMap] = useState<CopyMap>({});
   const theme = useTheme();
   const is_xs_media = useMediaQuery(theme.breakpoints.down("xs"));
 
@@ -78,6 +84,14 @@ const ConnectedWalletBox = (props: any) => {
     }
   }, [])
 
+  const onCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopyMap({ ...copyMap, [text]: true });
+    setTimeout(() => {
+      setCopyMap({ ...copyMap, [text]: false });
+    }, 500)
+  }
+
   address = wallet.account.address;
   return (
     <Box display="flex" flexDirection="column">
@@ -88,7 +102,7 @@ const ConnectedWalletBox = (props: any) => {
           <Box mt={"8px"} display="flex" flexDirection="row" alignItems="center">
             <Typography color="textSecondary" variant="body1">{is_xs_media ? truncate(address, 10, 10) : address}</Typography>
             <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=testnet`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
-            <IconButton onClick={() => navigator.clipboard.writeText(address)} className={classes.copy} size="small"><CopyIcon /></IconButton>
+            <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(address)} open={!!copyMap[address]} title="Copied!"><IconButton className={classes.copy} size="small"><CopyIcon /></IconButton></Tooltip>
           </Box>
           <Typography className={cls(classes.info, classes.logout)} onClick={() => { wallet && wallet.logout(); onLogout() }} color="primary" variant="body1">Disconnect</Typography>
         </Box>
@@ -117,7 +131,7 @@ const ConnectedWalletBox = (props: any) => {
               <Box display="flex" flexDirection="row" alignItems="center">
                 <Typography variant="body2">{truncate(transaction.hash, 10, 10)}</Typography>
                 <IconButton target="_blank" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=testnet`} className={classes.newLinkTransaction} size="small"><NewLinkIcon /></IconButton>
-                <IconButton onClick={() => navigator.clipboard.writeText(transaction.hash)} className={classes.copy} size="small"><CopyIcon /></IconButton>
+                <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(transaction.hash)} open={!!copyMap[transaction.hash]} title="Copied!"><IconButton className={classes.copy} size="small"><CopyIcon /></IconButton></Tooltip>
               </Box>
               <Typography variant="body2">{transaction.receiptSuccess ? "Completed" : "Cancelled"}</Typography>
             </Box>
