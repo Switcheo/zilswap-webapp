@@ -26,7 +26,7 @@ export class MoonletConnectedWallet implements ConnectedWallet {
     const zilliqa = getZilliqa();
     if (!zilliqa) return;
     // @ts-ignore
-    const network = zilliqa.currentNetwork.mainNet ? "mainnet" : "testnet";
+    const network = zilliqa.currentNetwork && zilliqa.currentNetwork.mainNet ? "mainnet" : "testnet";
     const accinfo = await getBalance({ network, address: this.account.address });
     // @ts-ignore
     this.balance = accinfo.balance;
@@ -36,7 +36,7 @@ export class MoonletConnectedWallet implements ConnectedWallet {
 
   async getTransactions() {
     // @ts-ignore
-    this.transactions = listTransactions(this.account.address);
+    this.transactions = await listTransactions({ address: this.account.address });
   }
 
   async createTransaction() {

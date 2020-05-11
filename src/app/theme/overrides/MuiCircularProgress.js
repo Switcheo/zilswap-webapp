@@ -1,5 +1,5 @@
 export default theme => ({
-  root: {
+  circle: {
     color: theme.palette.colors.zilliqa.neutral[100],
   },
 });
