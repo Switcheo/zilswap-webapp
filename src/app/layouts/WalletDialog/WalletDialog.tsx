@@ -73,7 +73,6 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
         //@ts-ignore
         const { wallet } = await WalletService.connectWalletMoonlet();
         dispatch(actions.Wallet.update({ wallet, currencies: {} }));
-        dispatch(actions.Layout.toggleShowWallet());
       }
     }
   };
