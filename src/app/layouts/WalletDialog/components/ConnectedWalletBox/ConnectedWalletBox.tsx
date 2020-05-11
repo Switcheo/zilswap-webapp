@@ -1,4 +1,4 @@
-import { Box, Button, Typography, Divider, IconButton } from "@material-ui/core";
+import { Box, Button, Typography, Divider, IconButton, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ContrastBox } from "app/components";
 import { AppTheme } from "app/theme/types";
@@ -55,6 +55,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   checkbox: {
     marginRight: 6
+  },
+  logout: {
+    cursor: "pointer"
   }
 
 }));
@@ -62,7 +65,10 @@ const ConnectedWalletBox = (props: any) => {
   const { children, className, secureLevel, icon: Icon, buttonText, onSelect, ...rest } = props;
   const classes = useStyles();
   const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
-  const [includeCompleted, setIncludeCompleted] = useState(false);
+  const [includeCompleted, setIncludeCompleted] = useState(true);
+  const theme = useTheme();
+  const is_xs_media = useMediaQuery(theme.breakpoints.down("xs"));
+
   let address = "";
 
   useEffect(() => {
@@ -81,11 +87,11 @@ const ConnectedWalletBox = (props: any) => {
         <Box className={classes.label}>
           <Typography variant="h3">{wallet.type ? "Private Key" : "Moonlet"}</Typography>
           <Box mt={"8px"} display="flex" flexDirection="row" alignItems="center">
-            <Typography color="textSecondary" variant="body1">{address}</Typography>
+            <Typography color="textSecondary" variant="body1">{is_xs_media ? truncate(address, 10, 10) : address}</Typography>
             <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=testnet`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
             <IconButton onClick={() => navigator.clipboard.writeText(address)} className={classes.copy} size="small"><CopyIcon /></IconButton>
           </Box>
-          <Typography className={classes.info} color="primary" variant="body1">Log Out</Typography>
+          <Typography className={cls(classes.info, classes.logout)} onClick={() => { }} color="primary" variant="body1">Log Out</Typography>
         </Box>
       </ContrastBox>
       <Box mt={"36px"}>
@@ -106,12 +112,13 @@ const ConnectedWalletBox = (props: any) => {
           </Box>
           <Divider className={cls(classes.divider, classes.rowHeader)} />
         </Box>
-        {wallet && wallet && wallet.transactions && wallet.transactions.map((transaction: any) => (
+        {wallet && wallet && wallet.transactions && wallet.transactions.filter((t: any) => includeCompleted ? true : !t.receiptSuccess).map((transaction: any) => (
           <Box key={transaction.hash}>
             <Box display="flex" flexDirection="row" justifyContent="space-between">
               <Box display="flex" flexDirection="row" alignItems="center">
                 <Typography variant="body2">{truncate(transaction.hash, 10, 10)}</Typography>
                 <IconButton target="_blank" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=testnet`} className={classes.newLinkTransaction} size="small"><NewLinkIcon /></IconButton>
+                <IconButton onClick={() => navigator.clipboard.writeText(transaction.hash)} className={classes.copy} size="small"><CopyIcon /></IconButton>
               </Box>
               <Typography variant="body2">{transaction.receiptSuccess ? "Completed" : "Cancelled"}</Typography>
             </Box>
