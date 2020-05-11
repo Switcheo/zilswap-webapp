@@ -19,5 +19,5 @@ export type ConnectedWallet = {
 }
 
 export type ConnectWalletResult = {
-  wallet?: ConnectedWallet;
-}
+  wallet: ConnectedWallet;
+} | null;

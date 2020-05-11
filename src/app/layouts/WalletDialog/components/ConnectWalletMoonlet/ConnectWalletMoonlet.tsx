@@ -43,7 +43,7 @@ const ConnectWalletMoonlet: React.FC<ConnectWalletManagerViewProps & React.HTMLA
   const classes = useStyles();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const dispatch = useDispatch();
-  const connectedWallet = useSelector<RootState, ConnectedWallet>(state => state.wallet.connectedWallet);
+  const connectedWallet = useSelector<RootState, ConnectedWallet>(state => state.wallet.wallet);
   const subscriber = useMessageSubscriber();
 
   useEffect(() => {

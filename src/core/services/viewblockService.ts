@@ -4,7 +4,7 @@ import querystring from "query-string";
 const headers = {
 	"X-APIKEY": "05d219b0475304c1c1f61c564877ceda894ef3ce66202034363e7dca2886af03"
 }
-const QUERY_PATH = "https://api.viewblock.io/v1/zilliqa/addresses/:address/txs"
+const QUERY_PATH = "https://api.viewblock.io/v1/zilliqa/addresses/:address";
 
 const getPath = (url: string, route_params?: any, query_params?: any) => {
 	if (route_params) {
@@ -16,8 +16,17 @@ const getPath = (url: string, route_params?: any, query_params?: any) => {
 	return url;
 }
 
-export const listTransations = async ({ network = "testnet", page = 1, type = "all", address }: any) => {
-	const url = getPath(QUERY_PATH, { address }, { network, page, type });
+export const listTransactions = async ({ network = "testnet", page = 1, type = "all", address }: any) => {
+	let path = QUERY_PATH + "/txs";
+	const url = getPath(path, { address }, { network, page, type });
+
+	let response = await HTTPSrv.get({ url, headers });
+	response = await response.json();
+	return response;
+}
+
+export const getBalance = async ({ network = "testnet", address }: any) => {
+	const url = getPath(QUERY_PATH, { address }, { network });
 
 	let response = await HTTPSrv.get({ url, headers });
 	response = await response.json();

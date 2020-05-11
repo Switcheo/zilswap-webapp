@@ -2,7 +2,7 @@ import { WalletConnectType, ConnectedWallet } from "./ConnectedWallet";
 import moment from "moment";
 import { getZilliqa } from "core/zilliqa";
 import { Account } from "@zilliqa-js/account";
-import { listTransations } from "core/services/TransactionSrv";
+import { listTransactions } from "core/services/viewblockService";
 import BlockchainService from "core/blockchain";
 
 export class MoonletConnectedWallet implements ConnectedWallet {
@@ -32,7 +32,7 @@ export class MoonletConnectedWallet implements ConnectedWallet {
 
   async getTransactions() {
     // @ts-ignore
-    this.transactions = listTransations(this.account.address);
+    this.transactions = listTransactions(this.account.address);
   }
 
   async createTransaction() {

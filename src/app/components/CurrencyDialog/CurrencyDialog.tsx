@@ -5,6 +5,10 @@ import React, { useState } from "react";
 import ContrastBox from "../ContrastBox";
 import CurrencyLogo from "../CurrencyLogo";
 import { ReactComponent as SearchIcon } from "./SearchIcon.svg";
+import { useSelector } from "react-redux";
+import { WalletState } from "app/store/wallet/types";
+import { RootState } from "app/store/types";
+import { useMoneyFormatter } from "app/utils";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -51,7 +55,7 @@ const useStyles = makeStyles(theme => ({
 
 const currencies = [
   { symbol: "SWTH", name: "Switcheo Network", amount: 100 },
-  { symbol: "ZIL", name: "Ziliqa", amount: 2688.88 },
+  { symbol: "ZIL", name: "Zilliqa", amount: 2688.88 },
   { symbol: "ETH", name: "Ethereum", amount: 0 },
   { symbol: "0xBTC", name: "0xBTC Token", amount: 0 },
   { symbol: "DAI", name: "Dai Stablecoin", amount: 0 },
@@ -70,7 +74,8 @@ const CurrencyDialog = (props: any) => {
   const { children, className, showCurrencyDialog, onCloseDialog, onSelect, ...rest } = props;
   const classes = useStyles();
   const [search, setSearch] = useState("");
-
+  const wallet = useSelector<RootState, WalletState>(state => state.wallet);
+  const moneyFormat = useMoneyFormatter({ decPlaces: 10 });
   const filter = (currency: {
     symbol: string;
     name: string;
@@ -115,7 +120,7 @@ const CurrencyDialog = (props: any) => {
                   <Typography color="textSecondary" variant="body2">{c.name}</Typography>
                 </Box>
                 <Box flex={1}>
-                  <Typography align="right" variant="h6" component="p">{c.amount ? `${c.amount.toLocaleString("en-US", { maximumFractionDigits: 10 })} ${c.symbol}` : "-"}</Typography>
+                  <Typography align="right" variant="h6" component="p">{wallet.currencies[c.symbol] ? `${moneyFormat(wallet.currencies[c.symbol], { currency: c.symbol }).toLocaleString("en-US", { maximumFractionDigits: 10 })} ${c.symbol}` : "-"}</Typography>
                 </Box>
               </ContrastBox>
             </ButtonBase>
