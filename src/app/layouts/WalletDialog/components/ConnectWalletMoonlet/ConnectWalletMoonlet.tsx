@@ -2,16 +2,16 @@ import { Box, Button, DialogContent, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import { ContrastBox } from "app/components";
-import { useMessageSubscriber } from "app/utils";
-import cls from "classnames";
-import React, { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { ConnectWalletManagerViewProps } from "../../types";
-import { ConnectOptionType, ConnectedWallet, ConnectWalletResult } from "core/wallet/ConnectedWallet";
 // import { Zilliqa } from "@zilliqa-js/zilliqa";
 // import { getZilliqa } from "core/zilliqa";
 // import WalletService from "core/wallet";
 import { RootState } from "app/store/types";
+import { useMessageSubscriber } from "app/utils";
+import cls from "classnames";
+import { ConnectedWallet } from "core/wallet/ConnectedWallet";
+import React, { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { ConnectWalletManagerViewProps } from "../../types";
 
 const useStyles = makeStyles(theme => ({
   root: {

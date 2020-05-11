@@ -1,4 +1,4 @@
-import { Box, Button, DialogContent, InputLabel, OutlinedInput } from "@material-ui/core";
+import { Box, Button, DialogContent, InputLabel, OutlinedInput, Typography, CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import { ContrastBox } from "app/components";
@@ -10,6 +10,7 @@ import { ConnectOptionType, ConnectedWallet, ConnectWalletResult } from "core/wa
 import WalletService from "core/wallet"
 import { actions } from "app/store";
 import { useDispatch } from "react-redux";
+import { useErrorCatcher } from "app/utils";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -51,12 +52,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
+
 const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, onResult, ...rest } = props;
   const classes = useStyles();
   const [privateKey, setPrivateKey] = useState("");
+  const [error, setError] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const errorCatcher = useErrorCatcher((err: any) => err && setError(err.message));
 
   const onBack = () => {
     if (typeof onResult === "function")
@@ -72,15 +77,19 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
   }
 
   const connect = async () => {
+    setError("");
+    if (loading) return;
+    setLoading(true);
     let wallet: ConnectWalletResult;
     let connectedWallet: ConnectedWallet;
-    if (privateKey)
-      wallet = await WalletService.connectWalletPrivateKey(privateKey);
-    else return;
-    if (wallet) {
-      dispatch(actions.Wallet.update({ ...wallet, currencies: { ZIL: +(wallet.wallet!.balance) }, pk: privateKey }));
-      dispatch(actions.Layout.toggleShowWallet());
-    }
+    errorCatcher(async () => {
+      if (privateKey)
+        wallet = await WalletService.connectWalletPrivateKey(privateKey);
+      else return;
+      if (wallet) {
+        dispatch(actions.Wallet.update({ ...wallet, currencies: { ZIL: +(wallet.wallet!.balance) }, pk: privateKey }));
+      }
+    }).finally(() => setLoading(false));
   }
 
   return (
@@ -88,11 +97,16 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
       <DialogContent>
         <ContrastBox className={classes.container}>
           <form className={classes.form} noValidate autoComplete="off">
-            <InputLabel>Enter a Private Key</InputLabel>
-            <OutlinedInput type="password" value={privateKey} onChange={onTextChange} />
+            <Box display="flex" flexDirection="row" justifyContent="space-between">
+              <InputLabel>Enter a Private Key</InputLabel>
+              {error && (
+                <InputLabel><Typography color="error">{error}</Typography></InputLabel>
+              )}
+            </Box>
+            <OutlinedInput value={privateKey} onChange={onTextChange} />
             {/* <InputLabel>Enter a Password</InputLabel>
             <OutlinedInput type="password" value={password} onChange={onPasswordChange} /> */}
-            <Button onClick={connect} className={classes.submitButton} variant="contained" color="primary">Connect</Button>
+            <Button onClick={connect} className={classes.submitButton} variant="contained" color="primary">{loading ? <CircularProgress size={14} /> : "Connect"} </Button>
           </form>
         </ContrastBox>
       </DialogContent>

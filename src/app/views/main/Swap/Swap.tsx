@@ -7,16 +7,15 @@ import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { SwapFormState } from "app/store/swap/types";
 import { RootState } from "app/store/types";
+import { WalletState } from "app/store/wallet/types";
 import { AppTheme } from "app/theme/types";
+import { useMoneyFormatter } from "app/utils";
 import cls from "classnames";
 import Decimal from "decimal.js";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CurrencyInput, ShowAdvanced } from "./components";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
-import { wallet } from "dapp-wallet-util";
-import { WalletState } from "app/store/wallet/types";
-import { useMoneyFormatter } from "app/utils";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
