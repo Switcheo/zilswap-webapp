@@ -1,4 +1,4 @@
-import { Box, DialogContent, Link, Typography } from "@material-ui/core";
+import { Box, DialogContent, Link, Typography, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { ConnectOptionType } from "../../../../../core/wallet/ConnectedWallet";
@@ -6,6 +6,7 @@ import React from "react";
 import { ConnectWalletOption } from "./components";
 import { ReactComponent as MoonletIcon } from "./moonlet.svg";
 import { ReactComponent as PrivateKeyIcon } from "./private-key.svg";
+import { ReactComponent as PrivateKeyIconDark } from "./private-key-dark.svg";
 
 export interface ConnectWalletProps {
   onSelectConnectOption: (option: ConnectOptionType) => void;
@@ -28,12 +29,13 @@ const useStyles = makeStyles(theme => ({
 const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { loading, children, className, onSelectConnectOption, ...rest } = props;
   const classes = useStyles();
+  const theme = useTheme();
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <DialogContent>
         <ConnectWalletOption loading={loading} label="Moonlet Wallet" icon={MoonletIcon} secureLevel={4} buttonText="Connect Moonlet" onSelect={() => onSelectConnectOption("moonlet")} />
-        <ConnectWalletOption disable={loading} label="Private Key" icon={PrivateKeyIcon} secureLevel={1} buttonText="Enter Private Key" onSelect={() => onSelectConnectOption("privateKey")} />
+        <ConnectWalletOption disable={loading} label="Private Key" icon={theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon} secureLevel={1} buttonText="Enter Private Key" onSelect={() => onSelectConnectOption("privateKey")} />
       </DialogContent>
       <DialogContent className={classes.extraSpacious}>
         <Typography color="textPrimary" variant="body2" align="center">
