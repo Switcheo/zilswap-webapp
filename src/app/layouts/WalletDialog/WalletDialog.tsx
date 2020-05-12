@@ -1,23 +1,22 @@
+import { DialogContent, useTheme, InputLabel, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { DialogModal, ContrastBox } from "app/components";
+import { DialogModal } from "app/components";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
-import cls from "classnames";
-import { useMessageSubscriber } from "app/utils";
-import { ConnectOptionType, ConnectedWallet } from "../../../core/wallet/ConnectedWallet";
-import React, { useEffect, useState, useRef, Fragment } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { ConnectWallet, ConnectWalletPrivateKey } from "./components";
-import { getZilliqa } from "core/zilliqa";
-import WalletService from "core/wallet";
-import { LayoutState } from "app/store/layout/types";
 import { WalletState } from "app/store/wallet/types";
-import { DialogContent, useTheme, InputLabel, Typography } from "@material-ui/core";
-import { ReactComponent as MoonletIcon } from "./components/ConnectWallet/moonlet.svg";
-import { ReactComponent as PrivateKeyIcon } from "./components/ConnectWallet/private-key.svg";
-import { ReactComponent as PrivateKeyIconDark } from "./components/ConnectWallet/private-key-dark.svg";
+import { useMessageSubscriber } from "app/utils";
+import cls from "classnames";
+import WalletService from "core/wallet";
+import { getZilliqa } from "core/zilliqa";
+import React, { Fragment, useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { ConnectedWallet, ConnectOptionType } from "../../../core/wallet/ConnectedWallet";
+import { ConnectWallet, ConnectWalletPrivateKey } from "./components";
 import ConnectedWalletBox from "./components/ConnectedWalletBox";
+import { ReactComponent as MoonletIcon } from "./components/ConnectWallet/moonlet.svg";
+import { ReactComponent as PrivateKeyIconDark } from "./components/ConnectWallet/private-key-dark.svg";
 import { useErrorCatcher } from "app/utils";
+import { ReactComponent as PrivateKeyIcon } from "./components/ConnectWallet/private-key.svg";
 
 const DIALOG_HEADERS: { [key in ConnectOptionType]: string } = {
   moonlet: "Connect Moonlet Wallet",
@@ -34,7 +33,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
   const [connectWalletType, setConnectWalletType] = useState<ConnectOptionType | null>("privateKey");
   const showWalletDialog = useSelector<RootState, boolean>(state => state.layout.showWalletDialog);
-  const [moonletBridgeReady, setMoonletBridgeReady] = useState(false);
+  const [moonletBridgeReady, setMoonletBridgeReady] = useState(false); // eslint-disable-line
   const dispatch = useDispatch();
   const zilliqa = getZilliqa();
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -130,7 +129,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
             <ConnectWalletPrivateKey onResult={onConnectWalletResult} />
           )}
           {connectWalletType === "moonlet" && (
-            <iframe ref={iframeRef} height={0} width={0} frameBorder={0} src="https://cryptolandtech.github.io/dapp-wallet-util/" />
+            <iframe title="moonlet" ref={iframeRef} height={0} width={0} frameBorder={0} src="https://cryptolandtech.github.io/dapp-wallet-util/" />
           )}
         </Fragment>
       )}

@@ -1,17 +1,17 @@
 import { Box, Typography, Divider, IconButton, useMediaQuery, useTheme, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ContrastBox } from "app/components";
+import { ReactComponent as CopyIcon } from "app/components/copy.svg";
+import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
+import { RootState } from "app/store/types";
+import { WalletState } from "app/store/wallet/types";
 import { AppTheme } from "app/theme/types";
+import { hexToRGBA, truncate } from "app/utils";
 import cls from "classnames";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "app/store/types";
-import { WalletState } from "app/store/wallet/types";
-import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
-import { ReactComponent as CopyIcon } from "app/components/copy.svg";
-import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
 import { ReactComponent as CheckCompleteIcon } from "./check_complete.svg";
-import { hexToRGBA, truncate } from "app/utils";
+import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -67,7 +67,7 @@ type CopyMap = {
 };
 
 const ConnectedWalletBox = (props: any) => {
-  const { onLogout, children, className, secureLevel, icon: Icon, buttonText, onSelect, ...rest } = props;
+  const { onLogout, className, icon: Icon } = props;
   const classes = useStyles();
   const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
   const [includeCompleted, setIncludeCompleted] = useState(true);
@@ -81,7 +81,7 @@ const ConnectedWalletBox = (props: any) => {
     if (wallet) {
       if (typeof wallet.reload === "function") wallet.reload();
     }
-  }, [])
+  }, []) // eslint-disable-line
 
   const onCopy = (text: string) => {
     navigator.clipboard.writeText(text);

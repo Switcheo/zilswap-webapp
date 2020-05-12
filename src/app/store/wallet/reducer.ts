@@ -9,7 +9,7 @@ const initial_currencies: WalletCurrencies = {}
 const initial_state: WalletState = {
   wallet: undefined,
   currencies: initial_currencies,
-  pk: savedPk || ""
+  pk: savedPk || "",
 };
 
 const reducer = (state: WalletState = initial_state, action: any) => {

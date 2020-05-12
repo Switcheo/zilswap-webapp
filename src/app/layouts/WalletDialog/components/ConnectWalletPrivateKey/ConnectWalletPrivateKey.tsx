@@ -1,16 +1,17 @@
-import { Box, Button, DialogContent, InputLabel, OutlinedInput, Typography, CircularProgress } from "@material-ui/core";
+import { Box, Button, CircularProgress, DialogContent, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import { ContrastBox } from "app/components";
-import { AppTheme } from "app/theme/types";
-import cls from "classnames";
-import React, { useState, useEffect } from "react";
-import { ConnectWalletManagerViewProps } from "../../types";
-import { ConnectOptionType, ConnectedWallet, ConnectWalletResult } from "core/wallet/ConnectedWallet";
-import WalletService from "core/wallet"
 import { actions } from "app/store";
-import { useDispatch } from "react-redux";
+import { WalletActionTypes } from "app/store/wallet/actions";
+import { AppTheme } from "app/theme/types";
 import { useErrorCatcher } from "app/utils";
+import cls from "classnames";
+import WalletService from "core/wallet";
+import { ConnectedWallet, ConnectWalletResult } from "core/wallet/ConnectedWallet";
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { ConnectWalletManagerViewProps } from "../../types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -52,6 +53,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
+let mounted = false
 
 const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, onResult, ...rest } = props;
@@ -76,19 +78,25 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
     setPassword(ev.target.value);
   }
 
+  useEffect(() => {
+    mounted = true;
+    return () => { mounted = false }
+  }, [])
+
   const connect = async () => {
-    setError("");
+    mounted && setError("");
     if (loading) return;
-    setLoading(true);
+    mounted && setLoading(true);
     let wallet: ConnectWalletResult;
     errorCatcher(async () => {
-      if (privateKey)
+      if (privateKey) {
+        dispatch({ type: WalletActionTypes.LOAD });
         wallet = await WalletService.connectWalletPrivateKey(privateKey);
-      else return;
+      } else return;
       if (wallet) {
         dispatch(actions.Wallet.update({ ...wallet, currencies: { ZIL: +(wallet.wallet!.balance) }, pk: privateKey }));
       }
-    }).finally(() => setLoading(false));
+    }).finally(() => mounted && setLoading(false));
   }
 
   return (

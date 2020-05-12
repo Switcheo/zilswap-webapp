@@ -1,18 +1,17 @@
-import { AppBar, Box, Button, IconButton, Toolbar, Chip, Badge, Typography } from "@material-ui/core";
+import { AppBar, Box, Button, Chip, IconButton, Toolbar, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Brand } from "app/components/TopBar/components";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
+import { WalletState } from "app/store/wallet/types";
+import { truncate } from "app/utils";
 import cls from "classnames";
-import React, { Fragment } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ThemeSwitch from "../ThemeSwitch";
-import { ReactComponent as MenuIcon } from "./menu.svg";
 import { ReactComponent as DotIcon } from "./dot.svg";
+import { ReactComponent as MenuIcon } from "./menu.svg";
 import { TopBarProps } from "./types";
-import { WalletState } from "app/store/wallet/types";
-import LensIcon from '@material-ui/icons/Lens';
-import { truncate } from "app/utils";
 
 const useStyles = makeStyles(theme => ({
   root: {
