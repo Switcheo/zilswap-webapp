@@ -81,7 +81,6 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
     if (loading) return;
     setLoading(true);
     let wallet: ConnectWalletResult;
-    let connectedWallet: ConnectedWallet;
     errorCatcher(async () => {
       if (privateKey)
         wallet = await WalletService.connectWalletPrivateKey(privateKey);

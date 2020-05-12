@@ -1,4 +1,4 @@
-import { Box, Button, Typography, Divider, IconButton, useMediaQuery, useTheme, Tooltip } from "@material-ui/core";
+import { Box, Typography, Divider, IconButton, useMediaQuery, useTheme, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ContrastBox } from "app/components";
 import { AppTheme } from "app/theme/types";
@@ -12,7 +12,6 @@ import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
 import { ReactComponent as CheckCompleteIcon } from "./check_complete.svg";
 import { hexToRGBA, truncate } from "app/utils";
-import { actions } from "app/store";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

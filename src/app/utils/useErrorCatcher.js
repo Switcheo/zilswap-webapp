@@ -1,3 +1,5 @@
+import useStatefulTask from "./useStatefulTask";
+
 const parse_error = (original) => {
   let error = original;
   if (original.isAxiosError) {
@@ -19,11 +21,11 @@ export default function (error_catcher) {
     if (error_catcher) error_catcher(null);
   };
   const _error_catcher = error_catcher || console.error;
-
-  return (async_func) => {
+  const statefulTask = useStatefulTask();
+  return (async_func, taskname) => {
     if (typeof cleanup === "function") cleanup();
 
-    return Promise.resolve(async_func())
+    return Promise.resolve(statefulTask(async_func, taskname))
       .catch(error => {
         console.error(error);
         cleanup = _error_catcher(parse_error(error)) || cleanup;

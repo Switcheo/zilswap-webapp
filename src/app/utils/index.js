@@ -7,6 +7,7 @@ export { default as gradients } from "./gradients";
 export { default as isUrl } from "./isUrl";
 export { default as multiLineFormat } from "./multiLineFormat";
 export { default as snakeToTitle } from "./snakeToTitle";
+export { default as strings } from "./strings";
 export { default as useErrorCatcher } from "./useErrorCatcher";
 export { default as useFilter } from "./useFilter";
 export { default as useFormHandler } from "./useFormHandler";
@@ -15,4 +16,3 @@ export { default as useMoneyFormatter } from "./useMoneyFormatter";
 export { default as useRouter } from "./useRouter";
 export { default as hexToRGB } from "./hexToRGB";
 export { default as hexToRGBA } from "./hexToRGBA";
-

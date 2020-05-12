@@ -4,18 +4,20 @@ import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import cls from "classnames";
 import { useMessageSubscriber } from "app/utils";
-import { ConnectOptionType, ConnectedWallet, ConnectWalletResult, WalletConnectType } from "../../../core/wallet/ConnectedWallet";
+import { ConnectOptionType, ConnectedWallet } from "../../../core/wallet/ConnectedWallet";
 import React, { useEffect, useState, useRef, Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ConnectWallet, ConnectWalletMoonlet, ConnectWalletPrivateKey } from "./components";
+import { ConnectWallet, ConnectWalletPrivateKey } from "./components";
 import { getZilliqa } from "core/zilliqa";
 import WalletService from "core/wallet";
+import { LayoutState } from "app/store/layout/types";
 import { WalletState } from "app/store/wallet/types";
-import { DialogContent, useTheme } from "@material-ui/core";
+import { DialogContent, useTheme, InputLabel, Typography } from "@material-ui/core";
 import { ReactComponent as MoonletIcon } from "./components/ConnectWallet/moonlet.svg";
 import { ReactComponent as PrivateKeyIcon } from "./components/ConnectWallet/private-key.svg";
 import { ReactComponent as PrivateKeyIconDark } from "./components/ConnectWallet/private-key-dark.svg";
 import ConnectedWalletBox from "./components/ConnectedWalletBox";
+import { useErrorCatcher } from "app/utils";
 
 const DIALOG_HEADERS: { [key in ConnectOptionType]: string } = {
   moonlet: "Connect Moonlet Wallet",
@@ -37,8 +39,19 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const zilliqa = getZilliqa();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const theme = useTheme();
+  const [error, setError] = useState<string | null>();
   const subscriber = useMessageSubscriber();
   const wallet = useSelector<RootState, WalletState>(state => state.wallet);
+  const errorCatcher = useErrorCatcher((err: any) => {
+    if (err) {
+      if (err === "WALLET_SCRIPT_INJECT_TIMEOUT" || err === "WALLET_NOT_INSTALLED")
+        setError("Error occurred, please ensure that the moonlet extension is installed/enabled");
+      else if (err === "USER_DID_NOT_GRANT_PERMISSION")
+        setError("User denied permission");
+      else setError(err);
+      setConnectWalletType(null);
+    }
+  });
 
   const get_icon = () => {
     if (wallet.wallet.type !== 1) return MoonletIcon;
@@ -75,11 +88,14 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
   const onSelectConnectOption = async (connectType: ConnectOptionType) => {
     setConnectWalletType(connectType);
+    setError(null);
     if (connectType === "moonlet") {
       if (WalletService) {
-        //@ts-ignore
-        const { wallet } = await WalletService.connectWalletMoonlet();
-        dispatch(actions.Wallet.update({ wallet, currencies: {} }));
+        errorCatcher(async () => {
+          //@ts-ignore
+          const { wallet } = await WalletService.connectWalletMoonlet();
+          dispatch(actions.Wallet.update({ wallet, currencies: {} }));
+        }, "connectWallet")
       }
     }
   };
@@ -100,14 +116,16 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   }
   return (
     <DialogModal header={getDialogHeader()} open={showWalletDialog} onClose={onCloseDialog} {...rest} className={cls(classes.root, className)}>
+      <DialogContent>
+        {error && (
+          <InputLabel><Typography color="error">{error}</Typography></InputLabel>
+        )}
+      </DialogContent>
       {!wallet.wallet && (
         <Fragment>
           {zilliqa === undefined && !(connectWalletType === "privateKey") && (
             <ConnectWallet loading={connectWalletType === "moonlet"} onSelectConnectOption={onSelectConnectOption} />
           )}
-          {/* {connectWalletType === "moonlet" && zilliqa && (
-            <ConnectWalletMoonlet onResult={onConnectWalletResult} />
-          )} */}
           {connectWalletType === "privateKey" && (
             <ConnectWalletPrivateKey onResult={onConnectWalletResult} />
           )}

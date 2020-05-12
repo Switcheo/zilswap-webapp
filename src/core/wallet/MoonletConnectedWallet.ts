@@ -28,14 +28,12 @@ export class MoonletConnectedWallet implements ConnectedWallet {
     // @ts-ignore
     const network = zilliqa.currentNetwork && zilliqa.currentNetwork.mainNet ? "mainnet" : "testnet";
     const accinfo = await getBalance({ network, address: this.account.address });
-    // @ts-ignore
-    this.balance = accinfo.balance;
+    this.balance = accinfo[0].balance;
     this.timestamp = moment();
     await this.getTransactions();
   }
 
   async getTransactions() {
-    // @ts-ignore
     this.transactions = await listTransactions({ address: this.account.address });
   }
 

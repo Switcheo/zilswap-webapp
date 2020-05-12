@@ -18,7 +18,7 @@ const getPath = (url: string, route_params?: any, query_params?: any) => {
 	return url;
 }
 
-export const listTransactions = async ({ network = "testnet", page = 1, type = "all", address }: any) => {
+export const listTransactions = async ({ network = "testnet", page = 1, type = "all", address }: any): Promise<any> => {
 	let path = QUERY_PATH + "/txs";
 	const url = getPath(path, { address }, { network, page, type });
 
@@ -27,7 +27,7 @@ export const listTransactions = async ({ network = "testnet", page = 1, type = "
 	return response;
 }
 
-export const getBalance = async ({ network = "testnet", address }: any) => {
+export const getBalance = async ({ network = "testnet", address }: any): Promise<any> => {
 	const url = getPath(QUERY_PATH, { address }, { network });
 
 	let response = await HTTPSrv.get({ url, headers });
