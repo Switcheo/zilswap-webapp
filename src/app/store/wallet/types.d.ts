@@ -3,7 +3,7 @@ import { ConnectedWallet } from "core/wallet/wallet";
 export interface WalletState {
   wallet?: ConnectedWallet;
   currencies: WalletCurrencies;
-  pk?: string
+  pk?: string,
 };
 
 export interface WalletCurrencies {

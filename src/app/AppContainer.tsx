@@ -31,7 +31,7 @@ const AppContainer: React.FC = () => {
 
   useEffect(() => {
     if (wallet.pk) dispatch(actions.Wallet.init(wallet.pk));
-  }, [])
+  }, []); // eslint-disable-line
 
   return (
     <ThemeProvider theme={theme}>

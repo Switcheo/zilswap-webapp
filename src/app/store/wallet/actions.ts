@@ -1,8 +1,7 @@
+import WalletService from "core/wallet";
+import { Dispatch } from "redux";
 import { OpenCloseState } from "../layout/types";
 import { WalletState } from "./types";
-import { Dispatch } from "redux";
-import WalletService from "core/wallet";
-import { ConnectWalletResult, ConnectedWallet } from "core/wallet/ConnectedWallet";
 
 export const TYPES = {
   TOGGLE_CONNECT_WALLET: "TOGGLE_CONNECT_WALLET",
@@ -10,12 +9,13 @@ export const TYPES = {
 };
 
 export enum WalletActionTypes {
-  UPDATE = "WALLET_UPDATE", LOGOUT = "WALLET_LOGOUT"
+  UPDATE = "WALLET_UPDATE", LOGOUT = "WALLET_LOGOUT", LOAD = "LOAD"
 }
 
 export function init(pk: string) {
   return async (dispatch: Dispatch) => {
     let wallet;
+    dispatch({ type: WalletActionTypes.LOAD });
     if (pk) {
       wallet = await WalletService.connectWalletPrivateKey(pk);
     }
