@@ -12,6 +12,8 @@ import { ConnectedWallet, ConnectWalletResult } from "core/wallet/ConnectedWalle
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { ConnectWalletManagerViewProps } from "../../types";
+import { BigNumber } from "bignumber.js";
+import { getZilliqa } from "core/zilliqa";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -95,8 +97,33 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
       } else return;
       if (wallet) {
         dispatch(actions.Wallet.update({ ...wallet, currencies: { ZIL: +(wallet.wallet!.balance) }, pk: privateKey }));
+        await getPool();
       }
     }).finally(() => mounted && setLoading(false));
+  }
+
+  const getPool = async () => {
+    const zilliqa = getZilliqa();
+    await zilliqa.initialize();
+    const pool = await zilliqa.getPool("ITN");
+    let { contributionPercentage, exchangeRate, tokenReserve, totalContribution, userContribution, zilReserve } = pool;
+
+    console.log("contributionPercentage", new BigNumber(contributionPercentage).toString());
+    console.log("exchangeRate", new BigNumber(exchangeRate).toString());
+    console.log("tokenReserve", new BigNumber(tokenReserve).toString());
+    console.log("totalContribution", new BigNumber(totalContribution).toString());
+    console.log("userContribution", new BigNumber(userContribution).toString());
+    console.log("zilReserve", new BigNumber(zilReserve).toString());
+
+    contributionPercentage = new BigNumber(contributionPercentage).toString();
+    exchangeRate = new BigNumber(exchangeRate).toString();
+    tokenReserve = new BigNumber(tokenReserve).toString();
+    totalContribution = new BigNumber(totalContribution).shiftedBy(-12).toString();
+    userContribution = new BigNumber(userContribution).toString();
+    zilReserve = new BigNumber(zilReserve).toString();
+
+    dispatch(actions.Pool.update_pool({ contributionPercentage, exchangeRate, tokenReserve, totalContribution, userContribution, zilReserve }));
+    await zilliqa.teardown();
   }
 
   return (

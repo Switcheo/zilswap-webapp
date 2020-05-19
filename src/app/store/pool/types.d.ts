@@ -7,10 +7,17 @@ export interface PoolFormState {
   },
   touched: {
     [key: string]: boolean;
+  },
+  poolValues: {
+    [key: string]: any;
   }
 }
 
 export interface PoolUpdateExtendedPayload {
   key: string;
   value: any;
+}
+
+export interface PoolValue {
+
 }

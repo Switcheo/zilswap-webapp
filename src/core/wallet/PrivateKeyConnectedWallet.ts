@@ -22,7 +22,7 @@ export class PrivateKeyConnectedWallet implements ConnectedWallet {
   }
 
   async reload() {
-    const zilliqa = getZilliqa();
+    const { zilliqa } = getZilliqa();
     if (!zilliqa) return;
     // @ts-ignore
     const network = zilliqa.currentNetwork && zilliqa.currentNetwork.mainNet ? "mainnet" : "testnet";

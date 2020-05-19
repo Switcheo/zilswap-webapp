@@ -1,13 +1,15 @@
 import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { bytes, units } from "@zilliqa-js/util";
+import { Zilswap } from "zilswap-sdk";
+import { Network } from 'zilswap-sdk/lib/constants';
 
 let zilliqa: any;
 
-export const setZilliqa = (newZil: Zilliqa) => {
+export const setZilliqa = (newZil: Zilswap) => {
   zilliqa = newZil
 }
 
-export const getZilliqa = (): Zilliqa => {
+export const getZilliqa = (): Zilswap | any => {
   return zilliqa;
 };
 

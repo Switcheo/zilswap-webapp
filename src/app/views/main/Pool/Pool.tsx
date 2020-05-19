@@ -9,10 +9,15 @@ import { PoolFormState } from "app/store/pool/types";
 import { RootState } from "app/store/types";
 import { WalletState } from "app/store/wallet/types";
 import cls from "classnames";
-import React, { useState } from "react";
+import React, { useState, useEffect, EffectCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { PoolDeposit, PoolWithdraw, ShowAdvanced, CreatePoolDialog } from "./components";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
+import { getZilliqa } from "core/zilliqa";
+import { Zilswap } from "zilswap-sdk";
+import { Network } from 'zilswap-sdk/lib/constants';
+import { useErrorCatcher } from "app/utils";
+import { BigNumber } from "bignumber.js";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -54,8 +59,16 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [showCreatePool, setShowCreatePool] = useState(false);
   const [notification, setNotification] = useState<{ type: string; message: string; } | null>({ type: "pool_created", message: "Transaction Submitted." });
   const formState = useSelector<RootState, PoolFormState>(state => state.pool);
+  const poolValue = useSelector<RootState, any>(state => state.pool.poolValues);
   const dispatch = useDispatch();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+
+
+  const errorCatcher = useErrorCatcher((err: any) => {
+    if (err) {
+      console.log({ err });
+    }
+  });
 
   const onTypeChange = (type: string) => {
     dispatch(actions.Pool.update_extended({ key: "type", value: type }))
@@ -92,9 +105,9 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         </Box>
         {type === "add" && (<PoolDeposit />)}
         {type === "remove" && (<PoolWithdraw />)}
-        <KeyValueDisplay kkey={"Exchange Rate"} value={"-"} mb="8px" />
-        <KeyValueDisplay kkey={"Current Pool Size"} value={"-"} mb="8px" />
-        <KeyValueDisplay kkey={"Your Pool Share (%)"} value={"-"} />
+        <KeyValueDisplay kkey={"Exchange Rate"} value={poolValue.exchangeRate} mb="8px" />
+        <KeyValueDisplay kkey={"Current Pool Size"} value={poolValue.totalContribution} mb="8px" />
+        <KeyValueDisplay kkey={"Your Pool Share (%)"} value={poolValue.contributionPercentage} />
         <Button
           className={classes.actionButton}
           variant="contained"
@@ -110,6 +123,7 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       {type === "remove" && (
         <ShowAdvanced
           showAdvanced={showAdvanced}
+          poolValue={poolValue}
         />
       )}
       <CreatePoolDialog open={showCreatePool} onCloseDialog={() => setShowCreatePool(false)} />

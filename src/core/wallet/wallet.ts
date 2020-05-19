@@ -1,5 +1,7 @@
 import { setZilliqa, ZilUrl } from "core/zilliqa";
-import { Zilliqa } from "@zilliqa-js/zilliqa";
+import { toBech32Address } from "@zilliqa-js/crypto"
+import { Zilswap } from "zilswap-sdk";
+import { Network } from 'zilswap-sdk/lib/constants';
 import moment from "moment";
 import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
 import { MoonletConnectedWallet } from "./MoonletConnectedWallet";
@@ -7,13 +9,16 @@ import { ConnectWalletResult } from "./ConnectedWallet";
 import { listTransactions, getBalance } from "core/services/viewblockService";
 import { dapp } from "dapp-wallet-util";
 
+import LiquidityService from "../liquidity";
+
+
 export const connectWalletMoonlet = async (): Promise<ConnectWalletResult> => {
   let moonlet = await dapp.getWalletInstance('moonlet');
   // @ts-ignore
   let account = await moonlet.providers.zilliqa.getAccounts();
   if (account.length < 1) return null;
   // @ts-ignore
-  const moonletZil = new Zilliqa(moonlet.providers.zilliqa.currentNetwork.url, moonlet.providers.zilliqa);
+  const moonletZil = new Zilswap(Network.TestNet, moonlet.providers.zilliqa);
   // @ts-ignore
   const network = moonlet.providers.zilliqa.currentNetwork.mainNet ? "mainnet" : "testnet";
   const accinfo = await getBalance({ network, address: account[0].address });
@@ -26,7 +31,10 @@ export const connectWalletMoonlet = async (): Promise<ConnectWalletResult> => {
 }
 
 export const connectWalletPrivateKey = async (inputPrivateKey: string): Promise<ConnectWalletResult> => {
-  const zilliqa = new Zilliqa(ZilUrl);
+  const zilswap = new Zilswap(Network.TestNet, inputPrivateKey);
+
+  //@ts-ignore
+  let { zilliqa } = zilswap;
   await zilliqa.wallet.addByPrivateKey(inputPrivateKey);
 
   const account = zilliqa.wallet.defaultAccount!;
@@ -35,6 +43,11 @@ export const connectWalletPrivateKey = async (inputPrivateKey: string): Promise<
   const balance = accinfo[0].balance;
   const timestamp = moment();
   const wallet = new PrivateKeyConnectedWallet(account, balance, timestamp, transactions);
-  setZilliqa(zilliqa);
+  console.log({ wallet });
+  setZilliqa(zilswap);
+  // const fungible_token_address = toBech32Address("509ae6e5d91cee3c6571dcd04aa08288a29d563a");
+  // await LiquidityService.removeLiquidity({ tokenId: "ITN", contributionAmount: "4" });
+  // const receipt = await LiquidityService.addLiquidity({ tokenId: fungible_token_address, tokenAmount: "1", zilAmount: "1" });
+  // console.log({ receipt });
   return { wallet };
 }

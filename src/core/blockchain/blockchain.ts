@@ -23,12 +23,12 @@ export interface TxResult {
 }
 
 export const getTransaction = async (txHash: string): Promise<Transaction> => {
-  const zilliqa = getZilliqa();
+  const { zilliqa } = getZilliqa();
   if (!zilliqa) Promise.reject("no wallet");
   return await zilliqa.blockchain.getTransaction(txHash);
 };
 export const createTransaction = async (txRequest: TxRequestProps): Promise<Transaction> => {
-  const zilliqa = getZilliqa();
+  const { zilliqa } = getZilliqa();
   if (!zilliqa) Promise.reject("no wallet");
   const { toAddr, gasLimit, gasPrice, amount } = txRequest;
   // Without this bypass create transaction wont work

@@ -17,6 +17,7 @@ import { ReactComponent as MoonletIcon } from "./components/ConnectWallet/moonle
 import { ReactComponent as PrivateKeyIconDark } from "./components/ConnectWallet/private-key-dark.svg";
 import { useErrorCatcher } from "app/utils";
 import { ReactComponent as PrivateKeyIcon } from "./components/ConnectWallet/private-key.svg";
+import { BigNumber } from "bignumber.js";
 
 const DIALOG_HEADERS: { [key in ConnectOptionType]: string } = {
   moonlet: "Connect Moonlet Wallet",
@@ -35,7 +36,6 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const showWalletDialog = useSelector<RootState, boolean>(state => state.layout.showWalletDialog);
   const [moonletBridgeReady, setMoonletBridgeReady] = useState(false); // eslint-disable-line
   const dispatch = useDispatch();
-  const zilliqa = getZilliqa();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const theme = useTheme();
   const [error, setError] = useState<string | null>();
@@ -94,10 +94,28 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           //@ts-ignore
           const { wallet } = await WalletService.connectWalletMoonlet();
           dispatch(actions.Wallet.update({ wallet, currencies: {} }));
+          await getPool();
         }, "connectWallet")
       }
     }
   };
+
+  const getPool = async () => {
+    const zilliqa = getZilliqa();
+    await zilliqa.initialize();
+    const pool = await zilliqa.getPool("ITN");
+    let { contributionPercentage, exchangeRate, tokenReserve, totalContribution, userContribution, zilReserve } = pool;
+
+    contributionPercentage = new BigNumber(contributionPercentage).toString();
+    exchangeRate = new BigNumber(exchangeRate).toString();
+    tokenReserve = new BigNumber(tokenReserve).toString();
+    totalContribution = new BigNumber(totalContribution).shiftedBy(-12).toString();
+    userContribution = new BigNumber(userContribution).toString();
+    zilReserve = new BigNumber(zilReserve).toString();
+
+    dispatch(actions.Pool.update_pool({ contributionPercentage, exchangeRate, tokenReserve, totalContribution, userContribution, zilReserve }));
+    await zilliqa.teardown();
+  }
 
   const onConnectWalletResult = (wallet: ConnectedWallet | null) => {
     if (!wallet)
@@ -122,7 +140,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       </DialogContent>
       {!wallet.wallet && (
         <Fragment>
-          {zilliqa === undefined && !(connectWalletType === "privateKey") && (
+          {getZilliqa() === undefined && !(connectWalletType === "privateKey") && (
             <ConnectWallet loading={connectWalletType === "moonlet"} onSelectConnectOption={onSelectConnectOption} />
           )}
           {connectWalletType === "privateKey" && (

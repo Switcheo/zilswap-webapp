@@ -22,6 +22,14 @@ const initial_state: PoolFormState = {
     depositCurrency: false,
     withdraw: false,
     withdrawCurrency: false,
+  },
+  poolValues: {
+    contributionPercentage: null,
+    exchangeRate: null,
+    tokenReserve: null,
+    totalContribution: null,
+    userContribution: null,
+    zilReserve: null,
   }
 }
 
@@ -46,6 +54,8 @@ const reducer = (state: PoolFormState = initial_state, action: any) => {
           break;
       }
       return output;
+    case PoolActionTypes.UPDATE_POOL:
+      return { ...state, poolValues: { ...payload } };
     default:
       return state;
   }
