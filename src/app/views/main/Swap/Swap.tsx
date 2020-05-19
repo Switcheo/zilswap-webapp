@@ -157,7 +157,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           label="You Receive"
           name="receive"
         >
-          <KeyValueDisplay mt={"22px"} kkey={"Exchange Rate"} value={`1 ${formState.values.giveCurrency} = ${formState.values.rate} ${formState.values.receiveCurrency}`} />
+          <KeyValueDisplay mt={"22px"} kkey={"Exchange Rate"} value={`1 ${formState.values.giveCurrency} = ${formState.values.rate.toFixed(5)} ${formState.values.receiveCurrency}`} />
         </CurrencyInput>
         {!wallet.wallet && (<Button
           className={classes.actionButton}
