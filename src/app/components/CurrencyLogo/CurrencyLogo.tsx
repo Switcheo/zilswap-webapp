@@ -14,6 +14,7 @@ export type CurrencyLogoMap = {
 
 const currencies: CurrencyLogoMap = {
   "SWTH": SWTH,
+  "ITN": SWTH,
   "ZIL": ZIL,
   "ETH": ETH,
   "0xBTC": C0XBTC,
@@ -34,9 +35,11 @@ const CurrencyLogo = (props: any) => {
   const classes = useStyles();
   const Logo = currencies[currency];
   if (!Logo) return null;
-  return <div className={cls(classes.root, className)}>
-    <Logo />
-  </div>;
+  return (
+    <div className={cls(classes.root, className)}>
+      <Logo />
+    </div>
+  );
 };
 
 export default CurrencyLogo;
