@@ -29,7 +29,7 @@ export function init(pk: string) {
       contributionPercentage = new BigNumber(contributionPercentage).toString();
       exchangeRate = new BigNumber(exchangeRate).toString();
       tokenReserve = new BigNumber(tokenReserve).toString();
-      totalContribution = new BigNumber(totalContribution).toString();
+      totalContribution = new BigNumber(totalContribution).shiftedBy(-12).toString();
       userContribution = new BigNumber(userContribution).toString();
       zilReserve = new BigNumber(zilReserve).toString();
 

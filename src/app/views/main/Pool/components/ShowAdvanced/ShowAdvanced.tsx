@@ -75,13 +75,13 @@ const ShowAdvanced = (props: any) => {
   const { showAdvanced, poolValue } = props;
   const classes = useStyles();
   const state = useSelector<RootState, { [key: string]: any }>(state => state.pool.values);
-  const { withdrawCurrency } = state;
+  const { withdrawCurrency, withdraw } = state;
 
   if (!showAdvanced) return null;
 
   return (
     <ContrastBox className={classes.showAdvanced}>
-      <Typography className={classes.text} variant="body2">You are removing <span className={classes.bold}>{(0).toLocaleString("en-US", { maximumFractionDigits: 10 })} ZIL{withdrawCurrency && ` + {0} {withdrawCurrency}`}</span> from the liquidity pool. (<span className={classes.bold}>~{(0).toLocaleString("en-US", { maximumFractionDigits: 10 })}</span> Liquidity tokens)</Typography>
+      <Typography className={classes.text} variant="body2">You are removing <span className={classes.bold}>{(0).toLocaleString("en-US", { maximumFractionDigits: 10 })} ZIL{withdrawCurrency && ` + ${withdraw} ${withdrawCurrency}`}</span> from the liquidity pool. (<span className={classes.bold}>~{(0).toLocaleString("en-US", { maximumFractionDigits: 10 })}</span> Liquidity tokens)</Typography>
       <Divider className={classes.divider} />
       <KeyValueDisplay mt={"22px"} kkey={"Current Total Supply"} value={`${parseFloat(poolValue.tokenReserve).toLocaleString("en-US", { maximumFractionDigits: 10 })} Liquidity Tokens`} />
       <KeyValueDisplay mt={"22px"} kkey={"Each Pool Token Value"} value={`${1 * poolValue.exchangeRate} ZIL${withdrawCurrency ? ` + ${(parseFloat("0")).toLocaleString("en-US", { maximumFractionDigits: 10 })} ${withdrawCurrency}` : ""}`} />
