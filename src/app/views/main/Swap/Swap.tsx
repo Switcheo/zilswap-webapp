@@ -85,8 +85,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const classes = useStyles();
   const [error, setError] = useState("");
 
-  const [showAdvanced, setShowAdvanced] = useState(true);
-  const [notification, setNotification] = useState<{ type: string; message: string; } | null>({ type: "success", message: "Transaction Submitted." });
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [notification, setNotification] = useState<{ type: string; message: string; } | null>(); //{ type: "success", message: "Transaction Submitted." }
   const formState = useSelector<RootState, SwapFormState>(state => state.swap);
   const wallet = useSelector<RootState, WalletState>(state => state.wallet);
   const moneyFormat = useMoneyFormatter({ decPlaces: 10 });
@@ -166,14 +166,17 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           fullWidth
           onClick={onConnectWallet}
         >Connect Wallet</Button>)}
-        {wallet.wallet && (<Button
-          className={classes.actionButton}
-          variant="contained"
-          color="primary"
-          fullWidth
-          disabled={!(formState.values.give && formState.values.receive)}
-          onClick={onConnectWallet}
-        >Swap</Button>)}
+        {wallet.wallet && (
+          <Button
+            className={classes.actionButton}
+            variant="contained"
+            color="primary"
+            fullWidth
+            disabled={!(formState.values.give && formState.values.receive)}
+            onClick={onConnectWallet}>
+            Swap
+          </Button>
+        )}
         <Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
           Advanced Details{showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </Typography>

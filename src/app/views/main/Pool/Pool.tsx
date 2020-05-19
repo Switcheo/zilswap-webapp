@@ -57,7 +57,7 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [error, setError] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showCreatePool, setShowCreatePool] = useState(false);
-  const [notification, setNotification] = useState<{ type: string; message: string; } | null>();
+  const [notification, setNotification] = useState<{ type: string; message: string; } | null>(); //{ type: "success", message: "Transaction Submitted." }
   const formState = useSelector<RootState, PoolFormState>(state => state.pool);
   const poolValue = useSelector<RootState, any>(state => state.pool.poolValues);
   const dispatch = useDispatch();

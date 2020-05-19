@@ -49,8 +49,8 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
             <Typography variant="button">75%</Typography>
           </Button>
           <Button className={classes.percentageButton}>
-            <Typography variant="button">100%</Typography
-            ></Button>
+            <Typography variant="button">100%</Typography>
+          </Button>
         </ButtonGroup>
       </CurrencyInput>
       {theme.palette.type === "light" ? <PlusSVG className={classes.svg} /> : <PlusSVGDark className={classes.svg} />}
