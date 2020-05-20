@@ -116,7 +116,7 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
     console.log("zilReserve", new BigNumber(zilReserve).toString());
 
     contributionPercentage = new BigNumber(contributionPercentage).toString();
-    exchangeRate = new BigNumber(exchangeRate).toString();
+    exchangeRate = new BigNumber(exchangeRate).toFixed(5).toString();
     tokenReserve = new BigNumber(tokenReserve).toString();
     totalContribution = new BigNumber(totalContribution).shiftedBy(-12).toString();
     userContribution = new BigNumber(userContribution).toString();

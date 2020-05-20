@@ -1,5 +1,6 @@
 import * as HTTPSrv from "./httpService";
 import querystring from "query-string";
+import { toBech32Address } from "@zilliqa-js/crypto";
 
 const API_KEY = process.env.REACT_APP_VIEWBLOCK_API_KEY;
 
@@ -28,7 +29,7 @@ export const listTransactions = async ({ network = "testnet", page = 1, type = "
 }
 
 export const getBalance = async ({ network = "testnet", address }: any): Promise<any> => {
-	const url = getPath(QUERY_PATH, { address }, { network });
+	const url = getPath(QUERY_PATH, { address: toBech32Address(address) }, { network, type: "all" });
 
 	let response = await HTTPSrv.get({ url, headers });
 	response = await response.json();

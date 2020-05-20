@@ -1,5 +1,5 @@
 import { setZilliqa, ZilUrl } from "core/zilliqa";
-import { toBech32Address } from "@zilliqa-js/crypto"
+import { fromBech32Address } from "@zilliqa-js/crypto"
 import { Zilswap } from "zilswap-sdk";
 import { Network } from 'zilswap-sdk/lib/constants';
 import moment from "moment";
@@ -32,6 +32,24 @@ export const connectWalletMoonlet = async (): Promise<ConnectWalletResult> => {
 
 export const connectWalletPrivateKey = async (inputPrivateKey: string): Promise<ConnectWalletResult> => {
   const zilswap = new Zilswap(Network.TestNet, inputPrivateKey);
+  // const tok_addr = "zil18zlr57uhrmnk4mfkuawgv0un295k970a9s3lnq";
+
+  // //@ts-ignore
+  // let contract = await zilswap.zilliqa.contracts.at("zil18zlr57uhrmnk4mfkuawgv0un295k970a9s3lnq");
+  // //@ts-ignore
+  // let balances_map = await contract.getSubState("balances_map");
+
+  // console.log({ balances_map })
+
+  //@ts-ignore
+  // let state = await zilswap.zilliqa.contract.getSubState(
+  //   fromBech32Address(tok_addr).replace(
+  //     "0x",
+  //     ""
+  //   )
+  // );
+
+  // console.log({ state })
 
   //@ts-ignore
   let { zilliqa } = zilswap;

@@ -27,7 +27,7 @@ export function init(pk: string) {
       let { contributionPercentage, exchangeRate, tokenReserve, totalContribution, userContribution, zilReserve } = pool;
 
       contributionPercentage = new BigNumber(contributionPercentage).toString();
-      exchangeRate = new BigNumber(exchangeRate).toString();
+      exchangeRate = new BigNumber(exchangeRate).toFixed(5).toString();
       tokenReserve = new BigNumber(tokenReserve).toString();
       totalContribution = new BigNumber(totalContribution).shiftedBy(-12).toString();
       userContribution = new BigNumber(userContribution).toString();
