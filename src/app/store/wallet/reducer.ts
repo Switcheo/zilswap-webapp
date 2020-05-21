@@ -19,6 +19,21 @@ const reducer = (state: WalletState = initial_state, action: any) => {
       const { pk } = payload;
       if (pk) localStorage.setItem(LOCAL_STORAGE_KEY_PRIVAYE_KEY, pk);
       return { ...state, ...payload };
+
+    case WalletActionTypes.UPDATE_CURRENCY:
+      //@ts-ignore
+      return {
+        ...state,
+        currencies: {
+          ...state.currencies,
+          [action.payload.currency]: {
+            //@ts-ignore
+            ...state.currencies[action.payload.currency],
+            balance: action.payload.balance
+          }
+        }
+      };
+
     case WalletActionTypes.LOGOUT:
       localStorage.setItem(LOCAL_STORAGE_KEY_PRIVAYE_KEY, "");
       return { ...initial_state, pk: "" };

@@ -1,7 +1,7 @@
 import { setZilliqa, ZilUrl } from "core/zilliqa";
 import { fromBech32Address } from "@zilliqa-js/crypto"
 import { Zilswap } from "zilswap-sdk";
-import { Network } from 'zilswap-sdk/lib/constants';
+import { Network, TOKENS } from 'zilswap-sdk/lib/constants';
 import moment from "moment";
 import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
 import { MoonletConnectedWallet } from "./MoonletConnectedWallet";
@@ -34,16 +34,10 @@ export const connectWalletMoonlet = async (): Promise<ConnectWalletResult> => {
   return { wallet };
 }
 
-export const connectWalletPrivateKey = async (inputPrivateKey: string): Promise<ConnectWalletResult> => {
+export const connectWalletPrivateKey = async (inputPrivateKey: string, dispatch: Dispatch): Promise<ConnectWalletResult> => {
   const zilswap = new Zilswap(Network.TestNet, inputPrivateKey);
-  // const tok_addr = "zil18zlr57uhrmnk4mfkuawgv0un295k970a9s3lnq";
-
-  // //@ts-ignore
-  // let contract = await zilswap.zilliqa.contracts.at("zil18zlr57uhrmnk4mfkuawgv0un295k970a9s3lnq");
-  // //@ts-ignore
-  // let balances_map = await contract.getSubState("balances_map");
-
-  // console.log({ balances_map })
+  setZilliqa(zilswap);
+  //@ts-ignore
 
   //@ts-ignore
   // let state = await zilswap.zilliqa.contract.getSubState(
@@ -54,13 +48,13 @@ export const connectWalletPrivateKey = async (inputPrivateKey: string): Promise<
   // );
 
   // console.log({ state })
-
-  console.log(zilswap);
   //@ts-ignore
   let { zilliqa } = zilswap;
   await zilliqa.wallet.addByPrivateKey(inputPrivateKey);
-
   const account = zilliqa.wallet.defaultAccount!;
+
+  await getBalancesMap(dispatch, account.address);
+
   const accinfo = await getBalance({ address: account.address });
   const transactions = await listTransactions({ address: account.address });
   const balance = accinfo[0].balance;
@@ -98,4 +92,20 @@ export const getPool = async (dispatch: Dispatch) => {
 
   dispatch(actions.Pool.update_pool({ contributionPercentage, exchangeRate, tokenReserve, totalContribution, userContribution, zilReserve }));
   await zilliqa.teardown();
+}
+
+export const getBalancesMap = async (dispatch: Dispatch, account_addr: string) => {
+  const tok_addr = TOKENS.TestNet[Network.TestNet];
+  const zilswap = getZilliqa();
+  let { zilliqa } = zilswap;
+  //@ts-ignore
+  let contract = await zilliqa.contracts.at("zil18zlr57uhrmnk4mfkuawgv0un295k970a9s3lnq");
+  let { balances_map } = await contract.getSubState("balances_map");
+
+  if (balances_map) {
+    let balance = balances_map[account_addr.toLowerCase()];
+    dispatch(actions.Wallet.update_currency_balance({ currency: "ITN", balance }));
+
+    console.log(account_addr, { balances_map }, balance, account_addr);
+  }
 }

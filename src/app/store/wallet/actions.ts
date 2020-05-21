@@ -12,7 +12,8 @@ export const TYPES = {
 };
 
 export enum WalletActionTypes {
-  UPDATE = "WALLET_UPDATE", LOGOUT = "WALLET_LOGOUT", LOAD = "LOAD"
+  UPDATE = "WALLET_UPDATE", LOGOUT = "WALLET_LOGOUT", LOAD = "LOAD",
+  UPDATE_CURRENCY = "UPDATE_CURRENCY"
 }
 
 export function init(pk: string) {
@@ -20,10 +21,12 @@ export function init(pk: string) {
     let wallet;
     dispatch({ type: WalletActionTypes.LOAD });
     if (pk) {
-      wallet = await WalletService.connectWalletPrivateKey(pk);
+      wallet = await WalletService.connectWalletPrivateKey(pk, dispatch);
     }
     if (wallet) {
-      dispatch(update({ ...wallet, currencies: { ZIL: +(wallet.wallet!.balance) } }))
+      dispatch(update({ ...wallet, currencies: { ZIL: +(wallet.wallet!.balance) } }));
+      //@ts-ignore
+      await WalletService.getBalancesMap(dispatch, wallet.wallet.account.address);
       await WalletService.getPool(dispatch);
     }
   }
@@ -42,6 +45,13 @@ export function toggleConnectWallet(override?: OpenCloseState) {
     override
   }
 };
+
+export function update_currency_balance(payload: any) {
+  return {
+    type: WalletActionTypes.UPDATE_CURRENCY,
+    payload
+  }
+}
 
 export function logout() {
   return {

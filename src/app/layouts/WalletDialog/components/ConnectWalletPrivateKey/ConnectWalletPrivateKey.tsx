@@ -94,7 +94,7 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
       console.log("connect");
       if (privateKey) {
         dispatch({ type: WalletActionTypes.LOAD });
-        wallet = await WalletService.connectWalletPrivateKey(privateKey);
+        wallet = await WalletService.connectWalletPrivateKey(privateKey, dispatch);
       } else return;
       if (wallet) {
         dispatch(actions.Wallet.update({ ...wallet, currencies: { ZIL: +(wallet.wallet!.balance) }, pk: privateKey }));
