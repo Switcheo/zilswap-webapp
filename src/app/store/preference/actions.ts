@@ -1,7 +1,7 @@
 import { PreferenceStateInitProps, PreferenceStateUpdateProps } from "./types";
 
 export enum PreferenceActionTypes {
-  INIT, UPDATE
+  INIT = "PREFERENCE_INIT", UPDATE = "PREFERENCE_UPDATE"
 };
 
 export function init(payload: PreferenceStateInitProps) {

@@ -1,9 +1,9 @@
 import { SwapFormState, UpdateExtendedPayload } from "./types";
 
 export enum SwapActionTypes {
-  UPDATE,
-  UPDATE_EXTENDED,
-  REVERSE
+  UPDATE = "SWAP_UPDATE",
+  UPDATE_EXTENDED = "SWAP_UPDATE_EXTENDED",
+  REVERSE = "SWAP_REVERSE"
 }
 
 export function update(payload: SwapFormState) {

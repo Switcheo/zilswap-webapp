@@ -1,7 +1,7 @@
 import { PoolFormState, PoolUpdateExtendedPayload } from "./types";
 
 export enum PoolActionTypes {
-  UPDATE, UPDATE_EXTENDED, UPDATE_POOL
+  UPDATE = "POOL_UPDATE", UPDATE_EXTENDED = "POOL_UPDATE_EXTENDED", UPDATE_POOL = "POOL_UPDATE_POOL"
 }
 
 export function update(payload: PoolFormState) {
