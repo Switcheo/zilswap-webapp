@@ -1,7 +1,7 @@
 import WalletService from "core/wallet";
 import { Dispatch } from "redux";
 import { OpenCloseState } from "../layout/types";
-import { WalletState } from "./types";
+import { WalletState, WalletUpdatePayload } from "./types";
 import { getZilliqa } from "core/zilliqa";
 import { BigNumber } from "bignumber.js";
 import { actions } from "app/store";
@@ -24,15 +24,14 @@ export function init(pk: string) {
       wallet = await WalletService.connectWalletPrivateKey(pk, dispatch);
     }
     if (wallet) {
-      dispatch(update({ ...wallet, currencies: { ZIL: +(wallet.wallet!.balance) } }));
-      //@ts-ignore
-      await WalletService.getBalancesMap(dispatch, wallet.wallet.account.address);
+      dispatch(update({ ...wallet }));
+      dispatch(update_currency_balance({ currency: "ZIL", balance: wallet.wallet!.balance }));
       await WalletService.getPool(dispatch);
     }
   }
 }
 
-export function update(payload: WalletState) {
+export function update(payload: WalletUpdatePayload) {
   return {
     type: WalletActionTypes.UPDATE,
     payload

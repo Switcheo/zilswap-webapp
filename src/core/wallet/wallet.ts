@@ -103,7 +103,7 @@ export const getBalancesMap = async (dispatch: Dispatch, account_addr: string) =
   let { balances_map } = await contract.getSubState("balances_map");
 
   if (balances_map) {
-    let balance = balances_map[account_addr.toLowerCase()];
+    let balance = balances_map[account_addr.toLowerCase()] || "0";
     dispatch(actions.Wallet.update_currency_balance({ currency: "ITN", balance }));
 
     console.log(account_addr, { balances_map }, balance, account_addr);
