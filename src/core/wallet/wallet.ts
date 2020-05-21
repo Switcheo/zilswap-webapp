@@ -8,8 +8,12 @@ import { MoonletConnectedWallet } from "./MoonletConnectedWallet";
 import { ConnectWalletResult } from "./ConnectedWallet";
 import { listTransactions, getBalance } from "core/services/viewblockService";
 import { dapp } from "dapp-wallet-util";
+import { getZilliqa } from "core/zilliqa";
 
 import LiquidityService from "../liquidity";
+import { BigNumber } from "bignumber.js";
+import { actions } from "app/store";
+import { Dispatch } from "redux";
 
 
 export const connectWalletMoonlet = async (): Promise<ConnectWalletResult> => {
@@ -51,6 +55,7 @@ export const connectWalletPrivateKey = async (inputPrivateKey: string): Promise<
 
   // console.log({ state })
 
+  console.log(zilswap);
   //@ts-ignore
   let { zilliqa } = zilswap;
   await zilliqa.wallet.addByPrivateKey(inputPrivateKey);
@@ -68,4 +73,29 @@ export const connectWalletPrivateKey = async (inputPrivateKey: string): Promise<
   // const receipt = await LiquidityService.addLiquidity({ tokenId: fungible_token_address, tokenAmount: "1", zilAmount: "1" });
   // console.log({ receipt });
   return { wallet };
+}
+
+export const getPool = async (dispatch: Dispatch) => {
+  const zilliqa = getZilliqa();
+  await zilliqa.initialize();
+  console.log(zilliqa)
+  const pool = await zilliqa.getPool("ITN");
+  let { contributionPercentage, exchangeRate, tokenReserve, totalContribution, userContribution, zilReserve } = pool;
+
+  console.log("contributionPercentage", new BigNumber(contributionPercentage).toString());
+  console.log("exchangeRate", new BigNumber(exchangeRate).toString());
+  console.log("tokenReserve", new BigNumber(tokenReserve).toString());
+  console.log("totalContribution", new BigNumber(totalContribution).toString());
+  console.log("userContribution", new BigNumber(userContribution).toString());
+  console.log("zilReserve", new BigNumber(zilReserve).toString());
+
+  contributionPercentage = new BigNumber(contributionPercentage).toString();
+  exchangeRate = new BigNumber(exchangeRate).toFixed(5).toString();
+  tokenReserve = new BigNumber(tokenReserve).toString();
+  totalContribution = new BigNumber(totalContribution).shiftedBy(-12).toString();
+  userContribution = new BigNumber(userContribution).toString();
+  zilReserve = new BigNumber(zilReserve).toString();
+
+  dispatch(actions.Pool.update_pool({ contributionPercentage, exchangeRate, tokenReserve, totalContribution, userContribution, zilReserve }));
+  await zilliqa.teardown();
 }

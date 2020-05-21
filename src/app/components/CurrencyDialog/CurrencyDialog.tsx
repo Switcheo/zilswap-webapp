@@ -42,6 +42,10 @@ const useStyles = makeStyles(theme => ({
   currencies: {
     maxHeight: 460,
     overflowY: "scroll",
+    "-ms-overflow-style": "none",
+    "&::-webkit-scrollbar": {
+      // display: "none"
+    },
     [theme.breakpoints.down("xs")]: {
       maxHeight: 324,
     }
@@ -55,19 +59,19 @@ const useStyles = makeStyles(theme => ({
 
 const currencies = [
   { symbol: "ITN", name: "IToken", address: "zil18zlr57uhrmnk4mfkuawgv0un295k970a9s3lnq", amount: 0 },
-  // { symbol: "ZIL", name: "Zilliqa", amount: 2688.88 },
-  // { symbol: "ETH", name: "Ethereum", amount: 0 },
-  // { symbol: "0xBTC", name: "0xBTC Token", amount: 0 },
-  // { symbol: "DAI", name: "Dai Stablecoin", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
+  { symbol: "ZIL", name: "Zilliqa", amount: 2688.88 },
+  { symbol: "ETH", name: "Ethereum", amount: 0 },
+  { symbol: "0xBTC", name: "0xBTC Token", amount: 0 },
+  { symbol: "DAI", name: "Dai Stablecoin", amount: 0 },
+  { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
+  { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
+  { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
+  { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
+  { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
+  { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
+  { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
+  { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
+  { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
 ];
 
 const CurrencyDialog = (props: any) => {

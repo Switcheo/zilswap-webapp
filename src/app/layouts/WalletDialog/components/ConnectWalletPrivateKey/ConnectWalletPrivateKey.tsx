@@ -91,39 +91,16 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
     mounted && setLoading(true);
     let wallet: ConnectWalletResult;
     errorCatcher(async () => {
+      console.log("connect");
       if (privateKey) {
         dispatch({ type: WalletActionTypes.LOAD });
         wallet = await WalletService.connectWalletPrivateKey(privateKey);
       } else return;
       if (wallet) {
         dispatch(actions.Wallet.update({ ...wallet, currencies: { ZIL: +(wallet.wallet!.balance) }, pk: privateKey }));
-        await getPool();
+        await WalletService.getPool(dispatch);
       }
     }).finally(() => mounted && setLoading(false));
-  }
-
-  const getPool = async () => {
-    const zilliqa = getZilliqa();
-    await zilliqa.initialize();
-    const pool = await zilliqa.getPool("ITN");
-    let { contributionPercentage, exchangeRate, tokenReserve, totalContribution, userContribution, zilReserve } = pool;
-
-    console.log("contributionPercentage", new BigNumber(contributionPercentage).toString());
-    console.log("exchangeRate", new BigNumber(exchangeRate).toString());
-    console.log("tokenReserve", new BigNumber(tokenReserve).toString());
-    console.log("totalContribution", new BigNumber(totalContribution).toString());
-    console.log("userContribution", new BigNumber(userContribution).toString());
-    console.log("zilReserve", new BigNumber(zilReserve).toString());
-
-    contributionPercentage = new BigNumber(contributionPercentage).toString();
-    exchangeRate = new BigNumber(exchangeRate).toFixed(5).toString();
-    tokenReserve = new BigNumber(tokenReserve).toString();
-    totalContribution = new BigNumber(totalContribution).shiftedBy(-12).toString();
-    userContribution = new BigNumber(userContribution).toString();
-    zilReserve = new BigNumber(zilReserve).toString();
-
-    dispatch(actions.Pool.update_pool({ contributionPercentage, exchangeRate, tokenReserve, totalContribution, userContribution, zilReserve }));
-    await zilliqa.teardown();
   }
 
   return (
