@@ -93,30 +93,11 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
         errorCatcher(async () => {
           //@ts-ignore
           const { wallet } = await WalletService.connectWalletMoonlet();
-          dispatch(actions.Wallet.update({ wallet, currencies: {} }));
-          await getPool();
+          dispatch(actions.Wallet.update({ wallet }));
         }, "connectWallet")
       }
     }
   };
-
-  const getPool = async () => {
-    const zilliqa = getZilliqa();
-    await zilliqa.initialize();
-    const pool = await zilliqa.getPool("ITN");
-    let { contributionPercentage, exchangeRate, tokenReserve, totalContribution, userContribution, zilReserve } = pool;
-
-    contributionPercentage = new BigNumber(contributionPercentage).toString();
-    exchangeRate = new BigNumber(exchangeRate).toFixed(5).toString();
-    tokenReserve = new BigNumber(tokenReserve).toString();
-    totalContribution = new BigNumber(totalContribution).shiftedBy(-12).toString();
-    userContribution = new BigNumber(userContribution).toString();
-    zilReserve = new BigNumber(zilReserve).toString();
-
-    dispatch(actions.Pool.update_pool({ contributionPercentage, exchangeRate, tokenReserve, totalContribution, userContribution, zilReserve }));
-    await zilliqa.teardown();
-  }
-
   const onConnectWalletResult = (wallet: ConnectedWallet | null) => {
     if (!wallet)
       setConnectWalletType(null);

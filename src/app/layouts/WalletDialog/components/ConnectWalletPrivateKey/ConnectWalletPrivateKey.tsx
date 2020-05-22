@@ -12,8 +12,7 @@ import { ConnectedWallet, ConnectWalletResult } from "core/wallet/ConnectedWalle
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { ConnectWalletManagerViewProps } from "../../types";
-import { BigNumber } from "bignumber.js";
-import { getZilliqa } from "core/zilliqa";
+import TokenService from "core/token";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -97,8 +96,9 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
         wallet = await WalletService.connectWalletPrivateKey(privateKey, dispatch);
       } else return;
       if (wallet) {
-        dispatch(actions.Wallet.update({ ...wallet, currencies: { ZIL: +(wallet.wallet!.balance) }, pk: privateKey }));
-        await WalletService.getPool(dispatch);
+        dispatch(actions.Wallet.update({ ...wallet, pk: privateKey }));
+
+        await TokenService.getAllBalances(dispatch);
       }
     }).finally(() => mounted && setLoading(false));
   }

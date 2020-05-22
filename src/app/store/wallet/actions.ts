@@ -1,4 +1,5 @@
 import WalletService from "core/wallet";
+import TokenService from "core/token";
 import { Dispatch } from "redux";
 import { OpenCloseState } from "../layout/types";
 import { WalletState } from "./types";
@@ -13,7 +14,7 @@ export const TYPES = {
 
 export enum WalletActionTypes {
   UPDATE = "WALLET_UPDATE", LOGOUT = "WALLET_LOGOUT", LOAD = "LOAD",
-  UPDATE_CURRENCY = "UPDATE_CURRENCY"
+  UPDATE_CURRENCY = "UPDATE_CURRENCY", UPDATE_CURRENCY_POOL = "UPDATE_CURRENCY_POOL"
 }
 
 export function init(pk: string) {
@@ -26,8 +27,7 @@ export function init(pk: string) {
     if (wallet) {
       dispatch(update({ ...wallet, currencies: { ZIL: +(wallet.wallet!.balance) } }));
       //@ts-ignore
-      await WalletService.getBalancesMap(dispatch, wallet.wallet.account.address);
-      await WalletService.getPool(dispatch);
+      await TokenService.getAllBalances(dispatch);
     }
   }
 }
@@ -49,6 +49,13 @@ export function toggleConnectWallet(override?: OpenCloseState) {
 export function update_currency_balance(payload: any) {
   return {
     type: WalletActionTypes.UPDATE_CURRENCY,
+    payload
+  }
+}
+
+export function update_currency_pool(payload: any) {
+  return {
+    type: WalletActionTypes.UPDATE_CURRENCY_POOL,
     payload
   }
 }

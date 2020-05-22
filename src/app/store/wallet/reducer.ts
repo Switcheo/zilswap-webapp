@@ -1,5 +1,6 @@
 import { WalletState, WalletCurrencies } from "./types";
 import { WalletActionTypes } from "./actions";
+import WalletService from "core/wallet";
 
 const LOCAL_STORAGE_KEY_PRIVAYE_KEY = "zilswap:pk";
 const savedPk = localStorage.getItem(LOCAL_STORAGE_KEY_PRIVAYE_KEY);
@@ -17,6 +18,8 @@ const reducer = (state: WalletState = initial_state, action: any) => {
     case WalletActionTypes.UPDATE:
       const { payload } = action;
       const { pk } = payload;
+
+      console.log("wallet update paylaod", { payload })
       if (pk) localStorage.setItem(LOCAL_STORAGE_KEY_PRIVAYE_KEY, pk);
       return { ...state, ...payload };
 
@@ -33,6 +36,19 @@ const reducer = (state: WalletState = initial_state, action: any) => {
           }
         }
       };
+
+    case WalletActionTypes.UPDATE_CURRENCY_POOL:
+      return {
+        ...state,
+        currencies: {
+          ...state.currencies,
+          [action.payload.currency]: {
+            //@ts-ignore
+            ...state.currencies[action.payload.currency],
+            ...action.payload
+          }
+        }
+      }
 
     case WalletActionTypes.LOGOUT:
       localStorage.setItem(LOCAL_STORAGE_KEY_PRIVAYE_KEY, "");

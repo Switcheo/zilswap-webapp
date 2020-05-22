@@ -19,12 +19,6 @@ export interface PoolProps {
   tokenId: string;
 }
 
-export const getPool = async (props: PoolProps) => {
-  let zilswap = getZilliqa();
-  if (!zilswap) return;
-  return await zilswap.getPool(props.tokenId);
-}
-
 export const addLiquidity = async (addProps: AddLiquidityProps) => {
   let zilswap = getZilliqa();
   if (!zilswap) return;
