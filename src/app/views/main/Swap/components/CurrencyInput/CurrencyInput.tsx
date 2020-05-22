@@ -59,10 +59,11 @@ export interface CurrencyInputProps {
   children: any;
   className?: string;
   name: string;
+  exclude?: string;
 }
 
 const CurrencyInput: React.FC<CurrencyInputProps> = (props: any) => {
-  const { children, label, name } = props;
+  const { children, label, name, exclude } = props;
   const classes = useStyles();
   const amountKey = name;
   const currencyKey = `${name}Currency`;
@@ -72,7 +73,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: any) => {
   const wallet = useSelector<RootState, WalletState>(state => state.wallet)
   const dispatch = useDispatch();
   const moneyFormat = useMoneyFormatter({ decPlaces: 10 });
-
+  console.log(exclude, "exclude")
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     dispatch(actions.Swap.update_extended({
       key: name,
@@ -119,7 +120,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: any) => {
         }}
       />
       {children}
-      <CurrencyDialog showCurrencyDialog={showCurrencyDialog} onSelect={onCurrencySelect} onCloseDialog={() => setShowCurrencyDialog(false)} />
+      <CurrencyDialog showCurrencyDialog={showCurrencyDialog} onSelect={onCurrencySelect} onCloseDialog={() => setShowCurrencyDialog(false)} exclude={exclude} />
     </form>
   );
 };

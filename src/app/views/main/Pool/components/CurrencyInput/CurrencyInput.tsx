@@ -49,10 +49,13 @@ export interface CurrencyInputProps {
   className?: string;
   name: string;
   fixed?: boolean;
+  exchangeRate?: number;
+  rightLabel?: string;
+  exclude?: string;
 }
 
 const CurrencyInput: React.FC<CurrencyInputProps> = (props: any) => {
-  const { children, label, name, fixed, className } = props;
+  const { children, label, name, fixed, className, exchangeRate, rightLabel, exclude } = props;
   const classes = useStyles();
   const amountKey = name;
   const currencyKey = `${name}Currency`;
@@ -60,12 +63,12 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: any) => {
   const amount = useSelector<RootState, number>(state => state.pool.values[amountKey])
   const currency = useSelector<RootState, string>(state => state.pool.values[currencyKey])
   const dispatch = useDispatch();
-
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     dispatch(actions.Pool.update_extended({
       key: name,
-      value: e.target.value
-    }))
+      value: e.target.value,
+      exchangeRate
+    }));
   }
 
   const onCurrencySelect = (value: string) => {
@@ -78,7 +81,11 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: any) => {
 
   return (
     <form className={cls(classes.form, className)} noValidate autoComplete="off">
-      <InputLabel>{label}</InputLabel>
+      <Box display="flex" justifyContent="space-between">
+        <InputLabel>{label}</InputLabel>
+        {rightLabel && <Typography variant="body2">{rightLabel}</Typography>}
+      </Box>
+
       <OutlinedInput
         className={classes.inputRow}
         placeholder={"0.00"}
@@ -109,7 +116,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: any) => {
         }}
       />
       {children}
-      <CurrencyDialog showCurrencyDialog={showCurrencyDialog} onSelect={onCurrencySelect} onCloseDialog={() => setShowCurrencyDialog(false)} />
+      <CurrencyDialog showCurrencyDialog={showCurrencyDialog} onSelect={onCurrencySelect} onCloseDialog={() => setShowCurrencyDialog(false)} exclude={exclude} />
     </form>
   );
 };

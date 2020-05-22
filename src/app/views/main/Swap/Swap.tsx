@@ -128,6 +128,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       <NotificationBox notification={notification} setNotification={setNotification} />
       <Box display="flex" flexDirection="column" className={classes.container}>
         <CurrencyInput
+          exclude={formState.values.receiveCurrency}
           label="You Give"
           name="give"
         >
@@ -157,6 +158,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         <CurrencyInput
           label="You Receive"
           name="receive"
+          exclude={formState.values.giveCurrency}
         >
           {poolValues && poolValues.exchangeRate && <KeyValueDisplay mt={"22px"} kkey={"Exchange Rate"} value={`1 ${formState.values.giveCurrency} = ${poolValues.exchangeRate || 0} ${formState.values.receiveCurrency}`} />}
         </CurrencyInput>

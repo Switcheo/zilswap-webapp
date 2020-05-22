@@ -6,7 +6,7 @@ const initial_state: SwapFormState = {
   values: {
     give: 0,
     receive: 0,
-    giveCurrency: "SWTH",
+    giveCurrency: "ITN",
     receiveCurrency: "ZIL",
     rate: 29913.9683245177,
     slippage: 0,
@@ -66,10 +66,10 @@ const reducer = (state: SwapFormState = initial_state, action: any) => {
       }
       switch (key) {
         case "give":
-          output.values.receive = +(new Decimal(give || 0).times(new Decimal(rate || 0)).toFixed(10))
+          output.values.receive = +(new Decimal(output.values.give || 0).times(new Decimal(rate || 0)).toFixed(10))
           break;
         case "receive":
-          output.values.give = (new Decimal(receive || 0).dividedBy(new Decimal(rate || 1)).toFixed(10))
+          output.values.give = (new Decimal(output.values.receive || 0).dividedBy(new Decimal(rate || 1)).toFixed(10))
           break;
         case "giveCurrency":
         case "receiveCurrency":

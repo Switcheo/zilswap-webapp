@@ -1,5 +1,7 @@
 import { PoolActionTypes } from "./actions";
 import { PoolFormState } from "./types";
+import Decimal from "decimal.js";
+import store from "../index";
 
 const initial_state: PoolFormState = {
   values: {
@@ -9,7 +11,7 @@ const initial_state: PoolFormState = {
     deposit1Currency: null,
     withdraw: 0,
     withdrawCurrency: null,
-    type: "remove"
+    type: "add"
   },
   errors: {
     deposit: false,
@@ -35,13 +37,14 @@ const initial_state: PoolFormState = {
 
 const reducer = (state: PoolFormState = initial_state, action: any) => {
   const { values } = state;
+  const { deposit, deposit1, depositCurrency, deposit1Currency } = values;
   const { payload } = action;
 
   switch (action.type) {
     case PoolActionTypes.UPDATE:
       return { ...state, ...payload }
     case PoolActionTypes.UPDATE_EXTENDED:
-      const { key, value } = payload;
+      const { key, value, exchangeRate } = payload;
       let output: PoolFormState = {
         ...state,
         values: {
@@ -50,6 +53,12 @@ const reducer = (state: PoolFormState = initial_state, action: any) => {
         }
       }
       switch (key) {
+        case "deposit":
+          output.values.deposit1 = +(new Decimal(output.values.deposit || 0).times(new Decimal(exchangeRate || 0)).toFixed(10))
+          break;
+        case "deposit1":
+          output.values.deposit = +(new Decimal(output.values.deposit1 || 0).dividedBy(new Decimal(exchangeRate || 0)).toFixed(10))
+          break;
         default:
           break;
       }

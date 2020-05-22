@@ -75,7 +75,7 @@ const currencies = [
 ];
 
 const CurrencyDialog = (props: any) => {
-  const { children, className, showCurrencyDialog, onCloseDialog, onSelect, ...rest } = props;
+  const { children, className, showCurrencyDialog, onCloseDialog, onSelect, exclude, ...rest } = props;
   const classes = useStyles();
   const [search, setSearch] = useState("");
   const wallet = useSelector<RootState, WalletState>(state => state.wallet);
@@ -85,12 +85,12 @@ const CurrencyDialog = (props: any) => {
     name: string;
     amount: number;
   }) => {
+    if (currency.symbol === exclude) return false;
     let value = search.toLowerCase()
     if (currency.symbol.toLowerCase().includes(value)) return true;
     if (currency.name.toLowerCase().includes(value)) return true;
     return false;
   }
-
   return (
     <DialogModal header="Select a Token" open={showCurrencyDialog} onClose={onCloseDialog} {...rest} className={cls(classes.root, className)}>
       <DialogContent className={classes.content}>

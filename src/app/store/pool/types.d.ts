@@ -16,6 +16,7 @@ export interface PoolFormState {
 export interface PoolUpdateExtendedPayload {
   key: string;
   value: any;
+  exchangeRate?: number;
 }
 
 export interface PoolValue {
