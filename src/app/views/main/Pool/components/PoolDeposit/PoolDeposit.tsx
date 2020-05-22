@@ -56,7 +56,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       {theme.palette.type === "light" ? <PlusSVG className={classes.svg} /> : <PlusSVGDark className={classes.svg} />}
       <CurrencyInput
         label="Deposit"
-        name="deposit2"
+        name="deposit1"
         className={classes.input}
       />
     </Box>

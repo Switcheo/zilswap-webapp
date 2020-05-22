@@ -59,11 +59,14 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [showCreatePool, setShowCreatePool] = useState(false);
   const [notification, setNotification] = useState<{ type: string; message: string; } | null>(); //{ type: "success", message: "Transaction Submitted." }
   const formState = useSelector<RootState, PoolFormState>(state => state.pool);
+  const deposit1Currency = useSelector<RootState, string>(state => state.pool.values.deposit1Currency)
+  const withdrawCurrency = useSelector<RootState, string>(state => state.pool.values.withdrawCurrency)
+
   const poolValue = useSelector<RootState, any>(state => state.pool.poolValues);
   const dispatch = useDispatch();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-
-
+  const type = formState.values.type;
+  const currency = type === "add" ? deposit1Currency : withdrawCurrency;
   const errorCatcher = useErrorCatcher((err: any) => {
     if (err) {
       console.log({ err });
@@ -74,7 +77,6 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     dispatch(actions.Pool.update_extended({ key: "type", value: type }))
   }
 
-  const type = formState.values.type;
 
   return (
     <MainCard hasNotification={notification} {...rest} className={cls(classes.root, className)}>
@@ -105,9 +107,9 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         </Box>
         {type === "add" && (<PoolDeposit />)}
         {type === "remove" && (<PoolWithdraw />)}
-        <KeyValueDisplay kkey={"Exchange Rate"} value={poolValue.exchangeRate} mb="8px" />
-        <KeyValueDisplay kkey={"Current Pool Size"} value={poolValue.totalContribution} mb="8px" />
-        <KeyValueDisplay kkey={"Your Pool Share (%)"} value={poolValue.contributionPercentage} />
+        <KeyValueDisplay kkey={"Exchange Rate"} value={(walletState.currencies![currency] && walletState.currencies![currency].exchangeRate) || "-"} mb="8px" />
+        <KeyValueDisplay kkey={"Current Pool Size"} value={(walletState.currencies![currency] && walletState.currencies![currency].totalContribution?.toFixed(10)) || "-"} mb="8px" />
+        <KeyValueDisplay kkey={"Your Pool Share (%)"} value={(walletState.currencies![currency] && walletState.currencies![currency].contributionPercentage?.toFixed(10)) || "-"} />
         <Button
           className={classes.actionButton}
           variant="contained"
