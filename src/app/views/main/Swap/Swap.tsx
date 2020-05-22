@@ -116,7 +116,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const onPercentage = (percentage: number) => {
     const currency = formState.values.giveCurrency;
-    const balance = wallet.currencies![currency] > 0 ? +(moneyFormat(wallet.currencies![currency], { currency })) : 0;
+    const balance = wallet.currencies![currency] && wallet.currencies![currency].balance > 0 ? +(moneyFormat(wallet.currencies![currency].balance, { currency })) : 0;
     dispatch(actions.Swap.update_extended({
       key: "give",
       value: balance * percentage

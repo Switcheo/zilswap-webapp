@@ -97,8 +97,8 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
       } else return;
       if (wallet) {
         dispatch(actions.Wallet.update({ ...wallet, pk: privateKey }));
-
         await TokenService.getAllBalances(dispatch);
+        dispatch(actions.Wallet.update_currency_balance({ currency: "ZIL", balance: wallet.wallet!.balance }));
       }
     }).finally(() => mounted && setLoading(false));
   }

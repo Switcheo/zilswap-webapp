@@ -16,6 +16,11 @@ const currencies = {
     name: "Zilliqa",
     compression: 12,
     symbol: "ZIL"
+  },
+  ITN: {
+    name: "iToken",
+    compression: 12,
+    symbol: "ITN"
   }
 };
 

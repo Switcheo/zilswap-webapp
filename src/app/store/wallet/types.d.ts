@@ -6,8 +6,18 @@ export interface WalletState {
   pk?: string,
 };
 
+export interface WalletUpdatePayload {
+  wallet?: ConnectedWallet;
+  currencies?: WalletCurrencies;
+  pk?: string,
+}
+
 export interface WalletCurrencies {
-  [key: string]: number;
+  [key: string]: WalletCurrency
+}
+
+export interface WalletCurrency {
+  balance: number
 }
 
 export interface PoolUpdateExtendedPayload {

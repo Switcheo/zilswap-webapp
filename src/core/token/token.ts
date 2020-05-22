@@ -42,8 +42,10 @@ export const getAllBalances = async (dispatch: Dispatch) => {
       let contract = await zilliqa.contracts.at(tok_addr);
       let { balances_map } = await contract.getSubState("balances_map");
       if (balances_map) {
-        let balance = balances_map[address.toLowerCase()];
+        let balance = balances_map[address.toLowerCase()] || 0;
         dispatch(actions.Wallet.update_currency_balance({ currency: tok, balance }));
+      } else {
+        dispatch(actions.Wallet.update_currency_balance({ currency: tok, balance: 0 }));
       }
       await getTokenPoolDetail(tok, dispatch);
     }
