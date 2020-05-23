@@ -12705,10 +12705,10 @@ yargs@^7.0.0:
     y18n "^3.2.1"
     yargs-parser "^5.0.0"
 
-zilswap-sdk@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/zilswap-sdk/-/zilswap-sdk-0.0.4.tgz#ebdf990ba58289410bc2df7c1c67171b437a85e5"
-  integrity sha512-FflI9XAzVbIaw3OpM6CL0eRJ6mpHhFeTlS2U1nod8E1OdVBdehVs+LeJHh4yFfPm0hB+gvxVzQz4vnPolg9Tyw==
+zilswap-sdk@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/zilswap-sdk/-/zilswap-sdk-0.0.6.tgz#b83cb82116d22741262013ab5c13cb597da09988"
+  integrity sha512-Pyt0lc1ea80kaXWb8AePzXy2MTXUycQJQD6kgZItV2Y7P0XFuTWkWTLqTqgWTEZFLBJBLYxsE0M+8ODtg5ru+w==
   dependencies:
     "@zilliqa-js/zilliqa" "^0.9.1"
     bignumber.js "^9.0.0"

@@ -1,23 +1,27 @@
 import moment from "moment";
-import { Transaction } from "@zilliqa-js/account";
-
+import { BN } from "@zilliqa-js/util";
+import { Network } from "zilswap-sdk/lib/constants";
 
 export type ConnectOptionType = "moonlet" | "privateKey";
 
 export enum WalletConnectType {
   Moonlet, PrivateKey
-}
+};
+
+export type WalletAccountInfo = {
+  byte20: string;
+  bech32: string;
+  privateKey?: string;
+};
 
 export type ConnectedWallet = {
   type: WalletConnectType;
-  balance: string;
+  network: Network;
+
+  balance: BN;
   timestamp: moment.Moment;
-  transactions: Array<any>;
-  reload: () => Promise<void>;
-  getTransactions: () => Promise<void>;
-  createTransaction: () => Promise<Transaction>;
-  logout: () => void;
-}
+  addressInfo: WalletAccountInfo;
+};
 
 export type ConnectWalletResult = {
   wallet?: ConnectedWallet;
