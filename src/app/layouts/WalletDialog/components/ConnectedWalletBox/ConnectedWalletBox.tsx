@@ -9,10 +9,12 @@ import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate } from "app/utils";
 import cls from "classnames";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { ReactComponent as CheckCompleteIcon } from "./check_complete.svg";
 import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
 import { ConnectedWallet } from "core/wallet";
+import { ZilswapConnector } from "core/zilswap";
+import { actions } from "app/store";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -73,6 +75,7 @@ type CopyMap = {
 const ConnectedWalletBox = (props: any) => {
   const { onLogout, className, icon: Icon } = props;
   const classes = useStyles();
+  const dispatch = useDispatch();
   const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
   const [includeCompleted, setIncludeCompleted] = useState(true);
   const [copyMap, setCopyMap] = useState<CopyMap>({});
@@ -95,6 +98,12 @@ const ConnectedWalletBox = (props: any) => {
     }, 500)
   }
 
+  const onDisconnect = () => {
+    ZilswapConnector.disconnect();
+    dispatch(actions.Wallet.logout());
+    if (typeof onLogout === "function") onLogout();
+  };
+
   address = (wallet as ConnectedWallet).addressInfo.byte20;
   return (
     <Box display="flex" flexDirection="column">
@@ -107,7 +116,7 @@ const ConnectedWalletBox = (props: any) => {
             <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=testnet`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
             <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(address)} open={!!copyMap[address]} title="Copied!"><IconButton className={classes.copy} size="small"><CopyIcon /></IconButton></Tooltip>
           </Box>
-          <Typography className={cls(classes.info, classes.logout)} onClick={() => { wallet && wallet.logout(); onLogout() }} color="primary" variant="body1">Disconnect</Typography>
+          <Typography className={cls(classes.info, classes.logout)} onClick={onDisconnect} color="primary" variant="body1">Disconnect</Typography>
         </Box>
       </ContrastBox>
       <Box mt={"36px"}>
