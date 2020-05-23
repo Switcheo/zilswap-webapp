@@ -1,5 +1,4 @@
 import { useState, Dispatch, SetStateAction } from "react";
-import { AxiosError } from "axios";
 
 export type FormState = {
   values: { [index: string]: any };
@@ -8,7 +7,6 @@ export type FormState = {
 }
 
 export interface FormError {
-  axios?: AxiosError;
   message?: string;
   errors?: {
     [index: string]: {
@@ -29,16 +27,8 @@ export default function (initialFormState: FormState = defaultFormState, errorPr
   const [formState, setFormState] = useState(initialFormState);
 
   const _errorPrinter = errorPrinter || console.error;
-  let error_message: string;
-  const errorHandler = (error: FormError) => {
-    if (!error || !error.axios) {
-      if (error && error.message && typeof error.message === 'string')
-        error_message = error.message;
-      _errorPrinter(error_message);
-      return;
-    }
-
-    if (error.axios) {
+  const errorHandler = (error?: FormError) => {
+    if (error) {
       const { errors, message } = error;
 
       if (message) _errorPrinter(message);
