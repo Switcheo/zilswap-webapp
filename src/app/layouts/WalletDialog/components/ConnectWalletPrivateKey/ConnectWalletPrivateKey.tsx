@@ -7,8 +7,7 @@ import { WalletActionTypes } from "app/store/wallet/actions";
 import { AppTheme } from "app/theme/types";
 import { useErrorCatcher } from "app/utils";
 import cls from "classnames";
-import TokenService from "core/token";
-import WalletService from "core/wallet";
+import { connectWalletPrivateKey } from "core/wallet";
 import { ConnectWalletResult } from "core/wallet/ConnectedWallet";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -83,17 +82,16 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
     mounted && setError("");
     if (loading) return;
     mounted && setLoading(true);
-    let wallet: ConnectWalletResult;
+    let walletResult: ConnectWalletResult;
     errorCatcher(async () => {
       console.log("connect");
       if (privateKey) {
         dispatch({ type: WalletActionTypes.LOAD });
-        wallet = await WalletService.connectWalletPrivateKey(privateKey, dispatch);
+        walletResult = await connectWalletPrivateKey(privateKey);
       } else return;
-      if (wallet) {
-        dispatch(actions.Wallet.update({ ...wallet, pk: privateKey }));
-        await TokenService.getAllBalances(dispatch);
-        dispatch(actions.Wallet.update_currency_balance({ currency: "ZIL", balance: wallet.wallet!.balance }));
+      if (walletResult) {
+        dispatch(actions.Wallet.update({ ...walletResult, pk: privateKey }));
+        dispatch(actions.Wallet.update_currency_balance({ currency: "ZIL", balance: walletResult.wallet?.balance }));
       }
     }).finally(() => mounted && setLoading(false));
   }

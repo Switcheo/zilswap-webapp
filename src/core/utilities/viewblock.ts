@@ -15,14 +15,14 @@ const PATHS = {
 
 const http = new HTTP(PATH_PREFIX, PATHS);
 
-export namespace ViewBlock {
-	export const listTransactions = async ({ network = "testnet", page = 1, type = "all", address }: any): Promise<any> => {
+export class ViewBlock {
+	static listTransactions = async ({ network = "testnet", page = 1, type = "all", address }: any): Promise<any> => {
 		const url = http.path("listTransactions", { address }, { network, page, type });
 		const response = await http.get({ url, headers });
 		return await response.json();
 	}
 
-	export const getBalance = async ({ network = "testnet", address }: any): Promise<any> => {
+	static getBalance = async ({ network = "testnet", address }: any): Promise<any> => {
 		const url = http.path("getBalance", { address: toBech32Address(address) }, { network, type: "all" });
 		const response = await http.get({ url, headers });
 		return await response.json();

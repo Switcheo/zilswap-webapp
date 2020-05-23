@@ -79,27 +79,27 @@ const initializeForWallet = async (wallet: ConnectedWallet): Promise<Zilswap> =>
   }
 };
 
-export namespace ZilswapConnector {
-  export const connect = async (props: ConnectProps) => {
+export class ZilswapConnector {
+  static connect = async (props: ConnectProps) => {
     await initializeForWallet(props.wallet);
     await getState().zilswap.initialize();
 
     console.log("zilswap connection established");
   };
 
-  export const getTokens = (): TokenDetails[] => {
+  static getTokens = (): TokenDetails[] => {
     const { zilswap } = getState();
     const { tokens } = zilswap.getAppState();
     const tokensArray = Object.keys(tokens).map(hash => tokens[hash]);
-    return <TokenDetails[]><unknown>tokensArray!;
+    return ((tokensArray! as unknown) as TokenDetails[]);
   };
 
-  export const getPool = (tokenID: string): Pool | null => {
+  static getPool = (tokenID: string): Pool | null => {
     const { zilswap } = getState();
     return zilswap.getPool(tokenID);
   };
 
-  export const addLiquidity = async (props: AddLiquidityProps) => {
+  static addLiquidity = async (props: AddLiquidityProps) => {
     const { zilswap } = getState();
 
     const txReceipt = await zilswap.addLiquidity(
@@ -111,7 +111,7 @@ export namespace ZilswapConnector {
     return txReceipt;
   };
 
-  export const removeLiquidity = async (props: RemoveLiquidityProps) => {
+  static removeLiquidity = async (props: RemoveLiquidityProps) => {
     const { zilswap } = getState();
 
     const txReceipt = await zilswap.removeLiquidity(
@@ -122,7 +122,7 @@ export namespace ZilswapConnector {
     return txReceipt;
   };
 
-  export const disconnect = async (): Promise<void> => {
+  static disconnect = async (): Promise<void> => {
     const { zilswap } = getState();
     await zilswap.teardown();
   };

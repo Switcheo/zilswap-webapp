@@ -12,6 +12,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { ReactComponent as CheckCompleteIcon } from "./check_complete.svg";
 import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
+import { ConnectedWallet } from "core/wallet";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -94,7 +95,7 @@ const ConnectedWalletBox = (props: any) => {
     }, 500)
   }
 
-  address = wallet.account.address;
+  address = (wallet as ConnectedWallet).addressInfo.byte20;
   return (
     <Box display="flex" flexDirection="column">
       <ContrastBox className={cls(classes.root, className)}>

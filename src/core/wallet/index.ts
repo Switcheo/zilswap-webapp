@@ -1,3 +1,2 @@
-import * as WalletService from "./wallet";
-
-export default WalletService;
+export * from "./wallet";
+export * from "./ConnectedWallet";

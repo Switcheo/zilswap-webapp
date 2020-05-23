@@ -12,6 +12,7 @@ import ThemeSwitch from "../ThemeSwitch";
 import { ReactComponent as DotIcon } from "./dot.svg";
 import { ReactComponent as MenuIcon } from "./menu.svg";
 import { TopBarProps } from "./types";
+import { ConnectedWallet } from "core/wallet";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -57,15 +58,12 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
   const dispatch = useDispatch();
   const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
   const themeType = useSelector<RootState, string>(state => state.preference.theme);
-  let address = "";
 
   const onConnectWallet = () => {
     dispatch(actions.Layout.toggleShowWallet());
   };
 
-  if (wallet && wallet.account) {
-    address = wallet.account.address
-  }
+  const address = (wallet as ConnectedWallet)?.addressInfo.byte20;
 
   return (
     <AppBar {...rest} elevation={0} position="static" className={cls(classes.root, className)}>

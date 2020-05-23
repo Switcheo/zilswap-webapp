@@ -9,8 +9,9 @@ export class RPCResultError extends Error {
   }
 };
 
-export namespace RPCHandler {
-  export const parseResponse = (response: RPCResponse<any, string>): any => {
+export class RPCHandler {
+  
+  static parseResponse = (response: RPCResponse<any, string>): any => {
     if (typeof response !== "object")
       throw new RPCResultError("cannot parse RPC response", response)
 

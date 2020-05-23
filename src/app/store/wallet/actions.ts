@@ -1,5 +1,4 @@
-import TokenService from "core/token";
-import WalletService from "core/wallet";
+import { connectWalletPrivateKey } from "core/wallet";
 import { Dispatch } from "redux";
 import { OpenCloseState } from "../layout/types";
 import { WalletUpdatePayload } from "./types";
@@ -14,16 +13,15 @@ export enum WalletActionTypes {
   UPDATE_CURRENCY = "UPDATE_CURRENCY", UPDATE_CURRENCY_POOL = "UPDATE_CURRENCY_POOL"
 }
 
-export function init(pk: string) {
+export function init(privateKey?: string) {
   return async (dispatch: Dispatch) => {
     let wallet;
     dispatch({ type: WalletActionTypes.LOAD });
-    if (pk) {
-      wallet = await WalletService.connectWalletPrivateKey(pk, dispatch);
+    if (privateKey) {
+      wallet = await connectWalletPrivateKey(privateKey);
     }
     if (wallet) {
       //@ts-ignore
-      await TokenService.getAllBalances(dispatch);
       dispatch(update({ ...wallet }));
       dispatch(update_currency_balance({ currency: "ZIL", balance: wallet.wallet!.balance }));
     }

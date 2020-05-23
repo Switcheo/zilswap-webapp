@@ -4,9 +4,8 @@ import { DialogModal } from "app/components";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { WalletState } from "app/store/wallet/types";
-import { useErrorCatcher, useMessageSubscriber } from "app/utils";
+import { useMessageSubscriber } from "app/utils";
 import cls from "classnames";
-import WalletService from "core/wallet";
 import { getZilliqa } from "core/zilliqa";
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -39,16 +38,16 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const [error, setError] = useState<string | null>();
   const subscriber = useMessageSubscriber();
   const wallet = useSelector<RootState, WalletState>(state => state.wallet);
-  const errorCatcher = useErrorCatcher((err: any) => {
-    if (err) {
-      if (err === "WALLET_SCRIPT_INJECT_TIMEOUT" || err === "WALLET_NOT_INSTALLED")
-        setError("Error occurred, please ensure that the moonlet extension is installed/enabled");
-      else if (err === "USER_DID_NOT_GRANT_PERMISSION")
-        setError("User denied permission");
-      else setError(err);
-      setConnectWalletType(null);
-    }
-  });
+  // const errorCatcher = useErrorCatcher((err: any) => {
+  //   if (err) {
+  //     if (err === "WALLET_SCRIPT_INJECT_TIMEOUT" || err === "WALLET_NOT_INSTALLED")
+  //       setError("Error occurred, please ensure that the moonlet extension is installed/enabled");
+  //     else if (err === "USER_DID_NOT_GRANT_PERMISSION")
+  //       setError("User denied permission");
+  //     else setError(err);
+  //     setConnectWalletType(null);
+  //   }
+  // });
 
   const get_icon = () => {
     if (wallet.wallet.type !== 1) return MoonletIcon;
@@ -87,13 +86,11 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     setConnectWalletType(connectType);
     setError(null);
     if (connectType === "moonlet") {
-      if (WalletService) {
-        errorCatcher(async () => {
-          //@ts-ignore
-          const { wallet } = await WalletService.connectWalletMoonlet();
-          dispatch(actions.Wallet.update({ wallet }));
-        }, "connectWallet")
-      }
+      // errorCatcher(async () => {
+      //   //@ts-ignore
+      //   const { wallet } = await WalletService.connectWalletMoonlet();
+      //   dispatch(actions.Wallet.update({ wallet }));
+      // }, "connectWallet")
     }
   };
   const onConnectWalletResult = (wallet: ConnectedWallet | null) => {
