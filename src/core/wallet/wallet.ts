@@ -16,7 +16,11 @@ export const connectWalletMoonlet = async (): Promise<ConnectWalletResult> => {
   let moonlet = await dapp.getWalletInstance('moonlet');
   // @ts-ignore
   let account = await moonlet.providers.zilliqa.getAccounts();
-  if (account.length < 1) return null;
+  if (account.length < 1) return {
+    wallet: undefined,
+    error: "moonlet account is empty",
+  };
+
   // @ts-ignore
   const moonletZil = new Zilswap(Network.TestNet, moonlet.providers.zilliqa);
   // @ts-ignore
