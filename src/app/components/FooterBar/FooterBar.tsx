@@ -9,6 +9,9 @@ import { ReactComponent as SwitcheoIcon } from "./switcheo.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    position: "fixed",
+    bottom: 0,
+    left: 0,
     minWidth: "100%",
     height: theme.spacing(4.5),
     backgroundColor: theme.palette.toolbar.main,
@@ -50,7 +53,7 @@ const FooterBar: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =
   const classes = useStyles();
 
   return (
-    <Box {...rest} className={cls(classes.root, className)}>
+    <Box {...rest} className={cls(classes.root, className)} elevation={1}>
       <SocialLinkGroup className={classes.socialLinks} />
       <Box className={classes.switcheoBrand}>
         <Typography variant="body1">By</Typography>

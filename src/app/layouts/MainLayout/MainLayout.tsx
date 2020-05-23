@@ -4,8 +4,9 @@ import { FooterBar, NavDrawer, TopBar } from "app/components";
 import React, { Suspense, useState } from "react";
 import { renderRoutes } from "react-router-config";
 import WalletDialog from "../WalletDialog";
+import { AppTheme } from "app/theme/types";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     position: "relative",
     flex: 1,
@@ -16,6 +17,7 @@ const useStyles = makeStyles(theme => ({
     flex: 1,
     display: "flex",
     flexDirection: "row",
+    paddingBottom: theme.spacing(8),
   },
 }));
 
