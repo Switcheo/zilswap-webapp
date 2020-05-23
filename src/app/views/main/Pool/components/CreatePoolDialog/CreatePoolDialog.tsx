@@ -64,7 +64,7 @@ const CreatePoolDialog = (props: any) => {
   const { children, className, open, onCloseDialog, onSelect, ...rest } = props;
   const classes = useStyles();
   const [address, setAddress] = useState("");
-  const [error, setError] = useState("");
+  const [error] = useState("");
 
   return (
     <DialogModal header="Create Pool" open={open} onClose={onCloseDialog} {...rest} className={cls(classes.root, className)}>

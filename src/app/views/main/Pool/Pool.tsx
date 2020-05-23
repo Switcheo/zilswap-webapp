@@ -9,15 +9,10 @@ import { PoolFormState } from "app/store/pool/types";
 import { RootState } from "app/store/types";
 import { WalletState } from "app/store/wallet/types";
 import cls from "classnames";
-import React, { useState, useEffect, EffectCallback } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { PoolDeposit, PoolWithdraw, ShowAdvanced, CreatePoolDialog } from "./components";
+import { CreatePoolDialog, PoolDeposit, PoolWithdraw, ShowAdvanced } from "./components";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
-import { getZilliqa } from "core/zilliqa";
-import { Zilswap } from "zilswap-sdk";
-import { Network } from 'zilswap-sdk/lib/constants';
-import { useErrorCatcher } from "app/utils";
-import { BigNumber } from "bignumber.js";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -54,7 +49,6 @@ const useStyles = makeStyles(theme => ({
 const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
-  const [error, setError] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showCreatePool, setShowCreatePool] = useState(false);
   const [notification, setNotification] = useState<{ type: string; message: string; } | null>(); //{ type: "success", message: "Transaction Submitted." }
@@ -67,11 +61,6 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const exchangeRate = (walletState.currencies![currency] && walletState.currencies![currency].exchangeRate) || 0;
   const poolValue = useSelector<RootState, any>(state => state.pool.poolValues);
   const dispatch = useDispatch();
-  const errorCatcher = useErrorCatcher((err: any) => {
-    if (err) {
-      console.log({ err });
-    }
-  });
 
   const onTypeChange = (type: string) => {
     dispatch(actions.Pool.update_extended({ key: "type", value: type }))

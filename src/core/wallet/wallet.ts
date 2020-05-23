@@ -1,17 +1,15 @@
-import { setZilliqa, getZilliqa } from "core/zilliqa";
-import { fromBech32Address } from "@zilliqa-js/crypto"
-import { Zilswap } from "zilswap-sdk";
-import { Network, TOKENS } from 'zilswap-sdk/lib/constants';
-import moment from "moment";
-import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
-import { MoonletConnectedWallet } from "./MoonletConnectedWallet";
-import { ConnectWalletResult } from "./ConnectedWallet";
-import { listTransactions, getBalance } from "core/services/viewblockService";
+import { getBalance, listTransactions } from "core/services/viewblockService";
+import { setZilliqa } from "core/zilliqa";
 import { dapp } from "dapp-wallet-util";
-import TokenService from "../token";
-import { BigNumber } from "bignumber.js";
-import { actions } from "app/store";
+import moment from "moment";
 import { Dispatch } from "redux";
+import { Zilswap } from "zilswap-sdk";
+import { Network } from 'zilswap-sdk/lib/constants';
+import TokenService from "../token";
+import { ConnectWalletResult } from "./ConnectedWallet";
+import { MoonletConnectedWallet } from "./MoonletConnectedWallet";
+import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
+
 
 
 export const connectWalletMoonlet = async (): Promise<ConnectWalletResult> => {

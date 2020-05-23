@@ -1,7 +1,5 @@
-import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { bytes, units } from "@zilliqa-js/util";
 import { Zilswap } from "zilswap-sdk";
-import { Network } from 'zilswap-sdk/lib/constants';
 
 let zilliqa: any;
 

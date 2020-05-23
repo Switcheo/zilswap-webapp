@@ -83,7 +83,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
-  const [error, setError] = useState("");
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [notification, setNotification] = useState<{ type: string; message: string; } | null>(); //{ type: "success", message: "Transaction Submitted." }

@@ -7,12 +7,12 @@ import { WalletActionTypes } from "app/store/wallet/actions";
 import { AppTheme } from "app/theme/types";
 import { useErrorCatcher } from "app/utils";
 import cls from "classnames";
+import TokenService from "core/token";
 import WalletService from "core/wallet";
-import { ConnectedWallet, ConnectWalletResult } from "core/wallet/ConnectedWallet";
-import React, { useState, useEffect } from "react";
+import { ConnectWalletResult } from "core/wallet/ConnectedWallet";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { ConnectWalletManagerViewProps } from "../../types";
-import TokenService from "core/token";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -61,7 +61,6 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
   const classes = useStyles();
   const [privateKey, setPrivateKey] = useState("");
   const [error, setError] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const errorCatcher = useErrorCatcher((err: any) => err && setError(err.message));
@@ -73,10 +72,6 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
 
   const onTextChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     setPrivateKey(ev.target.value);
-  }
-
-  const onPasswordChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(ev.target.value);
   }
 
   useEffect(() => {
