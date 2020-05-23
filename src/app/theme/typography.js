@@ -46,10 +46,10 @@ export default (palette) => ({
     fontWeight: 500
   },
   button: {
-    fontSize: "14px",
+    fontSize: "16px",
     fontFamily: "Avenir Next",
     fontWeight: 600,
-    lineHeight: "16px",
+    lineHeight: "18px",
     textTransform: "none"
   },
   caption: {
