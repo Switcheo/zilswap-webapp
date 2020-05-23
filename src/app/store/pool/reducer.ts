@@ -1,7 +1,6 @@
+import Decimal from "decimal.js";
 import { PoolActionTypes } from "./actions";
 import { PoolFormState } from "./types";
-import Decimal from "decimal.js";
-import store from "../index";
 
 const initial_state: PoolFormState = {
   values: {
@@ -37,7 +36,6 @@ const initial_state: PoolFormState = {
 
 const reducer = (state: PoolFormState = initial_state, action: any) => {
   const { values } = state;
-  const { deposit, deposit1, depositCurrency, deposit1Currency } = values;
   const { payload } = action;
 
   switch (action.type) {

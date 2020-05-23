@@ -1,15 +1,14 @@
 import { Box, Button, ButtonGroup, Typography, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import cls from "classnames";
-import React from "react";
-import CurrencyInput from "../CurrencyInput";
-import { ReactComponent as PlusSVG } from "./plus_pool.svg";
-import { ReactComponent as PlusSVGDark } from "./plus_pool_dark.svg";
-import { useSelector } from "react-redux";
-import { PoolFormState } from "app/store/pool/types";
 import { RootState } from "app/store/types";
 import { WalletState } from "app/store/wallet/types";
 import { useMoneyFormatter } from "app/utils";
+import cls from "classnames";
+import React from "react";
+import { useSelector } from "react-redux";
+import CurrencyInput from "../CurrencyInput";
+import { ReactComponent as PlusSVG } from "./plus_pool.svg";
+import { ReactComponent as PlusSVGDark } from "./plus_pool_dark.svg";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -36,7 +35,6 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const { className, ...rest } = props;
   const classes = useStyles();
   const theme = useTheme();
-  const formState = useSelector<RootState, PoolFormState>(state => state.pool);
   const deposit1Currency = useSelector<RootState, string>(state => state.pool.values.deposit1Currency)
   const depositCurrency = useSelector<RootState, string>(state => state.pool.values.depositCurrency)
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);

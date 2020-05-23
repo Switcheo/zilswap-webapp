@@ -1,10 +1,10 @@
-import { DialogContent, useTheme, InputLabel, Typography } from "@material-ui/core";
+import { DialogContent, InputLabel, Typography, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { DialogModal } from "app/components";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { WalletState } from "app/store/wallet/types";
-import { useMessageSubscriber } from "app/utils";
+import { useErrorCatcher, useMessageSubscriber } from "app/utils";
 import cls from "classnames";
 import WalletService from "core/wallet";
 import { getZilliqa } from "core/zilliqa";
@@ -15,9 +15,7 @@ import { ConnectWallet, ConnectWalletPrivateKey } from "./components";
 import ConnectedWalletBox from "./components/ConnectedWalletBox";
 import { ReactComponent as MoonletIcon } from "./components/ConnectWallet/moonlet.svg";
 import { ReactComponent as PrivateKeyIconDark } from "./components/ConnectWallet/private-key-dark.svg";
-import { useErrorCatcher } from "app/utils";
 import { ReactComponent as PrivateKeyIcon } from "./components/ConnectWallet/private-key.svg";
-import { BigNumber } from "bignumber.js";
 
 const DIALOG_HEADERS: { [key in ConnectOptionType]: string } = {
   moonlet: "Connect Moonlet Wallet",

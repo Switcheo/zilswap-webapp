@@ -1,11 +1,8 @@
-import WalletService from "core/wallet";
 import TokenService from "core/token";
+import WalletService from "core/wallet";
 import { Dispatch } from "redux";
 import { OpenCloseState } from "../layout/types";
-import { WalletState, WalletUpdatePayload } from "./types";
-import { getZilliqa } from "core/zilliqa";
-import { BigNumber } from "bignumber.js";
-import { actions } from "app/store";
+import { WalletUpdatePayload } from "./types";
 
 export const TYPES = {
   TOGGLE_CONNECT_WALLET: "TOGGLE_CONNECT_WALLET",

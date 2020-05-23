@@ -1,9 +1,8 @@
-import { listTransactions, getBalance } from "core/services/viewblockService";
-import { TOKENS } from 'zilswap-sdk/lib/constants';
-import { Dispatch } from 'redux';
-import { getZilliqa } from "core/zilliqa";
 import { actions } from "app/store";
 import { BigNumber } from "bignumber.js";
+import { getZilliqa } from "core/zilliqa";
+import { Dispatch } from 'redux';
+import { TOKENS } from 'zilswap-sdk/lib/constants';
 
 
 export const getTokenPoolDetail = async (tokenId: string, dispatch: Dispatch) => {
@@ -31,7 +30,6 @@ export const getTokenPoolDetail = async (tokenId: string, dispatch: Dispatch) =>
 export const getAllBalances = async (dispatch: Dispatch) => {
   const tokenArr = Object.keys(TOKENS.TestNet);
   console.log("getting all bal of:", tokenArr);
-  const currencies = {};
   const zilswap = getZilliqa();
   let { zilliqa } = zilswap;
   const { address } = zilliqa.wallet.defaultAccount!;

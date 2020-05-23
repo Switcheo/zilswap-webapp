@@ -1,6 +1,5 @@
-import { WalletState, WalletCurrencies } from "./types";
 import { WalletActionTypes } from "./actions";
-import WalletService from "core/wallet";
+import { WalletCurrencies, WalletState } from "./types";
 
 const LOCAL_STORAGE_KEY_PRIVAYE_KEY = "zilswap:pk";
 const savedPk = localStorage.getItem(LOCAL_STORAGE_KEY_PRIVAYE_KEY);

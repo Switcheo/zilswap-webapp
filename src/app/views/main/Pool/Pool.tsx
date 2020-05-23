@@ -58,7 +58,6 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const withdrawCurrency = useSelector<RootState, string>(state => state.pool.values.withdrawCurrency)
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const currency = type === "add" ? deposit1Currency : withdrawCurrency;
-  const exchangeRate = (walletState.currencies![currency] && walletState.currencies![currency].exchangeRate) || 0;
   const poolValue = useSelector<RootState, any>(state => state.pool.poolValues);
   const dispatch = useDispatch();
 
