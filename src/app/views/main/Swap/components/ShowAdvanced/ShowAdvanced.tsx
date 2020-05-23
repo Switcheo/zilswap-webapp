@@ -17,10 +17,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
   },
   showAdvanced: {
-    padding: `20px ${theme.spacing(8)}px 52px ${theme.spacing(8)}px`,
+    padding: theme.spacing(2.5, 8, 6.5),
     [theme.breakpoints.down("xs")]: {
-      paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2),
+      padding: theme.spacing(2.5, 2, 6.5),
     },
   },
   selectRoot: {

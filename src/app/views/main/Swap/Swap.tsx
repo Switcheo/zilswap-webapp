@@ -1,5 +1,4 @@
-import { Box, Button, ButtonGroup, IconButton, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Box, Button, ButtonGroup, IconButton, makeStyles, Typography } from "@material-ui/core";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { KeyValueDisplay, NotificationBox } from "app/components";
@@ -21,10 +20,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   container: {
-    padding: `${theme.spacing(4)}px ${theme.spacing(8)}px ${theme.spacing(0)}px ${theme.spacing(8)}px`,
+    padding: theme.spacing(4, 8, 0),
     [theme.breakpoints.down("xs")]: {
-      paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2),
+      padding: theme.spacing(4, 2, 0),
     },
   },
   swapButton: {

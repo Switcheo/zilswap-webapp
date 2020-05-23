@@ -18,16 +18,15 @@ const useStyles = makeStyles(theme => ({
   root: {
   },
   container: {
-    padding: `${theme.spacing(4)}px ${theme.spacing(8)}px ${theme.spacing(2)}px ${theme.spacing(8)}px`,
+    padding: theme.spacing(4, 8, 2),
     [theme.breakpoints.down("xs")]: {
-      paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2),
+      padding: theme.spacing(4, 2, 2),
     },
   },
   addRemoveButton: {
     borderRadius: 4,
     width: 90,
-    padding: `${theme.spacing(1.5)}px ${theme.spacing(4)}px`
+    padding: theme.spacing(1.5, 4),
   },
   actionButton: {
     marginTop: 45,

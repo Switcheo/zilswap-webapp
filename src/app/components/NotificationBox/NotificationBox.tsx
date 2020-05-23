@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
   notification: {
     backgroundColor: theme.palette.background.paperOpposite!,
-    padding: `${theme.spacing(2)}px ${theme.spacing(2)}px`,
+    padding: theme.spacing(2),
     display: "flex",
     justifyContent: "space-between",
     alignItems: "start"

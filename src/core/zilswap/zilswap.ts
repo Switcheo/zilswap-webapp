@@ -127,28 +127,3 @@ export class ZilswapConnector {
     await zilswap.teardown();
   };
 }
-
-
-
-(async () => {
-  const privateKey = "0x0eb38fce6e3f05b10b75d7e54d16aee9ed113d9c308b863c565648e5d826186b";
-  const zilswap = new Zilswap(Network.TestNet, privateKey);
-  const zilliqa = new Zilliqa(Network.TestNet);
-  const addByPrivateKey = zilliqa.wallet.addByPrivateKey(privateKey);
-  const account = zilliqa.wallet.defaultAccount!;
-  console.log("addByPrivateKey", addByPrivateKey);
-  console.log("account", account);
-
-  await zilswap.initialize();
-
-
-
-  const appState = zilswap.getAppState();
-  const pool = zilswap.getPool(TOKENS.TestNet.ITN);
-
-  console.log("appState", appState);
-  console.log("pool", pool);
-
-  await zilswap.teardown();
-  console.log("teardown complete");
-})();

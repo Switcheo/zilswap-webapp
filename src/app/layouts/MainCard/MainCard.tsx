@@ -17,15 +17,12 @@ const CARD_BORDER_RADIUS = 4;
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     flex: 1,
-    paddingTop: theme.spacing(8),
-    paddingBottom: theme.spacing(2),
+    padding: theme.spacing(8, 0, 2),
     [theme.breakpoints.down("sm")]: {
-      paddingTop: theme.spacing(6),
+      padding: theme.spacing(6, 0, 2),
     },
     [theme.breakpoints.down("xs")]: {
-      paddingTop: theme.spacing(4),
-      paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2),
+      padding: theme.spacing(6, 2, 2),
     },
   },
   card: {

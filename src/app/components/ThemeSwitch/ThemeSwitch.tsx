@@ -45,7 +45,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const ThemeSwitch: React.FC<ThemeSwitchProps> = (props: ThemeSwitchProps) => {
-  const { children, className, ...rest } = props;
+  const { className, ...rest } = props;
   const classes = useStyles(props);
 
   const themeType = useSelector<RootState, string>(state => state.preference.theme);
