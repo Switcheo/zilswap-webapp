@@ -95,7 +95,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: any) => {
     <form className={classes.form} noValidate autoComplete="off">
       <Box display="flex" justifyContent="space-between">
         <InputLabel className={classes.floatLeft}>{label}</InputLabel>
-        {showBalance && wallet && wallet.currencies![currency] && wallet.currencies![currency].balance >= 0 && (<Typography variant="body2" className={classes.floatRight}>{`Balance: ${wallet.currencies![currency].balance >= 0 ? `${moneyFormat(wallet.currencies![currency].balance, { currency }).toLocaleString("en-US", { maximumFractionDigits: 10 })} ${currency}` : "-"}`}</Typography>)}
+        {/* {showBalance && wallet && wallet.currencies![currency] && wallet.currencies![currency].balance >= 0 && (<Typography variant="body2" className={classes.floatRight}>{`Balance: ${wallet.currencies![currency].balance >= 0 ? `${moneyFormat(wallet.currencies![currency].balance, { currency }).toLocaleString("en-US", { maximumFractionDigits: 10 })} ${currency}` : "-"}`}</Typography>)} */}
       </Box>
       <OutlinedInput
         className={classes.inputRow}

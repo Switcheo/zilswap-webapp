@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props: any) => {
   const { children, className, onResult, ...rest } = props;
   const classes = useStyles();
   const [privateKey, setPrivateKey] = useState("");
@@ -76,10 +76,8 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps & React.HT
       if (walletResult.error)
         throw walletResult.error;
 
-      if (walletResult.wallet) {
-        dispatch(actions.Wallet.update({ ...walletResult.wallet!, pk: privateKey }));
-        dispatch(actions.Wallet.update_currency_balance({ currency: "ZIL", balance: walletResult.wallet!.balance }));
-      }
+      if (walletResult.wallet)
+        dispatch(actions.Wallet.update({ wallet: walletResult.wallet!, pk: privateKey }));
     });
   }
 

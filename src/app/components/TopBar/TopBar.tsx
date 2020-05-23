@@ -79,7 +79,7 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
         <Box display="flex" flex={1} justifyContent="flex-end" alignItems="center">
           {!wallet && (<Button className={classes.btnConnect} onClick={onConnectWallet}>Connect Wallet</Button>)}
           {wallet && (<Chip onClick={onConnectWallet} color="primary" size="small" variant="outlined" label={<Typography variant="button" color="textPrimary"><DotIcon className={classes.dot} />{truncate(address)}</Typography>} />)}
-          < ThemeSwitch className={classes.themeSwitch} />
+          <ThemeSwitch className={classes.themeSwitch} />
         </Box>
       </Toolbar>
     </AppBar >

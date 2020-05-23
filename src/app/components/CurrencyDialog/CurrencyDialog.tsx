@@ -124,7 +124,7 @@ const CurrencyDialog = (props: any) => {
                   <Typography color="textSecondary" variant="body2">{c.name}</Typography>
                 </Box>
                 <Box flex={1}>
-                  <Typography align="right" variant="h6" component="p">{wallet.currencies![c.symbol] ? `${moneyFormat(wallet.currencies![c.symbol].balance, { currency: c.symbol }).toLocaleString("en-US", { maximumFractionDigits: 10 })} ${c.symbol}` : "-"}</Typography>
+                  {/* <Typography align="right" variant="h6" component="p">{wallet.currencies![c.symbol] ? `${moneyFormat(wallet.currencies![c.symbol].balance, { currency: c.symbol }).toLocaleString("en-US", { maximumFractionDigits: 10 })} ${c.symbol}` : "-"}</Typography> */}
                 </Box>
               </ContrastBox>
             </ButtonBase>

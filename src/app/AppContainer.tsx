@@ -11,8 +11,10 @@ import { GoogleAnalytics, ScrollReset } from "./components";
 import routes from "./routes";
 import { RootState } from "./store/types";
 import { darkTheme, lightTheme } from "./theme";
-import { actions } from "./store";
 import { WalletState } from "./store/wallet/types";
+import { connectWalletPrivateKey, ConnectWalletResult } from "core/wallet";
+import { useAsyncTask } from "./utils";
+import { actions } from "./store";
 
 
 const history = createBrowserHistory();
@@ -25,13 +27,26 @@ const themes: any = {
 const AppContainer: React.FC = () => {
 
   const themeType = useSelector<RootState, string>(state => state.preference.theme);
-  const wallet = useSelector<RootState, WalletState>(state => state.wallet);
   const theme = themes[themeType] || themes.default;
   const dispatch = useDispatch();
+  const walletState = useSelector<RootState, WalletState>(store => store.wallet);
+  const [runConnectTask] = useAsyncTask<void>("connectPrivateKey");
 
   useEffect(() => {
-    if (wallet.pk) dispatch(actions.Wallet.init(wallet.pk));
-  }, []); // eslint-disable-line
+    if (walletState.pk && !walletState.wallet) {
+      const privateKey = walletState.pk!;
+      runConnectTask(async () => {
+        const walletResult: ConnectWalletResult = await connectWalletPrivateKey(privateKey);
+
+        if (walletResult.wallet) {
+          dispatch(actions.Wallet.update({ wallet: walletResult.wallet!, pk: privateKey }));
+        } else {
+          dispatch(actions.Wallet.update({ wallet: undefined, pk: undefined }));
+        }
+      });
+    }
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>

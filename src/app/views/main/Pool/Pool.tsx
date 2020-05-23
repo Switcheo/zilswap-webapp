@@ -95,9 +95,9 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         </Box>
         {type === "add" && (<PoolDeposit />)}
         {type === "remove" && (<PoolWithdraw />)}
-        <KeyValueDisplay kkey={"Exchange Rate"} value={(walletState.currencies![currency] && walletState.currencies![currency].exchangeRate) || "-"} mb="8px" />
+        {/* <KeyValueDisplay kkey={"Exchange Rate"} value={(walletState.currencies![currency] && walletState.currencies![currency].exchangeRate) || "-"} mb="8px" />
         <KeyValueDisplay kkey={"Current Pool Size"} value={(walletState.currencies![currency] && walletState.currencies![currency].totalContribution?.toFixed(10)) || "-"} mb="8px" />
-        <KeyValueDisplay kkey={"Your Pool Share (%)"} value={(walletState.currencies![currency] && walletState.currencies![currency].contributionPercentage?.toFixed(10)) || "-"} />
+        <KeyValueDisplay kkey={"Your Pool Share (%)"} value={(walletState.currencies![currency] && walletState.currencies![currency].contributionPercentage?.toFixed(10)) || "-"} /> */}
         <Button
           className={classes.actionButton}
           variant="contained"

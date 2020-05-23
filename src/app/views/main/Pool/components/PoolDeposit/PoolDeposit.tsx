@@ -38,14 +38,17 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const deposit1Currency = useSelector<RootState, string>(state => state.pool.values.deposit1Currency)
   const depositCurrency = useSelector<RootState, string>(state => state.pool.values.depositCurrency)
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const exchangeRate = (walletState.currencies![deposit1Currency] && walletState.currencies![deposit1Currency].exchangeRate) || 0;
+  // const exchangeRate = (walletState.currencies![deposit1Currency] && walletState.currencies![deposit1Currency].exchangeRate) || 0;
   const moneyFormat = useMoneyFormatter({ decPlaces: 10 });
 
-  const depositRightLabel = walletState && walletState.currencies![depositCurrency] && walletState.currencies![depositCurrency].balance >= 0 ?
-    `Balance: ${moneyFormat(walletState.currencies![depositCurrency].balance, { currency: depositCurrency }).toLocaleString("en-US", { maximumFractionDigits: 10 })}` : "";
-  const deposit1RightLabel = walletState && walletState.currencies![deposit1Currency] && walletState.currencies![deposit1Currency].balance >= 0 ?
-    `Balance: ${moneyFormat(walletState.currencies![deposit1Currency].balance, { currency: deposit1Currency }).toLocaleString("en-US", { maximumFractionDigits: 10 })}` : "";
+  // const depositRightLabel = walletState && walletState.currencies![depositCurrency] && walletState.currencies![depositCurrency].balance >= 0 ?
+  //   `Balance: ${moneyFormat(walletState.currencies![depositCurrency].balance, { currency: depositCurrency }).toLocaleString("en-US", { maximumFractionDigits: 10 })}` : "";
+  // const deposit1RightLabel = walletState && walletState.currencies![deposit1Currency] && walletState.currencies![deposit1Currency].balance >= 0 ?
+  //   `Balance: ${moneyFormat(walletState.currencies![deposit1Currency].balance, { currency: deposit1Currency }).toLocaleString("en-US", { maximumFractionDigits: 10 })}` : "";
 
+  const exchangeRate = 0;
+  const depositRightLabel = "";
+  const deposit1RightLabel = "";
 
   return (
     <Box display="flex" flexDirection="column" {...rest} className={cls(classes.root, className)}>
