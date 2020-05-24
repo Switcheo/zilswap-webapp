@@ -1,11 +1,11 @@
 import { Value } from "@zilliqa-js/contract";
 import { BN } from "@zilliqa-js/util";
 import { actions } from "app/store";
-import { RootState, TokenInfo, TokenState, WalletState, TokenBalanceMap } from "app/store/types";
-import { ZilswapConnector, TokenDetails } from "core/zilswap";
+import { RootState, TokenBalanceMap, TokenInfo, TokenState, WalletState } from "app/store/types";
+import { useAsyncTask } from "app/utils";
+import { TokenDetails, ZilswapConnector } from "core/zilswap";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useAsyncTask } from "app/utils";
 
 export type AppButlerProps = {
 
@@ -21,7 +21,7 @@ const mapZilswapToken = (zilswapToken: TokenDetails): TokenInfo => {
     balances: {},
   }
 };
-const zilParamsToMap = (params: Value[]): { [index: string]: any } => {
+export const zilParamsToMap = (params: Value[]): { [index: string]: any } => {
   const output: { [index: string]: any } = {};
   for (const set of params)
     output[set.vname] = set.value;

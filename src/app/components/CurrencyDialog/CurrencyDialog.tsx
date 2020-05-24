@@ -67,7 +67,7 @@ const CurrencyDialog = (props: any) => {
   const [search, setSearch] = useState("");
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const moneyFormat = useMoneyFormatter({ maxFractionDigits: 10 });
+  const moneyFormat = useMoneyFormatter({ maxFractionDigits: 12 });
 
   const getTokenBalance = (token: TokenInfo): BigNumber => {
     if (!walletState.wallet) return BIG_ZERO;

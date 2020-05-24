@@ -4,6 +4,7 @@ import React from "react";
 
 const useStyles = makeStyles(theme => ({
   root: {
+    display: "block",
     margin: "0 auto",
   },
 }));
@@ -14,7 +15,7 @@ const LoadableArea: React.FC<{ loading?: boolean } & CircularProgressProps> = (p
   if (loading) return (
     <CircularProgress size={20} {...rest} className={classes.root} />
   );
-  return children;
+  return children || <></>;
 };
 
 export default LoadableArea;

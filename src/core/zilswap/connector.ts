@@ -2,7 +2,8 @@ import { Contract } from '@zilliqa-js/contract';
 import BigNumber from 'bignumber.js';
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
 import { Zilswap } from "zilswap-sdk";
-import { Network } from "zilswap-sdk/lib/constants";
+import { Network, APIS } from "zilswap-sdk/lib/constants";
+import { Zilliqa } from '@zilliqa-js/zilliqa';
 
 
 export interface ConnectProps {
@@ -84,6 +85,11 @@ export class ZilswapConnector {
     await getState().zilswap.initialize();
 
     console.log("zilswap connection established");
+  };
+
+  static getZilliqa = () => {
+    const { zilswap } = getState();
+    return new Zilliqa(APIS[zilswap.network]);
   };
 
   static getZilswapState = () => {
