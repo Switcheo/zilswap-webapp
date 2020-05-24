@@ -25,6 +25,15 @@ const initialFormState = {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-around",
+    padding: theme.spacing(0, 8, 2),
+    [theme.breakpoints.down("xs")]: {
+      padding: theme.spacing(0, 2, 2),
+    },
+  },
   percentageButton: {
     borderRadius: 4,
     color: theme.palette.text?.secondary,
@@ -82,7 +91,6 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   };
 
   const onTokenChange = (amount: string = "0") => {
-    console.log(amount);
     const value = new BigNumber(amount);
     if (poolToken) {
       if (!poolToken.pool) return;
@@ -115,49 +123,52 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
   return (
     <Box display="flex" flexDirection="column"  {...rest} className={cls(classes.root, className)}>
-      <CurrencyInput
-        showContribution
-        label="Remove"
-        token={poolToken}
-        amount={formState.tokenAmount}
-        onAmountChange={onTokenChange}
-        onCurrencyChange={onPoolChange} />
-      <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
-        <Button className={classes.percentageButton}>
-          <Typography variant="button">25%</Typography>
-        </Button>
-        <Button className={classes.percentageButton}>
-          <Typography variant="button">50%</Typography>
-        </Button>
-        <Button className={classes.percentageButton}>
-          <Typography variant="button">75%</Typography>
-        </Button>
-        <Button className={classes.percentageButton}>
-          <Typography variant="button">100%</Typography>
-        </Button>
-      </ButtonGroup>
-      {theme.palette.type === "light" ? <MinusSVG className={classes.svg} /> : <MinusSVGDark className={classes.svg} />}
-      <InputLabel>You Receive (Estimate)</InputLabel>
-      <ContrastBox className={classes.readOnly}>
-        <Typography>0.00</Typography>
-      </ContrastBox>
+      <Box className={classes.container}>
+        <CurrencyInput
+          showContribution
+          label="Remove"
+          token={poolToken}
+          amount={formState.tokenAmount}
+          disabled={!poolToken}
+          onAmountChange={onTokenChange}
+          onCurrencyChange={onPoolChange} />
+        <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
+          <Button className={classes.percentageButton}>
+            <Typography variant="button">25%</Typography>
+          </Button>
+          <Button className={classes.percentageButton}>
+            <Typography variant="button">50%</Typography>
+          </Button>
+          <Button className={classes.percentageButton}>
+            <Typography variant="button">75%</Typography>
+          </Button>
+          <Button className={classes.percentageButton}>
+            <Typography variant="button">100%</Typography>
+          </Button>
+        </ButtonGroup>
+        {theme.palette.type === "light" ? <MinusSVG className={classes.svg} /> : <MinusSVGDark className={classes.svg} />}
+        <InputLabel>You Receive (Estimate)</InputLabel>
+        <ContrastBox className={classes.readOnly}>
+          <Typography>0.00</Typography>
+        </ContrastBox>
 
-      <Typography color="error">{error?.message}</Typography>
-      <FancyButton walletRequired fullWidth
-        loading={loading}
-        className={classes.actionButton}
-        variant="contained"
-        color="primary"
-        onClick={onRemoveLiquidity}>
-        Remove Liquidity
+        <Typography color="error">{error?.message}</Typography>
+        <FancyButton walletRequired fullWidth
+          loading={loading}
+          className={classes.actionButton}
+          variant="contained"
+          color="primary"
+          onClick={onRemoveLiquidity}>
+          Remove Liquidity
       </FancyButton>
 
-      <Typography
-        variant="body2"
-        className={cls(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })}
-        onClick={() => setShowAdvanced(!showAdvanced)}>
-        Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-      </Typography>
+        <Typography
+          variant="body2"
+          className={cls(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })}
+          onClick={() => setShowAdvanced(!showAdvanced)}>
+          Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        </Typography>
+      </Box>
       <ShowAdvanced show={showAdvanced} />
     </Box>
   );

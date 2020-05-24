@@ -22,6 +22,15 @@ const initialFormState = {
 const useStyles = makeStyles(theme => ({
   root: {
   },
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-around",
+    padding: theme.spacing(0, 8, 2),
+    [theme.breakpoints.down("xs")]: {
+      padding: theme.spacing(0, 2, 2),
+    },
+  },
   percentageButton: {
     borderRadius: 4,
     color: theme.palette.text?.secondary,
@@ -61,7 +70,6 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   };
 
   const onZilChange = (amount: string = "0") => {
-    console.log(amount);
     const value = new BigNumber(amount);
     if (poolToken) {
       if (!poolToken.pool) return;
@@ -73,7 +81,6 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   };
 
   const onTokenChange = (amount: string = "0") => {
-    console.log(amount);
     const value = new BigNumber(amount);
     if (poolToken) {
       if (!poolToken.pool) return;
@@ -107,45 +114,50 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
   return (
     <Box display="flex" flexDirection="column" {...rest} className={cls(classes.root, className)}>
-      <CurrencyInput fixedToZil
-        token={tokenState.tokens[ZIL_TOKEN_NAME]}
-        amount={formState.zilAmount}
-        onAmountChange={onZilChange}
-        label="Deposit" />
-      <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
-        <Button className={classes.percentageButton}>
-          <Typography variant="button">25%</Typography>
-        </Button>
-        <Button className={classes.percentageButton}>
-          <Typography variant="button">50%</Typography>
-        </Button>
-        <Button className={classes.percentageButton}>
-          <Typography variant="button">75%</Typography>
-        </Button>
-        <Button className={classes.percentageButton}>
-          <Typography variant="button">100%</Typography>
-        </Button>
-      </ButtonGroup>
-      {theme.palette.type === "light" ? <PlusSVG className={classes.svg} /> : <PlusSVGDark className={classes.svg} />}
-      <CurrencyInput
-        label="Deposit"
-        token={poolToken}
-        amount={formState.tokenAmount}
-        className={classes.input}
-        onAmountChange={onTokenChange}
-        onCurrencyChange={onPoolChange} />
-      <PoolDetail token={poolToken || undefined} />
-      <Typography color="error">{error?.message}</Typography>
-      <FancyButton
-        loading={loading}
-        walletRequired
-        className={classes.actionButton}
-        variant="contained"
-        color="primary"
-        fullWidth
-        onClick={onAddLiquidity}>
-        Add Liquidity
+      <Box className={classes.container}>
+        <CurrencyInput fixedToZil
+          label="Deposit"
+          token={tokenState.tokens[ZIL_TOKEN_NAME]}
+          amount={formState.zilAmount}
+          disabled={!poolToken}
+          onAmountChange={onZilChange} />
+        <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
+          <Button className={classes.percentageButton}>
+            <Typography variant="button">25%</Typography>
+          </Button>
+          <Button className={classes.percentageButton}>
+            <Typography variant="button">50%</Typography>
+          </Button>
+          <Button className={classes.percentageButton}>
+            <Typography variant="button">75%</Typography>
+          </Button>
+          <Button className={classes.percentageButton}>
+            <Typography variant="button">100%</Typography>
+          </Button>
+        </ButtonGroup>
+        {theme.palette.type === "light" ? <PlusSVG className={classes.svg} /> : <PlusSVGDark className={classes.svg} />}
+        <CurrencyInput
+          label="Deposit"
+          token={poolToken}
+          amount={formState.tokenAmount}
+          className={classes.input}
+          disabled={!poolToken}
+          onAmountChange={onTokenChange}
+          onCurrencyChange={onPoolChange} />
+        <PoolDetail token={poolToken || undefined} />
+
+        <Typography color="error">{error?.message}</Typography>
+        <FancyButton
+          loading={loading}
+          walletRequired
+          className={classes.actionButton}
+          variant="contained"
+          color="primary"
+          fullWidth
+          onClick={onAddLiquidity}>
+          Add Liquidity
       </FancyButton>
+      </Box>
     </Box>
   );
 };

@@ -31,7 +31,7 @@ const formatter = (inputNumber: BigNumber | number | string = 0, opts: MoneyForm
     compression = currencyData.compression;
     symbol = currencyData.symbol;
   }
-  number = number.times(new BigNumber(10).pow(-compression));
+  number = number.shiftedBy(-compression);
 
   const positive = number.isPositive();
   const absValue = number.abs();

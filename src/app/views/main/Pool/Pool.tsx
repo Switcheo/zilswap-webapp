@@ -15,9 +15,9 @@ const useStyles = makeStyles(theme => ({
   root: {
   },
   container: {
-    padding: theme.spacing(4, 8, 2),
+    padding: theme.spacing(4, 8, 0),
     [theme.breakpoints.down("xs")]: {
-      padding: theme.spacing(4, 2, 2),
+      padding: theme.spacing(2, 2, 0),
     },
   },
   addRemoveButton: {
@@ -52,8 +52,8 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
   return (
     <MainCard hasNotification={notification} {...rest} className={cls(classes.root, className)}>
       <NotificationBox notification={notification} setNotification={setNotification} />
-      <Box display="flex" flexDirection="column" className={classes.container}>
-        <Box display="flex" justifyContent="space-between" mb="28px" >
+      <Box display="flex" flexDirection="column">
+        <Box display="flex" justifyContent="space-between" mb="28px" className={classes.container}>
           <ButtonGroup color="primary">
             <Button
               onClick={() => onTypeChange("add")}

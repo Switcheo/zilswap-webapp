@@ -52,6 +52,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   token: TokenInfo | null;
   amount: BigNumber;
   fixedToZil?: boolean;
+  disabled?: boolean;
   showContribution?: boolean;
 
   onCurrencyChange?: (token: TokenInfo) => void;
@@ -59,7 +60,11 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
 };
 
 const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
-  const { children, label, fixedToZil, amount, showContribution, onAmountChange, onCurrencyChange, token, className } = props;
+  const {
+    children, className,
+    label, fixedToZil, amount, disabled,
+    showContribution, onAmountChange, onCurrencyChange, token, 
+  } = props;
   const classes = useStyles();
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5 });
   const [tokenBalance, setTokenBalance] = useState<BigNumber | null>(null);
@@ -75,7 +80,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
       const tokenBalance = token!.balances[wallet.addressInfo.byte20.toLowerCase()];
       if (!tokenBalance)
         return setTokenBalance(null);
-  
+
       setTokenBalance(new BigNumber(tokenBalance!.toString()));
     } else {
       if (!token.pool) return setTokenBalance(null);
@@ -115,6 +120,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
         placeholder={"0.00"}
         value={amount.toString()}
         onChange={onChange}
+        disabled={disabled}
         type="number"
         inputProps={{ className: classes.input }}
         startAdornment={
