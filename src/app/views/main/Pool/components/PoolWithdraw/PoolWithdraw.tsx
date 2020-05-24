@@ -133,7 +133,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       const tokenAddress = poolToken.address;
       const txReceipt = await ZilswapConnector.removeLiquidity({
         tokenID: tokenAddress,
-        contributionAmount: formState.tokenAmount,
+        contributionAmount: formState.zilAmount,
       });
 
       const updatedPool = ZilswapConnector.getPool(tokenAddress) || undefined;
@@ -144,6 +144,8 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       console.log({ txReceipt });
     });
   };
+
+  // TODO: fix liquidity token count
 
   return (
     <Box display="flex" flexDirection="column"  {...rest} className={cls(classes.root, className)}>

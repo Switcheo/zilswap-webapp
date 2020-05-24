@@ -31,7 +31,7 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
 
   const getExchangeRateValue = () => {
     if (!token?.pool) return "-";
-    const rate = token.pool.exchangeRate;
+    const rate = token.pool.exchangeRate.pow(-1);
     return `1 ZIL = ${rate.toNumber().toLocaleString("en-US", { maximumFractionDigits: 5 })} ${token!.symbol}`;
   };
   const getPoolSizeValue = () => {
