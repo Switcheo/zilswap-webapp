@@ -1,7 +1,7 @@
-import { Box, Button, CircularProgress, DialogContent, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
+import { Box, Button, DialogContent, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import { ContrastBox } from "app/components";
+import { ContrastBox, FancyButton } from "app/components";
 import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
@@ -95,9 +95,9 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props:
             <OutlinedInput value={privateKey} onChange={onTextChange} />
             {/* <InputLabel>Enter a Password</InputLabel>
             <OutlinedInput type="password" value={password} onChange={onPasswordChange} /> */}
-            <Button onClick={connect} className={classes.submitButton} variant="contained" color="primary">
-              {loadingConnect ? <CircularProgress size={14} /> : "Connect"}
-            </Button>
+            <FancyButton loading={loadingConnect} onClick={connect} className={classes.submitButton} variant="contained" color="primary">
+              Connect
+            </FancyButton>
           </form>
         </ContrastBox>
       </DialogContent>

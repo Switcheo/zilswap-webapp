@@ -1,7 +1,7 @@
-import { Box, Button, Typography, CircularProgress } from "@material-ui/core";
+import { Box, Button, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import { ContrastBox } from "app/components";
+import { ContrastBox, FancyButton } from "app/components";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React from "react";
@@ -98,7 +98,9 @@ const ConnectWalletOption: React.FC<ConnectWalletOptionProps & React.HTMLAttribu
           <SecurityLevelIcon className={cls(classes.securityLevelIcon, securityLevelClass)} />
         </Typography>
       </Box>
-      <Button disabled={disable} className={classes.button} color="primary" variant="contained" onClick={() => { if (loading) return; onSelect() }}>{loading ? <CircularProgress size={14} /> : buttonText}</Button>
+      <FancyButton loading={loading} disabled={disable} className={classes.button} color="primary" variant="contained" onClick={onSelect}>
+        {buttonText}
+      </FancyButton>
       <Button disabled={disable} className={classes.iconButton} color="primary" variant="contained" onClick={onSelect}>
         <ChevronRightIcon />
       </Button>

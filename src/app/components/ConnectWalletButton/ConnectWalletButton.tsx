@@ -9,6 +9,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import LoadableArea from "../LoadableArea";
 import { ReactComponent as DotIcon } from "./dot.svg";
+import { LoadingKeys } from "app/utils/contants";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -19,12 +20,6 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const loadingWhen = [
-  "connectWallet",
-  "connectWalletMoonlet",
-  "connectWalletPrivateKey",
-];
-
 const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
@@ -32,7 +27,7 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
   const dispatch = useDispatch();
 
   const wallet = useSelector<RootState, ConnectedWallet | undefined>(state => state.wallet.wallet);
-  const [loading] = useTaskSubscriber(...loadingWhen);
+  const [loading] = useTaskSubscriber(...LoadingKeys.connectWallet);
 
   const onConnectWallet = () => {
     dispatch(actions.Layout.toggleShowWallet());
