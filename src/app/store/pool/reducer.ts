@@ -1,6 +1,6 @@
 import Decimal from "decimal.js";
 import { PoolActionTypes } from "./actions";
-import { PoolFormState } from "./types";
+import { PoolFormState, PoolSelectProps } from "./types";
 
 const initial_state: PoolFormState = {
   values: {
@@ -24,14 +24,7 @@ const initial_state: PoolFormState = {
     withdraw: false,
     withdrawCurrency: false,
   },
-  poolValues: {
-    contributionPercentage: null,
-    exchangeRate: null,
-    tokenReserve: null,
-    totalContribution: null,
-    userContribution: null,
-    zilReserve: null,
-  }
+  token: null,
 }
 
 const reducer = (state: PoolFormState = initial_state, action: any) => {
@@ -39,6 +32,14 @@ const reducer = (state: PoolFormState = initial_state, action: any) => {
   const { payload } = action;
 
   switch (action.type) {
+
+    case PoolActionTypes.POOL_SELECT:
+      const selectProps: PoolSelectProps = payload;
+      return {
+        ...state,
+        token: selectProps.token,
+      };
+
     case PoolActionTypes.UPDATE:
       return { ...state, ...payload }
     case PoolActionTypes.UPDATE_EXTENDED:

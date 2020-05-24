@@ -4,7 +4,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { CurrencyLogo } from "app/components";
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "app/store/types";
+import { RootState, TokenInfo } from "app/store/types";
 import { actions } from "app/store";
 import CurrencyDialog from "app/components/CurrencyDialog";
 import { WalletState } from "app/store/wallet/types";
@@ -81,10 +81,10 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: any) => {
     }))
   }
 
-  const onCurrencySelect = (value: string) => {
+  const onCurrencySelect = (token: TokenInfo) => {
     dispatch(actions.Swap.update_extended({
       key: currencyKey,
-      value
+      value: token.symbol,
     }));
     setShowCurrencyDialog(false);
   }
@@ -121,7 +121,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: any) => {
         }}
       />
       {children}
-      <CurrencyDialog showCurrencyDialog={showCurrencyDialog} onSelect={onCurrencySelect} onCloseDialog={() => setShowCurrencyDialog(false)} exclude={exclude} />
+      <CurrencyDialog open={showCurrencyDialog} onSelectCurrency={onCurrencySelect} onClose={() => setShowCurrencyDialog(false)} />
     </form>
   );
 };

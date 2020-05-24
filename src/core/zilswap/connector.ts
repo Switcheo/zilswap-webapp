@@ -1,9 +1,9 @@
-import { Contract } from '@zilliqa-js/contract';
-import BigNumber from 'bignumber.js';
+import { Contract } from "@zilliqa-js/contract";
+import BigNumber from "bignumber.js";
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
 import { Zilswap } from "zilswap-sdk";
 import { Network, APIS } from "zilswap-sdk/lib/constants";
-import { Zilliqa } from '@zilliqa-js/zilliqa';
+import { Zilliqa } from "@zilliqa-js/zilliqa";
 
 
 export interface ConnectProps {
@@ -13,14 +13,14 @@ export interface ConnectProps {
 
 export interface AddLiquidityProps {
   tokenID: string;
-  zilAmount: string;
-  tokenAmount: string;
+  zilAmount: BigNumber;
+  tokenAmount: BigNumber;
   maxExchangeRateChange?: number;
 }
 
 export interface RemoveLiquidityProps {
   tokenID: string;
-  contributionAmount: string;
+  contributionAmount: BigNumber;
   maxExchangeRateChange?: number;
 }
 
@@ -38,7 +38,7 @@ export type TokenDetails = {
 /**
  * Filler for unexported type from zilswap-sdk
  */
-type Pool = {
+export type Pool = {
   zilReserve: BigNumber;
   tokenReserve: BigNumber;
   exchangeRate: BigNumber;
@@ -114,8 +114,8 @@ export class ZilswapConnector {
 
     const txReceipt = await zilswap.addLiquidity(
       props.tokenID,
-      props.zilAmount,
-      props.tokenAmount,
+      props.zilAmount.toString(),
+      props.tokenAmount.toString(),
       props.maxExchangeRateChange);
 
     return txReceipt;
@@ -126,7 +126,7 @@ export class ZilswapConnector {
 
     const txReceipt = await zilswap.removeLiquidity(
       props.tokenID,
-      props.contributionAmount,
+      props.contributionAmount.toString(),
       props.maxExchangeRateChange);
 
     return txReceipt;

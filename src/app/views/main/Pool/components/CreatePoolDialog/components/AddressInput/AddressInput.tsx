@@ -58,6 +58,8 @@ const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => 
   useEffect(() => {
     if (typeof onTokenChanged === "function")
       onTokenChanged(tokenPreview);
+
+    // eslint-disable-next-line
   }, [tokenPreview]);
 
   useEffect(() => {
@@ -90,6 +92,7 @@ const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => 
     } else {
       setTokenPreview(undefined);
     }
+    // eslint-disable-next-line
   }, [walletState.wallet, address]);
 
   return (

@@ -47,25 +47,21 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const theme = useTheme<AppTheme>();
   return (
     <Box display="flex" flexDirection="column"  {...rest} className={cls(classes.root, className)}>
-      <CurrencyInput
-        label="Remove"
-        name="withdraw"
-      >
-        <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">25%</Typography>
-          </Button>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">50%</Typography>
-          </Button>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">75%</Typography>
-          </Button>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">100%</Typography
-            ></Button>
-        </ButtonGroup>
-      </CurrencyInput>
+      <CurrencyInput label="Remove" token={null} amount={0} />
+      <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
+        <Button className={classes.percentageButton}>
+          <Typography variant="button">25%</Typography>
+        </Button>
+        <Button className={classes.percentageButton}>
+          <Typography variant="button">50%</Typography>
+        </Button>
+        <Button className={classes.percentageButton}>
+          <Typography variant="button">75%</Typography>
+        </Button>
+        <Button className={classes.percentageButton}>
+          <Typography variant="button">100%</Typography>
+        </Button>
+      </ButtonGroup>
       {theme.palette.type === "light" ? <MinusSVG className={classes.svg} /> : <MinusSVGDark className={classes.svg} />}
       <InputLabel>You Receive (Estimate)</InputLabel>
       <ContrastBox className={classes.readOnly}>

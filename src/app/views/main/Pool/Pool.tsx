@@ -62,13 +62,12 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const withdrawCurrency = useSelector<RootState, string>(state => state.pool.values.withdrawCurrency)
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const currency = type === "add" ? deposit1Currency : withdrawCurrency;
-  const poolValue = useSelector<RootState, any>(state => state.pool.poolValues);
+  const poolState = useSelector<RootState, any>(state => state.pool);
   const dispatch = useDispatch();
 
   const onTypeChange = (type: string) => {
     dispatch(actions.Pool.update_extended({ key: "type", value: type }))
   }
-
 
   return (
     <MainCard hasNotification={notification} {...rest} className={cls(classes.root, className)}>
@@ -98,15 +97,6 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         {/* <KeyValueDisplay kkey={"Exchange Rate"} value={(walletState.currencies![currency] && walletState.currencies![currency].exchangeRate) || "-"} mb="8px" />
         <KeyValueDisplay kkey={"Current Pool Size"} value={(walletState.currencies![currency] && walletState.currencies![currency].totalContribution?.toFixed(10)) || "-"} mb="8px" />
         <KeyValueDisplay kkey={"Your Pool Share (%)"} value={(walletState.currencies![currency] && walletState.currencies![currency].contributionPercentage?.toFixed(10)) || "-"} /> */}
-        <FancyButton
-          walletRequired
-          className={classes.actionButton}
-          variant="contained"
-          color="primary"
-          fullWidth
-          onClick={() => { }}>
-          {type === "add" ? "Add Liquidity" : "Remove Liquidity"}
-        </FancyButton>
         {type === "remove" && (
           <Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
             Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -114,10 +104,7 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         )}
       </Box>
       {type === "remove" && (
-        <ShowAdvanced
-          showAdvanced={showAdvanced}
-          poolValue={poolValue}
-        />
+        <ShowAdvanced show={showAdvanced} />
       )}
       <CreatePoolDialog open={showCreatePool} onCloseDialog={() => setShowCreatePool(false)} />
     </MainCard>

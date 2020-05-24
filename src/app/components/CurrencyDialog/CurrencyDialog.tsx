@@ -1,8 +1,8 @@
-import { Box, ButtonBase, DialogContent, InputAdornment, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import { Box, ButtonBase, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
 import { DialogModal } from "app/components";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
-import { BIG_ZERO } from "app/utils/contants";
+import { BIG_ZERO, sortTokens } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
@@ -11,6 +11,10 @@ import { useSelector } from "react-redux";
 import ContrastBox from "../ContrastBox";
 import CurrencyLogo from "../CurrencyLogo";
 import { ReactComponent as SearchIcon } from "./SearchIcon.svg";
+
+export interface CurrencyDialogProps extends DialogProps {
+  onSelectCurrency: (token: TokenInfo) => void;
+};
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -60,8 +64,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-const CurrencyDialog = (props: any) => {
-  const { children, className, showCurrencyDialog, onCloseDialog, onSelect, exclude, ...rest } = props;
+const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProps) => {
+  const { children, className, onSelectCurrency, ...rest } = props;
   const classes = useStyles();
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const [search, setSearch] = useState("");
@@ -86,11 +90,12 @@ const CurrencyDialog = (props: any) => {
       const token = tokenState.tokens![address];
       tokens.push(token);
     }
-    setTokens(tokens);
+
+    setTokens(tokens.sort(sortTokens));
   }, [tokenState.tokens])
 
   return (
-    <DialogModal header="Select a Token" open={showCurrencyDialog} onClose={onCloseDialog} {...rest} className={cls(classes.root, className)}>
+    <DialogModal header="Select a Token" {...rest} className={cls(classes.root, className)}>
       <DialogContent className={classes.content}>
         <OutlinedInput
           placeholder="Search token name, symbol or address"
@@ -98,22 +103,26 @@ const CurrencyDialog = (props: any) => {
           fullWidth
           className={classes.input}
           onChange={(e) => setSearch(e.target.value)}
-          inputProps={{
-            className: classes.inputProps
-          }}
+          inputProps={{ className: classes.inputProps }}
           startAdornment={
             <InputAdornment position="start">
               <SearchIcon />
             </InputAdornment>
           }
         />
+        {!tokenState.initialized && (
+          <Box>
+            <Typography color="error">Connect wallet to view tokens</Typography>
+          </Box>
+        )}
+
         <Box className={classes.currencies}>
           {tokens.map((token, index) => (
             <ButtonBase
               className={classes.buttonBase}
               key={index}
               focusRipple
-              onClick={() => onSelect(token.symbol)}>
+              onClick={() => onSelectCurrency(token)}>
               <ContrastBox className={classes.currencyBox}>
                 <CurrencyLogo className={classes.currencyLogo} currency={token.symbol} />
                 <Box display="flex" flexDirection="column">

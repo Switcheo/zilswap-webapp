@@ -1,14 +1,17 @@
 import { Box, Button, ButtonGroup, Typography, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { RootState } from "app/store/types";
+import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { WalletState } from "app/store/wallet/types";
 import { useMoneyFormatter } from "app/utils";
 import cls from "classnames";
 import React from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import CurrencyInput from "../CurrencyInput";
 import { ReactComponent as PlusSVG } from "./plus_pool.svg";
 import { ReactComponent as PlusSVGDark } from "./plus_pool_dark.svg";
+import { FancyButton } from "app/components";
+import { actions } from "app/store";
+import { ZIL_TOKEN_NAME } from "app/utils/contants";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -27,6 +30,11 @@ const useStyles = makeStyles(theme => ({
     marginTop: 12,
     marginBottom: 20
   },
+  actionButton: {
+    marginTop: 45,
+    marginBottom: 40,
+    height: 46
+  },
   svg: {
     alignSelf: "center"
   },
@@ -35,55 +43,53 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const { className, ...rest } = props;
   const classes = useStyles();
   const theme = useTheme();
-  const deposit1Currency = useSelector<RootState, string>(state => state.pool.values.deposit1Currency)
-  const depositCurrency = useSelector<RootState, string>(state => state.pool.values.depositCurrency)
+  const dispatch = useDispatch();
+  const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
+
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  // const exchangeRate = (walletState.currencies![deposit1Currency] && walletState.currencies![deposit1Currency].exchangeRate) || 0;
-  const moneyFormat = useMoneyFormatter({ decPlaces: 10 });
 
-  // const depositRightLabel = walletState && walletState.currencies![depositCurrency] && walletState.currencies![depositCurrency].balance >= 0 ?
-  //   `Balance: ${moneyFormat(walletState.currencies![depositCurrency].balance, { currency: depositCurrency }).toLocaleString("en-US", { maximumFractionDigits: 10 })}` : "";
-  // const deposit1RightLabel = walletState && walletState.currencies![deposit1Currency] && walletState.currencies![deposit1Currency].balance >= 0 ?
-  //   `Balance: ${moneyFormat(walletState.currencies![deposit1Currency].balance, { currency: deposit1Currency }).toLocaleString("en-US", { maximumFractionDigits: 10 })}` : "";
+  const onPoolChange = (token: TokenInfo) => {
+    dispatch(actions.Pool.selectPool({ token }));
+  };
 
-  const exchangeRate = 0;
-  const depositRightLabel = "";
-  const deposit1RightLabel = "";
+  const onAddLiquidity = () => {
+
+  };
 
   return (
     <Box display="flex" flexDirection="column" {...rest} className={cls(classes.root, className)}>
-      <CurrencyInput
-        exchangeRate={exchangeRate}
-        rightLabel={depositRightLabel}
-        fixed
-        exclude={deposit1Currency}
-        label="Deposit"
-        name="deposit"
-      >
-        <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">25%</Typography>
-          </Button>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">50%</Typography>
-          </Button>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">75%</Typography>
-          </Button>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">100%</Typography>
-          </Button>
-        </ButtonGroup>
-      </CurrencyInput>
+      <CurrencyInput fixedToZil token={tokenState.tokens[ZIL_TOKEN_NAME]} amount={0} label="Deposit" />
+      <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
+        <Button className={classes.percentageButton}>
+          <Typography variant="button">25%</Typography>
+        </Button>
+        <Button className={classes.percentageButton}>
+          <Typography variant="button">50%</Typography>
+        </Button>
+        <Button className={classes.percentageButton}>
+          <Typography variant="button">75%</Typography>
+        </Button>
+        <Button className={classes.percentageButton}>
+          <Typography variant="button">100%</Typography>
+        </Button>
+      </ButtonGroup>
       {theme.palette.type === "light" ? <PlusSVG className={classes.svg} /> : <PlusSVGDark className={classes.svg} />}
       <CurrencyInput
-        exchangeRate={exchangeRate}
-        exclude={depositCurrency}
-        rightLabel={deposit1RightLabel}
         label="Deposit"
-        name="deposit1"
+        token={poolToken}
+        amount={0}
         className={classes.input}
-      />
+        onCurrencyChange={onPoolChange} />
+      <FancyButton
+        walletRequired
+        className={classes.actionButton}
+        variant="contained"
+        color="primary"
+        fullWidth
+        onClick={onAddLiquidity}>
+        Add Liquidity
+      </FancyButton>
     </Box>
   );
 };

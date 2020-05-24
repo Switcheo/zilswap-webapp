@@ -1,8 +1,12 @@
-import { Backdrop, Dialog, DialogTitle, IconButton, Typography } from "@material-ui/core";
+import { Backdrop, Dialog, DialogTitle, DialogProps, IconButton, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import CloseIcon from "@material-ui/icons/Close";
 import cls from "classnames";
-import React from "react";
+import React, { MouseEvent, SyntheticEvent } from "react";
+
+export interface DialogModalProps extends DialogProps {
+  header?: string;
+};
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -14,9 +18,15 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.grey[500],
   },
 }));
-const DialogModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+const DialogModal: React.FC<DialogModalProps> = (props: DialogModalProps) => {
   const { children, className, header, onClose, ...rest } = props;
   const classes = useStyles();
+
+  const onCloseButton = (e: any) => {
+    if (typeof onClose === "function")
+      onClose(e, "backdropClick");
+  };
+
   return (
     <Dialog
       maxWidth={"md"}
@@ -28,7 +38,7 @@ const DialogModal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       className={cls(classes.root, className)} >
       <DialogTitle disableTypography>
         <Typography variant="h2">{header}</Typography>
-        <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+        <IconButton aria-label="close" className={classes.closeButton} onClick={onCloseButton}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>

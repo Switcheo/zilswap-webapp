@@ -1,6 +1,6 @@
 import { Divider, Typography, makeStyles } from "@material-ui/core";
 import { ContrastBox, KeyValueDisplay } from "app/components";
-import { RootState } from "app/store/types";
+import { RootState, PoolFormState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA } from "app/utils";
 import React from "react";
@@ -71,22 +71,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const ShowAdvanced = (props: any) => {
-  const { showAdvanced, poolValue } = props;
+  const { show } = props;
   const classes = useStyles();
-  const state = useSelector<RootState, { [key: string]: any }>(state => state.pool.values);
-  const { withdrawCurrency, withdraw } = state;
+  const poolState = useSelector<RootState, PoolFormState>(state => state.pool);
 
-  if (!showAdvanced) return null;
+  if (!show) return null;
 
-  return (
-    <ContrastBox className={classes.showAdvanced}>
-      <Typography className={classes.text} variant="body2">You are removing <span className={classes.bold}>{(0).toLocaleString("en-US", { maximumFractionDigits: 10 })} ZIL{withdrawCurrency && ` + ${withdraw} ${withdrawCurrency}`}</span> from the liquidity pool. (<span className={classes.bold}>~{(0).toLocaleString("en-US", { maximumFractionDigits: 10 })}</span> Liquidity tokens)</Typography>
-      <Divider className={classes.divider} />
-      <KeyValueDisplay mt={"22px"} kkey={"Current Total Supply"} value={`${parseFloat(poolValue.tokenReserve).toLocaleString("en-US", { maximumFractionDigits: 10 })} Liquidity Tokens`} />
-      <KeyValueDisplay mt={"22px"} kkey={"Each Pool Token Value"} value={`${1 * poolValue.exchangeRate} ZIL${withdrawCurrency ? ` + ${(parseFloat("0")).toLocaleString("en-US", { maximumFractionDigits: 10 })} ${withdrawCurrency}` : ""}`} />
+  return null;
 
-    </ContrastBox >
-  )
+  // return (
+  //   <ContrastBox className={classes.showAdvanced}>
+  //     <Typography className={classes.text} variant="body2">You are removing <span className={classes.bold}>{(0).toLocaleString("en-US", { maximumFractionDigits: 10 })} ZIL{withdrawCurrency && ` + ${withdraw} ${withdrawCurrency}`}</span> from the liquidity pool. (<span className={classes.bold}>~{(0).toLocaleString("en-US", { maximumFractionDigits: 10 })}</span> Liquidity tokens)</Typography>
+  //     <Divider className={classes.divider} />
+  //     <KeyValueDisplay mt={"22px"} kkey={"Current Total Supply"} value={`${parseFloat(poolValue.tokenReserve).toLocaleString("en-US", { maximumFractionDigits: 10 })} Liquidity Tokens`} />
+  //     <KeyValueDisplay mt={"22px"} kkey={"Each Pool Token Value"} value={`${1 * poolValue.exchangeRate} ZIL${withdrawCurrency ? ` + ${(parseFloat("0")).toLocaleString("en-US", { maximumFractionDigits: 10 })} ${withdrawCurrency}` : ""}`} />
+
+  //   </ContrastBox >
+  // )
 }
 
 export default ShowAdvanced;

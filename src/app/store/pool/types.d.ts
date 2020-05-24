@@ -1,3 +1,6 @@
+import { Pool } from "core/zilswap";
+import { TokenInfo } from "../token/types";
+
 export interface PoolFormState {
   values: {
     [key: string]: any;
@@ -8,11 +11,12 @@ export interface PoolFormState {
   touched: {
     [key: string]: boolean;
   },
-  poolValues: {
-    [key: string]: any;
-  }
+  token: TokenInfo | null,
 }
 
+export interface PoolSelectProps {
+  token: TokenInfo;
+};
 export interface PoolUpdateExtendedPayload {
   key: string;
   value: any;

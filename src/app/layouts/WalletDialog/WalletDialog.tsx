@@ -6,7 +6,6 @@ import { RootState } from "app/store/types";
 import { WalletState } from "app/store/wallet/types";
 import { useMessageSubscriber } from "app/utils";
 import cls from "classnames";
-import { getZilliqa } from "core/zilliqa";
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ConnectedWallet, ConnectOptionType } from "../../../core/wallet/ConnectedWallet";
@@ -37,7 +36,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const theme = useTheme();
   const [error, setError] = useState<string | null>();
   const subscriber = useMessageSubscriber();
-  const wallet = useSelector<RootState, WalletState>(state => state.wallet);
+  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   // const errorCatcher = useErrorCatcher((err: any) => {
   //   if (err) {
   //     if (err === "WALLET_SCRIPT_INJECT_TIMEOUT" || err === "WALLET_NOT_INSTALLED")
@@ -50,7 +49,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   // });
 
   const get_icon = () => {
-    if (wallet.wallet.type !== 1) return MoonletIcon;
+    if (walletState.wallet.type !== 1) return MoonletIcon;
     return theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon;
   }
 
@@ -99,7 +98,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   };
 
   const getDialogHeader = () => {
-    if (wallet.wallet) {
+    if (walletState.wallet) {
       return "Connected Wallet"
     } else if (connectWalletType === null) {
       return "Connect Wallet"
@@ -114,9 +113,9 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           <InputLabel><Typography color="error">{error}</Typography></InputLabel>
         )}
       </DialogContent>
-      {!wallet.wallet && (
+      {!walletState.wallet && (
         <Fragment>
-          {getZilliqa() === undefined && !(connectWalletType === "privateKey") && (
+          {!(connectWalletType === "privateKey") && (
             <ConnectWallet loading={connectWalletType === "moonlet"} onSelectConnectOption={onSelectConnectOption} />
           )}
           {connectWalletType === "privateKey" && (
@@ -127,7 +126,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           )}
         </Fragment>
       )}
-      {wallet.wallet && (
+      {walletState.wallet && (
         <Fragment>
           <DialogContent>
             <ConnectedWalletBox onLogout={() => { setConnectWalletType(null) }} icon={get_icon()} />

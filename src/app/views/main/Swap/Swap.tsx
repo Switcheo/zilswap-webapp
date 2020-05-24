@@ -85,7 +85,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [notification, setNotification] = useState<{ type: string; message: string; } | null>(); //{ type: "success", message: "Transaction Submitted." }
   const formState = useSelector<RootState, SwapFormState>(state => state.swap);
-  const poolValues = useSelector<RootState, any>(state => state.pool.poolValues);
+  const poolState = useSelector<RootState, any>(state => state.pool);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const moneyFormat = useMoneyFormatter({ decPlaces: 10 });
 
@@ -150,7 +150,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           label="You Receive"
           name="receive"
           exclude={formState.values.giveCurrency}>
-          {poolValues && poolValues.exchangeRate && <KeyValueDisplay mt={"22px"} kkey={"Exchange Rate"} value={`1 ${formState.values.giveCurrency} = ${poolValues.exchangeRate || 0} ${formState.values.receiveCurrency}`} />}
+          {/* {poolValues && poolValues.exchangeRate && <KeyValueDisplay mt={"22px"} kkey={"Exchange Rate"} value={`1 ${formState.values.giveCurrency} = ${poolValues.exchangeRate || 0} ${formState.values.receiveCurrency}`} />} */}
         </CurrencyInput>
         <FancyButton
           walletRequired
