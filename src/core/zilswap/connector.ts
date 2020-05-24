@@ -112,6 +112,10 @@ export class ZilswapConnector {
   static addLiquidity = async (props: AddLiquidityProps) => {
     const { zilswap } = getState();
 
+    console.log(props.tokenID);
+    console.log(props.zilAmount.toString());
+    console.log(props.tokenAmount.toString());
+    console.log(props.maxExchangeRateChange);
     const txReceipt = await zilswap.addLiquidity(
       props.tokenID,
       props.zilAmount.toString(),
@@ -124,6 +128,9 @@ export class ZilswapConnector {
   static removeLiquidity = async (props: RemoveLiquidityProps) => {
     const { zilswap } = getState();
 
+    console.log(props.tokenID);
+    console.log(props.contributionAmount.toString());
+    console.log(props.maxExchangeRateChange);
     const txReceipt = await zilswap.removeLiquidity(
       props.tokenID,
       props.contributionAmount.toString(),

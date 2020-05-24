@@ -52,13 +52,14 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   token: TokenInfo | null;
   amount: BigNumber;
   fixedToZil?: boolean;
+  showContribution?: boolean;
 
   onCurrencyChange?: (token: TokenInfo) => void;
   onAmountChange?: (value: string) => void;
 };
 
 const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
-  const { children, label, fixedToZil, amount, onAmountChange, onCurrencyChange, token, className } = props;
+  const { children, label, fixedToZil, amount, showContribution, onAmountChange, onCurrencyChange, token, className } = props;
   const classes = useStyles();
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5 });
   const [tokenBalance, setTokenBalance] = useState<BigNumber | null>(null);
@@ -69,14 +70,19 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     if (!walletState.wallet || !token)
       return setTokenBalance(null);
 
-    const wallet = walletState.wallet!;
-    const tokenBalance = token!.balances[wallet.addressInfo.byte20.toLowerCase()];
-    if (!tokenBalance)
-      return setTokenBalance(null);
-    
-    setTokenBalance(new BigNumber(tokenBalance!.toString()));
+    if (!showContribution) {
+      const wallet = walletState.wallet!;
+      const tokenBalance = token!.balances[wallet.addressInfo.byte20.toLowerCase()];
+      if (!tokenBalance)
+        return setTokenBalance(null);
+  
+      setTokenBalance(new BigNumber(tokenBalance!.toString()));
+    } else {
+      if (!token.pool) return setTokenBalance(null);
+      setTokenBalance(token.pool!.userContribution);
+    }
 
-  }, [walletState.wallet, token]);
+  }, [walletState.wallet, token, showContribution]);
 
   const onCurrencySelect = (token: TokenInfo) => {
     if (typeof onCurrencyChange === "function")

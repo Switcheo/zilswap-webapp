@@ -67,7 +67,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       if (!poolToken.pool) return;
       setFormState({
         zilAmount: value,
-        tokenAmount: value.div(poolToken.pool.exchangeRate).decimalPlaces(12)
+        tokenAmount: value.div(poolToken.pool.exchangeRate).decimalPlaces(poolToken.decimals)
       })
     }
   };
@@ -78,7 +78,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     if (poolToken) {
       if (!poolToken.pool) return;
       setFormState({
-        zilAmount: value.times(poolToken.pool.exchangeRate).decimalPlaces(12),
+        zilAmount: value.times(poolToken.pool.exchangeRate).decimalPlaces(poolToken.decimals),
         tokenAmount: value,
       })
     }
@@ -135,7 +135,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         onAmountChange={onTokenChange}
         onCurrencyChange={onPoolChange} />
       <PoolDetail token={poolToken || undefined} />
-      <Typography>{error?.message}</Typography>
+      <Typography color="error">{error?.message}</Typography>
       <FancyButton
         loading={loading}
         walletRequired
