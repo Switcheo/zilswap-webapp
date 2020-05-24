@@ -1,9 +1,10 @@
+import { TxReceipt } from "@zilliqa-js/account";
 import { Contract } from "@zilliqa-js/contract";
+import { Zilliqa } from "@zilliqa-js/zilliqa";
 import BigNumber from "bignumber.js";
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
 import { Zilswap } from "zilswap-sdk";
-import { Network, APIS } from "zilswap-sdk/lib/constants";
-import { Zilliqa } from "@zilliqa-js/zilliqa";
+import { APIS, Network } from "zilswap-sdk/lib/constants";
 
 
 export interface ConnectProps {
@@ -22,6 +23,13 @@ export interface RemoveLiquidityProps {
   tokenID: string;
   contributionAmount: BigNumber;
   maxExchangeRateChange?: number;
+}
+export interface SwapProps {
+  exactOf: "in" | "out";
+  tokenInID: string;
+  tokenOutID: string;
+  amount: BigNumber;
+  maxAdditionalSlippage?: number;
 }
 
 /**
@@ -79,6 +87,13 @@ const initializeForWallet = async (wallet: ConnectedWallet): Promise<Zilswap> =>
   }
 };
 
+const handleTxReceipt = (txReceipt: TxReceipt) => {
+  // @ts-ignore
+  if (txReceipt.exceptions?.length) {
+    // @ts-ignore
+    throw txReceipt.exceptions[0];
+  }
+};
 export class ZilswapConnector {
   static connect = async (props: ConnectProps) => {
     await initializeForWallet(props.wallet);
@@ -121,6 +136,7 @@ export class ZilswapConnector {
       props.zilAmount.toString(),
       props.tokenAmount.toString(),
       props.maxExchangeRateChange);
+    handleTxReceipt(txReceipt);
 
     return txReceipt;
   };
@@ -135,6 +151,28 @@ export class ZilswapConnector {
       props.tokenID,
       props.contributionAmount.toString(),
       props.maxExchangeRateChange);
+    handleTxReceipt(txReceipt);
+
+    return txReceipt;
+  };
+
+  static swap = async (props: SwapProps) => {
+    const { zilswap } = getState();
+
+    const swapFunction = props.exactOf === "in" ?
+      zilswap.swapWithExactInput.bind(zilswap) :
+      zilswap.swapWithExactOutput.bind(zilswap);
+
+    console.log(props.tokenInID);
+    console.log(props.tokenOutID);
+    console.log(props.amount.toString());
+    console.log(props.maxAdditionalSlippage);
+    const txReceipt = await swapFunction(
+      props.tokenInID,
+      props.tokenOutID,
+      props.amount.toString(),
+      props.maxAdditionalSlippage);
+    handleTxReceipt(txReceipt);
 
     return txReceipt;
   };

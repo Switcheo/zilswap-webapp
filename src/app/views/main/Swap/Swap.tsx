@@ -5,9 +5,10 @@ import { CurrencyInput, FancyButton, KeyValueDisplay, NotificationBox } from "ap
 import MainCard from "app/layouts/MainCard";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useMoneyFormatter } from "app/utils";
+import { useAsyncTask, useMoneyFormatter } from "app/utils";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
+import { ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { ShowAdvanced } from "./components";
@@ -79,8 +80,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 const BN_ONE = new BigNumber(1);
 
+type ExactOfOptions = "in" | "out";
+
 type WithdrawFormState = {
   percentage: BigNumber;
+  exactOf: ExactOfOptions;
   poolToken?: TokenInfo;
   inToken?: TokenInfo;
   inAmount: BigNumber;
@@ -88,9 +92,18 @@ type WithdrawFormState = {
   outAmount: BigNumber;
   exchangeRate: BigNumber;
 };
+type CalculateAmountProps = {
+  exactOf?: ExactOfOptions;
+  inToken?: TokenInfo;
+  inAmount?: BigNumber;
+  outToken?: TokenInfo;
+  outAmount?: BigNumber;
+  exchangeRate?: BigNumber;
+};
 
 const initialState: WithdrawFormState = {
   percentage: new BigNumber(0.005),
+  exactOf: "in",
   inAmount: new BigNumber(0),
   outAmount: new BigNumber(0),
   exchangeRate: BN_ONE,
@@ -101,6 +114,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const classes = useStyles();
   const [formState, setFormState] = useState<WithdrawFormState>(initialState);
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
+  const [runSwap, loading, error] = useAsyncTask("swap");
   const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -113,7 +127,12 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       exchangeRate,
       inToken: formState.outToken,
       outToken: formState.inToken,
-      inAmount: formState.outAmount.times(exchangeRate).decimalPlaces(inToken?.decimals || 0),
+      ...formState.exactOf === "in" && {
+        outAmount: formState.inAmount.times(exchangeRate).decimalPlaces(outToken?.decimals || 0),
+      },
+      ...formState.exactOf === "out" && {
+        inAmount: formState.outAmount.div(exchangeRate).decimalPlaces(inToken?.decimals || 0),
+      },
     });
   };
 
@@ -126,23 +145,44 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     onOutAmountChange(amount.shiftedBy(-outToken.decimals).toString());
   };
 
+  const calculateAmounts = (props: CalculateAmountProps = {}) => {
+    let _inAmount: BigNumber = props.inAmount || formState.inAmount;
+    let _outAmount: BigNumber = props.outAmount || formState.outAmount;
+    const _inToken: TokenInfo | undefined = props.inToken || formState.inToken;
+    const _outToken: TokenInfo | undefined = props.outToken || formState.outToken;
+    const _exactOf: ExactOfOptions = props.exactOf || formState.exactOf;
+    const _exchangeRate: BigNumber = props.exchangeRate || formState.exchangeRate;
+
+    if (_exactOf === "in")
+      _outAmount = _inAmount.times(_exchangeRate).decimalPlaces(_outToken?.decimals || 0);
+    else
+      _inAmount = _outAmount.div(_exchangeRate).decimalPlaces(_inToken?.decimals || 0);
+
+    return {
+      inAmount: _inAmount,
+      outAmount: _outAmount,
+      inToken: _inToken,
+      outToken: _outToken,
+      exactOf: _exactOf,
+      exchangeRate: _exchangeRate,
+    };
+  };
+
   const onOutAmountChange = (amount: string = "0") => {
-    const value = new BigNumber(amount);
+    const outAmount = new BigNumber(amount);
     if (formState.exchangeRate) {
       setFormState({
         ...formState,
-        outAmount: value,
-        inAmount: value.times(formState.exchangeRate).decimalPlaces(inToken?.decimals || 0)
+        ...calculateAmounts({ exactOf: "out", outAmount }),
       });
     }
   };
   const onInAmountChange = (amount: string = "0") => {
-    const value = new BigNumber(amount);
+    const inAmount = new BigNumber(amount);
     if (formState.exchangeRate) {
       setFormState({
         ...formState,
-        inAmount: value,
-        outAmount: value.div(formState.exchangeRate).decimalPlaces(outToken?.decimals || 0)
+        ...calculateAmounts({ exactOf: "in", inAmount }),
       });
     }
   };
@@ -160,8 +200,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
     setFormState({
       ...formState,
-      poolToken, exchangeRate,
-      inToken, outToken: token,
+      poolToken,
+      ...calculateAmounts({ exchangeRate, inToken, outToken: token }),
     });
   };
   const onInCurrencyChange = (token: TokenInfo) => {
@@ -178,8 +218,27 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
     setFormState({
       ...formState,
-      poolToken, exchangeRate,
-      outToken, inToken: token,
+      poolToken,
+      ...calculateAmounts({ exchangeRate, inToken: token, outToken }),
+    });
+  };
+
+  const onSwap = () => {
+    const { outToken, inToken, inAmount, outAmount, exactOf } = formState;
+    if (!inToken || !outToken) return;
+    if (loading) return;
+
+    runSwap(async () => {
+
+      const amount = exactOf === "in" ? inAmount : outAmount;
+
+      const txReceipt = await ZilswapConnector.swap({
+        tokenInID: inToken.symbol,
+        tokenOutID: outToken.symbol,
+        amount, exactOf,
+      });
+
+      console.log({ txReceipt });
     });
   };
 
@@ -190,11 +249,11 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       <Box display="flex" flexDirection="column" className={classes.container}>
         <CurrencyInput
           label="You Give"
-          token={outToken || null}
-          amount={outAmount}
-          disabled={!outToken}
-          onAmountChange={onOutAmountChange}
-          onCurrencyChange={onOutCurrencyChange} />
+          token={inToken || null}
+          amount={inAmount}
+          disabled={!inToken}
+          onAmountChange={onInAmountChange}
+          onCurrencyChange={onInCurrencyChange} />
         <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
           <Button onClick={() => onPercentage(0.25)} className={classes.percentageButton}>
             <Typography variant="button">25%</Typography>
@@ -216,22 +275,26 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         </Box>
         <CurrencyInput
           label="You Receive"
-          token={inToken || null}
-          amount={inAmount}
-          disabled={!inToken}
-          onAmountChange={onInAmountChange}
-          onCurrencyChange={onInCurrencyChange} />
+          token={outToken || null}
+          amount={outAmount}
+          disabled={!outToken}
+          onAmountChange={onOutAmountChange}
+          onCurrencyChange={onOutCurrencyChange} />
         {!!(inToken && outToken) && (
           <KeyValueDisplay className={classes.labelExchangeRate}
             kkey="Exchange Rate"
-            value={`1 ${outToken?.symbol || ""} = ${moneyFormat(exchangeRate || 0, { maxFractionDigits: inToken?.decimals, symbol: inToken?.symbol })}`} />
+            value={`1 ${inToken?.symbol || ""} = ${moneyFormat(exchangeRate || 0, { maxFractionDigits: outToken?.decimals, symbol: outToken?.symbol })}`} />
         )}
 
+        <Typography color="error">{error?.message}</Typography>
+
         <FancyButton walletRequired fullWidth
+          loading={loading}
           className={classes.actionButton}
           variant="contained"
           color="primary"
-          disabled={!inToken || !outToken}>
+          disabled={!inToken || !outToken}
+          onClick={onSwap}>
           Swap
         </FancyButton>
         <Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
