@@ -1,8 +1,8 @@
-import { Backdrop, Dialog, DialogTitle, DialogProps, IconButton, Typography } from "@material-ui/core";
+import { Backdrop, Dialog, DialogProps, DialogTitle, IconButton, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import CloseIcon from "@material-ui/icons/Close";
 import cls from "classnames";
-import React, { MouseEvent, SyntheticEvent } from "react";
+import React from "react";
 
 export interface DialogModalProps extends DialogProps {
   header?: string;

@@ -1,13 +1,17 @@
 
-import { Box, ButtonGroup, Button, Typography, InputLabel, useTheme } from "@material-ui/core";
+import { Box, Button, ButtonGroup, InputLabel, Typography, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { ContrastBox, CurrencyInput, FancyButton } from "app/components";
+import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React from "react";
-import CurrencyInput from "../CurrencyInput";
+import React, { useState } from "react";
+import { ShowAdvanced } from "./components";
 import { ReactComponent as MinusSVG } from "./minus_pool.svg";
 import { ReactComponent as MinusSVGDark } from "./minus_pool_dark.svg";
-import { ContrastBox } from "app/components";
-import { AppTheme } from "app/theme/types";
+import { RootState, TokenInfo } from "app/store/types";
+import { useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -39,15 +43,28 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     textAlign: "right",
     color: theme.palette.text?.secondary,
     marginBottom: 20
-  }
+  },
+  advanceDetails: {
+    marginBottom: 26,
+    justifyContent: "center",
+    alignItems: "center",
+    display: "flex",
+    color: theme.palette.text!.secondary,
+    cursor: "pointer"
+  },
+  primaryColor: {
+    color: theme.palette.primary.main
+  },
 }));
 const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const theme = useTheme<AppTheme>();
   return (
     <Box display="flex" flexDirection="column"  {...rest} className={cls(classes.root, className)}>
-      <CurrencyInput label="Remove" token={null} amount={0} />
+      <CurrencyInput label="Remove" token={poolToken} amount={0} />
       <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
         <Button className={classes.percentageButton}>
           <Typography variant="button">25%</Typography>
@@ -67,6 +84,22 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       <ContrastBox className={classes.readOnly}>
         <Typography>0.00</Typography>
       </ContrastBox>
+      <FancyButton
+        walletRequired
+        className={classes.actionButton}
+        variant="contained"
+        color="primary"
+        fullWidth>
+        Remove Liquidity
+      </FancyButton>
+
+      <Typography
+        variant="body2"
+        className={cls(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })}
+        onClick={() => setShowAdvanced(!showAdvanced)}>
+        Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+      </Typography>
+      <ShowAdvanced show={showAdvanced} />
     </Box>
   );
 };

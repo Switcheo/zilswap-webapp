@@ -1,17 +1,15 @@
 import { Box, Button, ButtonGroup, Typography, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { CurrencyInput, FancyButton } from "app/components";
+import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
-import { WalletState } from "app/store/wallet/types";
-import { useMoneyFormatter } from "app/utils";
+import { ZIL_TOKEN_NAME } from "app/utils/contants";
 import cls from "classnames";
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import CurrencyInput from "../CurrencyInput";
+import { useDispatch, useSelector } from "react-redux";
+import PoolDetail from "../PoolDetail";
 import { ReactComponent as PlusSVG } from "./plus_pool.svg";
 import { ReactComponent as PlusSVGDark } from "./plus_pool_dark.svg";
-import { FancyButton } from "app/components";
-import { actions } from "app/store";
-import { ZIL_TOKEN_NAME } from "app/utils/contants";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -47,9 +45,8 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
-  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-
   const onPoolChange = (token: TokenInfo) => {
+    if (token.symbol === "ZIL") return;
     dispatch(actions.Pool.selectPool({ token }));
   };
 
@@ -81,6 +78,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         amount={0}
         className={classes.input}
         onCurrencyChange={onPoolChange} />
+      <PoolDetail token={poolToken || undefined} />
       <FancyButton
         walletRequired
         className={classes.actionButton}

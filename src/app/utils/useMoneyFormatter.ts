@@ -37,12 +37,13 @@ const formatter = (inputNumber: BigNumber | number | string = 0, opts: MoneyForm
   const absValue = number.abs();
   const integers = absValue.toFixed(0);
   const firstThouSepIndex = integers.length > 3 ? integers.length % 3 : 0;
-  const decimals = absValue.toFixed(decPlaces).replace(/^.*\./g, "");
+  let decimals = absValue.toFixed(decPlaces).replace(/^.*\./g, "").slice(0, maxFractionDigits).replace(/0+$/, "");
+  if (decimals === "") decimals = "000".slice(0, maxFractionDigits);
 
   return (positive ? "" : "+") +
     (firstThouSepIndex ? integers.substr(0, firstThouSepIndex) + thouSep : "") +
     integers.substr(firstThouSepIndex).replace(/(\decSep{3})(?=\decSep)/g, "$1" + thouSep) +
-    (decPlaces ? decSep + decimals.slice(0, maxFractionDigits) : "") +
+    (decPlaces ? decSep + decimals : "") +
     (showCurrency ? ` ${symbol} ` : "");
 };
 
