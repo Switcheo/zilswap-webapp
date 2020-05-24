@@ -2,7 +2,7 @@ import { Box, Button, ButtonGroup, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { KeyValueDisplay, NotificationBox } from "app/components";
+import { KeyValueDisplay, NotificationBox, FancyButton } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { PoolFormState } from "app/store/pool/types";
@@ -80,15 +80,11 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
             <Button
               onClick={() => onTypeChange("remove")}
               variant={type === "remove" ? "contained" : "outlined"}
-              className={classes.addRemoveButton}
-            >
+              className={classes.addRemoveButton}>
               Remove
               </Button>
           </ButtonGroup>
-          <Button
-            startIcon={<PlusSVG />}
-            onClick={() => setShowCreatePool(true)}
-          >
+          <Button startIcon={<PlusSVG />} onClick={() => setShowCreatePool(true)}>
             Create Pool
           </Button>
         </Box>
@@ -97,17 +93,20 @@ const Pool: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         {/* <KeyValueDisplay kkey={"Exchange Rate"} value={(walletState.currencies![currency] && walletState.currencies![currency].exchangeRate) || "-"} mb="8px" />
         <KeyValueDisplay kkey={"Current Pool Size"} value={(walletState.currencies![currency] && walletState.currencies![currency].totalContribution?.toFixed(10)) || "-"} mb="8px" />
         <KeyValueDisplay kkey={"Your Pool Share (%)"} value={(walletState.currencies![currency] && walletState.currencies![currency].contributionPercentage?.toFixed(10)) || "-"} /> */}
-        <Button
+        <FancyButton
+          walletRequired
           className={classes.actionButton}
           variant="contained"
           color="primary"
           fullWidth
-          disabled={!walletState.wallet}
-          onClick={() => { }}
-        >{type === "add" ? "Add Liquidity" : "Remove Liquidity"}</Button>
-        {type === "remove" && (<Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
-          Advanced Details{showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        </Typography>)}
+          onClick={() => { }}>
+          {type === "add" ? "Add Liquidity" : "Remove Liquidity"}
+        </FancyButton>
+        {type === "remove" && (
+          <Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
+            Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          </Typography>
+        )}
       </Box>
       {type === "remove" && (
         <ShowAdvanced

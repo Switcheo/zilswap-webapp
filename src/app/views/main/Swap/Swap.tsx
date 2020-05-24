@@ -8,8 +8,7 @@ import { SwapFormState } from "app/store/swap/types";
 import { RootState } from "app/store/types";
 import { WalletState } from "app/store/wallet/types";
 import { AppTheme } from "app/theme/types";
-import { useMoneyFormatter, useTaskSubscriber } from "app/utils";
-import { LoadingKeys } from "app/utils/contants";
+import { useMoneyFormatter } from "app/utils";
 import cls from "classnames";
 import Decimal from "decimal.js";
 import React, { useState } from "react";
@@ -82,13 +81,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
-  const [loadingConnectWallet] = useTaskSubscriber(...LoadingKeys.connectWallet);
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [notification, setNotification] = useState<{ type: string; message: string; } | null>(); //{ type: "success", message: "Transaction Submitted." }
   const formState = useSelector<RootState, SwapFormState>(state => state.swap);
   const poolValues = useSelector<RootState, any>(state => state.pool.poolValues);
-  const wallet = useSelector<RootState, WalletState>(state => state.wallet);
+  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const moneyFormat = useMoneyFormatter({ decPlaces: 10 });
 
   const dispatch = useDispatch();
@@ -154,30 +152,18 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           exclude={formState.values.giveCurrency}>
           {poolValues && poolValues.exchangeRate && <KeyValueDisplay mt={"22px"} kkey={"Exchange Rate"} value={`1 ${formState.values.giveCurrency} = ${poolValues.exchangeRate || 0} ${formState.values.receiveCurrency}`} />}
         </CurrencyInput>
-        {!wallet.wallet && (
-          <FancyButton
-            loading={loadingConnectWallet}
-            className={classes.actionButton}
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={onConnectWallet}>
-            Connect Wallet
+        <FancyButton
+          walletRequired
+          className={classes.actionButton}
+          variant="contained"
+          color="primary"
+          fullWidth
+          disabled={!(formState.values.give && formState.values.receive)}
+          onClick={onConnectWallet}>
+          Swap
           </FancyButton>
-        )}
-        {wallet.wallet && (
-          <FancyButton
-            className={classes.actionButton}
-            variant="contained"
-            color="primary"
-            fullWidth
-            disabled={!(formState.values.give && formState.values.receive)}
-            onClick={onConnectWallet}>
-            Swap
-          </FancyButton>
-        )}
         <Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
-          Advanced Details{showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </Typography>
       </Box>
       <ShowAdvanced
