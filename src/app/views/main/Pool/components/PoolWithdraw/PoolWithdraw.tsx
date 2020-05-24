@@ -62,6 +62,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.text?.secondary,
     marginBottom: 20
   },
+  previewAmount: {
+    fontSize: 20,
+    lineHeight: "24px",
+  },
   advanceDetails: {
     marginTop: theme.spacing(6),
     marginBottom: theme.spacing(3),
@@ -175,8 +179,9 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
         <PoolIcon type="minus" />
         <InputLabel>You Receive (Estimate)</InputLabel>
         <ContrastBox className={classes.readOnly}>
-          <Typography>
-            {formatMoney(formState.zilAmount, zilFormatOpts)} + {formatMoney(formState.tokenAmount, formatOpts)}
+          <Typography className={classes.previewAmount}>
+            <span>{formatMoney(formState.zilAmount, zilFormatOpts)}</span> 
+            <span> + {formatMoney(formState.tokenAmount, formatOpts)}</span>
           </Typography>
         </ContrastBox>
 

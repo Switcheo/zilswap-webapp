@@ -43,7 +43,7 @@ const formatter = (inputNumber: BigNumber | number | string = 0, opts: MoneyForm
 
   return (positive ? "" : "+") +
     (firstThouSepIndex ? integers.substr(0, firstThouSepIndex) + thouSep : "") +
-    integers.substr(firstThouSepIndex).replace(/(\decSep{3})(?=\decSep)/g, "$1" + thouSep) +
+    integers.substr(firstThouSepIndex).replace(/(\d{3})(?=\d)/g, "$1" + thouSep) +
     (decPlaces ? decSep + decimals : "") +
     (showCurrency ? ` ${symbol} ` : "");
 };
