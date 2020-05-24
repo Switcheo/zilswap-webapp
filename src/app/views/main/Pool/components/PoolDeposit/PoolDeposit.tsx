@@ -1,18 +1,17 @@
-import { Box, Button, ButtonGroup, Typography, useTheme } from "@material-ui/core";
+import { Box, Button, ButtonGroup, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { CurrencyInput, FancyButton } from "app/components";
 import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
+import { useAsyncTask } from "app/utils";
 import { ZIL_TOKEN_NAME } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
+import { ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PoolDetail from "../PoolDetail";
-import { ReactComponent as PlusSVG } from "./plus_pool.svg";
-import { ReactComponent as PlusSVGDark } from "./plus_pool_dark.svg";
-import { ZilswapConnector } from "core/zilswap";
-import { useAsyncTask } from "app/utils";
+import PoolIcon from "../PoolIcon";
 
 const initialFormState = {
   zilAmount: new BigNumber(0),
@@ -57,7 +56,6 @@ const useStyles = makeStyles(theme => ({
 const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { className, ...rest } = props;
   const classes = useStyles();
-  const theme = useTheme();
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const [runAddLiquidity, loading, error] = useAsyncTask("poolAddLiquidity");
   const dispatch = useDispatch();
@@ -135,7 +133,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
             <Typography variant="button">100%</Typography>
           </Button>
         </ButtonGroup>
-        {theme.palette.type === "light" ? <PlusSVG className={classes.svg} /> : <PlusSVGDark className={classes.svg} />}
+        <PoolIcon type="plus" />
         <CurrencyInput
           label="Deposit"
           token={poolToken}

@@ -1,5 +1,5 @@
 
-import { Box, Button, ButtonGroup, InputLabel, Typography, useTheme, Divider } from "@material-ui/core";
+import { Box, Button, ButtonGroup, Divider, InputLabel, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -7,16 +7,15 @@ import { ContrastBox, CurrencyInput, FancyButton, KeyValueDisplay } from "app/co
 import { actions } from "app/store";
 import { RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask, useMoneyFormatter, hexToRGBA } from "app/utils";
+import { hexToRGBA, useAsyncTask, useMoneyFormatter } from "app/utils";
+import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ReactComponent as MinusSVG } from "./minus_pool.svg";
-import { ReactComponent as MinusSVGDark } from "./minus_pool_dark.svg";
-import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import PoolDetail from "../PoolDetail";
+import PoolIcon from "../PoolIcon";
 
 const initialFormState = {
   zilAmount: new BigNumber(0),
@@ -99,7 +98,6 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const [runRemoveLiquidity, loading, error] = useAsyncTask("poolRemoveLiquidity");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
-  const theme = useTheme<AppTheme>();
   const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 5 });
 
   const zilFormatOpts: MoneyFormatterOptions = {
@@ -172,7 +170,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
             <Typography variant="button">100%</Typography>
           </Button>
         </ButtonGroup>
-        {theme.palette.type === "light" ? <MinusSVG className={classes.svg} /> : <MinusSVGDark className={classes.svg} />}
+        <PoolIcon type="minus" />
         <InputLabel>You Receive (Estimate)</InputLabel>
         <ContrastBox className={classes.readOnly}>
           <Typography>
