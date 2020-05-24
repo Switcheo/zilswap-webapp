@@ -27,6 +27,11 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 4,
     width: 90,
     padding: theme.spacing(1.5, 4),
+    "&.MuiButton-contained": {
+      borderWidth: 1,
+      borderStyle: "solid",
+      borderColor: theme.palette.primary.main,
+    },
   },
   actionButton: {
     marginTop: 45,
