@@ -1,12 +1,11 @@
 import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import cls from "classnames";
-import React, { useEffect, useState } from "react";
 import { KeyValueDisplay } from "app/components";
 import { TokenInfo } from "app/store/types";
-import { Pool, ZilswapConnector } from "core/zilswap";
 import { useMoneyFormatter } from "app/utils";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
+import cls from "classnames";
+import React from "react";
 
 export interface PoolDetailProps extends BoxProps {
   token?: TokenInfo;
@@ -18,7 +17,6 @@ const useStyles = makeStyles(theme => ({
 }));
 const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
   const { children, className, token, ...rest } = props;
-  const [pool, setPool] = useState<Pool | undefined>();
   const classes = useStyles();
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5 });
 
@@ -33,30 +31,25 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
     showCurrency: true,
   };
 
-  useEffect(() => {
-    if (!token) return setPool(undefined);
-    const pool = ZilswapConnector.getPool(token.address) || undefined;
-    setPool(pool);
-  }, [token]);
-
   const getExchangeRateValue = () => {
-    if (!pool || !token) return "-";
-    const rate = pool.exchangeRate;
+    if (!token?.pool) return "-";
+    const rate = token.pool.exchangeRate;
     return `1 ZIL = ${rate.toNumber().toLocaleString("en-US", { maximumFractionDigits: 5 })} ${token!.symbol}`;
   };
   const getPoolSizeValue = () => {
-    if (!pool || !token) return "-";
-    const { tokenReserve, zilReserve } = pool;
-    return `${moneyFormat(zilReserve, zilFormatOpts)} + ${moneyFormat(tokenReserve, formatOpts)}`;
+    if (!token?.pool) return "-";
+    const { zilReserve, tokenReserve } = token.pool;
+    return `${moneyFormat(zilReserve, { ...zilFormatOpts, compression: 0 })} + ${moneyFormat(tokenReserve, { ...formatOpts, compression: 0 })}`;
   };
   const getShareValue = () => {
-    if (!pool || !token) return "-";
-    const { userContribution } = pool;
-    return `${moneyFormat(0, zilFormatOpts)} + ${moneyFormat(userContribution, formatOpts)}`;
+    if (!token?.pool) return "-";
+    const { userContribution, exchangeRate } = token.pool;
+    const zilContribution = userContribution.times(exchangeRate);
+    return `${moneyFormat(zilContribution, zilFormatOpts)} + ${moneyFormat(userContribution, formatOpts)}`;
   };
   const getUserPoolShare = () => {
-    if (!pool || !token) return "%";
-    const { contributionPercentage } = pool;
+    if (!token?.pool) return "%";
+    const { contributionPercentage } = token.pool;
     return `${contributionPercentage.toFixed(3)} %`;
   };
 

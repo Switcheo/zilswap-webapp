@@ -50,7 +50,7 @@ const useStyles = makeStyles(theme => ({
 export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement> {
   label: string;
   token: TokenInfo | null;
-  amount: number;
+  amount: BigNumber;
   fixedToZil?: boolean;
 
   onCurrencyChange?: (token: TokenInfo) => void;
@@ -107,7 +107,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
       <OutlinedInput
         className={classes.inputRow}
         placeholder={"0.00"}
-        value={amount}
+        value={amount.toString()}
         onChange={onChange}
         type="number"
         inputProps={{ className: classes.input }}

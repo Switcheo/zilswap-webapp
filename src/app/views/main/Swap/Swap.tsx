@@ -13,6 +13,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ShowAdvanced } from "./components";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
+import BigNumber from "bignumber.js";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -116,7 +117,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     <MainCard {...rest} hasNotification={notification} className={cls(classes.root, className)}>
       <NotificationBox notification={notification} setNotification={setNotification} />
       <Box display="flex" flexDirection="column" className={classes.container}>
-        <CurrencyInput token={null} amount={0} label="You Give" />
+        <CurrencyInput token={null} amount={new BigNumber(0)} label="You Give" />
         <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
           <Button onClick={() => onPercentage(0.25)} className={classes.percentageButton}>
             <Typography variant="button">25%</Typography>
@@ -136,7 +137,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
             <SwapSVG />
           </IconButton>
         </Box>
-        <CurrencyInput token={null} amount={0} label="You Receive" />
+        <CurrencyInput token={null} amount={new BigNumber(0)} label="You Receive" />
         <FancyButton
           walletRequired
           className={classes.actionButton}

@@ -12,6 +12,7 @@ import { ReactComponent as MinusSVG } from "./minus_pool.svg";
 import { ReactComponent as MinusSVGDark } from "./minus_pool_dark.svg";
 import { RootState, TokenInfo } from "app/store/types";
 import { useSelector } from "react-redux";
+import BigNumber from "bignumber.js";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -64,7 +65,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const theme = useTheme<AppTheme>();
   return (
     <Box display="flex" flexDirection="column"  {...rest} className={cls(classes.root, className)}>
-      <CurrencyInput label="Remove" token={poolToken} amount={0} />
+      <CurrencyInput label="Remove" token={poolToken} amount={new BigNumber(0)} />
       <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
         <Button className={classes.percentageButton}>
           <Typography variant="button">25%</Typography>

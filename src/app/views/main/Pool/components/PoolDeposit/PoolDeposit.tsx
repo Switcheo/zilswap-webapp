@@ -4,12 +4,20 @@ import { CurrencyInput, FancyButton } from "app/components";
 import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { ZIL_TOKEN_NAME } from "app/utils/contants";
+import BigNumber from "bignumber.js";
 import cls from "classnames";
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PoolDetail from "../PoolDetail";
 import { ReactComponent as PlusSVG } from "./plus_pool.svg";
 import { ReactComponent as PlusSVGDark } from "./plus_pool_dark.svg";
+import { ZilswapConnector } from "core/zilswap";
+import { useAsyncTask } from "app/utils";
+
+const initialFormState = {
+  zilAmount: new BigNumber(0),
+  tokenAmount: new BigNumber(0),
+};
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -41,6 +49,8 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const { className, ...rest } = props;
   const classes = useStyles();
   const theme = useTheme();
+  const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
+  const [runAddLiquidity, loading, error] = useAsyncTask("poolAddLiquidity");
   const dispatch = useDispatch();
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
@@ -50,13 +60,58 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     dispatch(actions.Pool.selectPool({ token }));
   };
 
-  const onAddLiquidity = () => {
+  const onZilChange = (amount: string = "0") => {
+    console.log(amount);
+    const value = new BigNumber(amount);
+    if (poolToken) {
+      if (!poolToken.pool) return;
+      setFormState({
+        zilAmount: value,
+        tokenAmount: value.div(poolToken.pool.exchangeRate).decimalPlaces(12)
+      })
+    }
+  };
 
+  const onTokenChange = (amount: string = "0") => {
+    console.log(amount);
+    const value = new BigNumber(amount);
+    if (poolToken) {
+      if (!poolToken.pool) return;
+      setFormState({
+        zilAmount: value.times(poolToken.pool.exchangeRate).decimalPlaces(12),
+        tokenAmount: value,
+      })
+    }
+  };
+
+  const onAddLiquidity = () => {
+    if (!poolToken) return;
+    if (loading) return;
+
+    runAddLiquidity(async () => {
+      const tokenAddress = poolToken.address;
+      const txReceipt = await ZilswapConnector.addLiquidity({
+        tokenAmount: formState.tokenAmount,
+        zilAmount: formState.zilAmount,
+        tokenID: tokenAddress,
+      });
+
+      const updatedPool = ZilswapConnector.getPool(tokenAddress) || undefined;
+      dispatch(actions.Token.update({
+        address: tokenAddress,
+        pool: updatedPool,
+      }));
+      console.log({ txReceipt });
+    });
   };
 
   return (
     <Box display="flex" flexDirection="column" {...rest} className={cls(classes.root, className)}>
-      <CurrencyInput fixedToZil token={tokenState.tokens[ZIL_TOKEN_NAME]} amount={0} label="Deposit" />
+      <CurrencyInput fixedToZil
+        token={tokenState.tokens[ZIL_TOKEN_NAME]}
+        amount={formState.zilAmount}
+        onAmountChange={onZilChange}
+        label="Deposit" />
       <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
         <Button className={classes.percentageButton}>
           <Typography variant="button">25%</Typography>
@@ -75,11 +130,14 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       <CurrencyInput
         label="Deposit"
         token={poolToken}
-        amount={0}
+        amount={formState.tokenAmount}
         className={classes.input}
+        onAmountChange={onTokenChange}
         onCurrencyChange={onPoolChange} />
       <PoolDetail token={poolToken || undefined} />
+      <Typography>{error?.message}</Typography>
       <FancyButton
+        loading={loading}
         walletRequired
         className={classes.actionButton}
         variant="contained"

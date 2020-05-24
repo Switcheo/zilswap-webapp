@@ -24,11 +24,13 @@ export interface TokenState {
 };
 
 export interface TokenUpdateProps {
-  symbol: string;
-  name: string;
-  decimals: number;
-  init_supply: BN;
   address: string;
+
+  symbol?: string;
+  name?: string;
+  decimals?: number;
+  init_supply?: BN;
+  pool?: Pool;
 };
 
 export interface TokenInitProps {

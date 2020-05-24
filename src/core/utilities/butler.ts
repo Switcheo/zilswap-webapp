@@ -3,10 +3,10 @@ import { BN } from "@zilliqa-js/util";
 import { actions } from "app/store";
 import { RootState, TokenBalanceMap, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
+import { ConnectedWallet } from "core/wallet";
 import { TokenDetails, ZilswapConnector } from "core/zilswap";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ConnectedWallet } from "core/wallet";
 
 export type AppButlerProps = {
 
@@ -51,7 +51,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
     const tokens: { [index: string]: TokenInfo } = {};
     zilswapTokens.map(mapZilswapToken).forEach(token => tokens[token.address] = token);
-    
+
     const wallet: ConnectedWallet = walletState.wallet!;
     // inject ZIL as a token
     tokens["zil"] = {
@@ -87,7 +87,6 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
           name: contractInit.name,
           pool: ZilswapConnector.getPool(zilswapToken.address) || undefined,
         };
-
         dispatch(actions.Token.update(tokenInfo));
       });
     }

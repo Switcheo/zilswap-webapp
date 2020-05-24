@@ -18,6 +18,12 @@ const reducer = (state: TokenState = initial_state, action: any) => {
         tokens: {
           ...state.tokens,
           [updateProps.address]: {
+            // copy original token properties
+            ...state.tokens[updateProps.address] && {
+              ...state.tokens[updateProps.address],
+            },
+
+            // copy new token properties
             ...updateProps,
           }
         }
