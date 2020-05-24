@@ -1,19 +1,17 @@
 import { Box, Button, ButtonGroup, IconButton, makeStyles, Typography } from "@material-ui/core";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { CurrencyInput, FancyButton, NotificationBox } from "app/components";
+import { CurrencyInput, FancyButton, KeyValueDisplay, NotificationBox } from "app/components";
 import MainCard from "app/layouts/MainCard";
-import { actions } from "app/store";
-import { SwapFormState } from "app/store/swap/types";
-import { RootState } from "app/store/types";
+import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
+import { useMoneyFormatter } from "app/utils";
+import BigNumber from "bignumber.js";
 import cls from "classnames";
-import Decimal from "decimal.js";
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { ShowAdvanced } from "./components";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
-import BigNumber from "bignumber.js";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -49,6 +47,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "column",
   },
+  labelExchangeRate: {
+    marginTop: theme.spacing(1),
+  },
   percentageButton: {
     borderRadius: 4,
     color: theme.palette.text?.secondary,
@@ -76,48 +77,124 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
+const BN_ONE = new BigNumber(1);
+
+type WithdrawFormState = {
+  percentage: BigNumber;
+  poolToken?: TokenInfo;
+  inToken?: TokenInfo;
+  inAmount: BigNumber;
+  outToken?: TokenInfo;
+  outAmount: BigNumber;
+  exchangeRate: BigNumber;
+};
+
+const initialState: WithdrawFormState = {
+  percentage: new BigNumber(0.005),
+  inAmount: new BigNumber(0),
+  outAmount: new BigNumber(0),
+  exchangeRate: BN_ONE,
+};
 
 const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
+  const [formState, setFormState] = useState<WithdrawFormState>(initialState);
+  const tokenState = useSelector<RootState, TokenState>(store => store.token);
+  const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [notification, setNotification] = useState<{ type: string; message: string; } | null>(); //{ type: "success", message: "Transaction Submitted." }
-  const formState = useSelector<RootState, SwapFormState>(state => state.swap);
-
-  const dispatch = useDispatch();
 
   const onReverse = () => {
-    const values = { ...formState.values };
-    const { give, receive, giveCurrency, receiveCurrency, rate } = values;
-    dispatch(actions.Swap.update({
+    const exchangeRate = BN_ONE.div(formState.exchangeRate);
+    setFormState({
       ...formState,
-      values: {
-        ...formState.values,
-        give: receive,
-        receive: give,
-        receiveCurrency: giveCurrency,
-        giveCurrency: receiveCurrency,
-        rate: +(new Decimal(1).dividedBy(new Decimal(rate)).toFixed(10)),
-      }
-    }));
-  }
+      exchangeRate,
+      inToken: formState.outToken,
+      outToken: formState.inToken,
+      inAmount: formState.outAmount.times(exchangeRate).decimalPlaces(inToken?.decimals || 0),
+    });
+  };
 
   const onPercentage = (percentage: number) => {
-    // const currency = formState.values.giveCurrency;
-    // const balance = wallet.currencies![currency] && wallet.currencies![currency].balance > 0 ? +(moneyFormat(wallet.currencies![currency].balance, { currency })) : 0;
-    const balance = 0;
-    dispatch(actions.Swap.update_extended({
-      key: "give",
-      value: balance * percentage
-    }));
-  }
+    const { outToken } = formState;
+    if (!outToken) return;
 
+    const balance = new BigNumber(outToken.balance.toString());
+    const amount = balance.times(percentage).decimalPlaces(outToken.decimals);
+    onOutAmountChange(amount.shiftedBy(-outToken.decimals).toString());
+  };
+
+  const onOutAmountChange = (amount: string = "0") => {
+    const value = new BigNumber(amount);
+    if (formState.exchangeRate) {
+      setFormState({
+        ...formState,
+        outAmount: value,
+        inAmount: value.times(formState.exchangeRate).decimalPlaces(inToken?.decimals || 0)
+      });
+    }
+  };
+  const onInAmountChange = (amount: string = "0") => {
+    const value = new BigNumber(amount);
+    if (formState.exchangeRate) {
+      setFormState({
+        ...formState,
+        inAmount: value,
+        outAmount: value.div(formState.exchangeRate).decimalPlaces(outToken?.decimals || 0)
+      });
+    }
+  };
+  const onOutCurrencyChange = (token: TokenInfo) => {
+    if (token.isZil && formState.inToken === token) return;
+    let { inToken, poolToken, exchangeRate } = formState;
+    if (!token.isZil) {
+      inToken = tokenState.tokens?.zil;
+      poolToken = token;
+      exchangeRate = BN_ONE.div(poolToken.pool?.exchangeRate || BN_ONE);
+    } else {
+      poolToken = tokenState.tokens?.zil;
+      exchangeRate = poolToken.pool?.exchangeRate || BN_ONE;
+    }
+
+    setFormState({
+      ...formState,
+      poolToken, exchangeRate,
+      inToken, outToken: token,
+    });
+  };
+  const onInCurrencyChange = (token: TokenInfo) => {
+    if (token.isZil && formState.outToken === token) return;
+    let { outToken, poolToken, exchangeRate } = formState;
+    if (!token.isZil) {
+      outToken = tokenState.tokens?.zil;
+      poolToken = token;
+      exchangeRate = BN_ONE.div(poolToken.pool?.exchangeRate || BN_ONE);
+    } else {
+      poolToken = tokenState.tokens?.zil;
+      exchangeRate = poolToken.pool?.exchangeRate || BN_ONE;
+    }
+
+    setFormState({
+      ...formState,
+      poolToken, exchangeRate,
+      outToken, inToken: token,
+    });
+  };
+
+  const { outToken, inToken, inAmount, outAmount, exchangeRate } = formState;
   return (
     <MainCard {...rest} hasNotification={notification} className={cls(classes.root, className)}>
       <NotificationBox notification={notification} setNotification={setNotification} />
       <Box display="flex" flexDirection="column" className={classes.container}>
-        <CurrencyInput token={null} amount={new BigNumber(0)} label="You Give" />
+        <CurrencyInput
+          label="You Give"
+          token={outToken || null}
+          amount={outAmount}
+          disabled={!outToken}
+          onAmountChange={onOutAmountChange}
+          onCurrencyChange={onOutCurrencyChange} />
         <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
           <Button onClick={() => onPercentage(0.25)} className={classes.percentageButton}>
             <Typography variant="button">25%</Typography>
@@ -137,16 +214,26 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
             <SwapSVG />
           </IconButton>
         </Box>
-        <CurrencyInput token={null} amount={new BigNumber(0)} label="You Receive" />
-        <FancyButton
-          walletRequired
+        <CurrencyInput
+          label="You Receive"
+          token={inToken || null}
+          amount={inAmount}
+          disabled={!inToken}
+          onAmountChange={onInAmountChange}
+          onCurrencyChange={onInCurrencyChange} />
+        {!!(inToken && outToken) && (
+          <KeyValueDisplay className={classes.labelExchangeRate}
+            kkey="Exchange Rate"
+            value={`1 ${outToken?.symbol || ""} = ${moneyFormat(exchangeRate || 0, { maxFractionDigits: inToken?.decimals, symbol: inToken?.symbol })}`} />
+        )}
+
+        <FancyButton walletRequired fullWidth
           className={classes.actionButton}
           variant="contained"
           color="primary"
-          fullWidth
-          disabled={!(formState.values.give && formState.values.receive)}>
+          disabled={!inToken || !outToken}>
           Swap
-          </FancyButton>
+        </FancyButton>
         <Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
           Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </Typography>

@@ -8,12 +8,14 @@ export type TokenBalanceMap = {
 };
 
 export type TokenInfo = {
+  isZil: boolean;
   listPriority?: number;
   symbol: string;
   name: string;
   decimals: number;
   init_supply: BN;
   address: string;
+  balance: BN;
   balances: TokenBalanceMap;
   pool?: Pool;
 };
