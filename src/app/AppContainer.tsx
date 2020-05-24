@@ -30,7 +30,7 @@ const AppContainer: React.FC = () => {
   const theme = themes[themeType] || themes.default;
   const dispatch = useDispatch();
   const walletState = useSelector<RootState, WalletState>(store => store.wallet);
-  const [runConnectTask] = useAsyncTask<void>("connectPrivateKey");
+  const [runConnectTask] = useAsyncTask<void>("connectWalletPrivateKey");
 
   useEffect(() => {
     if (walletState.pk && !walletState.wallet) {

@@ -18,10 +18,7 @@ const reducer = (state: LayoutState = initial_state, actions: any) => {
       };
 
     case TYPES.ADD_BACKGROUND_LOADING:
-      loadingTask = state.loadingTasks[actions.name];
-      if (!loadingTask)
-        loadingTask = {};
-
+      loadingTask = state.loadingTasks[actions.name] || {};
       loadingTask[actions.uuid] = moment();
       state.tasksRegistry[actions.uuid] = actions.name;
       return {

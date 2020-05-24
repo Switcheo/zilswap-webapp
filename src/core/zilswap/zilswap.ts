@@ -1,9 +1,8 @@
 import { Contract } from '@zilliqa-js/contract';
-import { Zilliqa } from "@zilliqa-js/zilliqa";
+import BigNumber from 'bignumber.js';
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
 import { Zilswap } from "zilswap-sdk";
-import { Network, TOKENS } from "zilswap-sdk/lib/constants";
-import BigNumber from 'bignumber.js';
+import { Network } from "zilswap-sdk/lib/constants";
 
 
 export interface ConnectProps {

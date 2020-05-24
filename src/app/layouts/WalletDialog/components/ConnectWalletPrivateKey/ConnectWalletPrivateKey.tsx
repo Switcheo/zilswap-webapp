@@ -57,7 +57,7 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props:
   const classes = useStyles();
   const [privateKey, setPrivateKey] = useState("");
   const dispatch = useDispatch();
-  const [runConnectTask, loadingConnect, errorConnect] = useAsyncTask<void>("connectPrivateKey");
+  const [runConnectTask, loadingConnect, errorConnect] = useAsyncTask<void>("connectWalletPrivateKey");
 
   const onBack = () => {
     if (typeof onResult === "function")

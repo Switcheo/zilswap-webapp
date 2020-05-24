@@ -1,18 +1,12 @@
-import { AppBar, Box, Button, Chip, IconButton, Toolbar, Typography } from "@material-ui/core";
+import { AppBar, Box, IconButton, Toolbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Brand } from "app/components/TopBar/components";
-import { actions } from "app/store";
-import { RootState } from "app/store/types";
-import { WalletState } from "app/store/wallet/types";
-import { truncate } from "app/utils";
 import cls from "classnames";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
 import ThemeSwitch from "../ThemeSwitch";
-import { ReactComponent as DotIcon } from "./dot.svg";
+import ConnectWalletButton from "../ConnectWalletButton";
 import { ReactComponent as MenuIcon } from "./menu.svg";
 import { TopBarProps } from "./types";
-import { ConnectedWallet } from "core/wallet";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -32,9 +26,6 @@ const useStyles = makeStyles(theme => ({
       paddingRight: 0,
     },
   },
-  btnConnect: {
-
-  },
   themeSwitch: {
     [theme.breakpoints.down("xs")]: {
       display: "none",
@@ -43,9 +34,6 @@ const useStyles = makeStyles(theme => ({
   grow: {
     flexGrow: 1,
   },
-  dot: {
-    marginRight: theme.spacing(1)
-  },
   chipText: {
     color: theme.palette.text.primary
   }
@@ -53,17 +41,7 @@ const useStyles = makeStyles(theme => ({
 
 const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, onToggleDrawer, ...rest } = props;
-
   const classes = useStyles();
-  const dispatch = useDispatch();
-  const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
-  const themeType = useSelector<RootState, string>(state => state.preference.theme);
-
-  const onConnectWallet = () => {
-    dispatch(actions.Layout.toggleShowWallet());
-  };
-
-  const address = (wallet as ConnectedWallet)?.addressInfo.byte20;
 
   return (
     <AppBar {...rest} elevation={0} position="static" className={cls(classes.root, className)}>
@@ -74,11 +52,10 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
           </IconButton>
         </Box>
         <Box justifyContent="center">
-          <Brand theme={themeType} />
+          <Brand />
         </Box>
         <Box display="flex" flex={1} justifyContent="flex-end" alignItems="center">
-          {!wallet && (<Button className={classes.btnConnect} onClick={onConnectWallet}>Connect Wallet</Button>)}
-          {wallet && (<Chip onClick={onConnectWallet} color="primary" size="small" variant="outlined" label={<Typography variant="button" color="textPrimary"><DotIcon className={classes.dot} />{truncate(address)}</Typography>} />)}
+          <ConnectWalletButton />
           <ThemeSwitch className={classes.themeSwitch} />
         </Box>
       </Toolbar>
