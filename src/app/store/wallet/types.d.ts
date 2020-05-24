@@ -6,7 +6,7 @@ export interface WalletState {
   pk?: string,
 };
 
-export interface WalletUpdatePayload {
+export interface WalletUpdateProps {
   wallet?: ConnectedWallet;
   pk?: string,
 };

@@ -26,7 +26,7 @@ export interface RemoveLiquidityProps {
 /**
  * Filler for unexported type from zilswap-sdk
  */
-type TokenDetails = {
+export type TokenDetails = {
   contract: Contract;
   address: string;
   hash: string;
@@ -84,6 +84,11 @@ export class ZilswapConnector {
     await getState().zilswap.initialize();
 
     console.log("zilswap connection established");
+  };
+
+  static getZilswapState = () => {
+    const { zilswap } = getState();
+    return zilswap.getAppState();
   };
 
   static getTokens = (): TokenDetails[] => {

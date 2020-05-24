@@ -15,6 +15,7 @@ import { WalletState } from "./store/wallet/types";
 import { connectWalletPrivateKey, ConnectWalletResult } from "core/wallet";
 import { useAsyncTask } from "./utils";
 import { actions } from "./store";
+import { AppButler } from "core/utilities";
 
 
 const history = createBrowserHistory();
@@ -50,6 +51,7 @@ const AppContainer: React.FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
+      <AppButler />
       <CssBaseline />
       <MuiPickersUtilsProvider utils={MomentUtils}>
         <Router history={history}>

@@ -166,9 +166,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </Typography>
       </Box>
-      <ShowAdvanced
-        showAdvanced={showAdvanced}
-      />
+      <ShowAdvanced showAdvanced={showAdvanced} />
     </MainCard >
   );
 };

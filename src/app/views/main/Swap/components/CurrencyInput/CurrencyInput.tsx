@@ -106,7 +106,8 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: any) => {
           <InputAdornment position="start">
             <Button className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
               <Box display="flex" alignItems="center">
-                <CurrencyLogo currency={currency} className={classes.currencyLogo} /><Typography variant="button">{currency || "Select Token"}</Typography>
+                <CurrencyLogo currency={currency} className={classes.currencyLogo} />
+                <Typography variant="button">{currency || "Select Token"}</Typography>
               </Box>
               <ExpandMoreIcon className={classes.primaryColor} />
             </Button>

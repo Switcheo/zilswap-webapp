@@ -1,3 +1,5 @@
+import BigNumber from "bignumber.js";
+
 export const LoadingKeys = {
   connectWallet: [
     "connectWallet",
@@ -5,3 +7,6 @@ export const LoadingKeys = {
     "connectWalletPrivateKey",
   ],
 };
+
+
+export const BIG_ZERO = new BigNumber(0);

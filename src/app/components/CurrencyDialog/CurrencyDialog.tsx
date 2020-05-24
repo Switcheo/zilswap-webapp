@@ -1,14 +1,16 @@
 import { Box, ButtonBase, DialogContent, InputAdornment, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
 import { DialogModal } from "app/components";
+import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
+import { useMoneyFormatter } from "app/utils";
+import { BIG_ZERO } from "app/utils/contants";
+import BigNumber from "bignumber.js";
 import cls from "classnames";
-import React, { useState } from "react";
+import { ConnectedWallet } from "core/wallet";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import ContrastBox from "../ContrastBox";
 import CurrencyLogo from "../CurrencyLogo";
 import { ReactComponent as SearchIcon } from "./SearchIcon.svg";
-import { useSelector } from "react-redux";
-import { WalletState } from "app/store/wallet/types";
-import { RootState } from "app/store/types";
-import { useMoneyFormatter } from "app/utils";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -16,8 +18,8 @@ const useStyles = makeStyles(theme => ({
   content: {
     width: 516,
     [theme.breakpoints.down("xs")]: {
-      width: 296
-    }
+      width: 296,
+    },
   },
   input: {
     marginBottom: 20,
@@ -57,40 +59,36 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const currencies = [
-  { symbol: "ITN", name: "IToken", address: "zil18zlr57uhrmnk4mfkuawgv0un295k970a9s3lnq", amount: 0 },
-  { symbol: "ZIL", name: "Zilliqa", amount: 2688.88 },
-  // { symbol: "ETH", name: "Ethereum", amount: 0 },
-  // { symbol: "0xBTC", name: "0xBTC Token", amount: 0 },
-  // { symbol: "DAI", name: "Dai Stablecoin", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-  // { symbol: "SWTH", name: "Switcheo Network", amount: 0 },
-];
 
 const CurrencyDialog = (props: any) => {
   const { children, className, showCurrencyDialog, onCloseDialog, onSelect, exclude, ...rest } = props;
   const classes = useStyles();
+  const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const [search, setSearch] = useState("");
-  const wallet = useSelector<RootState, WalletState>(state => state.wallet);
-  const moneyFormat = useMoneyFormatter({ decPlaces: 10 });
-  const filter = (currency: {
-    symbol: string;
-    name: string;
-    amount: number;
-  }) => {
-    if (currency.symbol === exclude) return false;
-    let value = search.toLowerCase()
-    if (currency.symbol.toLowerCase().includes(value)) return true;
-    if (currency.name.toLowerCase().includes(value)) return true;
-    return false;
-  }
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+  const moneyFormat = useMoneyFormatter({ maxFractionDigits: 10 });
+
+  const getTokenBalance = (token: TokenInfo): BigNumber => {
+    if (!walletState.wallet) return BIG_ZERO;
+
+    const wallet: ConnectedWallet = walletState.wallet!;
+    const tokenBalance = token.balances && token.balances[wallet.addressInfo.byte20.toLowerCase()];
+    if (!tokenBalance) return BIG_ZERO;
+
+    return new BigNumber(tokenBalance.toString());
+  };
+
+  useEffect(() => {
+    if (!tokenState.tokens) return setTokens([]);
+    const tokens = [];
+    for (const address in tokenState.tokens!) {
+      const token = tokenState.tokens![address];
+      tokens.push(token);
+    }
+    setTokens(tokens);
+  }, [tokenState.tokens])
+
   return (
     <DialogModal header="Select a Token" open={showCurrencyDialog} onClose={onCloseDialog} {...rest} className={cls(classes.root, className)}>
       <DialogContent className={classes.content}>
@@ -110,21 +108,26 @@ const CurrencyDialog = (props: any) => {
           }
         />
         <Box className={classes.currencies}>
-          {currencies.filter(filter).map((c, index) => (
+          {tokens.map((token, index) => (
             <ButtonBase
               className={classes.buttonBase}
               key={index}
               focusRipple
-              onClick={() => onSelect(c.symbol)}
-            >
+              onClick={() => onSelect(token.symbol)}>
               <ContrastBox className={classes.currencyBox}>
-                <CurrencyLogo className={classes.currencyLogo} currency={c.symbol} />
+                <CurrencyLogo className={classes.currencyLogo} currency={token.symbol} />
                 <Box display="flex" flexDirection="column">
-                  <Typography variant="h2">{c.symbol}</Typography>
-                  <Typography color="textSecondary" variant="body2">{c.name}</Typography>
+                  <Typography variant="h2">{token.symbol}</Typography>
+                  <Typography color="textSecondary" variant="body2">{token.name}</Typography>
                 </Box>
                 <Box flex={1}>
-                  {/* <Typography align="right" variant="h6" component="p">{wallet.currencies![c.symbol] ? `${moneyFormat(wallet.currencies![c.symbol].balance, { currency: c.symbol }).toLocaleString("en-US", { maximumFractionDigits: 10 })} ${c.symbol}` : "-"}</Typography> */}
+                  <Typography align="right" variant="h6" component="p">
+                    {moneyFormat(getTokenBalance(token), {
+                      symbol: token.symbol,
+                      compression: token.decimals,
+                      showCurrency: true,
+                    })}
+                  </Typography>
                 </Box>
               </ContrastBox>
             </ButtonBase>
