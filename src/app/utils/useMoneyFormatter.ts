@@ -19,6 +19,7 @@ const formatter = (inputNumber: BigNumber | number | string = 0, opts: MoneyForm
       return `${inputNumber}`;
   }
   let number = new BigNumber(inputNumber);
+  if (isNaN(number.toNumber())) number = new BigNumber(0);
   let { currency, symbol = "", compression = 0, decPlaces, maxFractionDigits = 2, decSep = ".", thouSep = ",", showCurrency = false } = opts;
 
   if (decPlaces === undefined)
@@ -34,10 +35,10 @@ const formatter = (inputNumber: BigNumber | number | string = 0, opts: MoneyForm
   number = number.shiftedBy(-compression);
 
   const positive = number.isPositive();
-  const absValue = number.abs();
-  const integers = absValue.toFixed(0);
+  const absValue = number.abs().toFixed(decPlaces);
+  let [integers, decimals = "0"] = absValue.split(".");
   const firstThouSepIndex = integers.length > 3 ? integers.length % 3 : 0;
-  let decimals = absValue.toFixed(decPlaces).replace(/^.*\./g, "").slice(0, maxFractionDigits).replace(/0+$/, "");
+  decimals = decimals.replace(/^.*\./g, "").slice(0, maxFractionDigits).replace(/0+$/, "");
   if (decimals === "") decimals = "000".slice(0, maxFractionDigits);
 
   return (positive ? "" : "+") +

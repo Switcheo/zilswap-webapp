@@ -18,17 +18,15 @@ const useStyles = makeStyles(theme => ({
 const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
   const { children, className, token, ...rest } = props;
   const classes = useStyles();
-  const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5 });
+  const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5, showCurrency: true });
 
   const zilFormatOpts: MoneyFormatterOptions = {
     symbol: "ZIL",
     compression: 12,
-    showCurrency: true,
   };
   const formatOpts: MoneyFormatterOptions = {
     symbol: token?.symbol,
     compression: token?.decimals,
-    showCurrency: true,
   };
 
   const getExchangeRateValue = () => {
