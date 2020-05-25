@@ -11,6 +11,7 @@ export const LoadingKeys = {
 
 
 export const BIG_ZERO = new BigNumber(0);
+export const BIG_ONE = new BigNumber(1);
 
 export const sortTokens = (lhs: TokenInfo, rhs: TokenInfo) => {
   const { listPriority: lhsPriority = Number.MAX_SAFE_INTEGER } = lhs;

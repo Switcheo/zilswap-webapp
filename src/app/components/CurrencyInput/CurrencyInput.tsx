@@ -50,13 +50,14 @@ const useStyles = makeStyles(theme => ({
 export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement> {
   label: string;
   token: TokenInfo | null;
-  amount: BigNumber;
+  amount: string;
   fixedToZil?: boolean;
   disabled?: boolean;
   showContribution?: boolean;
 
   onCurrencyChange?: (token: TokenInfo) => void;
   onAmountChange?: (value: string) => void;
+  onEditorBlur?: () => void;
 };
 
 const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
@@ -64,6 +65,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     children, className,
     label, fixedToZil, amount, disabled,
     showContribution, onAmountChange, onCurrencyChange, token, 
+    onEditorBlur,
   } = props;
   const classes = useStyles();
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5 });
@@ -120,6 +122,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
         placeholder={"0.00"}
         value={amount.toString()}
         onChange={onChange}
+        onBlur={onEditorBlur}
         disabled={disabled}
         type="number"
         inputProps={{ className: classes.input }}

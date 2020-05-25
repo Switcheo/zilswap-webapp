@@ -1,36 +1,20 @@
-import Decimal from "decimal.js";
-import { PoolActionTypes } from "./actions";
-import { PoolFormState, PoolSelectProps } from "./types";
+import BigNumber from "bignumber.js";
 import { TokenActionTypes } from "../token/actions";
 import { TokenUpdateProps } from "../token/types";
+import { PoolActionTypes } from "./actions";
+import { PoolFormState, PoolSelectProps } from "./types";
 
 const initial_state: PoolFormState = {
-  values: {
-    deposit: 0,
-    depositCurrency: "ZIL",
-    deposit1: 0,
-    deposit1Currency: null,
-    withdraw: 0,
-    withdrawCurrency: null,
-    type: "add"
-  },
-  errors: {
-    deposit: false,
-    depositCurrency: false,
-    withdraw: false,
-    withdrawCurrency: false,
-  },
-  touched: {
-    deposit: false,
-    depositCurrency: false,
-    withdraw: false,
-    withdrawCurrency: false,
-  },
   token: null,
+
+  addZilAmount: new BigNumber(0),
+  addTokenAmount: new BigNumber(0),
+
+  removeZilAmount: new BigNumber(0),
+  removeTokenAmount: new BigNumber(0),
 }
 
 const reducer = (state: PoolFormState = initial_state, action: any) => {
-  const { values } = state;
   const { payload } = action;
 
   switch (action.type) {
@@ -49,36 +33,15 @@ const reducer = (state: PoolFormState = initial_state, action: any) => {
 
       return {
         ...state,
-        token: { 
+        token: {
           ...state.token,
           ...updateProps,
         },
       };
 
     case PoolActionTypes.UPDATE:
-      return { ...state, ...payload }
-    case PoolActionTypes.UPDATE_EXTENDED:
-      const { key, value, exchangeRate } = payload;
-      let output: PoolFormState = {
-        ...state,
-        values: {
-          ...values,
-          [key]: value
-        }
-      }
-      switch (key) {
-        case "deposit":
-          output.values.deposit1 = +(new Decimal(output.values.deposit || 0).times(new Decimal(exchangeRate || 0)).toFixed(10))
-          break;
-        case "deposit1":
-          output.values.deposit = +(new Decimal(output.values.deposit1 || 0).dividedBy(new Decimal(exchangeRate || 0)).toFixed(10))
-          break;
-        default:
-          break;
-      }
-      return output;
-    case PoolActionTypes.UPDATE_POOL:
-      return { ...state, poolValues: { ...payload } };
+      return { ...state, ...payload };
+
     default:
       return state;
   }

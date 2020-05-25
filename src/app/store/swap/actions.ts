@@ -6,7 +6,7 @@ export enum SwapActionTypes {
   REVERSE = "SWAP_REVERSE"
 }
 
-export function update(payload: SwapFormState) {
+export function update(payload: Partial<SwapFormState>) {
   return {
     type: SwapActionTypes.UPDATE,
     payload

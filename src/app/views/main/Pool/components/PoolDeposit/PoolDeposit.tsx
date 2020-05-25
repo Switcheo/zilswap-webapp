@@ -2,9 +2,9 @@ import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { CurrencyInput, FancyButton, ProportionSelect } from "app/components";
 import { actions } from "app/store";
-import { RootState, TokenInfo, TokenState } from "app/store/types";
+import { RootState, TokenInfo, TokenState, PoolFormState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
-import { ZIL_TOKEN_NAME } from "app/utils/contants";
+import { ZIL_TOKEN_NAME, BIG_ZERO } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
@@ -12,11 +12,6 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PoolDetail from "../PoolDetail";
 import PoolIcon from "../PoolIcon";
-
-const initialFormState = {
-  zilAmount: new BigNumber(0),
-  tokenAmount: new BigNumber(0),
-};
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -47,13 +42,20 @@ const useStyles = makeStyles(theme => ({
     alignSelf: "center"
   },
 }));
+
+const initialFormState = {
+  zilAmount: "0",
+  tokenAmount: "0",
+};
+
 const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { className, ...rest } = props;
   const classes = useStyles();
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const [runAddLiquidity, loading, error] = useAsyncTask("poolAddLiquidity");
   const dispatch = useDispatch();
-  const poolToken = useSelector<RootState, TokenInfo | null>(state => (console.log(state.pool.token) as undefined) || state.pool.token);
+  const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
+  const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
   const onPercentage = (percentage: number) => {
@@ -71,32 +73,56 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   };
 
   const onZilChange = (amount: string = "0") => {
-    const value = new BigNumber(amount);
     if (poolToken) {
+      const zilAmount = amount;
+      let bnZilAmount = new BigNumber(amount);
+      if (bnZilAmount.isNegative() || bnZilAmount.isNaN() || !bnZilAmount.isFinite())
+        bnZilAmount = BIG_ZERO;
+
+      let bnTokenAmount = bnZilAmount.div(poolToken.pool?.exchangeRate || 1).decimalPlaces(poolToken.decimals);
+      const tokenAmount = bnTokenAmount.toString();
+
       setFormState({
         ...formState,
-        zilAmount: value,
+        zilAmount,
 
         // only update counter currency if exchange rate is available
-        ...poolToken.pool && {
-          tokenAmount: value.div(poolToken.pool.exchangeRate).decimalPlaces(poolToken.decimals)
-        },
-      })
+        ...poolToken.pool && { tokenAmount },
+      });
+
+      dispatch(actions.Pool.update({
+        addZilAmount: bnZilAmount,
+
+        // only update counter currency if exchange rate is available
+        ...poolToken.pool && { addTokenAmount: bnTokenAmount },
+      }));
     }
   };
 
   const onTokenChange = (amount: string = "0") => {
-    const value = new BigNumber(amount);
     if (poolToken) {
+      const tokenAmount = amount;
+      let bnTokenAmount = new BigNumber(amount);
+      if (bnTokenAmount.isNegative() || bnTokenAmount.isNaN() || !bnTokenAmount.isFinite())
+        bnTokenAmount = BIG_ZERO;
+
+      let bnZilAmount = bnTokenAmount.div(poolToken.pool?.exchangeRate || 1).decimalPlaces(tokenState.tokens.zil?.decimals || 12);
+      const zilAmount = bnZilAmount.toString();
+
       setFormState({
         ...formState,
-        tokenAmount: value,
+        tokenAmount,
 
         // only update counter currency if exchange rate is available
-        ...poolToken.pool && {
-          zilAmount: value.times(poolToken.pool.exchangeRate).decimalPlaces(poolToken.decimals),
-        },
-      })
+        ...poolToken.pool && { zilAmount },
+      });
+
+      dispatch(actions.Pool.update({
+        addTokenAmount: bnTokenAmount,
+
+        // only update counter currency if exchange rate is available
+        ...poolToken.pool && { addZilAmount: bnZilAmount },
+      }));
     }
   };
 
@@ -107,8 +133,8 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     runAddLiquidity(async () => {
       const tokenAddress = poolToken.address;
       const txReceipt = await ZilswapConnector.addLiquidity({
-        tokenAmount: formState.tokenAmount,
-        zilAmount: formState.zilAmount,
+        tokenAmount: poolFormState.addTokenAmount,
+        zilAmount: poolFormState.addZilAmount,
         tokenID: tokenAddress,
       });
 
@@ -121,6 +147,13 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     });
   };
 
+  const onDoneEditing = () => {
+    setFormState({
+      tokenAmount: poolFormState.addTokenAmount.toString(),
+      zilAmount: poolFormState.addZilAmount.toString(),
+    });
+  };
+
   return (
     <Box display="flex" flexDirection="column" {...rest} className={cls(classes.root, className)}>
       <Box className={classes.container}>
@@ -129,6 +162,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           token={tokenState.tokens[ZIL_TOKEN_NAME]}
           amount={formState.zilAmount}
           disabled={!poolToken}
+          onEditorBlur={onDoneEditing}
           onAmountChange={onZilChange} />
 
         <ProportionSelect fullWidth
@@ -141,9 +175,10 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         <CurrencyInput
           label="Deposit"
           token={poolToken}
-          amount={formState.tokenAmount}
+          amount={formState.tokenAmount.toString()}
           className={classes.input}
           disabled={!poolToken}
+          onEditorBlur={onDoneEditing}
           onAmountChange={onTokenChange}
           onCurrencyChange={onPoolChange} />
         <PoolDetail token={poolToken || undefined} />

@@ -1,16 +1,24 @@
+export type ExactOfOptions = "in" | "out";
+
 export interface SwapFormState {
-  values: {
-    [key: string]: any;
-  },
-  errors: {
-    [key: string]: string | boolean | null;
-  },
-  touched: {
-    [key: string]: boolean;
-  }
-}
+  slippage: number;
+  expiry: number;
+
+
+  percentage: BigNumber;
+  exactOf: ExactOfOptions;
+  
+  poolToken?: TokenInfo;
+
+  inToken?: TokenInfo;
+  inAmount: BigNumber;
+
+  outToken?: TokenInfo;
+  outAmount: BigNumber;
+  exchangeRate: BigNumber;
+};
 
 export interface UpdateExtendedPayload {
   key: string;
   value: any;
-}
+};
