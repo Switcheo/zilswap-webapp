@@ -38,7 +38,7 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
 
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
-      {!poolToken?.pool && (<NewPoolMessage token={poolToken || undefined} />)}
+      {(!poolToken?.loading && !poolToken?.pool) && (<NewPoolMessage token={poolToken || undefined} />)}
       <Box display="flex" flexDirection="column">
         <Box display="flex" justifyContent="space-between" mb="28px" className={classes.container}>
           <PoolToggleButton />

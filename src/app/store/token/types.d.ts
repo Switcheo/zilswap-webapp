@@ -9,6 +9,7 @@ export type TokenBalanceMap = {
 
 export type TokenInfo = {
   initialized: boolean;
+  loading?: boolean;
   isZil: boolean;
   listPriority?: number;
   symbol: string;

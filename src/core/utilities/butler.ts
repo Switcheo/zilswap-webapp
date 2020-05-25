@@ -86,6 +86,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
       dispatch(actions.Token.update({
         address,
+        loading: true,
         initialized: true,
       }));
 
@@ -104,6 +105,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
         const tokenInfo: TokenInfo = {
           initialized: true,
+          loading: false,
           pool, balances,
           isZil: false,
           address: token.address,
