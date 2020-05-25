@@ -49,7 +49,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     console.log("butler init");
     if (tokenState.initialized) return;
     if (!walletState.wallet) return;
-    const zilswapTokens = ZilswapConnector.getTokens();
+    const zilswapTokens = ZilswapConnector.getTokens(); // test new pool: .filter(token => token.symbol !== "ITN");
 
     const tokens: { [index: string]: TokenInfo } = {};
     zilswapTokens.map(mapZilswapToken).forEach(token => tokens[token.address] = token);
@@ -83,8 +83,10 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         for (const address in contractBalanceState)
           balances[address] = new BN(contractBalanceState[address]);
 
+        const pool = ZilswapConnector.getPool(zilswapToken.address) || undefined;
+
         const tokenInfo: TokenInfo = {
-          balances,
+          pool, balances,
           isZil: false,
           address: zilswapToken.address,
           decimals: zilswapToken.decimals,
@@ -92,7 +94,6 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
           symbol: contractInit.symbol,
           name: contractInit.name,
           balance: balances[wallet.addressInfo.byte20.toLowerCase()] || new BN(0),
-          pool: ZilswapConnector.getPool(zilswapToken.address) || undefined,
         };
         dispatch(actions.Token.update(tokenInfo));
       });

@@ -117,7 +117,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   };
 
   const onPoolChange = (token: TokenInfo) => {
-    if (token.symbol === "ZIL") return;
+    if (!token.pool) return;
     dispatch(actions.Pool.selectPool({ token }));
   };
 
@@ -165,12 +165,15 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           disabled={!poolToken}
           onAmountChange={onTokenChange}
           onCurrencyChange={onPoolChange} />
+
         <ProportionSelect fullWidth
           color="primary"
           className={classes.proportionSelect}
           onSelectProp={onPercentage} />
+
         <PoolIcon type="minus" />
         <InputLabel>You Receive (Estimate)</InputLabel>
+
         <ContrastBox className={classes.readOnly}>
           <Typography className={classes.previewAmount}>
             <span>{formatMoney(formState.zilAmount, zilFormatOpts)}</span>
@@ -181,6 +184,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
         <PoolDetail token={poolToken || undefined} />
 
         <Typography color="error">{error?.message}</Typography>
+
         <FancyButton walletRequired fullWidth
           loading={loading}
           className={classes.actionButton}
@@ -197,6 +201,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </Typography>
       </Box>
+
       {!!showAdvanced && (
         <ContrastBox className={classes.showAdvanced}>
           <Typography className={classes.text} variant="body2">

@@ -95,8 +95,12 @@ const handleTxReceipt = (txReceipt: TxReceipt) => {
   }
 };
 export class ZilswapConnector {
+  static network?: Network;
+  
   static connect = async (props: ConnectProps) => {
     await initializeForWallet(props.wallet);
+    ZilswapConnector.network = props.network;
+
     await getState().zilswap.initialize();
 
     console.log("zilswap connection established");
@@ -179,6 +183,7 @@ export class ZilswapConnector {
 
   static disconnect = async (): Promise<void> => {
     const { zilswap } = getState();
+    ZilswapConnector.network = undefined;
     await zilswap.teardown();
   };
 }

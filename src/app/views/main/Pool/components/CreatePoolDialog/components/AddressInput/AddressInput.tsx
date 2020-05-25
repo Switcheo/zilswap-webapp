@@ -1,14 +1,17 @@
 import { Box, BoxProps, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
 import { KeyValueDisplay, LoadableArea } from "app/components";
-import { RootState, WalletState } from "app/store/types";
+import { RootState, WalletState, TokenBalanceMap } from "app/store/types";
 import { truncate, useAsyncTask } from "app/utils";
 import cls from "classnames";
 import { zilParamsToMap } from "core/utilities";
-import { toBech32Address, ZilliqaValidate, ZilswapConnector } from "core/zilswap";
+import { toBech32Address, ZilliqaValidate, ZilswapConnector, Contract, BN } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 export type TokenPreview = {
+  contract: Contract;
+  init_supply: BN;
+  balances: TokenBalanceMap;
   name: string;
   symbol: string;
   address: string;
@@ -82,7 +85,15 @@ const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => 
           throw new Error(`${truncate(address)} is not a contract address`);
         const contractInit = zilParamsToMap(contractInitParams);
 
+        const { balances_map: contractBalanceState } = await contract.getSubState("balances_map");
+
+        const balances: TokenBalanceMap = {};
+        for (const address in contractBalanceState)
+          balances[address] = new BN(contractBalanceState[address]);
+
         setTokenPreview({
+          contract, balances,
+          init_supply: contractInit.init_supply,
           name: contractInit.name,
           symbol: contractInit.symbol,
           address: inputAddress,

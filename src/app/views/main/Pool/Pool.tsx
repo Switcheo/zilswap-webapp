@@ -1,14 +1,12 @@
-import { Box, Button, ButtonGroup } from "@material-ui/core";
+import { Box, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { NotificationBox } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
-import { PoolFormState } from "app/store/pool/types";
-import { RootState } from "app/store/types";
+import { OpenCloseState, PoolType, RootState, TokenInfo } from "app/store/types";
 import cls from "classnames";
-import React, { useState } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CreatePoolDialog, PoolDeposit, PoolWithdraw } from "./components";
+import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolToggleButton, PoolWithdraw } from "./components";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
 
 const useStyles = makeStyles(theme => ({
@@ -20,16 +18,6 @@ const useStyles = makeStyles(theme => ({
       padding: theme.spacing(2, 2, 0),
     },
   },
-  addRemoveButton: {
-    borderRadius: 4,
-    width: 90,
-    padding: theme.spacing(1.5, 4),
-    "&.MuiButton-contained": {
-      borderWidth: 1,
-      borderStyle: "solid",
-      borderColor: theme.palette.primary.main,
-    },
-  },
   actionButton: {
     marginTop: 45,
     marginBottom: 40,
@@ -39,43 +27,29 @@ const useStyles = makeStyles(theme => ({
 const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
-  const [showCreatePool, setShowCreatePool] = useState(false);
-  const [notification, setNotification] = useState<{ type: string; message: string; } | null>(); //{ type: "success", message: "Transaction Submitted." }
-  const formState = useSelector<RootState, PoolFormState>(state => state.pool);
-  const type = formState.values.type;
   const dispatch = useDispatch();
+  const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
+  const poolType = useSelector<RootState, PoolType>(state => state.layout.showPoolType);
+  const showCreatePool = useSelector<RootState, boolean>(state => state.layout.showCreatePool);
 
-  const onTypeChange = (type: string) => {
-    dispatch(actions.Pool.update_extended({ key: "type", value: type }))
-  }
+  const onShowCreatePool = (override: OpenCloseState) => {
+    dispatch(actions.Layout.toggleShowCreatePool(override));
+  };
 
   return (
-    <MainCard hasNotification={notification} {...rest} className={cls(classes.root, className)}>
-      <NotificationBox notification={notification} setNotification={setNotification} />
+    <MainCard {...rest} className={cls(classes.root, className)}>
+      {!poolToken?.pool && (<NewPoolMessage token={poolToken || undefined} />)}
       <Box display="flex" flexDirection="column">
         <Box display="flex" justifyContent="space-between" mb="28px" className={classes.container}>
-          <ButtonGroup color="primary">
-            <Button
-              onClick={() => onTypeChange("add")}
-              variant={type === "add" ? "contained" : "outlined"}
-              className={classes.addRemoveButton}>
-              Add
-              </Button>
-            <Button
-              onClick={() => onTypeChange("remove")}
-              variant={type === "remove" ? "contained" : "outlined"}
-              className={classes.addRemoveButton}>
-              Remove
-              </Button>
-          </ButtonGroup>
-          <Button startIcon={<PlusSVG />} onClick={() => setShowCreatePool(true)}>
+          <PoolToggleButton />
+          <Button startIcon={<PlusSVG />} onClick={() => onShowCreatePool("open")}>
             Create Pool
           </Button>
         </Box>
-        {type === "add" && (<PoolDeposit />)}
-        {type === "remove" && (<PoolWithdraw />)}
+        {poolType === "add" && (<PoolDeposit />)}
+        {poolType === "remove" && (<PoolWithdraw />)}
       </Box>
-      <CreatePoolDialog open={showCreatePool} onCloseDialog={() => setShowCreatePool(false)} />
+      <CreatePoolDialog open={showCreatePool} onCloseDialog={() => onShowCreatePool("close")} />
     </MainCard>
   );
 };

@@ -36,5 +36,8 @@ export interface TokenUpdateProps {
 };
 
 export interface TokenInitProps {
-  tokens: { [index: string]: TokenInfo },
+  tokens: { [index: string]: TokenInfo };
+};
+export interface TokenAddProps {
+  token: TokenInfo;
 };

@@ -73,10 +73,14 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const onZilChange = (amount: string = "0") => {
     const value = new BigNumber(amount);
     if (poolToken) {
-      if (!poolToken.pool) return;
       setFormState({
+        ...formState,
         zilAmount: value,
-        tokenAmount: value.div(poolToken.pool.exchangeRate).decimalPlaces(poolToken.decimals)
+
+        // only update counter currency if exchange rate is available
+        ...poolToken.pool && {
+          tokenAmount: value.div(poolToken.pool.exchangeRate).decimalPlaces(poolToken.decimals)
+        },
       })
     }
   };
@@ -84,10 +88,14 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const onTokenChange = (amount: string = "0") => {
     const value = new BigNumber(amount);
     if (poolToken) {
-      if (!poolToken.pool) return;
       setFormState({
-        zilAmount: value.times(poolToken.pool.exchangeRate).decimalPlaces(poolToken.decimals),
+        ...formState,
         tokenAmount: value,
+
+        // only update counter currency if exchange rate is available
+        ...poolToken.pool && {
+          zilAmount: value.times(poolToken.pool.exchangeRate).decimalPlaces(poolToken.decimals),
+        },
       })
     }
   };
@@ -122,11 +130,14 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           amount={formState.zilAmount}
           disabled={!poolToken}
           onAmountChange={onZilChange} />
+
         <ProportionSelect fullWidth
           color="primary"
           className={classes.proportionSelect}
           onSelectProp={onPercentage} />
+
         <PoolIcon type="plus" />
+
         <CurrencyInput
           label="Deposit"
           token={poolToken}

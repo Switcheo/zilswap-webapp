@@ -1,9 +1,12 @@
-import { TYPES } from "./actions";
-import { LayoutState } from "./types";
 import moment from "moment";
+import { ActionTypes } from "./actions";
+import { LayoutState } from "./types";
 
 const initial_state: LayoutState = {
   showWalletDialog: false,
+  showCreatePool: false,
+  notification: undefined,
+  showPoolType: "add",
   loadingTasks: {},
   tasksRegistry: {},
 };
@@ -11,13 +14,28 @@ const initial_state: LayoutState = {
 const reducer = (state: LayoutState = initial_state, actions: any) => {
   let loadingTask = null, taskName;
   switch (actions.type) {
-    case TYPES.TOGGLE_SHOW_WALLET:
+    case ActionTypes.TOGGLE_SHOW_WALLET:
       return {
         ...state,
         showWalletDialog: !actions.override ? !state.showWalletDialog : actions.override === "open",
       };
+    case ActionTypes.SHOW_POOL_TYPE:
+      return {
+        ...state,
+        showPoolType: actions.poolType,
+      };
+    case ActionTypes.TOGGLE_SHOW_CREATE_POOL:
+      return {
+        ...state,
+        showCreatePool: !actions.override ? !state.showWalletDialog : actions.override === "open",
+      };
+    case ActionTypes.UPDATE_NOTIFICATION:
+      return {
+        ...state,
+        notification: actions.notification,
+      };
 
-    case TYPES.ADD_BACKGROUND_LOADING:
+    case ActionTypes.ADD_BACKGROUND_LOADING:
       loadingTask = state.loadingTasks[actions.name] || {};
       loadingTask[actions.uuid] = moment();
       state.tasksRegistry[actions.uuid] = actions.name;
@@ -31,7 +49,7 @@ const reducer = (state: LayoutState = initial_state, actions: any) => {
           ...state.tasksRegistry,
         },
       };
-    case TYPES.REMOVE_BACKGROUND_LOADING:
+    case ActionTypes.REMOVE_BACKGROUND_LOADING:
       taskName = state.tasksRegistry[actions.uuid];
       if (!taskName)
         return state;

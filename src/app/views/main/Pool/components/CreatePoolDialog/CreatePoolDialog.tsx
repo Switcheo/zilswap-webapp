@@ -1,12 +1,12 @@
 import { DialogContent, makeStyles, Typography } from "@material-ui/core";
 import { DialogModal, FancyButton } from "app/components";
-import { RootState, WalletState } from "app/store/types";
+import { actions } from "app/store";
+import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
-import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ZilswapConnector } from "core/zilswap";
+import { BN, ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AddressInput } from "./components";
 import { TokenPreview } from "./components/AddressInput/AddressInput";
 
@@ -31,11 +31,13 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const CreatePoolDialog = (props: any) => {
-  const { children, className, open, onCloseDialog, onSelect, ...rest } = props;
+  const { children, className, open, onCloseDialog, ...rest } = props;
   const classes = useStyles();
+  const dispatch = useDispatch();
   const [tokenPreview, setTokenPreview] = useState<TokenPreview | undefined>();
   const [runAsyncTask, loading, error] = useAsyncTask("createPool");
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
   const onCreatePool = () => {
     if (loading) return;
@@ -45,16 +47,24 @@ const CreatePoolDialog = (props: any) => {
         throw new Error("Connect wallet to create pool");
       if (!tokenPreview) throw new Error("Address not valid");
       const { address } = tokenPreview;
-      const pool = ZilswapConnector.getPool(address);
-      if (pool)
+      if (tokenState.tokens[address])
         throw new Error(`Pool for ${tokenPreview.symbol} already exists`);
 
-      // TODO: create pool
-      ZilswapConnector.addLiquidity({ 
-        tokenID: address, 
-        tokenAmount: new BigNumber(0),
-        zilAmount: new BigNumber(0),
-      });
+      const pool = ZilswapConnector.getPool(address) || undefined;
+      const token: TokenInfo = {
+        address,
+        ...tokenPreview.symbol !== "ITN" && { pool },
+        isZil: false,
+        symbol: tokenPreview.symbol,
+        name: tokenPreview.name,
+        decimals: tokenPreview.decimals,
+        init_supply: tokenPreview.init_supply,
+        balance: new BN(0),
+        balances: tokenPreview.balances,
+      };
+      dispatch(actions.Token.add({ token }));
+
+      return onCloseDialog();
     });
   };
 

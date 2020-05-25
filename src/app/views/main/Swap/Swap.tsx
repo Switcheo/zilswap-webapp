@@ -1,7 +1,7 @@
 import { Box, IconButton, makeStyles, Typography } from "@material-ui/core";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { CurrencyInput, FancyButton, KeyValueDisplay, NotificationBox, ProportionSelect } from "app/components";
+import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -112,7 +112,6 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [notification, setNotification] = useState<{ type: string; message: string; } | null>(); //{ type: "success", message: "Transaction Submitted." }
 
   const onReverse = () => {
     const exchangeRate = BN_ONE.div(formState.exchangeRate);
@@ -238,8 +237,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const { outToken, inToken, inAmount, outAmount, exchangeRate } = formState;
   return (
-    <MainCard {...rest} hasNotification={notification} className={cls(classes.root, className)}>
-      <NotificationBox notification={notification} setNotification={setNotification} />
+    <MainCard {...rest} className={cls(classes.root, className)}>
       <Box display="flex" flexDirection="column" className={classes.container}>
         <CurrencyInput
           label="You Give"

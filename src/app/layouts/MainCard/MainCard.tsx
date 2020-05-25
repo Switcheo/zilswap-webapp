@@ -5,6 +5,8 @@ import cls from "classnames";
 import { PaperProps } from "material-ui";
 import React, { forwardRef } from "react";
 import { NavLink as RouterLink } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState, FormNotification } from "app/store/types";
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1, flexBasis: 1 }} >
@@ -78,8 +80,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 const MainCard: React.FC<PaperProps> = (props: any) => {
-  const { children, className, hasNotification, staticContext, ...rest } = props;
+  const { children, className, staticContext, ...rest } = props;
   const classes = useStyles();
+  const notification = useSelector<RootState, FormNotification | undefined>(state => state.layout.notification);
+  const hasNotification = notification !== undefined;
 
   return (
     <Box className={classes.root}>
@@ -90,7 +94,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
             color="primary"
             variant="contained"
             className={cls(classes.tab, classes.tabCornerLeft)}
-            activeClassName={cls(classes.tabActive, hasNotification ? classes.tabNoticeOpposite : {})}
+            activeClassName={cls(classes.tabActive, { [classes.tabNoticeOpposite]: hasNotification })}
             component={CustomRouterLink}
             to="/swap">Swap</Button>
           <Button
@@ -98,7 +102,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
             color="primary"
             variant="contained"
             className={cls(classes.tab, classes.tabCornerRight)}
-            activeClassName={cls(classes.tabActive, hasNotification ? classes.tabNoticeOpposite : {})}
+            activeClassName={cls(classes.tabActive, { [classes.tabNoticeOpposite]: hasNotification })}
             component={CustomRouterLink}
             to="/pool">Pool</Button>
         </Box>
