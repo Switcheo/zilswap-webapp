@@ -53,7 +53,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const [runAddLiquidity, loading, error] = useAsyncTask("poolAddLiquidity");
   const dispatch = useDispatch();
-  const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
+  const poolToken = useSelector<RootState, TokenInfo | null>(state => (console.log(state.pool.token) as undefined) || state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
   const onPercentage = (percentage: number) => {

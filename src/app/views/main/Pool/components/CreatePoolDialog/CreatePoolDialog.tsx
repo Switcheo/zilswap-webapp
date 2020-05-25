@@ -4,9 +4,9 @@ import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
 import cls from "classnames";
-import { BN, ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { BN } from "zilswap-sdk/node_modules/@zilliqa-js/util";
 import { AddressInput } from "./components";
 import { TokenPreview } from "./components/AddressInput/AddressInput";
 
@@ -50,19 +50,19 @@ const CreatePoolDialog = (props: any) => {
       if (tokenState.tokens[address])
         throw new Error(`Pool for ${tokenPreview.symbol} already exists`);
 
-      const pool = ZilswapConnector.getPool(address) || undefined;
       const token: TokenInfo = {
         address,
-        ...tokenPreview.symbol !== "ITN" && { pool },
+        initialized: false,
         isZil: false,
         symbol: tokenPreview.symbol,
         name: tokenPreview.name,
         decimals: tokenPreview.decimals,
-        init_supply: tokenPreview.init_supply,
         balance: new BN(0),
+        init_supply: tokenPreview.init_supply,
         balances: tokenPreview.balances,
       };
       dispatch(actions.Token.add({ token }));
+      dispatch(actions.Pool.selectPool({ token }));
 
       return onCloseDialog();
     });

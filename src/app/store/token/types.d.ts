@@ -8,6 +8,7 @@ export type TokenBalanceMap = {
 };
 
 export type TokenInfo = {
+  initialized: boolean;
   isZil: boolean;
   listPriority?: number;
   symbol: string;
@@ -25,14 +26,8 @@ export interface TokenState {
   tokens: { [index: string]: TokenInfo },
 };
 
-export interface TokenUpdateProps {
+export interface TokenUpdateProps extends Partial<TokenInfo> {
   address: string;
-
-  symbol?: string;
-  name?: string;
-  decimals?: number;
-  init_supply?: BN;
-  pool?: Pool;
 };
 
 export interface TokenInitProps {

@@ -1,5 +1,5 @@
-import { Types } from "./actions";
-import { TokenState, TokenUpdateProps, TokenInitProps, TokenAddProps } from "./types";
+import { TokenActionTypes } from "./actions";
+import { TokenAddProps, TokenInitProps, TokenState, TokenUpdateProps } from "./types";
 
 const initial_state: TokenState = {
   initialized: false,
@@ -11,7 +11,7 @@ const reducer = (state: TokenState = initial_state, action: any) => {
 
   switch (action.type) {
 
-    case Types.TOKEN_INIT:
+    case TokenActionTypes.TOKEN_INIT:
       const initProps: TokenInitProps = payload;
       return {
         ...state,
@@ -21,7 +21,7 @@ const reducer = (state: TokenState = initial_state, action: any) => {
         }
       };
 
-    case Types.TOKEN_UPDATE:
+    case TokenActionTypes.TOKEN_UPDATE:
       const updateProps: TokenUpdateProps = payload;
       return {
         ...state,
@@ -39,15 +39,13 @@ const reducer = (state: TokenState = initial_state, action: any) => {
         }
       };
 
-    case Types.TOKEN_ADD:
+    case TokenActionTypes.TOKEN_ADD:
       const addProps: TokenAddProps = payload;
       return {
         ...state,
         tokens: {
           ...state.tokens,
-          [addProps.token.address]: {
-            ...addProps.token,
-          }
+          [addProps.token.address]: addProps.token,
         }
       };
     default:

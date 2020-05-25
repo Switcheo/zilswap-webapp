@@ -14,6 +14,7 @@ export type AppButlerProps = {
 
 const mapZilswapToken = (zilswapToken: TokenDetails): TokenInfo => {
   return {
+    initialized: false,
     isZil: false,
     address: zilswapToken.address,
     decimals: zilswapToken.decimals,
@@ -58,6 +59,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     // inject ZIL as a token
     tokens["zil"] = {
       isZil: true,
+      initialized: true,
       listPriority: 0,
       address: "",
       decimals: 12,
@@ -72,24 +74,40 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
     dispatch(actions.Token.init({ tokens }));
 
-    for (const zilswapToken of zilswapTokens) {
+    // eslint-disable-next-line
+  }, [walletState.wallet, tokenState.initialized]);
+
+  useEffect(() => {
+
+    for (const address in tokenState.tokens) {
+      const token = tokenState.tokens[address];
+      if (token.initialized) continue;
+      console.log(`butler update:${token.symbol}`);
+
+      dispatch(actions.Token.update({
+        address,
+        initialized: true,
+      }));
+
       runQueryToken(async () => {
-        const contractInitParams = await zilswapToken.contract.getInit();
+        const contract = ZilswapConnector.getZilliqa().contracts.at(address);
+        const contractInitParams = await contract.getInit();
         const wallet: ConnectedWallet = walletState.wallet!;
-        const { balances_map: contractBalanceState } = await zilswapToken.contract.getSubState("balances_map");
+        const { balances_map: contractBalanceState } = await contract.getSubState("balances_map");
         const contractInit = zilParamsToMap(contractInitParams);
 
         const balances: TokenBalanceMap = {};
         for (const address in contractBalanceState)
           balances[address] = new BN(contractBalanceState[address]);
 
-        const pool = ZilswapConnector.getPool(zilswapToken.address) || undefined;
+        const pool = ZilswapConnector.getPool(token.address) || undefined;
 
         const tokenInfo: TokenInfo = {
+          initialized: true,
           pool, balances,
           isZil: false,
-          address: zilswapToken.address,
-          decimals: zilswapToken.decimals,
+          address: token.address,
+          decimals: token.decimals,
           init_supply: new BN(contractInit.init_supply),
           symbol: contractInit.symbol,
           name: contractInit.name,
@@ -100,7 +118,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     }
 
     // eslint-disable-next-line
-  }, [walletState.wallet, tokenState.initialized]);
+  }, [tokenState.tokens]);
 
   return null;
 };

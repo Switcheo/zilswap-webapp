@@ -1,6 +1,6 @@
 import { TokenUpdateProps, TokenInitProps, TokenAddProps } from "./types";
 
-export const Types = {
+export const TokenActionTypes = {
   TOKEN_UPDATE: "TOKEN_UPDATE",
   TOKEN_INIT: "TOKEN_INIT",
   TOKEN_ADD: "TOKEN_ADD",
@@ -8,19 +8,19 @@ export const Types = {
 
 export function update(payload: TokenUpdateProps) {
   return {
-    type: Types.TOKEN_UPDATE,
+    type: TokenActionTypes.TOKEN_UPDATE,
     payload
   }
 };
 export function init(payload: TokenInitProps) {
   return {
-    type: Types.TOKEN_INIT,
+    type: TokenActionTypes.TOKEN_INIT,
     payload
   }
 };
 export function add(payload: TokenAddProps) {
   return {
-    type: Types.TOKEN_ADD,
+    type: TokenActionTypes.TOKEN_ADD,
     payload
   }
 };

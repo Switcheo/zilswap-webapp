@@ -96,7 +96,7 @@ const handleTxReceipt = (txReceipt: TxReceipt) => {
 };
 export class ZilswapConnector {
   static network?: Network;
-  
+
   static connect = async (props: ConnectProps) => {
     await initializeForWallet(props.wallet);
     ZilswapConnector.network = props.network;
@@ -167,6 +167,7 @@ export class ZilswapConnector {
       zilswap.swapWithExactInput.bind(zilswap) :
       zilswap.swapWithExactOutput.bind(zilswap);
 
+    console.log(props.exactOf);
     console.log(props.tokenInID);
     console.log(props.tokenOutID);
     console.log(props.amount.toString());

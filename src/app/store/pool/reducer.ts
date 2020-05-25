@@ -1,6 +1,8 @@
 import Decimal from "decimal.js";
 import { PoolActionTypes } from "./actions";
 import { PoolFormState, PoolSelectProps } from "./types";
+import { TokenActionTypes } from "../token/actions";
+import { TokenUpdateProps } from "../token/types";
 
 const initial_state: PoolFormState = {
   values: {
@@ -38,6 +40,19 @@ const reducer = (state: PoolFormState = initial_state, action: any) => {
       return {
         ...state,
         token: selectProps.token,
+      };
+
+    case TokenActionTypes.TOKEN_UPDATE:
+      const updateProps: TokenUpdateProps = payload;
+      if (updateProps.address !== state.token?.address)
+        return state;
+
+      return {
+        ...state,
+        token: { 
+          ...state.token,
+          ...updateProps,
+        },
       };
 
     case PoolActionTypes.UPDATE:
