@@ -1,7 +1,8 @@
-import { SwapFormState } from "./types";
-import { SwapActionTypes } from "./actions";
-import { BIG_ONE } from "app/utils/contants";
 import BigNumber from "bignumber.js";
+import { SwapActionTypes } from "./actions";
+import { SwapFormState } from "./types";
+import { TokenActionTypes } from "../token/actions";
+import { TokenUpdateProps } from "../token/types";
 
 const initial_state: SwapFormState = {
   slippage: 0.005, // percent
@@ -11,7 +12,7 @@ const initial_state: SwapFormState = {
   exactOf: "in",
   inAmount: new BigNumber(0),
   outAmount: new BigNumber(0),
-  exchangeRate: BIG_ONE,
+  reverseExchangeRate: false,
 }
 
 const reducer = (state: SwapFormState = initial_state, action: any) => {
@@ -20,6 +21,37 @@ const reducer = (state: SwapFormState = initial_state, action: any) => {
   switch (action.type) {
     case SwapActionTypes.UPDATE:
       return { ...state, ...payload };
+
+    case TokenActionTypes.TOKEN_UPDATE:
+      const updateProps: TokenUpdateProps = payload;
+      if (updateProps.address !== state.inToken?.address &&
+        updateProps.address !== state.outToken?.address)
+        return state;
+
+      return {
+        ...state,
+        ...updateProps.address === state.inToken?.address && {
+          inToken: {
+            ...state.inToken,
+            ...updateProps,
+          }
+        },
+
+        ...updateProps.address === state.outToken?.address && {
+          outToken: {
+            ...state.outToken,
+            ...updateProps,
+          }
+        },
+
+        ...updateProps.address === state.poolToken?.address && {
+          poolToken: {
+            ...state.poolToken,
+            ...updateProps,
+          }
+        },
+      };
+
     default:
       return state;
   }

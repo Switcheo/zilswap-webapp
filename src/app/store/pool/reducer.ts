@@ -26,6 +26,9 @@ const reducer = (state: PoolFormState = initial_state, action: any) => {
         token: selectProps.token,
       };
 
+    case PoolActionTypes.UPDATE:
+      return { ...state, ...payload };
+
     case TokenActionTypes.TOKEN_UPDATE:
       const updateProps: TokenUpdateProps = payload;
       if (updateProps.address !== state.token?.address)
@@ -38,9 +41,6 @@ const reducer = (state: PoolFormState = initial_state, action: any) => {
           ...updateProps,
         },
       };
-
-    case PoolActionTypes.UPDATE:
-      return { ...state, ...payload };
 
     default:
       return state;

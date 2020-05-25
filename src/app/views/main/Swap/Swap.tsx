@@ -3,18 +3,18 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect } from "app/components";
 import MainCard from "app/layouts/MainCard";
-import { RootState, TokenInfo, TokenState, ExactOfOptions, SwapFormState } from "app/store/types";
+import { actions } from "app/store";
+import { ExactOfOptions, RootState, SwapFormState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
+import { BIG_ONE, BIG_ZERO } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ZilswapConnector, toBasisPoints } from "core/zilswap";
+import { toBasisPoints, ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ShowAdvanced } from "./components";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
-import { actions } from "app/store";
-import { BIG_ONE, BIG_ZERO } from "app/utils/contants";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -85,7 +85,7 @@ type CalculateAmountProps = {
   inAmount?: BigNumber;
   outToken?: TokenInfo;
   outAmount?: BigNumber;
-  exchangeRate?: BigNumber;
+  reverseExchangeRate?: boolean;
 };
 
 const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -100,10 +100,17 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  const getExchangeRate = (reverseExchangeRate?: boolean): BigNumber => {
+    const _reverseExchangeRate = reverseExchangeRate === undefined ? swapFormState.reverseExchangeRate : reverseExchangeRate;
+    const power = _reverseExchangeRate ? -1: 1;
+    return swapFormState.poolToken?.pool?.exchangeRate?.pow(power) || BIG_ONE;
+  }
+
   const onReverse = () => {
-    const exchangeRate = swapFormState.exchangeRate.pow(-1);
+    const reverseExchangeRate = !swapFormState.reverseExchangeRate;
+    const exchangeRate = getExchangeRate(reverseExchangeRate);
     const result = {
-      exchangeRate,
+      reverseExchangeRate,
       inToken: swapFormState.outToken,
       outToken: swapFormState.inToken,
       ...swapFormState.exactOf === "in" && {
@@ -138,14 +145,16 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     const _inToken: TokenInfo | undefined = props.inToken || swapFormState.inToken;
     const _outToken: TokenInfo | undefined = props.outToken || swapFormState.outToken;
     const _exactOf: ExactOfOptions = props.exactOf || swapFormState.exactOf;
-    const _exchangeRate: BigNumber = props.exchangeRate || swapFormState.exchangeRate;
+    const _reverseExchangeRate = props.reverseExchangeRate === undefined ? swapFormState.reverseExchangeRate: props.reverseExchangeRate;
+
+    const exchangeRate = getExchangeRate(props.reverseExchangeRate);
 
     if (_exactOf === "in") {
       if (_inAmount.isNaN() || _inAmount.isNegative() || !_inAmount.isFinite()) _inAmount = BIG_ZERO;
-      _outAmount = _inAmount.times(_exchangeRate).decimalPlaces(_outToken?.decimals || 0);
+      _outAmount = _inAmount.times(exchangeRate).decimalPlaces(_outToken?.decimals || 0);
     } else {
       if (_outAmount.isNaN() || _outAmount.isNegative() || !_outAmount.isFinite()) _outAmount = BIG_ZERO;
-      _inAmount = _outAmount.div(_exchangeRate).decimalPlaces(_inToken?.decimals || 0);
+      _inAmount = _outAmount.div(exchangeRate).decimalPlaces(_inToken?.decimals || 0);
     }
 
     return {
@@ -154,13 +163,13 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       inToken: _inToken,
       outToken: _outToken,
       exactOf: _exactOf,
-      exchangeRate: _exchangeRate,
+      reverseExchangeRate: _reverseExchangeRate,
     };
   };
 
   const onOutAmountChange = (amount: string = "0") => {
     const outAmount = new BigNumber(amount);
-    if (swapFormState.exchangeRate) {
+    if (swapFormState.poolToken) {
       const result = calculateAmounts({ exactOf: "out", outAmount });
       setFormState({
         outAmount: amount,
@@ -171,7 +180,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
   const onInAmountChange = (amount: string = "0") => {
     const inAmount = new BigNumber(amount);
-    if (swapFormState.exchangeRate) {
+    if (swapFormState.poolToken) {
       const result = calculateAmounts({ exactOf: "in", inAmount });
       setFormState({
         inAmount: amount,
@@ -182,17 +191,15 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
   const onOutCurrencyChange = (token: TokenInfo) => {
     if (token.isZil && swapFormState.inToken === token) return;
-    let { inToken, poolToken, exchangeRate } = swapFormState;
+    let { inToken, poolToken, reverseExchangeRate } = swapFormState;
+    reverseExchangeRate = !token.isZil;
+
     if (!token.isZil) {
-      inToken = tokenState.tokens?.zil;
       poolToken = token;
-      exchangeRate = poolToken.pool?.exchangeRate.pow(-1) || BIG_ONE;
-    } else {
-      poolToken = tokenState.tokens?.zil;
-      exchangeRate = poolToken.pool?.exchangeRate || BIG_ONE;
+      inToken = tokenState.tokens?.zil;
     }
 
-    const result = calculateAmounts({ exchangeRate, inToken, outToken: token });
+    const result = calculateAmounts({ reverseExchangeRate, inToken, outToken: token });
 
     setFormState({
       outAmount: result.outAmount.toString(),
@@ -206,17 +213,15 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
   const onInCurrencyChange = (token: TokenInfo) => {
     if (token.isZil && swapFormState.outToken === token) return;
-    let { outToken, poolToken, exchangeRate } = swapFormState;
+    let { outToken, poolToken, reverseExchangeRate } = swapFormState;
+    reverseExchangeRate = token.isZil;
+
     if (!token.isZil) {
-      outToken = tokenState.tokens?.zil;
       poolToken = token;
-      exchangeRate = poolToken.pool?.exchangeRate.pow(-1) || BIG_ONE;
-    } else {
-      poolToken = tokenState.tokens?.zil;
-      exchangeRate = poolToken.pool?.exchangeRate || BIG_ONE;
+      outToken = tokenState.tokens?.zil;
     }
 
-    const result = calculateAmounts({ exchangeRate, inToken: token, outToken });
+    const result = calculateAmounts({ reverseExchangeRate, inToken: token, outToken });
 
     setFormState({
       outAmount: result.outAmount.toString(),
@@ -258,7 +263,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     });
   };
 
-  const { outToken, inToken, exchangeRate } = swapFormState;
+  const { outToken, inToken } = swapFormState;
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       <Box display="flex" flexDirection="column" className={classes.container}>
@@ -287,7 +292,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         {!!(inToken && outToken) && (
           <KeyValueDisplay className={classes.labelExchangeRate}
             kkey="Exchange Rate"
-            value={`1 ${inToken!.symbol || ""} = ${moneyFormat(exchangeRate || 0, { maxFractionDigits: outToken?.decimals, symbol: outToken?.symbol })}`} />
+            value={`1 ${inToken!.symbol || ""} = ${moneyFormat(getExchangeRate(), { maxFractionDigits: outToken?.decimals, symbol: outToken?.symbol })}`} />
         )}
 
         <Typography color="error">{error?.message}</Typography>

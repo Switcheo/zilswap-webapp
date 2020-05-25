@@ -7,7 +7,7 @@ export interface SwapFormState {
 
   percentage: BigNumber;
   exactOf: ExactOfOptions;
-  
+
   poolToken?: TokenInfo;
 
   inToken?: TokenInfo;
@@ -15,7 +15,8 @@ export interface SwapFormState {
 
   outToken?: TokenInfo;
   outAmount: BigNumber;
-  exchangeRate: BigNumber;
+
+  reverseExchangeRate: boolean;
 };
 
 export interface UpdateExtendedPayload {
