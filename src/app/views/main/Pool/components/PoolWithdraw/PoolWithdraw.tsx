@@ -1,9 +1,9 @@
 
-import { Box, Button, ButtonGroup, Divider, InputLabel, Typography } from "@material-ui/core";
+import { Box, Divider, InputLabel, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { ContrastBox, CurrencyInput, FancyButton, KeyValueDisplay } from "app/components";
+import { ContrastBox, CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect } from "app/components";
 import { actions } from "app/store";
 import { RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -34,13 +34,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       padding: theme.spacing(0, 2, 2),
     },
   },
-  percentageButton: {
-    borderRadius: 4,
-    color: theme.palette.text?.secondary,
-    paddingTop: 10,
-    paddingBottom: 10
-  },
-  percentageGroup: {
+  proportionSelect: {
     marginTop: 12,
     marginBottom: 20
   },
@@ -113,6 +107,15 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     compression: poolToken?.decimals,
   };
 
+  const onPercentage = (percentage: number) => {
+    if (!poolToken?.pool) return;
+    const pool = poolToken.pool!;
+
+    const balance = new BigNumber(pool.userContribution);
+    const amount = balance.times(percentage).decimalPlaces(0);
+    onTokenChange(amount.shiftedBy(-poolToken.decimals).toString());
+  };
+
   const onPoolChange = (token: TokenInfo) => {
     if (token.symbol === "ZIL") return;
     dispatch(actions.Pool.selectPool({ token }));
@@ -162,25 +165,15 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           disabled={!poolToken}
           onAmountChange={onTokenChange}
           onCurrencyChange={onPoolChange} />
-        <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">25%</Typography>
-          </Button>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">50%</Typography>
-          </Button>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">75%</Typography>
-          </Button>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">100%</Typography>
-          </Button>
-        </ButtonGroup>
+        <ProportionSelect fullWidth
+          color="primary"
+          className={classes.proportionSelect}
+          onSelectProp={onPercentage} />
         <PoolIcon type="minus" />
         <InputLabel>You Receive (Estimate)</InputLabel>
         <ContrastBox className={classes.readOnly}>
           <Typography className={classes.previewAmount}>
-            <span>{formatMoney(formState.zilAmount, zilFormatOpts)}</span> 
+            <span>{formatMoney(formState.zilAmount, zilFormatOpts)}</span>
             <span> + {formatMoney(formState.tokenAmount, formatOpts)}</span>
           </Typography>
         </ContrastBox>

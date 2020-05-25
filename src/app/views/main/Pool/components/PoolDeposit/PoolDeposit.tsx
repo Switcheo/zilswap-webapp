@@ -1,6 +1,6 @@
-import { Box, Button, ButtonGroup, Typography } from "@material-ui/core";
+import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { CurrencyInput, FancyButton } from "app/components";
+import { CurrencyInput, FancyButton, ProportionSelect } from "app/components";
 import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
@@ -30,13 +30,7 @@ const useStyles = makeStyles(theme => ({
       padding: theme.spacing(0, 2, 2),
     },
   },
-  percentageButton: {
-    borderRadius: 4,
-    color: theme.palette.text?.secondary,
-    paddingTop: 10,
-    paddingBottom: 10
-  },
-  percentageGroup: {
+  proportionSelect: {
     marginTop: 12,
     marginBottom: 20
   },
@@ -61,6 +55,15 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const dispatch = useDispatch();
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
+
+  const onPercentage = (percentage: number) => {
+    const zilToken = tokenState.tokens.zil;
+    if (!zilToken) return;
+
+    const balance = new BigNumber(zilToken.balance.toString());
+    const amount = balance.times(percentage).decimalPlaces(0);
+    onZilChange(amount.shiftedBy(-zilToken.decimals).toString());
+  };
 
   const onPoolChange = (token: TokenInfo) => {
     if (token.symbol === "ZIL") return;
@@ -119,20 +122,10 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           amount={formState.zilAmount}
           disabled={!poolToken}
           onAmountChange={onZilChange} />
-        <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">25%</Typography>
-          </Button>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">50%</Typography>
-          </Button>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">75%</Typography>
-          </Button>
-          <Button className={classes.percentageButton}>
-            <Typography variant="button">100%</Typography>
-          </Button>
-        </ButtonGroup>
+        <ProportionSelect fullWidth
+          color="primary"
+          className={classes.proportionSelect}
+          onSelectProp={onPercentage} />
         <PoolIcon type="plus" />
         <CurrencyInput
           label="Deposit"

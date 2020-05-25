@@ -1,7 +1,7 @@
-import { Box, Button, ButtonGroup, IconButton, makeStyles, Typography } from "@material-ui/core";
+import { Box, IconButton, makeStyles, Typography } from "@material-ui/core";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { CurrencyInput, FancyButton, KeyValueDisplay, NotificationBox } from "app/components";
+import { CurrencyInput, FancyButton, KeyValueDisplay, NotificationBox, ProportionSelect } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -29,6 +29,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   inputRow: {
     paddingLeft: 0
   },
+  proportionSelect: {
+    marginTop: 12,
+  },
   currencyButton: {
     borderRadius: 0,
     color: theme.palette.text!.primary,
@@ -50,15 +53,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   labelExchangeRate: {
     marginTop: theme.spacing(1),
-  },
-  percentageButton: {
-    borderRadius: 4,
-    color: theme.palette.text?.secondary,
-    paddingTop: 10,
-    paddingBottom: 10
-  },
-  percentageGroup: {
-    marginTop: 12
   },
   actionButton: {
     marginTop: theme.spacing(6),
@@ -137,12 +131,12 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
 
   const onPercentage = (percentage: number) => {
-    const { outToken } = formState;
-    if (!outToken) return;
+    const { inToken } = formState;
+    if (!inToken) return;
 
-    const balance = new BigNumber(outToken.balance.toString());
-    const amount = balance.times(percentage).decimalPlaces(outToken.decimals);
-    onOutAmountChange(amount.shiftedBy(-outToken.decimals).toString());
+    const balance = new BigNumber(inToken.balance.toString());
+    const amount = balance.times(percentage).decimalPlaces(0);
+    onInAmountChange(amount.shiftedBy(-inToken.decimals).toString());
   };
 
   const calculateAmounts = (props: CalculateAmountProps = {}) => {
@@ -254,20 +248,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           disabled={!inToken}
           onAmountChange={onInAmountChange}
           onCurrencyChange={onInCurrencyChange} />
-        <ButtonGroup fullWidth color="primary" className={classes.percentageGroup}>
-          <Button onClick={() => onPercentage(0.25)} className={classes.percentageButton}>
-            <Typography variant="button">25%</Typography>
-          </Button>
-          <Button onClick={() => onPercentage(0.5)} className={classes.percentageButton}>
-            <Typography variant="button">50%</Typography>
-          </Button>
-          <Button onClick={() => onPercentage(0.75)} className={classes.percentageButton}>
-            <Typography variant="button">75%</Typography>
-          </Button>
-          <Button onClick={() => onPercentage(1)} className={classes.percentageButton}>
-            <Typography variant="button">100%</Typography>
-          </Button>
-        </ButtonGroup>
+        <ProportionSelect fullWidth color="primary" className={classes.proportionSelect} onSelectProp={onPercentage} />
         <Box display="flex" mt={4} mb={1} justifyContent="center">
           <IconButton onClick={() => onReverse()} className={classes.swapButton}>
             <SwapSVG />
