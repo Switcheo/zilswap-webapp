@@ -226,7 +226,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           <Typography className={classes.text} variant="body2">
             You are removing{" "}
             {formatMoney(poolFormState.removeZilAmount, zilFormatOpts)} + {formatMoney(poolFormState.removeTokenAmount, formatOpts)}
-            from the liquidity pool. (~{formatMoney(formState.tokenAmount, { ...formatOpts, showCurrency: false })} Liquidity tokens)
+            from the liquidity pool. (~{formatMoney(poolFormState.removeTokenAmount, { ...formatOpts, showCurrency: false })} Liquidity tokens)
           </Typography>
           <Divider className={classes.divider} />
           <KeyValueDisplay mt={"22px"} kkey={"Current Total Supply"} value={`${formatMoney(poolToken?.pool?.tokenReserve || 0, { ...formatOpts, compression: 0 })} Liquidity Tokens`} />
