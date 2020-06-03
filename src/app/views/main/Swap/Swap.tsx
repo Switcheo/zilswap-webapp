@@ -77,6 +77,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const initialFormState = {
   inAmount: "0",
   outAmount: "0",
+  calculatingRate: false,
 };
 
 type CalculateAmountProps = {
@@ -96,6 +97,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
   const [runSwap, loading, error] = useAsyncTask("swap");
+  const [runExchangeRate, loadingRate, errorRate] = useAsyncTask("exchangeRate");
   const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -104,6 +106,13 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     const _reverseExchangeRate = reverseExchangeRate === undefined ? swapFormState.reverseExchangeRate : reverseExchangeRate;
     const power = _reverseExchangeRate ? -1 : 1;
     return swapFormState.poolToken?.pool?.exchangeRate?.pow(power) || BIG_ONE;
+  };
+
+  const getExchangeRateLabel = () => {
+    if (formState.calculatingRate) return "Calculating…";
+    // const exchangeRate = swapFormState.expectedExchangeRate || getExchangeRate();
+    const exchangeRate = getExchangeRate();
+    return `1 ${inToken!.symbol || ""} = ${moneyFormat(exchangeRate, { compression: 0, maxFractionDigits: outToken?.decimals, symbol: outToken?.symbol })}`
   };
 
   const onReverse = () => {
@@ -139,6 +148,52 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     onInAmountChange(amount.shiftedBy(-inToken.decimals).toString());
   };
 
+  const updateExchangeRate = () => {
+    if (loadingRate) return;
+    runExchangeRate(async () => {
+      const { inToken, outToken, exactOf, inAmount, outAmount } = swapFormState;
+      if (!inToken || !outToken) {
+        setFormState({
+          ...formState,
+          calculatingRate: false,
+        });
+      };
+
+      const amount = exactOf === "in" ? inAmount.shiftedBy(inToken.decimals) : outAmount.shiftedBy(outToken.decimals);
+
+      const rateResult = await ZilswapConnector.getExchangeRate({
+        amount, exactOf,
+        tokenInID: inToken!.address,
+        tokenOutID: outToken.address,
+      });
+
+      // setFormState({
+      //   ...formState,
+      //   ...exactOf === "in" && {
+      //     outAmount: rateResult.expectedAmount.shiftedBy(-outToken.decimals).toString(),
+      //   },
+      //   ...exactOf === "out" && {
+      //     inAmount: rateResult.expectedAmount.shiftedBy(-inToken.decimals).toString(),
+      //   },
+      //   calculatingRate: false,
+      // });
+
+      dispatch(actions.Swap.update({
+        ...exactOf === "in" && {
+          expectedInAmount: undefined,
+          expectedOutAmount: rateResult.expectedAmount.shiftedBy(-outToken.decimals),
+          expectedExchangeRate: amount.div(rateResult.expectedAmount).pow(-1),
+        },
+        ...exactOf === "out" && {
+          expectedOutAmount: undefined,
+          expectedInAmount: rateResult.expectedAmount.shiftedBy(-inToken.decimals),
+          expectedExchangeRate: amount.div(rateResult.expectedAmount).pow(1),
+        },
+        expectedSlippage: rateResult.slippage.shiftedBy(-2).toNumber(),
+      }));
+    });
+  };
+
   const calculateAmounts = (props: CalculateAmountProps = {}) => {
     let _inAmount: BigNumber = props.inAmount || swapFormState.inAmount;
     let _outAmount: BigNumber = props.outAmount || swapFormState.outAmount;
@@ -172,6 +227,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (swapFormState.poolToken) {
       const result = calculateAmounts({ exactOf: "out", outAmount });
       setFormState({
+        ...formState,
         outAmount: amount,
         inAmount: result.inAmount.toString(),
       });
@@ -183,6 +239,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (swapFormState.poolToken) {
       const result = calculateAmounts({ exactOf: "in", inAmount });
       setFormState({
+        ...formState,
         inAmount: amount,
         outAmount: result.outAmount.toString(),
       });
@@ -202,6 +259,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     const result = calculateAmounts({ reverseExchangeRate, inToken, outToken: token });
 
     setFormState({
+      ...formState,
       outAmount: result.outAmount.toString(),
       inAmount: result.inAmount.toString(),
     });
@@ -224,6 +282,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     const result = calculateAmounts({ reverseExchangeRate, inToken: token, outToken });
 
     setFormState({
+      ...formState,
       outAmount: result.outAmount.toString(),
       inAmount: result.inAmount.toString(),
     });
@@ -237,6 +296,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const onSwap = () => {
     const { outToken, inToken, inAmount, outAmount, exactOf, slippage, expiry } = swapFormState;
     if (!inToken || !outToken) return;
+    if (inAmount.isZero() || outAmount.isZero()) return;
     if (loading) return;
 
     runSwap(async () => {
@@ -260,9 +320,13 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const onDoneEditing = () => {
     setFormState({
+      ...formState,
+      // calculatingRate: true,
       inAmount: swapFormState.inAmount.toString(),
       outAmount: swapFormState.outAmount.toString(),
     });
+
+    updateExchangeRate();
   };
 
   const { outToken, inToken } = swapFormState;
@@ -295,10 +359,10 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         {!!(inToken && outToken) && (
           <KeyValueDisplay className={classes.labelExchangeRate}
             kkey="Exchange Rate"
-            value={`1 ${inToken!.symbol || ""} = ${moneyFormat(getExchangeRate(), { maxFractionDigits: outToken?.decimals, symbol: outToken?.symbol })}`} />
+            value={getExchangeRateLabel()} />
         )}
 
-        <Typography color="error">{error?.message}</Typography>
+        <Typography color="error">{(error || errorRate)?.message}</Typography>
 
         <FancyButton walletRequired fullWidth
           loading={loading}

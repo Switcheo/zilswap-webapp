@@ -147,6 +147,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
   const onRemoveLiquidity = () => {
     if (!poolToken) return;
+    if (poolFormState.removeTokenAmount.isZero()) return;
     if (loading) return;
 
     runRemoveLiquidity(async () => {

@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 const LoadingIcon = () => {
   return (
-    <CircularProgress size={24} />
+    <CircularProgress style={{ display: "block" }} size={24} />
   );
 };
 

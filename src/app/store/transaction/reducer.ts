@@ -6,7 +6,7 @@ import { ObservedTx } from "zilswap-sdk";
 
 const LOCAL_STORAGE_KEY_OBSERVING_TXS = "zilswap:observing-txs";
 const savedTxsString = localStorage.getItem(LOCAL_STORAGE_KEY_OBSERVING_TXS) || "[]";
-const savedObservingTxs = JSON.parse(savedTxsString);
+const savedObservingTxs = JSON.parse(savedTxsString).filter((tx: ObservedTx) => typeof tx.hash === "string");
 
 const initial_state: TransactionState = {
   transactions: [],
@@ -33,6 +33,8 @@ const reducer = (state: TransactionState = initial_state, action: any) => {
       };
     case Types.TX_OBSERVE:
       const observeProps: ObserveTxProps = action.payload;
+      if (!observeProps.observedTx?.hash) return state;
+
       const newPendingTx: Transaction = {
         status: "pending",
         hash: observeProps.observedTx.hash,
@@ -41,8 +43,8 @@ const reducer = (state: TransactionState = initial_state, action: any) => {
       return {
         ...state,
         transactions: [
-          ...state.transactions,
           newPendingTx,
+          ...state.transactions,
         ],
         observingTxs: [
           ...state.observingTxs,
@@ -52,8 +54,11 @@ const reducer = (state: TransactionState = initial_state, action: any) => {
     case Types.TX_UPDATE:
       const updateProps: TransactionUpdateProps = action.payload;
       const updateTxIndex = state.transactions.findIndex(tx => tx.hash === updateProps.hash);
+
       if (updateTxIndex >= 0) {
         state.transactions.splice(updateTxIndex, 1, { ...updateProps });
+      } else {
+        state.transactions.unshift({ ...updateProps });
       }
       const observedTxIndex = state.observingTxs.findIndex(tx => tx.hash === updateProps.hash);
       const confirmedTxs = state.observingTxs.splice(observedTxIndex, 1);

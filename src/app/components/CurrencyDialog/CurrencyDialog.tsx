@@ -63,7 +63,6 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-
 const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProps) => {
   const { children, className, onSelectCurrency, ...rest } = props;
   const classes = useStyles();
@@ -92,8 +91,17 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     }
 
     setTokens(tokens.sort(sortTokens));
-  }, [tokenState.tokens])
+  }, [tokenState.tokens]);
 
+  const filterSearch = (token: TokenInfo): boolean => {
+    if (!search.trim().length) return true;
+    const searchTerm = search.toLowerCase();
+    return token.address.toLowerCase().includes(searchTerm) ||
+      token.name.toLowerCase().includes(searchTerm) ||
+      token.symbol.toLowerCase().includes(searchTerm);
+  };
+
+  const filteredTokens = tokens.filter(filterSearch);
   return (
     <DialogModal header="Select a Token" {...rest} className={cls(classes.root, className)}>
       <DialogContent className={classes.content}>
@@ -117,7 +125,12 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
         )}
 
         <Box className={classes.currencies}>
-          {tokens.map((token, index) => (
+          {!!tokenState.initialized && search.length > 0 && !filteredTokens.length && (
+            <Box>
+              <Typography color="error">No tokens found for "{search}"</Typography>
+            </Box>
+          )}
+          {filteredTokens.map((token, index) => (
             <ButtonBase
               className={classes.buttonBase}
               key={index}

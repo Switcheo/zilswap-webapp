@@ -8,6 +8,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolToggleButton, PoolWithdraw } from "./components";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
+import { Notifications } from "app/components";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -38,6 +39,7 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
 
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
+      <Notifications />
       {(!poolToken?.loading && !poolToken?.pool) && (<NewPoolMessage token={poolToken || undefined} />)}
       <Box display="flex" flexDirection="column">
         <Box display="flex" justifyContent="space-between" mb="28px" className={classes.container}>

@@ -128,6 +128,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
   const onAddLiquidity = () => {
     if (!poolToken) return;
+    if (poolFormState.addTokenAmount.isZero()) return;
     if (loading) return;
 
     runAddLiquidity(async () => {

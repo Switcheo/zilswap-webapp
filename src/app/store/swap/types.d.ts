@@ -1,3 +1,5 @@
+import BigNumber from "bignumber.js";
+
 export type ExactOfOptions = "in" | "out";
 
 export interface SwapFormState {
@@ -17,6 +19,11 @@ export interface SwapFormState {
   outAmount: BigNumber;
 
   reverseExchangeRate: boolean;
+
+  expectedExchangeRate?: BigNumber;
+  expectedSlippage?: number;
+  expectedInAmount?: BigNumber;
+  expectedOutAmount?: BigNumber;
 };
 
 export interface UpdateExtendedPayload {
