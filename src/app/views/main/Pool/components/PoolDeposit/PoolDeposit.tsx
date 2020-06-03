@@ -144,7 +144,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         address: tokenAddress,
         pool: updatedPool,
       }));
-      console.log({ observedTx });
+      dispatch(actions.Transaction.observe({ observedTx }));
     });
   };
 

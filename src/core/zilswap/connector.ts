@@ -1,13 +1,14 @@
 import { Zilliqa } from "@zilliqa-js/zilliqa";
 import BigNumber from "bignumber.js";
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
-import { ObservedTx, Pool, TokenDetails, Zilswap } from "zilswap-sdk";
+import { ObservedTx, Pool, TokenDetails, Zilswap, OnUpdate, TxStatus, TxReceipt } from "zilswap-sdk";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
 
 
 export interface ConnectProps {
   wallet: ConnectedWallet;
   network: Network;
+  observedTxs?: ObservedTx[];
 };
 
 export interface ExchangeRateQueryProps {
@@ -93,6 +94,26 @@ const handleObservedTx = (observedTx: ObservedTx) => {
  */
 export class ZilswapConnector {
   static network?: Network;
+  private static observer: OnUpdate | null;
+
+  private static mainObserver: OnUpdate = (tx: ObservedTx, status: TxStatus, receipt?: TxReceipt) => {
+    console.log("main observer", tx.hash, status);
+    try {
+      if (ZilswapConnector.observer)
+        ZilswapConnector.observer(tx, status, receipt);
+    } catch (e) {
+      console.log("error processing observeTx update", e);
+    }
+  };
+
+  /**
+   * 
+   * 
+   */
+  static registerObserver = (observer: OnUpdate | null) => {
+    console.log("connector register observer");
+    ZilswapConnector.observer = observer;
+  };
 
   /**
    * 
@@ -101,7 +122,9 @@ export class ZilswapConnector {
     await initializeForWallet(props.wallet);
     ZilswapConnector.network = props.network;
 
-    await getState().zilswap.initialize(console.log);
+    const observedTxs = props.observedTxs || [];
+
+    await getState().zilswap.initialize(ZilswapConnector.mainObserver, observedTxs);
 
     console.log("zilswap connection established");
   };

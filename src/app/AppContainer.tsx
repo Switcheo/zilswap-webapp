@@ -16,6 +16,7 @@ import { connectWalletPrivateKey, ConnectWalletResult } from "core/wallet";
 import { useAsyncTask } from "./utils";
 import { actions } from "./store";
 import { AppButler } from "core/utilities";
+import { ZilswapConnector } from "core/zilswap";
 
 
 const history = createBrowserHistory();
@@ -40,7 +41,17 @@ const AppContainer: React.FC = () => {
         const walletResult: ConnectWalletResult = await connectWalletPrivateKey(privateKey);
 
         if (walletResult.wallet) {
-          dispatch(actions.Wallet.update({ wallet: walletResult.wallet!, pk: privateKey }));
+          const savedTxsString = localStorage.getItem("zilswap:observing-txs") || "[]";
+          const savedObservingTxs = JSON.parse(savedTxsString);
+          console.log({ savedObservingTxs });
+
+          await ZilswapConnector.connect({
+            wallet: walletResult.wallet!,
+            network: walletResult.wallet!.network,
+            observedTxs: savedObservingTxs,
+          });
+
+          dispatch(actions.Wallet.update({ wallet: walletResult.wallet!, pk: privateKey, }));
         } else {
           dispatch(actions.Wallet.update({ wallet: undefined, pk: undefined }));
         }

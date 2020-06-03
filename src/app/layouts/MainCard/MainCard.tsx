@@ -1,12 +1,12 @@
 import { Box, Button, Paper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { RootState, TokenInfo, TransactionState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import { PaperProps } from "material-ui";
 import React, { forwardRef } from "react";
-import { NavLink as RouterLink } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { RootState, FormNotification } from "app/store/types";
+import { NavLink as RouterLink } from "react-router-dom";
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1, flexBasis: 1 }} >
@@ -82,8 +82,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const MainCard: React.FC<PaperProps> = (props: any) => {
   const { children, className, staticContext, ...rest } = props;
   const classes = useStyles();
-  const notification = useSelector<RootState, FormNotification | undefined>(state => state.layout.notification);
-  const hasNotification = notification !== undefined;
+  const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
+  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+  const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
+
+  const hasNotification = !!walletState.wallet && ((poolToken && !poolToken.loading && !poolToken.pool) ||
+    transactionState.observingTxs.length > 0 ||
+    transactionState.confirmedTxs.length > 0);
+  console.log({ hasNotification });
 
   return (
     <Box className={classes.root}>

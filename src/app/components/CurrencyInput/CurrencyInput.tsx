@@ -23,7 +23,6 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 0,
     color: theme.palette.text.primary,
     fontWeight: 600,
-    width: 150,
     display: "flex",
     justifyContent: "space-between"
   },
@@ -42,9 +41,10 @@ const useStyles = makeStyles(theme => ({
     marginRight: theme.spacing(1),
     paddingTop: theme.spacing(1),
   },
-  primaryColor: {
+  expandIcon: {
+    marginLeft: theme.spacing(1),
     color: theme.palette.primary.main
-  }
+  },
 }));
 
 export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement> {
@@ -135,7 +135,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
                   <CurrencyLogo currency={token?.symbol} className={classes.currencyLogo} />
                   <Typography variant="button">{token?.symbol || "Select Token"}</Typography>
                 </Box>
-                <ExpandMoreIcon className={classes.primaryColor} />
+                <ExpandMoreIcon className={classes.expandIcon} />
               </Button>
             )}
 

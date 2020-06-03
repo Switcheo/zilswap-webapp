@@ -7,7 +7,7 @@ import { ConnectedWallet } from "core/wallet";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { TokenDetails } from "zilswap-sdk";
+import { ObservedTx, TokenDetails, TxReceipt, TxStatus } from "zilswap-sdk";
 import { ZIL_HASH } from "zilswap-sdk/lib/constants";
 
 /**
@@ -15,7 +15,6 @@ import { ZIL_HASH } from "zilswap-sdk/lib/constants";
  * 
  */
 export type AppButlerProps = {
-
 };
 
 /**
@@ -98,8 +97,24 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
   useEffect(() => {
     console.log("butler mount");
+
+    ZilswapConnector.registerObserver((tx: ObservedTx, status: TxStatus, receipt?: TxReceipt) => {
+      console.log("butler observed tx", tx.hash, status);
+
+      dispatch(actions.Transaction.update({
+        hash: tx.hash,
+        status: status,
+        txReceipt: receipt,
+      }))
+    });
+
     mounted = true;
-    return () => { mounted = false };
+    return () => {
+      mounted = false
+      ZilswapConnector.registerObserver(null);
+    };
+
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {

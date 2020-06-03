@@ -1,86 +1,60 @@
-import { Box, IconButton } from "@material-ui/core";
+import { Box, IconButton, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React from "react";
 import { ReactComponent as CancelLogo } from "./cancel_logo.svg";
 
+export interface NotificationBoxProps extends BoxProps {
+  IconComponent?: React.ElementType;
+  onRemove?: () => void;
+};
+
 const useStyles = makeStyles((theme: AppTheme) => ({
   notification: {
     backgroundColor: theme.palette.background.paperOpposite!,
-    padding: theme.spacing(2),
+    padding: theme.spacing(1),
     display: "flex",
-    justifyContent: "space-between",
-    alignItems: "start"
+    flexDirection: "row",
+    alignItems: "flex-start"
   },
   notificationSymbol: {
-    position: "relative",
-    left: 20,
-    top: 0,
-    float: "left"
+    marginLeft: theme.spacing(1),
+    color: theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "100" : "200"],
+    "& svg": {
+      display: "block",
+    }
   },
   notificationDetail: {
-    display: "flex",
-    alignSelf: "stretch"
-  },
-  notificationMessage: {
-    fontWeight: 400,
-    color: theme.palette.type === "light" ? theme.palette.colors.zilliqa.neutral["100"] : theme.palette.colors.zilliqa.neutral["200"]
+    marginLeft: theme.spacing(1),
+    marginTop: theme.spacing(.75),
+    flex: 1,
   },
   cancelNotification: {
-    float: "right",
-    paddingRight: theme.spacing(1),
-    display: "flex",
-    justifyContent: "start"
-  },
-  viewDetail: {
-    color: theme.palette.primary.main,
-    marginLeft: theme.spacing(1)
-  },
-  success: {
-    top: 10
-  },
-  successMessage: {
-    paddingTop: 10
+    padding: theme.spacing(1),
+    marginRight: theme.spacing(1),
   },
 }));
 
-const NotificationBox: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: React.HTMLAttributes<HTMLDivElement>) => {
-  const { children, className, ...rest } = props;
+const NotificationBox: React.FC<NotificationBoxProps> = (props: NotificationBoxProps) => {
+  const { children, className, onRemove, IconComponent, ...rest } = props;
   const classes = useStyles();
-
-  // const renderNotification = (type: string) => {
-  //   switch (type) {
-  //     case "success":
-  //       return (
-  //         <Fragment>
-  //           <Box className={cls(classes.notificationSymbol, classes.success)}>
-  //             <SuccessLogo />
-  //           </Box>
-  //           <Box ml={6}>
-  //             <Typography variant="body2" className={cls(classes.notificationMessage, classes.successMessage)}>
-  //               {notification.message} {notification.type === "success" && (
-  //                 <RouterLink className={classes.viewDetail} to="detail">View Details</RouterLink>
-  //               )}
-  //             </Typography>
-  //           </Box>
-  //         </Fragment>
-  //       );
-  //   }
-  // }
-
-  const clearNotification = () => {
-
-  };
 
   return (
     <Box {...rest} className={cls(classes.notification, className)}>
+      {!!IconComponent && (
+        <Box className={classes.notificationSymbol}>
+          <IconComponent />
+        </Box>
+      )}
       <Box className={classes.notificationDetail}>
         {children}
       </Box>
-      <IconButton onClick={clearNotification} className={classes.cancelNotification}>
-        <CancelLogo />
-      </IconButton>
+      {!!onRemove && (
+        <IconButton onClick={onRemove} className={classes.cancelNotification}>
+          <CancelLogo />
+        </IconButton>
+      )}
     </Box>
   );
 }

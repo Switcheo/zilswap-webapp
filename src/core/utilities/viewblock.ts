@@ -6,7 +6,7 @@ const API_KEY = process.env.REACT_APP_VIEWBLOCK_API_KEY;
 const headers = {
 	"X-APIKEY": API_KEY
 }
-const PATH_PREFIX = "https://api.viewblock.io/v1";
+export const PATH_PREFIX = "https://api.viewblock.io/v1";
 
 const PATHS = {
 	getBalance: "/zilliqa/addresses/:address",

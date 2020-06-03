@@ -1,7 +1,7 @@
 import { Box, IconButton, makeStyles, Typography } from "@material-ui/core";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect } from "app/components";
+import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect, Notifications } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, RootState, SwapFormState, TokenInfo, TokenState } from "app/store/types";
@@ -102,7 +102,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const getExchangeRate = (reverseExchangeRate?: boolean): BigNumber => {
     const _reverseExchangeRate = reverseExchangeRate === undefined ? swapFormState.reverseExchangeRate : reverseExchangeRate;
-    const power = _reverseExchangeRate ? -1: 1;
+    const power = _reverseExchangeRate ? -1 : 1;
     return swapFormState.poolToken?.pool?.exchangeRate?.pow(power) || BIG_ONE;
   };
 
@@ -254,7 +254,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         maxAdditionalSlippage: toBasisPoints(slippage).toNumber(),
       });
 
-      console.log({ observedTx });
+      dispatch(actions.Transaction.observe({ observedTx }));
     });
   };
 
@@ -268,6 +268,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { outToken, inToken } = swapFormState;
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
+      <Notifications />
       <Box display="flex" flexDirection="column" className={classes.container}>
         <CurrencyInput
           label="You Give"
