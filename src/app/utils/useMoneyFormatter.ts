@@ -39,7 +39,7 @@ const formatter = (inputNumber: BigNumber | number | string = 0, opts: MoneyForm
   let [integers, decimals = "0"] = absValue.split(".");
   const firstThouSepIndex = integers.length > 3 ? integers.length % 3 : 0;
   decimals = decimals.replace(/^.*\./g, "").slice(0, maxFractionDigits).replace(/0+$/, "");
-  if (decimals === "") decimals = "000".slice(0, maxFractionDigits);
+  if (decimals === "") decimals = "00".slice(0, maxFractionDigits);
 
   return (positive ? "" : "+") +
     (firstThouSepIndex ? integers.substr(0, firstThouSepIndex) + thouSep : "") +

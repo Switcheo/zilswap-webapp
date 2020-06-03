@@ -104,7 +104,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     const _reverseExchangeRate = reverseExchangeRate === undefined ? swapFormState.reverseExchangeRate : reverseExchangeRate;
     const power = _reverseExchangeRate ? -1: 1;
     return swapFormState.poolToken?.pool?.exchangeRate?.pow(power) || BIG_ONE;
-  }
+  };
 
   const onReverse = () => {
     const reverseExchangeRate = !swapFormState.reverseExchangeRate;
@@ -145,9 +145,9 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     const _inToken: TokenInfo | undefined = props.inToken || swapFormState.inToken;
     const _outToken: TokenInfo | undefined = props.outToken || swapFormState.outToken;
     const _exactOf: ExactOfOptions = props.exactOf || swapFormState.exactOf;
-    const _reverseExchangeRate = props.reverseExchangeRate === undefined ? swapFormState.reverseExchangeRate: props.reverseExchangeRate;
+    const _reverseExchangeRate = props.reverseExchangeRate === undefined ? swapFormState.reverseExchangeRate : props.reverseExchangeRate;
 
-    const exchangeRate = getExchangeRate(props.reverseExchangeRate);
+    const exchangeRate = getExchangeRate(_reverseExchangeRate);
 
     if (_exactOf === "in") {
       if (_inAmount.isNaN() || _inAmount.isNegative() || !_inAmount.isFinite()) _inAmount = BIG_ZERO;
@@ -235,24 +235,26 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
 
   const onSwap = () => {
-    const { outToken, inToken, inAmount, outAmount, exactOf, slippage } = swapFormState;
+    const { outToken, inToken, inAmount, outAmount, exactOf, slippage, expiry } = swapFormState;
     if (!inToken || !outToken) return;
     if (loading) return;
 
     runSwap(async () => {
 
-      const amount = exactOf === "in" ? inAmount : outAmount;
-      if (isNaN(amount) || !isFinite(amount))
+      const amount: BigNumber = exactOf === "in" ? inAmount.shiftedBy(inToken.decimals) : outAmount.shiftedBy(outToken.decimals);
+      if (amount.isNaN() || !amount.isFinite())
         throw new Error("Invalid input amount");
 
-      const txReceipt = await ZilswapConnector.swap({
+      ZilswapConnector.setDeadlineBlocks(expiry);
+
+      const observedTx = await ZilswapConnector.swap({
         tokenInID: inToken.symbol,
         tokenOutID: outToken.symbol,
         amount, exactOf,
         maxAdditionalSlippage: toBasisPoints(slippage).toNumber(),
       });
 
-      console.log({ txReceipt });
+      console.log({ observedTx });
     });
   };
 

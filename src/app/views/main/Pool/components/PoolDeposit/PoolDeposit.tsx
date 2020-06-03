@@ -132,9 +132,10 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
     runAddLiquidity(async () => {
       const tokenAddress = poolToken.address;
-      const txReceipt = await ZilswapConnector.addLiquidity({
-        tokenAmount: poolFormState.addTokenAmount,
-        zilAmount: poolFormState.addZilAmount,
+      const { addTokenAmount, addZilAmount } = poolFormState;
+      const observedTx = await ZilswapConnector.addLiquidity({
+        tokenAmount: addTokenAmount.shiftedBy(poolToken.decimals),
+        zilAmount: addZilAmount.shiftedBy(tokenState.tokens.zil.decimals),
         tokenID: tokenAddress,
       });
 
@@ -143,7 +144,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         address: tokenAddress,
         pool: updatedPool,
       }));
-      console.log({ txReceipt });
+      console.log({ observedTx });
     });
   };
 

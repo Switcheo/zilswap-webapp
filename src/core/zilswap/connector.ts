@@ -1,9 +1,7 @@
-import { TxReceipt } from "@zilliqa-js/account";
-import { Contract } from "@zilliqa-js/contract";
 import { Zilliqa } from "@zilliqa-js/zilliqa";
 import BigNumber from "bignumber.js";
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
-import { Zilswap } from "zilswap-sdk";
+import { ObservedTx, Pool, TokenDetails, Zilswap } from "zilswap-sdk";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
 
 
@@ -12,47 +10,31 @@ export interface ConnectProps {
   network: Network;
 };
 
+export interface ExchangeRateQueryProps {
+  exactOf: "in" | "out";
+  tokenInID: string;
+  tokenOutID: string;
+  amount: BigNumber;
+};
+
 export interface AddLiquidityProps {
   tokenID: string;
   zilAmount: BigNumber;
   tokenAmount: BigNumber;
   maxExchangeRateChange?: number;
-}
+};
 
 export interface RemoveLiquidityProps {
   tokenID: string;
   contributionAmount: BigNumber;
   maxExchangeRateChange?: number;
-}
+};
 export interface SwapProps {
   exactOf: "in" | "out";
   tokenInID: string;
   tokenOutID: string;
   amount: BigNumber;
   maxAdditionalSlippage?: number;
-}
-
-/**
- * Filler for unexported type from zilswap-sdk
- */
-export type TokenDetails = {
-  contract: Contract;
-  address: string;
-  hash: string;
-  symbol: string;
-  decimals: number;
-};
-
-/**
- * Filler for unexported type from zilswap-sdk
- */
-export type Pool = {
-  zilReserve: BigNumber;
-  tokenReserve: BigNumber;
-  exchangeRate: BigNumber;
-  totalContribution: BigNumber;
-  userContribution: BigNumber;
-  contributionPercentage: BigNumber;
 };
 
 type ConnectorState = {
@@ -96,12 +78,12 @@ const initializeForWallet = async (wallet: ConnectedWallet): Promise<Zilswap> =>
  * 
  * @param txReceipt `@zilliqa-js` blockchain transaction receipt
  */
-const handleTxReceipt = (txReceipt: TxReceipt) => {
-  // @ts-ignore
-  if (txReceipt.exceptions?.length) {
-    // @ts-ignore
-    throw txReceipt.exceptions[0];
-  }
+const handleObservedTx = (observedTx: ObservedTx) => {
+  // // @ts-ignore
+  // if (txReceipt.exceptions?.length) {
+  //   // @ts-ignore
+  //   throw txReceipt.exceptions[0];
+  // }
 };
 
 /**
@@ -119,7 +101,7 @@ export class ZilswapConnector {
     await initializeForWallet(props.wallet);
     ZilswapConnector.network = props.network;
 
-    await getState().zilswap.initialize();
+    await getState().zilswap.initialize(console.log);
 
     console.log("zilswap connection established");
   };
@@ -172,6 +154,31 @@ export class ZilswapConnector {
   };
 
   /**
+   * 
+   * 
+   * @throws "not connected" if `ZilswapConnector.connect` not called.
+   */
+  static setDeadlineBlocks = (blocks: number) => {
+    const { zilswap } = getState();
+    return zilswap.setDeadlineBlocks(blocks);
+  };
+
+  /**
+   * 
+   * 
+   * @throws "not connected" if `ZilswapConnector.connect` not called.
+   */
+  static getExchangeRate = async (props: ExchangeRateQueryProps) => {
+    const { zilswap } = getState();
+    const queryFunction = props.exactOf === "in" ?
+      zilswap.getRatesForInput.bind(zilswap) : zilswap.getRatesForOutput.bind(zilswap);
+    return await queryFunction(
+      props.tokenInID,
+      props.tokenOutID,
+      props.amount.toString());
+  };
+
+  /**
    * Abstraction for Zilswap SDK functions
    * `addLiquidity`
    * 
@@ -190,14 +197,14 @@ export class ZilswapConnector {
     console.log(props.zilAmount.toString());
     console.log(props.tokenAmount.toString());
     console.log(props.maxExchangeRateChange);
-    const txReceipt = await zilswap.addLiquidity(
+    const observedTx = await zilswap.addLiquidity(
       props.tokenID,
       props.zilAmount.toString(),
       props.tokenAmount.toString(),
       props.maxExchangeRateChange);
-    handleTxReceipt(txReceipt);
+    handleObservedTx(observedTx);
 
-    return txReceipt;
+    return observedTx;
   };
 
   /**
@@ -217,13 +224,13 @@ export class ZilswapConnector {
     console.log(props.tokenID);
     console.log(props.contributionAmount.toString());
     console.log(props.maxExchangeRateChange);
-    const txReceipt = await zilswap.removeLiquidity(
+    const observedTx = await zilswap.removeLiquidity(
       props.tokenID,
       props.contributionAmount.toString(),
       props.maxExchangeRateChange);
-    handleTxReceipt(txReceipt);
+    handleObservedTx(observedTx);
 
-    return txReceipt;
+    return observedTx;
   };
 
   /**
@@ -254,14 +261,14 @@ export class ZilswapConnector {
     console.log(props.tokenOutID);
     console.log(props.amount.toString());
     console.log(props.maxAdditionalSlippage);
-    const txReceipt = await swapFunction(
+    const observedTx = await swapFunction(
       props.tokenInID,
       props.tokenOutID,
       props.amount.toString(),
       props.maxAdditionalSlippage);
-    handleTxReceipt(txReceipt);
+    handleObservedTx(observedTx);
 
-    return txReceipt;
+    return observedTx;
   };
 
   /**

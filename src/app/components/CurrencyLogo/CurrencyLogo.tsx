@@ -10,7 +10,7 @@ import { makeStyles } from "@material-ui/core";
 
 export type CurrencyLogoMap = {
   [index: string]: any
-}
+};
 
 const currencies: CurrencyLogoMap = {
   "SWTH": SWTH,
@@ -19,7 +19,7 @@ const currencies: CurrencyLogoMap = {
   "ETH": ETH,
   "0xBTC": C0XBTC,
   "DAI": DAI
-}
+};
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -33,7 +33,7 @@ const CurrencyLogo = (props: any) => {
     className: string;
   } = props;
   const classes = useStyles();
-  const Logo = currencies[currency];
+  const Logo = currencies[currency] || SWTH;
   if (!Logo) return null;
   return (
     <div className={cls(classes.root, className)}>

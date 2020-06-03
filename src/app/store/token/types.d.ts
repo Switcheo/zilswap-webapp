@@ -1,7 +1,7 @@
 import { ConnectedWallet } from "core/wallet/wallet";
 import { BN } from "@zilliqa-js/util";
 import BigNumber from "bignumber.js";
-import { Pool } from "core/zilswap";
+import { Pool } from "zilswap-sdk";
 
 export type TokenBalanceMap = {
   [index: string]: BN;

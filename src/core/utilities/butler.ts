@@ -4,9 +4,11 @@ import { actions } from "app/store";
 import { RootState, TokenBalanceMap, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
 import { ConnectedWallet } from "core/wallet";
-import { TokenDetails, ZilswapConnector } from "core/zilswap";
+import { ZilswapConnector } from "core/zilswap";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { TokenDetails } from "zilswap-sdk";
+import { ZIL_HASH } from "zilswap-sdk/lib/constants";
 
 /**
  * Component constructor properties for {@link AppButler}
@@ -115,7 +117,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
       isZil: true,
       initialized: true,
       listPriority: 0,
-      address: "",
+      address: ZIL_HASH,
       decimals: 12,
       balance: wallet.balance,
       init_supply: new BN(0),

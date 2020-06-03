@@ -32,13 +32,13 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
   const getExchangeRateValue = () => {
     if (!token?.pool) return "-";
     const rate = token.pool.exchangeRate.pow(-1);
-    return `1 ZIL = ${rate.toNumber().toLocaleString("en-US", { maximumFractionDigits: 5 })} ${token!.symbol}`;
+    return `1 ZIL = ${rate.toNumber().toLocaleString("en-US", { maximumFractionDigits: 12 })} ${token!.symbol}`;
   };
   const getPoolSizeValue = () => {
     if (!token?.pool) return "-";
     const { exchangeRate, totalContribution } = token.pool;
     const zilAmount = totalContribution.times(exchangeRate);
-    return `${moneyFormat(zilAmount,zilFormatOpts)} + ${moneyFormat(totalContribution, formatOpts)}`;
+    return `${moneyFormat(zilAmount, zilFormatOpts)} + ${moneyFormat(totalContribution, formatOpts)}`;
   };
   const getShareValue = () => {
     if (!token?.pool) return "-";
