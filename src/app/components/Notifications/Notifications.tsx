@@ -53,7 +53,7 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
       {confirmedTxs.map((observedTx: ObservedTx, index) => (
         <NotificationBox key={index} IconComponent={CheckmarkIcon} onRemove={() => onRemoveConfirmedTx(observedTx)}>
           <Typography variant="body2" className={classes.notificationMessage}>
-            Transaction {truncate(observedTx.hash)} submitted.{" "}
+            Transaction 0x{truncate(observedTx.hash)} submitted.{" "}
             <Typography component="a" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/${observedTx.hash}?network=testnet`}>
               View on explorer
             </Typography>

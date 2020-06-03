@@ -47,7 +47,7 @@ const SampleComponent: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: 
           InputProps={{ className: classes.inputWrapper }}
           inputProps={{ className: classes.input }}
           onChange={onChange} />
-        <Typography variant="body2" className={classes.minutes}>Mins</Typography>
+        <Typography variant="body2" className={classes.minutes}>Blocks</Typography>
       </Box>
     </Box>
   );

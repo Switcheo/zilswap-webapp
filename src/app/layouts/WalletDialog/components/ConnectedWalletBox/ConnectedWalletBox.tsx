@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { ContrastBox } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
-import { RootState } from "app/store/types";
+import { RootState, Transaction, TransactionState } from "app/store/types";
 import { WalletState } from "app/store/wallet/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate } from "app/utils";
@@ -15,6 +15,7 @@ import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
 import { ConnectedWallet } from "core/wallet";
 import { ZilswapConnector } from "core/zilswap";
 import { actions } from "app/store";
+import { ObservedTx } from "zilswap-sdk";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -77,6 +78,7 @@ const ConnectedWalletBox = (props: any) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
+  const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
   const [includeCompleted, setIncludeCompleted] = useState(true);
   const [copyMap, setCopyMap] = useState<CopyMap>({});
   const theme = useTheme();
@@ -138,15 +140,37 @@ const ConnectedWalletBox = (props: any) => {
           <Divider className={cls(classes.divider, classes.rowHeader)} />
         </Box>
         <Box maxHeight={"460px"} overflow="scroll" className={classes.transactions}>
-          {wallet && wallet && wallet.transactions && wallet.transactions.filter((t: any) => includeCompleted ? true : !t.receiptSuccess).map((transaction: any) => (
+          {transactionState.observingTxs.map((transaction: ObservedTx) => (
             <Box key={transaction.hash}>
               <Box display="flex" flexDirection="row" justifyContent="space-between">
                 <Box display="flex" flexDirection="row" alignItems="center">
-                  <Typography variant="body2">{truncate(transaction.hash, 10, 10)}</Typography>
-                  <IconButton target="_blank" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=testnet`} className={classes.newLinkTransaction} size="small"><NewLinkIcon /></IconButton>
-                  <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(transaction.hash)} open={!!copyMap[transaction.hash]} title="Copied!"><IconButton className={classes.copy} size="small"><CopyIcon /></IconButton></Tooltip>
+                  <Typography variant="body2">0x{truncate(transaction.hash, 10, 10)}</Typography>
+                  <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(transaction.hash)} open={!!copyMap[transaction.hash]} title="Copied!">
+                    <IconButton className={classes.copy} size="small">
+                      <CopyIcon />
+                    </IconButton>
+                  </Tooltip>
                 </Box>
-                <Typography variant="body2">{transaction.receiptSuccess ? "Completed" : "Cancelled"}</Typography>
+                <Typography variant="body2">Pending</Typography>
+              </Box>
+              <Divider className={cls(classes.divider)} />
+            </Box>
+          ))}
+          {includeCompleted && transactionState.transactions.map((transaction: Transaction) => (
+            <Box key={transaction.hash}>
+              <Box display="flex" flexDirection="row" justifyContent="space-between">
+                <Box display="flex" flexDirection="row" alignItems="center">
+                  <Typography variant="body2">0x{truncate(transaction.hash, 10, 10)}</Typography>
+                  <IconButton target="_blank" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=testnet`} className={classes.newLinkTransaction} size="small">
+                    <NewLinkIcon />
+                  </IconButton>
+                  <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(transaction.hash)} open={!!copyMap[transaction.hash]} title="Copied!">
+                    <IconButton className={classes.copy} size="small">
+                      <CopyIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+                <Typography variant="body2">{transaction.status === "confirmed" ? "Completed" : "Cancelled"}</Typography>
               </Box>
               <Divider className={cls(classes.divider)} />
             </Box>

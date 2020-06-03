@@ -1,5 +1,7 @@
 import { Types } from "./actions";
+import { Types as WalletTypes } from "../wallet/actions";
 import { ObserveTxProps, Transaction, TransactionsInitProps, TransactionState, TransactionUpdateProps, TransactionRemoveProps } from "./types";
+import { ObservedTx } from "zilswap-sdk";
 
 
 const LOCAL_STORAGE_KEY_OBSERVING_TXS = "zilswap:observing-txs";
@@ -16,9 +18,18 @@ const reducer = (state: TransactionState = initial_state, action: any) => {
   switch (action.type) {
     case Types.TX_INIT:
       const initProps: TransactionsInitProps = action.payload;
+      const interimConfirmedTxs: ObservedTx[] = [];
+      const observingTxs: ObservedTx[] = [];
+      state.observingTxs.forEach(observingTx => {
+        if (initProps.transactions.find(tx => tx.hash === observingTx.hash))
+          interimConfirmedTxs.push(observingTx);
+        else
+          observingTxs.push(observingTx);
+      })
       return {
-        ...state,
         transactions: [...initProps.transactions],
+        observingTxs,
+        confirmedTxs: interimConfirmedTxs,
       };
     case Types.TX_OBSERVE:
       const observeProps: ObserveTxProps = action.payload;
@@ -45,17 +56,23 @@ const reducer = (state: TransactionState = initial_state, action: any) => {
         state.transactions.splice(updateTxIndex, 1, { ...updateProps });
       }
       const observedTxIndex = state.observingTxs.findIndex(tx => tx.hash === updateProps.hash);
-      const [observedTx] = state.observingTxs.splice(observedTxIndex, 1);
+      const confirmedTxs = state.observingTxs.splice(observedTxIndex, 1);
       return {
         transactions: [...state.transactions],
         observingTxs: [...state.observingTxs],
-        confirmedTxs: [...state.confirmedTxs, observedTx],
+        confirmedTxs: [...state.confirmedTxs, ...confirmedTxs],
       };
     case Types.TX_REMOVE:
       const removeProps: TransactionRemoveProps = action.payload;
       return {
         ...state,
         confirmedTxs: state.confirmedTxs.filter(tx => tx.hash !== removeProps.hash),
+      };
+    case WalletTypes.WALLET_LOGOUT:
+      return {
+        transactions: [],
+        observingTxs: [],
+        confirmedTxs: [],
       };
     default:
       return state;
