@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 const LoadingIcon = () => {
   return (
-    <CircularProgress style={{ display: "block" }} size={24} />
+    <CircularProgress style={{ display: "block" }} size={20} />
   );
 };
 
@@ -38,6 +38,10 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
     dispatch(actions.Transaction.remove({ hash: observedTx.hash }));
   };
 
+  const onShowTxDetail = () => {
+    dispatch(actions.Layout.toggleShowWallet());
+  };
+
   if (!walletState.wallet) return null;
 
   return (
@@ -46,7 +50,7 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
         <NotificationBox IconComponent={LoadingIcon}>
           <Typography variant="body2" className={classes.notificationMessage}>
             {observingTxs.length} Transaction{observingTxs.length > 1 ? "s" : ""} Confirming.{" "}
-            <Typography component="a" color="primary" href="#">View detail</Typography>
+            <Typography component="a" color="primary" onClick={onShowTxDetail}>View detail</Typography>
           </Typography>
         </NotificationBox>
       )}

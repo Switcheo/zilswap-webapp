@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: theme.spacing(1),
     display: "flex",
     flexDirection: "row",
-    alignItems: "flex-start"
+    alignItems: "center"
   },
   notificationSymbol: {
     marginLeft: theme.spacing(1),
@@ -27,7 +27,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   notificationDetail: {
     marginLeft: theme.spacing(1),
-    marginTop: theme.spacing(.75),
     flex: 1,
   },
   cancelNotification: {
