@@ -13,7 +13,7 @@ import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PoolDetail from "../PoolDetail";
 import PoolIcon from "../PoolIcon";
@@ -96,6 +96,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const classes = useStyles();
   const dispatch = useDispatch();
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
+  const [currencyDialogOverride, setCurrencyDialogOverride] = useState<boolean>(false);
   const [runRemoveLiquidity, loading, error] = useAsyncTask("poolRemoveLiquidity");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
@@ -110,6 +111,12 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     symbol: poolToken?.symbol,
     compression: poolToken?.decimals,
   };
+
+  useEffect(() => {
+    if (poolToken && currencyDialogOverride) {
+      setCurrencyDialogOverride(false);
+    }
+  }, [poolToken, currencyDialogOverride]);
 
   const onPercentage = (percentage: number) => {
     if (!poolToken?.pool) return;
@@ -146,7 +153,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   };
 
   const onRemoveLiquidity = () => {
-    if (!poolToken) return;
+    if (!poolToken) return setCurrencyDialogOverride(true);
     if (poolFormState.removeTokenAmount.isZero()) return;
     if (loading) return;
 
@@ -187,6 +194,8 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       <Box className={classes.container}>
         <CurrencyInput
           showContribution
+          showCurrencyDialog={currencyDialogOverride}
+          onCloseDialog={() => setCurrencyDialogOverride(false)}
           label="Remove"
           token={poolToken}
           amount={formState.tokenAmount}

@@ -8,7 +8,7 @@ import { ZIL_TOKEN_NAME, BIG_ZERO } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PoolDetail from "../PoolDetail";
 import PoolIcon from "../PoolIcon";
@@ -52,11 +52,18 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const { className, ...rest } = props;
   const classes = useStyles();
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
+  const [currencyDialogOverride, setCurrencyDialogOverride] = useState<boolean>(false);
   const [runAddLiquidity, loading, error] = useAsyncTask("poolAddLiquidity");
   const dispatch = useDispatch();
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
+
+  useEffect(() => {
+    if (poolToken && currencyDialogOverride) {
+      setCurrencyDialogOverride(false);
+    }
+  }, [poolToken, currencyDialogOverride]);
 
   const onPercentage = (percentage: number) => {
     const zilToken = tokenState.tokens.zil;
@@ -127,7 +134,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   };
 
   const onAddLiquidity = () => {
-    if (!poolToken) return;
+    if (!poolToken) return setCurrencyDialogOverride(true);
     if (poolFormState.addTokenAmount.isZero()) return;
     if (loading) return;
 
@@ -177,6 +184,8 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         <CurrencyInput
           label="Deposit"
           token={poolToken}
+          showCurrencyDialog={currencyDialogOverride}
+          onCloseDialog={() => setCurrencyDialogOverride(false)}
           amount={formState.tokenAmount.toString()}
           className={classes.input}
           disabled={!poolToken}
@@ -189,6 +198,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         <FancyButton
           loading={loading}
           walletRequired
+          // disabled={!poolToken}
           className={classes.actionButton}
           variant="contained"
           color="primary"

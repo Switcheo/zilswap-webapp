@@ -51,6 +51,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   label: string;
   token: TokenInfo | null;
   amount: string;
+  showCurrencyDialog?: boolean;
   fixedToZil?: boolean;
   disabled?: boolean;
   showContribution?: boolean;
@@ -58,13 +59,17 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   onCurrencyChange?: (token: TokenInfo) => void;
   onAmountChange?: (value: string) => void;
   onEditorBlur?: () => void;
+  onCloseDialog?: () => void;
 };
 
 const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
   const {
     children, className,
     label, fixedToZil, amount, disabled,
-    showContribution, onAmountChange, onCurrencyChange, token, 
+    showCurrencyDialog: showDialogOverride, 
+    onCloseDialog: onCloseDialogListener,
+    showContribution, 
+    onAmountChange, onCurrencyChange, token, 
     onEditorBlur,
   } = props;
   const classes = useStyles();
@@ -100,6 +105,12 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (typeof onAmountChange === "function")
       onAmountChange(event.target.value);
+  };
+
+  const onCloseDialog = () => {
+    setShowCurrencyDialog(false);
+    if (typeof onCloseDialogListener === "function")
+      onCloseDialogListener();
   };
 
   return (
@@ -152,7 +163,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
         }
       />
       {children}
-      <CurrencyDialog open={showCurrencyDialog} onSelectCurrency={onCurrencySelect} onClose={() => setShowCurrencyDialog(false)} />
+      <CurrencyDialog open={showCurrencyDialog || showDialogOverride || false} onSelectCurrency={onCurrencySelect} onClose={onCloseDialog} />
     </form>
   );
 };
