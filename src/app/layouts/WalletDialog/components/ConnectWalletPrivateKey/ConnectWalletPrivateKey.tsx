@@ -11,6 +11,7 @@ import { ConnectWalletResult } from "core/wallet/ConnectedWallet";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { ConnectWalletManagerViewProps } from "../../types";
+import { ZilswapConnector } from "core/zilswap";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -76,8 +77,14 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props:
       if (walletResult.error)
         throw walletResult.error;
 
-      if (walletResult.wallet)
+      if (walletResult.wallet) {
+        const { network } = walletResult.wallet!;
+        await ZilswapConnector.connect({
+          network,
+          wallet: walletResult.wallet,
+        });
         dispatch(actions.Wallet.update({ wallet: walletResult.wallet!, pk: privateKey }));
+      }
     });
   }
 

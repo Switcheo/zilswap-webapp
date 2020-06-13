@@ -18,7 +18,7 @@ export class RPCHandler {
    */
   static parseResponse = (response: RPCResponse<any, string>): any => {
     if (typeof response !== "object")
-      throw new RPCResultError("cannot parse RPC response", response)
+      throw new RPCResultError("cannot parse RPC response", response);
 
     if (response.error)
       throw new RPCResultError(response.error.message, response);
