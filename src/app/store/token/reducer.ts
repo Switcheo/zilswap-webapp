@@ -48,6 +48,16 @@ const reducer = (state: TokenState = initial_state, action: any) => {
           [addProps.token.address]: addProps.token,
         }
       };
+
+    case TokenActionTypes.TOKEN_INVALIDATE:
+      for (const key in state.tokens)
+        state.tokens[key].dirty = true;
+      return {
+        ...state,
+        tokens: {
+          ...state.tokens,
+        },
+      };
     default:
       return state;
   };

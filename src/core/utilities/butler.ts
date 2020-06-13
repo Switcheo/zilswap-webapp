@@ -1,14 +1,15 @@
 import { Value } from "@zilliqa-js/contract";
 import { BN } from "@zilliqa-js/util";
 import { actions } from "app/store";
-import { RootState, TokenBalanceMap, TokenInfo, TokenState, WalletState } from "app/store/types";
+import { RootState, TokenBalanceMap, TokenInfo, TokenState, Transaction, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
 import { ConnectedWallet } from "core/wallet";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector, useStore } from "react-redux";
 import { ObservedTx, TokenDetails, TxReceipt, TxStatus } from "zilswap-sdk";
 import { ZIL_HASH } from "zilswap-sdk/lib/constants";
+import { connectWalletPrivateKey } from "../wallet";
 
 /**
  * Component constructor properties for {@link AppButler}
@@ -28,6 +29,7 @@ const mapZilswapToken = (zilswapToken: TokenDetails): TokenInfo => {
   return {
     initialized: false,
     isZil: false,
+    dirty: false,
     address: zilswapToken.address,
     decimals: zilswapToken.decimals,
     symbol: zilswapToken.symbol,
@@ -92,6 +94,7 @@ let mounted = false;
 export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const store =useStore();
   const [runQueryToken] = useAsyncTask<void>("queryTokenInfo");
   const dispatch = useDispatch();
 
@@ -105,7 +108,13 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         hash: tx.hash,
         status: status,
         txReceipt: receipt,
-      }))
+      }));
+
+      // invalidate all tokens if updated TX is currently 
+      // recorded within state
+      const transactions: Transaction[] = store.getState().transaction.transactions;
+      if (transactions.find(transaction => transaction.hash === tx.hash))
+        dispatch(actions.Token.invalidate());
     });
 
     mounted = true;
@@ -130,6 +139,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     // inject ZIL as a pseudo-token
     tokens["zil"] = {
       isZil: true,
+      dirty: false,
       initialized: true,
       listPriority: 0,
       address: ZIL_HASH,
@@ -158,7 +168,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
       // skip initialized tokens to prevent run away
       // update cycle by useEffect.
-      if (token.initialized) continue;
+      if (token.initialized && !token.dirty) continue;
       console.log(`butler update:${token.symbol}`);
 
       // set initialized to true to prevent repeat execution
@@ -167,10 +177,35 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
       dispatch(actions.Token.update({
         address,
         loading: true,
+        dirty: false,
         initialized: true,
       }));
 
       runQueryToken(async () => {
+        // zil is a pseudo token that should be updated through
+        // updating the connected wallet.
+        if (token.isZil) {
+          const privateKey = walletState.wallet?.addressInfo.privateKey;
+          if (!privateKey)
+            return;
+          const result = await connectWalletPrivateKey(privateKey, walletState.wallet!.network);
+          const wallet: ConnectedWallet = result.wallet!;
+
+          // update wallet store
+          dispatch(actions.Wallet.update({ wallet, pk: privateKey }));
+
+          // update token store
+          dispatch(actions.Token.update({
+            address,
+            loading: false,
+            balance: wallet.balance,
+            balances: {
+              // initialize with own wallet balance
+              [wallet.addressInfo.byte20.toLowerCase()]: wallet.balance,
+            },
+          }));
+        }
+
         // retrieve contract and init params
         const contract = ZilswapConnector.getZilliqa().contracts.at(address);
         const contractInitParams = await contract.getInit();
@@ -194,6 +229,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         // prepare and dispatch token info update to store.
         const tokenInfo: TokenInfo = {
           initialized: true,
+          dirty: false,
           loading: false,
           isZil: false,
 

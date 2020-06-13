@@ -54,6 +54,7 @@ const CreatePoolDialog = (props: any) => {
         address,
         initialized: false,
         isZil: false,
+        dirty: false,
         symbol: tokenPreview.symbol,
         name: tokenPreview.name,
         decimals: tokenPreview.decimals,

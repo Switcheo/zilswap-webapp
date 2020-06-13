@@ -113,7 +113,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       if (bnTokenAmount.isNegative() || bnTokenAmount.isNaN() || !bnTokenAmount.isFinite())
         bnTokenAmount = BIG_ZERO;
 
-      let bnZilAmount = bnTokenAmount.div(poolToken.pool?.exchangeRate || 1).decimalPlaces(tokenState.tokens.zil?.decimals || 12);
+      let bnZilAmount = bnTokenAmount.times(poolToken.pool?.exchangeRate || 1).decimalPlaces(tokenState.tokens.zil?.decimals || 12);
       const zilAmount = bnZilAmount.toString();
 
       setFormState({
