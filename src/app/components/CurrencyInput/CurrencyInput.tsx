@@ -9,6 +9,7 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { CurrencyDialogProps } from "../CurrencyDialog/CurrencyDialog";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -61,6 +62,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   disabled?: boolean;
   hideBalance?: boolean;
   showContribution?: boolean;
+  dialogOpts?: Partial<CurrencyDialogProps>;
 
   onCurrencyChange?: (token: TokenInfo) => void;
   onAmountChange?: (value: string) => void;
@@ -74,7 +76,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     label, fixedToZil, amount, disabled,
     showCurrencyDialog: showDialogOverride,
     onCloseDialog: onCloseDialogListener,
-    showContribution, hideBalance,
+    showContribution, hideBalance, dialogOpts = {},
     onAmountChange, onCurrencyChange, token,
     onEditorBlur,
   } = props;
@@ -169,7 +171,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
         }
       />
       {children}
-      <CurrencyDialog open={showCurrencyDialog || showDialogOverride || false} onSelectCurrency={onCurrencySelect} onClose={onCloseDialog} />
+      <CurrencyDialog {...dialogOpts} open={showCurrencyDialog || showDialogOverride || false} onSelectCurrency={onCurrencySelect} onClose={onCloseDialog} />
     </form>
   );
 };

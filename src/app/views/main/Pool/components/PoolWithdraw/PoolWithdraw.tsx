@@ -202,7 +202,11 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           disabled={!poolToken}
           onEditorBlur={onDoneEditing}
           onAmountChange={onTokenChange}
-          onCurrencyChange={onPoolChange} />
+          onCurrencyChange={onPoolChange}
+          dialogOpts={{
+            hideZil: true,
+            showContribution: true,
+          }} />
 
         <ProportionSelect fullWidth
           color="primary"

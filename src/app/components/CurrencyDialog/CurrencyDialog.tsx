@@ -14,6 +14,8 @@ import { ReactComponent as SearchIcon } from "./SearchIcon.svg";
 
 export interface CurrencyDialogProps extends DialogProps {
   onSelectCurrency: (token: TokenInfo) => void;
+  hideZil?: boolean;
+  showContribution?: boolean;
 };
 
 const useStyles = makeStyles(theme => ({
@@ -64,7 +66,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProps) => {
-  const { children, className, onSelectCurrency, ...rest } = props;
+  const { children, className, onSelectCurrency, hideZil, showContribution, ...rest } = props;
   const classes = useStyles();
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const [search, setSearch] = useState("");
@@ -76,10 +78,19 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     if (!walletState.wallet) return BIG_ZERO;
 
     const wallet: ConnectedWallet = walletState.wallet!;
-    const tokenBalance = token.balances && token.balances[wallet.addressInfo.byte20.toLowerCase()];
-    if (!tokenBalance) return BIG_ZERO;
+    if (showContribution) {
+      const contribution = token.pool?.userContribution || BIG_ZERO;
+      return contribution;
+    } else {
+      const amount = token.balances && token.balances[wallet.addressInfo.byte20.toLowerCase()];
+      if (!amount) return BIG_ZERO;
 
-    return new BigNumber(tokenBalance.toString());
+      return new BigNumber(amount.toString());
+    }
+  };
+  const getContributionPercentage = (token: TokenInfo) => {
+    if (!walletState.wallet) return BIG_ZERO;
+    return token.pool?.contributionPercentage || BIG_ZERO;
   };
 
   useEffect(() => {
@@ -94,6 +105,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   }, [tokenState.tokens]);
 
   const filterSearch = (token: TokenInfo): boolean => {
+    if (token.isZil && hideZil) return false;
     if (!search.trim().length) return true;
     const searchTerm = search.toLowerCase();
     return token.address.toLowerCase().includes(searchTerm) ||
@@ -101,7 +113,23 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
       token.symbol.toLowerCase().includes(searchTerm);
   };
 
-  const filteredTokens = tokens.filter(filterSearch);
+  const sortResult = (lhs: TokenInfo, rhs: TokenInfo) => {
+    if (!walletState.wallet) return 0;
+    if (lhs.isZil) return -1;
+    if (rhs.isZil) return 1;
+    if (showContribution) {
+      // sort first by contribution
+      const difference = (rhs.pool?.userContribution || BIG_ZERO)
+        .comparedTo(lhs.pool?.userContribution || BIG_ZERO);
+      // then lexicographically by symbol
+      return difference !== 0 ? difference : lhs.symbol.localeCompare(rhs.symbol);
+    }
+    const userAddress = walletState.wallet!.addressInfo.byte20.toLowerCase();
+    const difference = new BigNumber(rhs.balances[userAddress]?.toString() || 0).comparedTo(lhs.balances[userAddress]?.toString() || 0);
+    return difference !== 0 ? difference : lhs.symbol.localeCompare(rhs.symbol);
+  };
+
+  const filteredTokens = tokens.filter(filterSearch).sort(sortResult);
   return (
     <DialogModal header="Select a Token" {...rest} className={cls(classes.root, className)}>
       <DialogContent className={classes.content}>
@@ -146,10 +174,20 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
                   <Typography align="right" variant="h6" component="p">
                     {moneyFormat(getTokenBalance(token), {
                       symbol: token.symbol,
+                      maxFractionDigits: showContribution ? 5 : token.decimals,
                       compression: token.decimals,
                       showCurrency: true,
                     })}
                   </Typography>
+                  {showContribution && (
+                    <Typography align="right" color="textSecondary" variant="body2">
+                      {moneyFormat(getContributionPercentage(token), {
+                        maxFractionDigits: 2,
+                        compression: 0,
+                        showCurrency: false,
+                      })}%
+                    </Typography>
+                  )}
                 </Box>
               </ContrastBox>
             </ButtonBase>
