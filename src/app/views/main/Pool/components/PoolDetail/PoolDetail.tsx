@@ -56,7 +56,7 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
     <Box {...rest} className={cls(classes.root, className)}>
       <KeyValueDisplay kkey={"Exchange Rate"} value={getExchangeRateValue()} mb="8px" />
       <KeyValueDisplay kkey={"Current Pool Size"} value={getPoolSizeValue()} mb="8px" />
-      <KeyValueDisplay kkey={`Your Pool Share (${getUserPoolShare()})`} value={getShareValue()} />
+      <KeyValueDisplay kkey={`Your Current Pool Share (${getUserPoolShare()})`} value={getShareValue()} />
     </Box>
   );
 };
