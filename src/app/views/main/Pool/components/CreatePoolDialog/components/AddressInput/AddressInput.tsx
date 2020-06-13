@@ -113,7 +113,7 @@ const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => 
         <InputLabel className={classes.error}><Typography color="error">{error.message}</Typography></InputLabel>
       )}
       <OutlinedInput
-        placeholder="Token Address"
+        placeholder="zil18zlr57uhrmnk4mfkuawgv0un295k970a9s3lnq"
         value={address}
         fullWidth
         className={cls(classes.input, error ? classes.inputError : {})}
