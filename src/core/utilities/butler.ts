@@ -4,7 +4,7 @@ import { actions } from "app/store";
 import { RootState, TokenBalanceMap, TokenInfo, TokenState, Transaction, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
 import { ConnectedWallet } from "core/wallet";
-import { ZilswapConnector } from "core/zilswap";
+import { ZilswapConnector, getBalancesMap } from "core/zilswap";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { ObservedTx, TokenDetails, TxReceipt, TxStatus } from "zilswap-sdk";
@@ -204,6 +204,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
               [wallet.addressInfo.byte20.toLowerCase()]: wallet.balance,
             },
           }));
+          return;
         }
 
         // retrieve contract and init params
@@ -212,7 +213,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         const contractInit = zilParamsToMap(contractInitParams);
 
         // retrieve balances of each token owner
-        const { balances_map: contractBalanceState } = await contract.getSubState("balances_map");
+        const contractBalanceState = await getBalancesMap(contract);
 
         // map balance object from string values to BN values
         const balances: TokenBalanceMap = {};

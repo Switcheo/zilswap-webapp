@@ -27,6 +27,7 @@ export default <T>(taskname: string): AsyncTaskOutput<T> => {
     try {
       await statefulTask(task, taskname);
     } catch (rawError) {
+      console.log("async task error", rawError);
       const error = parseError(rawError);
       setError(error);
     }

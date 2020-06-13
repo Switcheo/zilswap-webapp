@@ -4,7 +4,7 @@ import { RootState, WalletState, TokenBalanceMap } from "app/store/types";
 import { truncate, useAsyncTask } from "app/utils";
 import cls from "classnames";
 import { zilParamsToMap } from "core/utilities";
-import { toBech32Address, ZilliqaValidate, ZilswapConnector, Contract, BN } from "core/zilswap";
+import { toBech32Address, ZilliqaValidate, ZilswapConnector, Contract, BN, getBalancesMap } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -85,7 +85,7 @@ const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => 
           throw new Error(`${truncate(address)} is not a contract address`);
         const contractInit = zilParamsToMap(contractInitParams);
 
-        const { balances_map: contractBalanceState } = await contract.getSubState("balances_map");
+        const contractBalanceState = await getBalancesMap(contract);
 
         const balances: TokenBalanceMap = {};
         for (const address in contractBalanceState)
