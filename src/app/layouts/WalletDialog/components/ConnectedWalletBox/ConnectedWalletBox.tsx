@@ -1,21 +1,20 @@
-import { Box, Typography, Divider, IconButton, useMediaQuery, useTheme, Tooltip } from "@material-ui/core";
+import { Box, Divider, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ContrastBox } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
+import { actions } from "app/store";
 import { RootState, Transaction, TransactionState } from "app/store/types";
-import { WalletState } from "app/store/wallet/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate } from "app/utils";
 import cls from "classnames";
-import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { ReactComponent as CheckCompleteIcon } from "./check_complete.svg";
-import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
 import { ConnectedWallet } from "core/wallet";
 import { ZilswapConnector } from "core/zilswap";
-import { actions } from "app/store";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { ObservedTx } from "zilswap-sdk";
+import { ReactComponent as CheckCompleteIcon } from "./check_complete.svg";
+import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -77,7 +76,7 @@ const ConnectedWalletBox = (props: any) => {
   const { onLogout, className, icon: Icon } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
-  const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
+  const wallet = useSelector<RootState, ConnectedWallet>(state => state.wallet.wallet);
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
   const [includeCompleted, setIncludeCompleted] = useState(true);
   const [copyMap, setCopyMap] = useState<CopyMap>({});
@@ -85,12 +84,6 @@ const ConnectedWalletBox = (props: any) => {
   const is_xs_media = useMediaQuery(theme.breakpoints.down("xs"));
 
   let address = "";
-
-  useEffect(() => {
-    if (wallet) {
-      if (typeof wallet.reload === "function") wallet.reload();
-    }
-  }, []) // eslint-disable-line
 
   const onCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -106,7 +99,8 @@ const ConnectedWalletBox = (props: any) => {
     if (typeof onLogout === "function") onLogout();
   };
 
-  address = (wallet as ConnectedWallet).addressInfo.byte20;
+  address = wallet?.addressInfo.byte20;
+  const humanAddress = wallet?.addressInfo.bech32;
   return (
     <Box display="flex" flexDirection="column">
       <ContrastBox className={cls(classes.root, className)}>
@@ -114,9 +108,11 @@ const ConnectedWalletBox = (props: any) => {
         <Box className={classes.label}>
           <Typography variant="h3">{wallet.type ? "Private Key" : "Moonlet"}</Typography>
           <Box mt={"8px"} display="flex" flexDirection="row" alignItems="center">
-            <Typography color="textSecondary" variant="body1">{is_xs_media ? truncate(address, 10, 10) : address}</Typography>
+            <Typography color="textSecondary" variant="body1">{is_xs_media ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
             <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=testnet`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
-            <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(address)} open={!!copyMap[address]} title="Copied!"><IconButton className={classes.copy} size="small"><CopyIcon /></IconButton></Tooltip>
+            <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(humanAddress)} open={!!copyMap[humanAddress]} title="Copied!">
+              <IconButton className={classes.copy} size="small"><CopyIcon /></IconButton>
+            </Tooltip>
           </Box>
           <Typography className={cls(classes.info, classes.logout)} onClick={onDisconnect} color="primary" variant="body1">Disconnect</Typography>
         </Box>

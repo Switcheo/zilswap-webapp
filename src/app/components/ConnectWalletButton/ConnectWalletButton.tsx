@@ -47,7 +47,7 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
             variant="outlined"
             label={(
               <Typography variant="button" color="textPrimary">
-                <DotIcon className={classes.dotIcon} />{truncate(wallet!.addressInfo.byte20)}
+                <DotIcon className={classes.dotIcon} />{truncate(wallet!.addressInfo.bech32)}
               </Typography>
             )} />
         )}
