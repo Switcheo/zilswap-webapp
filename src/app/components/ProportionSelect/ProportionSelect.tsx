@@ -12,7 +12,7 @@ const useStyles = makeStyles(theme => ({
   },
   percentageButton: {
     borderRadius: 4,
-    color: theme.palette.text?.secondary,
+    color: theme.palette.text?.primary,
     paddingTop: 10,
     paddingBottom: 10
   },

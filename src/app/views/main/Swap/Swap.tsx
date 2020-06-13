@@ -4,7 +4,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect, Notifications } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
-import { ExactOfOptions, RootState, SwapFormState, TokenInfo, TokenState } from "app/store/types";
+import { ExactOfOptions, RootState, SwapFormState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
 import { BIG_ONE, BIG_ZERO } from "app/utils/contants";
@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "column",
   },
-  labelExchangeRate: {
+  keyValueLabel: {
     marginTop: theme.spacing(1),
   },
   actionButton: {
@@ -96,6 +96,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const swapFormState = useSelector<RootState, SwapFormState>(store => store.swap);
   const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
+  const walletState = useSelector<RootState, WalletState>(store => store.wallet);
   const [runSwap, loading, error] = useAsyncTask("swap");
   const [runExchangeRate, loadingRate, errorRate] = useAsyncTask("exchangeRate");
   const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
@@ -330,12 +331,14 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
 
   const { outToken, inToken } = swapFormState;
+  const tokenBalance = inToken?.balances[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""] || BIG_ZERO;
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       <Notifications />
       <Box display="flex" flexDirection="column" className={classes.container}>
         <CurrencyInput
           label="You Give"
+          hideBalance
           token={inToken || null}
           amount={formState.inAmount}
           disabled={!inToken}
@@ -343,6 +346,16 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onAmountChange={onInAmountChange}
           onCurrencyChange={onInCurrencyChange} />
         <ProportionSelect fullWidth color="primary" className={classes.proportionSelect} onSelectProp={onPercentage} />
+        {!!inToken && (
+          <KeyValueDisplay className={classes.keyValueLabel}
+            deemphasizeValue
+            kkey="You Have"
+            value={moneyFormat(tokenBalance, {
+              symbol: inToken!.symbol,
+              compression: inToken!.decimals,
+              showCurrency: true,
+            })} />
+        )}
         <Box display="flex" mt={4} mb={1} justifyContent="center">
           <IconButton onClick={() => onReverse()} className={classes.swapButton}>
             <SwapSVG />
@@ -358,7 +371,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onAmountChange={onOutAmountChange}
           onCurrencyChange={onOutCurrencyChange} />
         {!!(inToken && outToken) && (
-          <KeyValueDisplay className={classes.labelExchangeRate}
+          <KeyValueDisplay className={classes.keyValueLabel}
+            deemphasizeValue
             kkey="Exchange Rate"
             value={getExchangeRateLabel()} />
         )}
