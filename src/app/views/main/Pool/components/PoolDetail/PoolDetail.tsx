@@ -49,7 +49,7 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
   const getUserPoolShare = () => {
     if (!token?.pool) return "%";
     const { contributionPercentage } = token.pool;
-    return `${contributionPercentage.toFixed(3)}%`;
+    return `${contributionPercentage.toFixed(1)}%`;
   };
 
   return (

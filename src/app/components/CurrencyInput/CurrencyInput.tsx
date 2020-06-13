@@ -42,7 +42,9 @@ const useStyles = makeStyles(theme => ({
   },
   currencyLogo: {
     marginRight: theme.spacing(1),
-    paddingTop: theme.spacing(1),
+    "& svg": {
+      display: "block",
+    }
   },
   expandIcon: {
     marginLeft: theme.spacing(1),
