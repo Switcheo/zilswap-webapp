@@ -21,6 +21,9 @@ const useStyles = makeStyles(theme => ({
   },
   currencyButton: {
     borderRadius: 0,
+    borderTopLeftRadius: 4,
+    borderBottomLeftRadius: 4,
+    minHeight: 52,
     color: theme.palette.text.primary,
     fontWeight: 600,
     display: "flex",

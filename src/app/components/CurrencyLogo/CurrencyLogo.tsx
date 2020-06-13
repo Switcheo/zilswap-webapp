@@ -33,11 +33,10 @@ const CurrencyLogo = (props: any) => {
     className: string;
   } = props;
   const classes = useStyles();
-  const Logo = currencies[currency] || SWTH;
-  if (!Logo) return null;
+  const Logo = currencies[currency];
   return (
     <div className={cls(classes.root, className)}>
-      <Logo />
+      {!!Logo && <Logo />}
     </div>
   );
 };
