@@ -1,8 +1,9 @@
 import { Box, CircularProgress, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import CheckmarkIcon from "@material-ui/icons/CheckOutlined";
+import TimeoutIcon from "@material-ui/icons/TimerOutlined";
 import { actions } from "app/store";
-import { RootState, WalletState } from "app/store/types";
+import { RootState, WalletState, SubmittedTx } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { truncate } from "app/utils";
 import React from "react";
@@ -35,10 +36,10 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
   const dispatch = useDispatch();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const observingTxs = useSelector<RootState, ObservedTx[]>(state => state.transaction.observingTxs);
-  const confirmedTxs = useSelector<RootState, ObservedTx[]>(state => state.transaction.confirmedTxs);
+  const submittedTxs = useSelector<RootState, SubmittedTx[]>(state => state.transaction.submittedTxs);
 
-  const onRemoveConfirmedTx = (observedTx: ObservedTx) => {
-    dispatch(actions.Transaction.remove({ hash: observedTx.hash }));
+  const onRemoveConfirmedTx = (submittedTx: SubmittedTx) => {
+    dispatch(actions.Transaction.remove({ hash: submittedTx.hash }));
   };
 
   const onShowTxDetail = () => {
@@ -57,13 +58,15 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
           </Typography>
         </NotificationBox>
       )}
-      {confirmedTxs.map((observedTx: ObservedTx, index) => (
-        <NotificationBox key={index} IconComponent={CheckmarkIcon} onRemove={() => onRemoveConfirmedTx(observedTx)}>
+      {submittedTxs.map((submittedTx: SubmittedTx, index) => (
+        <NotificationBox key={index} IconComponent={submittedTx.status === "expired" ? TimeoutIcon: CheckmarkIcon} onRemove={() => onRemoveConfirmedTx(submittedTx)}>
           <Typography variant="body2" className={classes.notificationMessage}>
-            Transaction 0x{truncate(observedTx.hash)} submitted.{" "}
-            <Typography className={classes.link} component="a" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/${observedTx.hash}?network=testnet`}>
-              View on explorer
-            </Typography>
+            Transaction 0x{truncate(submittedTx.hash)} {submittedTx.status || "status unknown"}.{" "}
+            {submittedTx.status !== "expired" && (
+              <Typography className={classes.link} component="a" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/${submittedTx.hash}?network=testnet`}>
+                View on explorer
+              </Typography>
+            )}
           </Typography>
         </NotificationBox>
       ))}

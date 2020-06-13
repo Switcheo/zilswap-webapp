@@ -88,7 +88,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
 
   const hasNotification = !!walletState.wallet && ((poolToken && !poolToken.loading && !poolToken.pool) ||
     transactionState.observingTxs.length > 0 ||
-    transactionState.confirmedTxs.length > 0);
+    transactionState.submittedTxs.length > 0);
 
   return (
     <Box className={classes.root}>

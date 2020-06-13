@@ -1,6 +1,6 @@
 import { Types } from "./actions";
 import { Types as WalletTypes } from "../wallet/actions";
-import { ObserveTxProps, Transaction, TransactionsInitProps, TransactionState, TransactionUpdateProps, TransactionRemoveProps } from "./types";
+import { ObserveTxProps, Transaction, TransactionsInitProps, TransactionState, TransactionUpdateProps, TransactionRemoveProps, SubmittedTx } from "./types";
 import { ObservedTx } from "zilswap-sdk";
 
 
@@ -10,26 +10,30 @@ const savedObservingTxs = JSON.parse(savedTxsString).filter((tx: ObservedTx) => 
 
 const initial_state: TransactionState = {
   transactions: [],
-  confirmedTxs: [],
+  submittedTxs: [],
   observingTxs: savedObservingTxs,
 };
 
-const reducer = (state: TransactionState = initial_state, action: any) => {
+const reducer = (state: TransactionState = initial_state, action: any): TransactionState => {
   switch (action.type) {
     case Types.TX_INIT:
       const initProps: TransactionsInitProps = action.payload;
-      const interimConfirmedTxs: ObservedTx[] = [];
+      const interimSubmittedTxs: SubmittedTx[] = [];
       const observingTxs: ObservedTx[] = [];
       state.observingTxs.forEach(observingTx => {
-        if (initProps.transactions.find(tx => tx.hash === observingTx.hash))
-          interimConfirmedTxs.push(observingTx);
+        const tx = initProps.transactions.find(tx => tx.hash === observingTx.hash);
+        if (tx)
+          interimSubmittedTxs.push({
+            hash: tx.hash,
+            status: tx.status,
+          });
         else
           observingTxs.push(observingTx);
       })
       return {
         transactions: [...initProps.transactions],
         observingTxs,
-        confirmedTxs: interimConfirmedTxs,
+        submittedTxs: interimSubmittedTxs,
       };
     case Types.TX_OBSERVE:
       const observeProps: ObserveTxProps = action.payload;
@@ -61,23 +65,26 @@ const reducer = (state: TransactionState = initial_state, action: any) => {
         state.transactions.unshift({ ...updateProps });
       }
       const observedTxIndex = state.observingTxs.findIndex(tx => tx.hash === updateProps.hash);
-      const confirmedTxs = state.observingTxs.splice(observedTxIndex, 1);
+      state.observingTxs.splice(observedTxIndex, 1);
       return {
         transactions: [...state.transactions],
         observingTxs: [...state.observingTxs],
-        confirmedTxs: [...state.confirmedTxs, ...confirmedTxs],
+        submittedTxs: [...state.submittedTxs, {
+          hash: updateProps.hash,
+          status: updateProps.status,
+        }],
       };
     case Types.TX_REMOVE:
       const removeProps: TransactionRemoveProps = action.payload;
       return {
         ...state,
-        confirmedTxs: state.confirmedTxs.filter(tx => tx.hash !== removeProps.hash),
+        submittedTxs: state.submittedTxs.filter(tx => tx.hash !== removeProps.hash),
       };
     case WalletTypes.WALLET_LOGOUT:
       return {
         transactions: [],
         observingTxs: [],
-        confirmedTxs: [],
+        submittedTxs: [],
       };
     default:
       return state;

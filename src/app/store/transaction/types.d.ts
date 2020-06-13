@@ -8,11 +8,15 @@ export type Transaction = {
   observedTx?: ObservedTx;
   txReceipt?: TxReceipt;
 };
+export type SubmittedTx = {
+  hash: string;
+  status: string;
+};
 
 export interface TransactionState {
   transactions: Transaction[];
   observingTxs: ObservedTx[];
-  confirmedTxs: ObservedTx[];
+  submittedTxs: SubmittedTx[];
 };
 
 export interface TransactionsInitProps {
