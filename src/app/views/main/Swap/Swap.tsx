@@ -353,6 +353,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           token={outToken || null}
           amount={formState.outAmount}
           disabled={!outToken}
+          hideBalance={true}
           onEditorBlur={onDoneEditing}
           onAmountChange={onOutAmountChange}
           onCurrencyChange={onOutCurrencyChange} />

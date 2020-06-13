@@ -59,6 +59,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   showCurrencyDialog?: boolean;
   fixedToZil?: boolean;
   disabled?: boolean;
+  hideBalance?: boolean;
   showContribution?: boolean;
 
   onCurrencyChange?: (token: TokenInfo) => void;
@@ -71,10 +72,10 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
   const {
     children, className,
     label, fixedToZil, amount, disabled,
-    showCurrencyDialog: showDialogOverride, 
+    showCurrencyDialog: showDialogOverride,
     onCloseDialog: onCloseDialogListener,
-    showContribution, 
-    onAmountChange, onCurrencyChange, token, 
+    showContribution, hideBalance,
+    onAmountChange, onCurrencyChange, token,
     onEditorBlur,
   } = props;
   const classes = useStyles();
@@ -122,7 +123,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     <form className={cls(classes.form, className)} noValidate autoComplete="off">
       <Box display="flex" justifyContent="space-between">
         <InputLabel>{label}</InputLabel>
-        {tokenBalance && (
+        {tokenBalance && !hideBalance && (
           <Typography variant="body2">
             {moneyFormat(tokenBalance, {
               symbol: token?.symbol,
