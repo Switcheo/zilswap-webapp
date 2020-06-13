@@ -12,14 +12,21 @@ import { ConnectedWallet } from "core/wallet";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ObservedTx } from "zilswap-sdk";
 import { ReactComponent as CheckCompleteIcon } from "./check_complete.svg";
 import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    flex: 1,
+    overflow: "hidden",
+  },
+  walletDetail: {
     display: "flex",
     flexDirection: "row",
+    margin: theme.spacing(4, 8, 0),
+    [theme.breakpoints.down("sm")]: {
+      margin: theme.spacing(2, 3, 0),
+    }
   },
   icon: {
     height: 40,
@@ -51,10 +58,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   divider: {
     marginTop: 12,
     marginBottom: 12,
-    backgroundColor: `rgba${hexToRGBA(theme.palette.primary.main, 0.3)}`
+    backgroundColor: `rgba${hexToRGBA(theme.palette.primary.main, 0.3)}`,
   },
   rowHeader: {
-    marginTop: 2
+    marginTop: 2,
+    marginBottom: 0,
   },
   checkbox: {
     marginRight: 6
@@ -62,7 +70,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   logout: {
     cursor: "pointer"
   },
+  transactionsHeader: {
+    margin: theme.spacing(4, 8, 0),
+    [theme.breakpoints.down("sm")]: {
+      margin: theme.spacing(2, 3, 0),
+    }
+  },
   transactions: {
+    padding: theme.spacing(1.5, 8, 8),
+    [theme.breakpoints.down("sm")]: {
+      padding: theme.spacing(1.5, 3, 4),
+    },
     "-ms-overflow-style": "none",
   }
 
@@ -83,7 +101,15 @@ const ConnectedWalletBox = (props: any) => {
   const theme = useTheme();
   const is_xs_media = useMediaQuery(theme.breakpoints.down("xs"));
 
-  let address = "";
+  const formatStatusLabel = (status: string) => {
+    if (!status) return "Unknown";
+    return `${status.charAt(0).toUpperCase()}${status.substring(1)}`;
+  };
+
+  const filterTXs = (transaction: Transaction) => {
+    if (includeCompleted) return true;
+    return transaction.status !== "confirmed";
+  };
 
   const onCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -99,11 +125,12 @@ const ConnectedWalletBox = (props: any) => {
     if (typeof onLogout === "function") onLogout();
   };
 
-  address = wallet?.addressInfo.byte20;
+  const address = wallet?.addressInfo.byte20;
   const humanAddress = wallet?.addressInfo.bech32;
+  const transactions = transactionState.transactions.filter(filterTXs);
   return (
-    <Box display="flex" flexDirection="column">
-      <ContrastBox className={cls(classes.root, className)}>
+    <Box display="flex" flexDirection="column" className={cls(classes.root, className)}>
+      <ContrastBox className={classes.walletDetail}>
         <Icon className={classes.icon} />
         <Box className={classes.label}>
           <Typography variant="h3">{wallet.type ? "Private Key" : "Moonlet"}</Typography>
@@ -117,43 +144,29 @@ const ConnectedWalletBox = (props: any) => {
           <Typography className={cls(classes.info, classes.logout)} onClick={onDisconnect} color="primary" variant="body1">Disconnect</Typography>
         </Box>
       </ContrastBox>
-      <Box mt={"36px"}>
-        <Box display="flex" flexDirection="row" justifyContent="space-between">
-          <Typography variant="h3">Transaction History</Typography>
-          <Box display="flex" flexDirection="row" alignItems="center">
-            {includeCompleted && (<IconButton size="small" className={classes.checkbox} onClick={() => setIncludeCompleted(false)}><CheckCompleteIcon /></IconButton>)}
-            {!includeCompleted && (<IconButton size="small" className={classes.checkbox} onClick={() => setIncludeCompleted(true)}><CheckEmptyIcon /></IconButton>)}
-            <Typography color="textSecondary" variant="body2">
-              Include Completed
-            </Typography>
-          </Box>
-        </Box>
-        <Box mt={"28px"}>
+      <Box mt={"36px"} overflow="hidden" display="flex" flexDirection="column">
+        <Box className={classes.transactionsHeader}>
           <Box display="flex" flexDirection="row" justifyContent="space-between">
-            <Typography color="textSecondary" variant="body2">Transaction ID</Typography>
-            <Typography color="textSecondary" variant="body2">Status</Typography>
-          </Box>
-          <Divider className={cls(classes.divider, classes.rowHeader)} />
-        </Box>
-        <Box maxHeight={"460px"} overflow="scroll" className={classes.transactions}>
-          {transactionState.observingTxs.map((transaction: ObservedTx) => (
-            <Box key={transaction.hash}>
-              <Box display="flex" flexDirection="row" justifyContent="space-between">
-                <Box display="flex" flexDirection="row" alignItems="center">
-                  <Typography variant="body2">0x{truncate(transaction.hash, 10, 10)}</Typography>
-                  <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(transaction.hash)} open={!!copyMap[transaction.hash]} title="Copied!">
-                    <IconButton className={classes.copy} size="small">
-                      <CopyIcon />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-                <Typography variant="body2">Pending</Typography>
-              </Box>
-              <Divider className={cls(classes.divider)} />
+            <Typography variant="h3">Transaction History</Typography>
+            <Box display="flex" flexDirection="row" alignItems="center">
+              {includeCompleted && (<IconButton size="small" className={classes.checkbox} onClick={() => setIncludeCompleted(false)}><CheckCompleteIcon /></IconButton>)}
+              {!includeCompleted && (<IconButton size="small" className={classes.checkbox} onClick={() => setIncludeCompleted(true)}><CheckEmptyIcon /></IconButton>)}
+              <Typography color="textSecondary" variant="body2">
+                Include Completed
+            </Typography>
             </Box>
-          ))}
-          {includeCompleted && transactionState.transactions.map((transaction: Transaction) => (
-            <Box key={transaction.hash}>
+          </Box>
+          <Box mt={"28px"}>
+            <Box display="flex" flexDirection="row" justifyContent="space-between">
+              <Typography color="textSecondary" variant="body2">Transaction ID</Typography>
+              <Typography color="textSecondary" variant="body2">Status</Typography>
+            </Box>
+            <Divider className={cls(classes.divider, classes.rowHeader)} />
+          </Box>
+        </Box>
+        <Box overflow="scroll" className={classes.transactions}>
+          {transactions.map((transaction: Transaction, index: number) => (
+            <Box key={index}>
               <Box display="flex" flexDirection="row" justifyContent="space-between">
                 <Box display="flex" flexDirection="row" alignItems="center">
                   <Typography variant="body2">0x{truncate(transaction.hash, 10, 10)}</Typography>
@@ -166,11 +179,14 @@ const ConnectedWalletBox = (props: any) => {
                     </IconButton>
                   </Tooltip>
                 </Box>
-                <Typography variant="body2">{transaction.status === "confirmed" ? "Completed" : "Cancelled"}</Typography>
+                <Typography variant="body2">{formatStatusLabel(transaction.status)}</Typography>
               </Box>
               <Divider className={cls(classes.divider)} />
             </Box>
           ))}
+          {!transactions.length && (
+            <Typography align="center" variant="body2" color="textSecondary">No transactions found.</Typography>
+          )}
         </Box>
       </Box>
     </Box>

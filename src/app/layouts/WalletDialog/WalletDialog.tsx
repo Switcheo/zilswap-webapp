@@ -107,12 +107,19 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     }
   }
   return (
-    <DialogModal header={getDialogHeader()} open={showWalletDialog} onClose={onCloseDialog} {...rest} className={cls(classes.root, className)}>
-      <DialogContent>
-        {error && (
-          <InputLabel><Typography color="error">{error}</Typography></InputLabel>
-        )}
-      </DialogContent>
+    <DialogModal
+      header={getDialogHeader()}
+      open={showWalletDialog}
+      onClose={onCloseDialog}
+      {...rest}
+      className={cls(classes.root, className)}>
+      {error && (
+        <DialogContent>
+          <InputLabel>
+            <Typography color="error">{error}</Typography>
+          </InputLabel>
+        </DialogContent>
+      )}
       {!walletState.wallet && (
         <Fragment>
           {!(connectWalletType === "privateKey") && (
@@ -127,11 +134,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
         </Fragment>
       )}
       {walletState.wallet && (
-        <Fragment>
-          <DialogContent>
-            <ConnectedWalletBox onLogout={() => { setConnectWalletType(null) }} icon={get_icon()} />
-          </DialogContent>
-        </Fragment>
+        <ConnectedWalletBox onLogout={() => { setConnectWalletType(null) }} icon={get_icon()} />
       )}
     </DialogModal>
   );

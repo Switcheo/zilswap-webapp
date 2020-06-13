@@ -18,6 +18,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 400,
     color: theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "100" : "200"],
   },
+  link: {
+    cursor: "pointer",
+  },
 }));
 
 const LoadingIcon = () => {
@@ -50,7 +53,7 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
         <NotificationBox IconComponent={LoadingIcon}>
           <Typography variant="body2" className={classes.notificationMessage}>
             {observingTxs.length} Transaction{observingTxs.length > 1 ? "s" : ""} Confirming.{" "}
-            <Typography component="a" color="primary" onClick={onShowTxDetail}>View detail</Typography>
+            <Typography className={classes.link} component="a" color="primary" onClick={onShowTxDetail}>View detail</Typography>
           </Typography>
         </NotificationBox>
       )}
@@ -58,7 +61,7 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
         <NotificationBox key={index} IconComponent={CheckmarkIcon} onRemove={() => onRemoveConfirmedTx(observedTx)}>
           <Typography variant="body2" className={classes.notificationMessage}>
             Transaction 0x{truncate(observedTx.hash)} submitted.{" "}
-            <Typography component="a" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/${observedTx.hash}?network=testnet`}>
+            <Typography className={classes.link} component="a" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/${observedTx.hash}?network=testnet`}>
               View on explorer
             </Typography>
           </Typography>
