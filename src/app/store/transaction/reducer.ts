@@ -66,6 +66,11 @@ const reducer = (state: TransactionState = initial_state, action: any): Transact
       }
       const observedTxIndex = state.observingTxs.findIndex(tx => tx.hash === updateProps.hash);
       state.observingTxs.splice(observedTxIndex, 1);
+
+      const submittedTxIndex = state.submittedTxs.findIndex(tx => tx.hash === updateProps.hash);
+      if (submittedTxIndex >= 0)
+        state.submittedTxs.splice(submittedTxIndex, 1);
+
       return {
         transactions: [...state.transactions],
         observingTxs: [...state.observingTxs],
