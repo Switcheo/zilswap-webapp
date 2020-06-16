@@ -1,7 +1,7 @@
 import { Box, IconButton, makeStyles, Typography } from "@material-ui/core";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect, Notifications } from "app/components";
+import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, RootState, SwapFormState, TokenInfo, TokenState, WalletState } from "app/store/types";
@@ -14,6 +14,7 @@ import { toBasisPoints, ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ShowAdvanced } from "./components";
+import { ReactComponent as SwitchSVG } from "./swap-icon.svg";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -27,6 +28,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   swapButton: {
     padding: 0
+  },
+  switchIcon: {
+    height: 16,
+    width: 16,
+    marginLeft: 8,
+    backgroundColor: theme.palette.type === "dark" ? "#2B4648" : "#E4F1F2",
+    borderRadius: 8,
+    cursor: "pointer",
+    transform: "rotate(0)",
+    transition: "transform .5s ease-in-out",
+  },
+  activeSwitchIcon: {
+    transform: "rotate(180deg)",
   },
   inputRow: {
     paddingLeft: 0
@@ -55,6 +69,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   keyValueLabel: {
     marginTop: theme.spacing(1),
+  },
+  exchangeRateLabel: {
+    flex: 1,
   },
   actionButton: {
     marginTop: theme.spacing(6),
@@ -102,6 +119,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [reversedRate, setReversedRate] = useState(false);
 
   const getExchangeRate = (reverseExchangeRate?: boolean): BigNumber => {
     const _reverseExchangeRate = reverseExchangeRate === undefined ? swapFormState.reverseExchangeRate : reverseExchangeRate;
@@ -112,8 +130,14 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const getExchangeRateLabel = () => {
     if (formState.calculatingRate) return "Calculating…";
     // const exchangeRate = swapFormState.expectedExchangeRate || getExchangeRate();
-    const exchangeRate = getExchangeRate();
-    return `1 ${inToken!.symbol || ""} = ${moneyFormat(exchangeRate, { compression: 0, maxFractionDigits: outToken?.decimals, symbol: outToken?.symbol })}`
+    const exchangeRate = getExchangeRate().pow(reversedRate ? -1 : 1);
+    let src = inToken, dst = outToken;
+    if (reversedRate) {
+      dst = inToken;
+      src = outToken;
+    }
+
+    return `1 ${src!.symbol || ""} = ${moneyFormat(exchangeRate, { compression: 0, maxFractionDigits: dst?.decimals, symbol: dst?.symbol })}`
   };
 
   const onReverse = () => {
@@ -371,10 +395,17 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onAmountChange={onOutAmountChange}
           onCurrencyChange={onOutCurrencyChange} />
         {!!(inToken && outToken) && (
-          <KeyValueDisplay className={classes.keyValueLabel}
-            deemphasizeValue
-            kkey="Exchange Rate"
-            value={getExchangeRateLabel()} />
+          <Box display="flex" flexDirection="row" marginTop={1}>
+            <KeyValueDisplay className={classes.exchangeRateLabel}
+              deemphasizeValue
+              kkey="Exchange Rate"
+              value={getExchangeRateLabel()} />
+            <SwitchSVG
+              onClick={() => setReversedRate(!reversedRate)}
+              className={cls(classes.switchIcon, {
+                [classes.activeSwitchIcon]: reversedRate,
+              })} />
+          </Box>
         )}
 
         <Typography color="error">{(error || errorRate)?.message}</Typography>
