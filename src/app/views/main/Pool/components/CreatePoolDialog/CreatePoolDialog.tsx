@@ -4,9 +4,9 @@ import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
 import cls from "classnames";
+import { BN } from "core/zilswap";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { BN } from "zilswap-sdk/node_modules/@zilliqa-js/util";
 import { AddressInput } from "./components";
 import { TokenPreview } from "./components/AddressInput/AddressInput";
 

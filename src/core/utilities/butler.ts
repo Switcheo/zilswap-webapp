@@ -1,15 +1,14 @@
 import { Value } from "@zilliqa-js/contract";
-import { BN } from "@zilliqa-js/util";
 import { actions } from "app/store";
 import { RootState, TokenBalanceMap, TokenInfo, TokenState, Transaction, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
-import { ConnectedWallet } from "core/wallet";
-import { ZilswapConnector, getBalancesMap } from "core/zilswap";
+import { parseBalanceResponse } from "core/wallet";
+import { BN, getBalancesMap, RPCResponse, ZilswapConnector } from "core/zilswap";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { ObservedTx, TokenDetails, TxReceipt, TxStatus } from "zilswap-sdk";
-import { ZIL_HASH } from "zilswap-sdk/lib/constants";
-import { connectWalletPrivateKey } from "../wallet";
+import { Network, ZIL_HASH } from "zilswap-sdk/lib/constants";
+import { ViewBlock } from "./viewblock";
 
 /**
  * Component constructor properties for {@link AppButler}
@@ -94,8 +93,10 @@ let mounted = false;
 export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
-  const store =useStore();
+  const store = useStore();
   const [runQueryToken] = useAsyncTask<void>("queryTokenInfo");
+  const [runInitZilswap] = useAsyncTask<void>("initZilswap");
+  const [runReloadTransactions] = useAsyncTask<void>("reloadTransactions");
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -127,44 +128,72 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   }, []);
 
   useEffect(() => {
-    console.log("butler init");
-    if (tokenState.initialized) return;
-    if (!walletState.wallet) return;
-    const zilswapTokens = ZilswapConnector.getTokens(); // test new pool: .filter(token => token.symbol !== "ITN");
+    if (walletState.wallet) {
+      runReloadTransactions(async () => {
+        if (!walletState.wallet) return;
+        const viewblockTxs = await ViewBlock.listTransactions({
+          network: ZilswapConnector.network!.toLowerCase(),
+          address: walletState.wallet!.addressInfo.bech32,
+        });
+        const transactions: Transaction[] = viewblockTxs.map((tx: any) => ({
+          hash: tx.hash.replace(/^0x/, ""),
+          status: "confirmed",
+        }));
 
-    const tokens: { [index: string]: TokenInfo } = {};
-    zilswapTokens.map(mapZilswapToken).forEach(token => tokens[token.address] = token);
-
-    const wallet: ConnectedWallet = walletState.wallet!;
-    // inject ZIL as a pseudo-token
-    tokens["zil"] = {
-      isZil: true,
-      dirty: false,
-      initialized: true,
-      listPriority: 0,
-      address: ZIL_HASH,
-      decimals: 12,
-      balance: wallet.balance,
-      init_supply: new BN(0),
-      name: "Zilliqa",
-      symbol: "ZIL",
-      balances: {
-
-        // initialize with own wallet balance
-        [wallet.addressInfo.byte20.toLowerCase()]: wallet.balance,
-      },
-    };
-
-    // initialize store TokenState
-    dispatch(actions.Token.init({ tokens }));
+        dispatch(actions.Transaction.init({ transactions }));
+      });
+    } else {
+      dispatch(actions.Transaction.init({ transactions: [] }));
+    }
 
     // eslint-disable-next-line
-  }, [walletState.wallet, tokenState.initialized]);
+  }, [walletState.wallet]);
+
+  useEffect(() => {
+    console.log("butler init");
+
+    const tokenState: TokenState = store.getState().token;
+    if (tokenState.initialized) {
+      dispatch(actions.Token.invalidate());
+      return;
+    };
+
+    runInitZilswap(async () => {
+      await ZilswapConnector.initialise({
+        network: Network.TestNet,
+      });
+      const zilswapTokens = ZilswapConnector.getTokens(); // test new pool: .filter(token => token.symbol !== "ITN");
+
+      const tokens: { [index: string]: TokenInfo } = {};
+      zilswapTokens.map(mapZilswapToken).forEach(token => tokens[token.address] = token);
+
+      // inject ZIL as a pseudo-token
+      tokens["zil"] = {
+        isZil: true,
+        dirty: false,
+        initialized: true,
+        listPriority: 0,
+        address: ZIL_HASH,
+        decimals: 12,
+        balance: walletState.wallet?.balance,
+        init_supply: new BN(0),
+        name: "Zilliqa",
+        symbol: "ZIL",
+        balances: {},
+      };
+
+      // initialize store TokenState
+      dispatch(actions.Token.init({ tokens }));
+    });
+
+    // eslint-disable-next-line
+  }, [tokenState.initialized, walletState.wallet]);
 
   useEffect(() => {
 
-    for (const address in tokenState.tokens) {
-      const token = tokenState.tokens[address];
+    const tokens = store.getState().token.tokens;
+    for (const address in tokens) {
+      const token = tokens[address];
 
       // skip initialized tokens to prevent run away
       // update cycle by useEffect.
@@ -185,23 +214,24 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         // zil is a pseudo token that should be updated through
         // updating the connected wallet.
         if (token.isZil) {
-          const privateKey = walletState.wallet?.addressInfo.privateKey;
-          if (!privateKey)
-            return;
-          const result = await connectWalletPrivateKey(privateKey, walletState.wallet!.network);
-          const wallet: ConnectedWallet = result.wallet!;
-
-          // update wallet store
-          dispatch(actions.Wallet.update({ wallet, pk: privateKey }));
+          const walletAddress = walletState.wallet?.addressInfo.byte20;
+          let balance: BN | undefined;
+          if (walletAddress) {
+            const balanceRPCResponse = await ZilswapConnector.getZilliqa().blockchain.getBalance(walletAddress);
+            const balanceResult = parseBalanceResponse(balanceRPCResponse as RPCResponse<any, string>);
+            balance = balanceResult.balance;
+          }
 
           // update token store
           dispatch(actions.Token.update({
             address,
             loading: false,
-            balance: wallet.balance,
+            balance: balance || new BN(0),
             balances: {
-              // initialize with own wallet balance
-              [wallet.addressInfo.byte20.toLowerCase()]: wallet.balance,
+              ...balance && {
+                // initialize with own wallet balance
+                [walletState.wallet.addressInfo.byte20.toLowerCase()]: balance!,
+              },
             },
           }));
           return;
@@ -223,10 +253,6 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         // retrieve token pool, if it exists
         const pool = ZilswapConnector.getPool(token.address) || undefined;
 
-        // retrieve user's token balance, if it exists
-        const wallet: ConnectedWallet = walletState.wallet!;
-        const balance = balances[wallet.addressInfo.byte20.toLowerCase()] || new BN(0)
-
         // prepare and dispatch token info update to store.
         const tokenInfo: TokenInfo = {
           initialized: true,
@@ -236,12 +262,13 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
           address: token.address,
           decimals: token.decimals,
+          balance: token.balance,
 
           init_supply: new BN(contractInit.init_supply),
           symbol: contractInit.symbol,
           name: contractInit.name,
 
-          pool, balances, balance,
+          pool, balances,
 
         };
         dispatch(actions.Token.update(tokenInfo));

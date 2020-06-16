@@ -4,13 +4,13 @@ import cls from "classnames";
 import { ConnectOptionType } from "../../../../../core/wallet/ConnectedWallet";
 import React from "react";
 import { ConnectWalletOption } from "./components";
-import { ReactComponent as MoonletIcon } from "./moonlet.svg";
+import { ReactComponent as ZilPayIcon } from "./zilpay.svg";
 import { ReactComponent as PrivateKeyIcon } from "./private-key.svg";
 import { ReactComponent as PrivateKeyIconDark } from "./private-key-dark.svg";
 
 export interface ConnectWalletProps {
   onSelectConnectOption: (option: ConnectOptionType) => void;
-  loading: Boolean;
+  loading?: Boolean;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -34,12 +34,12 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <DialogContent>
-        <ConnectWalletOption loading={loading} label="Moonlet Wallet" icon={MoonletIcon} secureLevel={4} buttonText="Connect Moonlet" onSelect={() => onSelectConnectOption("moonlet")} />
-        <ConnectWalletOption disable={loading} label="Private Key" icon={theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon} secureLevel={1} buttonText="Enter Private Key" onSelect={() => onSelectConnectOption("privateKey")} />
+        <ConnectWalletOption label="ZilPay" icon={ZilPayIcon} secureLevel={4} buttonText="Connect ZilPay" onSelect={() => onSelectConnectOption("zilpay")} />
+        <ConnectWalletOption label="Private Key" icon={theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon} secureLevel={1} buttonText="Enter Private Key" onSelect={() => onSelectConnectOption("privateKey")} />
       </DialogContent>
       <DialogContent className={classes.extraSpacious}>
         <Typography color="textPrimary" variant="body2" align="center">
-          New to Moonlet? Download <Link target="_blank" href="https://chrome.google.com/webstore/detail/moonlet-wallet-legacy/aepcjklheilpnnokjfpgncfcdakhbgci">here</Link> or <Link href="#">contact us</Link>.
+          New to ZilPay? Download <Link target="_blank" href="https://chrome.google.com/webstore/detail/zilpay/klnaejjgbibmhlephnhpmaofohgkpgkd">here</Link> or <Link href="#">contact us</Link>.
         </Typography>
       </DialogContent>
     </Box>

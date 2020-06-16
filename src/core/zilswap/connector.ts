@@ -3,12 +3,16 @@ import BigNumber from "bignumber.js";
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
 import { ObservedTx, Pool, TokenDetails, Zilswap, OnUpdate, TxStatus, TxReceipt } from "zilswap-sdk";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
+import { Provider } from "./reexport";
 
 
 export interface ConnectProps {
   wallet: ConnectedWallet;
   network: Network;
   observedTxs?: ObservedTx[];
+};
+export interface InitProps {
+  network?: Network;
 };
 
 export interface ExchangeRateQueryProps {
@@ -40,37 +44,13 @@ export interface SwapProps {
 
 type ConnectorState = {
   zilswap: Zilswap;
-  wallet: ConnectedWallet;
+  wallet?: ConnectedWallet;
 };
-
-let connectorState: ConnectorState | null = null;
-
-const getState = (): ConnectorState => {
-  if (connectorState === null)
-    throw new Error("not connected");
-  return connectorState!;
-};
-
-/**
- * Constructor for Zilswap SDK wrapper. Must populate connectorState if executed, 
- * throws error otherwise. 
- * 
- * @param wallet `ConnectedWallet` instance to provide blockchain connection interface.
- * @returns Promise<Zilswap> Zilswap instance initialized with wallet properties (network and provider).
- * @throws "moonlet support under development" when providing MoonletConnectedWallet.
- * @throws "unknown wallet connector" when wallet type unknown.
- */
-const initializeForWallet = async (wallet: ConnectedWallet): Promise<Zilswap> => {
-  switch (wallet.type) {
-    case WalletConnectType.PrivateKey:
-      const zilswap = new Zilswap(wallet.network, wallet.addressInfo.privateKey!);
-      connectorState = { zilswap, wallet };
-      return zilswap;
-    case WalletConnectType.Moonlet:
-      throw new Error("moonlet support under development");
-    default:
-      throw new Error("unknown wallet connector");
-  }
+type StateUpdateProps = {
+  network: Network;
+  wallet?: ConnectedWallet;
+  observedTxs?: ObservedTx[];
+  providerOrKey?: Provider | string;
 };
 
 /**
@@ -96,6 +76,8 @@ export class ZilswapConnector {
   static network?: Network;
   private static observer: OnUpdate | null;
 
+  static connectorState: ConnectorState;
+
   private static mainObserver: OnUpdate = (tx: ObservedTx, status: TxStatus, receipt?: TxReceipt) => {
     console.log("main observer", tx.hash, status);
     try {
@@ -107,6 +89,62 @@ export class ZilswapConnector {
   };
 
   /**
+   * Constructor for Zilswap SDK wrapper. Must populate connectorState.wallet if executed, 
+   * throws error otherwise. 
+   * 
+   * @param wallet `ConnectedWallet` instance to provide blockchain connection interface.
+   * @returns Promise<Zilswap> Zilswap instance initialized with wallet properties (network and provider).
+   * @throws "moonlet support under development" when providing MoonletConnectedWallet.
+   * @throws "unknown wallet connector" when wallet type unknown.
+   */
+  private static initializeForWallet = async (props: ConnectProps): Promise<void> => {
+    const { wallet, observedTxs } = props;
+    switch (wallet.type) {
+      case WalletConnectType.PrivateKey:
+        await ZilswapConnector.setState({
+          network: wallet.network,
+          wallet, observedTxs,
+          providerOrKey: wallet.addressInfo.privateKey,
+        });
+        return;
+      case WalletConnectType.Moonlet:
+        throw new Error("moonlet support under development");
+      case WalletConnectType.ZilPay:
+        // zilswap sdk checks for wallet.defaultAccount.address (not populated by zilpay)
+        await ZilswapConnector.setState({
+          network: wallet.network,
+          wallet, observedTxs,
+          providerOrKey: wallet.provider!,
+        });
+        return;
+      default:
+        throw new Error("unknown wallet connector");
+    }
+  };
+
+  private static getState = (connected: boolean = false): ConnectorState => {
+    if (connected && !ZilswapConnector.connectorState?.wallet)
+      throw new Error("not connected");
+    if (!ZilswapConnector.connectorState)
+      throw new Error("not intialised");
+    return ZilswapConnector.connectorState!;
+  };
+
+  private static setState = async (props: StateUpdateProps) => {
+    const { wallet, network, providerOrKey } = props;
+    const zilswap = new Zilswap(network, providerOrKey);
+    ZilswapConnector.network = network;
+
+    await ZilswapConnector.connectorState?.zilswap.teardown();
+
+    const observedTxs = props.observedTxs || [];
+    await zilswap.initialize(ZilswapConnector.mainObserver, observedTxs)
+    ZilswapConnector.connectorState = { zilswap, wallet };
+    console.log("zilswap sdk initialised");
+  };
+
+
+  /**
    * 
    * 
    */
@@ -115,17 +153,18 @@ export class ZilswapConnector {
     ZilswapConnector.observer = observer;
   };
 
+  static initialise = async (props: InitProps = {}) => {
+    const { network = ZilswapConnector.network || Network.TestNet } = props;
+
+    await ZilswapConnector.setState({ network });
+    console.log("zilswap connection established");
+  };
+
   /**
    * 
    */
   static connect = async (props: ConnectProps) => {
-    await initializeForWallet(props.wallet);
-    ZilswapConnector.network = props.network;
-
-    const observedTxs = props.observedTxs || [];
-
-    await getState().zilswap.initialize(ZilswapConnector.mainObserver, observedTxs);
-
+    await ZilswapConnector.initializeForWallet(props);
     console.log("zilswap connection established");
   };
 
@@ -136,7 +175,7 @@ export class ZilswapConnector {
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static getZilliqa = () => {
-    const { zilswap } = getState();
+    const { zilswap } = ZilswapConnector.getState();
     return new Zilliqa(APIS[zilswap.network]);
   };
 
@@ -147,7 +186,7 @@ export class ZilswapConnector {
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static getZilswapState = () => {
-    const { zilswap } = getState();
+    const { zilswap } = ZilswapConnector.getState();
     return zilswap.getAppState();
   };
 
@@ -158,7 +197,7 @@ export class ZilswapConnector {
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static getTokens = (): TokenDetails[] => {
-    const { zilswap } = getState();
+    const { zilswap } = ZilswapConnector.getState();
     const { tokens } = zilswap.getAppState();
     const tokensArray = Object.keys(tokens).map(hash => tokens[hash]);
     return ((tokensArray! as unknown) as TokenDetails[]);
@@ -172,7 +211,7 @@ export class ZilswapConnector {
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static getPool = (tokenID: string): Pool | null => {
-    const { zilswap } = getState();
+    const { zilswap } = ZilswapConnector.getState();
     return zilswap.getPool(tokenID);
   };
 
@@ -182,7 +221,7 @@ export class ZilswapConnector {
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static setDeadlineBlocks = (blocks: number) => {
-    const { zilswap } = getState();
+    const { zilswap } = ZilswapConnector.getState();
     return zilswap.setDeadlineBlocks(blocks);
   };
 
@@ -192,7 +231,7 @@ export class ZilswapConnector {
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static getExchangeRate = async (props: ExchangeRateQueryProps) => {
-    const { zilswap } = getState();
+    const { zilswap } = ZilswapConnector.getState();
     const queryFunction = props.exactOf === "in" ?
       zilswap.getRatesForInput.bind(zilswap) : zilswap.getRatesForOutput.bind(zilswap);
 
@@ -218,7 +257,7 @@ export class ZilswapConnector {
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static addLiquidity = async (props: AddLiquidityProps) => {
-    const { zilswap } = getState();
+    const { zilswap } = ZilswapConnector.getState(true);
 
     console.log(props.tokenID);
     console.log(props.zilAmount.toString());
@@ -246,7 +285,7 @@ export class ZilswapConnector {
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static removeLiquidity = async (props: RemoveLiquidityProps) => {
-    const { zilswap } = getState();
+    const { zilswap } = ZilswapConnector.getState(true);
 
     console.log(props.tokenID);
     console.log(props.contributionAmount.toString());
@@ -277,7 +316,7 @@ export class ZilswapConnector {
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static swap = async (props: SwapProps) => {
-    const { zilswap } = getState();
+    const { zilswap } = ZilswapConnector.getState(true);
 
     const swapFunction = props.exactOf === "in" ?
       zilswap.swapWithExactInput.bind(zilswap) :
@@ -296,17 +335,5 @@ export class ZilswapConnector {
     handleObservedTx(observedTx);
 
     return observedTx;
-  };
-
-  /**
-   * Cleanup connections and disconnect from network.
-   * May take awhile to disconnect due to `zilswap-sdk` tear down call.
-   * 
-   * @throws "not connected" if `ZilswapConnector.connect` not called.
-   */
-  static disconnect = async (): Promise<void> => {
-    const { zilswap } = getState();
-    ZilswapConnector.network = undefined;
-    await zilswap.teardown();
   };
 }

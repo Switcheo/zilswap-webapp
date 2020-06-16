@@ -9,14 +9,14 @@ import cls from "classnames";
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ConnectedWallet, ConnectOptionType } from "../../../core/wallet/ConnectedWallet";
-import { ConnectWallet, ConnectWalletPrivateKey } from "./components";
+import { ConnectWallet, ConnectWalletPrivateKey, ConnectWalletZilPay } from "./components";
 import ConnectedWalletBox from "./components/ConnectedWalletBox";
 import { ReactComponent as MoonletIcon } from "./components/ConnectWallet/moonlet.svg";
 import { ReactComponent as PrivateKeyIconDark } from "./components/ConnectWallet/private-key-dark.svg";
 import { ReactComponent as PrivateKeyIcon } from "./components/ConnectWallet/private-key.svg";
 
 const DIALOG_HEADERS: { [key in ConnectOptionType]: string } = {
-  moonlet: "Connect Moonlet Wallet",
+  zilpay: "Connect With ZilPay",
   privateKey: "Connect With Private Key",
 };
 
@@ -84,13 +84,6 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const onSelectConnectOption = async (connectType: ConnectOptionType) => {
     setConnectWalletType(connectType);
     setError(null);
-    if (connectType === "moonlet") {
-      // errorCatcher(async () => {
-      //   //@ts-ignore
-      //   const { wallet } = await WalletService.connectWalletMoonlet();
-      //   dispatch(actions.Wallet.update({ wallet }));
-      // }, "connectWallet")
-    }
   };
   const onConnectWalletResult = (wallet: ConnectedWallet | null) => {
     if (!wallet)
@@ -122,14 +115,14 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       )}
       {!walletState.wallet && (
         <Fragment>
-          {!(connectWalletType === "privateKey") && (
-            <ConnectWallet loading={connectWalletType === "moonlet"} onSelectConnectOption={onSelectConnectOption} />
+          {!connectWalletType && (
+            <ConnectWallet onSelectConnectOption={onSelectConnectOption} />
           )}
           {connectWalletType === "privateKey" && (
             <ConnectWalletPrivateKey onResult={onConnectWalletResult} />
           )}
-          {connectWalletType === "moonlet" && (
-            <iframe title="moonlet" ref={iframeRef} height={0} width={0} frameBorder={0} src="https://cryptolandtech.github.io/dapp-wallet-util/" />
+          {connectWalletType === "zilpay" && (
+            <ConnectWalletZilPay onResult={onConnectWalletResult} />
           )}
         </Fragment>
       )}

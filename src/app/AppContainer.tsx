@@ -2,7 +2,7 @@ import MomentUtils from "@date-io/moment";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import { ThemeProvider } from "@material-ui/styles";
-import { AppButler, ViewBlock } from "core/utilities";
+import { AppButler } from "core/utilities";
 import { connectWalletPrivateKey, ConnectWalletResult } from "core/wallet";
 import { ZilswapConnector } from "core/zilswap";
 import { createBrowserHistory } from "history";
@@ -13,11 +13,10 @@ import { Router } from "react-router-dom";
 import { GoogleAnalytics, ScrollReset } from "./components";
 import routes from "./routes";
 import { actions } from "./store";
-import { RootState, Transaction } from "./store/types";
+import { RootState } from "./store/types";
 import { WalletState } from "./store/wallet/types";
 import { darkTheme, lightTheme } from "./theme";
 import { useAsyncTask } from "./utils";
-
 
 const history = createBrowserHistory();
 const themes: any = {
@@ -50,21 +49,7 @@ const AppContainer: React.FC = () => {
             wallet, network,
             observedTxs: storeState.transaction.observingTxs,
           });
-
           dispatch(actions.Wallet.update({ wallet, pk: privateKey, }));
-
-          const viewblockTxs = await ViewBlock.listTransactions({
-            network: network.toLowerCase(),
-            address: wallet.addressInfo.bech32,
-          });
-          const transactions: Transaction[] = viewblockTxs.map((tx: any) => ({
-            hash: tx.hash.replace(/^0x/, ""),
-            status: "confirmed",
-          }))
-          console.log({ transactions });
-
-          dispatch(actions.Transaction.init({ transactions }))
-
         } else {
           dispatch(actions.Wallet.update({ wallet: undefined, pk: undefined }));
         }

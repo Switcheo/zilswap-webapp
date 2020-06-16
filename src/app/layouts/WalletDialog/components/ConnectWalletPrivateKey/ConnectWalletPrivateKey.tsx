@@ -83,6 +83,7 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props:
           network,
           wallet: walletResult.wallet,
         });
+        console.log("connector connected");
         dispatch(actions.Wallet.update({ wallet: walletResult.wallet!, pk: privateKey }));
       }
     });

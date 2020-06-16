@@ -1,11 +1,11 @@
 import moment from "moment";
-import { BN } from "@zilliqa-js/util";
 import { Network } from "zilswap-sdk/lib/constants";
+import { Provider } from "../zilswap";
 
-export type ConnectOptionType = "moonlet" | "privateKey";
+export type ConnectOptionType = "zilpay" | "privateKey";
 
 export enum WalletConnectType {
-  Moonlet, PrivateKey
+  Moonlet, PrivateKey, ZilPay
 };
 
 export type WalletAccountInfo = {
@@ -15,10 +15,10 @@ export type WalletAccountInfo = {
 };
 
 export type ConnectedWallet = {
+  provider?: Provider;
   type: WalletConnectType;
   network: Network;
 
-  balance: BN;
   timestamp: moment.Moment;
   addressInfo: WalletAccountInfo;
 };

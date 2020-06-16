@@ -1,27 +1,31 @@
-import { Account } from "@zilliqa-js/account";
 import moment from "moment";
 import { Network } from "zilswap-sdk/lib/constants";
+import { Provider } from "../zilswap";
 import { ConnectedWallet, WalletAccountInfo, WalletConnectType } from "./ConnectedWallet";
 
-export interface PrivateKeyConnectProps {
+export interface ZilPayConnectProps {
+  provider: Provider;
   network?: Network;
   timestamp?: moment.Moment;
+  bech32: string;
+  base16: string;
 };
-export class PrivateKeyConnectedWallet implements ConnectedWallet {
-  type = WalletConnectType.PrivateKey;
+export class ZilPayConnectedWallet implements ConnectedWallet {
+  type = WalletConnectType.ZilPay;
 
+  provider: Provider;
   network: Network;
 
   timestamp: moment.Moment;
   addressInfo: WalletAccountInfo;
 
-  constructor(account: Account, props: PrivateKeyConnectProps = {}) {
+  constructor(props: ZilPayConnectProps) {
+    this.provider = props.provider;
     this.network = props.network || Network.TestNet;
     this.timestamp = props.timestamp || moment();
     this.addressInfo = {
-      bech32: account.bech32Address,
-      byte20: account.address,
-      privateKey: account.privateKey,
+      bech32: props.bech32,
+      byte20: props.base16,
     };
   }
 }

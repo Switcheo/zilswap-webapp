@@ -1,4 +1,4 @@
-import { Box, Divider, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@material-ui/core";
+import { Box, Divider, CircularProgress, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ContrastBox } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
@@ -6,7 +6,7 @@ import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { RootState, Transaction, TransactionState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate } from "app/utils";
+import { hexToRGBA, truncate, useAsyncTask } from "app/utils";
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
 import { ZilswapConnector } from "core/zilswap";
@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     justifyContent: "space-between",
   },
   info: {
-    marginTop: 8
+    marginRight: 8,
   },
   copy: {
     marginLeft: 10
@@ -96,6 +96,7 @@ const ConnectedWalletBox = (props: any) => {
   const dispatch = useDispatch();
   const wallet = useSelector<RootState, ConnectedWallet>(state => state.wallet.wallet);
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
+  const [runDisconnectZilswap, loadingDisconnectZilswap] = useAsyncTask<void>("disconnectZilswap");
   const [includeCompleted, setIncludeCompleted] = useState(true);
   const [copyMap, setCopyMap] = useState<CopyMap>({});
   const theme = useTheme();
@@ -120,9 +121,12 @@ const ConnectedWalletBox = (props: any) => {
   }
 
   const onDisconnect = () => {
-    ZilswapConnector.disconnect();
-    dispatch(actions.Wallet.logout());
-    if (typeof onLogout === "function") onLogout();
+    if (loadingDisconnectZilswap) return;
+    runDisconnectZilswap(async () => {
+      await ZilswapConnector.initialise();
+      dispatch(actions.Wallet.logout());
+      if (typeof onLogout === "function") onLogout();
+    });
   };
 
   const address = wallet?.addressInfo.byte20;
@@ -141,7 +145,12 @@ const ConnectedWalletBox = (props: any) => {
               <IconButton className={classes.copy} size="small"><CopyIcon /></IconButton>
             </Tooltip>
           </Box>
-          <Typography className={cls(classes.info, classes.logout)} onClick={onDisconnect} color="primary" variant="body1">Disconnect</Typography>
+          <Box display="flex" flexDirection="row" marginTop={1}>
+            <Typography className={cls(classes.info, classes.logout)} onClick={onDisconnect} color="primary" variant="body1">
+              Disconnect
+            </Typography>
+            {loadingDisconnectZilswap && <CircularProgress size={12} />}
+          </Box>
         </Box>
       </ContrastBox>
       <Box mt={"36px"} overflow="hidden" display="flex" flexDirection="column">
@@ -153,7 +162,7 @@ const ConnectedWalletBox = (props: any) => {
               {!includeCompleted && (<IconButton size="small" className={classes.checkbox} onClick={() => setIncludeCompleted(true)}><CheckEmptyIcon /></IconButton>)}
               <Typography color="textSecondary" variant="body2">
                 Include Completed
-            </Typography>
+              </Typography>
             </Box>
           </Box>
           <Box mt={"28px"}>
