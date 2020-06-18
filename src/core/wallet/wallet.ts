@@ -8,6 +8,7 @@ import { APIS, Network } from 'zilswap-sdk/lib/constants';
 import { ConnectWalletResult } from "./ConnectedWallet";
 import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
 import { ZilPayConnectedWallet } from "./ZilPayConnectedWallet";
+import { WalletProvider } from "zilswap-sdk";
 
 export const parseBalanceResponse = (balanceRPCResponse: RPCResponse<any, string>) => {
   let balanceResult = null;
@@ -47,28 +48,19 @@ export const connectWalletZilPay = async (zilPay: any): Promise<ConnectWalletRes
   if (!zilPay.wallet.isConnect)
     throw new Error("ZilPay not connected.");
 
-  const account: any = zilPay.wallet.defaultAccount!;
+  const account: any = zilPay.wallet.defaultAccount;
+  if (!account)
+    throw new Error("Please sign in to your ZilPay account before connecting.");
   const timestamp = moment();
 
-  let balance = null;
-  try {
-    const balanceRPCResponse = await zilPay.blockchain.getBalance(account.bech32);
-    const balanceResult = RPCHandler.parseResponse(balanceRPCResponse as RPCResponse<any, string>);
-    balance = balanceResult.balance;
-  } catch (error) {
-    // bypass error for addresses without any TXs.
-    if (error.message !== "Account is not created")
-      throw error;
-    balance = 0;
-  }
-
-  console.log(balance);
   const network = zilPay.wallet.net === "testnet" ? Network.TestNet : Network.MainNet;
+  if (network === Network.MainNet)
+    throw new Error("MainNet is not supported yet");
   const wallet = new ZilPayConnectedWallet({
     network, timestamp,
-    provider: zilPay.provider,
-    bech32: account.bech32,
-    base16: account.base16,
+    zilpay: zilPay as WalletProvider,
+    bech32: account!.bech32,
+    base16: account!.base16,
   });
 
   return { wallet };

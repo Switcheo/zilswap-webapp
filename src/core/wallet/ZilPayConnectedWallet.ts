@@ -1,10 +1,10 @@
 import moment from "moment";
+import { WalletProvider } from "zilswap-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
-import { Provider } from "../zilswap";
 import { ConnectedWallet, WalletAccountInfo, WalletConnectType } from "./ConnectedWallet";
 
 export interface ZilPayConnectProps {
-  provider: Provider;
+  zilpay: WalletProvider;
   network?: Network;
   timestamp?: moment.Moment;
   bech32: string;
@@ -13,14 +13,14 @@ export interface ZilPayConnectProps {
 export class ZilPayConnectedWallet implements ConnectedWallet {
   type = WalletConnectType.ZilPay;
 
-  provider: Provider;
+  provider: WalletProvider;
   network: Network;
 
   timestamp: moment.Moment;
   addressInfo: WalletAccountInfo;
 
   constructor(props: ZilPayConnectProps) {
-    this.provider = props.provider;
+    this.provider = props.zilpay;
     this.network = props.network || Network.TestNet;
     this.timestamp = props.timestamp || moment();
     this.addressInfo = {

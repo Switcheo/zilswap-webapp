@@ -1,9 +1,8 @@
 import { Zilliqa } from "@zilliqa-js/zilliqa";
 import BigNumber from "bignumber.js";
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
-import { ObservedTx, Pool, TokenDetails, Zilswap, OnUpdate, TxStatus, TxReceipt } from "zilswap-sdk";
+import { ObservedTx, OnUpdate, Pool, TokenDetails, TxReceipt, TxStatus, WalletProvider, Zilswap } from "zilswap-sdk";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
-import { Provider } from "./reexport";
 
 
 export interface ConnectProps {
@@ -50,7 +49,7 @@ type StateUpdateProps = {
   network: Network;
   wallet?: ConnectedWallet;
   observedTxs?: ObservedTx[];
-  providerOrKey?: Provider | string;
+  providerOrKey?: WalletProvider | string;
 };
 
 /**
@@ -110,11 +109,11 @@ export class ZilswapConnector {
       case WalletConnectType.Moonlet:
         throw new Error("moonlet support under development");
       case WalletConnectType.ZilPay:
-        // zilswap sdk checks for wallet.defaultAccount.address (not populated by zilpay)
+        console.log("setState:ZilPay", wallet);
         await ZilswapConnector.setState({
           network: wallet.network,
           wallet, observedTxs,
-          providerOrKey: wallet.provider!,
+          providerOrKey: wallet.provider,
         });
         return;
       default:

@@ -1,6 +1,6 @@
 import moment from "moment";
+import { WalletProvider } from "zilswap-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
-import { Provider } from "../zilswap";
 
 export type ConnectOptionType = "zilpay" | "privateKey";
 
@@ -15,7 +15,7 @@ export type WalletAccountInfo = {
 };
 
 export type ConnectedWallet = {
-  provider?: Provider;
+  provider?: WalletProvider;
   type: WalletConnectType;
   network: Network;
 
