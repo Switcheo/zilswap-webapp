@@ -1,4 +1,6 @@
+import { TokenInfo } from "app/store/types";
 import BigNumber from "bignumber.js";
+
 
 export type ExactOfOptions = "in" | "out";
 

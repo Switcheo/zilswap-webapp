@@ -110,7 +110,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
-  const swapFormState = useSelector<RootState, SwapFormState>(store => store.swap);
+  const swapFormState: SwapFormState = useSelector<RootState, SwapFormState>(store => store.swap);
   const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
   const walletState = useSelector<RootState, WalletState>(store => store.wallet);
@@ -178,7 +178,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     runExchangeRate(async () => {
       const { inToken, outToken, exactOf, inAmount, outAmount } = swapFormState;
       if (!inToken || !outToken) {
-        setFormState({
+        return setFormState({
           ...formState,
           calculatingRate: false,
         });
@@ -333,8 +333,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       ZilswapConnector.setDeadlineBlocks(expiry);
 
       const observedTx = await ZilswapConnector.swap({
-        tokenInID: inToken.symbol,
-        tokenOutID: outToken.symbol,
+        tokenInID: inToken.address,
+        tokenOutID: outToken.address,
         amount, exactOf,
         maxAdditionalSlippage: toBasisPoints(slippage).toNumber(),
       });
@@ -355,7 +355,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
 
   const { outToken, inToken } = swapFormState;
-  const tokenBalance = inToken?.balances[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""] || BIG_ZERO;
+  const tokenBalance = new BigNumber(inToken?.balances[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString() || 0);
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       <Notifications />

@@ -262,7 +262,6 @@ export class ZilswapConnector {
     console.log(props.zilAmount.toString());
     console.log(props.tokenAmount.toString());
     console.log(props.maxExchangeRateChange);
-    await zilswap.approveTokenTransferIfRequired(props.tokenID, props.tokenAmount.toString());
     const observedTx = await zilswap.addLiquidity(
       props.tokenID,
       props.zilAmount.toString(),
@@ -327,7 +326,6 @@ export class ZilswapConnector {
     console.log(props.tokenOutID);
     console.log(props.amount.toString());
     console.log(props.maxAdditionalSlippage);
-    await zilswap.approveTokenTransferIfRequired(props.tokenInID, props.amount.toString());
     const observedTx = await swapFunction(
       props.tokenInID,
       props.tokenOutID,
