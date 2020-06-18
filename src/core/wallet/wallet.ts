@@ -4,11 +4,11 @@ import { validation } from "@zilliqa-js/util";
 import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { RPCHandler } from "core/utilities";
 import moment from "moment";
+import { WalletProvider } from "zilswap-sdk";
 import { APIS, Network } from 'zilswap-sdk/lib/constants';
 import { ConnectWalletResult } from "./ConnectedWallet";
 import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
 import { ZilPayConnectedWallet } from "./ZilPayConnectedWallet";
-import { WalletProvider } from "zilswap-sdk";
 
 export const parseBalanceResponse = (balanceRPCResponse: RPCResponse<any, string>) => {
   let balanceResult = null;

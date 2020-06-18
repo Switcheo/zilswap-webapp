@@ -3,12 +3,12 @@ import { BigNumber } from "bignumber.js";
 
 export interface WalletState {
   wallet?: ConnectedWallet;
-  pk?: string;
+  privateKey?: string;
   zilpay?: boolean;
 };
 
 export interface WalletUpdateProps {
   wallet?: ConnectedWallet;
-  pk?: string;
+  privateKey?: string;
   zilpay?: boolean;
 };

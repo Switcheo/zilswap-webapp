@@ -6,9 +6,14 @@ export const LoadingKeys = {
     "connectWallet",
     "connectWalletMoonlet",
     "connectWalletPrivateKey",
+    "initWallet",
   ],
 };
 
+export const LocalStorageKeys = {
+  PrivateKey: "zilswap:private-key",
+  ZilPayConnected: "zilswap:zilpay-connected",
+};
 
 export const BIG_ZERO = new BigNumber(0);
 export const BIG_ONE = new BigNumber(1);
