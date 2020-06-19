@@ -27,7 +27,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   swapButton: {
-    padding: 0
+    padding: 0,
+    transform: "rotate(0)",
+    transition: "transform .5s ease-in-out",
+  },
+  rotateSwapButton: {
+    transform: "rotate(180deg)",
   },
   switchIcon: {
     height: 16,
@@ -108,6 +113,7 @@ type CalculateAmountProps = {
 const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
+  const [buttonRotate, setButtonRotate] = useState(false);
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const swapFormState: SwapFormState = useSelector<RootState, SwapFormState>(store => store.swap);
   const dispatch = useDispatch();
@@ -131,6 +137,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
 
   const onReverse = () => {
+    setButtonRotate(!buttonRotate);
     const result = calculateAmounts({
       inToken: swapFormState.outToken,
       outToken: swapFormState.inToken,
@@ -342,7 +349,10 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         </KeyValueDisplay>
 
         <Box display="flex" mt={4} mb={1} justifyContent="center">
-          <IconButton onClick={() => onReverse()} className={classes.swapButton}>
+          <IconButton
+            disabled={!inToken || !outToken}
+            onClick={() => onReverse()} 
+            className={cls(classes.swapButton, { [classes.rotateSwapButton]: buttonRotate })}>
             <SwapSVG />
           </IconButton>
         </Box>
