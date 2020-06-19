@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const ShowAdvanced = (props: any) => {
   const { showAdvanced } = props;
   const classes = useStyles();
-  const { inAmount, outAmount, inToken, outToken, expectedSlippage, expectedInAmount, expectedOutAmount } = useSelector<RootState, SwapFormState>(store => store.swap);
+  const { inAmount, outAmount, inToken, outToken, expectedSlippage } = useSelector<RootState, SwapFormState>(store => store.swap);
   const moneyFormat = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 5 });
 
   if (!showAdvanced) return null;
@@ -42,9 +42,9 @@ const ShowAdvanced = (props: any) => {
     <ContrastBox className={classes.showAdvanced}>
       <Typography className={classes.text} variant="body2">
         You are giving{" "}
-        <strong>{moneyFormat(expectedInAmount || inAmount, { maxFractionDigits: inToken?.decimals, symbol: inToken?.symbol })}</strong>
+        <strong>{moneyFormat(inAmount, { maxFractionDigits: inToken?.decimals, symbol: inToken?.symbol })}</strong>
         {" "}for at least{" "}
-        <strong>{moneyFormat(expectedOutAmount || outAmount, { maxFractionDigits: outToken?.decimals, symbol: outToken?.symbol })}</strong>
+        <strong>{moneyFormat(outAmount, { maxFractionDigits: outToken?.decimals, symbol: outToken?.symbol })}</strong>
       </Typography>
       <Typography className={classes.text} variant="body2">
         Expected price slippage <strong>{moneyFormat((expectedSlippage || 0) * 100)}%</strong>

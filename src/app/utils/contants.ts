@@ -24,4 +24,4 @@ export const sortTokens = (lhs: TokenInfo, rhs: TokenInfo) => {
   return lhsPriority - rhsPriority;
 };
 
-export const ZIL_TOKEN_NAME =  "zil";
+export const ZIL_TOKEN_NAME =  "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";

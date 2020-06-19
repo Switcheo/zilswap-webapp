@@ -20,12 +20,8 @@ export interface SwapFormState {
   outToken?: TokenInfo;
   outAmount: BigNumber;
 
-  reverseExchangeRate: boolean;
-
   expectedExchangeRate?: BigNumber;
   expectedSlippage?: number;
-  expectedInAmount?: BigNumber;
-  expectedOutAmount?: BigNumber;
 };
 
 export interface UpdateExtendedPayload {

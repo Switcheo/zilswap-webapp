@@ -115,7 +115,8 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       if (bnTokenAmount.isNegative() || bnTokenAmount.isNaN() || !bnTokenAmount.isFinite())
         bnTokenAmount = BIG_ZERO;
 
-      let bnZilAmount = bnTokenAmount.times(poolToken.pool?.exchangeRate || 1).decimalPlaces(tokenState.tokens.zil?.decimals || 12);
+      const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
+      let bnZilAmount = bnTokenAmount.times(poolToken.pool?.exchangeRate || 1).decimalPlaces(zilToken?.decimals || 12);
       const zilAmount = bnZilAmount.toString();
 
       setFormState({
@@ -143,9 +144,10 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     runAddLiquidity(async () => {
       const tokenAddress = poolToken.address;
       const { addTokenAmount, addZilAmount } = poolFormState;
+      const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
       const observedTx = await ZilswapConnector.addLiquidity({
         tokenAmount: addTokenAmount.shiftedBy(poolToken.decimals),
-        zilAmount: addZilAmount.shiftedBy(tokenState.tokens.zil.decimals),
+        zilAmount: addZilAmount.shiftedBy(zilToken.decimals),
         tokenID: tokenAddress,
       });
 
@@ -179,7 +181,8 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           disabled={!poolToken}
           onEditorBlur={onDoneEditing}
           onAmountChange={onTokenChange}
-          onCurrencyChange={onPoolChange} />
+          onCurrencyChange={onPoolChange}
+          dialogOpts={{ hideZil: true }} />
 
         <ProportionSelect fullWidth
           color="primary"

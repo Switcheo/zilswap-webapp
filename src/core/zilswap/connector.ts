@@ -229,7 +229,7 @@ export class ZilswapConnector {
    * 
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
-  static getExchangeRate = async (props: ExchangeRateQueryProps) => {
+  static getExchangeRate = (props: ExchangeRateQueryProps) => {
     const { zilswap } = ZilswapConnector.getState();
     const queryFunction = props.exactOf === "in" ?
       zilswap.getRatesForInput.bind(zilswap) : zilswap.getRatesForOutput.bind(zilswap);
@@ -237,7 +237,7 @@ export class ZilswapConnector {
     console.log(props.tokenInID);
     console.log(props.tokenOutID);
     console.log(props.amount.toString());
-    return await queryFunction(
+    return queryFunction(
       props.tokenInID,
       props.tokenOutID,
       props.amount.toString());
