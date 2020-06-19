@@ -8,12 +8,12 @@ import { actions } from "app/store";
 import { PoolFormState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useMoneyFormatter } from "app/utils";
-import { BIG_ZERO, BIG_ONE } from "app/utils/contants";
+import { BIG_ONE, BIG_ZERO } from "app/utils/contants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PoolDetail from "../PoolDetail";
 import PoolIcon from "../PoolIcon";
@@ -32,7 +32,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   proportionSelect: {
     marginTop: 12,
-    marginBottom: 20
   },
   input: {
     marginTop: 12,
@@ -55,6 +54,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   previewAmount: {
     fontSize: 20,
     lineHeight: "24px",
+  },
+  keyValueLabel: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(2.5),
   },
   advanceDetails: {
     marginTop: theme.spacing(6),
@@ -193,7 +196,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     <Box display="flex" flexDirection="column"  {...rest} className={cls(classes.root, className)}>
       <Box className={classes.container}>
         <CurrencyInput
-          showContribution
+          hideBalance
           showCurrencyDialog={currencyDialogOverride}
           onCloseDialog={() => setCurrencyDialogOverride(false)}
           label="Remove"
@@ -205,13 +208,18 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           onCurrencyChange={onPoolChange}
           dialogOpts={{
             hideZil: true,
-            showContribution: true,
           }} />
 
         <ProportionSelect fullWidth
           color="primary"
           className={classes.proportionSelect}
           onSelectProp={onPercentage} />
+
+        <KeyValueDisplay className={classes.keyValueLabel}
+          deemphasizeValue
+          hideIfNoValue
+          kkey="In Pool"
+          value={!!poolToken && formatMoney(poolToken?.pool?.userContribution || 0, formatOpts)} />
 
         <PoolIcon type="minus" />
         <InputLabel>You Receive (Estimate)</InputLabel>

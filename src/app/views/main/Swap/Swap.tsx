@@ -372,16 +372,15 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onAmountChange={onInAmountChange}
           onCurrencyChange={onInCurrencyChange} />
         <ProportionSelect fullWidth color="primary" className={classes.proportionSelect} onSelectProp={onPercentage} />
-        {!!inToken && (
-          <KeyValueDisplay className={classes.keyValueLabel}
-            deemphasizeValue
-            kkey="You Have"
-            value={moneyFormat(tokenBalance, {
-              symbol: inToken!.symbol,
-              compression: inToken!.decimals,
-              showCurrency: true,
-            })} />
-        )}
+        <KeyValueDisplay className={classes.keyValueLabel}
+          deemphasizeValue
+          hideIfNoValue
+          kkey="You Have"
+          value={!!inToken && moneyFormat(tokenBalance, {
+            symbol: inToken!.symbol,
+            compression: inToken!.decimals,
+            showCurrency: true,
+          })} />
         <Box display="flex" mt={4} mb={1} justifyContent="center">
           <IconButton onClick={() => onReverse()} className={classes.swapButton}>
             <SwapSVG />

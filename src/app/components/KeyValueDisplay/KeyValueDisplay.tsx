@@ -8,13 +8,15 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 const KeyValueDisplay: any = (props: any) => {
-  const { children, className, kkey, deemphasizeValue, value, ...rest } = props;
+  const { children, className, kkey, deemphasizeValue, hideIfNoValue, value, ...rest } = props;
   const classes = useStyles();
 
   return (
     <Box {...rest} display="flex" flexDirection={"row"} justifyContent="space-between" className={cls(classes.root, className)}>
-      <Typography color="textSecondary" variant="body1">{kkey}</Typography>
-      <Typography color={deemphasizeValue ? "textSecondary": undefined} variant="body2">{value}</Typography>
+      <Typography color="textSecondary" variant="body1">
+        {(!value && hideIfNoValue) ? "": kkey}
+      </Typography>
+      <Typography color={deemphasizeValue ? "textSecondary" : undefined} variant="body2">{value || <span>&nbsp;</span>}</Typography>
     </Box>
   );
 };

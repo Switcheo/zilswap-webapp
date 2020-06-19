@@ -1,9 +1,9 @@
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { CurrencyInput, FancyButton, ProportionSelect } from "app/components";
+import { CurrencyInput, FancyButton, ProportionSelect, KeyValueDisplay } from "app/components";
 import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState, PoolFormState } from "app/store/types";
-import { useAsyncTask } from "app/utils";
+import { useAsyncTask, useMoneyFormatter } from "app/utils";
 import { ZIL_TOKEN_NAME, BIG_ZERO } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -26,12 +26,16 @@ const useStyles = makeStyles(theme => ({
     },
   },
   proportionSelect: {
-    margin: theme.spacing(1.5, 0, 2.5),
+    margin: theme.spacing(1.5, 0, 0),
   },
   actionButton: {
     marginTop: 45,
     marginBottom: 40,
     height: 46
+  },
+  keyValueLabel: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(2.5),
   },
   poolDetails: {
     marginTop: 12,
@@ -56,6 +60,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 5 });
 
   useEffect(() => {
     if (poolToken && currencyDialogOverride) {
@@ -68,7 +73,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
     const balance = new BigNumber(poolToken.balance.toString());
     const amount = balance.times(percentage).decimalPlaces(0);
-    onZilChange(amount.shiftedBy(-poolToken.decimals).toString());
+    onTokenChange(amount.shiftedBy(-poolToken.decimals).toString());
   };
 
   const onPoolChange = (token: TokenInfo) => {
@@ -165,6 +170,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       <Box className={classes.container}>
 
         <CurrencyInput
+          hideBalance
           label="Deposit"
           token={poolToken}
           showCurrencyDialog={currencyDialogOverride}
@@ -179,6 +185,17 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           color="primary"
           className={classes.proportionSelect}
           onSelectProp={onPercentage} />
+
+        <KeyValueDisplay className={classes.keyValueLabel}
+          deemphasizeValue
+          hideIfNoValue
+          kkey="You Have"
+          value={!!poolToken &&
+            formatMoney(poolToken?.balance.toString(), {
+              symbol: poolToken?.symbol,
+              compression: poolToken?.decimals,
+            })} />
+
 
         <PoolIcon type="plus" />
 
