@@ -273,6 +273,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
   const onOutCurrencyChange = (token: TokenInfo) => {
     if (token.isZil && swapFormState.inToken === token) return;
+    if (swapFormState.outToken === token) return;
     let { inToken, poolToken, reverseExchangeRate } = swapFormState;
     reverseExchangeRate = !token.isZil;
 
@@ -296,6 +297,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
   const onInCurrencyChange = (token: TokenInfo) => {
     if (token.isZil && swapFormState.outToken === token) return;
+    if (swapFormState.inToken === token) return;
     let { outToken, poolToken, reverseExchangeRate } = swapFormState;
     reverseExchangeRate = token.isZil;
 

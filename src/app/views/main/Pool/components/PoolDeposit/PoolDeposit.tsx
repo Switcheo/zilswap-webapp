@@ -26,17 +26,15 @@ const useStyles = makeStyles(theme => ({
     },
   },
   proportionSelect: {
-    marginTop: 12,
-    marginBottom: 20
-  },
-  input: {
-    marginTop: 12,
-    marginBottom: 20
+    margin: theme.spacing(1.5, 0, 2.5),
   },
   actionButton: {
     marginTop: 45,
     marginBottom: 40,
     height: 46
+  },
+  poolDetails: {
+    marginTop: 12,
   },
   svg: {
     alignSelf: "center"
@@ -66,12 +64,11 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   }, [poolToken, currencyDialogOverride]);
 
   const onPercentage = (percentage: number) => {
-    const zilToken = tokenState.tokens.zil;
-    if (!zilToken) return;
+    if (!poolToken) return;
 
-    const balance = new BigNumber(zilToken.balance.toString());
+    const balance = new BigNumber(poolToken.balance.toString());
     const amount = balance.times(percentage).decimalPlaces(0);
-    onZilChange(amount.shiftedBy(-zilToken.decimals).toString());
+    onZilChange(amount.shiftedBy(-poolToken.decimals).toString());
   };
 
   const onPoolChange = (token: TokenInfo) => {
@@ -166,13 +163,17 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   return (
     <Box display="flex" flexDirection="column" {...rest} className={cls(classes.root, className)}>
       <Box className={classes.container}>
-        <CurrencyInput fixedToZil
+
+        <CurrencyInput
           label="Deposit"
-          token={tokenState.tokens[ZIL_TOKEN_NAME]}
-          amount={formState.zilAmount}
+          token={poolToken}
+          showCurrencyDialog={currencyDialogOverride}
+          onCloseDialog={() => setCurrencyDialogOverride(false)}
+          amount={formState.tokenAmount.toString()}
           disabled={!poolToken}
           onEditorBlur={onDoneEditing}
-          onAmountChange={onZilChange} />
+          onAmountChange={onTokenChange}
+          onCurrencyChange={onPoolChange} />
 
         <ProportionSelect fullWidth
           color="primary"
@@ -181,18 +182,15 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
         <PoolIcon type="plus" />
 
-        <CurrencyInput
+        <CurrencyInput fixedToZil
           label="Deposit"
-          token={poolToken}
-          showCurrencyDialog={currencyDialogOverride}
-          onCloseDialog={() => setCurrencyDialogOverride(false)}
-          amount={formState.tokenAmount.toString()}
-          className={classes.input}
+          token={tokenState.tokens[ZIL_TOKEN_NAME]}
+          amount={formState.zilAmount}
           disabled={!poolToken}
           onEditorBlur={onDoneEditing}
-          onAmountChange={onTokenChange}
-          onCurrencyChange={onPoolChange} />
-        <PoolDetail token={poolToken || undefined} />
+          onAmountChange={onZilChange} />
+
+        <PoolDetail className={classes.poolDetails} token={poolToken || undefined} />
 
         <Typography color="error">{error?.message}</Typography>
         <FancyButton
