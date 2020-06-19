@@ -175,31 +175,37 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       exactOf: _exactOf,
     };
 
-    const amount = _exactOf === "in" ? _inAmount.shiftedBy(_inToken.decimals) : _outAmount.shiftedBy(_outToken.decimals);
+    const srcToken = _exactOf === "in" ? _inToken : _outToken;
+    const dstToken = _exactOf === "in" ? _outToken : _inToken;
+
+    const srcAmount = (_exactOf === "in" ? _inAmount : _outAmount).shiftedBy(srcToken.decimals);
     const rateResult = ZilswapConnector.getExchangeRate({
-      amount: amount.decimalPlaces(0),
+      amount: srcAmount.decimalPlaces(0),
       exactOf: _exactOf,
       tokenInID: _inToken!.address,
       tokenOutID: _outToken!.address,
     });
+
     console.log(rateResult.expectedAmount.toString());
+
     let expectedExchangeRate = BIG_ZERO;
     if (rateResult.expectedAmount.comparedTo(BIG_ZERO) === 0) {
       const inRate = _inToken.pool?.exchangeRate || BIG_ONE;
       const outRate = _outToken.pool?.exchangeRate || BIG_ONE;
-      expectedExchangeRate = inRate.times(outRate);
+      expectedExchangeRate = inRate.div(outRate);
     } else {
-      expectedExchangeRate = amount.div(rateResult.expectedAmount).pow(_exactOf === "in" ? -1 : 1).abs();
+      const expectedAmountUnits = rateResult.expectedAmount.shiftedBy(-dstToken.decimals);
+      const srcAmountUnits = srcAmount.shiftedBy(-srcToken.decimals);
+      expectedExchangeRate = expectedAmountUnits.div(srcAmountUnits).pow(_exactOf === "in" ? 1: -1).abs();
     }
-
-    console.log("expectedExchangeRate", expectedExchangeRate.toString());
+    console.log(expectedExchangeRate.toString());
 
     const expectedSlippage = rateResult.slippage.shiftedBy(-2).toNumber();
 
     if (_exactOf === "in") {
-      _outAmount = _inAmount.times(expectedExchangeRate).decimalPlaces(_outToken?.decimals || 0);
+      _outAmount = rateResult.expectedAmount.shiftedBy(-_outToken?.decimals || 0).decimalPlaces(_outToken?.decimals || 0);
     } else {
-      _inAmount = _outAmount.div(expectedExchangeRate).decimalPlaces(_inToken?.decimals || 0);
+      _inAmount = rateResult.expectedAmount.shiftedBy(-_inToken?.decimals || 0).decimalPlaces(_inToken?.decimals || 0);
     }
 
     return {
@@ -245,7 +251,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (swapFormState.outToken === token) return;
     let { inToken, poolToken } = swapFormState;
 
-    if (!token.isZil) {
+    if (!token.isZil && !inToken) {
       poolToken = token;
       inToken = tokenState.tokens[ZIL_TOKEN_NAME];
     }
@@ -268,7 +274,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (swapFormState.inToken === token) return;
     let { outToken, poolToken } = swapFormState;
 
-    if (!token.isZil) {
+    if (!token.isZil && !outToken) {
       poolToken = token;
       outToken = tokenState.tokens[ZIL_TOKEN_NAME];
     }
@@ -351,7 +357,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         <Box display="flex" mt={4} mb={1} justifyContent="center">
           <IconButton
             disabled={!inToken || !outToken}
-            onClick={() => onReverse()} 
+            onClick={() => onReverse()}
             className={cls(classes.swapButton, { [classes.rotateSwapButton]: buttonRotate })}>
             <SwapSVG />
           </IconButton>
