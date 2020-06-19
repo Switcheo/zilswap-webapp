@@ -81,14 +81,23 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
           <List key={index}>
             {navigation.pages.map((page, index) => (
               <ListItem className={classes.listItem} disableGutters button key={index}>
-                <Button
-                  className={classes.buttonLeaf}
-                  activeClassName={classes.buttonLeafActive}
-                  component={CustomRouterLink}
-                  to={page.href}
-                  exact={false}>
+                {!page.external ? (
+                  <Button
+                    className={classes.buttonLeaf}
+                    activeClassName={classes.buttonLeafActive}
+                    component={CustomRouterLink}
+                    to={page.href}
+                    exact={false}>
                     {page.title}
                   </Button>
+                ) : (
+                    <Button
+                      className={classes.buttonLeaf}
+                      href={page.href}
+                      target="_blank">
+                      {page.title}
+                    </Button>
+                  )}
               </ListItem>
             ))}
           </List>

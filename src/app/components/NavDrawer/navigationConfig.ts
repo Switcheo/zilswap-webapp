@@ -9,10 +9,12 @@ const navigationConfig: NavigationOptions[] = [{
     href: "/about",
   }, {
     title: "Documentation",
-    href: "/docs",
+    href: "https://docs.zilswap.org/",
+    external: true,
   }, {
     title: "API",
-    href: "/api",
+    href: "https://docs.zilswap.org/#/smart-contract",
+    external: true,
   }, {
     title: "Support",
     href: "/support",
