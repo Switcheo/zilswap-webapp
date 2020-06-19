@@ -179,33 +179,33 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     const dstToken = _exactOf === "in" ? _outToken : _inToken;
 
     const srcAmount = (_exactOf === "in" ? _inAmount : _outAmount).shiftedBy(srcToken.decimals);
-    const rateResult = ZilswapConnector.getExchangeRate({
-      amount: srcAmount.decimalPlaces(0),
-      exactOf: _exactOf,
-      tokenInID: _inToken!.address,
-      tokenOutID: _outToken!.address,
-    });
+    let expectedExchangeRate = BIG_ONE;
+    let expectedSlippage = 0;
+    let dstAmount = srcAmount;
 
-    console.log(rateResult.expectedAmount.toString());
+    if (srcAmount.abs().gt(0)) {
+      const rateResult = ZilswapConnector.getExchangeRate({
+        amount: srcAmount.decimalPlaces(0),
+        exactOf: _exactOf,
+        tokenInID: _inToken!.address,
+        tokenOutID: _outToken!.address,
+      });
+      console.log(rateResult.expectedAmount.toString());
 
-    let expectedExchangeRate = BIG_ZERO;
-    if (rateResult.expectedAmount.comparedTo(BIG_ZERO) === 0) {
-      const inRate = _inToken.pool?.exchangeRate || BIG_ONE;
-      const outRate = _outToken.pool?.exchangeRate || BIG_ONE;
-      expectedExchangeRate = inRate.div(outRate);
-    } else {
       const expectedAmountUnits = rateResult.expectedAmount.shiftedBy(-dstToken.decimals);
       const srcAmountUnits = srcAmount.shiftedBy(-srcToken.decimals);
-      expectedExchangeRate = expectedAmountUnits.div(srcAmountUnits).pow(_exactOf === "in" ? 1: -1).abs();
-    }
-    console.log(expectedExchangeRate.toString());
+      expectedExchangeRate = expectedAmountUnits.div(srcAmountUnits).pow(_exactOf === "in" ? 1 : -1).abs();
 
-    const expectedSlippage = rateResult.slippage.shiftedBy(-2).toNumber();
+      expectedSlippage = rateResult.slippage.shiftedBy(-2).toNumber();
 
-    if (_exactOf === "in") {
-      _outAmount = rateResult.expectedAmount.shiftedBy(-_outToken?.decimals || 0).decimalPlaces(_outToken?.decimals || 0);
+      dstAmount = rateResult.expectedAmount.shiftedBy(-dstToken?.decimals || 0).decimalPlaces(dstToken?.decimals || 0);
     } else {
-      _inAmount = rateResult.expectedAmount.shiftedBy(-_inToken?.decimals || 0).decimalPlaces(_inToken?.decimals || 0);
+      const inRate = _inToken.pool?.exchangeRate || BIG_ONE;
+      const outRate = _outToken.pool?.exchangeRate || BIG_ONE;
+      console.log({ inRate, outRate });
+      expectedExchangeRate = inRate.div(outRate).pow(_exactOf === "in" ? 1 : -1);
+
+      dstAmount = BIG_ZERO;
     }
 
     return {
@@ -214,6 +214,12 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       inToken: _inToken,
       outToken: _outToken,
       exactOf: _exactOf,
+      ..._exactOf === "in" && {
+        outAmount: dstAmount, 
+      },
+      ..._exactOf === "out" && {
+        inAmount: dstAmount, 
+      },
 
       expectedExchangeRate,
       expectedSlippage,
