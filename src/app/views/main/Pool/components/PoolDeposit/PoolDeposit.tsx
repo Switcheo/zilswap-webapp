@@ -186,15 +186,16 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           className={classes.proportionSelect}
           onSelectProp={onPercentage} />
 
-        <KeyValueDisplay className={classes.keyValueLabel}
-          deemphasizeValue
+        <KeyValueDisplay
+          className={classes.keyValueLabel}
           hideIfNoValue
-          kkey="You Have"
-          value={!!poolToken &&
+          kkey="You Have">
+          {!!poolToken &&
             formatMoney(poolToken?.balance.toString(), {
               symbol: poolToken?.symbol,
               compression: poolToken?.decimals,
-            })} />
+            })}
+        </KeyValueDisplay>
 
 
         <PoolIcon type="plus" />

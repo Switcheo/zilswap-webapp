@@ -25,9 +25,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-around",
-    padding: theme.spacing(0, 8, 2),
+    padding: theme.spacing(0, 8, 5),
     [theme.breakpoints.down("xs")]: {
-      padding: theme.spacing(0, 2, 2),
+      padding: theme.spacing(0, 2, 5),
     },
   },
   proportionSelect: {
@@ -61,7 +61,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   advanceDetails: {
     marginTop: theme.spacing(6),
-    marginBottom: theme.spacing(3),
     justifyContent: "center",
     alignItems: "center",
     display: "flex",
@@ -215,11 +214,9 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           className={classes.proportionSelect}
           onSelectProp={onPercentage} />
 
-        <KeyValueDisplay className={classes.keyValueLabel}
-          deemphasizeValue
-          hideIfNoValue
-          kkey="In Pool"
-          value={!!poolToken && formatMoney(poolToken?.pool?.userContribution || 0, formatOpts)} />
+        <KeyValueDisplay className={classes.keyValueLabel} hideIfNoValue kkey="In Pool">
+          {!!poolToken && formatMoney(poolToken?.pool?.userContribution || 0, formatOpts)}
+        </KeyValueDisplay>
 
         <PoolIcon type="minus" />
         <InputLabel>You Receive (Estimate)</InputLabel>
@@ -244,24 +241,33 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           Remove Liquidity
         </FancyButton>
 
-        <Typography
-          variant="body2"
-          className={cls(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })}
-          onClick={() => setShowAdvanced(!showAdvanced)}>
-          Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        </Typography>
+        {!!poolToken && (
+          <Typography
+            variant="body2"
+            className={cls(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })}
+            onClick={() => setShowAdvanced(!showAdvanced)}>
+            Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          </Typography>
+        )}
       </Box>
 
-      {!!showAdvanced && (
+      {!!showAdvanced && !!poolToken && (
         <ContrastBox className={classes.showAdvanced}>
           <Typography className={classes.text} variant="body2">
             You are removing{" "}
-            {formatMoney(getReceiveAmount("zil"), zilFormatOpts)} + {formatMoney(getReceiveAmount("zrc2"), formatOpts)}
-            from the liquidity pool. (~{formatMoney(poolFormState.removeTokenAmount, { ...formatOpts, showCurrency: false })} Liquidity tokens)
+            <strong>{formatMoney(getReceiveAmount("zil"), zilFormatOpts)} + {formatMoney(getReceiveAmount("zrc2"), formatOpts)}</strong>
+            from the liquidity pool.{" "}
+            <strong>(~{formatMoney(poolFormState.removeTokenAmount, { ...formatOpts, showCurrency: true })} Pool Token)</strong>
           </Typography>
           <Divider className={classes.divider} />
-          <KeyValueDisplay mt={"22px"} kkey={"Current Total Supply"} value={`${formatMoney(poolToken?.pool?.tokenReserve || 0, { ...formatOpts })} Liquidity Tokens`} />
-          <KeyValueDisplay mt={"22px"} kkey={"Each Pool Token Value"} value={`${formatMoney(new BigNumber(liquidityTokenRate).times(poolToken?.pool?.exchangeRate || 0), { ...zilFormatOpts, compression: 0 })} + ${formatMoney(new BigNumber(liquidityTokenRate).shiftedBy(poolToken?.decimals || 0), formatOpts)}`} />
+          <KeyValueDisplay mt={"22px"} kkey={"Current Total Supply"}>
+            {formatMoney(poolToken?.pool?.tokenReserve || 0, { ...formatOpts })} Pool Token
+          </KeyValueDisplay>
+          <KeyValueDisplay mt={"8px"} kkey={"Each Pool Token Value"}>
+            {formatMoney(new BigNumber(liquidityTokenRate).times(poolToken?.pool?.exchangeRate || 0), { ...zilFormatOpts, compression: 0 })}
+            {" "}+{" "}
+            {formatMoney(new BigNumber(liquidityTokenRate).shiftedBy(poolToken?.decimals || 0), formatOpts)}
+          </KeyValueDisplay>
 
         </ContrastBox>
       )}

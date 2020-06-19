@@ -124,9 +124,9 @@ const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => 
         <LoadableArea loading={loading}>
           {!!tokenPreview && (
             <>
-              <KeyValueDisplay kkey={"Name"} value={tokenPreview.name} mb="8px" />
-              <KeyValueDisplay kkey={"Symbol"} value={tokenPreview.symbol} mb="8px" />
-              <KeyValueDisplay kkey={"Decimals"} value={`${tokenPreview.decimals}`} mb="8px" />
+              <KeyValueDisplay kkey={"Name"} mb="8px">{tokenPreview.name}</KeyValueDisplay>
+              <KeyValueDisplay kkey={"Symbol"} mb="8px">{tokenPreview.symbol}</KeyValueDisplay>
+              <KeyValueDisplay kkey={"Decimals"} mb="8px">{tokenPreview.decimals}</KeyValueDisplay>
             </>
           )}
         </LoadableArea>

@@ -372,15 +372,17 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onAmountChange={onInAmountChange}
           onCurrencyChange={onInCurrencyChange} />
         <ProportionSelect fullWidth color="primary" className={classes.proportionSelect} onSelectProp={onPercentage} />
+
         <KeyValueDisplay className={classes.keyValueLabel}
-          deemphasizeValue
           hideIfNoValue
-          kkey="You Have"
-          value={!!inToken && moneyFormat(tokenBalance, {
+          kkey="You Have">
+          {!!inToken && moneyFormat(tokenBalance, {
             symbol: inToken!.symbol,
             compression: inToken!.decimals,
             showCurrency: true,
-          })} />
+          })}
+        </KeyValueDisplay>
+
         <Box display="flex" mt={4} mb={1} justifyContent="center">
           <IconButton onClick={() => onReverse()} className={classes.swapButton}>
             <SwapSVG />
@@ -395,12 +397,13 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onEditorBlur={onDoneEditing}
           onAmountChange={onOutAmountChange}
           onCurrencyChange={onOutCurrencyChange} />
+
         {!!(inToken && outToken) && (
           <Box display="flex" flexDirection="row" marginTop={1}>
             <KeyValueDisplay className={classes.exchangeRateLabel}
-              deemphasizeValue
-              kkey="Exchange Rate"
-              value={getExchangeRateLabel()} />
+              kkey="Exchange Rate">
+              {getExchangeRateLabel()}
+            </KeyValueDisplay>
             <SwitchSVG
               onClick={() => setReversedRate(!reversedRate)}
               className={cls(classes.switchIcon, {
