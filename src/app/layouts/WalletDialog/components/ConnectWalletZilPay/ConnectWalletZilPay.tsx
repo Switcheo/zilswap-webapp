@@ -114,7 +114,7 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
               </Box>
             )}
           </Box>
-          <FancyButton loading={loadingConnect} onClick={connect} className={classes.submitButton} variant="contained" color="primary">
+          <FancyButton fullWidth loading={loadingConnect} onClick={connect} className={classes.submitButton} variant="contained" color="primary">
             Connect
           </FancyButton>
         </ContrastBox>

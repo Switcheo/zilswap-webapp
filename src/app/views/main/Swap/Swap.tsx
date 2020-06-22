@@ -210,7 +210,6 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     } else {
       const inRate = _inToken.pool?.exchangeRate || BIG_ONE;
       const outRate = _outToken.pool?.exchangeRate || BIG_ONE;
-      console.log({ inRate, outRate });
       expectedExchangeRate = inRate.div(outRate).pow(_exactOf === "in" ? 1 : -1);
 
       dstAmount = BIG_ZERO;
@@ -262,7 +261,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }
   };
   const onOutCurrencyChange = (token: TokenInfo) => {
-    if (token.isZil && swapFormState.inToken === token) return;
+    if (swapFormState.inToken === token) return;
     if (swapFormState.outToken === token) return;
     let { inToken, poolToken } = swapFormState;
 
@@ -285,7 +284,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }));
   };
   const onInCurrencyChange = (token: TokenInfo) => {
-    if (token.isZil && swapFormState.outToken === token) return;
+    if (swapFormState.outToken === token) return;
     if (swapFormState.inToken === token) return;
     let { outToken, poolToken } = swapFormState;
 
@@ -402,7 +401,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
         <Typography color="error">{error?.message}</Typography>
         {swapFormState.isInsufficientReserves && (
-          <Typography color="error">Pool reserve is too small to fulfill desired transaction.</Typography>
+          <Typography color="error">Pool reserve is too small to fulfill desired output.</Typography>
         )}
 
         <FancyButton walletRequired fullWidth
