@@ -22,6 +22,7 @@ export interface SwapFormState {
 
   expectedExchangeRate?: BigNumber;
   expectedSlippage?: number;
+  isInsufficientReserves: boolean;
 };
 
 export interface UpdateExtendedPayload {

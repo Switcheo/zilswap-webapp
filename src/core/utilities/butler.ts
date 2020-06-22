@@ -157,8 +157,13 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   const initWithPrivateKey = (privateKey: string) => {
     console.log("butler", "initWithPrivateKey");
     runInitWallet(async () => {
-      const walletResult: ConnectWalletResult = await connectWalletPrivateKey(privateKey);
-      if (walletResult.wallet) {
+      let walletResult: ConnectWalletResult | undefined;
+
+      try {
+        walletResult = await connectWalletPrivateKey(privateKey);
+      } catch (e) {}
+
+      if (walletResult?.wallet) {
         const { wallet } = walletResult;
         const { network } = wallet;
         const storeState: RootState = store.getState();
@@ -169,6 +174,9 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         });
         dispatch(actions.Wallet.update({ wallet, privateKey }));
       } else {
+        await ZilswapConnector.initialise({
+          network: Network.TestNet,
+        });
         dispatch(actions.Wallet.update({ wallet: undefined, privateKey: undefined, zilpay: undefined }));
       }
 
@@ -181,12 +189,14 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     runInitWallet(async () => {
       let walletResult: ConnectWalletResult | undefined;
       const zilPay = (window as any).zilPay;
-      if (typeof zilPay !== "undefined") {
-        const result = await zilPay.wallet.connect();
-        if (result === zilPay.wallet.isConnect) {
-          walletResult = await connectWalletZilPay(zilPay);
+      try {
+        if (typeof zilPay !== "undefined") {
+          const result = await zilPay.wallet.connect();
+          if (result === zilPay.wallet.isConnect) {
+            walletResult = await connectWalletZilPay(zilPay);
+          }
         }
-      }
+      } catch (e) {}
 
       if (walletResult?.wallet) {
         const { wallet } = walletResult;
@@ -199,6 +209,9 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         });
         dispatch(actions.Wallet.update({ wallet, zilpay: true }));
       } else {
+        await ZilswapConnector.initialise({
+          network: Network.TestNet,
+        });
         dispatch(actions.Wallet.update({ wallet: undefined, privateKey: undefined, zilpay: undefined }));
       }
 

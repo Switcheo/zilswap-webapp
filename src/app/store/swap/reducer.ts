@@ -12,6 +12,8 @@ const initial_state: SwapFormState = {
   exactOf: "in",
   inAmount: new BigNumber(0),
   outAmount: new BigNumber(0),
+  
+  isInsufficientReserves: false,
 }
 
 const reducer = (state: SwapFormState = initial_state, action: any) => {

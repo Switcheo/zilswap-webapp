@@ -77,9 +77,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   exchangeRateLabel: {
     flex: 1,
+    marginBottom: theme.spacing(2),
   },
   actionButton: {
-    marginTop: theme.spacing(6),
+    marginTop: theme.spacing(4),
     height: 46
   },
   advanceDetails: {
@@ -99,7 +100,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const initialFormState = {
   inAmount: "0",
   outAmount: "0",
-  calculatingRate: false,
 };
 
 type CalculateAmountProps = {
@@ -182,6 +182,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     let expectedExchangeRate = BIG_ONE;
     let expectedSlippage = 0;
     let dstAmount = srcAmount;
+    let isInsufficientReserves = false;
 
     if (srcAmount.abs().gt(0)) {
       const rateResult = ZilswapConnector.getExchangeRate({
@@ -192,13 +193,20 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       });
       console.log(rateResult.expectedAmount.toString());
 
-      const expectedAmountUnits = rateResult.expectedAmount.shiftedBy(-dstToken.decimals);
-      const srcAmountUnits = srcAmount.shiftedBy(-srcToken.decimals);
-      expectedExchangeRate = expectedAmountUnits.div(srcAmountUnits).pow(_exactOf === "in" ? 1 : -1).abs();
+      if (rateResult.expectedAmount.isNaN() || rateResult.expectedAmount.isNegative()) {
+        isInsufficientReserves = true;
+        expectedExchangeRate = BIG_ZERO;
+        expectedSlippage = 0;
+        dstAmount = BIG_ZERO;
+      } else {
+        const expectedAmountUnits = rateResult.expectedAmount.shiftedBy(-dstToken.decimals);
+        const srcAmountUnits = srcAmount.shiftedBy(-srcToken.decimals);
+        expectedExchangeRate = expectedAmountUnits.div(srcAmountUnits).pow(_exactOf === "in" ? 1 : -1).abs();
 
-      expectedSlippage = rateResult.slippage.shiftedBy(-2).toNumber();
+        expectedSlippage = rateResult.slippage.shiftedBy(-2).toNumber();
 
-      dstAmount = rateResult.expectedAmount.shiftedBy(-dstToken?.decimals || 0).decimalPlaces(dstToken?.decimals || 0);
+        dstAmount = rateResult.expectedAmount.shiftedBy(-dstToken?.decimals || 0).decimalPlaces(dstToken?.decimals || 0);
+      }
     } else {
       const inRate = _inToken.pool?.exchangeRate || BIG_ONE;
       const outRate = _outToken.pool?.exchangeRate || BIG_ONE;
@@ -215,12 +223,13 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       outToken: _outToken,
       exactOf: _exactOf,
       ..._exactOf === "in" && {
-        outAmount: dstAmount, 
+        outAmount: dstAmount,
       },
       ..._exactOf === "out" && {
-        inAmount: dstAmount, 
+        inAmount: dstAmount,
       },
 
+      isInsufficientReserves,
       expectedExchangeRate,
       expectedSlippage,
     };
@@ -327,7 +336,6 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const onDoneEditing = () => {
     setFormState({
       ...formState,
-      // calculatingRate: true,
       inAmount: swapFormState.inAmount.toString(),
       outAmount: swapFormState.outAmount.toString(),
     });
@@ -392,7 +400,10 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           </Box>
         )}
 
-        <Typography color="error">{(error)?.message}</Typography>
+        <Typography color="error">{error?.message}</Typography>
+        {swapFormState.isInsufficientReserves && (
+          <Typography color="error">Pool reserve is too small to fulfill desired transaction.</Typography>
+        )}
 
         <FancyButton walletRequired fullWidth
           loading={loading}
