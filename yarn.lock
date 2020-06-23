@@ -12547,10 +12547,10 @@ yargs@^7.0.0:
     y18n "^3.2.1"
     yargs-parser "^5.0.0"
 
-zilswap-sdk@^0.0.12:
-  version "0.0.12"
-  resolved "https://registry.yarnpkg.com/zilswap-sdk/-/zilswap-sdk-0.0.12.tgz#e9bdb6bcade70e73365a3a5320b0cd6d37eeafce"
-  integrity sha512-91su6JxUTJWbopB0HVDQ+8gw/kvJ3Ny5KUxihMkwd4IZB0l9Z1o9Kg/xr7NzHjdZm6B/+v4eaeNspoZQ56h+ew==
+zilswap-sdk@^0.0.13:
+  version "0.0.13"
+  resolved "https://registry.yarnpkg.com/zilswap-sdk/-/zilswap-sdk-0.0.13.tgz#7847fabe654ad45a6c332e521612c8e506904ab4"
+  integrity sha512-PaoaPajCHnnz9SLxClPB4rxoSGLr6cgFCtkvN6E6IvFw+ni++5H2lAi9VJU27S5V71lz7nO1gTbAwxRjATKDvA==
   dependencies:
     "@zilliqa-js/zilliqa" "^0.10.1"
     async-mutex "^0.2.2"

@@ -52,7 +52,7 @@
     "uuid": "^3.3.3",
     "validate.js": "^0.13.1",
     "xlsx": "^0.15.5",
-    "zilswap-sdk": "^0.0.12"
+    "zilswap-sdk": "^0.0.14"
   },
   "scripts": {
     "start": "react-scripts start",
