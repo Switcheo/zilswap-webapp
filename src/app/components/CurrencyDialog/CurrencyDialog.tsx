@@ -106,11 +106,11 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   }, [tokenState.tokens]);
 
   const filterSearch = (token: TokenInfo): boolean => {
+    const searchTerm = search.toLowerCase().trim();
     if (token.isZil && hideZil) return false;
-    if (!token.pool && hideNoPool) return false;
-    if (!search.trim().length) return true;
-    const searchTerm = search.toLowerCase();
-    return token.address.toLowerCase().includes(searchTerm) ||
+    if (!token.isZil && !token.pool && hideNoPool) return false;
+    if (!searchTerm.length) return true;
+    return token.address.toLowerCase() === searchTerm ||
       token.name.toLowerCase().includes(searchTerm) ||
       token.symbol.toLowerCase().includes(searchTerm);
   };
