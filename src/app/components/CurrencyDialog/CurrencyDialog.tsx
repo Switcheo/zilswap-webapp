@@ -167,7 +167,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
               focusRipple
               onClick={() => onSelectCurrency(token)}>
               <ContrastBox className={classes.currencyBox}>
-                <CurrencyLogo className={classes.currencyLogo} currency={token.symbol} />
+                <CurrencyLogo className={classes.currencyLogo} currency={token.address} />
                 <Box display="flex" flexDirection="column">
                   <Typography variant="h2">{token.symbol}</Typography>
                   <Typography color="textSecondary" variant="body2">{token.name}</Typography>

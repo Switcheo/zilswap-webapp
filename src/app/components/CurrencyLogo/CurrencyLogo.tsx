@@ -1,21 +1,22 @@
-import React from "react";
-import { ReactComponent as SWTH } from "./SWTH.svg";
-import { ReactComponent as ZIL } from "./ZIL.svg";
-import { ReactComponent as XSGD } from "./XSGD.svg";
-import { ReactComponent as DAI } from "./DAI.svg";
-import cls from "classnames";
-import { AppTheme } from "app/theme/types";
 import { makeStyles } from "@material-ui/core";
+import { AppTheme } from "app/theme/types";
+// import { ReactComponent as DAI } from "./DAI.svg";
+import cls from "classnames";
+import React from "react";
+import { TOKENS } from "zilswap-sdk/lib/constants";
+import { ReactComponent as SWTH } from "./SWTH.svg";
+import { ReactComponent as XSGD } from "./XSGD.svg";
+import { ReactComponent as ZIL } from "./ZIL.svg";
 
 export type CurrencyLogoMap = {
   [index: string]: any
 };
 
 const currencies: CurrencyLogoMap = {
-  "SWTH": SWTH,
-  "ZIL": ZIL,
-  "XSGD": XSGD,
-  "ITN": DAI,
+  [TOKENS.MainNet.ZIL]: ZIL,
+  [TOKENS.TestNet.ZIL]: ZIL,
+  [TOKENS.TestNet.SWTH]: SWTH,
+  [TOKENS.TestNet.XSGD]: XSGD,
 };
 
 const useStyles = makeStyles((theme: AppTheme) => ({
