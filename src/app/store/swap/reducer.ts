@@ -44,13 +44,6 @@ const reducer = (state: SwapFormState = initial_state, action: any) => {
             ...updateProps,
           }
         },
-
-        ...updateProps.address === state.poolToken?.address && {
-          poolToken: {
-            ...state.poolToken,
-            ...updateProps,
-          }
-        },
       };
 
     default:

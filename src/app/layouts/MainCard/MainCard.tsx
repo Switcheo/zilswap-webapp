@@ -88,9 +88,16 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
 
   const hasNotification = !!walletState.wallet && 
+    // show new pool warning
     ((isPool && poolToken && !poolToken?.loading && !poolToken?.pool) ||
+
+    // show user created token warning
     (isPool && !poolToken?.loading && poolToken?.pool && !poolToken?.whitelisted) ||
+
+    // show confirming tx message
     transactionState.observingTxs.length > 0 ||
+
+    // show confirmed tx message
     transactionState.submittedTxs.length > 0);
 
   return (

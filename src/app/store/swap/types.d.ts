@@ -12,8 +12,6 @@ export interface SwapFormState {
   percentage: BigNumber;
   exactOf: ExactOfOptions;
 
-  poolToken?: TokenInfo;
-
   inToken?: TokenInfo;
   inAmount: BigNumber;
 

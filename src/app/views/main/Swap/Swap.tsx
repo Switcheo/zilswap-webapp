@@ -238,20 +238,17 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const onOutAmountChange = (amount: string = "0") => {
     let outAmount = new BigNumber(amount);
     if (outAmount.isNaN() || outAmount.isNegative() || !outAmount.isFinite()) outAmount = BIG_ZERO;
-    if (swapFormState.poolToken) {
-      const result = calculateAmounts({ exactOf: "out", outAmount });
-      setFormState({
-        ...formState,
-        outAmount: amount,
-        inAmount: result.inAmount.toString(),
-      });
-      dispatch(actions.Swap.update(result));
-    }
+    const result = calculateAmounts({ exactOf: "out", outAmount });
+    setFormState({
+      ...formState,
+      outAmount: amount,
+      inAmount: result.inAmount.toString(),
+    });
+    dispatch(actions.Swap.update(result));
   };
   const onInAmountChange = (amount: string = "0") => {
     let inAmount = new BigNumber(amount);
     if (inAmount.isNaN() || inAmount.isNegative() || !inAmount.isFinite()) inAmount = BIG_ZERO;
-    if (swapFormState.poolToken) {
       const result = calculateAmounts({ exactOf: "in", inAmount });
       setFormState({
         ...formState,
@@ -259,15 +256,13 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         outAmount: result.outAmount.toString(),
       });
       dispatch(actions.Swap.update(result));
-    }
   };
   const onOutCurrencyChange = (token: TokenInfo) => {
     if (swapFormState.inToken === token) return;
     if (swapFormState.outToken === token) return;
-    let { inToken, poolToken } = swapFormState;
+    let { inToken } = swapFormState;
 
     if (!token.isZil && !inToken) {
-      poolToken = token;
       inToken = tokenState.tokens[ZIL_TOKEN_NAME];
     }
 
@@ -279,18 +274,14 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       inAmount: result.inAmount.toString(),
     });
 
-    dispatch(actions.Swap.update({
-      poolToken,
-      ...result,
-    }));
+    dispatch(actions.Swap.update(result));
   };
   const onInCurrencyChange = (token: TokenInfo) => {
     if (swapFormState.outToken === token) return;
     if (swapFormState.inToken === token) return;
-    let { outToken, poolToken } = swapFormState;
+    let { outToken } = swapFormState;
 
     if (!token.isZil && !outToken) {
-      poolToken = token;
       outToken = tokenState.tokens[ZIL_TOKEN_NAME];
     }
 
@@ -302,10 +293,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       inAmount: result.inAmount.toString(),
     });
 
-    dispatch(actions.Swap.update({
-      poolToken,
-      ...result,
-    }));
+    dispatch(actions.Swap.update(result));
   };
 
   const onSwap = () => {
