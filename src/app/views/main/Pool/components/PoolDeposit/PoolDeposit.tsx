@@ -55,7 +55,8 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const classes = useStyles();
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const [currencyDialogOverride, setCurrencyDialogOverride] = useState<boolean>(false);
-  const [runAddLiquidity, loading, error] = useAsyncTask("poolAddLiquidity");
+  const [runAddLiquidity, loading, error, clearPoolError] = useAsyncTask("poolAddLiquidity");
+  const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const dispatch = useDispatch();
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
@@ -141,6 +142,8 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     if (poolFormState.addTokenAmount.isZero()) return;
     if (loading) return;
 
+    clearApproveError();
+
     runAddLiquidity(async () => {
       const tokenAddress = poolToken.address;
       const { addTokenAmount, addZilAmount } = poolFormState;
@@ -156,6 +159,27 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         address: tokenAddress,
         pool: updatedPool,
       }));
+      dispatch(actions.Transaction.observe({ observedTx }));
+    });
+  };
+
+  const onApproveTx = () => {
+    if (!poolToken) return;
+    if (poolFormState.addTokenAmount.isZero()) return;
+    if (loading) return;
+
+    clearPoolError();
+
+    runApproveTx(async () => {
+      const tokenAddress = poolToken.address;
+      const { addTokenAmount } = poolFormState;
+      const observedTx = await ZilswapConnector.approveTokenTransfer({
+        tokenAmount: addTokenAmount,
+        tokenID: tokenAddress,
+      });
+
+      if (!observedTx)
+        throw new Error("Allowance already sufficient for specified amount");
       dispatch(actions.Transaction.observe({ observedTx }));
     });
   };
@@ -213,11 +237,13 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
         <PoolDetail className={classes.poolDetails} token={poolToken || undefined} />
 
-        <Typography color="error">{error?.message}</Typography>
+        <Typography color="error">{error?.message || errorApproveTx?.message}</Typography>
         <FancyButton
           loading={loading}
           walletRequired
-          // disabled={!poolToken}
+          showTxApprove
+          loadingTxApprove={loadingApproveTx}
+          onClickTxApprove={onApproveTx}
           className={classes.actionButton}
           variant="contained"
           color="primary"

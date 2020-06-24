@@ -119,7 +119,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
   const walletState = useSelector<RootState, WalletState>(store => store.wallet);
-  const [runSwap, loading, error] = useAsyncTask("swap");
+  const [runSwap, loading, error, clearSwapError] = useAsyncTask("swap");
+  const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -313,6 +314,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (inAmount.isZero() || outAmount.isZero()) return;
     if (loading) return;
 
+    clearApproveError();
+
     runSwap(async () => {
 
       const amount: BigNumber = exactOf === "in" ? inAmount.shiftedBy(inToken.decimals) : outAmount.shiftedBy(outToken.decimals);
@@ -328,6 +331,28 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         maxAdditionalSlippage: toBasisPoints(slippage).toNumber(),
       });
 
+      dispatch(actions.Transaction.observe({ observedTx }));
+    });
+  };
+
+  const onApproveTx = () => {
+    if (!swapFormState.inToken) return;
+    if (swapFormState.inToken.isZil) return;
+    if (swapFormState.inAmount.isZero()) return;
+    if (loading) return;
+
+    clearSwapError();
+
+    runApproveTx(async () => {
+      const tokenAddress = swapFormState.inToken!.address;
+      const tokenAmount = swapFormState.inAmount;
+      const observedTx = await ZilswapConnector.approveTokenTransfer({
+        tokenAmount: tokenAmount,
+        tokenID: tokenAddress,
+      });
+
+      if (!observedTx)
+        throw new Error("Transfer allowance already sufficient for specified amount");
       dispatch(actions.Transaction.observe({ observedTx }));
     });
   };
@@ -401,7 +426,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           </Box>
         )}
 
-        <Typography color="error">{error?.message}</Typography>
+        <Typography color="error">{error?.message || errorApproveTx?.message}</Typography>
         {swapFormState.isInsufficientReserves && (
           <Typography color="error">Pool reserve is too small to fulfill desired output.</Typography>
         )}
@@ -409,6 +434,9 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         <FancyButton walletRequired fullWidth
           loading={loading}
           className={classes.actionButton}
+          showTxApprove
+          loadingTxApprove={loadingApproveTx}
+          onClickTxApprove={onApproveTx}
           variant="contained"
           color="primary"
           disabled={!inToken || !outToken}

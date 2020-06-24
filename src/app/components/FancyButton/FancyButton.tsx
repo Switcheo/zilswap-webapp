@@ -1,5 +1,6 @@
-import { Button, ButtonProps, CircularProgress } from "@material-ui/core";
+import { Box, Button, ButtonProps, CircularProgress, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import LockIcon from "@material-ui/icons/LockOpen";
 import { actions } from "app/store";
 import { RootState, WalletState } from "app/store/types";
 import { useTaskSubscriber } from "app/utils";
@@ -11,6 +12,9 @@ import { useDispatch, useSelector } from "react-redux";
 export interface FancyButtonProps extends ButtonProps {
   loading?: boolean;
   walletRequired?: boolean;
+  loadingTxApprove?: boolean;
+  showTxApprove?: boolean;
+  onClickTxApprove?: () => any;
 };
 
 const useStyles = makeStyles(theme => ({
@@ -24,9 +28,12 @@ const useStyles = makeStyles(theme => ({
     marginTop: -12,
     marginLeft: -12,
   },
+  unlockButton: {
+    marginLeft: theme.spacing(1),
+  },
 }));
 const FancyButton: React.FC<FancyButtonProps> = (props: any) => {
-  const { children, loading, className, walletRequired, disabled, onClick, ...rest } = props;
+  const { children, loading, className, walletRequired, disabled, loadingTxApprove, showTxApprove, onClickTxApprove, onClick, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
@@ -60,12 +67,26 @@ const FancyButton: React.FC<FancyButtonProps> = (props: any) => {
     (!walletState.wallet ? loadingConnectWallet : loading) :
     (loading);
   return (
-    <Button {...rest} disabled={buttonDisabled} className={cls(classes.root, className)} onClick={onButtonClick}>
-      {!buttonLoading && buttonContent}
-      {!!buttonLoading && (
-        <CircularProgress size={24} className={classes.progress} />
+    <Box display="flex">
+      <Button {...rest} disabled={buttonDisabled} className={cls(classes.root, className)} onClick={onButtonClick}>
+        {!buttonLoading && buttonContent}
+        {!!buttonLoading && (
+          <CircularProgress size={24} className={classes.progress} />
+        )}
+      </Button>
+      {(showTxApprove && walletState.wallet) && (
+        <Tooltip title="Send TX to approve token transfer">
+          <Button onClick={onClickTxApprove} disabled={buttonDisabled} className={cls(classes.unlockButton, className)} color="primary" variant="contained">
+            {!loadingTxApprove && (
+              <LockIcon />
+            )}
+            {!!loadingTxApprove && (
+              <CircularProgress size={24} className={classes.progress} />
+            )}
+          </Button>
+        </Tooltip>
       )}
-    </Button>
+    </Box>
   );
 };
 

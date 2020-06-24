@@ -103,7 +103,7 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props:
             <OutlinedInput value={privateKey} onChange={onTextChange} />
             {/* <InputLabel>Enter a Password</InputLabel>
             <OutlinedInput type="password" value={password} onChange={onPasswordChange} /> */}
-            <FancyButton loading={loadingConnect} onClick={connect} className={classes.submitButton} variant="contained" color="primary">
+            <FancyButton fullWidth loading={loadingConnect} onClick={connect} className={classes.submitButton} variant="contained" color="primary">
               Connect
             </FancyButton>
           </form>

@@ -21,6 +21,11 @@ export interface ExchangeRateQueryProps {
   amount: BigNumber;
 };
 
+export interface ApproveTxProps {
+  tokenID: string;
+  tokenAmount: BigNumber;
+};
+
 export interface AddLiquidityProps {
   tokenID: string;
   zilAmount: BigNumber;
@@ -222,6 +227,22 @@ export class ZilswapConnector {
   static setDeadlineBlocks = (blocks: number) => {
     const { zilswap } = ZilswapConnector.getState();
     return zilswap.setDeadlineBlocks(blocks);
+  };
+
+  /**
+   * 
+   * @throws "not connected" if `ZilswapConnector.connect` not called.
+   */
+  static approveTokenTransfer = async (props: ApproveTxProps) => {
+    const { zilswap } = ZilswapConnector.getState(true);
+
+    console.log(props.tokenID);
+    console.log(props.tokenAmount.toString());
+    const observedTx = await zilswap.approveTokenTransferIfRequired(props.tokenID, props.tokenAmount);
+    if (observedTx)
+      handleObservedTx(observedTx);
+
+    return observedTx;
   };
 
   /**

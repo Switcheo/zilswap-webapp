@@ -5,7 +5,7 @@ import { RootState } from "app/store/types";
 import { LoadingTasks } from "app/store/layout/types";
 
 export type ErrorHandler = (error: any) => (() => void);
-export type AsyncTaskOutput<T> = [(task: () => Promise<T>) => Promise<void>, boolean, Error | null];
+export type AsyncTaskOutput<T> = [(task: () => Promise<T>) => Promise<void>, boolean, Error | null, () => void];
 
 const parseError = (original: Error): Error => {
   let error = original;
@@ -33,6 +33,10 @@ export default <T>(taskname: string): AsyncTaskOutput<T> => {
     }
   };
 
+  const clearError = () => {
+    setError(null);
+  };
+
   const loadingState = !!loadingTasks[taskname];
-  return [asyncTaskRunner, loadingState, error];
+  return [asyncTaskRunner, loadingState, error, clearError];
 };
