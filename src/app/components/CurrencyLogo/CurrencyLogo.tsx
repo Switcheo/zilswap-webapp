@@ -1,8 +1,7 @@
 import React from "react";
 import { ReactComponent as SWTH } from "./SWTH.svg";
 import { ReactComponent as ZIL } from "./ZIL.svg";
-import { ReactComponent as ETH } from "./ETH.svg";
-import { ReactComponent as C0XBTC } from "./0xBTC.svg";
+import { ReactComponent as XSGD } from "./XSGD.svg";
 import { ReactComponent as DAI } from "./DAI.svg";
 import cls from "classnames";
 import { AppTheme } from "app/theme/types";
@@ -14,11 +13,9 @@ export type CurrencyLogoMap = {
 
 const currencies: CurrencyLogoMap = {
   "SWTH": SWTH,
-  "ITN": SWTH,
   "ZIL": ZIL,
-  "ETH": ETH,
-  "0xBTC": C0XBTC,
-  "DAI": DAI
+  "XSGD": XSGD,
+  "ITN": DAI,
 };
 
 const useStyles = makeStyles((theme: AppTheme) => ({
