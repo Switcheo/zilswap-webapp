@@ -12,12 +12,6 @@ import ContrastBox from "../ContrastBox";
 import CurrencyLogo from "../CurrencyLogo";
 import { ReactComponent as SearchIcon } from "./SearchIcon.svg";
 
-export interface CurrencyDialogProps extends DialogProps {
-  onSelectCurrency: (token: TokenInfo) => void;
-  hideZil?: boolean;
-  showContribution?: boolean;
-};
-
 const useStyles = makeStyles(theme => ({
   root: {
   },
@@ -65,8 +59,15 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+export interface CurrencyDialogProps extends DialogProps {
+  onSelectCurrency: (token: TokenInfo) => void;
+  hideZil?: boolean;
+  hideNoPool?: boolean;
+  showContribution?: boolean;
+};
+
 const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProps) => {
-  const { children, className, onSelectCurrency, hideZil, showContribution, ...rest } = props;
+  const { children, className, onSelectCurrency, hideZil, hideNoPool, showContribution, ...rest } = props;
   const classes = useStyles();
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const [search, setSearch] = useState("");
@@ -106,6 +107,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
 
   const filterSearch = (token: TokenInfo): boolean => {
     if (token.isZil && hideZil) return false;
+    if (!token.pool && hideNoPool) return false;
     if (!search.trim().length) return true;
     const searchTerm = search.toLowerCase();
     return token.address.toLowerCase().includes(searchTerm) ||

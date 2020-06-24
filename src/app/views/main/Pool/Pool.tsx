@@ -1,14 +1,14 @@
 import { Box, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { Notifications } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { OpenCloseState, PoolType, RootState, TokenInfo } from "app/store/types";
 import cls from "classnames";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolToggleButton, PoolWithdraw } from "./components";
+import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolToggleButton, PoolWithdraw, UserPoolMessage } from "./components";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
-import { Notifications } from "app/components";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -29,7 +29,7 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
-  const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
+  const poolToken = useSelector<RootState, TokenInfo | undefined>(state => state.pool.token || undefined);
   const poolType = useSelector<RootState, PoolType>(state => state.layout.showPoolType);
   const showCreatePool = useSelector<RootState, boolean>(state => state.layout.showCreatePool);
 
@@ -40,7 +40,12 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       <Notifications />
-      {(!poolToken?.loading && !poolToken?.pool) && (<NewPoolMessage token={poolToken || undefined} />)}
+      {!poolToken?.loading && (
+        <>
+          {!poolToken?.pool && (<NewPoolMessage token={poolToken} />)}
+          {poolToken?.pool && !poolToken?.whitelisted && (<UserPoolMessage token={poolToken} />)}
+        </>
+      )}
       <Box display="flex" flexDirection="column">
         <Box display="flex" justifyContent="space-between" mb="28px" className={classes.container}>
           <PoolToggleButton />

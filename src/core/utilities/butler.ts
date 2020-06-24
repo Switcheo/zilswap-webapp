@@ -28,6 +28,7 @@ export type AppButlerProps = {
 const mapZilswapToken = (zilswapToken: TokenDetails): TokenInfo => {
   return {
     initialized: false,
+    whitelisted: zilswapToken.whitelisted,
     isZil: zilswapToken.address === ZIL_TOKEN_NAME,
     dirty: false,
     address: zilswapToken.address,
@@ -282,7 +283,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
   useEffect(() => {
 
-    const tokens = store.getState().token.tokens;
+    const tokens: TokenInfo[] = store.getState().token.tokens;
     for (const address in tokens) {
       const token = tokens[address];
 
@@ -354,6 +355,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
           loading: false,
           isZil: false,
 
+          whitelisted: token.whitelisted,
           address: token.address,
           decimals: token.decimals,
 

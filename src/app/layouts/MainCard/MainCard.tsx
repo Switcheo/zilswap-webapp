@@ -6,7 +6,7 @@ import cls from "classnames";
 import { PaperProps } from "material-ui";
 import React, { forwardRef } from "react";
 import { useSelector } from "react-redux";
-import { NavLink as RouterLink } from "react-router-dom";
+import { NavLink as RouterLink, useRouteMatch } from "react-router-dom";
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1, flexBasis: 1 }} >
@@ -82,11 +82,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const MainCard: React.FC<PaperProps> = (props: any) => {
   const { children, className, staticContext, ...rest } = props;
   const classes = useStyles();
+  const isPool = useRouteMatch("/pool");
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
 
-  const hasNotification = !!walletState.wallet && ((poolToken && !poolToken.loading && !poolToken.pool) ||
+  const hasNotification = !!walletState.wallet && 
+    ((isPool && poolToken && !poolToken?.loading && !poolToken?.pool) ||
+    (isPool && !poolToken?.loading && poolToken?.pool && !poolToken?.whitelisted) ||
     transactionState.observingTxs.length > 0 ||
     transactionState.submittedTxs.length > 0);
 

@@ -206,6 +206,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           onAmountChange={onTokenChange}
           onCurrencyChange={onPoolChange}
           dialogOpts={{
+            hideNoPool: true,
             hideZil: true,
           }} />
 
