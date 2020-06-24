@@ -3,11 +3,11 @@ import { makeStyles } from "@material-ui/core/styles";
 import CheckmarkIcon from "@material-ui/icons/CheckOutlined";
 import TimeoutIcon from "@material-ui/icons/TimerOutlined";
 import { actions } from "app/store";
-import { RootState, WalletState, SubmittedTx } from "app/store/types";
+import { RootState, SubmittedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { truncate } from "app/utils";
-import React from "react";
+import { truncate, useNetwork } from "app/utils";
 import cls from "classnames";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ObservedTx } from "zilswap-sdk";
 import NotificationBox from "../NotificationBox";
@@ -33,7 +33,9 @@ const LoadingIcon = () => {
 const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { className, ...rest } = props;
   const classes = useStyles();
+
   const dispatch = useDispatch();
+  const network = useNetwork();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const observingTxs = useSelector<RootState, ObservedTx[]>(state => state.transaction.observingTxs);
   const submittedTxs = useSelector<RootState, SubmittedTx[]>(state => state.transaction.submittedTxs);
@@ -63,7 +65,7 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
           <Typography variant="body2" className={classes.notificationMessage}>
             Transaction 0x{truncate(submittedTx.hash)} {submittedTx.status || "status unknown"}.{" "}
             {submittedTx.status !== "expired" && (
-              <Typography className={classes.link} component="a" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/${submittedTx.hash}?network=testnet`}>
+              <Typography className={classes.link} component="a" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/${submittedTx.hash}?network=${network}`}>
                 View on explorer
               </Typography>
             )}

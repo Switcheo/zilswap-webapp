@@ -76,14 +76,16 @@ const FancyButton: React.FC<FancyButtonProps> = (props: any) => {
       </Button>
       {(showTxApprove && walletState.wallet) && (
         <Tooltip title="Send TX to approve token transfer">
-          <Button onClick={onClickTxApprove} disabled={buttonDisabled} className={cls(classes.unlockButton, className)} color="primary" variant="contained">
-            {!loadingTxApprove && (
-              <LockIcon />
-            )}
-            {!!loadingTxApprove && (
-              <CircularProgress size={24} className={classes.progress} />
-            )}
-          </Button>
+          <span>
+            <Button onClick={onClickTxApprove} disabled={buttonDisabled} className={cls(classes.unlockButton, className)} color="primary" variant="contained">
+              {!loadingTxApprove && (
+                <LockIcon />
+              )}
+              {!!loadingTxApprove && (
+                <CircularProgress size={24} className={classes.progress} />
+              )}
+            </Button>
+          </span>
         </Tooltip>
       )}
     </Box>

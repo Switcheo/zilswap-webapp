@@ -2,13 +2,12 @@ import { Value } from "@zilliqa-js/contract";
 import { actions } from "app/store";
 import { RootState, TokenBalanceMap, TokenInfo, TokenState, Transaction, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
-import { LocalStorageKeys, ZIL_TOKEN_NAME } from "app/utils/contants";
+import { DefaultFallbackNetwork, LocalStorageKeys, ZIL_TOKEN_NAME } from "app/utils/contants";
 import { connectWalletPrivateKey, ConnectWalletResult, connectWalletZilPay, parseBalanceResponse } from "core/wallet";
 import { BN, getBalancesMap, RPCResponse, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { ObservedTx, TokenDetails, TxReceipt, TxStatus } from "zilswap-sdk";
-import { Network } from "zilswap-sdk/lib/constants";
 import { ViewBlock } from "./viewblock";
 
 /**
@@ -176,7 +175,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         dispatch(actions.Wallet.update({ wallet, privateKey }));
       } else {
         await ZilswapConnector.initialise({
-          network: Network.TestNet,
+          network: DefaultFallbackNetwork,
         });
         dispatch(actions.Wallet.update({ wallet: undefined, privateKey: undefined, zilpay: undefined }));
       }
@@ -211,7 +210,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         dispatch(actions.Wallet.update({ wallet, zilpay: true }));
       } else {
         await ZilswapConnector.initialise({
-          network: Network.TestNet,
+          network: DefaultFallbackNetwork,
         });
         dispatch(actions.Wallet.update({ wallet: undefined, privateKey: undefined, zilpay: undefined }));
       }
@@ -224,7 +223,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     console.log("butler", "initWithoutWallet");
     runInitWallet(async () => {
       await ZilswapConnector.initialise({
-        network: Network.TestNet,
+        network: DefaultFallbackNetwork,
       });
       dispatch(actions.Wallet.update({ wallet: undefined, privateKey: undefined, zilpay: undefined }));
 

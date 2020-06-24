@@ -134,7 +134,14 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       src = outToken;
     }
 
-    return `1 ${src!.symbol || ""} = ${moneyFormat(exchangeRate.pow(reversedRate ? -1 : 1), { compression: 0, maxFractionDigits: dst?.decimals, symbol: dst?.symbol })}`
+    const formatterOpts = {
+      compression: 0,
+      maxFractionDigits: dst?.decimals,
+      symbol: dst?.symbol,
+    };
+    const srcAmount = `1 ${src!.symbol || ""}`;
+    const dstAmount = `${moneyFormat(exchangeRate.pow(reversedRate ? -1 : 1), formatterOpts)}`;
+    return `${srcAmount} = ${dstAmount}`;
   };
 
   const onReverse = () => {
@@ -249,13 +256,13 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const onInAmountChange = (amount: string = "0") => {
     let inAmount = new BigNumber(amount);
     if (inAmount.isNaN() || inAmount.isNegative() || !inAmount.isFinite()) inAmount = BIG_ZERO;
-      const result = calculateAmounts({ exactOf: "in", inAmount });
-      setFormState({
-        ...formState,
-        inAmount: amount,
-        outAmount: result.outAmount.toString(),
-      });
-      dispatch(actions.Swap.update(result));
+    const result = calculateAmounts({ exactOf: "in", inAmount });
+    setFormState({
+      ...formState,
+      inAmount: amount,
+      outAmount: result.outAmount.toString(),
+    });
+    dispatch(actions.Swap.update(result));
   };
   const onOutCurrencyChange = (token: TokenInfo) => {
     if (swapFormState.inToken === token) return;

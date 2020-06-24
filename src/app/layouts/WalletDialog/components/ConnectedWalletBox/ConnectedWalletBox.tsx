@@ -6,7 +6,7 @@ import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { RootState, Transaction, TransactionState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useAsyncTask } from "app/utils";
+import { hexToRGBA, truncate, useAsyncTask, useNetwork } from "app/utils";
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
 import { ZilswapConnector } from "core/zilswap";
@@ -94,6 +94,7 @@ const ConnectedWalletBox = (props: any) => {
   const { onLogout, className, icon: Icon } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
+  const network = useNetwork();
   const wallet = useSelector<RootState, ConnectedWallet>(state => state.wallet.wallet);
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
   const [runDisconnectZilswap, loadingDisconnectZilswap] = useAsyncTask<void>("disconnectZilswap");
@@ -140,7 +141,7 @@ const ConnectedWalletBox = (props: any) => {
           <Typography variant="h3">{wallet.type ? "Private Key" : "Moonlet"}</Typography>
           <Box mt={"8px"} display="flex" flexDirection="row" alignItems="center">
             <Typography color="textSecondary" variant="body1">{is_xs_media ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
-            <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=testnet`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
+            <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network}`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
             <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(humanAddress)} open={!!copyMap[humanAddress]} title="Copied!">
               <IconButton className={classes.copy} size="small"><CopyIcon /></IconButton>
             </Tooltip>
@@ -179,7 +180,7 @@ const ConnectedWalletBox = (props: any) => {
               <Box display="flex" flexDirection="row" justifyContent="space-between">
                 <Box display="flex" flexDirection="row" alignItems="center">
                   <Typography variant="body2">0x{truncate(transaction.hash, 10, 10)}</Typography>
-                  <IconButton target="_blank" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=testnet`} className={classes.newLinkTransaction} size="small">
+                  <IconButton target="_blank" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=${network}`} className={classes.newLinkTransaction} size="small">
                     <NewLinkIcon />
                   </IconButton>
                   <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(transaction.hash)} open={!!copyMap[transaction.hash]} title="Copied!">

@@ -5,7 +5,7 @@ import { ConnectedWallet, WalletAccountInfo, WalletConnectType } from "./Connect
 
 export interface ZilPayConnectProps {
   zilpay: WalletProvider;
-  network?: Network;
+  network: Network;
   timestamp?: moment.Moment;
   bech32: string;
   base16: string;
@@ -21,7 +21,7 @@ export class ZilPayConnectedWallet implements ConnectedWallet {
 
   constructor(props: ZilPayConnectProps) {
     this.provider = props.zilpay;
-    this.network = props.network || Network.TestNet;
+    this.network = props.network;
     this.timestamp = props.timestamp || moment();
     this.addressInfo = {
       bech32: props.bech32,

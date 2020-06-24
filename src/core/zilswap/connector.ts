@@ -3,6 +3,7 @@ import BigNumber from "bignumber.js";
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
 import { ObservedTx, OnUpdate, Pool, TokenDetails, TxReceipt, TxStatus, WalletProvider, Zilswap } from "zilswap-sdk";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
+import { DefaultFallbackNetwork } from "app/utils/contants";
 
 
 export interface ConnectProps {
@@ -158,7 +159,7 @@ export class ZilswapConnector {
   };
 
   static initialise = async (props: InitProps = {}) => {
-    const { network = ZilswapConnector.network || Network.TestNet } = props;
+    const { network = ZilswapConnector.network || DefaultFallbackNetwork } = props;
 
     await ZilswapConnector.setState({ network });
     console.log("zilswap connection established");

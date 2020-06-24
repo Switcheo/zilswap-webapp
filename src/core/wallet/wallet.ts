@@ -9,6 +9,7 @@ import { APIS, Network } from 'zilswap-sdk/lib/constants';
 import { ConnectWalletResult } from "./ConnectedWallet";
 import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
 import { ZilPayConnectedWallet } from "./ZilPayConnectedWallet";
+import { DefaultFallbackNetwork } from "app/utils/contants";
 
 export const parseBalanceResponse = (balanceRPCResponse: RPCResponse<any, string>) => {
   let balanceResult = null;
@@ -27,7 +28,7 @@ export const parseBalanceResponse = (balanceRPCResponse: RPCResponse<any, string
   return balanceResult;
 }
 
-export const connectWalletPrivateKey = async (inputPrivateKey: string, network: Network = Network.TestNet): Promise<ConnectWalletResult> => {
+export const connectWalletPrivateKey = async (inputPrivateKey: string, network: Network = DefaultFallbackNetwork): Promise<ConnectWalletResult> => {
 
   if (!validation.isPrivateKey(inputPrivateKey))
     throw new Error("Invalid private key");
@@ -53,7 +54,7 @@ export const connectWalletZilPay = async (zilPay: any): Promise<ConnectWalletRes
     throw new Error("Please sign in to your ZilPay account before connecting.");
   const timestamp = moment();
 
-  const network = zilPay.wallet.net === "testnet" ? Network.TestNet : Network.MainNet;
+  const network = zilPay.wallet.net === Network.TestNet.toLowerCase() ? Network.TestNet : Network.MainNet;
   if (network === Network.MainNet)
     throw new Error("MainNet is not supported yet");
   const wallet = new ZilPayConnectedWallet({
