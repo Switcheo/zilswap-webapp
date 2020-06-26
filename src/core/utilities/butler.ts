@@ -277,6 +277,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
       dispatch(actions.Transaction.init({ transactions: [] }));
     }
 
+    dispatch(actions.Token.invalidate());
     // eslint-disable-next-line
   }, [zilswapReady, walletState.wallet]);
 
