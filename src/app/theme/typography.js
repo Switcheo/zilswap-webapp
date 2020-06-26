@@ -33,11 +33,11 @@ export default (palette) => ({
     letterSpacing: 0,
   },
   body1: {
+    fontFamily: "Avenir Next",
     fontSize: "12px",
     lineHeight: "14px",
     fontWeight: 600,
     letterSpacing: 0,
-    fontFamily: "Avenir Next"
   },
   body2: {
     fontSize: "12px",
@@ -46,8 +46,8 @@ export default (palette) => ({
     fontWeight: 500
   },
   button: {
-    fontSize: "16px",
     fontFamily: "Avenir Next",
+    fontSize: "16px",
     fontWeight: 600,
     lineHeight: "18px",
     textTransform: "none"

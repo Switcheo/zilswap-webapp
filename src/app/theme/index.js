@@ -1,8 +1,8 @@
-import { createMuiTheme } from '@material-ui/core';
+import { createMuiTheme } from "@material-ui/core";
 
-import { light, dark } from './palettes';
-import typography from './typography';
-import overrides from './overrides';
+import { light, dark } from "./palettes";
+import typography from "./typography";
+import overrides from "./overrides";
 
 const darkFlavouringTheme = createMuiTheme({ palette: dark });
 const lightFlavouringTheme = createMuiTheme({ palette: light });
