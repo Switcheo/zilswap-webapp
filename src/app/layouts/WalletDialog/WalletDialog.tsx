@@ -8,10 +8,10 @@ import { useMessageSubscriber } from "app/utils";
 import cls from "classnames";
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ConnectedWallet, ConnectOptionType } from "../../../core/wallet/ConnectedWallet";
+import { ConnectedWallet, ConnectOptionType, WalletConnectType } from "../../../core/wallet/ConnectedWallet";
 import { ConnectWallet, ConnectWalletPrivateKey, ConnectWalletZilPay } from "./components";
 import ConnectedWalletBox from "./components/ConnectedWalletBox";
-import { ReactComponent as MoonletIcon } from "./components/ConnectWallet/moonlet.svg";
+import { ReactComponent as ZilPayIcon } from "./components/ConnectWallet/zilpay.svg";
 import { ReactComponent as PrivateKeyIconDark } from "./components/ConnectWallet/private-key-dark.svg";
 import { ReactComponent as PrivateKeyIcon } from "./components/ConnectWallet/private-key.svg";
 
@@ -49,7 +49,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   // });
 
   const get_icon = () => {
-    if (walletState.wallet.type !== 1) return MoonletIcon;
+    if (walletState.wallet.type === WalletConnectType.ZilPay) return ZilPayIcon;
     return theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon;
   }
 

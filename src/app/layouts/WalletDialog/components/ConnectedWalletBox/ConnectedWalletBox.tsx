@@ -8,7 +8,7 @@ import { RootState, Transaction, TransactionState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate, useAsyncTask, useNetwork } from "app/utils";
 import cls from "classnames";
-import { ConnectedWallet } from "core/wallet";
+import { ConnectedWallet, WalletConnectType } from "core/wallet";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -138,7 +138,7 @@ const ConnectedWalletBox = (props: any) => {
       <ContrastBox className={classes.walletDetail}>
         <Icon className={classes.icon} />
         <Box className={classes.label}>
-          <Typography variant="h3">{wallet.type ? "Private Key" : "Moonlet"}</Typography>
+          <Typography variant="h3">Connected with {wallet.type === WalletConnectType.ZilPay ? "ZilPay" : "Private Key"}</Typography>
           <Box mt={"8px"} display="flex" flexDirection="row" alignItems="center">
             <Typography color="textSecondary" variant="body1">{is_xs_media ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
             <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network}`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
