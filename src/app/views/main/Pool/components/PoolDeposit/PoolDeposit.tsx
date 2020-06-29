@@ -80,6 +80,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const onPoolChange = (token: TokenInfo) => {
     if (token.symbol === "ZIL") return;
     dispatch(actions.Pool.selectPool({ token }));
+    onTokenChange("0");
   };
 
   const onZilChange = (amount: string = "0") => {
