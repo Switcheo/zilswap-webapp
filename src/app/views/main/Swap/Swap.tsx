@@ -342,7 +342,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       const tokenAddress = swapFormState.inToken!.address;
       const tokenAmount = swapFormState.inAmount;
       const observedTx = await ZilswapConnector.approveTokenTransfer({
-        tokenAmount: tokenAmount,
+        tokenAmount: tokenAmount.shiftedBy(swapFormState.inToken!.decimals),
         tokenID: tokenAddress,
       });
 

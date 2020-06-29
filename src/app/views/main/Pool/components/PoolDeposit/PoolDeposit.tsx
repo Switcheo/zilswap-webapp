@@ -174,7 +174,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       const tokenAddress = poolToken.address;
       const { addTokenAmount } = poolFormState;
       const observedTx = await ZilswapConnector.approveTokenTransfer({
-        tokenAmount: addTokenAmount,
+        tokenAmount: addTokenAmount.shiftedBy(poolToken!.decimals),
         tokenID: tokenAddress,
       });
 
