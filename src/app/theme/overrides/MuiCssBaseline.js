@@ -1,37 +1,18 @@
-// const RobotoFont = {
-//   fontFamily: 'Roboto',
-//   fontStyle: 'normal',
-//   fontDisplay: 'swap',
-//   fontWeight: 400,
-//   src: `
-//     url(${RobotoTtf}) format('ttf')
-//   `,
-// };
-// const RobotoMedium = {
-//   fontFamily: 'Roboto',
-//   fontStyle: 'normal',
-//   fontDisplay: 'swap',
-//   fontWeight: 500,
-//   src: `
-//     url(${RobotoMediumTtf}) format('ttf')
-//   `,
-// };
-// const RobotoBold = {
-//   fontFamily: 'Roboto',
-//   fontStyle: 'normal',
-//   fontDisplay: 'swap',
-//   fontWeight: 700,
-//   src: `
-//     url(${RobotoBoldTtf}) format('ttf')
-//   `,
-// };
+import AvenirNextDemiBoldWoff from "../fonts/AvenirNext-DemiBold.woff";
 
-// export default () => ({
-//   "@global": {
-//     "@font-face": [RobotoFont, RobotoMedium, RobotoBold],
-//   }
-// });
+
+const AvenirNext = {
+  fontFamily: 'Avenir Next',
+  fontStyle: 'normal',
+  fontDisplay: 'swap',
+  fontWeight: 600,
+  src: `
+    url(${AvenirNextDemiBoldWoff}) format('woff')
+  `,
+};
 
 export default () => ({
-  
+  "@global": {
+    "@font-face": [AvenirNext],
+  }
 });
