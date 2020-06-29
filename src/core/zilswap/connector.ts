@@ -1,9 +1,9 @@
 import { Zilliqa } from "@zilliqa-js/zilliqa";
+import { BIG_ZERO, DefaultFallbackNetwork } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
 import { ObservedTx, OnUpdate, Pool, TokenDetails, TxReceipt, TxStatus, WalletProvider, Zilswap } from "zilswap-sdk";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
-import { DefaultFallbackNetwork } from "app/utils/contants";
 
 
 export interface ConnectProps {
@@ -218,6 +218,28 @@ export class ZilswapConnector {
   static getPool = (tokenID: string): Pool | null => {
     const { zilswap } = ZilswapConnector.getState();
     return zilswap.getPool(tokenID);
+  };
+
+  /**
+   * 
+   * 
+   * @throws "not connected" if `ZilswapConnector.connect` not called.
+   */
+  static getGasLimit = (): BigNumber => {
+    const { zilswap } = ZilswapConnector.getState();
+    return new BigNumber(zilswap._txParams.gasLimit.toString());
+  };
+
+  /**
+   * 
+   * 
+   * @throws "not connected" if `ZilswapConnector.connect` not called.
+   */
+  static adjustedForGas = (intendedAmount: BigNumber, balance?: BigNumber): BigNumber => {
+    if (!balance) balance = new BigNumber(intendedAmount);
+    const gasLimit = ZilswapConnector.getGasLimit();
+    const netGasAmount = BigNumber.min(BigNumber.max(balance.minus(gasLimit), BIG_ZERO), intendedAmount);
+    return netGasAmount;
   };
 
   /**

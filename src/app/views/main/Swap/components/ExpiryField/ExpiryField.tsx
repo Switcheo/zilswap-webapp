@@ -18,6 +18,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   input: {
     textAlign: "center",
+    fontSize: 12,
   },
   minutes: {
     display: "flex",

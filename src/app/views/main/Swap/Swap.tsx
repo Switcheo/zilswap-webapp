@@ -164,8 +164,9 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (!inToken) return;
 
     const balance = new BigNumber(inToken.balance.toString());
-    const amount = balance.times(percentage).decimalPlaces(0);
-    onInAmountChange(amount.shiftedBy(-inToken.decimals).toString());
+    const intendedAmount = balance.times(percentage).decimalPlaces(0);
+    const netGasAmount = inToken.isZil ? ZilswapConnector.adjustedForGas(intendedAmount, balance) : intendedAmount;
+    onInAmountChange(netGasAmount.shiftedBy(-inToken.decimals).toString());
   };
 
   const calculateAmounts = (props: CalculateAmountProps = {}) => {

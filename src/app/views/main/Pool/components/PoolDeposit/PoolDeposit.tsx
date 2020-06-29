@@ -73,8 +73,9 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     if (!poolToken) return;
 
     const balance = new BigNumber(poolToken.balance.toString());
-    const amount = balance.times(percentage).decimalPlaces(0);
-    onTokenChange(amount.shiftedBy(-poolToken.decimals).toString());
+    const intendedAmount = balance.times(percentage).decimalPlaces(0);
+    const netGasAmount = poolToken.isZil ? ZilswapConnector.adjustedForGas(intendedAmount, balance) : intendedAmount;
+    onTokenChange(netGasAmount.shiftedBy(-poolToken.decimals).toString());
   };
 
   const onPoolChange = (token: TokenInfo) => {
