@@ -77,7 +77,7 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
 
       const result = await zilPay.wallet.connect();
       if (result !== zilPay.wallet.isConnect)
-        throw new Error("ZilPay could not connect.");
+        throw new Error("ZilPay could not be connected to.");
 
       const walletResult: ConnectWalletResult = await connectWalletZilPay(zilPay);
       if (walletResult.error)
