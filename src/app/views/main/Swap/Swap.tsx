@@ -139,8 +139,9 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       maxFractionDigits: dst?.decimals,
       symbol: dst?.symbol,
     };
+    const shouldReverseRate = reversedRate && !exchangeRate.isZero();
     const srcAmount = `1 ${src!.symbol || ""}`;
-    const dstAmount = `${moneyFormat(exchangeRate.pow(reversedRate ? -1 : 1), formatterOpts)}`;
+    const dstAmount = `${moneyFormat(exchangeRate.pow(shouldReverseRate ? -1 : 1), formatterOpts)}`;
     return `${srcAmount} = ${dstAmount}`;
   };
 
