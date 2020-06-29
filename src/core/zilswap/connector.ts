@@ -61,7 +61,7 @@ type StateUpdateProps = {
 /**
  * Checks transaction receipt for error, and throw the top level exception
  * if any.
- * 
+ *
  * @param txReceipt `@zilliqa-js` blockchain transaction receipt
  */
 const handleObservedTx = (observedTx: ObservedTx) => {
@@ -74,7 +74,7 @@ const handleObservedTx = (observedTx: ObservedTx) => {
 
 /**
  * Abstraction class for Zilswap SDK.
- * 
+ *
  * @member network {@link Zilswap.Network}
  */
 export class ZilswapConnector {
@@ -94,9 +94,9 @@ export class ZilswapConnector {
   };
 
   /**
-   * Constructor for Zilswap SDK wrapper. Must populate connectorState.wallet if executed, 
-   * throws error otherwise. 
-   * 
+   * Constructor for Zilswap SDK wrapper. Must populate connectorState.wallet if executed,
+   * throws error otherwise.
+   *
    * @param wallet `ConnectedWallet` instance to provide blockchain connection interface.
    * @returns Promise<Zilswap> Zilswap instance initialized with wallet properties (network and provider).
    * @throws "moonlet support under development" when providing MoonletConnectedWallet.
@@ -150,8 +150,8 @@ export class ZilswapConnector {
 
 
   /**
-   * 
-   * 
+   *
+   *
    */
   static registerObserver = (observer: OnUpdate | null) => {
     console.log("connector register observer");
@@ -166,7 +166,7 @@ export class ZilswapConnector {
   };
 
   /**
-   * 
+   *
    */
   static connect = async (props: ConnectProps) => {
     await ZilswapConnector.initializeForWallet(props);
@@ -175,7 +175,7 @@ export class ZilswapConnector {
 
   /**
    * Get a fresh instance of Zilliqa with the connector's network.
-   * 
+   *
    * @returns Zilliqa instance
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
@@ -186,7 +186,7 @@ export class ZilswapConnector {
 
   /**
    * Get the app state of the Zilswap SDK.
-   * 
+   *
    * @returns the app state
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
@@ -197,7 +197,7 @@ export class ZilswapConnector {
 
   /**
    * Get list of tokens found in the Zilswap SDK app state.
-   * 
+   *
    * @returns array of tokens in Zilswap SDK's TokenDetails representation.
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
@@ -211,7 +211,7 @@ export class ZilswapConnector {
   /**
    * Get the pool of the provided token, or `null` if pool does not yet
    * exist on the contract.
-   * 
+   *
    * @returns the pool instance
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
@@ -221,8 +221,8 @@ export class ZilswapConnector {
   };
 
   /**
-   * 
-   * 
+   *
+   *
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static setDeadlineBlocks = (blocks: number) => {
@@ -231,7 +231,7 @@ export class ZilswapConnector {
   };
 
   /**
-   * 
+   *
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static approveTokenTransfer = async (props: ApproveTxProps) => {
@@ -247,8 +247,8 @@ export class ZilswapConnector {
   };
 
   /**
-   * 
-   * 
+   *
+   *
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static getExchangeRate = (props: ExchangeRateQueryProps) => {
@@ -268,13 +268,13 @@ export class ZilswapConnector {
   /**
    * Abstraction for Zilswap SDK functions
    * `addLiquidity`
-   * 
+   *
    * @param tokenID string
    * @param zilAmount BigNumber
    * @param tokenAmount BigNumber
    * @param maxExchangeRateChange number?
    * @see zilswap-sdk documentation
-   * 
+   *
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static addLiquidity = async (props: AddLiquidityProps) => {
@@ -297,12 +297,12 @@ export class ZilswapConnector {
   /**
    * Abstraction for Zilswap SDK functions
    * `removeLiquidity`
-   * 
+   *
    * @param tokenID string
    * @param contributionAmount BigNumber
    * @param maxExchangeRateChange number?
    * @see zilswap-sdk documentation
-   * 
+   *
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static removeLiquidity = async (props: RemoveLiquidityProps) => {
@@ -323,17 +323,17 @@ export class ZilswapConnector {
   /**
    * Abstraction for Zilswap SDK functions
    * `swapWithExactInput` and `swapWithExactOutput`
-   * 
+   *
    * "in" refers to the transfer of value *into* Zilswap contract
    * "out" refers to the transfer of value *out* of Zilswap contract
-   * 
+   *
    * @param exactOf  "in" | "out" - used to determine with exact swap function to use.
    * @param tokenInID string
    * @param tokenOutID string
    * @param amount BigNumber
    * @param maxAdditionalSlippage number?
    * @see zilswap-sdk documentation
-   * 
+   *
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static swap = async (props: SwapProps) => {
