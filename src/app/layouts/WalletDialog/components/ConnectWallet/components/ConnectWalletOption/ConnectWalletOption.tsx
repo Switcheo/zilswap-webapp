@@ -94,7 +94,7 @@ const ConnectWalletOption: React.FC<ConnectWalletOptionProps & React.HTMLAttribu
       <Box className={classes.label}>
         <Typography variant="h3">{label}</Typography>
         <Typography variant="subtitle2" color="textSecondary">
-          Secure Level
+          Security Level
           <SecurityLevelIcon className={cls(classes.securityLevelIcon, securityLevelClass)} />
         </Typography>
       </Box>
