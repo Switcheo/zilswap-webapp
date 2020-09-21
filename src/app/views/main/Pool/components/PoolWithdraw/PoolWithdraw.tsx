@@ -25,9 +25,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-around",
-    padding: theme.spacing(0, 8, 5),
+    padding: theme.spacing(0, 8, 0),
     [theme.breakpoints.down("xs")]: {
-      padding: theme.spacing(0, 2, 5),
+      padding: theme.spacing(0, 2, 0),
     },
   },
   proportionSelect: {
@@ -42,14 +42,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: 12
   },
   actionButton: {
-    marginTop: theme.spacing(6),
+    marginTop: theme.spacing(4),
+    marginBottom: theme.spacing(4),
     height: 46
   },
   readOnly: {
     backgroundColor: theme.palette.background.readOnly,
     textAlign: "right",
-    color: theme.palette.text?.secondary,
-    marginBottom: 20
+    color: theme.palette.text?.primary,
+    padding: theme.spacing(2, 3),
   },
   previewAmount: {
     fontSize: 20,
@@ -57,10 +58,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   keyValueLabel: {
     marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(2.5),
+  },
+  poolDetails: {
+    marginTop: theme.spacing(2),
   },
   advanceDetails: {
-    marginTop: theme.spacing(6),
+    marginBottom: theme.spacing(2),
     justifyContent: "center",
     alignItems: "center",
     display: "flex",
@@ -230,7 +233,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           </Typography>
         </ContrastBox>
 
-        <PoolDetail token={poolToken || undefined} />
+        <PoolDetail className={classes.poolDetails} token={poolToken || undefined} />
 
         <Typography color="error">{error?.message}</Typography>
 
@@ -243,14 +246,14 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           Remove Liquidity
         </FancyButton>
 
-        {!!poolToken && (
+        {!!poolToken ? (
           <Typography
             variant="body2"
             className={cls(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })}
             onClick={() => setShowAdvanced(!showAdvanced)}>
             Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </Typography>
-        )}
+        ) : <Box component="div" display="block" style={{height: 16}}>&nbsp;</Box>}
       </Box>
 
       {!!showAdvanced && !!poolToken && (

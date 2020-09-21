@@ -18,8 +18,8 @@ const useStyles = makeStyles(theme => ({
     flexDirection: "column",
     width: 516,
     [theme.breakpoints.down("xs")]: {
-      width: 296
-    }
+      width: 380,
+    },
   },
   actionButton: {
     height: 46,

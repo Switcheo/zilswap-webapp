@@ -19,6 +19,9 @@ const useStyles = makeStyles(theme => ({
       padding: theme.spacing(2, 2, 0),
     },
   },
+  createButton: {
+    borderRadius: 4,
+  },
   actionButton: {
     marginTop: 45,
     marginBottom: 40,
@@ -49,7 +52,7 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
       <Box display="flex" flexDirection="column">
         <Box display="flex" justifyContent="space-between" mb="28px" className={classes.container}>
           <PoolToggleButton />
-          <Button startIcon={<PlusSVG />} onClick={() => onShowCreatePool("open")}>
+          <Button className={classes.createButton} startIcon={<PlusSVG />} onClick={() => onShowCreatePool("open")}>
             Create Pool
           </Button>
         </Box>
