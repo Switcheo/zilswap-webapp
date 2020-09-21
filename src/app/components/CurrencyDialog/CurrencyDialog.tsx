@@ -171,7 +171,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
                 <CurrencyLogo className={classes.currencyLogo} currency={token.address} />
                 <Box display="flex" flexDirection="column">
                   <Typography variant="h2">{token.symbol}</Typography>
-                  <Typography color="textSecondary" variant="body2">{token.name}</Typography>
+                  <Typography color="textSecondary" variant="body2">{token.isZil ? 'Zilliqa' : token.name}</Typography>
                 </Box>
                 <Box flex={1}>
                   <Typography align="right" variant="h6" component="p">
