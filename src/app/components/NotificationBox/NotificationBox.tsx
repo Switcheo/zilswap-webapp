@@ -18,16 +18,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexDirection: "row",
     alignItems: "center"
   },
+  notificationDetail: {
+    display: 'flex',
+    flexDirection: 'row',
+    flex: 1,
+  },
   notificationSymbol: {
     marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
     color: theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "100" : "200"],
     "& svg": {
       display: "block",
     }
-  },
-  notificationDetail: {
-    marginLeft: theme.spacing(1),
-    flex: 1,
   },
   cancelNotification: {
     padding: theme.spacing(1),

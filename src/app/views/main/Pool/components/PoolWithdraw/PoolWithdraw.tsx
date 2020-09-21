@@ -131,7 +131,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
   const onPoolChange = (token: TokenInfo) => {
     if (!token.pool) return;
-    dispatch(actions.Pool.selectPool({ token }));
+    dispatch(actions.Pool.select({ token }));
     onTokenChange("0");
   };
 

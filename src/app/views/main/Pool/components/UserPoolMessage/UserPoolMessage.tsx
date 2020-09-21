@@ -18,10 +18,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   notificationSymbol: {
-    position: "relative",
-    left: 20,
-    top: 0,
-    float: "left"
+    margin: theme.spacing(2),
   },
   warning: {
     alignItems: "start"
@@ -30,10 +27,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.primary.main
   },
   linkLogo: {
-    marginLeft: 5
+    width: 10,
+    marginBottom: -2,
+    marginLeft: 5,
   },
   notificationMessage: {
     fontWeight: 400,
+    margin: theme.spacing(1),
     color: theme.palette.type === "light" ? theme.palette.colors.zilliqa.neutral["100"] : theme.palette.colors.zilliqa.neutral["200"]
   },
   viewDetail: {
@@ -63,7 +63,7 @@ const UserPoolMessage: React.FC<UserPoolMessageProps> = (props: UserPoolMessageP
         <Typography color="textSecondary" variant="body1">Pool Created by User</Typography>
         <Typography component="a" className={classes.symbolLink} href={infoUrl} target="_blank" >({token.symbol}) Token ({token.name}) <LinkLogo className={classes.linkLogo} /></Typography>
         <Typography className={classes.notificationMessage} variant="body2">
-          Please verify the legitimacy of this token before making any transactions. 
+          Please verify the legitimacy of this token before making any transactions.
           <RouterLink className={classes.viewDetail} to="detail">Learn More</RouterLink>
         </Typography>
       </Box>

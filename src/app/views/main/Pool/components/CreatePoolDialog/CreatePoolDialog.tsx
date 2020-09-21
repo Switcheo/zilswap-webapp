@@ -64,7 +64,7 @@ const CreatePoolDialog = (props: any) => {
         balances: tokenPreview.balances,
       };
       dispatch(actions.Token.add({ token }));
-      dispatch(actions.Pool.selectPool({ token }));
+      dispatch(actions.Pool.select({ token }));
 
       return onCloseDialog();
     });
