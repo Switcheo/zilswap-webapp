@@ -18,6 +18,10 @@ export const LocalStorageKeys = {
   ZilPayConnected: "zilswap:zilpay-connected",
 };
 
+export const PlaceholderStrings = {
+  ZilAddress: "zil18zlr57uhrmnk4mfkuawgv0un295k970a9s3lnq",
+};
+
 export const BIG_ZERO = new BigNumber(0);
 export const BIG_ONE = new BigNumber(1);
 

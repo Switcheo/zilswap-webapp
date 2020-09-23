@@ -234,7 +234,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
         <Typography color="error">{error?.message}</Typography>
 
-        <FancyButton walletRequired fullWidth
+        <FancyButton walletRequired
           loading={loading}
           className={classes.actionButton}
           variant="contained"

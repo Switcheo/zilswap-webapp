@@ -2,6 +2,7 @@ import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { CurrencyInput, FancyButton, ProportionSelect, KeyValueDisplay } from "app/components";
 import { actions } from "app/store";
+import { fromBech32Address } from "@zilliqa-js/crypto";
 import { RootState, TokenInfo, TokenState, PoolFormState } from "app/store/types";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
 import { ZIL_TOKEN_NAME, BIG_ZERO } from "app/utils/contants";
@@ -10,6 +11,7 @@ import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { CONTRACTS, Network } from "zilswap-sdk/lib/constants";
 import PoolDetail from "../PoolDetail";
 import PoolIcon from "../PoolIcon";
 
@@ -193,6 +195,9 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     });
   };
 
+  const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || Network.TestNet];
+  const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
+  const showTxApprove = new BigNumber(poolToken?.allowances[byte20ContractAddress] || "0").comparedTo(poolFormState.addTokenAmount) < 0;
   return (
     <Box display="flex" flexDirection="column" {...rest} className={cls(classes.root, className)}>
       <Box className={classes.container}>
@@ -243,13 +248,12 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         <FancyButton
           loading={loading}
           walletRequired
-          showTxApprove
+          showTxApprove={showTxApprove}
           loadingTxApprove={loadingApproveTx}
           onClickTxApprove={onApproveTx}
           className={classes.actionButton}
           variant="contained"
           color="primary"
-          fullWidth
           onClick={onAddLiquidity}>
           Add Liquidity
       </FancyButton>

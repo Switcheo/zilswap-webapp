@@ -4,7 +4,7 @@ import { RootState, TokenBalanceMap, TokenInfo, TokenState, Transaction, WalletS
 import { useAsyncTask } from "app/utils";
 import { DefaultFallbackNetwork, LocalStorageKeys, ZIL_TOKEN_NAME } from "app/utils/contants";
 import { connectWalletPrivateKey, ConnectWalletResult, connectWalletZilPay, parseBalanceResponse } from "core/wallet";
-import { BN, getBalancesMap, RPCResponse, ZilswapConnector } from "core/zilswap";
+import { BN, getBalancesMap, getAllowancesMap, RPCResponse, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { ObservedTx, TokenDetails, TxReceipt, TxStatus } from "zilswap-sdk";
@@ -37,6 +37,7 @@ const mapZilswapToken = (zilswapToken: TokenDetails): TokenInfo => {
     balance: new BN(0),
     init_supply: new BN(0),
     balances: {},
+    allowances: {},
   }
 };
 
@@ -161,7 +162,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
       try {
         walletResult = await connectWalletPrivateKey(privateKey);
-      } catch (e) {}
+      } catch (e) { }
 
       if (walletResult?.wallet) {
         const { wallet } = walletResult;
@@ -196,7 +197,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
             walletResult = await connectWalletZilPay(zilPay);
           }
         }
-      } catch (e) {}
+      } catch (e) { }
 
       if (walletResult?.wallet) {
         const { wallet } = walletResult;
@@ -307,6 +308,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         // updating the connected wallet.
 
         const walletAddress = walletState.wallet?.addressInfo.byte20;
+        const lowerCaseWalletAddress = walletAddress?.toLowerCase() || "";
         if (token.isZil) {
           let balance: BN | undefined;
           if (walletAddress) {
@@ -346,7 +348,11 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         // retrieve token pool, if it exists
         const pool = ZilswapConnector.getPool(token.address) || undefined;
 
-        const balance = balances[walletAddress?.toLowerCase() || ""] || new BN(0);
+        const balance = balances[lowerCaseWalletAddress] || new BN(0);
+
+        // retrieve allowances of each token owner
+        const contractAllowancesMap = await getAllowancesMap(contract);
+        const allowances = contractAllowancesMap[lowerCaseWalletAddress] || {};
 
         // prepare and dispatch token info update to store.
         const tokenInfo: TokenInfo = {
@@ -363,8 +369,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
           symbol: contractInit.symbol,
           name: contractInit.name,
 
-          balance, pool, balances,
-
+          balance, pool, balances, allowances,
         };
         dispatch(actions.Token.update(tokenInfo));
       });

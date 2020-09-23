@@ -1,6 +1,5 @@
 import { Box, Button, ButtonProps, CircularProgress, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import LockIcon from "@material-ui/icons/LockOpen";
 import { actions } from "app/store";
 import { RootState, WalletState } from "app/store/types";
 import { useTaskSubscriber } from "app/utils";
@@ -18,7 +17,8 @@ export interface FancyButtonProps extends ButtonProps {
 };
 
 const useStyles = makeStyles(theme => ({
-  root: {
+  confirmButton: {
+    flexGrow: 1,
   },
   progress: {
     color: "rgba(255,255,255,.8)",
@@ -29,7 +29,8 @@ const useStyles = makeStyles(theme => ({
     marginLeft: -12,
   },
   unlockButton: {
-    marginLeft: theme.spacing(1),
+    width: "100%",
+    marginRight: theme.spacing(1),
   },
 }));
 const FancyButton: React.FC<FancyButtonProps> = (props: any) => {
@@ -68,26 +69,22 @@ const FancyButton: React.FC<FancyButtonProps> = (props: any) => {
     (loading);
   return (
     <Box display="flex">
-      <Button {...rest} disabled={buttonDisabled} className={cls(classes.root, className)} onClick={onButtonClick}>
+      {(showTxApprove && walletState.wallet) && (
+        <Tooltip title="Transaction needs to be approved before swapping or adding liquidity">
+          <Button onClick={onClickTxApprove} disabled={buttonDisabled} className={cls(classes.unlockButton, className)} color="primary" variant="contained">
+            {!loadingTxApprove && "Approve"}
+            {!!loadingTxApprove && (
+              <CircularProgress size={24} className={classes.progress} />
+            )}
+          </Button>
+        </Tooltip>
+      )}
+      <Button {...rest} disabled={buttonDisabled || showTxApprove} className={cls(classes.confirmButton, className)} onClick={onButtonClick}>
         {!buttonLoading && buttonContent}
         {!!buttonLoading && (
           <CircularProgress size={24} className={classes.progress} />
         )}
       </Button>
-      {(showTxApprove && walletState.wallet) && (
-        <Tooltip title="Send TX to approve token transfer">
-          <span>
-            <Button onClick={onClickTxApprove} disabled={buttonDisabled} className={cls(classes.unlockButton, className)} color="primary" variant="contained">
-              {!loadingTxApprove && (
-                <LockIcon />
-              )}
-              {!!loadingTxApprove && (
-                <CircularProgress size={24} className={classes.progress} />
-              )}
-            </Button>
-          </span>
-        </Tooltip>
-      )}
     </Box>
   );
 };

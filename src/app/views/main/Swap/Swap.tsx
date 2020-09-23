@@ -1,18 +1,22 @@
-import { Box, IconButton, makeStyles, Typography } from "@material-ui/core";
+import { Box, IconButton, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import RemoveIcon from "@material-ui/icons/Remove";
+import { fromBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, RootState, SwapFormState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
-import { BIG_ONE, BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/contants";
+import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_TOKEN_NAME } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { CONTRACTS, Network } from "zilswap-sdk/lib/constants";
 import { ShowAdvanced } from "./components";
 import { ReactComponent as SwitchSVG } from "./swap-icon.svg";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
@@ -95,11 +99,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   primaryColor: {
     color: theme.palette.primary.main
   },
+  accordionButton: {
+    verticalAlign: "middle",
+    paddingBottom: 3,
+    cursor: "pointer",
+    color: theme.palette.primary.main,
+  },
 }));
 
 const initialFormState = {
   inAmount: "0",
   outAmount: "0",
+  showRecipientAddress: false,
 };
 
 type CalculateAmountProps = {
@@ -201,7 +212,6 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         tokenInID: _inToken!.address,
         tokenOutID: _outToken!.address,
       });
-      console.log(rateResult.expectedAmount.toString());
 
       if (rateResult.expectedAmount.isNaN() || rateResult.expectedAmount.isNegative()) {
         isInsufficientReserves = true;
@@ -305,8 +315,14 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     dispatch(actions.Swap.update(result));
   };
 
+  const onRecipientAddressChange = (event: any) => {
+    dispatch(actions.Swap.update({
+      recipientAddress: event.target.value,
+    }));
+  };
+
   const onSwap = () => {
-    const { outToken, inToken, inAmount, outAmount, exactOf, slippage, expiry } = swapFormState;
+    const { outToken, inToken, inAmount, outAmount, exactOf, slippage, expiry, recipientAddress } = swapFormState;
     if (!inToken || !outToken) return;
     if (inAmount.isZero() || outAmount.isZero()) return;
     if (loading) return;
@@ -326,6 +342,9 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         tokenOutID: outToken.address,
         amount, exactOf,
         maxAdditionalSlippage: toBasisPoints(slippage).toNumber(),
+        ...formState.showRecipientAddress && {
+          recipientAddress,
+        },
       });
 
       dispatch(actions.Transaction.observe({ observedTx }));
@@ -333,6 +352,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
 
   const onApproveTx = () => {
+    console.log("here", swapFormState);
     if (!swapFormState.inToken) return;
     if (swapFormState.inToken.isZil) return;
     if (swapFormState.inAmount.isZero()) return;
@@ -364,6 +384,12 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const { outToken, inToken } = swapFormState;
   const tokenBalance = new BigNumber(inToken?.balances[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString() || 0);
+  let showTxApprove = false; 
+  if (inToken && !inToken?.isZil) {
+    const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || Network.TestNet];
+    const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
+    showTxApprove = new BigNumber(inToken?.allowances[byte20ContractAddress] || "0").comparedTo(formState.inAmount) < 0;
+  }
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       <Notifications />
@@ -423,15 +449,35 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           </Box>
         )}
 
+        <Box display="flex" flexDirection="column" marginTop={3}>
+          <InputLabel onClick={() => setFormState({ ...formState, showRecipientAddress: !formState.showRecipientAddress })}>
+            {formState.showRecipientAddress && (
+              <>
+                <RemoveIcon className={classes.accordionButton} />
+                <span>Receiving Address</span>
+              </>
+            )}
+            {!formState.showRecipientAddress && (
+              <>
+                <AddIcon className={classes.accordionButton} />
+                <span>Add Receiving Address</span>
+              </>
+            )}
+          </InputLabel>
+          {formState.showRecipientAddress && (
+            <OutlinedInput value={swapFormState.recipientAddress || ""} placeholder={PlaceholderStrings.ZilAddress} onChange={onRecipientAddressChange} />
+          )}
+        </Box>
+
         <Typography color="error">{error?.message || errorApproveTx?.message}</Typography>
         {swapFormState.isInsufficientReserves && (
           <Typography color="error">Pool reserve is too small to fulfill desired output.</Typography>
         )}
 
-        <FancyButton walletRequired fullWidth
+        <FancyButton walletRequired
           loading={loading}
           className={classes.actionButton}
-          showTxApprove
+          showTxApprove={showTxApprove}
           loadingTxApprove={loadingApproveTx}
           onClickTxApprove={onApproveTx}
           variant="contained"

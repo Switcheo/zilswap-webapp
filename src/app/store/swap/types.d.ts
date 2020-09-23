@@ -8,6 +8,7 @@ export interface SwapFormState {
   slippage: number;
   expiry: number;
 
+  recipientAddress?: string;
 
   percentage: BigNumber;
   exactOf: ExactOfOptions;

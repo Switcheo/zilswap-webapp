@@ -35,3 +35,16 @@ export const getBalancesMap = async (contract: Contract) => {
   }
   return contractBalanceState;
 }
+
+/**
+ * Helper function to extract allowances map from token contract.
+ * @param contract zilliqa SDK contract
+ * @returns balances map or undefined if not present.
+ */
+export const getAllowancesMap = async (contract: Contract) => {
+  let result: any;
+  let contractAllowancesMap: any;
+  result = await contract.getSubState("allowances");
+  contractAllowancesMap = result?.allowances;
+  return contractAllowancesMap;
+}

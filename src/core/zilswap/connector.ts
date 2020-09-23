@@ -45,6 +45,7 @@ export interface SwapProps {
   tokenOutID: string;
   amount: BigNumber;
   maxAdditionalSlippage?: number;
+  recipientAddress?: string;
 };
 
 type ConnectorState = {

@@ -22,6 +22,7 @@ export type TokenInfo = {
   balance: BN;
   balances: TokenBalanceMap;
   pool?: Pool;
+  allowances: { [index: string]: string },
 };
 
 export interface TokenState {

@@ -36,9 +36,8 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
   };
   const getPoolSizeValue = () => {
     if (!token?.pool) return "-";
-    const { exchangeRate, totalContribution } = token.pool;
-    const zilAmount = totalContribution.times(exchangeRate);
-    return `${moneyFormat(zilAmount, zilFormatOpts)} + ${moneyFormat(totalContribution, formatOpts)}`;
+    const { zilReserve, tokenReserve } = token.pool;
+    return `${moneyFormat(zilReserve, zilFormatOpts)} + ${moneyFormat(tokenReserve, formatOpts)}`;
   };
   const getShareValue = () => {
     if (!token?.pool) return "-";

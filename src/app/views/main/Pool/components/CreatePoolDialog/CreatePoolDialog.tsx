@@ -62,6 +62,7 @@ const CreatePoolDialog = (props: any) => {
         balance: new BN(0),
         init_supply: tokenPreview.init_supply,
         balances: tokenPreview.balances,
+        allowances: {},
       };
       dispatch(actions.Token.add({ token }));
       dispatch(actions.Pool.selectPool({ token }));
