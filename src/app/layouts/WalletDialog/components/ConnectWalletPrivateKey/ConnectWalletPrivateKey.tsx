@@ -32,6 +32,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       minWidth: 470,
     },
   },
+  addressInput: {
+    "& input": {
+      padding: "17.5px 14px",
+      fontSize: "14px",
+    },
+  },
   submitButton: {
     marginTop: theme.spacing(6),
     minWidth: 240,
@@ -100,7 +106,7 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props:
                 <InputLabel><Typography color="error">{errorConnect.message}</Typography></InputLabel>
               )}
             </Box>
-            <OutlinedInput value={privateKey} onChange={onTextChange} />
+            <OutlinedInput className={classes.addressInput} value={privateKey} onChange={onTextChange} />
             {/* <InputLabel>Enter a Password</InputLabel>
             <OutlinedInput type="password" value={password} onChange={onPasswordChange} /> */}
             <FancyButton fullWidth loading={loadingConnect} onClick={connect} className={classes.submitButton} variant="contained" color="primary">

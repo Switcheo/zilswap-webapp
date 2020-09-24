@@ -371,11 +371,13 @@ export class ZilswapConnector {
     console.log(props.tokenOutID);
     console.log(props.amount.toString());
     console.log(props.maxAdditionalSlippage);
+    console.log(props.recipientAddress);
     const observedTx = await swapFunction(
       props.tokenInID,
       props.tokenOutID,
       props.amount.toString(),
-      props.maxAdditionalSlippage);
+      props.maxAdditionalSlippage,
+      props.recipientAddress);
     handleObservedTx(observedTx);
 
     return observedTx;

@@ -1,9 +1,10 @@
-import { Box, IconButton, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import { Box, Button, IconButton, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import RemoveIcon from "@material-ui/icons/Remove";
 import { fromBech32Address } from "@zilliqa-js/crypto";
+import { validation as ZilValidation } from "@zilliqa-js/util";
 import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
@@ -105,6 +106,29 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     cursor: "pointer",
     color: theme.palette.primary.main,
   },
+  addAddressButton: {
+    borderRadius: 0,
+    padding: 0,
+    fontSize: "12px",
+    "& .MuiButton-label": {
+      justifyContent: "flex-start",
+    },
+  },
+  addressLabel: {
+    display: "flex",
+    alignItems: "center",
+  },
+  addressInput: {
+    marginBottom: theme.spacing(2),
+    "& input": {
+      padding: "17.5px 14px",
+      fontSize: "14px",
+    },
+  },
+  addressError: {
+    justifySelf: "flex-end",
+    marginLeft: "auto",
+  },
 }));
 
 const initialFormState = {
@@ -133,6 +157,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [runSwap, loading, error, clearSwapError] = useAsyncTask("swap");
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
+  const [errorRecipientAddress, setErrorRecipientAddress] = useState<string | undefined>();
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [reversedRate, setReversedRate] = useState(false);
@@ -352,7 +377,6 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
 
   const onApproveTx = () => {
-    console.log("here", swapFormState);
     if (!swapFormState.inToken) return;
     if (swapFormState.inToken.isZil) return;
     if (swapFormState.inAmount.isZero()) return;
@@ -382,9 +406,20 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     });
   };
 
+  const onEnterRecipientAddress = () => {
+    const address = swapFormState.recipientAddress;
+    let error = undefined;
+    if (address && !ZilValidation.isBech32(address)) {
+      error = "Invalid address format";
+    }
+
+    if (error !== errorRecipientAddress)
+      setErrorRecipientAddress(error);
+  };
+
   const { outToken, inToken } = swapFormState;
   const tokenBalance = new BigNumber(inToken?.balances[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString() || 0);
-  let showTxApprove = false; 
+  let showTxApprove = false;
   if (inToken && !inToken?.isZil) {
     const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || Network.TestNet];
     const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
@@ -450,22 +485,26 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         )}
 
         <Box display="flex" flexDirection="column" marginTop={3}>
-          <InputLabel onClick={() => setFormState({ ...formState, showRecipientAddress: !formState.showRecipientAddress })}>
-            {formState.showRecipientAddress && (
-              <>
-                <RemoveIcon className={classes.accordionButton} />
-                <span>Receiving Address</span>
-              </>
-            )}
-            {!formState.showRecipientAddress && (
-              <>
-                <AddIcon className={classes.accordionButton} />
-                <span>Add Receiving Address</span>
-              </>
-            )}
-          </InputLabel>
+          {!formState.showRecipientAddress && (
+            <Button variant="text" className={classes.addAddressButton} onClick={() => setFormState({ ...formState, showRecipientAddress: true })}>
+              <AddIcon className={classes.accordionButton} />
+              <span>Add Receiving Address</span>
+            </Button>
+          )}
           {formState.showRecipientAddress && (
-            <OutlinedInput value={swapFormState.recipientAddress || ""} placeholder={PlaceholderStrings.ZilAddress} onChange={onRecipientAddressChange} />
+            <>
+              <InputLabel className={classes.addressLabel}>
+                <RemoveIcon className={classes.accordionButton} onClick={() => setFormState({ ...formState, showRecipientAddress: false })} />
+                <span>Receiving Address</span>
+                {!!errorRecipientAddress && <Typography className={classes.addressError} component="span" color="error">{errorRecipientAddress}</Typography>}
+              </InputLabel>
+              <OutlinedInput
+                onBlur={onEnterRecipientAddress}
+                className={classes.addressInput}
+                value={swapFormState.recipientAddress || ""}
+                placeholder={PlaceholderStrings.ZilAddress}
+                onChange={onRecipientAddressChange} />
+            </>
           )}
         </Box>
 
