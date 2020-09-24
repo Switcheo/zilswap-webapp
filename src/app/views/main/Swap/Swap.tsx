@@ -163,11 +163,24 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [reversedRate, setReversedRate] = useState(false);
 
   const getExchangeRateLabel = () => {
-    const exchangeRate = swapFormState.expectedExchangeRate || BIG_ONE;
+    let exchangeRate = swapFormState.expectedExchangeRate || BIG_ZERO;
+
     let src = inToken, dst = outToken;
     if (reversedRate) {
       dst = inToken;
       src = outToken;
+    }
+
+    if (exchangeRate.eq(0)) {
+      const rateResult = ZilswapConnector.getExchangeRate({
+        amount: BIG_ONE.shiftedBy(src!.decimals),
+        exactOf: reversedRate ? "out" : "in",
+        tokenInID: inToken!.address,
+        tokenOutID: outToken!.address,
+      });
+
+      if (!rateResult.expectedAmount.isNaN() && !rateResult.expectedAmount.isNegative())
+        exchangeRate = rateResult.expectedAmount.shiftedBy(-dst!.decimals).pow(reversedRate ? -1 : 1);
     }
 
     const formatterOpts = {
@@ -253,9 +266,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         dstAmount = rateResult.expectedAmount.shiftedBy(-dstToken?.decimals || 0).decimalPlaces(dstToken?.decimals || 0);
       }
     } else {
-      const inRate = _inToken.pool?.exchangeRate || BIG_ONE;
-      const outRate = _outToken.pool?.exchangeRate || BIG_ONE;
-      expectedExchangeRate = inRate.div(outRate).pow(_exactOf === "in" ? 1 : -1);
+      expectedExchangeRate = BIG_ZERO;
 
       dstAmount = BIG_ZERO;
     }

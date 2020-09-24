@@ -17,8 +17,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     textAlign: "center",
   },
   input: {
+    fontSize: "12px !important",
     textAlign: "center",
-    fontSize: 12,
   },
   minutes: {
     display: "flex",
@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const SampleComponent: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+const ExpiryField: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const dispatch = useDispatch();
   const expiry = useSelector<RootState, number>(state => state.swap.expiry);
@@ -54,4 +54,4 @@ const SampleComponent: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: 
   );
 };
 
-export default SampleComponent;
+export default ExpiryField;

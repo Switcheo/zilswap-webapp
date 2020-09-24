@@ -92,7 +92,9 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       if (bnZilAmount.isNegative() || bnZilAmount.isNaN() || !bnZilAmount.isFinite())
         bnZilAmount = BIG_ZERO;
 
-      let bnTokenAmount = bnZilAmount.div(poolToken.pool?.exchangeRate || 1).decimalPlaces(poolToken.decimals);
+      const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
+      const rate = poolToken.pool?.exchangeRate.shiftedBy(poolToken!.decimals - zilToken.decimals);
+      let bnTokenAmount = bnZilAmount.div(rate || 1).decimalPlaces(poolToken.decimals);
       const tokenAmount = bnTokenAmount.toString();
 
       setFormState({
@@ -120,7 +122,8 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         bnTokenAmount = BIG_ZERO;
 
       const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
-      let bnZilAmount = bnTokenAmount.times(poolToken.pool?.exchangeRate || 1).decimalPlaces(zilToken?.decimals || 12);
+      const rate = poolToken.pool?.exchangeRate.shiftedBy(poolToken!.decimals - zilToken.decimals);
+      let bnZilAmount = bnTokenAmount.times(rate || 1).decimalPlaces(zilToken?.decimals || 12);
       const zilAmount = bnZilAmount.toString();
 
       setFormState({
@@ -197,6 +200,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || Network.TestNet];
   const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
   const showTxApprove = new BigNumber(poolToken?.allowances[byte20ContractAddress] || "0").comparedTo(poolFormState.addTokenAmount) < 0;
+
   return (
     <Box display="flex" flexDirection="column" {...rest} className={cls(classes.root, className)}>
       <Box className={classes.container}>

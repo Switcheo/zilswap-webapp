@@ -279,6 +279,7 @@ export class ZilswapConnector {
     const queryFunction = props.exactOf === "in" ?
       zilswap.getRatesForInput.bind(zilswap) : zilswap.getRatesForOutput.bind(zilswap);
 
+    console.log(props.exactOf);
     console.log(props.tokenInID);
     console.log(props.tokenOutID);
     console.log(props.amount.toString());
