@@ -33,9 +33,9 @@ const CurrencyLogo = (props: any) => {
   const classes = useStyles();
   const Logo = currencies[currency];
   return (
-    <div className={cls(classes.root, className)}>
-      {!!Logo && <Logo />}
-    </div>
+    !!Logo ? <div className={cls(classes.root, className)}>
+      <Logo />
+    </div> : null
   );
 };
 

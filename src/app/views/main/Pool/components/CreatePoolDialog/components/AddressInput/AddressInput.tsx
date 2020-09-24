@@ -31,11 +31,10 @@ const useStyles = makeStyles(theme => ({
   inputError: {
     border: `1px solid ${theme.palette.error.main}`
   },
-  inputProps: {
+  inputText: {
+    fontSize: '16px!important',
     [theme.breakpoints.down("xs")]: {
-      '&::placeholder': {
-        fontSize: "11px"
-      }
+      fontSize: "12px!important"
     }
   },
   preview: {
@@ -118,7 +117,7 @@ const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => 
         fullWidth
         className={cls(classes.input, error ? classes.inputError : {})}
         onChange={(e) => setAddress(e.target.value)}
-        inputProps={{ className: classes.inputProps }}
+        classes={{ input: classes.inputText }}
       />
       <Box className={classes.preview}>
         <LoadableArea loading={loading}>

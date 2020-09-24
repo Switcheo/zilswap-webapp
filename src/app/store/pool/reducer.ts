@@ -19,7 +19,7 @@ const reducer = (state: PoolFormState = initial_state, action: any) => {
 
   switch (action.type) {
 
-    case PoolActionTypes.POOL_SELECT:
+    case PoolActionTypes.SELECT:
       const selectProps: PoolSelectProps = payload;
       return {
         ...state,

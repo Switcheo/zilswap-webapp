@@ -16,14 +16,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   notificationSymbol: {
-    position: "relative",
-    left: 20,
-    top: 0,
-    float: "left",
-    alignItems: "start",
+    margin: theme.spacing(2),
   },
   notificationMessage: {
     fontWeight: 400,
+    margin: theme.spacing(1),
     color: theme.palette.type === "light" ? theme.palette.colors.zilliqa.neutral["100"] : theme.palette.colors.zilliqa.neutral["200"]
   },
   viewDetail: {
@@ -43,8 +40,8 @@ const NewPoolMessage: React.FC<NewPoolMessageProps> = (props: NewPoolMessageProp
       <Box className={classes.notificationSymbol}>
         <WarningLogo />
       </Box>
-      <Box ml={6}>
-        <Typography className={classes.notificationMessage} variant="body2">You are the first person to add liquidity. The initial exchange rate will be set based on your deposits. Make sure that your ZIL and deposits have the same fiat value. 
+      <Box>
+        <Typography className={classes.notificationMessage} variant="body2">You are the first person to add liquidity. The initial exchange rate will be set based on your deposits. Make sure that your ZIL and deposits have the same fiat value.
         <RouterLink className={classes.viewDetail} to="detail">Learn More</RouterLink></Typography>
       </Box>
     </NotificationBox>

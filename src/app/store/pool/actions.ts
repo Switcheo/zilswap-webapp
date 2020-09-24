@@ -1,14 +1,13 @@
 import { PoolFormState, PoolSelectProps } from "./types";
 
 export enum PoolActionTypes {
-  POOL_SELECT = "POOL_SELECT",
+  SELECT = "POOL_SELECT",
   UPDATE = "POOL_UPDATE",
 }
 
-
-export function selectPool(payload: PoolSelectProps) {
+export function select(payload: PoolSelectProps) {
   return {
-    type: PoolActionTypes.POOL_SELECT,
+    type: PoolActionTypes.SELECT,
     payload
   }
 }

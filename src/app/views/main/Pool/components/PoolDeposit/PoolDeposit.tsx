@@ -31,16 +31,15 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(1.5, 0, 0),
   },
   actionButton: {
-    marginTop: 45,
-    marginBottom: 40,
+    marginTop: theme.spacing(4),
+    marginBottom: theme.spacing(4),
     height: 46
   },
   keyValueLabel: {
     marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(2.5),
   },
   poolDetails: {
-    marginTop: 12,
+    marginTop: theme.spacing(2),
   },
   svg: {
     alignSelf: "center"
@@ -82,7 +81,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
   const onPoolChange = (token: TokenInfo) => {
     if (token.symbol === "ZIL") return;
-    dispatch(actions.Pool.selectPool({ token }));
+    dispatch(actions.Pool.select({ token }));
     onTokenChange("0");
   };
 

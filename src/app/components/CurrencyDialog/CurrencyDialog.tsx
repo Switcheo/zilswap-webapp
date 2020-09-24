@@ -18,17 +18,16 @@ const useStyles = makeStyles(theme => ({
   content: {
     width: 516,
     [theme.breakpoints.down("xs")]: {
-      width: 296,
+      width: 380,
     },
   },
   input: {
     marginBottom: 20,
   },
-  inputProps: {
+  inputText: {
+    fontSize: '16px!important',
     [theme.breakpoints.down("xs")]: {
-      '&::placeholder': {
-        fontSize: "10.5px"
-      }
+      fontSize: "12px!important"
     }
   },
   currencyBox: {
@@ -139,9 +138,11 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
           placeholder="Search token name, symbol or address"
           value={search}
           fullWidth
+          classes={{
+            input: classes.inputText
+          }}
           className={classes.input}
           onChange={(e) => setSearch(e.target.value)}
-          inputProps={{ className: classes.inputProps }}
           startAdornment={
             <InputAdornment position="start">
               <SearchIcon />
@@ -170,7 +171,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
                 <CurrencyLogo className={classes.currencyLogo} currency={token.address} />
                 <Box display="flex" flexDirection="column">
                   <Typography variant="h2">{token.symbol}</Typography>
-                  <Typography color="textSecondary" variant="body2">{token.name}</Typography>
+                  <Typography color="textSecondary" variant="body2">{token.isZil ? 'Zilliqa' : token.name}</Typography>
                 </Box>
                 <Box flex={1}>
                   <Typography align="right" variant="h6" component="p">

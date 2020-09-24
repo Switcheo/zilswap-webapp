@@ -85,11 +85,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   actionButton: {
     marginTop: theme.spacing(4),
+    marginBottom: theme.spacing(4),
     height: 46
   },
   advanceDetails: {
-    marginTop: theme.spacing(9),
-    marginBottom: theme.spacing(4),
+    marginBottom: theme.spacing(2),
     justifyContent: "center",
     alignItems: "center",
     display: "flex",
@@ -416,7 +416,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           })}
         </KeyValueDisplay>
 
-        <Box display="flex" mt={4} mb={1} justifyContent="center">
+        <Box display="flex" mt={2} mb={3} justifyContent="center">
           <IconButton
             disabled={!inToken || !outToken}
             onClick={() => onReverse()}
