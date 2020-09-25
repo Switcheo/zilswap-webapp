@@ -76,6 +76,9 @@ const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => 
         if (!walletState.wallet)
           throw new Error("Connect wallet to view token information");
 
+        const token = await ZilswapConnector.addPoolToken({ address: inputAddress });
+        console.log(token);
+
         const zilliqa = ZilswapConnector.getZilliqa();
         const contract = zilliqa.contracts.at(inputAddress);
 

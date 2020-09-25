@@ -35,13 +35,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignItems: "center",
     marginBottom: theme.spacing(2),
     "&>svg": {
-      margin: 14,
+      height: theme.spacing(3),
+      width: theme.spacing(3),
+      marginLeft: theme.spacing(2),
+      marginTop: theme.spacing(1),
     },
     "& button": {
       minWidth: 0,
-      marginRight: theme.spacing(.5),
-      padding: theme.spacing(1),
+      padding: theme.spacing(1.5),
       color: "#A4A4A4",
+      '& svg': {
+        height: theme.spacing(2),
+        width: theme.spacing(2),
+      }
     }
   },
   footer: {

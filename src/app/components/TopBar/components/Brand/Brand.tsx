@@ -11,14 +11,18 @@ const useStyles = makeStyles(theme => ({
     position: "relative",
     display: "flex",
     flexDirection: "row",
-    "& path#brand-text": {
-      fill: "rgba(0,0,0,.9)",
+    justifyContent: "center",
+    '& svg': {
+      height: 36,
+      '& .st0': {
+        fill: '#169BA3!important',
+      }
     },
   },
   darkMode: {
-    "& path#brand-text": {
-      fill: "#ffffff",
-    },
+    '& svg .st0': {
+      fill: '#29CCC4!important',
+    }
   },
 }));
 

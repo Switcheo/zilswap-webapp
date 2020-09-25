@@ -36,16 +36,16 @@ const SocialLinkGroup: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: 
   const classes = useStyles();
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <Button href="https://switcheo.network">
+      <Button href="https://t.me/Switcheo">
         <TelegramIcon />
       </Button>
-      <Button href="https://switcheo.network">
+      <Button href="https://twitter.com/SwitcheoNetwork">
         <TwitterIcon />
       </Button>
-      <Button href="https://switcheo.network">
+      <Button href="https://medium.com/Switcheo">
         <MediumIcon />
       </Button>
-      <Button href="https://switcheo.network">
+      <Button href="https://support@switcheo.network">
         <MailIcon />
       </Button>
     </Box>

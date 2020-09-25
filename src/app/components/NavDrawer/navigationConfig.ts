@@ -5,16 +5,17 @@ const navigationConfig: NavigationOptions[] = [{
     title: "Swap",
     href: "/swap",
   }, {
-    title: "Documentation",
-    href: "https://docs.zilswap.org/",
+    title: "About",
+    href: "https://docs.zilswap.org/#/?id=introduction",
     external: true,
   }, {
-    title: "API",
+    title: "Documentation",
     href: "https://docs.zilswap.org/#/smart-contract",
     external: true,
   }, {
-    title: "Support",
-    href: "/support",
+    title: "API",
+    href: "https://github.com/Switcheo/zilswap-sdk",
+    external: true,
   }],
 }];
 

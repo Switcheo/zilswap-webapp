@@ -1,4 +1,5 @@
 import { Zilliqa } from "@zilliqa-js/zilliqa";
+import { fromBech32Address } from "@zilliqa-js/crypto";
 import { BIG_ZERO, DefaultFallbackNetwork } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
@@ -25,6 +26,10 @@ export interface ExchangeRateQueryProps {
 export interface ApproveTxProps {
   tokenID: string;
   tokenAmount: BigNumber;
+};
+
+export interface AddTokenProps {
+  address: string;
 };
 
 export interface AddLiquidityProps {
@@ -267,6 +272,21 @@ export class ZilswapConnector {
       handleObservedTx(observedTx);
 
     return observedTx;
+  };
+
+  /**
+   *
+   * @throws "not connected" if `ZilswapConnector.connect` not called.
+   */
+  static addPoolToken = async (props: AddTokenProps) => {
+    const { zilswap } = ZilswapConnector.getState(true);
+
+    const tokenExists = await zilswap.addToken(props.address);
+    if (!tokenExists)
+      throw new Error("token not found");
+    const { tokens } = zilswap.getAppState();
+    const byte20Address = fromBech32Address(props.address);
+    return tokens[byte20Address];
   };
 
   /**
