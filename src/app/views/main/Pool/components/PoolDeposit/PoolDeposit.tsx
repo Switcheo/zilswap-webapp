@@ -62,7 +62,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
-  const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 5 });
+  const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
 
   useEffect(() => {
     if (poolToken && currencyDialogOverride) {
@@ -153,10 +153,19 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     runAddLiquidity(async () => {
       const tokenAddress = poolToken.address;
       const { addTokenAmount, addZilAmount } = poolFormState;
+      const tokenBalance = new BigNumber(poolToken!.balance.toString()).shiftedBy(-poolToken.decimals);
       const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
+
+      let adjustedTokenAmount = addTokenAmount, adjustedZilAmount = addZilAmount;
+      if (addTokenAmount.gt(tokenBalance.toNumber())) {
+        adjustedTokenAmount = tokenBalance;
+        const rate = poolToken.pool?.exchangeRate.shiftedBy(poolToken!.decimals - zilToken.decimals);
+        adjustedZilAmount = adjustedTokenAmount.times(rate || 1).decimalPlaces(zilToken.decimals);
+      }
+
       const observedTx = await ZilswapConnector.addLiquidity({
-        tokenAmount: addTokenAmount.shiftedBy(poolToken.decimals),
-        zilAmount: addZilAmount.shiftedBy(zilToken.decimals),
+        tokenAmount: adjustedTokenAmount.shiftedBy(poolToken.decimals),
+        zilAmount: adjustedZilAmount.shiftedBy(zilToken.decimals),
         tokenID: tokenAddress,
       });
 

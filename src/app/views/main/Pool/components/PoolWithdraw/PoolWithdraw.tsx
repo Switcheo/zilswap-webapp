@@ -139,9 +139,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   };
 
   const onTokenChange = (amount: string = "0") => {
-    if (poolToken) {
-      if (!poolToken.pool) return;
-
+    if (poolToken?.pool) {
       const tokenAmount = amount;
       let bnTokenAmount = new BigNumber(amount);
       if (bnTokenAmount.isNegative() || bnTokenAmount.isNaN())
