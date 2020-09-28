@@ -7,6 +7,7 @@ import { TOKENS } from "zilswap-sdk/lib/constants";
 import { ReactComponent as SWTH } from "./SWTH.svg";
 import { ReactComponent as XSGD } from "./XSGD.svg";
 import { ReactComponent as ZIL } from "./ZIL.svg";
+import { ReactComponent as SvgTokenPlaceholder } from "./token-placeholder.svg";
 
 export type CurrencyLogoMap = {
   [index: string]: any
@@ -31,7 +32,7 @@ const CurrencyLogo = (props: any) => {
     className: string;
   } = props;
   const classes = useStyles();
-  const Logo = currencies[currency];
+  const Logo = currency && (currencies[currency] || SvgTokenPlaceholder);
   return (
     !!Logo ? <div className={cls(classes.root, className)}>
       <Logo />
