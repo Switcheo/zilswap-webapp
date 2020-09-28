@@ -7,6 +7,7 @@ import { TOKENS } from "zilswap-sdk/lib/constants";
 import { ReactComponent as SWTH } from "./SWTH.svg";
 import { ReactComponent as XSGD } from "./XSGD.svg";
 import { ReactComponent as ZIL } from "./ZIL.svg";
+import { ReactComponent as GZIL } from "./gZIL.svg";
 import { ReactComponent as SvgTokenPlaceholder } from "./token-placeholder.svg";
 
 export type CurrencyLogoMap = {
@@ -15,7 +16,9 @@ export type CurrencyLogoMap = {
 
 const currencies: CurrencyLogoMap = {
   [TOKENS.MainNet.ZIL]: ZIL,
+  [TOKENS.MainNet.XSGD]: XSGD,
   [TOKENS.TestNet.ZIL]: ZIL,
+  [TOKENS.TestNet.gZIL]: GZIL,
   [TOKENS.TestNet.SWTH]: SWTH,
   [TOKENS.TestNet.XSGD]: XSGD,
 };
