@@ -1,6 +1,6 @@
 import { Box, Button, Paper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { RootState, TokenInfo, TransactionState, WalletState } from "app/store/types";
+import { RootState, TokenInfo, TransactionState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import { PaperProps } from "material-ui";
@@ -84,21 +84,22 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
   const classes = useStyles();
   const isPool = useRouteMatch("/pool");
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
-  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
 
-  const hasNotification = !!walletState.wallet && 
+  const hasNotification =
     // show new pool warning
     ((isPool && poolToken && !poolToken?.loading && !poolToken?.pool) ||
 
-    // show user created token warning
-    (isPool && !poolToken?.loading && poolToken?.pool && !poolToken?.whitelisted) ||
+      // show user created token warning
+      (isPool && !poolToken?.loading && poolToken?.pool && !poolToken?.whitelisted) ||
 
-    // show confirming tx message
-    transactionState.observingTxs.length > 0 ||
+      // show confirming tx message
+      transactionState.observingTxs.length > 0 ||
 
-    // show confirmed tx message
-    transactionState.submittedTxs.length > 0);
+      // show confirmed tx message
+      transactionState.submittedTxs.length > 0);
+
+  console.log({ hasNotification, token: poolToken }, isPool && !poolToken?.loading && poolToken?.pool && !poolToken?.whitelisted);
 
   return (
     <Box className={classes.root}>

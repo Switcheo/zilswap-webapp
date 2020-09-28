@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   notificationMessage: {
     fontWeight: 400,
-    margin: theme.spacing(1),
+    margin: theme.spacing(0, 1),
     color: theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "100" : "200"],
   },
   link: {
