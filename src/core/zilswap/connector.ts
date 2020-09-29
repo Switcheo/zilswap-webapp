@@ -28,6 +28,10 @@ export interface ApproveTxProps {
   tokenAmount: BigNumber;
 };
 
+export interface ChangeNetworkProps {
+  network: Network;
+};
+
 export interface AddTokenProps {
   address: string;
 };
@@ -109,11 +113,11 @@ export class ZilswapConnector {
    * @throws "unknown wallet connector" when wallet type unknown.
    */
   private static initializeForWallet = async (props: ConnectProps): Promise<void> => {
-    const { wallet, observedTxs } = props;
+    const { wallet, observedTxs, network } = props;
     switch (wallet.type) {
       case WalletConnectType.PrivateKey:
         await ZilswapConnector.setState({
-          network: wallet.network,
+          network,
           wallet, observedTxs,
           providerOrKey: wallet.addressInfo.privateKey,
         });
@@ -121,9 +125,8 @@ export class ZilswapConnector {
       case WalletConnectType.Moonlet:
         throw new Error("moonlet support under development");
       case WalletConnectType.ZilPay:
-        console.log("setState:ZilPay", wallet);
         await ZilswapConnector.setState({
-          network: wallet.network,
+          network,
           wallet, observedTxs,
           providerOrKey: wallet.provider,
         });
@@ -144,13 +147,13 @@ export class ZilswapConnector {
   private static setState = async (props: StateUpdateProps) => {
     const { wallet, network, providerOrKey } = props;
     const zilswap = new Zilswap(network, providerOrKey);
-    ZilswapConnector.network = network;
 
     await ZilswapConnector.connectorState?.zilswap.teardown();
 
     const observedTxs = props.observedTxs || [];
     await zilswap.initialize(ZilswapConnector.mainObserver, observedTxs)
     ZilswapConnector.connectorState = { zilswap, wallet };
+    ZilswapConnector.network = network;
     console.log("zilswap sdk initialised");
   };
 
@@ -246,6 +249,25 @@ export class ZilswapConnector {
     const gasLimit = ZilswapConnector.getGasLimit();
     const netGasAmount = BigNumber.min(BigNumber.max(balance.minus(gasLimit), BIG_ZERO), intendedAmount);
     return netGasAmount;
+  };
+
+  /**
+   * change network for Zilswap SDK
+   * 
+   * @throws "not connected" if `ZilswapConnector.connect` not called.
+   */
+  static changeNetwork = async (props: ChangeNetworkProps) => {
+    const { wallet } = ZilswapConnector.getState(true);
+
+    if (!wallet)  
+      throw new Error("wallet not connected");
+
+    console.log(props.network);
+
+    await ZilswapConnector.connect({
+      network: props.network,
+      wallet: wallet!,
+    });
   };
 
   /**

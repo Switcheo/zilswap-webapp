@@ -4,6 +4,7 @@ import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React from "react";
 import SocialLinkGroup from "../SocialLinkGroup";
+import NetworkToggle from "../NetworkToggle";
 import { ReactComponent as SwitcheoIcon } from "./switcheo.svg";
 
 
@@ -19,6 +20,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexDirection: "row",
     alignItems: "center",
     padding: theme.spacing(0, 2),
+    "& .MuiBox-root": {
+      flex: 1,
+      flexBasis: 0,
+    }
   },
   socialLinks: {
     [theme.breakpoints.down("xs")]: {
@@ -26,10 +31,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   switcheoBrand: {
-    flex: 1,
     display: "flex",
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "center",
     alignItems: "center",
     color: theme.palette.colors.zilliqa.neutral[140],
     "& p": {
@@ -61,6 +65,7 @@ const FooterBar: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =
           <SwitcheoIcon />
         </IconButton>
       </Box>
+      <NetworkToggle />
     </Box>
   );
 };

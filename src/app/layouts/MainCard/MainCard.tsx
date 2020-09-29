@@ -1,6 +1,6 @@
 import { Box, Button, Paper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { RootState, TokenInfo, TransactionState } from "app/store/types";
+import { LayoutState, RootState, TokenInfo, TransactionState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import { PaperProps } from "material-ui";
@@ -83,6 +83,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
   const { children, className, staticContext, ...rest } = props;
   const classes = useStyles();
   const isPool = useRouteMatch("/pool");
+  const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
 
@@ -92,6 +93,9 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
 
       // show user created token warning
       (isPool && !poolToken?.loading && poolToken?.pool && !poolToken?.whitelisted) ||
+
+      // show generic notification
+      !!layoutState.notification ||
 
       // show confirming tx message
       transactionState.observingTxs.length > 0 ||

@@ -2,7 +2,7 @@
   "name": "zilswap-webapp",
   "version": "0.1.0",
   "main": "index.js",
-  "author": "NGNRS Software Solutions",
+  "author": "Switcheo",
   "license": "MIT",
   "dependencies": {
     "@date-io/moment": "1.x",

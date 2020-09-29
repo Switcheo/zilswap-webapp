@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import CheckmarkIcon from "@material-ui/icons/CheckOutlined";
 import TimeoutIcon from "@material-ui/icons/TimerOutlined";
 import { actions } from "app/store";
-import { RootState, SubmittedTx, WalletState } from "app/store/types";
+import { LayoutState, RootState, SubmittedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { truncate, useNetwork } from "app/utils";
 import cls from "classnames";
@@ -38,9 +38,14 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
 
   const dispatch = useDispatch();
   const network = useNetwork();
+  const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const observingTxs = useSelector<RootState, ObservedTx[]>(state => state.transaction.observingTxs);
   const submittedTxs = useSelector<RootState, SubmittedTx[]>(state => state.transaction.submittedTxs);
+
+  const onRemoveNotification = () => {
+    dispatch(actions.Layout.updateNotification(undefined));
+  };
 
   const onRemoveConfirmedTx = (submittedTx: SubmittedTx) => {
     dispatch(actions.Transaction.remove({ hash: submittedTx.hash }));
@@ -54,10 +59,17 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
+      {!!layoutState.notification && (
+        <NotificationBox onRemove={() => onRemoveNotification()}>
+          <Typography variant="body2" className={classes.notificationMessage}>
+            {layoutState.notification!.message}
+          </Typography>
+        </NotificationBox>
+      )}
       {!!observingTxs.length && (
         <NotificationBox IconComponent={LoadingIcon}>
           <Typography variant="body2" className={classes.notificationMessage}>
-            {observingTxs.length} Transaction{observingTxs.length > 1 ? "s" : ""} Confirming.{" "}
+            {observingTxs.length} Transaction{observingTxs.length > 1 ? "s" : ""} confirming.{" "}
             <Typography className={classes.link} component="a" color="primary" onClick={onShowTxDetail}>View detail</Typography>
           </Typography>
         </NotificationBox>

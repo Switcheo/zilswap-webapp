@@ -7,7 +7,7 @@ export const DefaultFallbackNetwork = Network.TestNet;
 export const LoadingKeys = {
   connectWallet: [
     "connectWallet",
-    "connectWalletMoonlet",
+    "connectWalletZilPay",
     "connectWalletPrivateKey",
     "initWallet",
   ],

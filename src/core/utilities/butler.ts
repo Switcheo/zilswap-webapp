@@ -105,7 +105,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
   const registerObserver = () => {
     ZilswapConnector.registerObserver((tx: ObservedTx, status: TxStatus, receipt?: TxReceipt) => {
-      console.log("butler observed tx", tx.hash, status);
+      // console.log("butler observed tx", tx.hash, status);
 
       dispatch(actions.Transaction.update({
         hash: tx.hash,
@@ -126,7 +126,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   };
 
   const initZilswap = () => {
-    console.log("butler", "initZilswap");
+    // console.log("butler", "initZilswap");
     runInitZilswap(async () => {
       const zilswapTokens = ZilswapConnector.getTokens(); // test new pool: .filter(token => token.symbol !== "ITN");
 
@@ -156,7 +156,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   };
 
   const initWithPrivateKey = (privateKey: string) => {
-    console.log("butler", "initWithPrivateKey");
+    // console.log("butler", "initWithPrivateKey");
     runInitWallet(async () => {
       let walletResult: ConnectWalletResult | undefined;
 
@@ -186,7 +186,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   };
 
   const initWithZilPay = () => {
-    console.log("butler", "initWithZilPay");
+    // console.log("butler", "initWithZilPay");
     runInitWallet(async () => {
       let walletResult: ConnectWalletResult | undefined;
       const zilPay = (window as any).zilPay;
@@ -221,7 +221,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   };
 
   const initWithoutWallet = () => {
-    console.log("butler", "initWithoutWallet");
+    // console.log("butler", "initWithoutWallet");
     runInitWallet(async () => {
       await ZilswapConnector.initialise({
         network: DefaultFallbackNetwork,
@@ -233,7 +233,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   };
 
   useEffect(() => {
-    console.log("butler mount");
+    // console.log("butler mount");
     registerObserver();
 
     const privateKey = localStorage.getItem(LocalStorageKeys.PrivateKey);
@@ -257,7 +257,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   }, []);
 
   useEffect(() => {
-    console.log("butler", "zilswapReady", { zilswapReady, wallet: walletState.wallet });
+    // console.log("butler", "zilswapReady", { zilswapReady, wallet: walletState.wallet });
     if (!zilswapReady) return;
 
     if (walletState.wallet) {
@@ -291,7 +291,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
       // skip initialized tokens to prevent run away
       // update cycle by useEffect.
       if (token.initialized && !token.dirty) continue;
-      console.log(`butler update:${token.symbol}`);
+      // console.log(`butler update:${token.symbol}`);
 
       // set initialized to true to prevent repeat execution
       // due to useEffect triggering.
