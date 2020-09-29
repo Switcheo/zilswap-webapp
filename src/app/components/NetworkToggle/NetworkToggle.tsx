@@ -29,10 +29,23 @@ const useStyles = makeStyles(theme => ({
     marginLeft: -8,
   },
   dropdown: {
-
+    "& .MuiMenu-list": {
+      padding: theme.spacing(.5),
+    },
   },
   dropdownItem: {
-    
+    minWidth: 116,
+    justifyContent: "center",
+    borderRadius: theme.spacing(.5),
+    ...theme.typography.subtitle1,
+    "&.Mui-selected": {
+      backgroundColor: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+    },
+    "&.Mui-selected:hover": {
+      backgroundColor: theme.palette.primary.dark,
+      color: theme.palette.primary.contrastText,
+    },
   },
 }));
 const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -85,7 +98,7 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
       <Button className={classes.button} onClick={onOpenMenu}>
         {!isLoading && (
           <>
-            {network} {menuAnchor ? <ArrowDownIcon /> : <ArrowUpIcon />}
+            {network} {menuAnchor ? <ArrowUpIcon /> : <ArrowDownIcon />}
           </>
         )}
 

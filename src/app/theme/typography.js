@@ -25,6 +25,9 @@ export default (palette) => ({
     fontSize: "14px"
   },
   subtitle1: {
+    fontSize: "14px",
+    lineHeight: "16px",
+    fontWeight: "500",
   },
   subtitle2: {
     fontSize: "12px",
