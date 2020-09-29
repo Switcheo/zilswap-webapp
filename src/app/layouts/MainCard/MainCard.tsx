@@ -103,8 +103,6 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
       // show confirmed tx message
       transactionState.submittedTxs.length > 0);
 
-  console.log({ hasNotification, token: poolToken }, isPool && !poolToken?.loading && poolToken?.pool && !poolToken?.whitelisted);
-
   return (
     <Box className={classes.root}>
       <Paper {...rest} className={classes.card}>

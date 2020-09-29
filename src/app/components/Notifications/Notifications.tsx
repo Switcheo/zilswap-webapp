@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import CheckmarkIcon from "@material-ui/icons/CheckOutlined";
 import TimeoutIcon from "@material-ui/icons/TimerOutlined";
 import { actions } from "app/store";
-import { LayoutState, RootState, SubmittedTx, WalletState } from "app/store/types";
+import { LayoutState, RootState, SubmittedTx } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { truncate, useNetwork } from "app/utils";
 import cls from "classnames";
@@ -39,7 +39,6 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
   const dispatch = useDispatch();
   const network = useNetwork();
   const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
-  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const observingTxs = useSelector<RootState, ObservedTx[]>(state => state.transaction.observingTxs);
   const submittedTxs = useSelector<RootState, SubmittedTx[]>(state => state.transaction.submittedTxs);
 
@@ -54,8 +53,6 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
   const onShowTxDetail = () => {
     dispatch(actions.Layout.toggleShowWallet());
   };
-
-  if (!walletState.wallet) return null;
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>

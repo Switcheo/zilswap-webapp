@@ -257,17 +257,20 @@ export class ZilswapConnector {
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static changeNetwork = async (props: ChangeNetworkProps) => {
-    const { wallet } = ZilswapConnector.getState(true);
-
-    if (!wallet)  
-      throw new Error("wallet not connected");
+    const { wallet } = ZilswapConnector.getState();
 
     console.log(props.network);
 
-    await ZilswapConnector.connect({
-      network: props.network,
-      wallet: wallet!,
-    });
+    if (wallet) {
+      await ZilswapConnector.connect({
+        network: props.network,
+        wallet,
+      });
+    } else {
+      await ZilswapConnector.initialise({
+        network: props.network,
+      });
+    }
   };
 
   /**
