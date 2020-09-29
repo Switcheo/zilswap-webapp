@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fill: theme.palette.switcheoLogo,
     },
     [theme.breakpoints.down("xs")]: {
-      justifyContent: "center",
+      justifyContent: "flex-start",
     },
   },
 }));

@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
     justifyContent: "flex-end",
   },
   button: {
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.text.primary,
   },
   progress: {
     position: "absolute",
@@ -27,6 +27,12 @@ const useStyles = makeStyles(theme => ({
     left: "50%",
     marginTop: -8,
     marginLeft: -8,
+  },
+  dropdown: {
+
+  },
+  dropdownItem: {
+    
   },
 }));
 const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -89,12 +95,19 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
 
       </Button>
       <Menu
+        className={classes.dropdown}
         anchorEl={menuAnchor}
         keepMounted
         open={!!menuAnchor}
         onClose={onCloseMenu}>
-        {Object.values(Network).map((network, index) => (
-          <MenuItem key={index} onClick={() => onSelectNetwork(network)}>{network}</MenuItem>
+        {Object.values(Network).map((option, index) => (
+          <MenuItem
+            className={classes.dropdownItem}
+            selected={network === option}
+            key={index}
+            onClick={() => onSelectNetwork(option)}>
+            {option}
+          </MenuItem>
         ))}
       </Menu>
     </Box>
