@@ -90,6 +90,7 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
 
     runNetworkChange(async () => {
       await ZilswapConnector.changeNetwork({ network });
+      dispatch(actions.Layout.updateNetwork(network));
     });
   };
 

@@ -1,10 +1,10 @@
 import { Value } from "@zilliqa-js/contract";
 import { actions } from "app/store";
-import { RootState, TokenBalanceMap, TokenInfo, TokenState, Transaction, WalletState } from "app/store/types";
+import { LayoutState, RootState, TokenBalanceMap, TokenInfo, TokenState, Transaction, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
-import { DefaultFallbackNetwork, LocalStorageKeys, ZIL_TOKEN_NAME } from "app/utils/contants";
+import { LocalStorageKeys, ZIL_TOKEN_NAME } from "app/utils/contants";
 import { connectWalletPrivateKey, ConnectWalletResult, connectWalletZilPay, parseBalanceResponse } from "core/wallet";
-import { BN, getBalancesMap, getAllowancesMap, RPCResponse, ZilswapConnector } from "core/zilswap";
+import { BN, getAllowancesMap, getBalancesMap, RPCResponse, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { ObservedTx, TokenDetails, TxReceipt, TxStatus } from "zilswap-sdk";
@@ -94,6 +94,7 @@ let mounted = false;
  */
 export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+  const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const store = useStore();
   const [zilswapReady, setZilswapReady] = useState(false);
@@ -164,10 +165,10 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         walletResult = await connectWalletPrivateKey(privateKey);
       } catch (e) { }
 
+      const storeState: RootState = store.getState();
       if (walletResult?.wallet) {
         const { wallet } = walletResult;
         const { network } = wallet;
-        const storeState: RootState = store.getState();
 
         await ZilswapConnector.connect({
           wallet, network,
@@ -176,7 +177,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         dispatch(actions.Wallet.update({ wallet, privateKey }));
       } else {
         await ZilswapConnector.initialise({
-          network: DefaultFallbackNetwork,
+          network: storeState.layout.network,
         });
         dispatch(actions.Wallet.update({ wallet: undefined, privateKey: undefined, zilpay: undefined }));
       }
@@ -199,10 +200,10 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         }
       } catch (e) { }
 
+      const storeState: RootState = store.getState();
       if (walletResult?.wallet) {
         const { wallet } = walletResult;
         const { network } = wallet;
-        const storeState: RootState = store.getState();
 
         await ZilswapConnector.connect({
           wallet, network,
@@ -211,7 +212,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         dispatch(actions.Wallet.update({ wallet, zilpay: true }));
       } else {
         await ZilswapConnector.initialise({
-          network: DefaultFallbackNetwork,
+          network: storeState.layout.network,
         });
         dispatch(actions.Wallet.update({ wallet: undefined, privateKey: undefined, zilpay: undefined }));
       }
@@ -223,8 +224,9 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   const initWithoutWallet = () => {
     // console.log("butler", "initWithoutWallet");
     runInitWallet(async () => {
+      const storeState: RootState = store.getState();
       await ZilswapConnector.initialise({
-        network: DefaultFallbackNetwork,
+        network: storeState.layout.network,
       });
       dispatch(actions.Wallet.update({ wallet: undefined, privateKey: undefined, zilpay: undefined }));
 
@@ -280,7 +282,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
     dispatch(actions.Token.invalidate());
     // eslint-disable-next-line
-  }, [zilswapReady, walletState.wallet]);
+  }, [zilswapReady, walletState.wallet, layoutState.network]);
 
   useEffect(() => {
 

@@ -1,11 +1,18 @@
+import { DefaultFallbackNetwork, LocalStorageKeys } from "app/utils/contants";
 import moment from "moment";
+import { Network } from "zilswap-sdk/lib/constants";
 import { ActionTypes } from "./actions";
 import { LayoutState } from "./types";
+
+const storedNetworkString = localStorage.getItem(LocalStorageKeys.Network);
+const networks: { [index: string]: Network | undefined } = Network;
+const storedNetwork = networks[storedNetworkString || ""] || DefaultFallbackNetwork;
 
 const initial_state: LayoutState = {
   showWalletDialog: false,
   showCreatePool: false,
   notification: undefined,
+  network: storedNetwork,
   showPoolType: "add",
   loadingTasks: {},
   tasksRegistry: {},
@@ -33,6 +40,12 @@ const reducer = (state: LayoutState = initial_state, actions: any) => {
       return {
         ...state,
         notification: actions.notification,
+      };
+
+    case ActionTypes.UPDATE_NETWORK:
+      return {
+        ...state,
+        network: actions.network,
       };
 
     case ActionTypes.ADD_BACKGROUND_LOADING:

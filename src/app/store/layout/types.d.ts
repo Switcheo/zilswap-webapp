@@ -1,4 +1,5 @@
 import moment from "moment";
+import { Network } from "zilswap-sdk/lib/constants";
 
 export interface LoadingTask {
   [index: string]: moment.Moment;
@@ -17,6 +18,7 @@ export interface LayoutState {
   showCreatePool: boolean;
   showPoolType: PoolType;
   notification?: FormNotification;
+  network: Network;
   loadingTasks: LoadingTasks;
   tasksRegistry: any,
 };
