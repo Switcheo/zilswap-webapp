@@ -37,6 +37,7 @@ const useStyles = makeStyles(theme => ({
     minWidth: 116,
     justifyContent: "center",
     borderRadius: theme.spacing(.5),
+    minHeight: theme.spacing(6),
     ...theme.typography.subtitle1,
     "&.Mui-selected": {
       backgroundColor: theme.palette.primary.main,
