@@ -56,8 +56,6 @@ export const connectWalletZilPay = async (zilPay: any): Promise<ConnectWalletRes
   const timestamp = moment();
 
   const network = zilPay.wallet.net === Network.TestNet.toLowerCase() ? Network.TestNet : Network.MainNet;
-  if (network === Network.MainNet)
-    throw new Error("MainNet is not supported yet. Please select 'TestNet' within ZilPay.");
 
   const wallet = new ZilPayConnectedWallet({
     network, timestamp,
