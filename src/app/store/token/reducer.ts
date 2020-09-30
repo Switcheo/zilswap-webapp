@@ -14,7 +14,6 @@ const reducer = (state: TokenState = initial_state, action: any) => {
     case TokenActionTypes.TOKEN_INIT:
       const initProps: TokenInitProps = payload;
       return {
-        ...state,
         initialized: true,
         tokens: {
           ...initProps.tokens,

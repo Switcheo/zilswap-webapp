@@ -10,6 +10,7 @@ import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import { Network } from "zilswap-sdk/lib/constants";
 
 const useStyles = makeStyles(theme => ({
@@ -50,7 +51,9 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+
   const { children, className, ...rest } = props;
+  const location = useLocation();
   const classes = useStyles();
   const dispatch = useDispatch();
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null);
@@ -90,9 +93,13 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
 
     runNetworkChange(async () => {
       await ZilswapConnector.changeNetwork({ network });
+      dispatch(actions.Wallet.update({ ...walletState, wallet: { ...walletState.wallet, network } }));
       dispatch(actions.Layout.updateNetwork(network));
     });
   };
+
+  // TODO: remove me when launched, hiding mainnet toggle for now.
+  if (location.search !== '?mayBeRugpulled=true') return null;
 
   const isLoading = loadingNetworkChange || loadingConnectWallet;
   return (

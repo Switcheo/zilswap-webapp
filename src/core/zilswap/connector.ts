@@ -230,8 +230,8 @@ export class ZilswapConnector {
   };
 
   /**
-   * 
-   * 
+   *
+   *
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static getGasLimit = (): BigNumber => {
@@ -240,8 +240,8 @@ export class ZilswapConnector {
   };
 
   /**
-   * 
-   * 
+   *
+   *
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static adjustedForGas = (intendedAmount: BigNumber, balance?: BigNumber): BigNumber => {
@@ -253,7 +253,7 @@ export class ZilswapConnector {
 
   /**
    * change network for Zilswap SDK
-   * 
+   *
    * @throws "not connected" if `ZilswapConnector.connect` not called.
    */
   static changeNetwork = async (props: ChangeNetworkProps) => {
@@ -264,7 +264,7 @@ export class ZilswapConnector {
     if (wallet) {
       await ZilswapConnector.connect({
         network: props.network,
-        wallet,
+        wallet: { ...wallet, network: props.network },
       });
     } else {
       await ZilswapConnector.initialise({

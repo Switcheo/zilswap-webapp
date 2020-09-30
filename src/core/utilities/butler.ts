@@ -12,7 +12,7 @@ import { ViewBlock } from "./viewblock";
 
 /**
  * Component constructor properties for {@link AppButler}
- * 
+ *
  */
 export type AppButlerProps = {
 };
@@ -20,7 +20,7 @@ export type AppButlerProps = {
 /**
  * Convert token representation from zilswap-sdk's {@link TokenDetails}
  * to application's {@link TokenInfo}
- * 
+ *
  * @param zilswapToken token representation from zilswap-sdk
  * @returns mapped {@link TokenInfo} representation of the token.
  */
@@ -42,10 +42,10 @@ const mapZilswapToken = (zilswapToken: TokenDetails): TokenInfo => {
 };
 
 /**
- * Converts `Value[]` array to map of string values. 
+ * Converts `Value[]` array to map of string values.
  * `Value.type` is ignored, all values are returned as string.
- * 
- * 
+ *
+ *
  * sample input:
  * ```javascript
  *  [{
@@ -58,7 +58,7 @@ const mapZilswapToken = (zilswapToken: TokenDetails): TokenInfo => {
  *    value: "100000000",
  *  }]
  * ```
- * 
+ *
  * output:
  * ```javascript
  *  {
@@ -66,7 +66,7 @@ const mapZilswapToken = (zilswapToken: TokenDetails): TokenInfo => {
  *    balance: "100000000",
  *  }
  * ```
- * 
+ *
  * @param params parameters in `Value[]` array representation
  * @returns mapped object representation - refer to sample output
  */
@@ -82,15 +82,15 @@ let mounted = false;
 /**
  * Helper service to run continuous update or polling tasks
  * in the background.
- * 
- * *init*: 
+ *
+ * *init*:
  *  - initialize TokenState tokens in existing pools on zilswap contract.
  *  - append pseudo-token ZIL for UI implementation convenience.
- * 
+ *
  * *update*:
  *  - listens to changes in tokens and loads token metadata (pool, balances, etc)
  * for tokens with `initialized` set to `false`.
- * 
+ *
  */
 export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
@@ -114,7 +114,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         txReceipt: receipt,
       }));
 
-      // invalidate all tokens if updated TX is currently 
+      // invalidate all tokens if updated TX is currently
       // recorded within state
       const transactions: Transaction[] = store.getState().transaction.transactions;
       if (transactions.find(transaction => transaction.hash === tx.hash))
@@ -126,32 +126,36 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     ZilswapConnector.registerObserver(null);
   };
 
+  const initTokens = () => {
+    const zilswapTokens = ZilswapConnector.getTokens(); // test new pool: .filter(token => token.symbol !== "ITN");
+
+    const tokens: { [index: string]: TokenInfo } = {};
+    zilswapTokens.map(mapZilswapToken).forEach(token => tokens[token.address] = token);
+
+    // // inject ZIL as a pseudo-token
+    // // SDK provides a zil token from v0.0.11
+    // tokens["zil"] = {
+    //   isZil: true,
+    //   dirty: false,
+    //   initialized: false,
+    //   listPriority: 0,
+    //   address: ZIL_HASH,
+    //   decimals: 12,
+    //   balance: walletState.wallet?.balance || new BN(0),
+    //   init_supply: new BN(0),
+    //   name: "Zilliqa",
+    //   symbol: "ZIL",
+    //   balances: {},
+    // };
+
+    // initialize store TokenState
+    dispatch(actions.Token.init({ tokens }));
+  }
+
   const initZilswap = () => {
     // console.log("butler", "initZilswap");
     runInitZilswap(async () => {
-      const zilswapTokens = ZilswapConnector.getTokens(); // test new pool: .filter(token => token.symbol !== "ITN");
-
-      const tokens: { [index: string]: TokenInfo } = {};
-      zilswapTokens.map(mapZilswapToken).forEach(token => tokens[token.address] = token);
-
-      // // inject ZIL as a pseudo-token
-      // // SDK provides a zil token from v0.0.11
-      // tokens["zil"] = {
-      //   isZil: true,
-      //   dirty: false,
-      //   initialized: false,
-      //   listPriority: 0,
-      //   address: ZIL_HASH,
-      //   decimals: 12,
-      //   balance: walletState.wallet?.balance || new BN(0),
-      //   init_supply: new BN(0),
-      //   name: "Zilliqa",
-      //   symbol: "ZIL",
-      //   balances: {},
-      // };
-
-      // initialize store TokenState
-      dispatch(actions.Token.init({ tokens }));
+      initTokens();
       setZilswapReady(true);
     });
   };
@@ -168,10 +172,10 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
       const storeState: RootState = store.getState();
       if (walletResult?.wallet) {
         const { wallet } = walletResult;
-        const { network } = wallet;
 
         await ZilswapConnector.connect({
-          wallet, network,
+          wallet,
+          network: storeState.layout.network,
           observedTxs: storeState.transaction.observingTxs,
         });
         dispatch(actions.Wallet.update({ wallet, privateKey }));
@@ -203,10 +207,10 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
       const storeState: RootState = store.getState();
       if (walletResult?.wallet) {
         const { wallet } = walletResult;
-        const { network } = wallet;
 
         await ZilswapConnector.connect({
-          wallet, network,
+          wallet,
+          network: storeState.layout.network,
           observedTxs: storeState.transaction.observingTxs,
         });
         dispatch(actions.Wallet.update({ wallet, zilpay: true }));
@@ -282,7 +286,14 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
     dispatch(actions.Token.invalidate());
     // eslint-disable-next-line
-  }, [zilswapReady, walletState.wallet, layoutState.network]);
+  }, [zilswapReady, walletState.wallet]);
+
+  useEffect(() => {
+    // console.log("butler", "network change")
+    if (zilswapReady) initTokens();
+
+    // eslint-disable-next-line
+  }, [layoutState.network])
 
   useEffect(() => {
 
