@@ -9,7 +9,7 @@ import { APIS, Network } from 'zilswap-sdk/lib/constants';
 import { ConnectWalletResult } from "./ConnectedWallet";
 import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
 import { ZilPayConnectedWallet } from "./ZilPayConnectedWallet";
-import { DefaultFallbackNetwork } from "app/utils/contants";
+import { DefaultFallbackNetwork, ZilPayNetworkMap } from "app/utils/contants";
 
 export const parseBalanceResponse = (balanceRPCResponse: RPCResponse<any, string>) => {
   let balanceResult = null;
@@ -55,7 +55,10 @@ export const connectWalletZilPay = async (zilPay: any): Promise<ConnectWalletRes
     throw new Error("Please sign in to your ZilPay account before connecting.");
   const timestamp = moment();
 
-  const network = zilPay.wallet.net === Network.TestNet.toLowerCase() ? Network.TestNet : Network.MainNet;
+  const net = zilPay.wallet.net;
+  const network = ZilPayNetworkMap[net];
+  if (!network)
+    throw new Error(`Unsupported ZilPay network: ${net}`);
 
   const wallet = new ZilPayConnectedWallet({
     network, timestamp,

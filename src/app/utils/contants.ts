@@ -23,6 +23,12 @@ export const PlaceholderStrings = {
   ZilAddress: "zil18zlr57uhrmnk4mfkuawgv0un295k970a9s3lnq",
 };
 
+
+export const ZilPayNetworkMap = {
+  mainnet: Network.MainNet,
+  testnet: Network.TestNet,
+} as { [index: string]: Network };
+
 export const BIG_ZERO = new BigNumber(0);
 export const BIG_ONE = new BigNumber(1);
 

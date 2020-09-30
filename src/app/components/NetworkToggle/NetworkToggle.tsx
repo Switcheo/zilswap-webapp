@@ -93,7 +93,6 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
 
     runNetworkChange(async () => {
       await ZilswapConnector.changeNetwork({ network });
-      // dispatch(actions.Wallet.update({ ...walletState, wallet: { ...walletState.wallet, network } }));
       dispatch(actions.Layout.updateNetwork(network));
     });
   };

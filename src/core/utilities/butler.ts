@@ -2,7 +2,7 @@ import { Value } from "@zilliqa-js/contract";
 import { actions } from "app/store";
 import { LayoutState, RootState, TokenBalanceMap, TokenInfo, TokenState, Transaction, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
-import { LocalStorageKeys, ZIL_TOKEN_NAME } from "app/utils/contants";
+import { LocalStorageKeys, ZilPayNetworkMap, ZIL_TOKEN_NAME } from "app/utils/contants";
 import { connectWalletPrivateKey, ConnectWalletResult, connectWalletZilPay, parseBalanceResponse } from "core/wallet";
 import { BN, getAllowancesMap, getBalancesMap, RPCResponse, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
@@ -79,6 +79,7 @@ export const zilParamsToMap = (params: Value[]): { [index: string]: any } => {
 
 // eslint-disable-next-line
 let mounted = false;
+let zilPayWatcherSubscribed = false;
 /**
  * Helper service to run continuous update or polling tasks
  * in the background.
@@ -126,27 +127,65 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     ZilswapConnector.registerObserver(null);
   };
 
+  const getConnectedZilPay = async () => {
+    const zilPay = (window as any).zilPay;
+    try {
+      if (typeof zilPay !== "undefined") {
+        const result = await zilPay.wallet.connect();
+        if (result === zilPay.wallet.isConnect) {
+          return zilPay;
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const watchZilPayAccount = (zilPay: any) => {
+    if (!zilPay || zilPayWatcherSubscribed) return;
+
+    const accountObserver = zilPay.wallet.observableAccount();
+    const networkObserver = zilPay.wallet.observableNetwork();
+    accountObserver.subscribe((account: any) => {
+      const walletState: WalletState = store.getState().wallet;
+      // ignore account change if not connected
+      if (!walletState.zilpay) return;
+
+      // re-initialise if account changed
+      if (walletState.wallet.addressInfo.bech32 !== account.bech32) {
+        // ZilPay unsubscribes doesnt work
+        // accountObserver.unsubscribe();
+        // networkObserver.unsubscribe();
+        initWithZilPay();
+      }
+    });
+    networkObserver.subscribe(async (net: string) => {
+      const walletState: WalletState = store.getState().wallet;
+      // ignore account change if not connected
+      if (!walletState.zilpay) return;
+
+      const network = ZilPayNetworkMap[net];
+
+      if (!network) {
+        // unregistered network
+        // run init to handle undefined network
+        initWithZilPay();
+        return;
+      }
+
+      if (network !== ZilswapConnector.network) {
+        initWithZilPay();
+      }
+    });
+
+    zilPayWatcherSubscribed = true;
+  };
+
   const initTokens = () => {
-    const zilswapTokens = ZilswapConnector.getTokens(); // test new pool: .filter(token => token.symbol !== "ITN");
+    const zilswapTokens = ZilswapConnector.getTokens();
 
     const tokens: { [index: string]: TokenInfo } = {};
     zilswapTokens.map(mapZilswapToken).forEach(token => tokens[token.address] = token);
-
-    // // inject ZIL as a pseudo-token
-    // // SDK provides a zil token from v0.0.11
-    // tokens["zil"] = {
-    //   isZil: true,
-    //   dirty: false,
-    //   initialized: false,
-    //   listPriority: 0,
-    //   address: ZIL_HASH,
-    //   decimals: 12,
-    //   balance: walletState.wallet?.balance || new BN(0),
-    //   init_supply: new BN(0),
-    //   name: "Zilliqa",
-    //   symbol: "ZIL",
-    //   balances: {},
-    // };
 
     // initialize store TokenState
     dispatch(actions.Token.init({ tokens }));
@@ -194,15 +233,18 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     // console.log("butler", "initWithZilPay");
     runInitWallet(async () => {
       let walletResult: ConnectWalletResult | undefined;
-      const zilPay = (window as any).zilPay;
-      try {
-        if (typeof zilPay !== "undefined") {
-          const result = await zilPay.wallet.connect();
-          if (result === zilPay.wallet.isConnect) {
-            walletResult = await connectWalletZilPay(zilPay);
-          }
+      const zilPay = await getConnectedZilPay();
+      if (zilPay) {
+        try {
+          walletResult = await connectWalletZilPay(zilPay);
+          watchZilPayAccount(zilPay);
+        } catch (e) {
+          dispatch(actions.Layout.updateNotification({
+            type: "",
+            message: e.message,
+          }));
         }
-      } catch (e) { }
+      }
 
       const storeState: RootState = store.getState();
       if (walletResult?.wallet) {
@@ -267,6 +309,9 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     if (!zilswapReady) return;
 
     if (walletState.wallet) {
+      if (!zilPayWatcherSubscribed && walletState.wallet.zilpay)
+        watchZilPayAccount(walletState.wallet.zilpay);
+
       runReloadTransactions(async () => {
         if (!walletState.wallet) return;
         const viewblockTxs = await ViewBlock.listTransactions({
