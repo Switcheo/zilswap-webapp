@@ -4,7 +4,7 @@ import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
 import cls from "classnames";
-import { BN } from "core/zilswap";
+import { BN, ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AddressInput } from "./components";
@@ -64,8 +64,10 @@ const CreatePoolDialog = (props: any) => {
         balances: tokenPreview.balances,
         allowances: {},
       };
+      const network = ZilswapConnector.network;
+
       dispatch(actions.Token.add({ token }));
-      dispatch(actions.Pool.select({ token }));
+      dispatch(actions.Pool.select({ token, network }));
 
       return onCloseDialog();
     });

@@ -5,7 +5,7 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { ContrastBox, CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect } from "app/components";
 import { actions } from "app/store";
-import { PoolFormState, RootState, TokenInfo } from "app/store/types";
+import { LayoutState, PoolFormState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useMoneyFormatter } from "app/utils";
 import { BIG_ONE, BIG_ZERO } from "app/utils/contants";
@@ -105,6 +105,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const [runRemoveLiquidity, loading, error] = useAsyncTask("poolRemoveLiquidity");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
+  const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 5 });
 
@@ -123,6 +124,18 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     }
   }, [poolToken, currencyDialogOverride]);
 
+  useEffect(() => {
+    if (!poolFormState.forNetwork) return
+
+    // clear form if network changed
+    if (poolFormState.forNetwork !== layoutState.network) {
+      setFormState({ ...initialFormState })
+      dispatch(actions.Pool.clear());
+    }
+
+    // eslint-disable-next-line
+  }, [layoutState.network]);
+
   const onPercentage = (percentage: number) => {
     if (!poolToken?.pool) return;
     const pool = poolToken.pool!;
@@ -134,7 +147,8 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
   const onPoolChange = (token: TokenInfo) => {
     if (!token.pool) return;
-    dispatch(actions.Pool.select({ token }));
+    const network = ZilswapConnector.network;
+    dispatch(actions.Pool.select({ token, network }));
     onTokenChange("0");
   };
 
@@ -150,6 +164,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       const removePercentage = bnTokenAmount.shiftedBy(poolToken.decimals).div(poolToken.pool?.totalContribution || BIG_ONE);
       setFormState({ zilAmount, tokenAmount, removePercentage });
       dispatch(actions.Pool.update({
+        forNetwork: ZilswapConnector.network,
         removeZilAmount: bnZilAmount.shiftedBy(poolToken.decimals),
         removeTokenAmount: bnTokenAmount.shiftedBy(poolToken.decimals),
       }));
@@ -251,7 +266,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
             onClick={() => setShowAdvanced(!showAdvanced)}>
             Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </Typography>
-        ) : <Box component="div" display="block" style={{height: 16}}>&nbsp;</Box>}
+        ) : <Box component="div" display="block" style={{ height: 16 }}>&nbsp;</Box>}
       </Box>
 
       {!!showAdvanced && !!poolToken && (

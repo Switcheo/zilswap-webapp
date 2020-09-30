@@ -6,6 +6,7 @@ import { PoolFormState, PoolSelectProps } from "./types";
 
 const initial_state: PoolFormState = {
   token: null,
+  forNetwork: null,
 
   addZilAmount: new BigNumber(0),
   addTokenAmount: new BigNumber(0),
@@ -19,11 +20,15 @@ const reducer = (state: PoolFormState = initial_state, action: any) => {
 
   switch (action.type) {
 
+    case PoolActionTypes.CLEAR:
+      return { ...initial_state };
+
     case PoolActionTypes.SELECT:
       const selectProps: PoolSelectProps = payload;
       return {
         ...state,
         token: selectProps.token,
+        forNetwork: selectProps.network || null,
       };
 
     case PoolActionTypes.UPDATE:

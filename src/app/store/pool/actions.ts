@@ -1,8 +1,15 @@
 import { PoolFormState, PoolSelectProps } from "./types";
 
 export enum PoolActionTypes {
+  CLEAR = "POOL_CLEAR",
   SELECT = "POOL_SELECT",
   UPDATE = "POOL_UPDATE",
+}
+
+export function clear() {
+  return {
+    type: PoolActionTypes.CLEAR,
+  }
 }
 
 export function select(payload: PoolSelectProps) {

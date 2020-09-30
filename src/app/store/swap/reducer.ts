@@ -12,14 +12,26 @@ const initial_state: SwapFormState = {
   exactOf: "in",
   inAmount: new BigNumber(0),
   outAmount: new BigNumber(0),
-  
+
   isInsufficientReserves: false,
+  forNetwork: null,
 }
 
 const reducer = (state: SwapFormState = initial_state, action: any) => {
   const { payload } = action;
 
   switch (action.type) {
+
+    case SwapActionTypes.CLEAR_FORM:
+      return {
+        exactOf: "in",
+        inAmount: new BigNumber(0),
+        outAmount: new BigNumber(0),
+      
+        isInsufficientReserves: false,
+        forNetwork: null,
+      };
+
     case SwapActionTypes.UPDATE:
       return { ...state, ...payload };
 

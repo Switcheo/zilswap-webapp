@@ -8,14 +8,14 @@ import { validation as ZilValidation } from "@zilliqa-js/util";
 import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
-import { ExactOfOptions, RootState, SwapFormState, TokenInfo, TokenState, WalletState } from "app/store/types";
+import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
 import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_TOKEN_NAME } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CONTRACTS, Network } from "zilswap-sdk/lib/constants";
 import { ShowAdvanced } from "./components";
@@ -151,6 +151,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [buttonRotate, setButtonRotate] = useState(false);
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const swapFormState: SwapFormState = useSelector<RootState, SwapFormState>(store => store.swap);
+  const layoutState: LayoutState = useSelector<RootState, LayoutState>(store => store.layout);
   const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
   const walletState = useSelector<RootState, WalletState>(store => store.wallet);
@@ -161,6 +162,25 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [reversedRate, setReversedRate] = useState(false);
+
+  useEffect(() => {
+    if (!swapFormState.forNetwork) return
+
+    // clear form if network changed
+    if (swapFormState.forNetwork !== layoutState.network) {
+      setFormState({
+        ...formState,
+        inAmount: "0",
+        outAmount: "0",
+      })
+      dispatch(actions.Swap.update({
+        inAmount: BIG_ZERO,
+        outAmount: BIG_ZERO,
+      }));
+    }
+
+    // eslint-disable-next-line
+  }, [layoutState.network]);
 
   const getExchangeRateLabel = () => {
     let exchangeRate = swapFormState.expectedExchangeRate || BIG_ZERO;
@@ -206,7 +226,10 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       ...result.inAmount && { inAmount: result.inAmount.toString() },
     });
 
-    dispatch(actions.Swap.update(result));
+    dispatch(actions.Swap.update({
+      forNetwork: ZilswapConnector.network || null,
+      ...result,
+    }));
   };
 
   const onPercentage = (percentage: number) => {
@@ -299,7 +322,10 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       outAmount: amount,
       inAmount: result.inAmount.toString(),
     });
-    dispatch(actions.Swap.update(result));
+    dispatch(actions.Swap.update({
+      forNetwork: ZilswapConnector.network || null,
+      ...result,
+    }));
   };
   const onInAmountChange = (amount: string = "0") => {
     let inAmount = new BigNumber(amount);
@@ -310,7 +336,10 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       inAmount: amount,
       outAmount: result.outAmount.toString(),
     });
-    dispatch(actions.Swap.update(result));
+    dispatch(actions.Swap.update({
+      forNetwork: ZilswapConnector.network || null,
+      ...result,
+    }));
   };
   const onOutCurrencyChange = (token: TokenInfo) => {
     if (swapFormState.inToken === token) return;
@@ -329,7 +358,10 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       inAmount: result.inAmount.toString(),
     });
 
-    dispatch(actions.Swap.update(result));
+    dispatch(actions.Swap.update({
+      forNetwork: ZilswapConnector.network || null,
+      ...result,
+    }));
   };
   const onInCurrencyChange = (token: TokenInfo) => {
     if (swapFormState.outToken === token) return;
@@ -348,7 +380,10 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       inAmount: result.inAmount.toString(),
     });
 
-    dispatch(actions.Swap.update(result));
+    dispatch(actions.Swap.update({
+      forNetwork: ZilswapConnector.network || null,
+      ...result,
+    }));
   };
 
   const onRecipientAddressChange = (event: any) => {

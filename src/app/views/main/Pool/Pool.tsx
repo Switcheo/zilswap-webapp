@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Notifications } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
-import { OpenCloseState, PoolType, RootState, TokenInfo } from "app/store/types";
+import { LayoutState, OpenCloseState, PoolFormState, RootState } from "app/store/types";
 import cls from "classnames";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -32,9 +32,11 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
-  const poolToken = useSelector<RootState, TokenInfo | undefined>(state => state.pool.token || undefined);
-  const poolType = useSelector<RootState, PoolType>(state => state.layout.showPoolType);
-  const showCreatePool = useSelector<RootState, boolean>(state => state.layout.showCreatePool);
+  const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
+  const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
+
+  const { token: poolToken } = poolFormState;
+  const { showPoolType: poolType, showCreatePool } = layoutState;
 
   const onShowCreatePool = (override: OpenCloseState) => {
     dispatch(actions.Layout.toggleShowCreatePool(override));
@@ -45,7 +47,7 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
       <Notifications />
       {!poolToken?.loading && (
         <>
-          {!poolToken?.pool && (<NewPoolMessage token={poolToken} />)}
+          {!poolToken?.pool && (<NewPoolMessage token={poolToken || undefined} />)}
           {poolToken?.pool && !poolToken?.whitelisted && (<UserPoolMessage token={poolToken} />)}
         </>
       )}

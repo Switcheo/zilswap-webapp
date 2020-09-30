@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { CurrencyInput, FancyButton, ProportionSelect, KeyValueDisplay } from "app/components";
 import { actions } from "app/store";
 import { fromBech32Address } from "@zilliqa-js/crypto";
-import { RootState, TokenInfo, TokenState, PoolFormState } from "app/store/types";
+import { RootState, TokenInfo, TokenState, PoolFormState, LayoutState } from "app/store/types";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
 import { ZIL_TOKEN_NAME, BIG_ZERO } from "app/utils/contants";
 import BigNumber from "bignumber.js";
@@ -60,6 +60,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const dispatch = useDispatch();
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
+  const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
@@ -69,6 +70,22 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       setCurrencyDialogOverride(false);
     }
   }, [poolToken, currencyDialogOverride]);
+
+  useEffect(() => {
+    if (!poolFormState.forNetwork) return
+
+    // clear form if network changed
+    if (poolFormState.forNetwork !== layoutState.network) {
+      setFormState({
+        zilAmount: "0",
+        tokenAmount: "0",
+      });
+      dispatch(actions.Pool.clear());
+    }
+
+    // eslint-disable-next-line
+  }, [layoutState.network]);
+
 
   const onPercentage = (percentage: number) => {
     if (!poolToken) return;
@@ -81,7 +98,8 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
   const onPoolChange = (token: TokenInfo) => {
     if (token.symbol === "ZIL") return;
-    dispatch(actions.Pool.select({ token }));
+    const network = ZilswapConnector.network;
+    dispatch(actions.Pool.select({ token, network }));
     onTokenChange("0");
   };
 
@@ -106,6 +124,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       });
 
       dispatch(actions.Pool.update({
+        forNetwork: ZilswapConnector.network,
         addZilAmount: bnZilAmount,
 
         // only update counter currency if exchange rate is available
@@ -135,6 +154,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       });
 
       dispatch(actions.Pool.update({
+        forNetwork: ZilswapConnector.network,
         addTokenAmount: bnTokenAmount,
 
         // only update counter currency if exchange rate is available

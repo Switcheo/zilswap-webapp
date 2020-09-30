@@ -53,13 +53,13 @@ const useStyles = makeStyles(theme => ({
 const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const { children, className, ...rest } = props;
-  const location = useLocation();
   const classes = useStyles();
   const dispatch = useDispatch();
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const [runNetworkChange, loadingNetworkChange, errorNetworkChange, clearError] = useAsyncTask("networkChange");
   const [loadingConnectWallet] = useTaskSubscriber(...LoadingKeys.connectWallet);
+  const location = useLocation();
 
   useEffect(() => {
     if (errorNetworkChange) {
@@ -93,13 +93,15 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
 
     runNetworkChange(async () => {
       await ZilswapConnector.changeNetwork({ network });
-      dispatch(actions.Wallet.update({ ...walletState, wallet: { ...walletState.wallet, network } }));
+      // dispatch(actions.Wallet.update({ ...walletState, wallet: { ...walletState.wallet, network } }));
       dispatch(actions.Layout.updateNetwork(network));
     });
   };
 
   // TODO: remove me when launched, hiding mainnet toggle for now.
-  if (location.search !== '?mayBeRugpulled=true') return null;
+  if (process.env.NODE_ENV && process.env.NODE_ENV !== "development") {
+    if (location.search !== '?mayBeRugpulled=true') return null;
+  }
 
   const isLoading = loadingNetworkChange || loadingConnectWallet;
   return (
