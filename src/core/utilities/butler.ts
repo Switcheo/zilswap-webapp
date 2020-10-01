@@ -8,6 +8,7 @@ import { BN, getAllowancesMap, getBalancesMap, RPCResponse, ZilswapConnector } f
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { ObservedTx, TokenDetails, TxReceipt, TxStatus } from "zilswap-sdk";
+import { logger } from "./logger";
 import { ViewBlock } from "./viewblock";
 
 /**
@@ -107,7 +108,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
   const registerObserver = () => {
     ZilswapConnector.registerObserver((tx: ObservedTx, status: TxStatus, receipt?: TxReceipt) => {
-      // console.log("butler observed tx", tx.hash, status);
+      logger("butler observed tx", tx.hash, status);
 
       dispatch(actions.Transaction.update({
         hash: tx.hash,
@@ -192,7 +193,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   }
 
   const initZilswap = () => {
-    // console.log("butler", "initZilswap");
+    logger("butler", "initZilswap");
     runInitZilswap(async () => {
       initTokens();
       setZilswapReady(true);
@@ -200,7 +201,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   };
 
   const initWithPrivateKey = (privateKey: string) => {
-    // console.log("butler", "initWithPrivateKey");
+    logger("butler", "initWithPrivateKey");
     runInitWallet(async () => {
       let walletResult: ConnectWalletResult | undefined;
 
@@ -230,7 +231,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   };
 
   const initWithZilPay = () => {
-    // console.log("butler", "initWithZilPay");
+    logger("butler", "initWithZilPay");
     runInitWallet(async () => {
       let walletResult: ConnectWalletResult | undefined;
       const zilPay = await getConnectedZilPay();
@@ -268,7 +269,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   };
 
   const initWithoutWallet = () => {
-    // console.log("butler", "initWithoutWallet");
+    logger("butler", "initWithoutWallet");
     runInitWallet(async () => {
       const storeState: RootState = store.getState();
       await ZilswapConnector.initialise({
@@ -281,7 +282,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   };
 
   useEffect(() => {
-    // console.log("butler mount");
+    logger("butler mount");
     registerObserver();
 
     const privateKey = localStorage.getItem(LocalStorageKeys.PrivateKey);
@@ -305,7 +306,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   }, []);
 
   useEffect(() => {
-    // console.log("butler", "zilswapReady", { zilswapReady, wallet: walletState.wallet });
+    logger("butler", "zilswapReady", { zilswapReady, wallet: walletState.wallet });
     if (!zilswapReady) return;
 
     if (walletState.wallet) {
@@ -334,7 +335,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   }, [zilswapReady, walletState.wallet]);
 
   useEffect(() => {
-    // console.log("butler", "network change")
+    logger("butler", "network change")
     if (zilswapReady) initTokens();
 
     // eslint-disable-next-line
@@ -349,7 +350,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
       // skip initialized tokens to prevent run away
       // update cycle by useEffect.
       if (token.initialized && !token.dirty) continue;
-      // console.log(`butler update:${token.symbol}`);
+      logger(`butler update:${token.symbol}`);
 
       // set initialized to true to prevent repeat execution
       // due to useEffect triggering.

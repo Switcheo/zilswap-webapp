@@ -1,3 +1,5 @@
+import { logger } from "core/utilities";
+
 export type MessageListener = (data: object) => void;
 
 let eventListenerRegistered: boolean = false;
@@ -10,15 +12,15 @@ const onMessage = (e: MessageEvent) => {
     try {
       listener(e.data);
     } catch (e) {
-      console.log("useMessageListener", `listener callback crashed for ${key}`)
+      logger("useMessageListener", `listener callback crashed for ${key}`)
     }
   }
 };
 
 const addListener = (listener: MessageListener): number => {
-  console.log("useMessageListener", "addListener");
+  logger("useMessageListener", "addListener");
   if (!eventListenerRegistered) {
-    console.log("useMessageListener", "registering aggregate listener");
+    logger("useMessageListener", "registering aggregate listener");
     window.addEventListener("message", onMessage);
     eventListenerRegistered = true;
   }
@@ -29,11 +31,11 @@ const addListener = (listener: MessageListener): number => {
   return listenerIndex;
 };
 const removeListener = (listenerId: number) => {
-  console.log("useMessageListener", "removeListener");
+  logger("useMessageListener", "removeListener");
   delete listeners[listenerId];
 
   if (Object.keys(listeners).length === 0 && eventListenerRegistered) {
-    console.log("useMessageListener", "deregistering aggregate listener");
+    logger("useMessageListener", "deregistering aggregate listener");
     window.removeEventListener("message", onMessage);
     eventListenerRegistered = false;
   }
@@ -41,7 +43,7 @@ const removeListener = (listenerId: number) => {
 
 const subscriber = (listener: MessageListener): (() => void) => {
   const listenerId = addListener(listener);
-  console.log("useMessageListener", "subscriber", listenerId);
+  logger("useMessageListener", "subscriber", listenerId);
   return () => removeListener(listenerId);
 };
 

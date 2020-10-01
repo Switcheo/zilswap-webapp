@@ -1,7 +1,8 @@
-import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { fromBech32Address } from "@zilliqa-js/crypto";
+import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { BIG_ZERO, DefaultFallbackNetwork } from "app/utils/contants";
 import BigNumber from "bignumber.js";
+import { logger } from "core/utilities";
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
 import { ObservedTx, OnUpdate, Pool, TokenDetails, TxReceipt, TxStatus, WalletProvider, Zilswap } from "zilswap-sdk";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
@@ -94,12 +95,12 @@ export class ZilswapConnector {
   static connectorState: ConnectorState;
 
   private static mainObserver: OnUpdate = (tx: ObservedTx, status: TxStatus, receipt?: TxReceipt) => {
-    console.log("main observer", tx.hash, status);
+    logger("main observer", tx.hash, status);
     try {
       if (ZilswapConnector.observer)
         ZilswapConnector.observer(tx, status, receipt);
     } catch (e) {
-      console.log("error processing observeTx update", e);
+      logger("error processing observeTx update", e);
     }
   };
 
@@ -154,7 +155,7 @@ export class ZilswapConnector {
     await zilswap.initialize(ZilswapConnector.mainObserver, observedTxs)
     ZilswapConnector.connectorState = { zilswap, wallet };
     ZilswapConnector.network = network;
-    console.log("zilswap sdk initialised");
+    logger("zilswap sdk initialised");
   };
 
 
@@ -163,7 +164,7 @@ export class ZilswapConnector {
    *
    */
   static registerObserver = (observer: OnUpdate | null) => {
-    console.log("connector register observer");
+    logger("connector register observer");
     ZilswapConnector.observer = observer;
   };
 
@@ -171,7 +172,7 @@ export class ZilswapConnector {
     const { network = ZilswapConnector.network || DefaultFallbackNetwork } = props;
 
     await ZilswapConnector.setState({ network });
-    console.log("zilswap connection established");
+    logger("zilswap connection established");
   };
 
   /**
@@ -179,7 +180,7 @@ export class ZilswapConnector {
    */
   static connect = async (props: ConnectProps) => {
     await ZilswapConnector.initializeForWallet(props);
-    console.log("zilswap connection established");
+    logger("zilswap connection established");
   };
 
   /**
@@ -259,7 +260,7 @@ export class ZilswapConnector {
   static changeNetwork = async (props: ChangeNetworkProps) => {
     const { wallet } = ZilswapConnector.getState();
 
-    console.log(props.network);
+    logger(props.network);
 
     if (wallet) {
       await ZilswapConnector.connect({
@@ -290,8 +291,8 @@ export class ZilswapConnector {
   static approveTokenTransfer = async (props: ApproveTxProps) => {
     const { zilswap } = ZilswapConnector.getState(true);
 
-    console.log(props.tokenID);
-    console.log(props.tokenAmount.toString());
+    logger(props.tokenID);
+    logger(props.tokenAmount.toString());
     const observedTx = await zilswap.approveTokenTransferIfRequired(props.tokenID, props.tokenAmount);
     if (observedTx)
       handleObservedTx(observedTx);
@@ -324,10 +325,10 @@ export class ZilswapConnector {
     const queryFunction = props.exactOf === "in" ?
       zilswap.getRatesForInput.bind(zilswap) : zilswap.getRatesForOutput.bind(zilswap);
 
-    console.log(props.exactOf);
-    console.log(props.tokenInID);
-    console.log(props.tokenOutID);
-    console.log(props.amount.toString());
+    logger(props.exactOf);
+    logger(props.tokenInID);
+    logger(props.tokenOutID);
+    logger(props.amount.toString());
     return queryFunction(
       props.tokenInID,
       props.tokenOutID,
@@ -349,10 +350,10 @@ export class ZilswapConnector {
   static addLiquidity = async (props: AddLiquidityProps) => {
     const { zilswap } = ZilswapConnector.getState(true);
 
-    console.log(props.tokenID);
-    console.log(props.zilAmount.toString());
-    console.log(props.tokenAmount.toString());
-    console.log(props.maxExchangeRateChange);
+    logger(props.tokenID);
+    logger(props.zilAmount.toString());
+    logger(props.tokenAmount.toString());
+    logger(props.maxExchangeRateChange);
     const observedTx = await zilswap.addLiquidity(
       props.tokenID,
       props.zilAmount.toString(),
@@ -377,9 +378,9 @@ export class ZilswapConnector {
   static removeLiquidity = async (props: RemoveLiquidityProps) => {
     const { zilswap } = ZilswapConnector.getState(true);
 
-    console.log(props.tokenID);
-    console.log(props.contributionAmount.toString());
-    console.log(props.maxExchangeRateChange);
+    logger(props.tokenID);
+    logger(props.contributionAmount.toString());
+    logger(props.maxExchangeRateChange);
     const observedTx = await zilswap.removeLiquidity(
       props.tokenID,
       props.contributionAmount.toString(),
@@ -412,12 +413,12 @@ export class ZilswapConnector {
       zilswap.swapWithExactInput.bind(zilswap) :
       zilswap.swapWithExactOutput.bind(zilswap);
 
-    console.log(props.exactOf);
-    console.log(props.tokenInID);
-    console.log(props.tokenOutID);
-    console.log(props.amount.toString());
-    console.log(props.maxAdditionalSlippage);
-    console.log(props.recipientAddress);
+    logger(props.exactOf);
+    logger(props.tokenInID);
+    logger(props.tokenOutID);
+    logger(props.amount.toString());
+    logger(props.maxAdditionalSlippage);
+    logger(props.recipientAddress);
     const observedTx = await swapFunction(
       props.tokenInID,
       props.tokenOutID,
