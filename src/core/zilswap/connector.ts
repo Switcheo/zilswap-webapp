@@ -311,7 +311,7 @@ export class ZilswapConnector {
       throw new Error("token not found");
     const { tokens } = zilswap.getAppState();
     const byte20Address = fromBech32Address(props.address);
-    return tokens[byte20Address];
+    return tokens[byte20Address.toLowerCase()];
   };
 
   /**

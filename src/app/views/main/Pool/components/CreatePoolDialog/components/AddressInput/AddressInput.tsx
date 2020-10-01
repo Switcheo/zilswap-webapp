@@ -1,10 +1,10 @@
 import { Box, BoxProps, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
 import { KeyValueDisplay, LoadableArea } from "app/components";
-import { RootState, WalletState, TokenBalanceMap } from "app/store/types";
-import { truncate, useAsyncTask } from "app/utils";
+import { RootState, TokenBalanceMap, WalletState } from "app/store/types";
+import { useAsyncTask } from "app/utils";
 import cls from "classnames";
 import { zilParamsToMap } from "core/utilities";
-import { toBech32Address, ZilliqaValidate, ZilswapConnector, Contract, BN, getBalancesMap } from "core/zilswap";
+import { BN, Contract, getBalancesMap, toBech32Address, ZilliqaValidate, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -76,15 +76,12 @@ const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => 
         if (!walletState.wallet)
           throw new Error("Connect wallet to view token information");
 
-        const zilliqa = ZilswapConnector.getZilliqa();
-        const contract = zilliqa.contracts.at(inputAddress);
+        const token = await ZilswapConnector.addPoolToken({ address: inputAddress });
+        const contract = token.contract
 
-        const contractInitParams = await contract.getInit();
-        if (!contractInitParams)
-          throw new Error(`${truncate(address)} is not a contract address`);
-        const contractInit = zilParamsToMap(contractInitParams);
+        const contractInit = zilParamsToMap(contract.init);
 
-        const contractBalanceState = await getBalancesMap(contract);
+        const contractBalanceState = await getBalancesMap(token.contract);
 
         const balances: TokenBalanceMap = {};
         for (const address in contractBalanceState)
