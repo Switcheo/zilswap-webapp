@@ -306,12 +306,13 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   }, []);
 
   useEffect(() => {
-    logger("butler", "zilswapReady", { zilswapReady, wallet: walletState.wallet });
+    logger("butler", "zilswapReady", { zilswapReady, wallet: walletState.wallet, zilpay: walletState.zilpay });
     if (!zilswapReady) return;
 
     if (walletState.wallet) {
-      if (!zilPayWatcherSubscribed && walletState.wallet.zilpay)
-        watchZilPayAccount(walletState.wallet.zilpay);
+      if (walletState.zilpay) {
+        watchZilPayAccount(walletState.wallet.provider);
+      }
 
       runReloadTransactions(async () => {
         if (!walletState.wallet) return;

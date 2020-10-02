@@ -84,12 +84,14 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
         throw walletResult.error;
 
       if (walletResult.wallet) {
-        const { network } = walletResult.wallet!;
+        const { wallet } = walletResult
+        const { network } = wallet
         await ZilswapConnector.connect({
           network,
-          wallet: walletResult.wallet,
+          wallet,
         });
-        dispatch(actions.Wallet.update({ wallet: walletResult.wallet!, zilpay: true }));
+        dispatch(actions.Layout.updateNetwork(network));
+        dispatch(actions.Wallet.update({ wallet, zilpay: true }));
       }
     });
   }

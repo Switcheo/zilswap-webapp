@@ -51,7 +51,6 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
-
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -92,6 +91,13 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
     if (network === ZilswapConnector.network) return;
 
     runNetworkChange(async () => {
+      if (walletState.zilpay) {
+        dispatch(actions.Layout.updateNotification({
+          type: "",
+          message: "Please change network using your Zilpay wallet.",
+        }));
+        return
+      }
       await ZilswapConnector.changeNetwork({ network });
       dispatch(actions.Layout.updateNetwork(network));
     });

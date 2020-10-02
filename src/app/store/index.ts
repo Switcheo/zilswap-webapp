@@ -5,7 +5,7 @@ import thunk from "redux-thunk";
 import combinedReducers from "./reducers";
 
 const middlewares: Middleware[] = [thunk];
-if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development')
+if ((!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && !process.env.REACT_APP_DISABLE_REDUX_LOGGER)
   middlewares.push(createLogger());
 
 // redux 4 does not have a easy workaround createStore needing 4 type arguments.
