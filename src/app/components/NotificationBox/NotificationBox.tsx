@@ -16,7 +16,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: theme.spacing(1),
     display: "flex",
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
+    borderBottom: `1px solid ${theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "170" : "120"]}`
   },
   notificationDetail: {
     display: 'flex',

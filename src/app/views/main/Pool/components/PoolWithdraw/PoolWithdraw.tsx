@@ -88,6 +88,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: theme.spacing(2),
     backgroundColor: `rgba${hexToRGBA(theme.palette.primary.main, 0.3)}`
   },
+  errorMessage: {
+    marginTop: theme.spacing(1),
+  }
 }));
 
 const initialFormState = {
@@ -256,7 +259,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
         <PoolDetail className={classes.poolDetails} token={poolToken || undefined} />
 
-        <Typography color="error">{error?.message}</Typography>
+        <Typography className={classes.errorMessage} color="error">{error?.message}</Typography>
 
         <FancyButton walletRequired
           loading={loading}

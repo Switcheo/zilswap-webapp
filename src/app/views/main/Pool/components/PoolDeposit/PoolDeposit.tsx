@@ -44,6 +44,9 @@ const useStyles = makeStyles(theme => ({
   svg: {
     alignSelf: "center"
   },
+  errorMessage: {
+    marginTop: theme.spacing(1),
+  }
 }));
 
 const initialFormState = {
@@ -175,17 +178,23 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       const { addTokenAmount, addZilAmount } = poolFormState;
       const tokenBalance = new BigNumber(poolToken!.balance.toString()).shiftedBy(-poolToken.decimals);
       const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
+      const zilBalance = new BigNumber(zilToken.balance.toString()).shiftedBy(-zilToken.decimals);
 
-      let adjustedTokenAmount = addTokenAmount, adjustedZilAmount = addZilAmount;
-      if (addTokenAmount.gt(tokenBalance.toNumber())) {
-        adjustedTokenAmount = tokenBalance;
-        const rate = poolToken.pool?.exchangeRate.shiftedBy(poolToken!.decimals - zilToken.decimals);
-        adjustedZilAmount = adjustedTokenAmount.times(rate || 1).decimalPlaces(zilToken.decimals);
+      if (addTokenAmount.gt(tokenBalance)) {
+        throw new Error(`Insufficient ${poolToken.symbol} balance.`)
+      }
+
+      if (addZilAmount.gt(zilBalance)) {
+        throw new Error(`Insufficient ZIL balance.`)
+      }
+
+      if (addZilAmount.lt(1000)) {
+        throw new Error('Minimum contribution is 1000 ZILs.')
       }
 
       const observedTx = await ZilswapConnector.addLiquidity({
-        tokenAmount: adjustedTokenAmount.shiftedBy(poolToken.decimals),
-        zilAmount: adjustedZilAmount.shiftedBy(zilToken.decimals),
+        tokenAmount: addTokenAmount.shiftedBy(poolToken.decimals),
+        zilAmount: addZilAmount.shiftedBy(zilToken.decimals),
         tokenID: tokenAddress,
       });
 
@@ -276,7 +285,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
         <PoolDetail className={classes.poolDetails} token={poolToken || undefined} />
 
-        <Typography color="error">{error?.message || errorApproveTx?.message}</Typography>
+        <Typography color="error" className={classes.errorMessage}>{error?.message || errorApproveTx?.message}</Typography>
         <FancyButton
           loading={loading}
           walletRequired

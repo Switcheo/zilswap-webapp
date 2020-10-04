@@ -1,11 +1,10 @@
-import { Box, Typography } from "@material-ui/core";
+import { Box, Typography, Link } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { NotificationBox } from "app/components";
 import { TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React from "react";
-import { NavLink as RouterLink } from "react-router-dom";
 import { ReactComponent as WarningLogo } from "./warning_logo.svg";
 
 export interface NewPoolMessageProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -40,9 +39,15 @@ const NewPoolMessage: React.FC<NewPoolMessageProps> = (props: NewPoolMessageProp
       <Box className={classes.notificationSymbol}>
         <WarningLogo />
       </Box>
-      <Box>
-        <Typography className={classes.notificationMessage} variant="body2">You are the first person to add liquidity. The initial exchange rate will be set based on your deposits. Make sure that your ZIL and deposits have the same fiat value.
-        <RouterLink className={classes.viewDetail} to="detail">Learn More</RouterLink></Typography>
+      <Box ml={2} mr={1}>
+        <Typography className={classes.notificationMessage} variant="body2">
+          You are the first person to add liquidity.
+          The initial exchange rate will be set based on your deposits.
+          Make sure that your ZIL and deposits have the same fiat value.
+          <Link className={classes.viewDetail} rel="noopener noreferrer" target="_blank" href="https://docs.zilswap.org/#/smart-contract?id=addliquidity">
+            Learn More
+          </Link>
+        </Typography>
       </Box>
     </NotificationBox>
   );

@@ -129,6 +129,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     justifySelf: "flex-end",
     marginLeft: "auto",
   },
+  errorMessage: {
+    marginTop: theme.spacing(1),
+  }
 }));
 
 const initialFormState = {
@@ -401,10 +404,16 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     clearApproveError();
 
     runSwap(async () => {
-
       const amount: BigNumber = exactOf === "in" ? inAmount.shiftedBy(inToken.decimals) : outAmount.shiftedBy(outToken.decimals);
       if (amount.isNaN() || !amount.isFinite())
         throw new Error("Invalid input amount");
+
+      const address = walletState.wallet?.addressInfo.byte20.toLowerCase() || ""
+      const balance: BigNumber = new BigNumber(inToken.balances[address]?.toString() || 0)
+
+      if (inAmount.shiftedBy(inToken.decimals).gt(balance)) {
+        throw new Error(`Insufficient ${inToken.symbol} balance.`)
+      }
 
       ZilswapConnector.setDeadlineBlocks(expiry);
 
@@ -554,7 +563,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           )}
         </Box>
 
-        <Typography color="error">{error?.message || errorApproveTx?.message}</Typography>
+        <Typography className={classes.errorMessage} color="error">{error?.message || errorApproveTx?.message}</Typography>
         {swapFormState.isInsufficientReserves && (
           <Typography color="error">Pool reserve is too small to fulfill desired output.</Typography>
         )}
