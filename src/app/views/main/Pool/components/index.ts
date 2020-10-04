@@ -1,3 +1,4 @@
+export { default as AddLiquidityEarnMessage } from "./AddLiquidityEarnMessage";
 export { default as CreatePoolDialog } from "./CreatePoolDialog";
 export { default as NewPoolMessage } from "./NewPoolMessage";
 export { default as PoolDeposit } from "./PoolDeposit";

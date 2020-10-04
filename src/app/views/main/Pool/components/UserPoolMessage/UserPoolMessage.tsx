@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   notificationSymbol: {
-    margin: theme.spacing(2),
+    margin: theme.spacing(1.5, 3, 0),
   },
   warning: {
     alignItems: "start"
@@ -59,7 +59,7 @@ const UserPoolMessage: React.FC<UserPoolMessageProps> = (props: UserPoolMessageP
       <Box className={cls(classes.notificationSymbol, classes.warning)}>
         <WarningLogo />
       </Box>
-      <Box ml={6}>
+      <Box ml={1}>
         <Typography color="textSecondary" variant="body1">Pool Created by User</Typography>
         <Typography component="a" className={classes.symbolLink} href={infoUrl} target="_blank" >({token.symbol}) Token ({token.name}) <LinkLogo className={classes.linkLogo} /></Typography>
         <Typography className={classes.notificationMessage} variant="body2">

@@ -7,7 +7,7 @@ import { LayoutState, OpenCloseState, PoolFormState, RootState } from "app/store
 import cls from "classnames";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolToggleButton, PoolWithdraw, UserPoolMessage } from "./components";
+import { AddLiquidityEarnMessage, CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolToggleButton, PoolWithdraw, UserPoolMessage } from "./components";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
 
 const useStyles = makeStyles(theme => ({
@@ -51,6 +51,7 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
           {poolToken?.pool && !poolToken?.whitelisted && (<UserPoolMessage token={poolToken} />)}
         </>
       )}
+      <AddLiquidityEarnMessage />
       <Box display="flex" flexDirection="column">
         <Box display="flex" justifyContent="space-between" mb="28px" className={classes.container}>
           <PoolToggleButton />
