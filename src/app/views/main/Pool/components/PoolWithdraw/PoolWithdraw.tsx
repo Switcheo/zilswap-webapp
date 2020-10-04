@@ -8,7 +8,7 @@ import { actions } from "app/store";
 import { LayoutState, PoolFormState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useMoneyFormatter } from "app/utils";
-import { BIG_ONE, BIG_ZERO } from "app/utils/contants";
+import { BIG_ZERO } from "app/utils/contants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -107,7 +107,10 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
   const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
-  const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 5 });
+  const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
+
+  const userPoolTokenPercent = poolToken?.pool?.contributionPercentage.shiftedBy(-2);
+  const inPoolAmount = poolToken?.pool?.tokenReserve.times(userPoolTokenPercent || 0);
 
   const zilFormatOpts: MoneyFormatterOptions = {
     symbol: "ZIL",
@@ -138,10 +141,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
   const onPercentage = (percentage: number) => {
     if (!poolToken?.pool) return;
-    const pool = poolToken.pool!;
-
-    const balance = new BigNumber(pool.userContribution);
-    const amount = balance.times(percentage).decimalPlaces(0);
+    const amount = inPoolAmount?.times(percentage).decimalPlaces(0) || BIG_ZERO;
     onTokenChange(amount.shiftedBy(-poolToken.decimals).toString());
   };
 
@@ -154,14 +154,18 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
   const onTokenChange = (amount: string = "0") => {
     if (poolToken?.pool) {
-      const tokenAmount = amount;
+      let tokenAmount = amount;
       let bnTokenAmount = new BigNumber(amount);
       if (bnTokenAmount.isNegative() || bnTokenAmount.isNaN())
         bnTokenAmount = BIG_ZERO;
 
+      if (bnTokenAmount.shiftedBy(poolToken.decimals).isGreaterThan(inPoolAmount!))
+        bnTokenAmount = inPoolAmount!.decimalPlaces(0).shiftedBy(-poolToken.decimals);
+
       const bnZilAmount = bnTokenAmount.times(poolToken.pool.exchangeRate).decimalPlaces(poolToken.decimals);
       const zilAmount = bnZilAmount.toString();
-      const removePercentage = bnTokenAmount.shiftedBy(poolToken.decimals).div(poolToken.pool?.totalContribution || BIG_ONE);
+      const removePercentage = bnTokenAmount.div(poolToken.pool.tokenReserve.shiftedBy(-poolToken.decimals));
+
       setFormState({ zilAmount, tokenAmount, removePercentage });
       dispatch(actions.Pool.update({
         forNetwork: ZilswapConnector.network,
@@ -178,9 +182,13 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
     runRemoveLiquidity(async () => {
       const tokenAddress = poolToken.address;
+      const tokenAmount = poolFormState.removeTokenAmount;
+      const removeRatio = tokenAmount.div(poolToken.pool!.tokenReserve);
+      const removeContribution = poolToken.pool!.totalContribution.times(removeRatio).decimalPlaces(0);
+
       const observedTx = await ZilswapConnector.removeLiquidity({
         tokenID: tokenAddress,
-        contributionAmount: poolFormState.removeTokenAmount,
+        contributionAmount: removeContribution,
       });
 
       const updatedPool = ZilswapConnector.getPool(tokenAddress) || undefined;
@@ -233,7 +241,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           onSelectProp={onPercentage} />
 
         <KeyValueDisplay className={classes.keyValueLabel} hideIfNoValue kkey="In Pool">
-          {!!poolToken && formatMoney(poolToken?.pool?.userContribution || 0, formatOpts)}
+          {!!poolToken && formatMoney(inPoolAmount || 0, formatOpts)}
         </KeyValueDisplay>
 
         <PoolIcon type="minus" />
