@@ -250,10 +250,10 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
       const storeState: RootState = store.getState();
       if (walletResult?.wallet) {
         const { wallet } = walletResult;
-
+        const { network } = wallet;
         await ZilswapConnector.connect({
           wallet,
-          network: storeState.layout.network,
+          network,
           observedTxs: storeState.transaction.observingTxs,
         });
         dispatch(actions.Wallet.update({ wallet, zilpay: true }));
