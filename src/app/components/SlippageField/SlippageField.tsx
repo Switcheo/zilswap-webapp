@@ -1,12 +1,12 @@
-import { Box, InputLabel, Tooltip, TextField, MenuItem } from "@material-ui/core";
+import { Box, BoxProps, InputLabel, MenuItem, TextField, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import cls from "classnames";
-import { ReactComponent as TooltipSVG } from "./tooltip.svg";
-import React, { useState, ChangeEvent } from "react";
-import { AppTheme } from "app/theme/types";
-import { RootState } from "app/store/types";
-import { useSelector, useDispatch } from "react-redux";
 import { actions } from "app/store";
+import { RootState } from "app/store/types";
+import { AppTheme } from "app/theme/types";
+import cls from "classnames";
+import React, { ChangeEvent, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { ReactComponent as TooltipSVG } from "./tooltip.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -43,8 +43,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const SlippageField: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
-  const { children, className, ...rest } = props;
+const DEFAULT_SLIPPAGE_LABEL = "Set Limit Add. Price Slippage";
+
+type Props = BoxProps & {
+  label?: string;
+};
+const SlippageField: React.FC<Props> = (props: Props) => {
+  const { children, className, label, ...rest } = props;
   const dispatch = useDispatch();
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
   const slippage = useSelector<RootState, number>(state => state.swap.slippage);
@@ -70,8 +75,8 @@ const SlippageField: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
   };
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <InputLabel>Set Limit Add. Price Slippage
-      <Tooltip placement="top"
+      <InputLabel>{label || DEFAULT_SLIPPAGE_LABEL}
+        <Tooltip placement="top"
           classes={{ tooltip: classes.tooltip }}
           title="Lowering this limit decreases your risk of fronttruning. However, this makes it more likely that your transaction will fail due to normal price movements.">
           <TooltipSVG className={classes.tooltipSVG} />

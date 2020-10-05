@@ -9,7 +9,7 @@ import { LayoutState, OpenCloseState, PoolFormState, RootState } from "app/store
 import cls from "classnames";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolToggleButton, PoolWithdraw, UserPoolMessage } from "./components";
+import { CreatePoolDialog, NewPoolMessage, PoolAdvancedDetails, PoolDeposit, PoolToggleButton, PoolWithdraw, UserPoolMessage } from "./components";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
 
 const useStyles = makeStyles(theme => ({
@@ -74,10 +74,11 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
         </Box>
         {poolType === "add" && (<PoolDeposit />)}
         {poolType === "remove" && (<PoolWithdraw />)}
+        <Typography variant="body2" className={cls(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })} onClick={() => setShowAdvanced(!showAdvanced)}>
+          Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        </Typography>
+        <PoolAdvancedDetails show={showAdvanced} />
       </Box>
-      <Typography variant="body2" className={cls(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })} onClick={() => setShowAdvanced(!showAdvanced)}>
-        Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-      </Typography>
       <CreatePoolDialog open={showCreatePool} onCloseDialog={() => onShowCreatePool("close")} />
     </MainCard>
   );

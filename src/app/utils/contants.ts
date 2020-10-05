@@ -4,6 +4,7 @@ import { Network } from "zilswap-sdk/lib/constants";
 
 export const DefaultFallbackNetwork = Network.MainNet;
 
+export type PageType = "pool" | "swap";
 export const LoadingKeys = {
   connectWallet: [
     "connectWallet",
