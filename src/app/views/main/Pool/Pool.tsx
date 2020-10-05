@@ -48,7 +48,6 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
       {!poolToken?.loading && (
         <>
           {!poolToken?.pool && (<NewPoolMessage token={poolToken || undefined} />)}
-          {poolToken?.pool && !poolToken?.whitelisted && (<UserPoolMessage token={poolToken} />)}
         </>
       )}
       <Box display="flex" flexDirection="column">
