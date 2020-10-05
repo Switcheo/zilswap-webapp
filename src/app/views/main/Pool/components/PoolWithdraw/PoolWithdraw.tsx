@@ -181,7 +181,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
       const userContribution = poolToken.pool.userContribution;
       const removeRatio = bnTokenAmount.div(poolToken.pool.tokenReserve.shiftedBy(-poolToken.decimals));
-      let removeContribution = poolToken.pool.totalContribution.times(removeRatio);
+      let removeContribution = poolToken.pool.totalContribution.times(removeRatio).decimalPlaces(0);
 
       // replace input with max available tokens/contribution
       // input will only visually update onBlur to preserve UX
