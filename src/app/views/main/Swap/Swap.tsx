@@ -11,13 +11,13 @@ import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
-import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_TOKEN_NAME } from "app/utils/contants";
+import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, PlaceholderStrings, ZIL_TOKEN_NAME } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CONTRACTS, Network } from "zilswap-sdk/lib/constants";
+import { CONTRACTS } from "zilswap-sdk/lib/constants";
 import { ShowAdvanced } from "./components";
 import { ReactComponent as SwitchSVG } from "./swap-icon.svg";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
@@ -476,7 +476,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const tokenBalance = new BigNumber(inToken?.balances[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString() || 0);
   let showTxApprove = false;
   if (inToken && !inToken?.isZil) {
-    const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || Network.TestNet];
+    const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || DefaultFallbackNetwork];
     const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
     showTxApprove = new BigNumber(inToken?.allowances[byte20ContractAddress] || "0").comparedTo(formState.inAmount) < 0;
   }

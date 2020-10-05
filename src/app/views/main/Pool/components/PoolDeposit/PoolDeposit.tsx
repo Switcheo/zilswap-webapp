@@ -1,17 +1,17 @@
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { CurrencyInput, FancyButton, ProportionSelect, KeyValueDisplay } from "app/components";
-import { actions } from "app/store";
 import { fromBech32Address } from "@zilliqa-js/crypto";
-import { RootState, TokenInfo, TokenState, PoolFormState, LayoutState } from "app/store/types";
+import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect } from "app/components";
+import { actions } from "app/store";
+import { LayoutState, PoolFormState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
-import { ZIL_TOKEN_NAME, BIG_ZERO } from "app/utils/contants";
+import { BIG_ZERO, DefaultFallbackNetwork, ZIL_TOKEN_NAME } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CONTRACTS, Network } from "zilswap-sdk/lib/constants";
+import { CONTRACTS } from "zilswap-sdk/lib/constants";
 import PoolDetail from "../PoolDetail";
 import PoolIcon from "../PoolIcon";
 
@@ -235,7 +235,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     });
   };
 
-  const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || Network.TestNet];
+  const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || DefaultFallbackNetwork];
   const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
   const showTxApprove = new BigNumber(poolToken?.allowances[byte20ContractAddress] || "0").comparedTo(poolFormState.addTokenAmount) < 0;
 
