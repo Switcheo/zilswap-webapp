@@ -17,9 +17,6 @@ export interface FancyButtonProps extends ButtonProps {
 };
 
 const useStyles = makeStyles(theme => ({
-  confirmButton: {
-    flexGrow: 1,
-  },
   progress: {
     color: "rgba(255,255,255,.8)",
     position: "absolute",
@@ -29,8 +26,13 @@ const useStyles = makeStyles(theme => ({
     marginLeft: -12,
   },
   unlockButton: {
-    width: "100%",
+    flexGrow: 1,
+    flexBasis: 150,
     marginRight: theme.spacing(1),
+  },
+  confirmButton: {
+    flexGrow: 1,
+    flexBasis: 150,
   },
 }));
 const FancyButton: React.FC<FancyButtonProps> = (props: any) => {
@@ -53,7 +55,7 @@ const FancyButton: React.FC<FancyButtonProps> = (props: any) => {
   // override children content if wallet required
   // and not connected.
   const buttonContent = walletRequired ?
-    (!walletState.wallet ? "Connect Wallet" : children) :
+    (!walletState.wallet ? "Connect Wallet" : (showTxApprove ? `2. ${children}` : children)) :
     (children);
 
   // override button disabled state if wallet required
@@ -72,7 +74,7 @@ const FancyButton: React.FC<FancyButtonProps> = (props: any) => {
       {(showTxApprove && walletState.wallet) && (
         <Tooltip title="Transaction needs to be approved before swapping or adding liquidity">
           <Button onClick={onClickTxApprove} disabled={buttonDisabled} className={cls(classes.unlockButton, className)} color="primary" variant="contained">
-            {!loadingTxApprove && "Approve"}
+            {!loadingTxApprove && "1. Unlock"}
             {!!loadingTxApprove && (
               <CircularProgress size={24} className={classes.progress} />
             )}
