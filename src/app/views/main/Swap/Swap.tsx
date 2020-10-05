@@ -176,10 +176,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         inAmount: "0",
         outAmount: "0",
       })
-      dispatch(actions.Swap.update({
-        inAmount: BIG_ZERO,
-        outAmount: BIG_ZERO,
-      }));
+      dispatch(actions.Swap.clearForm());
     }
 
     // eslint-disable-next-line
@@ -195,15 +192,18 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }
 
     if (exchangeRate.eq(0)) {
-      const rateResult = ZilswapConnector.getExchangeRate({
-        amount: BIG_ONE.shiftedBy(src!.decimals),
-        exactOf: reversedRate ? "out" : "in",
-        tokenInID: inToken!.address,
-        tokenOutID: outToken!.address,
-      });
-
-      if (!rateResult.expectedAmount.isNaN() && !rateResult.expectedAmount.isNegative())
-        exchangeRate = rateResult.expectedAmount.shiftedBy(-dst!.decimals).pow(reversedRate ? -1 : 1);
+      try {
+        const rateResult = ZilswapConnector.getExchangeRate({
+          amount: BIG_ONE.shiftedBy(src!.decimals),
+          exactOf: reversedRate ? "out" : "in",
+          tokenInID: inToken!.address,
+          tokenOutID: outToken!.address,
+        });
+        if (!rateResult.expectedAmount.isNaN() && !rateResult.expectedAmount.isNegative())
+          exchangeRate = rateResult.expectedAmount.shiftedBy(-dst!.decimals).pow(reversedRate ? -1 : 1);
+      } catch (e) {
+        exchangeRate = BIG_ZERO;
+      }
     }
 
     const formatterOpts = {
