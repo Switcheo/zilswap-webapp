@@ -1,6 +1,7 @@
 import { Types } from "./actions";
 import { Types as WalletTypes } from "../wallet/actions";
-import { ObserveTxProps, Transaction, TransactionsInitProps, TransactionState, TransactionUpdateProps, TransactionRemoveProps, SubmittedTx } from "./types";
+import { ActionTypes as LayoutTypes } from "../layout/actions";
+import { ObserveTxProps, Transaction, TransactionsInitProps, TransactionState, TransactionUpdateProps, TransactionRemoveProps, SubmittedTx, WalletObservedTx } from "./types";
 import { ObservedTx } from "zilswap-sdk";
 
 
@@ -19,7 +20,7 @@ const reducer = (state: TransactionState = initial_state, action: any): Transact
     case Types.TX_INIT:
       const initProps: TransactionsInitProps = action.payload;
       const interimSubmittedTxs: SubmittedTx[] = [];
-      const observingTxs: ObservedTx[] = [];
+      const observingTxs: WalletObservedTx[] = [];
       state.observingTxs.forEach(observingTx => {
         const tx = initProps.transactions.find(tx => tx.hash === observingTx.hash);
         if (tx)
@@ -85,6 +86,8 @@ const reducer = (state: TransactionState = initial_state, action: any): Transact
         ...state,
         submittedTxs: state.submittedTxs.filter(tx => tx.hash !== removeProps.hash),
       };
+    case WalletTypes.WALLET_UPDATE:
+    case LayoutTypes.UPDATE_NETWORK:
     case WalletTypes.WALLET_LOGOUT:
       return {
         transactions: [],

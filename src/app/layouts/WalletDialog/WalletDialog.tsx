@@ -4,16 +4,15 @@ import { DialogModal } from "app/components";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { WalletState } from "app/store/wallet/types";
-import { useMessageSubscriber } from "app/utils";
 import cls from "classnames";
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ConnectedWallet, ConnectOptionType, WalletConnectType } from "../../../core/wallet/ConnectedWallet";
 import { ConnectWallet, ConnectWalletPrivateKey, ConnectWalletZilPay } from "./components";
 import ConnectedWalletBox from "./components/ConnectedWalletBox";
-import { ReactComponent as ZilPayIcon } from "./components/ConnectWallet/zilpay.svg";
 import { ReactComponent as PrivateKeyIconDark } from "./components/ConnectWallet/private-key-dark.svg";
 import { ReactComponent as PrivateKeyIcon } from "./components/ConnectWallet/private-key.svg";
+import { ReactComponent as ZilPayIcon } from "./components/ConnectWallet/zilpay.svg";
 
 const DIALOG_HEADERS: { [key in ConnectOptionType]: string } = {
   zilpay: "Connect With ZilPay",
@@ -30,34 +29,16 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
   const [connectWalletType, setConnectWalletType] = useState<ConnectOptionType | null>("privateKey");
   const showWalletDialog = useSelector<RootState, boolean>(state => state.layout.showWalletDialog);
-  const [moonletBridgeReady, setMoonletBridgeReady] = useState(false); // eslint-disable-line
   const dispatch = useDispatch();
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const theme = useTheme();
   const [error, setError] = useState<string | null>();
-  const subscriber = useMessageSubscriber();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  // const errorCatcher = useErrorCatcher((err: any) => {
-  //   if (err) {
-  //     if (err === "WALLET_SCRIPT_INJECT_TIMEOUT" || err === "WALLET_NOT_INSTALLED")
-  //       setError("Error occurred, please ensure that the moonlet extension is installed/enabled");
-  //     else if (err === "USER_DID_NOT_GRANT_PERMISSION")
-  //       setError("User denied permission");
-  //     else setError(err);
-  //     setConnectWalletType(null);
-  //   }
-  // });
 
   const get_icon = () => {
-    if (walletState.wallet.type === WalletConnectType.ZilPay) return ZilPayIcon;
+    if (walletState.wallet?.type === WalletConnectType.ZilPay) return ZilPayIcon;
     return theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon;
   }
 
-  useEffect(() => {
-    const unsubscriber = subscriber(onMessage);
-    return () => unsubscriber();
-    // eslint-disable-next-line
-  }, []);
 
   useEffect(() => {
     if (showWalletDialog && connectWalletType)
@@ -65,17 +46,6 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
     // eslint-disable-next-line
   }, [showWalletDialog]);
-
-  const onMessage = async (data: any) => {
-    if (data.type && data.type === "walletReady") {
-      setMoonletBridgeReady(true);
-
-      if (iframeRef.current) {
-        iframeRef.current!.contentWindow!
-          .postMessage({ type: "grantPermissionRequest", walletId: "moonlet" }, "https://cryptolandtech.github.io/dapp-wallet-util/");
-      }
-    }
-  };
 
   const onCloseDialog = () => {
     dispatch(actions.Layout.toggleShowWallet("close"));

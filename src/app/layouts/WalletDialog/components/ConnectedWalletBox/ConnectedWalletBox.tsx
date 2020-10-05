@@ -95,7 +95,7 @@ const ConnectedWalletBox = (props: any) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const network = useNetwork();
-  const wallet = useSelector<RootState, ConnectedWallet>(state => state.wallet.wallet);
+  const wallet = useSelector<RootState, ConnectedWallet | undefined>(state => state.wallet.wallet);
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
   const [runDisconnectZilswap, loadingDisconnectZilswap] = useAsyncTask<void>("disconnectZilswap");
   const [includeCompleted, setIncludeCompleted] = useState(true);
@@ -130,8 +130,9 @@ const ConnectedWalletBox = (props: any) => {
     });
   };
 
-  const address = wallet?.addressInfo.byte20;
-  const humanAddress = wallet?.addressInfo.bech32;
+  if (!wallet) return null;
+  const address = wallet.addressInfo.byte20;
+  const humanAddress = wallet.addressInfo.bech32;
   const transactions = transactionState.transactions.filter(filterTXs);
   return (
     <Box display="flex" flexDirection="column" className={cls(classes.root, className)}>

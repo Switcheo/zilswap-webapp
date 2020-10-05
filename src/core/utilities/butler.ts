@@ -153,7 +153,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
       if (!walletState.zilpay) return;
 
       // re-initialise if account changed
-      if (walletState.wallet.addressInfo.bech32 !== account.bech32) {
+      if (walletState.wallet?.addressInfo.bech32 !== account.bech32) {
         // ZilPay unsubscribes doesnt work
         // accountObserver.unsubscribe();
         // networkObserver.unsubscribe();
@@ -385,7 +385,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
             balances: {
               ...balance && {
                 // initialize with own wallet balance
-                [walletState.wallet.addressInfo.byte20.toLowerCase()]: balance!,
+                [walletState.wallet!.addressInfo.byte20.toLowerCase()]: balance!,
               },
             },
           }));

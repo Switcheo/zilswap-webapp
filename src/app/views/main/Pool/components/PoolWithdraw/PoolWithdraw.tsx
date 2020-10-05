@@ -5,10 +5,10 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { ContrastBox, CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect } from "app/components";
 import { actions } from "app/store";
-import { LayoutState, PoolFormState, RootState, TokenInfo } from "app/store/types";
+import { LayoutState, PoolFormState, RootState, TokenInfo, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useMoneyFormatter } from "app/utils";
-import { BIG_ZERO } from "app/utils/contants";
+import { BIG_ZERO, DefaultFallbackNetwork } from "app/utils/contants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -108,6 +108,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const [showAdvanced, setShowAdvanced] = useState(false);
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
   const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
+  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
 
@@ -207,13 +208,18 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
         tokenID: tokenAddress,
         contributionAmount: removeContribution,
       });
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx!,
+        address: walletState.wallet?.addressInfo.bech32 || "",
+        network: walletState.wallet?.network || DefaultFallbackNetwork,
+      };
 
       const updatedPool = ZilswapConnector.getPool(tokenAddress) || undefined;
       dispatch(actions.Token.update({
         address: tokenAddress,
         pool: updatedPool,
       }));
-      dispatch(actions.Transaction.observe({ observedTx }));
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     });
   };
 

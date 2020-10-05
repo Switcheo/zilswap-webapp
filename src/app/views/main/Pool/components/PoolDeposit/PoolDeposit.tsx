@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect } from "app/components";
 import { actions } from "app/store";
-import { LayoutState, PoolFormState, RootState, TokenInfo, TokenState } from "app/store/types";
+import { LayoutState, PoolFormState, RootState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
 import { BIG_ZERO, DefaultFallbackNetwork, ZIL_TOKEN_NAME } from "app/utils/contants";
 import BigNumber from "bignumber.js";
@@ -66,6 +66,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
 
   useEffect(() => {
@@ -197,13 +198,18 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         zilAmount: addZilAmount.shiftedBy(zilToken.decimals),
         tokenID: tokenAddress,
       });
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx,
+        address: walletState.wallet?.addressInfo.bech32 || "",
+        network: walletState.wallet?.network || DefaultFallbackNetwork,
+      };
 
       const updatedPool = ZilswapConnector.getPool(tokenAddress) || undefined;
       dispatch(actions.Token.update({
         address: tokenAddress,
         pool: updatedPool,
       }));
-      dispatch(actions.Transaction.observe({ observedTx }));
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     });
   };
 
@@ -221,10 +227,15 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         tokenAmount: addTokenAmount.shiftedBy(poolToken!.decimals),
         tokenID: tokenAddress,
       });
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx!,
+        address: walletState.wallet?.addressInfo.bech32 || "",
+        network: walletState.wallet?.network || DefaultFallbackNetwork,
+      };
 
       if (!observedTx)
         throw new Error("Allowance already sufficient for specified amount");
-      dispatch(actions.Transaction.observe({ observedTx }));
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     });
   };
 

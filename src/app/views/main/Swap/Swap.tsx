@@ -8,7 +8,7 @@ import { validation as ZilValidation } from "@zilliqa-js/util";
 import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
-import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletState } from "app/store/types";
+import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
 import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, PlaceholderStrings, ZIL_TOKEN_NAME } from "app/utils/contants";
@@ -426,8 +426,13 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           recipientAddress,
         },
       });
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx,
+        address: walletState.wallet?.addressInfo.bech32 || "",
+        network: walletState.wallet?.network || DefaultFallbackNetwork,
+      };
 
-      dispatch(actions.Transaction.observe({ observedTx }));
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     });
   };
 
@@ -449,7 +454,13 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
       if (!observedTx)
         throw new Error("Transfer allowance already sufficient for specified amount");
-      dispatch(actions.Transaction.observe({ observedTx }));
+
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx!,
+        address: walletState.wallet?.addressInfo.bech32 || "",
+        network: walletState.wallet?.network || DefaultFallbackNetwork,
+      };
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     });
   };
 
