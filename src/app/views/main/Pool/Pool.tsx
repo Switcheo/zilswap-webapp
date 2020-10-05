@@ -7,7 +7,7 @@ import { LayoutState, OpenCloseState, PoolFormState, RootState } from "app/store
 import cls from "classnames";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolToggleButton, PoolWithdraw, UserPoolMessage } from "./components";
+import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolToggleButton, PoolWithdraw } from "./components";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
 
 const useStyles = makeStyles(theme => ({
