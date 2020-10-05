@@ -17,4 +17,3 @@ export { default as RandomAsciiEmoji } from "./RandomAsciiEmoji";
 export { default as ScrollReset } from "./ScrollReset";
 export { default as TopBar } from "./TopBar";
 export { default as UserPoolMessage } from "./UserPoolMessage";
-

@@ -68,10 +68,7 @@ const UserPoolMessage: React.FC<UserPoolMessageProps> = (props: UserPoolMessageP
         <Typography className={cls(classes.text, classes.notificationHeader)} variant="body1">Pool Created by User</Typography>
         <Typography component="a" className={classes.symbolLink} href={infoUrl} target="_blank" >{token.symbol} Token - {token.name} <LinkLogo className={classes.linkLogo} /></Typography>
         <Typography className={cls(classes.text, classes.notificationMessage)} variant="body2">
-          Pools involving user-created tokens may result in all deposited tokens to be lost,
-          if the user-created token does not properly follow ZRC-2 token specifications.
-          This includes all ZILs deposited into the liquidity pool.
-          Please verify the legitimacy of this token before contributing liquidity.
+          {children}
         </Typography>
       </Box>
     </NotificationBox>

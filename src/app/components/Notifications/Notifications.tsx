@@ -74,7 +74,21 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      {userToken && (<UserPoolMessage token={userToken} />)}
+      {userToken && (
+        isPool ?
+          <UserPoolMessage token={userToken}>
+            Liquidity pools created by other users may result in the loss of all deposited tokens
+            if the token for the pool does not fully comform to the ZRC-2 token specifications.
+            This includes all ZILs deposited into the pool.
+            Please verify the legitimacy of this token yourself before contributing liquidity.
+          </UserPoolMessage>
+          :
+          <UserPoolMessage token={userToken}>
+            Liquidity pools created by other users may involve tokens that do not comply with
+            ZRC-2 token specifications, and can result in loss of all funds sent.
+            Please verify the legitimacy of this token yourself before swapping.
+          </UserPoolMessage>
+      )}
       {!!layoutState.notification && (
         <NotificationBox onRemove={() => onRemoveNotification()}>
           <Typography variant="body2" className={classes.notificationMessage}>
