@@ -5,7 +5,7 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { ContrastBox, CurrencyInput, ExpiryField, FancyButton, KeyValueDisplay, ProportionSelect, SlippageField } from "app/components";
 import { actions } from "app/store";
-import { LayoutState, PoolFormState, RootState, TokenInfo, WalletObservedTx, WalletState } from "app/store/types";
+import { LayoutState, PoolFormState, RootState, SwapFormState, TokenInfo, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useMoneyFormatter } from "app/utils";
 import { BIG_ZERO, DefaultFallbackNetwork } from "app/utils/contants";
@@ -108,6 +108,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const [showAdvanced, setShowAdvanced] = useState(false);
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
   const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
+  const swapFormState = useSelector<RootState, SwapFormState>(state => state.swap);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
@@ -204,6 +205,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       const tokenAddress = poolToken.address;
       const removeContribution = formState.removeContribution;
 
+      ZilswapConnector.setDeadlineBlocks(swapFormState.expiry);
       const observedTx = await ZilswapConnector.removeLiquidity({
         tokenID: tokenAddress,
         contributionAmount: removeContribution,

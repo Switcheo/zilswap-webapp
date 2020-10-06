@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect } from "app/components";
 import { actions } from "app/store";
-import { LayoutState, PoolFormState, RootState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
+import { LayoutState, PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
 import { BIG_ZERO, DefaultFallbackNetwork, ZIL_TOKEN_NAME } from "app/utils/contants";
 import BigNumber from "bignumber.js";
@@ -77,6 +77,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const dispatch = useDispatch();
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
+  const swapFormState = useSelector<RootState, SwapFormState>(state => state.swap);
   const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
@@ -207,6 +208,9 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       if (addZilAmount.lt(1000)) {
         throw new Error('Minimum contribution is 1000 ZILs.')
       }
+
+
+      ZilswapConnector.setDeadlineBlocks(swapFormState.expiry);
 
       const observedTx = await ZilswapConnector.addLiquidity({
         tokenAmount: addTokenAmount.shiftedBy(poolToken.decimals),
