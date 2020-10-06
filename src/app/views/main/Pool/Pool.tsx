@@ -1,15 +1,13 @@
-import { Box, Button, Typography } from "@material-ui/core";
+import { Box, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { Notifications } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { LayoutState, OpenCloseState, PoolFormState, RootState } from "app/store/types";
 import cls from "classnames";
-import React, { useState } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CreatePoolDialog, NewPoolMessage, PoolAdvancedDetails, PoolDeposit, PoolToggleButton, PoolWithdraw } from "./components";
+import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolToggleButton, PoolWithdraw } from "./components";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
 
 const useStyles = makeStyles(theme => ({
@@ -29,17 +27,6 @@ const useStyles = makeStyles(theme => ({
     marginBottom: 40,
     height: 46
   },
-  advanceDetails: {
-    marginBottom: theme.spacing(2),
-    justifyContent: "center",
-    alignItems: "center",
-    display: "flex",
-    color: theme.palette.text!.secondary,
-    cursor: "pointer"
-  },
-  primaryColor: {
-    color: theme.palette.primary.main
-  },
 }));
 const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
@@ -47,7 +34,6 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
   const dispatch = useDispatch();
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
   const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const { token: poolToken } = poolFormState;
   const { showPoolType: poolType, showCreatePool } = layoutState;
@@ -73,10 +59,6 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
         </Box>
         {poolType === "add" && (<PoolDeposit />)}
         {poolType === "remove" && (<PoolWithdraw />)}
-        <Typography variant="body2" className={cls(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })} onClick={() => setShowAdvanced(!showAdvanced)}>
-          Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        </Typography>
-        <PoolAdvancedDetails show={showAdvanced} />
       </Box>
       <CreatePoolDialog open={showCreatePool} onCloseDialog={() => onShowCreatePool("close")} />
     </MainCard>

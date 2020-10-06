@@ -3,7 +3,7 @@ import { Box, Divider, InputLabel, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { ContrastBox, CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect } from "app/components";
+import { ContrastBox, CurrencyInput, ExpiryField, FancyButton, KeyValueDisplay, ProportionSelect, SlippageField } from "app/components";
 import { actions } from "app/store";
 import { LayoutState, PoolFormState, RootState, TokenInfo, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -11,7 +11,7 @@ import { hexToRGBA, useAsyncTask, useMoneyFormatter } from "app/utils";
 import { BIG_ZERO, DefaultFallbackNetwork } from "app/utils/contants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
-import cls from "classnames";
+import clsx from "clsx";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -233,7 +233,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const liquidityTokenRate = poolToken?.pool?.totalContribution.isPositive() ? poolToken!.pool!.tokenReserve.div(poolToken!.pool!.totalContribution) : BIG_ZERO;
 
   return (
-    <Box display="flex" flexDirection="column"  {...rest} className={cls(classes.root, className)}>
+    <Box display="flex" flexDirection="column"  {...rest} className={clsx(classes.root, className)}>
       <Box className={classes.container}>
         <CurrencyInput
           hideBalance
@@ -286,7 +286,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
         {!!poolToken ? (
           <Typography
             variant="body2"
-            className={cls(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })}
+            className={clsx(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })}
             onClick={() => setShowAdvanced(!showAdvanced)}>
             Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </Typography>
@@ -297,11 +297,13 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
         <ContrastBox className={classes.showAdvanced}>
           <Typography className={classes.text} variant="body2">
             You are removing{" "}
-            <strong>{formatMoney(poolFormState.addZilAmount, zilFormatOpts)} + {formatMoney(poolFormState.removeTokenAmount, formatOpts)}</strong>
+            <strong>{formatMoney(poolFormState.removeZilAmount, zilFormatOpts)} + {formatMoney(poolFormState.removeTokenAmount, formatOpts)}</strong>
             from the liquidity pool.{" "}
             <strong>(~{formatMoney(poolFormState.removeTokenAmount, { ...formatOpts, showCurrency: true })} Pool Token)</strong>
           </Typography>
+
           <Divider className={classes.divider} />
+
           <KeyValueDisplay mt={"22px"} kkey={"Current Total Supply"}>
             {formatMoney(poolToken?.pool?.tokenReserve || 0, { ...formatOpts })} Pool Token
           </KeyValueDisplay>
@@ -311,6 +313,12 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
             {formatMoney(new BigNumber(liquidityTokenRate).shiftedBy(poolToken?.decimals || 0), formatOpts)}
           </KeyValueDisplay>
 
+          <Divider className={classes.divider} />
+
+          <Box display="flex" justifyContent="space-between">
+            <SlippageField label="Set Limit Transaction Slippage" />
+            <ExpiryField />
+          </Box>
         </ContrastBox>
       )}
     </Box>

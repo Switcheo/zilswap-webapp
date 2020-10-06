@@ -7,11 +7,14 @@ import { LayoutState, PoolFormState, RootState, TokenInfo, TokenState, WalletObs
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
 import { BIG_ZERO, DefaultFallbackNetwork, ZIL_TOKEN_NAME } from "app/utils/contants";
 import BigNumber from "bignumber.js";
-import cls from "classnames";
+import clsx from "clsx";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CONTRACTS } from "zilswap-sdk/lib/constants";
+import PoolAdvancedDetails from "../PoolAdvancedDetails";
 import PoolDetail from "../PoolDetail";
 import PoolIcon from "../PoolIcon";
 
@@ -46,7 +49,18 @@ const useStyles = makeStyles(theme => ({
   },
   errorMessage: {
     marginTop: theme.spacing(1),
-  }
+  },
+  advanceDetails: {
+    marginBottom: theme.spacing(2),
+    justifyContent: "center",
+    alignItems: "center",
+    display: "flex",
+    color: theme.palette.text!.secondary,
+    cursor: "pointer"
+  },
+  primaryColor: {
+    color: theme.palette.primary.main
+  },
 }));
 
 const initialFormState = {
@@ -68,6 +82,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (poolToken && currencyDialogOverride) {
@@ -251,7 +266,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const showTxApprove = new BigNumber(poolToken?.allowances[byte20ContractAddress] || "0").comparedTo(poolFormState.addTokenAmount) < 0;
 
   return (
-    <Box display="flex" flexDirection="column" {...rest} className={cls(classes.root, className)}>
+    <Box display="flex" flexDirection="column" {...rest} className={clsx(classes.root, className)}>
       <Box className={classes.container}>
 
         <CurrencyInput
@@ -308,8 +323,14 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           color="primary"
           onClick={onAddLiquidity}>
           Add Liquidity
-      </FancyButton>
+        </FancyButton>
       </Box>
+      <Typography
+        variant="body2" className={clsx(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })}
+        onClick={() => setShowAdvanced(!showAdvanced)}>
+        Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+      </Typography>
+      <PoolAdvancedDetails show={showAdvanced} />
     </Box>
   );
 };
