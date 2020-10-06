@@ -49,7 +49,7 @@ const AddLiquidityEarnMessage: React.FC<AddLiquidityEarnMessageProps> = (props: 
         <Typography className={classes.notificationMessage} variant="body1">
           By adding liquidity, you will earn 0.3% of all
           trades on pairs proportional to your share of
-          the pool. Earn fees are added to the pool and
+          the pool. Earned fees are added to the pool and
           claimable by removing liquidity.
         </Typography>
       </Box>
