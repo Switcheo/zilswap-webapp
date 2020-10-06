@@ -11,6 +11,7 @@ const storedNetwork = networks[storedNetworkString || ""] || DefaultFallbackNetw
 const initial_state: LayoutState = {
   showWalletDialog: false,
   showCreatePool: false,
+  liquidityEarnHidden: false,
   notification: undefined,
   network: storedNetwork,
   showPoolType: "add",
@@ -36,10 +37,11 @@ const reducer = (state: LayoutState = initial_state, actions: any) => {
         ...state,
         showCreatePool: !actions.override ? !state.showWalletDialog : actions.override === "open",
       };
-    case ActionTypes.UPDATE_NOTIFICATION:
+
+    case ActionTypes.HIDE_LIQUIDITY_EARN:
       return {
         ...state,
-        notification: actions.notification,
+        liquidityEarnHidden: actions.hide === undefined ? true : actions.hide,
       };
 
     case ActionTypes.UPDATE_NETWORK:

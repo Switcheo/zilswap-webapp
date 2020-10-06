@@ -5,6 +5,7 @@ export const ActionTypes = {
   TOGGLE_SHOW_WALLET: "TOGGLE_SHOW_WALLET",
   SHOW_POOL_TYPE: "SHOW_POOL_TYPE",
   TOGGLE_SHOW_CREATE_POOL: "TOGGLE_SHOW_CREATE_POOL",
+  HIDE_LIQUIDITY_EARN: "HIDE_LIQUIDITY_EARN",
   UPDATE_NOTIFICATION: "UPDATE_NOTIFICATION",
 
   UPDATE_NETWORK: "UPDATE_NETWORK",
@@ -29,6 +30,13 @@ export function showPoolType(poolType?: PoolType) {
   return {
     type: ActionTypes.SHOW_POOL_TYPE,
     poolType,
+  }
+};
+
+export function hideLiquidityEarn(hide: boolean = true) {
+  return {
+    type: ActionTypes.HIDE_LIQUIDITY_EARN,
+    hide,
   }
 };
 
