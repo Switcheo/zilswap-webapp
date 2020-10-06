@@ -5,7 +5,6 @@ import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import clsx from "clsx";
 import React, { ChangeEvent, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ReactComponent as TooltipSVG } from "./tooltip.svg";
