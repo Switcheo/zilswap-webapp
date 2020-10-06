@@ -93,7 +93,8 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
     // show new pool warning
     ((isPool && poolToken && !poolToken?.loading && !poolToken?.pool) ||
 
-      (!layoutState.liquidityEarnHidden && layoutState.showPoolType === "add") ||
+      // show liquidity fee (add liquidity incentive) message
+      (isPool && !layoutState.liquidityEarnHidden && layoutState.showPoolType === "add") ||
 
       // show user created token warning for pool
       (isPool && !poolToken?.loading && poolToken?.pool && !poolToken?.whitelisted) ||
