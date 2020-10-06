@@ -2,8 +2,9 @@ import { TokenInfo } from "app/store/types";
 import BigNumber from "bignumber.js";
 import { Network } from "zilswap-sdk/lib/constants";
 
-export const DefaultFallbackNetwork = Network.TestNet;
+export const DefaultFallbackNetwork = Network.MainNet;
 
+export type PageType = "pool" | "swap";
 export const LoadingKeys = {
   connectWallet: [
     "connectWallet",

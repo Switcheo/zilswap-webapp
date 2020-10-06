@@ -43,6 +43,7 @@ const reducer = (state: LayoutState = initial_state, actions: any) => {
       };
 
     case ActionTypes.UPDATE_NETWORK:
+      localStorage.setItem(LocalStorageKeys.Network, actions.network);
       return {
         ...state,
         network: actions.network,

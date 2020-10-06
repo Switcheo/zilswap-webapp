@@ -1,11 +1,17 @@
 import { ConnectedWallet } from "core/wallet/wallet";
 import { BigNumber } from "bignumber.js";
 import { ObservedTx, TxReceipt, TxStatus } from "zilswap-sdk";
+import { Network } from "zilswap-sdk/lib/constants";
+
+export type WalletObservedTx = {
+  network: Network;
+  address: string;
+} & ObservedTx;
 
 export type Transaction = {
   hash: string;
   status: "pending" | TxStatus;
-  observedTx?: ObservedTx;
+  observedTx?: WalletObservedTx;
   txReceipt?: TxReceipt;
 };
 export type SubmittedTx = {
@@ -15,7 +21,7 @@ export type SubmittedTx = {
 
 export interface TransactionState {
   transactions: Transaction[];
-  observingTxs: ObservedTx[];
+  observingTxs: WalletObservedTx[];
   submittedTxs: SubmittedTx[];
 };
 
@@ -29,7 +35,7 @@ export interface TransactionUpdateProps {
 };
 
 export interface ObserveTxProps {
-  observedTx: ObservedTx,
+  observedTx: WalletObservedTx,
 };
 
 export interface TransactionRemoveProps {

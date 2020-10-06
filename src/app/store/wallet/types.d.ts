@@ -1,4 +1,4 @@
-import { ConnectedWallet } from "core/wallet/wallet";
+import { ConnectedWallet } from "core/wallet";
 import { BigNumber } from "bignumber.js";
 
 export interface WalletState {

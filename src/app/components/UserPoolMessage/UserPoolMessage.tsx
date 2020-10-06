@@ -6,7 +6,6 @@ import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
 import React from "react";
-import { NavLink as RouterLink } from "react-router-dom";
 import { ReactComponent as LinkLogo } from "./link_logo.svg";
 import { ReactComponent as WarningLogo } from "./warning_logo.svg";
 
@@ -16,6 +15,12 @@ export interface UserPoolMessageProps extends React.HTMLAttributes<HTMLDivElemen
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+  },
+  text: {
+    color: theme.palette.type === "light" ? theme.palette.colors.zilliqa.neutral["100"] : theme.palette.colors.zilliqa.neutral["200"]
+  },
+  notificationHeader: {
+    marginTop: theme.spacing(0.5),
   },
   notificationSymbol: {
     margin: theme.spacing(1.5, 3, 0),
@@ -34,7 +39,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   notificationMessage: {
     fontWeight: 400,
     margin: theme.spacing(1, 0),
-    color: theme.palette.type === "light" ? theme.palette.colors.zilliqa.neutral["100"] : theme.palette.colors.zilliqa.neutral["200"]
   },
   viewDetail: {
     color: theme.palette.primary.main,
@@ -59,12 +63,11 @@ const UserPoolMessage: React.FC<UserPoolMessageProps> = (props: UserPoolMessageP
       <Box className={cls(classes.notificationSymbol, classes.warning)}>
         <WarningLogo />
       </Box>
-      <Box ml={1}>
-        <Typography color="textSecondary" variant="body1">Pool Created by User</Typography>
-        <Typography component="a" className={classes.symbolLink} href={infoUrl} target="_blank" >({token.symbol}) Token ({token.name}) <LinkLogo className={classes.linkLogo} /></Typography>
-        <Typography className={classes.notificationMessage} variant="body2">
-          Please verify the legitimacy of this token before making any transactions.
-          <RouterLink className={classes.viewDetail} to="detail">Learn More</RouterLink>
+      <Box ml={2} mr={1}>
+        <Typography className={cls(classes.text, classes.notificationHeader)} variant="body1">Pool Created by User</Typography>
+        <Typography component="a" className={classes.symbolLink} href={infoUrl} target="_blank" >{token.symbol} Token - {token.name} <LinkLogo className={classes.linkLogo} /></Typography>
+        <Typography className={cls(classes.text, classes.notificationMessage)} variant="body2">
+          {children}
         </Typography>
       </Box>
     </NotificationBox>

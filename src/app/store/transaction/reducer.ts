@@ -1,7 +1,10 @@
 import { Types } from "./actions";
 import { Types as WalletTypes } from "../wallet/actions";
-import { ObserveTxProps, Transaction, TransactionsInitProps, TransactionState, TransactionUpdateProps, TransactionRemoveProps, SubmittedTx } from "./types";
+import { ActionTypes as LayoutTypes } from "../layout/actions";
+import { ObserveTxProps, Transaction, TransactionsInitProps, TransactionState, TransactionUpdateProps, TransactionRemoveProps, SubmittedTx, WalletObservedTx } from "./types";
 import { ObservedTx } from "zilswap-sdk";
+import { ConnectedWallet } from "core/wallet";
+import { Network } from "zilswap-sdk/lib/constants";
 
 
 const LOCAL_STORAGE_KEY_OBSERVING_TXS = "zilswap:observing-txs";
@@ -19,7 +22,7 @@ const reducer = (state: TransactionState = initial_state, action: any): Transact
     case Types.TX_INIT:
       const initProps: TransactionsInitProps = action.payload;
       const interimSubmittedTxs: SubmittedTx[] = [];
-      const observingTxs: ObservedTx[] = [];
+      const observingTxs: WalletObservedTx[] = [];
       state.observingTxs.forEach(observingTx => {
         const tx = initProps.transactions.find(tx => tx.hash === observingTx.hash);
         if (tx)
@@ -84,6 +87,23 @@ const reducer = (state: TransactionState = initial_state, action: any): Transact
       return {
         ...state,
         submittedTxs: state.submittedTxs.filter(tx => tx.hash !== removeProps.hash),
+      };
+    case WalletTypes.WALLET_UPDATE:
+    case LayoutTypes.UPDATE_NETWORK:
+      const wallet: ConnectedWallet | undefined = action.payload?.wallet;
+      const network: Network | undefined = wallet?.network || action.network;
+
+      const relevantObservingTxs = state.observingTxs.filter(tx => {
+        if (wallet && wallet.addressInfo.bech32 !== tx.address)
+          return false;
+        if (network && network !== tx.network)
+          return false;
+        return true;
+      });
+
+      return {
+        ...state,
+        observingTxs: relevantObservingTxs,
       };
     case WalletTypes.WALLET_LOGOUT:
       return {

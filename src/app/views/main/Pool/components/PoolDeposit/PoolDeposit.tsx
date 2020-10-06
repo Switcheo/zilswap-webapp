@@ -1,17 +1,20 @@
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { CurrencyInput, FancyButton, ProportionSelect, KeyValueDisplay } from "app/components";
-import { actions } from "app/store";
 import { fromBech32Address } from "@zilliqa-js/crypto";
-import { RootState, TokenInfo, TokenState, PoolFormState, LayoutState } from "app/store/types";
+import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect } from "app/components";
+import { actions } from "app/store";
+import { LayoutState, PoolFormState, RootState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
-import { ZIL_TOKEN_NAME, BIG_ZERO } from "app/utils/contants";
+import { BIG_ZERO, DefaultFallbackNetwork, ZIL_TOKEN_NAME } from "app/utils/contants";
 import BigNumber from "bignumber.js";
-import cls from "classnames";
+import clsx from "clsx";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { ZilswapConnector } from "core/zilswap";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CONTRACTS, Network } from "zilswap-sdk/lib/constants";
+import { CONTRACTS } from "zilswap-sdk/lib/constants";
+import PoolAdvancedDetails from "../PoolAdvancedDetails";
 import PoolDetail from "../PoolDetail";
 import PoolIcon from "../PoolIcon";
 
@@ -44,6 +47,20 @@ const useStyles = makeStyles(theme => ({
   svg: {
     alignSelf: "center"
   },
+  errorMessage: {
+    marginTop: theme.spacing(1),
+  },
+  advanceDetails: {
+    marginBottom: theme.spacing(2),
+    justifyContent: "center",
+    alignItems: "center",
+    display: "flex",
+    color: theme.palette.text!.secondary,
+    cursor: "pointer"
+  },
+  primaryColor: {
+    color: theme.palette.primary.main
+  },
 }));
 
 const initialFormState = {
@@ -63,7 +80,9 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (poolToken && currencyDialogOverride) {
@@ -175,26 +194,37 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       const { addTokenAmount, addZilAmount } = poolFormState;
       const tokenBalance = new BigNumber(poolToken!.balance.toString()).shiftedBy(-poolToken.decimals);
       const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
+      const zilBalance = new BigNumber(zilToken.balance.toString()).shiftedBy(-zilToken.decimals);
 
-      let adjustedTokenAmount = addTokenAmount, adjustedZilAmount = addZilAmount;
-      if (addTokenAmount.gt(tokenBalance.toNumber())) {
-        adjustedTokenAmount = tokenBalance;
-        const rate = poolToken.pool?.exchangeRate.shiftedBy(poolToken!.decimals - zilToken.decimals);
-        adjustedZilAmount = adjustedTokenAmount.times(rate || 1).decimalPlaces(zilToken.decimals);
+      if (addTokenAmount.gt(tokenBalance)) {
+        throw new Error(`Insufficient ${poolToken.symbol} balance.`)
+      }
+
+      if (addZilAmount.gt(zilBalance)) {
+        throw new Error(`Insufficient ZIL balance.`)
+      }
+
+      if (addZilAmount.lt(1000)) {
+        throw new Error('Minimum contribution is 1000 ZILs.')
       }
 
       const observedTx = await ZilswapConnector.addLiquidity({
-        tokenAmount: adjustedTokenAmount.shiftedBy(poolToken.decimals),
-        zilAmount: adjustedZilAmount.shiftedBy(zilToken.decimals),
+        tokenAmount: addTokenAmount.shiftedBy(poolToken.decimals),
+        zilAmount: addZilAmount.shiftedBy(zilToken.decimals),
         tokenID: tokenAddress,
       });
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx,
+        address: walletState.wallet?.addressInfo.bech32 || "",
+        network: walletState.wallet?.network || DefaultFallbackNetwork,
+      };
 
       const updatedPool = ZilswapConnector.getPool(tokenAddress) || undefined;
       dispatch(actions.Token.update({
         address: tokenAddress,
         pool: updatedPool,
       }));
-      dispatch(actions.Transaction.observe({ observedTx }));
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     });
   };
 
@@ -212,10 +242,15 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         tokenAmount: addTokenAmount.shiftedBy(poolToken!.decimals),
         tokenID: tokenAddress,
       });
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx!,
+        address: walletState.wallet?.addressInfo.bech32 || "",
+        network: walletState.wallet?.network || DefaultFallbackNetwork,
+      };
 
       if (!observedTx)
         throw new Error("Allowance already sufficient for specified amount");
-      dispatch(actions.Transaction.observe({ observedTx }));
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     });
   };
 
@@ -226,12 +261,12 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     });
   };
 
-  const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || Network.TestNet];
+  const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || DefaultFallbackNetwork];
   const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
   const showTxApprove = new BigNumber(poolToken?.allowances[byte20ContractAddress] || "0").comparedTo(poolFormState.addTokenAmount) < 0;
 
   return (
-    <Box display="flex" flexDirection="column" {...rest} className={cls(classes.root, className)}>
+    <Box display="flex" flexDirection="column" {...rest} className={clsx(classes.root, className)}>
       <Box className={classes.container}>
 
         <CurrencyInput
@@ -276,7 +311,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
         <PoolDetail className={classes.poolDetails} token={poolToken || undefined} />
 
-        <Typography color="error">{error?.message || errorApproveTx?.message}</Typography>
+        <Typography color="error" className={classes.errorMessage}>{error?.message || errorApproveTx?.message}</Typography>
         <FancyButton
           loading={loading}
           walletRequired
@@ -288,8 +323,14 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           color="primary"
           onClick={onAddLiquidity}>
           Add Liquidity
-      </FancyButton>
+        </FancyButton>
       </Box>
+      <Typography
+        variant="body2" className={clsx(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })}
+        onClick={() => setShowAdvanced(!showAdvanced)}>
+        Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+      </Typography>
+      <PoolAdvancedDetails show={showAdvanced} />
     </Box>
   );
 };

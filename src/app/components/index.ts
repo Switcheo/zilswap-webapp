@@ -3,6 +3,7 @@ export { default as CopyIcon } from "./copy.svg";
 export { default as CurrencyInput } from "./CurrencyInput";
 export { default as CurrencyLogo } from "./CurrencyLogo";
 export { default as DialogModal } from "./DialogModal";
+export { default as ExpiryField } from "./ExpiryField";
 export { default as FancyButton } from "./FancyButton";
 export { default as FooterBar } from "./FooterBar";
 export { default as GoogleAnalytics } from "./GoogleAnalytics";
@@ -15,5 +16,6 @@ export { default as Notifications } from "./Notifications";
 export { default as ProportionSelect } from "./ProportionSelect";
 export { default as RandomAsciiEmoji } from "./RandomAsciiEmoji";
 export { default as ScrollReset } from "./ScrollReset";
+export { default as SlippageField } from "./SlippageField";
 export { default as TopBar } from "./TopBar";
-
+export { default as UserPoolMessage } from "./UserPoolMessage";

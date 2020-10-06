@@ -8,16 +8,16 @@ import { validation as ZilValidation } from "@zilliqa-js/util";
 import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
-import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletState } from "app/store/types";
+import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
-import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_TOKEN_NAME } from "app/utils/contants";
+import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, PlaceholderStrings, ZIL_TOKEN_NAME } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CONTRACTS, Network } from "zilswap-sdk/lib/constants";
+import { CONTRACTS } from "zilswap-sdk/lib/constants";
 import { ShowAdvanced } from "./components";
 import { ReactComponent as SwitchSVG } from "./swap-icon.svg";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
@@ -129,6 +129,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     justifySelf: "flex-end",
     marginLeft: "auto",
   },
+  errorMessage: {
+    marginTop: theme.spacing(1),
+  }
 }));
 
 const initialFormState = {
@@ -172,11 +175,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         ...formState,
         inAmount: "0",
         outAmount: "0",
-      })
-      dispatch(actions.Swap.update({
-        inAmount: BIG_ZERO,
-        outAmount: BIG_ZERO,
-      }));
+      });
+      dispatch(actions.Swap.clearForm());
     }
 
     // eslint-disable-next-line
@@ -192,15 +192,18 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }
 
     if (exchangeRate.eq(0)) {
-      const rateResult = ZilswapConnector.getExchangeRate({
-        amount: BIG_ONE.shiftedBy(src!.decimals),
-        exactOf: reversedRate ? "out" : "in",
-        tokenInID: inToken!.address,
-        tokenOutID: outToken!.address,
-      });
-
-      if (!rateResult.expectedAmount.isNaN() && !rateResult.expectedAmount.isNegative())
-        exchangeRate = rateResult.expectedAmount.shiftedBy(-dst!.decimals).pow(reversedRate ? -1 : 1);
+      try {
+        const rateResult = ZilswapConnector.getExchangeRate({
+          amount: BIG_ONE.shiftedBy(src!.decimals),
+          exactOf: reversedRate ? "out" : "in",
+          tokenInID: inToken!.address,
+          tokenOutID: outToken!.address,
+        });
+        if (!rateResult.expectedAmount.isNaN() && !rateResult.expectedAmount.isNegative())
+          exchangeRate = rateResult.expectedAmount.shiftedBy(-dst!.decimals).pow(reversedRate ? -1 : 1);
+      } catch (e) {
+        exchangeRate = BIG_ZERO;
+      }
     }
 
     const formatterOpts = {
@@ -401,10 +404,16 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     clearApproveError();
 
     runSwap(async () => {
-
       const amount: BigNumber = exactOf === "in" ? inAmount.shiftedBy(inToken.decimals) : outAmount.shiftedBy(outToken.decimals);
       if (amount.isNaN() || !amount.isFinite())
         throw new Error("Invalid input amount");
+
+      const address = walletState.wallet?.addressInfo.byte20.toLowerCase() || ""
+      const balance: BigNumber = new BigNumber(inToken.balances[address]?.toString() || 0)
+
+      if (inAmount.shiftedBy(inToken.decimals).gt(balance)) {
+        throw new Error(`Insufficient ${inToken.symbol} balance.`)
+      }
 
       ZilswapConnector.setDeadlineBlocks(expiry);
 
@@ -417,8 +426,13 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           recipientAddress,
         },
       });
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx,
+        address: walletState.wallet?.addressInfo.bech32 || "",
+        network: walletState.wallet?.network || DefaultFallbackNetwork,
+      };
 
-      dispatch(actions.Transaction.observe({ observedTx }));
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     });
   };
 
@@ -440,7 +454,13 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
       if (!observedTx)
         throw new Error("Transfer allowance already sufficient for specified amount");
-      dispatch(actions.Transaction.observe({ observedTx }));
+
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx!,
+        address: walletState.wallet?.addressInfo.bech32 || "",
+        network: walletState.wallet?.network || DefaultFallbackNetwork,
+      };
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     });
   };
 
@@ -467,7 +487,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const tokenBalance = new BigNumber(inToken?.balances[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString() || 0);
   let showTxApprove = false;
   if (inToken && !inToken?.isZil) {
-    const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || Network.TestNet];
+    const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || DefaultFallbackNetwork];
     const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
     showTxApprove = new BigNumber(inToken?.allowances[byte20ContractAddress] || "0").comparedTo(formState.inAmount) < 0;
   }
@@ -554,7 +574,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           )}
         </Box>
 
-        <Typography color="error">{error?.message || errorApproveTx?.message}</Typography>
+        <Typography className={classes.errorMessage} color="error">{error?.message || errorApproveTx?.message}</Typography>
         {swapFormState.isInsufficientReserves && (
           <Typography color="error">Pool reserve is too small to fulfill desired output.</Typography>
         )}

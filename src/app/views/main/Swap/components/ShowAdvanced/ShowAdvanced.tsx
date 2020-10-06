@@ -5,9 +5,7 @@ import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useMoneyFormatter } from "app/utils";
 import React from "react";
 import { useSelector } from "react-redux";
-import ExpiryField from "../ExpiryField";
-import SlippageField from "../SlippageField";
-
+import { ExpiryField, SlippageField } from "app/components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

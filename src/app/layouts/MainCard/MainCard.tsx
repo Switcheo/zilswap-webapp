@@ -1,6 +1,6 @@
 import { Box, Button, Paper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { LayoutState, RootState, TokenInfo, TransactionState } from "app/store/types";
+import { LayoutState, RootState, SwapFormState, TokenInfo, TransactionState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import { PaperProps } from "material-ui";
@@ -83,7 +83,9 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
   const { children, className, staticContext, ...rest } = props;
   const classes = useStyles();
   const isPool = useRouteMatch("/pool");
+  const isSwap = useRouteMatch("/swap");
   const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
+  const swapState = useSelector<RootState, SwapFormState>(state => state.swap);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
 
@@ -91,8 +93,11 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
     // show new pool warning
     ((isPool && poolToken && !poolToken?.loading && !poolToken?.pool) ||
 
-      // show user created token warning
+      // show user created token warning for pool
       (isPool && !poolToken?.loading && poolToken?.pool && !poolToken?.whitelisted) ||
+
+      // show user created token warning for swap
+      (isSwap && ((swapState.inToken && !swapState.inToken.whitelisted) || (swapState.outToken && !swapState.outToken.whitelisted))) ||
 
       // show generic notification
       !!layoutState.notification ||

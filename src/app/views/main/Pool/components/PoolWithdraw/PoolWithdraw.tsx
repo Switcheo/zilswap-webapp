@@ -3,15 +3,15 @@ import { Box, Divider, InputLabel, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { ContrastBox, CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect } from "app/components";
+import { ContrastBox, CurrencyInput, ExpiryField, FancyButton, KeyValueDisplay, ProportionSelect, SlippageField } from "app/components";
 import { actions } from "app/store";
-import { LayoutState, PoolFormState, RootState, TokenInfo } from "app/store/types";
+import { LayoutState, PoolFormState, RootState, TokenInfo, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useMoneyFormatter } from "app/utils";
-import { BIG_ONE, BIG_ZERO } from "app/utils/contants";
+import { BIG_ZERO, DefaultFallbackNetwork } from "app/utils/contants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
-import cls from "classnames";
+import clsx from "clsx";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -88,12 +88,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: theme.spacing(2),
     backgroundColor: `rgba${hexToRGBA(theme.palette.primary.main, 0.3)}`
   },
+  errorMessage: {
+    marginTop: theme.spacing(1),
+  }
 }));
 
 const initialFormState = {
-  zilAmount: "0",
   tokenAmount: "0",
-  removePercentage: BIG_ZERO,
+  removeContribution: BIG_ZERO,
 };
 
 const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -106,8 +108,12 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const [showAdvanced, setShowAdvanced] = useState(false);
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
   const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
+  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
-  const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 5 });
+  const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
+
+  const userPoolTokenPercent = poolToken?.pool?.contributionPercentage.shiftedBy(-2);
+  const inPoolAmount = poolToken?.pool?.tokenReserve.times(userPoolTokenPercent || 0);
 
   const zilFormatOpts: MoneyFormatterOptions = {
     symbol: "ZIL",
@@ -136,15 +142,6 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     // eslint-disable-next-line
   }, [layoutState.network]);
 
-  const onPercentage = (percentage: number) => {
-    if (!poolToken?.pool) return;
-    const pool = poolToken.pool!;
-
-    const balance = new BigNumber(pool.userContribution);
-    const amount = balance.times(percentage).decimalPlaces(0);
-    onTokenChange(amount.shiftedBy(-poolToken.decimals).toString());
-  };
-
   const onPoolChange = (token: TokenInfo) => {
     if (!token.pool) return;
     const network = ZilswapConnector.network;
@@ -152,22 +149,49 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     onTokenChange("0");
   };
 
-  const onTokenChange = (amount: string = "0") => {
+  const updateFormStates = (tokenAmount: BigNumber, removeContribution: BigNumber, inputAmount?: string) => {
+
+    setFormState({
+      tokenAmount: inputAmount || tokenAmount.toString(),
+      removeContribution,
+    });
+
     if (poolToken?.pool) {
-      const tokenAmount = amount;
-      let bnTokenAmount = new BigNumber(amount);
+      const zilAmount = tokenAmount.times(poolToken.pool.exchangeRate).decimalPlaces(poolToken.decimals);
+      dispatch(actions.Pool.update({
+        forNetwork: ZilswapConnector.network,
+        removeZilAmount: zilAmount.shiftedBy(poolToken.decimals),
+        removeTokenAmount: tokenAmount.shiftedBy(poolToken.decimals),
+      }));
+    }
+  };
+
+  const onPercentage = (percentage: number) => {
+    if (!poolToken?.pool) return;
+    const removeContribution = poolToken.pool.userContribution.times(percentage).decimalPlaces(0) || BIG_ZERO;
+    const tokenAmount = removeContribution.div(poolToken.pool.totalContribution).times(poolToken.pool.tokenReserve).decimalPlaces(0);
+
+    updateFormStates(tokenAmount.shiftedBy(-poolToken.decimals), removeContribution);
+  };
+
+  const onTokenChange = (inputAmount: string = "0") => {
+    if (poolToken?.pool) {
+      let bnTokenAmount = new BigNumber(inputAmount);
       if (bnTokenAmount.isNegative() || bnTokenAmount.isNaN())
         bnTokenAmount = BIG_ZERO;
 
-      const bnZilAmount = bnTokenAmount.times(poolToken.pool.exchangeRate).decimalPlaces(poolToken.decimals);
-      const zilAmount = bnZilAmount.toString();
-      const removePercentage = bnTokenAmount.shiftedBy(poolToken.decimals).div(poolToken.pool?.totalContribution || BIG_ONE);
-      setFormState({ zilAmount, tokenAmount, removePercentage });
-      dispatch(actions.Pool.update({
-        forNetwork: ZilswapConnector.network,
-        removeZilAmount: bnZilAmount.shiftedBy(poolToken.decimals),
-        removeTokenAmount: bnTokenAmount.shiftedBy(poolToken.decimals),
-      }));
+      const userContribution = poolToken.pool.userContribution;
+      const removeRatio = bnTokenAmount.div(poolToken.pool.tokenReserve.shiftedBy(-poolToken.decimals));
+      let removeContribution = poolToken.pool.totalContribution.times(removeRatio).decimalPlaces(0);
+
+      // replace input with max available tokens/contribution
+      // input will only visually update onBlur to preserve UX
+      if (removeContribution.isGreaterThan(userContribution!)) {
+        bnTokenAmount = inPoolAmount!.decimalPlaces(0).shiftedBy(-poolToken.decimals);
+        removeContribution = poolToken.pool.userContribution;
+      }
+
+      updateFormStates(bnTokenAmount, removeContribution, inputAmount);
     }
   };
 
@@ -178,38 +202,38 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
     runRemoveLiquidity(async () => {
       const tokenAddress = poolToken.address;
+      const removeContribution = formState.removeContribution;
+
       const observedTx = await ZilswapConnector.removeLiquidity({
         tokenID: tokenAddress,
-        contributionAmount: poolFormState.removeTokenAmount,
+        contributionAmount: removeContribution,
       });
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx!,
+        address: walletState.wallet?.addressInfo.bech32 || "",
+        network: walletState.wallet?.network || DefaultFallbackNetwork,
+      };
 
       const updatedPool = ZilswapConnector.getPool(tokenAddress) || undefined;
       dispatch(actions.Token.update({
         address: tokenAddress,
         pool: updatedPool,
       }));
-      dispatch(actions.Transaction.observe({ observedTx }));
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     });
   };
 
   const onDoneEditing = () => {
     setFormState({
+      ...formState,
       tokenAmount: poolFormState.removeTokenAmount.shiftedBy(-(poolToken?.decimals || 0)).toString(),
-      zilAmount: poolFormState.removeZilAmount.shiftedBy(-12).toString(),
-      removePercentage: formState.removePercentage,
     });
-  };
-
-  const getReceiveAmount = (inputType: "zil" | "zrc2") => {
-    if (inputType !== "zil" && inputType !== "zrc2") return BIG_ZERO;
-    const total = inputType === "zil" ? (poolToken?.pool?.zilReserve) : (poolToken?.pool?.tokenReserve);
-    return formState.removePercentage.times(total || BIG_ZERO);
   };
 
   const liquidityTokenRate = poolToken?.pool?.totalContribution.isPositive() ? poolToken!.pool!.tokenReserve.div(poolToken!.pool!.totalContribution) : BIG_ZERO;
 
   return (
-    <Box display="flex" flexDirection="column"  {...rest} className={cls(classes.root, className)}>
+    <Box display="flex" flexDirection="column"  {...rest} className={clsx(classes.root, className)}>
       <Box className={classes.container}>
         <CurrencyInput
           hideBalance
@@ -233,7 +257,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           onSelectProp={onPercentage} />
 
         <KeyValueDisplay className={classes.keyValueLabel} hideIfNoValue kkey="In Pool">
-          {!!poolToken && formatMoney(poolToken?.pool?.userContribution || 0, formatOpts)}
+          {!!poolToken && formatMoney(inPoolAmount || 0, formatOpts)}
         </KeyValueDisplay>
 
         <PoolIcon type="minus" />
@@ -241,14 +265,14 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
         <ContrastBox className={classes.readOnly}>
           <Typography className={classes.previewAmount}>
-            <span>{formatMoney(getReceiveAmount("zil"), zilFormatOpts)}</span>
-            <span> + {formatMoney(getReceiveAmount("zrc2"), formatOpts)}</span>
+            <span>{formatMoney(poolFormState.removeZilAmount, zilFormatOpts)}</span>
+            <span> + {formatMoney(poolFormState.removeTokenAmount, formatOpts)}</span>
           </Typography>
         </ContrastBox>
 
         <PoolDetail className={classes.poolDetails} token={poolToken || undefined} />
 
-        <Typography color="error">{error?.message}</Typography>
+        <Typography className={classes.errorMessage} color="error">{error?.message}</Typography>
 
         <FancyButton walletRequired
           loading={loading}
@@ -262,7 +286,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
         {!!poolToken ? (
           <Typography
             variant="body2"
-            className={cls(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })}
+            className={clsx(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })}
             onClick={() => setShowAdvanced(!showAdvanced)}>
             Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </Typography>
@@ -273,11 +297,13 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
         <ContrastBox className={classes.showAdvanced}>
           <Typography className={classes.text} variant="body2">
             You are removing{" "}
-            <strong>{formatMoney(getReceiveAmount("zil"), zilFormatOpts)} + {formatMoney(getReceiveAmount("zrc2"), formatOpts)}</strong>
+            <strong>{formatMoney(poolFormState.removeZilAmount, zilFormatOpts)} + {formatMoney(poolFormState.removeTokenAmount, formatOpts)}</strong>
             from the liquidity pool.{" "}
             <strong>(~{formatMoney(poolFormState.removeTokenAmount, { ...formatOpts, showCurrency: true })} Pool Token)</strong>
           </Typography>
+
           <Divider className={classes.divider} />
+
           <KeyValueDisplay mt={"22px"} kkey={"Current Total Supply"}>
             {formatMoney(poolToken?.pool?.tokenReserve || 0, { ...formatOpts })} Pool Token
           </KeyValueDisplay>
@@ -287,6 +313,12 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
             {formatMoney(new BigNumber(liquidityTokenRate).shiftedBy(poolToken?.decimals || 0), formatOpts)}
           </KeyValueDisplay>
 
+          <Divider className={classes.divider} />
+
+          <Box display="flex" justifyContent="space-between">
+            <SlippageField label="Set Limit Transaction Slippage" />
+            <ExpiryField />
+          </Box>
         </ContrastBox>
       )}
     </Box>
