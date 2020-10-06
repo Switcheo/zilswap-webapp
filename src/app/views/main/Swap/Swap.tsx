@@ -175,7 +175,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         ...formState,
         inAmount: "0",
         outAmount: "0",
-      })
+      });
       dispatch(actions.Swap.clearForm());
     }
 

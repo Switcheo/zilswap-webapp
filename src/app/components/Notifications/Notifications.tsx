@@ -3,14 +3,16 @@ import { makeStyles } from "@material-ui/core/styles";
 import CheckmarkIcon from "@material-ui/icons/CheckOutlined";
 import TimeoutIcon from "@material-ui/icons/TimerOutlined";
 import { actions } from "app/store";
-import { LayoutState, RootState, SubmittedTx } from "app/store/types";
+import { LayoutState, PoolFormState, RootState, SubmittedTx, SwapFormState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { truncate, useNetwork } from "app/utils";
 import cls from "classnames";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useRouteMatch } from "react-router";
 import { ObservedTx } from "zilswap-sdk";
 import NotificationBox from "../NotificationBox";
+import UserPoolMessage from "../UserPoolMessage";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -38,9 +40,25 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
 
   const dispatch = useDispatch();
   const network = useNetwork();
+  const isSwap = useRouteMatch({ path: "/swap" })
+  const isPool = useRouteMatch({ path: "/pool" })
+
   const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
+  const poolState = useSelector<RootState, PoolFormState>(state => state.pool);
+  const swapState = useSelector<RootState, SwapFormState>(state => state.swap);
   const observingTxs = useSelector<RootState, ObservedTx[]>(state => state.transaction.observingTxs);
   const submittedTxs = useSelector<RootState, SubmittedTx[]>(state => state.transaction.submittedTxs);
+
+  const poolToken = poolState.token;
+  const { inToken, outToken } = swapState;
+
+  let userToken = null;
+  if (isPool && poolToken && !poolToken.whitelisted)
+    userToken = poolToken;
+  else if (isSwap && inToken && !inToken.isZil && !inToken.whitelisted)
+    userToken = inToken;
+  else if (isSwap && outToken && !outToken.isZil && !outToken.whitelisted)
+    userToken = outToken;
 
   const onRemoveNotification = () => {
     dispatch(actions.Layout.updateNotification(undefined));
@@ -56,6 +74,21 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
+      {userToken && (
+        isPool ?
+          <UserPoolMessage token={userToken}>
+            Liquidity pools created by other users may result in the loss of all deposited tokens
+            if the token for the pool does not fully comform to the ZRC-2 token specifications.
+            This includes all ZILs deposited into the pool.
+            Please verify the legitimacy of this token yourself before contributing liquidity.
+          </UserPoolMessage>
+          :
+          <UserPoolMessage token={userToken}>
+            Liquidity pools created by other users may involve tokens that do not comply with
+            ZRC-2 token specifications, and can result in loss of all funds sent.
+            Please verify the legitimacy of this token yourself before swapping.
+          </UserPoolMessage>
+      )}
       {!!layoutState.notification && (
         <NotificationBox onRemove={() => onRemoveNotification()}>
           <Typography variant="body2" className={classes.notificationMessage}>
@@ -72,7 +105,7 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
         </NotificationBox>
       )}
       {submittedTxs.map((submittedTx: SubmittedTx, index) => (
-        <NotificationBox key={index} IconComponent={submittedTx.status === "expired" ? TimeoutIcon: CheckmarkIcon} onRemove={() => onRemoveConfirmedTx(submittedTx)}>
+        <NotificationBox key={index} IconComponent={submittedTx.status === "expired" ? TimeoutIcon : CheckmarkIcon} onRemove={() => onRemoveConfirmedTx(submittedTx)}>
           <Typography variant="body2" className={classes.notificationMessage}>
             Transaction 0x{truncate(submittedTx.hash)} {submittedTx.status || "status unknown"}.{" "}
             {submittedTx.status !== "expired" && (

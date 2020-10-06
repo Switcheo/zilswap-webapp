@@ -90,7 +90,7 @@ const reducer = (state: TransactionState = initial_state, action: any): Transact
       };
     case WalletTypes.WALLET_UPDATE:
     case LayoutTypes.UPDATE_NETWORK:
-      const wallet: ConnectedWallet | undefined = action.payload.wallet;
+      const wallet: ConnectedWallet | undefined = action.payload?.wallet;
       const network: Network | undefined = wallet?.network || action.network;
 
       const relevantObservingTxs = state.observingTxs.filter(tx => {

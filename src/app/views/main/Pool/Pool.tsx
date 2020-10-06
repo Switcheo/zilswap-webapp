@@ -9,7 +9,7 @@ import { LayoutState, OpenCloseState, PoolFormState, RootState } from "app/store
 import cls from "classnames";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CreatePoolDialog, NewPoolMessage, PoolAdvancedDetails, PoolDeposit, PoolToggleButton, PoolWithdraw, UserPoolMessage } from "./components";
+import { CreatePoolDialog, NewPoolMessage, PoolAdvancedDetails, PoolDeposit, PoolToggleButton, PoolWithdraw } from "./components";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
 
 const useStyles = makeStyles(theme => ({
@@ -62,7 +62,6 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
       {!poolToken?.loading && (
         <>
           {!poolToken?.pool && (<NewPoolMessage token={poolToken || undefined} />)}
-          {poolToken?.pool && !poolToken?.whitelisted && (<UserPoolMessage token={poolToken} />)}
         </>
       )}
       <Box display="flex" flexDirection="column">
