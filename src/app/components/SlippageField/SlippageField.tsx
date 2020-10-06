@@ -106,7 +106,7 @@ const SlippageField: React.FC<Props> = (props: Props) => {
 
   const onEndEditing = () => {
     if (!error.length)
-      setInputSlippage(new BigNumber(slippage).shiftedBy(2).toFormat(1));
+      setInputSlippage(new BigNumber(slippage).shiftedBy(2).toFormat());
   };
 
   return (
