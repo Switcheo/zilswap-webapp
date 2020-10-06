@@ -4,7 +4,7 @@ import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import BigNumber from "bignumber.js";
-import cls from "classnames";
+import clsx from "clsx";
 import React, { ChangeEvent, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ReactComponent as TooltipSVG } from "./tooltip.svg";
@@ -42,6 +42,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "0.75rem",
     lineHeight: "1.875rem",
   },
+  warning: {
+    color: `${theme.palette.colors.zilliqa.warning}`,
+  },
+  inputError: {
+    border: `1px solid ${theme.palette.error}`,
+  },
+  inputWarning: {
+    border: `1px solid ${theme.palette.colors.zilliqa.warning}`,
+  },
 }));
 
 const DEFAULT_SLIPPAGE_LABEL = "Set Limit Add. Price Slippage";
@@ -58,6 +67,7 @@ const SlippageField: React.FC<Props> = (props: Props) => {
   const slippage = useSelector<RootState, number>(state => state.swap.slippage);
   const [inputSlippage, setInputSlippage] = useState(new BigNumber(slippage).shiftedBy(2).toString());
   const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
   const classes = useStyles();
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +93,14 @@ const SlippageField: React.FC<Props> = (props: Props) => {
 
   const onChangeValue = (slippage: BigNumber) => {
     setError("");
+
+    if (slippage.gt(0.05))
+      setWarning("High frontrun risk");
+    else if (slippage.lt(0.005))
+      setWarning("Your transaction may fail");
+    else
+      setWarning("");
+
     dispatch(actions.Swap.update({ slippage: slippage.toNumber() }));
   };
 
@@ -92,22 +110,28 @@ const SlippageField: React.FC<Props> = (props: Props) => {
   };
 
   return (
-    <Box {...rest} className={cls(classes.root, className)}>
+    <Box {...rest} className={clsx(classes.root, className)}>
       <InputLabel>{label || DEFAULT_SLIPPAGE_LABEL}
         <Tooltip placement="top"
           classes={{ tooltip: classes.tooltip }}
-          title="Lowering this limit decreases your risk of fronttruning. However, this makes it more likely that your transaction will fail due to normal price movements.">
+          title="Lowering this limit decreases your risk of frontruning. However, this makes it more likely that your transaction will fail due to normal price movements.">
           <TooltipSVG className={classes.tooltipSVG} />
         </Tooltip>
       </InputLabel>
 
-      <Box>
+      <Box marginBottom={1}>
         <TextField
           variant="outlined"
           value={inputSlippage}
           onChange={onChange}
           onBlur={onEndEditing}
-          InputProps={{ className: classes.inputWrapper, endAdornment: <span>%</span> }}
+          InputProps={{
+            className: clsx(classes.inputWrapper, {
+              [classes.inputError]: error.length > 0,
+              [classes.inputWarning]: warning.length > 0,
+            }),
+            endAdornment: <span>%</span>
+          }}
           inputProps={{ className: classes.input }} />
         {PRESET_SLIPPAGE.map((preset, index) => (
           <Button className={classes.optionButton} onClick={() => onSelectPreset(preset)} key={index}>
@@ -125,6 +149,7 @@ const SlippageField: React.FC<Props> = (props: Props) => {
         ))}
       </Box>
       <Typography color="error">{error}</Typography>
+      {!error && (<Typography className={classes.warning}>{warning}</Typography>)}
     </Box >
   );
 };
