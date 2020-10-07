@@ -10,7 +10,6 @@ import cls from "classnames";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { CurrencyDialogProps } from "../CurrencyDialog/CurrencyDialog";
-import { ZIL_TOKEN_NAME } from "app/utils/contants";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -152,7 +151,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
             {!fixedToZil && (
               <Button className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
                 <Box display="flex" alignItems="center">
-                  <CurrencyLogo currency={token?.address} className={classes.currencyLogo} />
+                  {token && <CurrencyLogo currency={token.whitelisted && token.symbol} className={classes.currencyLogo} />}
                   <Typography variant="button">{token?.symbol || "Select Token"}</Typography>
                 </Box>
                 <ExpandMoreIcon className={classes.expandIcon} />
@@ -162,7 +161,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
             {fixedToZil && (
               <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
                 <Box display="flex" alignItems="center">
-                  <CurrencyLogo currency={ZIL_TOKEN_NAME} className={classes.currencyLogo} />
+                  <CurrencyLogo currency="ZIL" className={classes.currencyLogo} />
                   <Typography variant="button">ZIL</Typography>
                 </Box>
               </Box>

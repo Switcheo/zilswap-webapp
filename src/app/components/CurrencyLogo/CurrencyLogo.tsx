@@ -1,27 +1,9 @@
 import { makeStyles } from "@material-ui/core";
-import { AppTheme } from "app/theme/types";
-// import { ReactComponent as DAI } from "./DAI.svg";
+import SVG from 'react-inlinesvg';
 import cls from "classnames";
 import React from "react";
-import { TOKENS } from "zilswap-sdk/lib/constants";
-import { ReactComponent as SWTH } from "./SWTH.svg";
-import { ReactComponent as XSGD } from "./XSGD.svg";
-import { ReactComponent as ZIL } from "./ZIL.svg";
-import { ReactComponent as GZIL } from "./gZIL.svg";
+import { AppTheme } from "app/theme/types";
 import { ReactComponent as SvgTokenPlaceholder } from "./token-placeholder.svg";
-
-export type CurrencyLogoMap = {
-  [index: string]: any
-};
-
-const currencies: CurrencyLogoMap = {
-  [TOKENS.MainNet.ZIL]: ZIL,
-  [TOKENS.MainNet.XSGD]: XSGD,
-  [TOKENS.TestNet.ZIL]: ZIL,
-  [TOKENS.TestNet.gZIL]: GZIL,
-  [TOKENS.TestNet.SWTH]: SWTH,
-  [TOKENS.TestNet.XSGD]: XSGD,
-};
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -35,12 +17,19 @@ const CurrencyLogo = (props: any) => {
     className: string;
   } = props;
   const classes = useStyles();
-  const Logo = currency && (currencies[currency] || SvgTokenPlaceholder);
   return (
-    !!Logo ? <div className={cls(classes.root, className)}>
-      <Logo />
-    </div> : null
-  );
+    <div className={cls(classes.root, className)}>
+      <SVG
+        src={`https://raw.githubusercontent.com/Switcheo/zilswap-token-list/master/logos/${currency}.svg`}
+        title={`${currency} Token Logo`}
+        description={`${currency} Token Logo`}
+        cacheRequests={true}
+        loader={<SvgTokenPlaceholder />}
+      >
+        <SvgTokenPlaceholder />
+      </SVG>
+    </div>
+  )
 };
 
 export default CurrencyLogo;

@@ -39,6 +39,7 @@
     "react-dropzone": "^10.1.8",
     "react-helmet": "^5.2.1",
     "react-hot-loader": "^4.12.19",
+    "react-inlinesvg": "^2.1.1",
     "react-markdown": "^4.2.2",
     "react-paginate": "^6.3.0",
     "react-perfect-scrollbar": "^1.5.3",
@@ -52,7 +53,7 @@
     "uuid": "^3.3.3",
     "validate.js": "^0.13.1",
     "xlsx": "^0.15.5",
-    "zilswap-sdk": "^1.0.0-rc.4"
+    "zilswap-sdk": "^1.0.0-rc.5"
   },
   "scripts": {
     "start": "react-scripts start",
