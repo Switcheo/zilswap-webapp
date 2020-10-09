@@ -4,7 +4,7 @@ import cls from "classnames";
 import React from "react";
 import { ReactComponent as MediumIcon } from "./social-icons/medium.svg";
 import { ReactComponent as MailIcon } from "./social-icons/mail.svg";
-import { ReactComponent as TelegramIcon } from "./social-icons/telegram.svg";
+import { ReactComponent as Discord } from "./social-icons/discord.svg";
 import { ReactComponent as TwitterIcon } from "./social-icons/twitter.svg";
 import { AppTheme } from "app/theme/types";
 
@@ -36,8 +36,8 @@ const SocialLinkGroup: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: 
   const classes = useStyles();
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <Button href="https://t.me/Switcheo">
-        <TelegramIcon />
+      <Button href="https://discord.com/invite/Cpsxb2d">
+        <Discord />
       </Button>
       <Button href="https://twitter.com/SwitcheoNetwork">
         <TwitterIcon />
