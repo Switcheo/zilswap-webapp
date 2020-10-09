@@ -10,7 +10,7 @@ import BigNumber from "bignumber.js";
 import clsx from "clsx";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { ZilswapConnector } from "core/zilswap";
+import { toBasisPoints, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CONTRACTS } from "zilswap-sdk/lib/constants";
@@ -193,6 +193,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     runAddLiquidity(async () => {
       const tokenAddress = poolToken.address;
       const { addTokenAmount, addZilAmount } = poolFormState;
+      const { slippage } = swapFormState;
       const tokenBalance = new BigNumber(poolToken!.balance.toString()).shiftedBy(-poolToken.decimals);
       const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
       const zilBalance = new BigNumber(zilToken.balance.toString()).shiftedBy(-zilToken.decimals);
@@ -216,6 +217,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         tokenAmount: addTokenAmount.shiftedBy(poolToken.decimals),
         zilAmount: addZilAmount.shiftedBy(zilToken.decimals),
         tokenID: tokenAddress,
+        maxExchangeRateChange: toBasisPoints(slippage).toNumber(),
       });
       const walletObservedTx: WalletObservedTx = {
         ...observedTx,
@@ -267,8 +269,11 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
   const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || DefaultFallbackNetwork];
   const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
-  const addTokenUnitlessAmount = poolFormState.addTokenAmount.shiftedBy(poolToken!.decimals);
-  const showTxApprove = new BigNumber(poolToken?.allowances[byte20ContractAddress] || "0").comparedTo(addTokenUnitlessAmount) < 0;
+  let showTxApprove = false;
+  if (poolToken) {
+    const addTokenUnitlessAmount = poolFormState.addTokenAmount.shiftedBy(poolToken.decimals);
+    showTxApprove = new BigNumber(poolToken.allowances[byte20ContractAddress] || "0").comparedTo(addTokenUnitlessAmount) < 0
+  }
 
   return (
     <Box display="flex" flexDirection="column" {...rest} className={clsx(classes.root, className)}>

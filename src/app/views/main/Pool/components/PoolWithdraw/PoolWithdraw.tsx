@@ -12,7 +12,7 @@ import { BIG_ZERO, DefaultFallbackNetwork } from "app/utils/contants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
-import { ZilswapConnector } from "core/zilswap";
+import { toBasisPoints, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PoolDetail from "../PoolDetail";
@@ -204,11 +204,13 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     runRemoveLiquidity(async () => {
       const tokenAddress = poolToken.address;
       const removeContribution = formState.removeContribution;
+      const slippage = swapFormState.slippage;
 
       ZilswapConnector.setDeadlineBlocks(swapFormState.expiry);
       const observedTx = await ZilswapConnector.removeLiquidity({
         tokenID: tokenAddress,
         contributionAmount: removeContribution,
+        maxExchangeRateChange: toBasisPoints(slippage).toNumber(),
       });
       const walletObservedTx: WalletObservedTx = {
         ...observedTx!,
