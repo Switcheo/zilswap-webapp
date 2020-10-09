@@ -489,7 +489,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   if (inToken && !inToken?.isZil) {
     const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || DefaultFallbackNetwork];
     const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
-    showTxApprove = new BigNumber(inToken?.allowances[byte20ContractAddress] || "0").comparedTo(formState.inAmount) < 0;
+    const unitlessInAmount = swapFormState.inAmount.shiftedBy(swapFormState.inToken!.decimals);
+    showTxApprove = new BigNumber(inToken?.allowances[byte20ContractAddress] || "0").comparedTo(unitlessInAmount) < 0;
   }
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>

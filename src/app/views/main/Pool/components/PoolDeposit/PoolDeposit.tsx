@@ -267,7 +267,8 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
   const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || DefaultFallbackNetwork];
   const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
-  const showTxApprove = new BigNumber(poolToken?.allowances[byte20ContractAddress] || "0").comparedTo(poolFormState.addTokenAmount) < 0;
+  const addTokenUnitlessAmount = poolFormState.addTokenAmount.shiftedBy(poolToken!.decimals);
+  const showTxApprove = new BigNumber(poolToken?.allowances[byte20ContractAddress] || "0").comparedTo(addTokenUnitlessAmount) < 0;
 
   return (
     <Box display="flex" flexDirection="column" {...rest} className={clsx(classes.root, className)}>
