@@ -223,16 +223,12 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       inToken: swapFormState.outToken,
       outToken: swapFormState.inToken,
     });
-    setFormState({
-      ...formState,
-      ...result.outAmount && { outAmount: result.outAmount.toString() },
-      ...result.inAmount && { inAmount: result.inAmount.toString() },
-    });
 
-    dispatch(actions.Swap.update({
-      forNetwork: ZilswapConnector.network || null,
-      ...result,
-    }));
+    if (result.exactOf === "in") {
+      onOutAmountChange(result.inAmount.toString(), true)
+    } else if (result.exactOf === "out") {
+      onInAmountChange(result.outAmount.toString(), true)
+    }
   };
 
   const onPercentage = (percentage: number) => {
@@ -316,10 +312,17 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     };
   };
 
-  const onOutAmountChange = (amount: string = "0") => {
+  const onOutAmountChange = (amount: string = "0", reverseTokens?: boolean) => {
     let outAmount = new BigNumber(amount);
     if (outAmount.isNaN() || outAmount.isNegative() || !outAmount.isFinite()) outAmount = BIG_ZERO;
-    const result = calculateAmounts({ exactOf: "out", outAmount });
+    const result = calculateAmounts({
+      exactOf: "out",
+      outAmount,
+      ...reverseTokens && {
+        inToken: swapFormState.outToken,
+        outToken: swapFormState.inToken,
+      },
+    });
     setFormState({
       ...formState,
       outAmount: amount,
@@ -330,10 +333,17 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       ...result,
     }));
   };
-  const onInAmountChange = (amount: string = "0") => {
+  const onInAmountChange = (amount: string = "0", reverseTokens?: boolean) => {
     let inAmount = new BigNumber(amount);
     if (inAmount.isNaN() || inAmount.isNegative() || !inAmount.isFinite()) inAmount = BIG_ZERO;
-    const result = calculateAmounts({ exactOf: "in", inAmount });
+    const result = calculateAmounts({
+      exactOf: "in",
+      inAmount,
+      ...reverseTokens && {
+        inToken: swapFormState.outToken,
+        outToken: swapFormState.inToken,
+      },
+    });
     setFormState({
       ...formState,
       inAmount: amount,
