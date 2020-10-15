@@ -1,24 +1,26 @@
-import { Box, ButtonBase, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import { Box, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
 import { DialogModal } from "app/components";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
-import { useMoneyFormatter } from "app/utils";
 import { BIG_ZERO, sortTokens } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ConnectedWallet } from "core/wallet";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import ContrastBox from "../ContrastBox";
-import CurrencyLogo from "../CurrencyLogo";
+import { CurrencyList } from "./components";
 import { ReactComponent as SearchIcon } from "./SearchIcon.svg";
 
 const useStyles = makeStyles(theme => ({
   root: {
-  },
-  content: {
-    width: 516,
+    width: "100%",
+    maxWidth: 650,
+    [theme.breakpoints.down("sm")]: {
+      maxWidth: 520,
+    },
     [theme.breakpoints.down("xs")]: {
-      width: 380,
+      maxWidth: 380,
+    },
+    "& .MuiPaper-root": {
+      width: "100%",
     },
   },
   input: {
@@ -30,19 +32,18 @@ const useStyles = makeStyles(theme => ({
       fontSize: "12px!important"
     }
   },
-  currencyBox: {
-    padding: "8px 12px 10px 12px",
-    marginTop: "0px !important",
+  currenciesContainer: {
+    height: 460,
     display: "flex",
-    alignItems: "center",
-    width: "100%"
+    flexDirection: "column",
   },
-  currencyLogo: {
-    marginRight: 10
+  currenciesHeader: {
+    margin: theme.spacing(1, 0, .5),
   },
   currencies: {
-    maxHeight: 460,
-    overflowY: "scroll",
+    flex: 1,
+    flexBasis: "50%",
+    overflowY: "auto",
     "-ms-overflow-style": "none",
     "&::-webkit-scrollbar": {
       // display: "none"
@@ -50,11 +51,6 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.down("xs")]: {
       maxHeight: 324,
     }
-  },
-  buttonBase: {
-    width: "100%",
-    marginTop: "2px",
-    textAlign: "left",
   },
 }));
 
@@ -72,26 +68,6 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const [search, setSearch] = useState("");
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const moneyFormat = useMoneyFormatter({ maxFractionDigits: 12 });
-
-  const getTokenBalance = (token: TokenInfo): BigNumber => {
-    if (!walletState.wallet) return BIG_ZERO;
-
-    const wallet: ConnectedWallet = walletState.wallet!;
-    if (showContribution) {
-      const contribution = token.pool?.userContribution || BIG_ZERO;
-      return contribution;
-    } else {
-      const amount = token.balances && token.balances[wallet.addressInfo.byte20.toLowerCase()];
-      if (!amount) return BIG_ZERO;
-
-      return new BigNumber(amount.toString());
-    }
-  };
-  const getContributionPercentage = (token: TokenInfo) => {
-    if (!walletState.wallet) return BIG_ZERO;
-    return token.pool?.contributionPercentage || BIG_ZERO;
-  };
 
   useEffect(() => {
     if (!tokenState.tokens) return setTokens([]);
@@ -104,14 +80,22 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     setTokens(tokens.sort(sortTokens));
   }, [tokenState.tokens]);
 
-  const filterSearch = (token: TokenInfo): boolean => {
+  const filterSearch = (token: TokenInfo, whitelisted?: boolean): boolean => {
     const searchTerm = search.toLowerCase().trim();
     if (token.isZil && hideZil) return false;
     if (!token.isZil && !token.pool && hideNoPool) return false;
-    if (!searchTerm.length) return true;
+    if (!searchTerm.length && whitelisted === undefined) return true;
+
+    if (whitelisted && !token.whitelisted) return false;
+    if (!whitelisted && token.whitelisted) return false;
+
     return token.address.toLowerCase() === searchTerm ||
       token.name.toLowerCase().includes(searchTerm) ||
       token.symbol.toLowerCase().includes(searchTerm);
+  };
+
+  const getTokenFilter = (type: "whitelisted" | "unverified") => {
+    return (token: TokenInfo) => filterSearch(token, type === "whitelisted")
   };
 
   const sortResult = (lhs: TokenInfo, rhs: TokenInfo) => {
@@ -130,10 +114,11 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     return difference !== 0 ? difference : lhs.symbol.localeCompare(rhs.symbol);
   };
 
-  const filteredTokens = tokens.filter(filterSearch).sort(sortResult);
+  const verifiedTokens = tokens.filter(getTokenFilter("whitelisted")).sort(sortResult);
+  const unverifiedTokens = tokens.filter(getTokenFilter("unverified")).sort(sortResult);
   return (
     <DialogModal header="Select a Token" {...rest} className={cls(classes.root, className)}>
-      <DialogContent className={classes.content}>
+      <DialogContent>
         <OutlinedInput
           placeholder="Search token name, symbol or address"
           value={search}
@@ -155,47 +140,27 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
           </Box>
         )}
 
-        <Box className={classes.currencies}>
-          {!!tokenState.initialized && search.length > 0 && !filteredTokens.length && (
-            <Box>
-              <Typography color="error">No tokens found for "{search}"</Typography>
-            </Box>
-          )}
-          {filteredTokens.map((token, index) => (
-            <ButtonBase
-              className={classes.buttonBase}
-              key={index}
-              focusRipple
-              onClick={() => onSelectCurrency(token)}>
-              <ContrastBox className={classes.currencyBox}>
-                <CurrencyLogo className={classes.currencyLogo} currency={token.whitelisted && token.symbol} />
-                <Box display="flex" flexDirection="column">
-                  <Typography variant="h2">{token.symbol}</Typography>
-                  <Typography color="textSecondary" variant="body2">{token.isZil ? 'Zilliqa' : token.name}</Typography>
-                </Box>
-                <Box flex={1}>
-                  <Typography align="right" variant="h6" component="p">
-                    {moneyFormat(getTokenBalance(token), {
-                      symbol: token.symbol,
-                      maxFractionDigits: showContribution ? 5 : token.decimals,
-                      compression: token.decimals,
-                      showCurrency: true,
-                    })}
-                  </Typography>
-                  {showContribution && (
-                    <Typography align="right" color="textSecondary" variant="body2">
-                      {moneyFormat(getContributionPercentage(token), {
-                        maxFractionDigits: 2,
-                        compression: 0,
-                        showCurrency: false,
-                      })}%
-                    </Typography>
-                  )}
-                </Box>
-              </ContrastBox>
-            </ButtonBase>
-          ))}
-        </Box>
+        {tokenState.initialized && (
+          <Box className={classes.currenciesContainer}>
+            <Typography className={classes.currenciesHeader} variant="h3">Verified tokens</Typography>
+            <CurrencyList
+              tokens={verifiedTokens}
+              search={search}
+              emptyStateLabel={`No verified tokens found for "${search}"`}
+              showContribution={showContribution}
+              onSelectCurrency={onSelectCurrency}
+              className={classes.currencies} />
+
+            <Typography className={classes.currenciesHeader} variant="h3">Others</Typography>
+            <CurrencyList
+              tokens={unverifiedTokens}
+              search={search}
+              emptyStateLabel={`No other tokens found for "${search}"`}
+              showContribution={showContribution}
+              onSelectCurrency={onSelectCurrency}
+              className={classes.currencies} />
+          </Box>
+        )}
       </DialogContent>
     </DialogModal>
   )
