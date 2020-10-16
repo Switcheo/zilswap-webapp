@@ -7,8 +7,15 @@ import { ReactComponent as SvgTokenPlaceholder } from "./token-placeholder.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    width: 28
-  }
+    width: 28,
+    display: "flex",
+  },
+  svg: {
+    maxWidth: "100%",
+    width: "unset",
+    height: "unset",
+    flex: 1,
+  },
 }));
 
 const CurrencyLogo = (props: any) => {
@@ -20,6 +27,7 @@ const CurrencyLogo = (props: any) => {
   return (
     <div className={cls(classes.root, className)}>
       <SVG
+        className={classes.svg}
         src={`https://raw.githubusercontent.com/Switcheo/zilswap-token-list/master/logos/${currency}.svg`}
         title={`${currency} Token Logo`}
         description={`${currency} Token Logo`}

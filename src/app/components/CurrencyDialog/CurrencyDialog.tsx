@@ -1,9 +1,12 @@
-import { Box, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import { Box, Button, CircularProgress, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import ArrayOpenedIcon from "@material-ui/icons/ArrowDropDown";
+import ArrayClosedIcon from "@material-ui/icons/ArrowRight";
 import { DialogModal } from "app/components";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
-import { BIG_ZERO, sortTokens } from "app/utils/contants";
+import { useTaskSubscriber } from "app/utils";
+import { BIG_ZERO, LoadingKeys, sortTokens } from "app/utils/contants";
 import BigNumber from "bignumber.js";
-import cls from "classnames";
+import clsx from "clsx";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { CurrencyList } from "./components";
@@ -33,24 +36,22 @@ const useStyles = makeStyles(theme => ({
     }
   },
   currenciesContainer: {
-    height: 460,
+    maxHeight: 460,
     display: "flex",
     flexDirection: "column",
+    overflowY: "auto",
   },
   currenciesHeader: {
+    justifyContent: "left",
+    borderRadius: 0,
     margin: theme.spacing(1, 0, .5),
   },
   currencies: {
-    flex: 1,
-    flexBasis: "50%",
-    overflowY: "auto",
-    "-ms-overflow-style": "none",
-    "&::-webkit-scrollbar": {
-      // display: "none"
-    },
-    [theme.breakpoints.down("xs")]: {
-      maxHeight: 324,
-    }
+    maxHeight: "1000000px",
+  },
+  currenciesHidden: {
+    maxHeight: "0px",
+    overflow: "hidden",
   },
 }));
 
@@ -61,13 +62,25 @@ export interface CurrencyDialogProps extends DialogProps {
   showContribution?: boolean;
 };
 
+type FormState = {
+  showWhitelisted: boolean;
+  showOthers: boolean;
+};
+
+const initialFormState: FormState = {
+  showWhitelisted: true,
+  showOthers: true,
+};
+
 const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProps) => {
   const { children, className, onSelectCurrency, hideZil, hideNoPool, showContribution, ...rest } = props;
   const classes = useStyles();
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const [search, setSearch] = useState("");
+  const [formState, setFormState] = useState<FormState>({ ...initialFormState });
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+  const [loadingConnectWallet] = useTaskSubscriber(...LoadingKeys.connectWallet);
 
   useEffect(() => {
     if (!tokenState.tokens) return setTokens([]);
@@ -79,6 +92,13 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
 
     setTokens(tokens.sort(sortTokens));
   }, [tokenState.tokens]);
+
+  const onToggleFormState = (key: keyof FormState) => {
+    setFormState({
+      ...formState,
+      [key]: !formState[key],
+    })
+  };
 
   const filterSearch = (token: TokenInfo, whitelisted?: boolean): boolean => {
     const searchTerm = search.toLowerCase().trim();
@@ -117,48 +137,64 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const verifiedTokens = tokens.filter(getTokenFilter("whitelisted")).sort(sortResult);
   const unverifiedTokens = tokens.filter(getTokenFilter("unverified")).sort(sortResult);
   return (
-    <DialogModal header="Select a Token" {...rest} className={cls(classes.root, className)}>
+    <DialogModal header="Select a Token" {...rest} className={clsx(classes.root, className)}>
       <DialogContent>
-        <OutlinedInput
-          placeholder="Search token name, symbol or address"
-          value={search}
-          fullWidth
-          classes={{
-            input: classes.inputText
-          }}
-          className={classes.input}
-          onChange={(e) => setSearch(e.target.value)}
-          startAdornment={
-            <InputAdornment position="start">
-              <SearchIcon />
-            </InputAdornment>
-          }
-        />
-        {!tokenState.initialized && (
+        {!loadingConnectWallet && (
+          <OutlinedInput
+            placeholder="Search token name, symbol or address"
+            value={search}
+            fullWidth
+            classes={{ input: classes.inputText }}
+            className={classes.input}
+            onChange={(e) => setSearch(e.target.value)}
+            startAdornment={
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            }
+          />
+        )}
+        {!loadingConnectWallet && !tokenState.initialized && (
           <Box>
             <Typography color="error">Connect wallet to view tokens</Typography>
           </Box>
         )}
 
+        {loadingConnectWallet && (
+          <Box display="flex" justifyContent="center">
+            <CircularProgress color="primary" />
+          </Box>
+        )}
+
         {tokenState.initialized && (
           <Box className={classes.currenciesContainer}>
-            <Typography className={classes.currenciesHeader} variant="h3">Verified tokens</Typography>
+            <Button color="inherit" component="h3" variant="text"
+              className={classes.currenciesHeader}
+              onClick={() => onToggleFormState("showWhitelisted")}>
+              Registered tokens
+              {formState.showWhitelisted ? <ArrayOpenedIcon /> : <ArrayClosedIcon />}
+            </Button>
             <CurrencyList
               tokens={verifiedTokens}
               search={search}
               emptyStateLabel={`No verified tokens found for "${search}"`}
               showContribution={showContribution}
               onSelectCurrency={onSelectCurrency}
-              className={classes.currencies} />
+              className={clsx(classes.currencies, { [classes.currenciesHidden]: !formState.showWhitelisted })} />
 
-            <Typography className={classes.currenciesHeader} variant="h3">Others</Typography>
+            <Button color="inherit" component="h3" variant="text"
+              className={classes.currenciesHeader}
+              onClick={() => onToggleFormState("showOthers")}>
+              Others
+              {formState.showOthers ? <ArrayOpenedIcon /> : <ArrayClosedIcon />}
+            </Button>
             <CurrencyList
               tokens={unverifiedTokens}
               search={search}
               emptyStateLabel={`No other tokens found for "${search}"`}
               showContribution={showContribution}
               onSelectCurrency={onSelectCurrency}
-              className={classes.currencies} />
+              className={clsx(classes.currencies, { [classes.currenciesHidden]: !formState.showOthers })} />
           </Box>
         )}
       </DialogContent>
