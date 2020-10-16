@@ -3,6 +3,7 @@ import { DialogModal, FancyButton } from "app/components";
 import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
+import { PlaceholderStrings } from "app/utils/contants";
 import cls from "classnames";
 import { BN, ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
@@ -76,7 +77,7 @@ const CreatePoolDialog = (props: any) => {
   return (
     <DialogModal header="Create Pool" open={open} onClose={onCloseDialog} {...rest} className={cls(classes.root, className)}>
       <DialogContent className={classes.content}>
-        <AddressInput onTokenChanged={preview => setTokenPreview(preview)} />
+        <AddressInput placeholder={PlaceholderStrings.ZilTokenAddress} onTokenChanged={preview => setTokenPreview(preview)} />
         {error && (
           <Typography className={classes.error} color="error">{error.message}</Typography>
         )}

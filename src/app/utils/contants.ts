@@ -21,9 +21,9 @@ export const LocalStorageKeys = {
 };
 
 export const PlaceholderStrings = {
-  ZilAddress: "zil18zlr57uhrmnk4mfkuawgv0un295k970a9s3lnq",
+  ZilAddress: "Enter ZIL address (e.g. zil…)",
+  ZilTokenAddress: "Enter token address (e.g. zil…)",
 };
-
 
 export const ZilPayNetworkMap = {
   mainnet: Network.MainNet,

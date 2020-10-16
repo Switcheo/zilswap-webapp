@@ -2,6 +2,7 @@ import { Box, BoxProps, InputLabel, makeStyles, OutlinedInput, Typography } from
 import { KeyValueDisplay, LoadableArea } from "app/components";
 import { RootState, TokenBalanceMap, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
+import { PlaceholderStrings } from "app/utils/contants";
 import cls from "classnames";
 import { zilParamsToMap } from "core/utilities";
 import { BN, Contract, getBalancesMap, toBech32Address, ZilliqaValidate, ZilswapConnector } from "core/zilswap";
@@ -20,6 +21,7 @@ export type TokenPreview = {
 
 export interface AddressInputProps extends BoxProps {
   onTokenChanged: (tokenPreview?: TokenPreview) => void;
+  placeholder: string;
 };
 
 const useStyles = makeStyles(theme => ({
@@ -50,7 +52,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => {
-  const { children, className, onTokenChanged, ...rest } = props;
+  const { children, className, placeholder, onTokenChanged, ...rest } = props;
   const classes = useStyles();
   const [address, setAddress] = useState<string>("");
   const [tokenPreview, setTokenPreview] = useState<TokenPreview | undefined>();
@@ -109,7 +111,7 @@ const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => 
         <InputLabel className={classes.error}><Typography color="error">{error.message}</Typography></InputLabel>
       )}
       <OutlinedInput
-        placeholder="zil18zlr57uhrmnk4mfkuawgv0un295k970a9s3lnq"
+        placeholder={placeholder || PlaceholderStrings.ZilAddress}
         value={address}
         fullWidth
         className={cls(classes.input, error ? classes.inputError : {})}
