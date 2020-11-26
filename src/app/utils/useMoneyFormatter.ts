@@ -49,7 +49,7 @@ const formatter = (inputNumber: BigNumber | number | string = 0, opts: MoneyForm
 };
 
 export default function (options: MoneyFormatterOptions = {}) {
-  return (number: number | string | BigNumber, adhocOptions: MoneyFormatterOptions = {}) => {
+  return (number: number | string | undefined | BigNumber, adhocOptions: MoneyFormatterOptions = {}) => {
     return formatter(number, { ...options, ...adhocOptions });
   }
 };

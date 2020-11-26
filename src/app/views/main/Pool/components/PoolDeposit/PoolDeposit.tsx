@@ -1,10 +1,10 @@
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
-import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect } from "app/components";
+import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect, StatefulText } from "app/components";
 import { actions } from "app/store";
 import { LayoutState, PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
-import { useAsyncTask, useMoneyFormatter } from "app/utils";
+import { useAsyncTask, useMoneyFormatter, strings } from "app/utils";
 import { BIG_ZERO, DefaultFallbackNetwork, ZIL_TOKEN_NAME } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
@@ -110,7 +110,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const onPercentage = (percentage: number) => {
     if (!poolToken) return;
 
-    const balance = new BigNumber(poolToken.balance.toString());
+    const balance = new BigNumber(poolToken.balance?.toString() || 0);
     const intendedAmount = balance.times(percentage).decimalPlaces(0);
     const netGasAmount = poolToken.isZil ? ZilswapConnector.adjustedForGas(intendedAmount, balance) : intendedAmount;
     onTokenChange(netGasAmount.shiftedBy(-poolToken.decimals).toString());
@@ -194,9 +194,9 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       const tokenAddress = poolToken.address;
       const { addTokenAmount, addZilAmount } = poolFormState;
       const { slippage } = swapFormState;
-      const tokenBalance = new BigNumber(poolToken!.balance.toString()).shiftedBy(-poolToken.decimals);
+      const tokenBalance = strings.bnOrZero(poolToken!.balance).shiftedBy(-poolToken.decimals);
       const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
-      const zilBalance = new BigNumber(zilToken.balance.toString()).shiftedBy(-zilToken.decimals);
+      const zilBalance = strings.bnOrZero(poolToken!.balance).shiftedBy(-zilToken.decimals);
 
       if (addTokenAmount.gt(tokenBalance)) {
         throw new Error(`Insufficient ${poolToken.symbol} balance.`)
@@ -272,7 +272,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   let showTxApprove = false;
   if (poolToken) {
     const addTokenUnitlessAmount = poolFormState.addTokenAmount.shiftedBy(poolToken.decimals);
-    showTxApprove = new BigNumber(poolToken.allowances[byte20ContractAddress] || "0").comparedTo(addTokenUnitlessAmount) < 0
+    showTxApprove = strings.bnOrZero(poolToken.allowances?.[byte20ContractAddress]).comparedTo(addTokenUnitlessAmount) < 0
   }
 
   return (
@@ -300,12 +300,18 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         <KeyValueDisplay
           className={classes.keyValueLabel}
           hideIfNoValue
-          kkey="You Have">
-          {!!poolToken &&
-            formatMoney(poolToken?.balance.toString(), {
-              symbol: poolToken?.symbol,
-              compression: poolToken?.decimals,
-            })}
+          kkey="You Have"
+          ValueComponent="span">
+          {!!poolToken && (
+            <StatefulText loadingKey={`rueryTokenBalance-${poolToken.address}`}>
+              <Typography color="textSecondary" variant="body2">
+                {formatMoney(poolToken?.balance?.toString(), {
+                  symbol: poolToken?.symbol,
+                  compression: poolToken?.decimals,
+                })}
+              </Typography>
+            </StatefulText>
+          )}
         </KeyValueDisplay>
 
 

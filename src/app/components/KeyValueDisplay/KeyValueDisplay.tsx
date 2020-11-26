@@ -8,7 +8,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 const KeyValueDisplay: any = (props: any) => {
-  const { children, className, kkey, emphasizeValue, value: inputValue, hideIfNoValue, ...rest } = props;
+  const { children, className, kkey, emphasizeValue, value: inputValue, ValueComponent = Typography, hideIfNoValue, ...rest } = props;
   const classes = useStyles();
 
   let value = inputValue;
@@ -21,7 +21,7 @@ const KeyValueDisplay: any = (props: any) => {
       <Typography color="textSecondary" variant="body1">
         {kkey}
       </Typography>
-      <Typography color={emphasizeValue ? undefined : "textSecondary"} variant="body2">{value || <span>&nbsp;</span>}</Typography>
+      <ValueComponent color={emphasizeValue ? undefined : "textSecondary"} variant="body2">{value || <span>&nbsp;</span>}</ValueComponent>
     </Box>
   );
 };

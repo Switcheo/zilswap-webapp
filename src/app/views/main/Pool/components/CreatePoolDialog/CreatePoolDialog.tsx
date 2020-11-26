@@ -3,9 +3,9 @@ import { DialogModal, FancyButton } from "app/components";
 import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
-import { PlaceholderStrings } from "app/utils/contants";
+import { BIG_ZERO, PlaceholderStrings } from "app/utils/contants";
 import cls from "classnames";
-import { BN, ZilswapConnector } from "core/zilswap";
+import { ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AddressInput } from "./components";
@@ -54,14 +54,14 @@ const CreatePoolDialog = (props: any) => {
       const token: TokenInfo = {
         address,
         initialized: false,
+        initBalance: false,
         isZil: false,
         dirty: false,
         whitelisted: false,
         symbol: tokenPreview.symbol,
         name: tokenPreview.name,
         decimals: tokenPreview.decimals,
-        balance: new BN(0),
-        init_supply: tokenPreview.init_supply,
+        balance: BIG_ZERO,
         balances: tokenPreview.balances,
         allowances: {},
       };

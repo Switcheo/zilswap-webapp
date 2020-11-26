@@ -6,7 +6,7 @@ import { logger } from "core/utilities";
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
 import { ObservedTx, OnUpdate, Pool, TokenDetails, TxReceipt, TxStatus, WalletProvider, Zilswap } from "zilswap-sdk";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
-
+import { getAllowancesMap, getBalancesMap } from "./utils";
 
 export interface ConnectProps {
   wallet: ConnectedWallet;
@@ -57,6 +57,14 @@ export interface SwapProps {
   maxAdditionalSlippage?: number;
   recipientAddress?: string;
 };
+
+export interface TokenContractBalancesState {
+  [index: string]: string;
+}
+
+export interface TokenContractAllowancesState {
+  [index: string]: TokenContractBalancesState;
+}
 
 type ConnectorState = {
   zilswap: Zilswap;
@@ -205,6 +213,13 @@ export class ZilswapConnector {
     return zilswap.getAppState();
   };
 
+  static getToken = (tokenID: string): TokenDetails | undefined => {
+    const { zilswap } = ZilswapConnector.getState();
+    const { tokens } = zilswap.getAppState();
+
+    return Object.values(tokens).find((token) => token.address === tokenID);
+  }
+
   /**
    * Get list of tokens found in the Zilswap SDK app state.
    *
@@ -239,6 +254,26 @@ export class ZilswapConnector {
     const { zilswap } = ZilswapConnector.getState();
     return new BigNumber(zilswap._txParams.gasLimit.toString());
   };
+
+  static loadBalanceState = async (tokenID: string): Promise<TokenContractBalancesState | undefined> => {
+    const token = ZilswapConnector.getToken(tokenID);
+    if (!token) {
+      return
+    }
+
+    const contractBalancesState = await getBalancesMap(token.contract);
+    return contractBalancesState as TokenContractBalancesState | undefined
+  }
+
+  static loadAllowances = async (tokenID: string): Promise<TokenContractAllowancesState | undefined> => {
+    const token = ZilswapConnector.getToken(tokenID);
+    if (!token) {
+      return
+    }
+
+    const contractAllowancesState = await getAllowancesMap(token.contract);
+    return contractAllowancesState as TokenContractAllowancesState | undefined
+  }
 
   /**
    *

@@ -1,10 +1,12 @@
 import { Value } from "@zilliqa-js/contract";
 import { actions } from "app/store";
-import { LayoutState, RootState, TokenBalanceMap, TokenInfo, TokenState, Transaction, WalletState } from "app/store/types";
-import { useAsyncTask } from "app/utils";
+import { LayoutState, RootState, TokenInfo, TokenState, Transaction, WalletState } from "app/store/types";
+import { strings, useAsyncTask } from "app/utils";
 import { LocalStorageKeys, ZilPayNetworkMap, ZIL_TOKEN_NAME } from "app/utils/contants";
+import useStatefulTask from "app/utils/useStatefulTask";
+import BigNumber from "bignumber.js";
 import { connectWalletPrivateKey, ConnectWalletResult, connectWalletZilPay, parseBalanceResponse } from "core/wallet";
-import { BN, getAllowancesMap, getBalancesMap, RPCResponse, ZilswapConnector } from "core/zilswap";
+import { RPCResponse, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { ObservedTx, TokenDetails, TxReceipt, TxStatus } from "zilswap-sdk";
@@ -29,14 +31,14 @@ const mapZilswapToken = (zilswapToken: TokenDetails): TokenInfo => {
   return {
     initialized: false,
     whitelisted: zilswapToken.whitelisted,
+    initBalance: false,
     isZil: zilswapToken.address === ZIL_TOKEN_NAME,
     dirty: false,
     address: zilswapToken.address,
     decimals: zilswapToken.decimals,
     symbol: zilswapToken.symbol,
     name: "",
-    balance: new BN(0),
-    init_supply: new BN(0),
+    balance: undefined,
     balances: {},
     allowances: {},
   }
@@ -104,6 +106,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   const [runInitWallet] = useAsyncTask<void>("initWallet");
   const [runInitZilswap] = useAsyncTask<void>("initZilswap");
   const [runReloadTransactions] = useAsyncTask<void>("reloadTransactions");
+  const runQueryTokenBalance = useStatefulTask<Partial<TokenInfo>>();
   const dispatch = useDispatch();
 
   const registerObserver = () => {
@@ -370,18 +373,19 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         const walletAddress = walletState.wallet?.addressInfo.byte20;
         const lowerCaseWalletAddress = walletAddress?.toLowerCase() || "";
         if (token.isZil) {
-          let balance: BN | undefined;
+          let balance: BigNumber | undefined;
           if (walletAddress) {
             const balanceRPCResponse = await ZilswapConnector.getZilliqa().blockchain.getBalance(walletAddress);
             const balanceResult = parseBalanceResponse(balanceRPCResponse as RPCResponse<any, string>);
-            balance = new BN(balanceResult.balance || 0);
+            balance = strings.bnOrZero(balanceResult.balance);
           }
 
           // update token store
           dispatch(actions.Token.update({
+            name: "Zilliqa",
             address,
+            balance,
             loading: false,
-            balance: balance || new BN(0),
             balances: {
               ...balance && {
                 // initialize with own wallet balance
@@ -392,27 +396,44 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
           return;
         }
 
-        // retrieve contract and init params
-        const contract = ZilswapConnector.getZilliqa().contracts.at(address);
-        const contractInitParams = await contract.getInit();
-        const contractInit = zilParamsToMap(contractInitParams);
+        const tokenDetails = ZilswapConnector.getToken(address);
 
-        // retrieve balances of each token owner
-        const contractBalanceState = await getBalancesMap(contract);
+        let { initBalance, balance, balances, allowances, name } = token;
 
-        // map balance object from string values to BN values
-        const balances: TokenBalanceMap = {};
-        for (const address in contractBalanceState)
-          balances[address] = new BN(contractBalanceState[address]);
+        if (initBalance) {
+          const result = await runQueryTokenBalance(async () => {
+            if (!name) {
+              const contractInitParams = await tokenDetails?.contract.getInit();
+              if (contractInitParams) {
+                const contractInit = zilParamsToMap(contractInitParams);
+                name = contractInit.name;
+              }
+            }
+
+            // load token balance
+            const contractBalanceState = await ZilswapConnector.loadBalanceState(token.address)
+            // map balance object from string values to BN values
+            balances = {};
+            for (const address in contractBalanceState)
+              balances[address] = strings.bnOrZero(contractBalanceState[address]);
+
+            balance = strings.bnOrZero(balances[lowerCaseWalletAddress]);
+
+            // load token allowances to check if unlock is necessary
+            const allowancesState = await ZilswapConnector.loadAllowances(token.address)
+            allowances = allowancesState?.[lowerCaseWalletAddress] || {};
+
+            return { balance, balances, allowances, name }
+          }, `rueryTokenBalance-${token.address}`);
+
+          balance = result.balance
+          balances = result.balances
+          allowances = result.allowances
+          name = result.name
+        }
 
         // retrieve token pool, if it exists
         const pool = ZilswapConnector.getPool(token.address) || undefined;
-
-        const balance = balances[lowerCaseWalletAddress] || new BN(0);
-
-        // retrieve allowances of each token owner
-        const contractAllowancesMap = await getAllowancesMap(contract);
-        const allowances = contractAllowancesMap[lowerCaseWalletAddress] || {};
 
         // prepare and dispatch token info update to store.
         const tokenInfo: TokenInfo = {
@@ -420,16 +441,15 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
           dirty: false,
           loading: false,
           isZil: false,
+          initBalance, name,
 
           whitelisted: token.whitelisted,
           address: token.address,
           decimals: token.decimals,
 
-          init_supply: new BN(contractInit.init_supply),
-          symbol: contractInit.symbol,
-          name: contractInit.name,
+          symbol: tokenDetails?.symbol ?? '',
 
-          balance, pool, balances, allowances,
+          pool, balance, balances, allowances,
         };
         dispatch(actions.Token.update(tokenInfo));
       });

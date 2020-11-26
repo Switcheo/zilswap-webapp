@@ -2,14 +2,16 @@ import { Box, BoxProps, ButtonBase, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ContrastBox from "app/components/ContrastBox";
 import CurrencyLogo from "app/components/CurrencyLogo";
+import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
 import { BIG_ZERO } from "app/utils/contants";
+import useStatefulTask from "app/utils/useStatefulTask";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 type CurrencyListProps = BoxProps & {
   tokens: TokenInfo[];
@@ -37,13 +39,19 @@ const useStyles = makeStyles(theme => ({
   currencyLogo: {
     marginRight: 10
   },
+  subtleText: {
+    fontStyle: "italic",
+    opacity: .5,
+  },
 }));
 const CurrencyList: React.FC<CurrencyListProps> = (props) => {
   const { children, className, onSelectCurrency, emptyStateLabel, showContribution, search, tokens, ...rest } = props;
   const classes = useStyles();
+  const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 12 });
+  const runQueryTokenBalance = useStatefulTask<void>();
 
   const getTokenBalance = (token: TokenInfo): BigNumber => {
     if (!walletState.wallet) return BIG_ZERO;
@@ -64,6 +72,20 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
     return token.pool?.contributionPercentage || BIG_ZERO;
   };
 
+  const onSelect = (token: TokenInfo) => {
+    if (!token.balance && walletState.wallet) {
+      runQueryTokenBalance(async () => {
+
+        dispatch(actions.Token.update({
+          address: token.address,
+          dirty: true,
+          initBalance: true,
+        }));
+      }, `rueryTokenBalance-${token.address}`);
+    }
+    onSelectCurrency(token)
+  };
+
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
@@ -77,22 +99,32 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
           className={classes.buttonBase}
           key={index}
           focusRipple
-          onClick={() => onSelectCurrency(token)}>
+          onClick={() => onSelect(token)}>
           <ContrastBox className={classes.currencyBox}>
             <CurrencyLogo className={classes.currencyLogo} currency={token.whitelisted && token.symbol} />
             <Box display="flex" flexDirection="column">
               <Typography variant="h2">{token.symbol}</Typography>
-              <Typography color="textSecondary" variant="body2">{token.isZil ? 'Zilliqa' : token.name}</Typography>
+
+              {!!token.name && (
+                <Typography color="textSecondary" variant="body2">{token.name}</Typography>
+              )}
             </Box>
             <Box flex={1}>
-              <Typography align="right" variant="h6" component="p">
-                {moneyFormat(getTokenBalance(token), {
-                  symbol: token.symbol,
-                  maxFractionDigits: showContribution ? 5 : token.decimals,
-                  compression: token.decimals,
-                  showCurrency: true,
-                })}
-              </Typography>
+              {!!token.balance && (
+                <Typography align="right" variant="h6" component="p">
+                  {moneyFormat(getTokenBalance(token), {
+                    symbol: token.symbol,
+                    maxFractionDigits: showContribution ? 5 : token.decimals,
+                    compression: token.decimals,
+                    showCurrency: true,
+                  })}
+                </Typography>
+              )}
+              {!token.balance && (
+                <Typography align="right" color="textSecondary" variant="body2" className={classes.subtleText}>
+                  {!!walletState.wallet ? "Select to load" : ""}
+                </Typography>
+              )}
               {showContribution && (
                 <Typography align="right" color="textSecondary" variant="body2">
                   {moneyFormat(getContributionPercentage(token), {

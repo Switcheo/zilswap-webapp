@@ -5,12 +5,12 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import RemoveIcon from "@material-ui/icons/Remove";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { validation as ZilValidation } from "@zilliqa-js/util";
-import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect } from "app/components";
+import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect, StatefulText } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask, useMoneyFormatter } from "app/utils";
+import { strings, useAsyncTask, useMoneyFormatter } from "app/utils";
 import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, PlaceholderStrings, ZIL_TOKEN_NAME } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -235,7 +235,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     const { inToken } = swapFormState;
     if (!inToken) return;
 
-    const balance = new BigNumber(inToken.balance.toString());
+    const balance = strings.bnOrZero(inToken.balance);
     const intendedAmount = balance.times(percentage).decimalPlaces(0);
     const netGasAmount = inToken.isZil ? ZilswapConnector.adjustedForGas(intendedAmount, balance) : intendedAmount;
     onInAmountChange(netGasAmount.shiftedBy(-inToken.decimals).toString());
@@ -419,7 +419,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         throw new Error("Invalid input amount");
 
       const address = walletState.wallet?.addressInfo.byte20.toLowerCase() || ""
-      const balance: BigNumber = new BigNumber(inToken.balances[address]?.toString() || 0)
+      const balance: BigNumber = strings.bnOrZero(inToken.balances?.[address])
 
       if (inAmount.shiftedBy(inToken.decimals).gt(balance)) {
         throw new Error(`Insufficient ${inToken.symbol} balance.`)
@@ -494,14 +494,15 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
 
   const { outToken, inToken } = swapFormState;
-  const tokenBalance = new BigNumber(inToken?.balances[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString() || 0);
+  const tokenBalance = strings.bnOrZero(inToken?.balances?.[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString());
   let showTxApprove = false;
   if (inToken && !inToken?.isZil) {
     const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || DefaultFallbackNetwork];
     const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
     const unitlessInAmount = swapFormState.inAmount.shiftedBy(swapFormState.inToken!.decimals);
-    showTxApprove = new BigNumber(inToken?.allowances[byte20ContractAddress] || "0").comparedTo(unitlessInAmount) < 0;
+    showTxApprove = strings.bnOrZero(inToken?.allowances?.[byte20ContractAddress]).comparedTo(unitlessInAmount) < 0;
   }
+
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       <Notifications />
@@ -520,12 +521,19 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
         <KeyValueDisplay className={classes.keyValueLabel}
           hideIfNoValue
-          kkey="You Have">
-          {!!inToken && moneyFormat(tokenBalance, {
-            symbol: inToken!.symbol,
-            compression: inToken!.decimals,
-            showCurrency: true,
-          })}
+          kkey="You Have"
+          ValueComponent="span">
+          {!!inToken && (
+            <StatefulText loadingKey={`rueryTokenBalance-${inToken.address}`}>
+              <Typography color="textSecondary" variant="body2">
+                {moneyFormat(tokenBalance, {
+                  symbol: inToken!.symbol,
+                  compression: inToken!.decimals,
+                  showCurrency: true,
+                })}
+              </Typography>
+            </StatefulText>
+          )}
         </KeyValueDisplay>
 
         <Box display="flex" mt={2} mb={3} justifyContent="center">

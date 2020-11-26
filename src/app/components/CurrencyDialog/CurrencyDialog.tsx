@@ -110,7 +110,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     if (!whitelisted && token.whitelisted) return false;
 
     return token.address.toLowerCase() === searchTerm ||
-      token.name.toLowerCase().includes(searchTerm) ||
+      (typeof token.name === "string" && token.name?.toLowerCase().includes(searchTerm)) ||
       token.symbol.toLowerCase().includes(searchTerm);
   };
 
@@ -130,7 +130,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
       return difference !== 0 ? difference : lhs.symbol.localeCompare(rhs.symbol);
     }
     const userAddress = walletState.wallet!.addressInfo.byte20.toLowerCase();
-    const difference = new BigNumber(rhs.balances[userAddress]?.toString() || 0).comparedTo(lhs.balances[userAddress]?.toString() || 0);
+    const difference = new BigNumber(rhs.balances?.[userAddress]?.toString() || 0).comparedTo(lhs.balances?.[userAddress]?.toString() || 0);
     return difference !== 0 ? difference : lhs.symbol.localeCompare(rhs.symbol);
   };
 

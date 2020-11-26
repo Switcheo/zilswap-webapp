@@ -4,25 +4,25 @@ import BigNumber from "bignumber.js";
 import { Pool } from "zilswap-sdk";
 
 export type TokenBalanceMap = {
-  [index: string]: BN;
+  [index: string]: BigNumber;
 };
 
 export type TokenInfo = {
   initialized: boolean;
+  initBalance: boolean;
   dirty: boolean;
   loading?: boolean;
   isZil: boolean;
   whitelisted: boolean;
   listPriority?: number;
   symbol: string;
-  name: string;
+  name?: string;
   decimals: number;
-  init_supply: BN;
   address: string;
-  balance: BN;
-  balances: TokenBalanceMap;
+  balance?: BigNumber;
+  balances?: TokenBalanceMap;
   pool?: Pool;
-  allowances: { [index: string]: string },
+  allowances?: { [index: string]: string },
 };
 
 export interface TokenState {

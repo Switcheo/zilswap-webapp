@@ -16,6 +16,7 @@ export { default as Notifications } from "./Notifications";
 export { default as ProportionSelect } from "./ProportionSelect";
 export { default as RandomAsciiEmoji } from "./RandomAsciiEmoji";
 export { default as ScrollReset } from "./ScrollReset";
+export { default as StatefulText } from "./StatefulText";
 export { default as SlippageField } from "./SlippageField";
 export { default as TopBar } from "./TopBar";
 export { default as UserPoolMessage } from "./UserPoolMessage";
