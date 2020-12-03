@@ -4,15 +4,16 @@ import { PaletteOptions, TypeBackground } from "@material-ui/core/styles/createP
 import { Spacing } from "@material-ui/core/styles/createSpacing";
 
 export type AppTypeBackground = {
-  contrast: string,
-  tooltip: string,
-  paperOpposite: string,
-  readOnly: string
+  contrast: string;
+  tooltip: string;
+  paperOpposite: string;
+  readOnly: string;
+  contrastAlternate: string;
 }
 
 export interface AppColors {
-  zilliqa: any,
-  switcheo: any,
+  zilliqa: any;
+  switcheo: any;
 }
 export interface AppPalette extends PaletteOptions {
   primary: SimplePaletteColorOptions;
@@ -20,13 +21,14 @@ export interface AppPalette extends PaletteOptions {
   background: AppTypeBackground & TypeBackground;
   toolbar: SimplePaletteColorOptions;
   colors: AppColors;
-  switcheoLogo: string,
-  navbar: string,
-  mainBoxShadow: string,
+  switcheoLogo: string;
+  navbar: string;
+  mainBoxShadow: string;
+  cardBoxShadow: string;
 }
 
 export interface AppTheme extends ThemeOptions {
   palette: AppPalette;
-  breakpoints: Breakpoints,
+  breakpoints: Breakpoints;
   spacing: Spacing;
 }

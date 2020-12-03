@@ -36,7 +36,7 @@ const useStyles = makeStyles(theme => ({
   },
   chipText: {
     color: theme.palette.text.primary
-  }
+  },
 }));
 
 const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {

@@ -43,6 +43,7 @@ export default {
     readOnly: zilliqa.neutral["195"]
   },
   mainBoxShadow: "none",
+  cardBoxShadow: "0 4px 8px 1px rgba(0, 0, 0, 0.2)",
   navbar: zilliqa.neutral[200],
   switcheoLogo: switcheo.logoDark,
   colors: { zilliqa, switcheo },

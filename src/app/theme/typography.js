@@ -3,6 +3,10 @@ export default (palette) => ({
     "Roboto"
   ].join(","),
   h1: {
+    fontSize: "24px",
+    lineHeight: "24px",
+    fontWeight: "600",
+    letterSpacing: "-0.2px",
   },
   h2: {
     fontSize: "18px",

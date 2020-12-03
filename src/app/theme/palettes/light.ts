@@ -36,12 +36,14 @@ export default {
   background: {
     default: zilliqa.neutral[100],
     contrast: zilliqa.primary["002"],
+    contrastAlternate: zilliqa.primary["010"],
     paper: zilliqa.neutral[100],
     paperOpposite: zilliqa.neutral[190],
     tooltip: zilliqa.primary["195"],
     readOnly: zilliqa.primary["004"]
   },
   mainBoxShadow: "0 8px 16px 0 rgba(20,155,163,0.16)",
+  cardBoxShadow: "0 4px 8px 2px rgba(20, 155, 163, 0.16)",
   navbar: zilliqa.neutral[200],
   switcheoLogo: switcheo.logoLight,
   colors: { zilliqa, switcheo },
