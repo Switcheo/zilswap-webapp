@@ -1,10 +1,11 @@
 import { Box, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { FooterBar, NavDrawer, TopBar } from "app/components";
+import { AppTheme } from "app/theme/types";
 import React, { Suspense, useState } from "react";
 import { renderRoutes } from "react-router-config";
 import WalletDialog from "../WalletDialog";
-import { AppTheme } from "app/theme/types";
+import { DevInfoBadge } from "./components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -14,6 +15,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexDirection: "column",
   },
   content: {
+    position: "relative",
     flex: 1,
     display: "flex",
     flexDirection: "row",
@@ -34,6 +36,7 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     <Box className={classes.root}>
       <TopBar onToggleDrawer={onToggleDrawer} />
       <main className={classes.content}>
+        <DevInfoBadge />
         <Suspense fallback={<LinearProgress />}>
           {renderRoutes(route.routes)}
         </Suspense>
