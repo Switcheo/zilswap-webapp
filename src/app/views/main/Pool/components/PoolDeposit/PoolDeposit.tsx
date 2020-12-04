@@ -196,7 +196,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       const { slippage } = swapFormState;
       const tokenBalance = strings.bnOrZero(poolToken!.balance).shiftedBy(-poolToken.decimals);
       const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
-      const zilBalance = strings.bnOrZero(poolToken!.balance).shiftedBy(-zilToken.decimals);
+      const zilBalance = strings.bnOrZero(zilToken!.balance).shiftedBy(-zilToken.decimals);
 
       if (addTokenAmount.gt(tokenBalance)) {
         throw new Error(`Insufficient ${poolToken.symbol} balance.`)
