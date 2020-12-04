@@ -40,7 +40,7 @@ const OverviewBanner: React.FC<Props> = (props: Props) => {
           <Grid container spacing={2}>
             <Grid item xs={12} md={4}>
               <StatsCard heading="Total Value Locked">
-                <Text marginBottom={2} variant="h1" className={classes.statistic}>$8,691,498</Text>
+                <Text marginBottom={2} variant="h1" className={classes.statistic} isPlaceholder>$8,691,498</Text>
                 <Box display="flex" flexDirection="row" alignItems="center">
                   <ArrowDropUpRounded className={classes.subtitleIcon} color="primary" />
                   <Text color="primary">3.0%</Text>
@@ -49,7 +49,7 @@ const OverviewBanner: React.FC<Props> = (props: Props) => {
             </Grid>
             <Grid item xs={12} md={4}>
               <StatsCard heading="Total ZAP Rewards">
-                <Text marginBottom={2} variant="h1" className={classes.statistic}>482,494</Text>
+                <Text marginBottom={2} variant="h1" className={classes.statistic} isPlaceholder>482,494</Text>
                 <Box alignItems="center" display="flex" className={classes.subtitle}>
                   <Text color="textSecondary">until next epoch</Text>
                 </Box>
@@ -59,21 +59,21 @@ const OverviewBanner: React.FC<Props> = (props: Props) => {
               <StatsCard heading="Countdown to next epoch">
                 <Box display="flex">
                   <Box display="flex" flexDirection="column">
-                    <Text marginBottom={2} variant="h1" className={classes.statistic}>05</Text>
+                    <Text marginBottom={2} variant="h1" className={classes.statistic} isPlaceholder>05</Text>
                     <Box alignItems="center" display="flex" className={classes.subtitle}>
                       <Text color="textSecondary">days</Text>
                     </Box>
                   </Box>
                   <Text variant="h1" className={classes.statistic} marginX={1}>:</Text>
                   <Box display="flex" flexDirection="column">
-                    <Text marginBottom={2} variant="h1" className={classes.statistic}>20</Text>
+                    <Text marginBottom={2} variant="h1" className={classes.statistic} isPlaceholder>20</Text>
                     <Box alignItems="center" display="flex" className={classes.subtitle}>
                       <Text color="textSecondary">hours</Text>
                     </Box>
                   </Box>
                   <Text variant="h1" className={classes.statistic} marginX={1}>:</Text>
                   <Box display="flex" flexDirection="column">
-                    <Text marginBottom={2} variant="h1" className={classes.statistic}>20</Text>
+                    <Text marginBottom={2} variant="h1" className={classes.statistic} isPlaceholder>20</Text>
                     <Box alignItems="center" display="flex" className={classes.subtitle}>
                       <Text color="textSecondary">minutes</Text>
                     </Box>

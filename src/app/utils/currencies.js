@@ -24,7 +24,7 @@ const currencies = {
   }
 };
 
-export const active = () => "SGD";
+export const active = () => "USD";
 export const map = () => JSON.parse(JSON.stringify(currencies));
 export const list = () => Object.values(currencies);
 export const symbols = () => Object.values(currencies).map(currency => currency.symbol);

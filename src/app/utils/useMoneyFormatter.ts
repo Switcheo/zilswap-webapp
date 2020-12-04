@@ -7,8 +7,6 @@ export type MoneyFormatterOptions = {
   compression?: number;
   decPlaces?: number;
   maxFractionDigits?: number;
-  decSep?: string;
-  thouSep?: string;
   showCurrency?: boolean;
 }
 
@@ -20,7 +18,7 @@ const formatter = (inputNumber: BigNumber | number | string = 0, opts: MoneyForm
   }
   let number = new BigNumber(inputNumber);
   if (isNaN(number.toNumber())) number = new BigNumber(0);
-  let { currency, symbol = "", compression = 0, decPlaces, maxFractionDigits = 2, decSep = ".", thouSep = ",", showCurrency = false } = opts;
+  let { currency, symbol, compression = 0, decPlaces, maxFractionDigits = 2, showCurrency = false } = opts;
 
   if (decPlaces === undefined)
     decPlaces = maxFractionDigits || 0;
@@ -34,18 +32,7 @@ const formatter = (inputNumber: BigNumber | number | string = 0, opts: MoneyForm
   }
   number = number.shiftedBy(-compression);
 
-  const positive = number.isPositive();
-  const absValue = number.abs().toFixed(decPlaces);
-  let [integers, decimals = "0"] = absValue.split(".");
-  const firstThouSepIndex = integers.length > 3 ? integers.length % 3 : 0;
-  decimals = decimals.replace(/^.*\./g, "").slice(0, maxFractionDigits).replace(/0+$/, "");
-  if (decimals === "") decimals = "00".slice(0, maxFractionDigits);
-
-  return (positive ? "" : "+") +
-    (firstThouSepIndex ? integers.substr(0, firstThouSepIndex) + thouSep : "") +
-    integers.substr(firstThouSepIndex).replace(/(\d{3})(?=\d)/g, "$1" + thouSep) +
-    (decPlaces ? decSep + decimals : "") +
-    (showCurrency ? ` ${symbol} ` : "");
+  return `${number.decimalPlaces(decPlaces).toFormat()}${showCurrency ? ` ${symbol || currency}` : ""}`.trim()
 };
 
 export default function (options: MoneyFormatterOptions = {}) {

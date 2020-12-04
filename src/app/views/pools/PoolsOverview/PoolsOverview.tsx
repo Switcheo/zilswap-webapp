@@ -1,11 +1,12 @@
-import { Box, Container, Divider, Grid, Tab, Tabs, TextField } from "@material-ui/core";
+import { Box, Container, Divider, Tab, Tabs } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { SearchInput } from "app/components";
 import Page from "app/layouts/Page";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React from "react";
+import React, { useState } from "react";
 import { useHistory, useLocation, useRouteMatch } from "react-router";
-import { OverviewBanner, PoolInfoCard } from "./components";
+import { OverviewBanner, PoolsListing } from "./components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -18,6 +19,7 @@ const PoolsOverview: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
   const location = useLocation();
   const history = useHistory();
   const isPools = useRouteMatch("/pools");
+  const [searchQuery, setSearchQuery] = useState<string | undefined>();
 
   const {
     tabValue,
@@ -35,6 +37,10 @@ const PoolsOverview: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
     history.push(newValue);
   };
 
+  const onSearch = (query?: string) => {
+    setSearchQuery(query);
+  };
+
   if (!isPools) return null;
 
   return (
@@ -49,26 +55,13 @@ const PoolsOverview: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
           <Divider />
 
           <Box marginTop={4} marginBottom={2}>
-            <TextField 
-              variant="outlined" 
+            <SearchInput
               placeholder="Search Pool"
+              onSearch={onSearch}
               fullWidth />
           </Box>
-          
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <PoolInfoCard />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <PoolInfoCard />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <PoolInfoCard />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <PoolInfoCard />
-            </Grid>
-          </Grid>
+
+          <PoolsListing query={searchQuery} />
         </Container>
       </Box>
       {children}

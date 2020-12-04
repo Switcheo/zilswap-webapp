@@ -2,6 +2,7 @@ import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import { useMoneyFormatter } from "app/utils";
+import { BIG_ZERO } from "app/utils/contants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import React from "react";
@@ -10,7 +11,8 @@ import Text from "../Text";
 
 interface Props extends BoxProps {
   currency: string;
-  amount: BigNumber;
+  amount?: BigNumber;
+  compression?: number;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -23,8 +25,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 const AmountLabel: React.FC<Props> = (props: Props) => {
-  const { children, className, amount, currency, ...rest } = props;
-  const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5, currency, showCurrency: true });
+  const { children, className, amount = BIG_ZERO, currency, compression, ...rest } = props;
+  const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5, currency, showCurrency: true, compression });
   const classes = useStyles();
 
   return (
