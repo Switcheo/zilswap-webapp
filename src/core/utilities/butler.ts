@@ -38,6 +38,7 @@ const mapZilswapToken = (zilswapToken: TokenDetails): TokenInfo => {
     decimals: zilswapToken.decimals,
     symbol: zilswapToken.symbol,
     name: "",
+    // name: zilswapToken.name,
     balance: undefined,
     balances: {},
     allowances: {},

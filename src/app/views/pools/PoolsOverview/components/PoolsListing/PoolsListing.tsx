@@ -1,10 +1,10 @@
-import { Box, BoxProps, Grid } from "@material-ui/core";
+import { Box, BoxProps, Button, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Text } from "app/components";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import PoolInfoCard from "../PoolInfoCard";
 
@@ -17,10 +17,25 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
+interface ListingLimits {
+  registered: number;
+  others: number;
+};
+
+const initialLimits = {
+  registered: 4,
+  others: 2,
+};
+
 const PoolsListing: React.FC<Props> = (props: Props) => {
   const { children, className, query, ...rest } = props;
+  const [limits, setLimits] = useState<ListingLimits>(initialLimits)
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const classes = useStyles();
+
+  useEffect(() => {
+    setLimits(initialLimits);
+  }, [query]);
 
   const {
     registeredTokens,
@@ -53,26 +68,53 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
       });
 
     return result;
-  }, [tokenState.tokens, query])
+  }, [tokenState.tokens, query]);
+
+  const onLoadMore = (key: keyof ListingLimits) => {
+    return () => {
+      setLimits({
+        ...limits,
+        [key]: limits[key] + 10,
+      });
+    };
+  };
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <Text variant="h2" margin={2}>Registered Pools</Text>
+      <Text variant="h2" margin={2}>Registered Pools ({registeredTokens.length})</Text>
       <Grid container spacing={2}>
-        {registeredTokens?.map((token) => (
+        {registeredTokens.slice(0, limits.registered).map((token) => (
           <Grid key={token.address} item xs={12} md={6}>
             <PoolInfoCard token={token} />
           </Grid>
         ))}
       </Grid>
-      <Text variant="h2" margin={2}>Other Pools</Text>
+      <Box display="flex" justifyContent="center" marginY={4} marginX={1}>
+        <Button
+          disabled={registeredTokens.length <= limits.registered}
+          variant="contained"
+          color="primary"
+          onClick={onLoadMore("registered")}>
+          Load more
+        </Button>
+      </Box>
+      <Text variant="h2" margin={2}>Other Pools ({otherTokens.length})</Text>
       <Grid container spacing={2}>
-        {otherTokens?.map((token) => (
+        {otherTokens.slice(0, limits.others).map((token) => (
           <Grid key={token.address} item xs={12} md={6}>
             <PoolInfoCard token={token} />
           </Grid>
         ))}
       </Grid>
+      <Box display="flex" justifyContent="center" marginY={4} marginX={1}>
+        <Button
+          disabled={otherTokens.length <= limits.others}
+          variant="contained"
+          color="primary"
+          onClick={onLoadMore("others")}>
+          Load more
+        </Button>
+      </Box>
     </Box>
   );
 };
