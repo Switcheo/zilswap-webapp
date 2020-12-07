@@ -1,6 +1,6 @@
 import { Box, BoxProps, Container, Grid } from "@material-ui/core";
-import { ArrowDropUpRounded } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
+import { ArrowDropUpRounded } from "@material-ui/icons";
 import { StatsCard, Text } from "app/components";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const OverviewBanner: React.FC<Props> = (props: Props) => {
+const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
   return (
@@ -88,4 +88,4 @@ const OverviewBanner: React.FC<Props> = (props: Props) => {
   );
 };
 
-export default OverviewBanner;
+export default PoolsOverviewBanner;

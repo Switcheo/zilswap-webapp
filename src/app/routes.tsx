@@ -12,6 +12,10 @@ const routes: RouteConfig[] = [{
     exact: true,
     component: lazy(() => import('./views/pools/PoolsOverview'))
   }, {
+    path: '/pools/transactions',
+    exact: true,
+    component: lazy(() => import('./views/pools/PoolTransactions'))
+  }, {
     component: () => <Redirect to="/pools/overview"></Redirect>
   }]
 }, {

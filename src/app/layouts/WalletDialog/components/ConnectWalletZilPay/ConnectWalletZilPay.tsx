@@ -111,8 +111,12 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
                 </InputLabel>
                 <br />
                 <Typography color="textPrimary" variant="body2" align="center">
-                  New to ZilPay? Download it <Link
-                    rel="noopener noreferrer" target="_blank" href="https://chrome.google.com/webstore/detail/zilpay/klnaejjgbibmhlephnhpmaofohgkpgkd">
+                  New to ZilPay? Download it
+                  {" "}
+                  <Link
+                    rel="noopener noreferrer" 
+                    target="_blank" 
+                    href="https://chrome.google.com/webstore/detail/zilpay/klnaejjgbibmhlephnhpmaofohgkpgkd">
                     here
                   </Link>!
                 </Typography>

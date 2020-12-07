@@ -40,6 +40,7 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
       <DialogContent className={classes.extraSpacious}>
         <Typography color="textPrimary" variant="body2" align="center">
           No wallet yet? Download ZilPay
+          {" "}
           <Link rel="noopener noreferrer" target="_blank" href="https://chrome.google.com/webstore/detail/zilpay/klnaejjgbibmhlephnhpmaofohgkpgkd">here</Link>.
         </Typography>
       </DialogContent>
