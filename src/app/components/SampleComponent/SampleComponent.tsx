@@ -12,6 +12,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
 }));
+
 const SampleComponent: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();

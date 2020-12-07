@@ -119,6 +119,7 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
       <Menu
         className={classes.dropdown}
         anchorEl={menuAnchor}
+        transformOrigin={{ vertical: "bottom", horizontal: "left" }}
         keepMounted
         open={!!menuAnchor}
         onClose={onCloseMenu}>

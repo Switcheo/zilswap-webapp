@@ -1,4 +1,4 @@
-import { Box, BoxProps, Checkbox, Container, FormControlLabel, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow } from "@material-ui/core";
+import { Box, BoxProps, Checkbox, Container, FormControlLabel, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { FirstPageRounded as FirstPageIcon, KeyboardArrowLeftRounded as KeyboardArrowLeftIcon, KeyboardArrowRightRounded as KeyboardArrowRightIcon, LastPageRounded as LastPageIcon } from "@material-ui/icons";
 import { PoolRouteIcon, PoolsNavigationTabs, PoolsOverviewBanner, Text } from "app/components";
@@ -28,31 +28,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   tableBody: {
-    "& > tr:not(:last-child) td": {
-      borderBottom: `1px solid #9CCAD2`,
-    },
     "& > tr > td": {
       padding: theme.spacing(2.5),
       fontSize: "14px",
-    },
-    "& td.MuiTableCell-root": {
-      borderBottom: "none",
+      borderBottom: `1px solid #9CCAD2`,
     },
   },
   placeholderCell: {
     borderBottom: "none !important",
     padding: `${theme.spacing(2)}px !important`,
   },
-  tableFooter: {
-    "& td": {
-      paddingTop: 0,
-      paddingBottom: 0,
-      "&.MuiTableCell-root": {
-        borderBottom: "none",
-      },
-    },
-  },
 }));
+
 const PoolTransactions: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
   const [showAllTransactions, setShowAllTransactions] = useState<boolean>(true);
@@ -84,85 +71,80 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
               )} />
           </Box>
 
-          <TableContainer component={Paper} className={classes.tableSurface}>
-            <Table>
-              <TableHead className={classes.tableHead}>
-                <TableRow>
-                  <TableCell className={classes.placeholderCell} />
-                  <TableCell>Transaction</TableCell>
-                  <TableCell>Pool / Route</TableCell>
-                  <TableCell align="right">Total Value</TableCell>
-                  <TableCell align="right">Token Amount</TableCell>
-                  <TableCell align="right">Time</TableCell>
-                  <TableCell className={classes.placeholderCell} />
-                </TableRow>
-              </TableHead>
-              <TableBody className={classes.tableBody}>
-                <TableRow>
-                  <TableCell className={classes.placeholderCell} />
-                  <TableCell>Add Liquidity</TableCell>
-                  <TableCell>
-                    <Box display="flex" alignItems="center">
-                      <PoolRouteIcon route={["SWTH", "ZIL"]} marginRight={1} />
-                      <Text className={classes.text}>SWTH - ZIL</Text>
-                    </Box>
-                  </TableCell>
-                  <TableCell align="right">$4,123</TableCell>
-                  <TableCell align="right">
-                    - 1,123 SWTH
+          <Paper className={classes.tableSurface}>
+            <TableContainer>
+              <Table>
+                <TableHead className={classes.tableHead}>
+                  <TableRow>
+                    <TableCell className={classes.placeholderCell} />
+                    <TableCell>Transaction</TableCell>
+                    <TableCell>Pool / Route</TableCell>
+                    <TableCell align="right">Total Value</TableCell>
+                    <TableCell align="right">Token Amount</TableCell>
+                    <TableCell align="right">Time</TableCell>
+                    <TableCell className={classes.placeholderCell} />
+                  </TableRow>
+                </TableHead>
+                <TableBody className={classes.tableBody}>
+                  <TableRow>
+                    <TableCell className={classes.placeholderCell} />
+                    <TableCell>Add Liquidity</TableCell>
+                    <TableCell>
+                      <Box display="flex" alignItems="center">
+                        <PoolRouteIcon route={["SWTH", "ZIL"]} marginRight={1} />
+                        <Text className={classes.text}>SWTH - ZIL</Text>
+                      </Box>
+                    </TableCell>
+                    <TableCell align="right">$4,123</TableCell>
+                    <TableCell align="right">
+                      - 1,123 SWTH
                       <br />
                       - 123 DAI
                   </TableCell>
-                  <TableCell align="right">
-                    14 minutes ago
+                    <TableCell align="right">
+                      14 minutes ago
                     </TableCell>
-                  <TableCell className={classes.placeholderCell} />
-                </TableRow>
-                <TableRow>
-                  <TableCell className={classes.placeholderCell} />
-                  <TableCell>Swap SWTH for DAI</TableCell>
-                  <TableCell>
-                    <Box display="flex" alignItems="center">
-                      <PoolRouteIcon route={["SWTH", "ZIL", "DAI"]} marginRight={1} />
-                      <Text className={classes.text}>SWTH - ZIL - DAI</Text>
-                    </Box>
-                  </TableCell>
-                  <TableCell align="right">$4,123</TableCell>
-                  <TableCell align="right">
-                    - 1,123 SWTH
+                    <TableCell className={classes.placeholderCell} />
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className={classes.placeholderCell} />
+                    <TableCell>Swap SWTH for DAI</TableCell>
+                    <TableCell>
+                      <Box display="flex" alignItems="center">
+                        <PoolRouteIcon route={["SWTH", "ZIL", "DAI"]} marginRight={1} />
+                        <Text className={classes.text}>SWTH - ZIL - DAI</Text>
+                      </Box>
+                    </TableCell>
+                    <TableCell align="right">$4,123</TableCell>
+                    <TableCell align="right">
+                      - 1,123 SWTH
                       <br />
                       + 123 DAI
                     </TableCell>
-                  <TableCell align="right">
-                    14 minutes ago
+                    <TableCell align="right">
+                      14 minutes ago
                     </TableCell>
-                  <TableCell className={classes.placeholderCell} />
-                </TableRow>
-              </TableBody>
+                    <TableCell className={classes.placeholderCell} />
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
 
-              <TableFooter className={classes.tableFooter}>
-                <TableRow>
-                  <TableCell colSpan={42}>
-                    <Box display="flex" justifyContent="flex-end">
-                      <IconButton>
-                        <FirstPageIcon color="primary" />
-                      </IconButton>
-                      <IconButton>
-                        <KeyboardArrowLeftIcon color="primary" />
-                      </IconButton>
-                      <IconButton>
-                        <KeyboardArrowRightIcon color="primary" />
-                      </IconButton>
-                      <IconButton>
-                        <LastPageIcon color="primary" />
-                      </IconButton>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </TableContainer>
-
+            <Box display="flex" justifyContent="flex-end" paddingRight={4}>
+              <IconButton>
+                <FirstPageIcon color="primary" />
+              </IconButton>
+              <IconButton>
+                <KeyboardArrowLeftIcon color="primary" />
+              </IconButton>
+              <IconButton>
+                <KeyboardArrowRightIcon color="primary" />
+              </IconButton>
+              <IconButton>
+                <LastPageIcon color="primary" />
+              </IconButton>
+            </Box>
+          </Paper>
         </Container>
       </Box>
     </Page>
