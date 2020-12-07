@@ -5,6 +5,8 @@ import React from "react";
 
 const useStyles = makeStyles(theme => ({
   root: {
+    whiteSpace: "nowrap",
+    maxWidth: "100%",
     flex: 1,
     display: "flex",
     flexDirection: "column",

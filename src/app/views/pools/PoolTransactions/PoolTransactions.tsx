@@ -47,6 +47,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& td": {
       paddingTop: 0,
       paddingBottom: 0,
+      "&.MuiTableCell-root": {
+        borderBottom: "none",
+      },
     },
   },
 }));
