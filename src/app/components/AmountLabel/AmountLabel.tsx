@@ -13,6 +13,8 @@ interface Props extends BoxProps {
   currency: string;
   amount?: BigNumber;
   compression?: number;
+  hideIcon?: boolean;
+  prefix?: string;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -25,14 +27,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 const AmountLabel: React.FC<Props> = (props: Props) => {
-  const { children, className, amount = BIG_ZERO, currency, compression, ...rest } = props;
+  const { children, className, amount = BIG_ZERO, currency, prefix, hideIcon = false, compression, ...rest } = props;
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5, currency, showCurrency: true, compression });
   const classes = useStyles();
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <CurrencyLogo className={classes.currencyLogo} currency={currency} />
-      <Text>{moneyFormat(amount)}</Text>
+      {!hideIcon && (
+        <CurrencyLogo className={classes.currencyLogo} currency={currency} />
+      )}
+      <Text>{prefix}{moneyFormat(amount)}</Text>
     </Box>
   );
 };

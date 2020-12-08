@@ -1,11 +1,16 @@
-import { Box, BoxProps, Checkbox, Container, FormControlLabel, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import { Box, BoxProps, Checkbox, CircularProgress, Container, FormControlLabel, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { FirstPageRounded as FirstPageIcon, KeyboardArrowLeftRounded as KeyboardArrowLeftIcon, KeyboardArrowRightRounded as KeyboardArrowRightIcon, LastPageRounded as LastPageIcon } from "@material-ui/icons";
-import { PoolRouteIcon, PoolsNavigationTabs, PoolsOverviewBanner, Text } from "app/components";
+import { KeyboardArrowLeftRounded as KeyboardArrowLeftIcon, KeyboardArrowRightRounded as KeyboardArrowRightIcon } from "@material-ui/icons";
+import { PoolsNavigationTabs, PoolsOverviewBanner, Text } from "app/components";
 import Page from "app/layouts/Page";
 import { AppTheme } from "app/theme/types";
+import { useAsyncTask } from "app/utils";
 import cls from "classnames";
-import React, { useState } from "react";
+import { ViewBlock, ZilTransaction } from "core/utilities";
+import { ZilswapConnector } from "core/zilswap";
+import React, { useEffect, useState } from "react";
+import { CONTRACTS as ZilswapContract } from "zilswap-sdk/lib/constants";
+import { AddRemoveLiquidityRow, SwapTxRow } from "./components";
 
 interface Props extends BoxProps {
 
@@ -17,6 +22,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   tableSurface: {
     borderRadius: 4,
     boxShadow: theme.palette.cardBoxShadow,
+    position: "relative",
   },
   text: {
     fontSize: "14px",
@@ -38,15 +44,54 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderBottom: "none !important",
     padding: `${theme.spacing(2)}px !important`,
   },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    display: "flex",
+    backgroundColor: "rgba(0,0,0, .7)",
+  },
 }));
 
 const PoolTransactions: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
+
+  const [pageNumber, setPageNumber] = useState<number>(1);
   const [showAllTransactions, setShowAllTransactions] = useState<boolean>(true);
+  const [transactions, setTransactions] = useState<ZilTransaction[]>([]);
+  const [runQueryEvents, queryLoading, queryError] = useAsyncTask("queryEvents");
   const classes = useStyles();
+
+  const network = ZilswapConnector.network;
+
+  useEffect(() => {
+    runQueryEvents(async () => {
+      if (!network) return;
+      const transactions = await ViewBlock.listTransactions({
+        address: ZilswapContract[network],
+        limit: 10,
+        network: network.toLowerCase(),
+        page: pageNumber,
+      });
+
+      setTransactions(transactions)
+    })
+
+    // eslint-disable-next-line
+  }, [network, pageNumber]);
 
   const onChangeShowAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     setShowAllTransactions(!event.target.checked);
+  };
+
+  const onPage = (change: number) => {
+    return (event: React.MouseEvent) => {
+      setPageNumber(Math.max(pageNumber + change, 0));
+    };
   };
 
   return (
@@ -71,8 +116,17 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
               )} />
           </Box>
 
+          {!!queryError && (
+            <Text marginY={2} color="error">Query Error: {queryError}</Text>
+          )}
+
           <Paper className={classes.tableSurface}>
             <TableContainer>
+              {queryLoading && (
+                <Box className={classes.overlay}>
+                  <CircularProgress />
+                </Box>
+              )}
               <Table>
                 <TableHead className={classes.tableHead}>
                   <TableRow>
@@ -86,63 +140,34 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
                   </TableRow>
                 </TableHead>
                 <TableBody className={classes.tableBody}>
-                  <TableRow>
-                    <TableCell className={classes.placeholderCell} />
-                    <TableCell>Add Liquidity</TableCell>
-                    <TableCell>
-                      <Box display="flex" alignItems="center">
-                        <PoolRouteIcon route={["SWTH", "ZIL"]} marginRight={1} />
-                        <Text className={classes.text}>SWTH - ZIL</Text>
-                      </Box>
-                    </TableCell>
-                    <TableCell align="right">$4,123</TableCell>
-                    <TableCell align="right">
-                      - 1,123 SWTH
-                      <br />
-                      - 123 DAI
-                  </TableCell>
-                    <TableCell align="right">
-                      14 minutes ago
-                    </TableCell>
-                    <TableCell className={classes.placeholderCell} />
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className={classes.placeholderCell} />
-                    <TableCell>Swap SWTH for DAI</TableCell>
-                    <TableCell>
-                      <Box display="flex" alignItems="center">
-                        <PoolRouteIcon route={["SWTH", "ZIL", "DAI"]} marginRight={1} />
-                        <Text className={classes.text}>SWTH - ZIL - DAI</Text>
-                      </Box>
-                    </TableCell>
-                    <TableCell align="right">$4,123</TableCell>
-                    <TableCell align="right">
-                      - 1,123 SWTH
-                      <br />
-                      + 123 DAI
-                    </TableCell>
-                    <TableCell align="right">
-                      14 minutes ago
-                    </TableCell>
-                    <TableCell className={classes.placeholderCell} />
-                  </TableRow>
+                  {transactions.map((transaction) => (
+                    <React.Fragment key={transaction.hash}>
+                      {["SwapExactTokensForZIL", "SwapExactZILForTokens", "SwapExactTokensForTokens"].includes(transaction.data?._tag ?? "") && (
+                        <SwapTxRow transaction={transaction} />
+                      )}
+                      {["AddLiquidity", "RemoveLiquidity"].includes(transaction.data?._tag ?? "") && (
+                        <AddRemoveLiquidityRow transaction={transaction} />
+                      )}
+                    </React.Fragment>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>
 
-            <Box display="flex" justifyContent="flex-end" paddingRight={4}>
-              <IconButton>
+            <Box display="flex" justifyContent="flex-end" alignItems="center" paddingRight={4}>
+              {/* <IconButton>
                 <FirstPageIcon color="primary" />
-              </IconButton>
-              <IconButton>
+              </IconButton> */}
+              <IconButton disabled={pageNumber === 1} onClick={onPage(-1)}>
                 <KeyboardArrowLeftIcon color="primary" />
               </IconButton>
-              <IconButton>
+              <Text>{pageNumber}</Text>
+              <IconButton onClick={onPage(+1)}>
                 <KeyboardArrowRightIcon color="primary" />
               </IconButton>
-              <IconButton>
+              {/* <IconButton>
                 <LastPageIcon color="primary" />
-              </IconButton>
+              </IconButton> */}
             </Box>
           </Paper>
         </Container>
