@@ -1,10 +1,15 @@
-import { Box, Card, CardContent, CardProps, Divider } from "@material-ui/core";
+import { Box, Card, CardContent, CardProps, Divider, IconButton, Menu, MenuItem } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { MoreVertOutlined } from "@material-ui/icons";
 import { AmountLabel, KeyValueDisplay, PoolLogo, Text } from "app/components";
+import { actions } from "app/store";
 import { TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React from "react";
+import { ZilswapConnector } from "core/zilswap";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useHistory } from "react-router";
 
 interface Props extends CardProps {
   token: TokenInfo;
@@ -32,13 +37,40 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   thinSubtitle: {
     fontWeight: 400,
   },
+
+  dropdown: {
+    "& .MuiMenu-list": {
+      padding: theme.spacing(.5),
+    },
+  },
+  dropdownItem: {
+    borderRadius: theme.spacing(.5),
+    minWidth: theme.spacing(15),
+  },
 }));
 
 const PoolInfoCard: React.FC<Props> = (props: Props) => {
   const { children, className, token, ...rest } = props;
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const classes = useStyles();
 
   if (token.isZil) return null;
+
+  const onShowActions = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setMenuAnchor(event.currentTarget);
+  };
+  const onCloseActions = () => {
+    setMenuAnchor(null);
+  };
+
+  const onGotoAddLiquidity = () => {
+    const network = ZilswapConnector.network;
+    dispatch(actions.Pool.select({ network, token }));
+    dispatch(actions.Layout.showPoolType("add"));
+    history.push("/pool");
+  }
 
   return (
     <Card {...rest} className={cls(classes.root, className)}>
@@ -46,6 +78,23 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
         <Box display="flex" alignItems="center">
           <PoolLogo className={classes.poolIcon} pair={[token.symbol, "ZIL"]} />
           <Text variant="h2">{token.symbol} - ZIL</Text>
+          <Box flex={1} />
+          <IconButton onClick={onShowActions} size="small">
+            <MoreVertOutlined />
+          </IconButton>
+          <Menu
+            className={classes.dropdown}
+            anchorEl={menuAnchor}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+            keepMounted
+            open={!!menuAnchor}
+            onClose={onCloseActions}>
+            <MenuItem
+              className={classes.dropdownItem}
+              onClick={onGotoAddLiquidity}>
+              Add Liquidity
+            </MenuItem>
+          </Menu>
         </Box>
       </CardContent>
       <CardContent className={classes.content}>

@@ -79,8 +79,8 @@ const AddRemoveLiquidityRow: React.FC<Props> = (props: Props) => {
       </TableCell>
       <TableCell>
         <Box display="flex" alignItems="center">
-          <PoolRouteIcon route={[poolToken.symbol, zilToken.symbol]} marginRight={1} />
-          <Text className={classes.text}>{poolToken.symbol} {zilToken.symbol}</Text>
+          <PoolRouteIcon route={[poolToken?.symbol, zilToken.symbol]} marginRight={1} />
+          <Text className={classes.text}>{poolToken?.symbol} {zilToken.symbol}</Text>
         </Box>
       </TableCell>
       <TableCell align="right">$4,123</TableCell>
@@ -95,8 +95,8 @@ const AddRemoveLiquidityRow: React.FC<Props> = (props: Props) => {
           hideIcon
           justifyContent="flex-end"
           amount={tokenAmount}
-          currency={poolToken.symbol}
-          compression={poolToken.decimals} />
+          currency={poolToken?.symbol}
+          compression={poolToken?.decimals} />
       </TableCell>
       <TableCell align="right">
         {transaction.timestamp?.fromNow()}
