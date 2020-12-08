@@ -20,7 +20,7 @@ const useStyles = makeStyles(theme => ({
     },
   },
 }));
-const SampleComponent: React.FC<ButtonGroupProps> = (props: ButtonGroupProps) => {
+const PoolToggleButton: React.FC<ButtonGroupProps> = (props: ButtonGroupProps) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -40,13 +40,13 @@ const SampleComponent: React.FC<ButtonGroupProps> = (props: ButtonGroupProps) =>
         Add
       </Button>
       <Button
-        onClick={() => onTypeChange("remove")}
-        variant={poolType === "remove" ? "contained" : "outlined"}
+        onClick={() => onTypeChange("manage")}
+        variant={poolType === "manage" ? "contained" : "outlined"}
         className={classes.button}>
-        Remove
+        Manage
       </Button>
     </ButtonGroup>
   );
 };
 
-export default SampleComponent;
+export default PoolToggleButton;

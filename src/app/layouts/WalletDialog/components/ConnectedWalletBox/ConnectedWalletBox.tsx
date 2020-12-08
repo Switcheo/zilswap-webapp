@@ -46,14 +46,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginRight: 8,
   },
   copy: {
-    marginLeft: 10
+    marginLeft: 10,
   },
   newLink: {
-    marginLeft: 4
+    marginLeft: 4,
   },
   newLinkTransaction: {
     marginLeft: 6,
-    height: 10
+    height: 10,
   },
   divider: {
     marginTop: 12,

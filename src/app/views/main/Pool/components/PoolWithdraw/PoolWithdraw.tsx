@@ -1,9 +1,10 @@
 
-import { Box, Divider, InputLabel, Typography } from "@material-ui/core";
+import { Box, Button, Divider, InputLabel, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { ArrowBack } from "@material-ui/icons";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { ContrastBox, CurrencyInput, ExpiryField, FancyButton, KeyValueDisplay, ProportionSelect, SlippageField } from "app/components";
+import { ContrastBox, CurrencyInput, ExpiryField, FancyButton, KeyValueDisplay, ProportionSelect, SlippageField, Text } from "app/components";
 import { actions } from "app/store";
 import { LayoutState, PoolFormState, RootState, SwapFormState, TokenInfo, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -45,6 +46,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginTop: theme.spacing(4),
     marginBottom: theme.spacing(4),
     height: 46
+  },
+  backButton: {
+    borderRadius: theme.spacing(.5),
+    marginLeft: theme.spacing(-2),
   },
   readOnly: {
     backgroundColor: theme.palette.background.readOnly,
@@ -227,6 +232,10 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     });
   };
 
+  const onBack = () => {
+    dispatch(actions.Layout.showPoolType("manage"));
+  };
+
   const onDoneEditing = () => {
     setFormState({
       ...formState,
@@ -239,11 +248,18 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   return (
     <Box display="flex" flexDirection="column"  {...rest} className={clsx(classes.root, className)}>
       <Box className={classes.container}>
+        <Box display="flex" justifyContent="flex-start" alignItems="center" marginY={4}>
+          <Button variant="text" onClick={onBack} className={classes.backButton}>
+            <ArrowBack color="disabled" />
+            <Text variant="h3" marginLeft={1}>Remove Liquidity</Text>
+          </Button>
+        </Box>
+
         <CurrencyInput
           hideBalance
           showCurrencyDialog={currencyDialogOverride}
           onCloseDialog={() => setCurrencyDialogOverride(false)}
-          label="Remove"
+          label="Withdraw Token"
           token={poolToken}
           amount={formState.tokenAmount}
           disabled={!poolToken}

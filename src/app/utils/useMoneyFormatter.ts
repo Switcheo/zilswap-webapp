@@ -32,7 +32,7 @@ const formatter = (inputNumber: BigNumber | number | string = 0, opts: MoneyForm
   }
   number = number.shiftedBy(-compression);
 
-  return `${number.decimalPlaces(decPlaces).toFormat()}${showCurrency ? ` ${symbol || currency}` : ""}`.trim()
+  return `${number.decimalPlaces(decPlaces).toFormat()}${showCurrency ? ` ${symbol ?? currency ?? ""}` : ""}`.trim()
 };
 
 export default function (options: MoneyFormatterOptions = {}) {

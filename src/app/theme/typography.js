@@ -15,6 +15,7 @@ export default (palette) => ({
     letterSpacing: "-0.2px",
   },
   h3: {
+    fontFamily: "Avenir Next",
     fontSize: "16px",
     lightHeight: "18px",
     fontWeight: 500

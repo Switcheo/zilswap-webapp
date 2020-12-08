@@ -7,7 +7,7 @@ import { LayoutState, OpenCloseState, PoolFormState, RootState } from "app/store
 import cls from "classnames";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolToggleButton, PoolWithdraw } from "./components";
+import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolManage, PoolToggleButton, PoolWithdraw } from "./components";
 import AddLiquidityEarnMessage from "./components/AddLiquidityEarnMessage";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
 
@@ -46,20 +46,21 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       <Notifications />
-      {!poolToken?.loading && (
-        <>
-          {!poolToken?.pool && (<NewPoolMessage token={poolToken || undefined} />)}
-        </>
+      {!poolToken?.loading && !poolToken?.pool && (
+        <NewPoolMessage token={poolToken || undefined} />
       )}
       <AddLiquidityEarnMessage />
       <Box display="flex" flexDirection="column">
-        <Box display="flex" justifyContent="space-between" mb="28px" className={classes.container}>
-          <PoolToggleButton />
-          <Button className={classes.createButton} startIcon={<PlusSVG />} onClick={() => onShowCreatePool("open")}>
-            Create Pool
-          </Button>
-        </Box>
+        {poolType !== "remove" && (
+          <Box display="flex" justifyContent="space-between" mb="28px" className={classes.container}>
+            <PoolToggleButton />
+            <Button className={classes.createButton} startIcon={<PlusSVG />} onClick={() => onShowCreatePool("open")}>
+              Create Pool
+            </Button>
+          </Box>
+        )}
         {poolType === "add" && (<PoolDeposit />)}
+        {poolType === "manage" && (<PoolManage />)}
         {poolType === "remove" && (<PoolWithdraw />)}
       </Box>
       <CreatePoolDialog open={showCreatePool} onCloseDialog={() => onShowCreatePool("close")} />

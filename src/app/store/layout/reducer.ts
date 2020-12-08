@@ -14,7 +14,7 @@ const initial_state: LayoutState = {
   liquidityEarnHidden: false,
   notification: undefined,
   network: storedNetwork,
-  showPoolType: "add",
+  showPoolType: "manage",
   loadingTasks: {},
   tasksRegistry: {},
 };

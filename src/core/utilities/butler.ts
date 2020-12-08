@@ -264,6 +264,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
           network,
           observedTxs: storeState.transaction.observingTxs,
         });
+        dispatch(actions.Layout.updateNetwork(network));
         dispatch(actions.Wallet.update({ wallet, zilpay: true }));
       } else {
         await ZilswapConnector.initialise({

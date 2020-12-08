@@ -24,5 +24,5 @@ export interface LayoutState {
   tasksRegistry: any,
 };
 
-export type PoolType = "add" | "remove";
+export type PoolType = "add" | "manage" | "remove";
 export type OpenCloseState = "open" | "close";
