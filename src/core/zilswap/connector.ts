@@ -17,7 +17,11 @@ export interface InitProps {
   network?: Network;
 };
 
-export interface ExchangeRateQueryProps {
+interface ConnectorCallProps {
+  suppressLogs?: boolean;
+};
+
+export interface ExchangeRateQueryProps extends ConnectorCallProps {
   exactOf: "in" | "out";
   tokenInID: string;
   tokenOutID: string;
@@ -360,10 +364,12 @@ export class ZilswapConnector {
     const queryFunction = props.exactOf === "in" ?
       zilswap.getRatesForInput.bind(zilswap) : zilswap.getRatesForOutput.bind(zilswap);
 
-    logger(props.exactOf);
-    logger(props.tokenInID);
-    logger(props.tokenOutID);
-    logger(props.amount.toString());
+    if (!props.suppressLogs) {
+      logger(props.exactOf);
+      logger(props.tokenInID);
+      logger(props.tokenOutID);
+      logger(props.amount.toString());
+    }
     return queryFunction(
       props.tokenInID,
       props.tokenOutID,

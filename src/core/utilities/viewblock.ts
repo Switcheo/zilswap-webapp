@@ -88,7 +88,7 @@ export class ViewBlock {
 		const url = http.path("listTransactions", { address }, { network, page, type, limit });
 		const response = await http.get({ url, headers });
 		const result = await response.json();
-		
+
 		return result.map((tx: any) => {
 			let data: ZilTxData | undefined;
 			try { data = JSON.parse(tx.data) as ZilTxData; } catch (e) {}

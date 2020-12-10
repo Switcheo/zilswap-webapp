@@ -1,8 +1,9 @@
 import { TokenActionTypes } from "./actions";
-import { TokenAddProps, TokenInitProps, TokenState, TokenUpdateProps } from "./types";
+import { TokenAddProps, TokenInitProps, TokenState, TokenUpdateProps, UpdatePriceProps } from "./types";
 
 const initial_state: TokenState = {
   initialized: false,
+  prices: {},
   tokens: {},
 };
 
@@ -46,6 +47,13 @@ const reducer = (state: TokenState = initial_state, action: any) => {
           ...state.tokens,
           [addProps.token.address]: addProps.token,
         }
+      };
+
+    case TokenActionTypes.TOKEN_UPDATE_PRICES:
+      const updatePricesProps: UpdatePriceProps = payload;
+      return {
+        ...state,
+        prices: updatePricesProps,
       };
 
     case TokenActionTypes.TOKEN_INVALIDATE:

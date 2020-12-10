@@ -117,7 +117,7 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
           </Box>
 
           {!!queryError && (
-            <Text marginY={2} color="error">Query Error: {queryError}</Text>
+            <Text marginY={2} color="error">Query Error: {queryError.message}</Text>
           )}
 
           <Paper className={classes.tableSurface}>

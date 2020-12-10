@@ -1,10 +1,11 @@
+import sagaMiddleware from "app/saga";
 import { applyMiddleware, createStore, Middleware } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
 import { createLogger } from "redux-logger";
 import thunk from "redux-thunk";
 import combinedReducers from "./reducers";
 
-const middlewares: Middleware[] = [thunk];
+const middlewares: Middleware[] = [thunk, sagaMiddleware];
 if ((!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && !process.env.REACT_APP_DISABLE_REDUX_LOGGER)
   middlewares.push(createLogger());
 

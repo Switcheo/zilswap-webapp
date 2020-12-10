@@ -83,6 +83,7 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
           const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
           swapRoute.push(zilToken.symbol, inToken.symbol);
           
+          // assumes swap route is max 2 steps
           const swapEvent2 = transaction.events.find((event, index) => index > 0 && event.name === "Swapped");
           if (swapEvent2) {
             outToken = tokenState.tokens[swapEvent2.params?.pool];

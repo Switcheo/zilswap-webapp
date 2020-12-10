@@ -27,6 +27,7 @@ export type TokenInfo = {
 
 export interface TokenState {
   initialized: boolean,
+  prices: { [index: string]: BigNumber },
   tokens: { [index: string]: TokenInfo },
 };
 
@@ -39,4 +40,8 @@ export interface TokenInitProps {
 };
 export interface TokenAddProps {
   token: TokenInfo;
+};
+
+export interface UpdatePriceProps {
+  [index: string]: BigNumber;
 };
