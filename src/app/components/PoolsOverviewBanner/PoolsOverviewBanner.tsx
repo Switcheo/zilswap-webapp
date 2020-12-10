@@ -2,11 +2,15 @@ import { Box, BoxProps, Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowDropUpRounded } from "@material-ui/icons";
 import { StatsCard, Text } from "app/components";
+import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
+import { useValueCalculators } from "app/utils";
+import { BIG_ZERO } from "app/utils/contants";
 import cls from "classnames";
 import React from "react";
+import { useSelector } from "react-redux";
 
-interface Props extends BoxProps {}
+interface Props extends BoxProps { }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -31,7 +35,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const valueCalculators = useValueCalculators();
   const classes = useStyles();
+
+  const { totalLiquidity } = React.useMemo(() => {
+
+    const totalLiquidity = Object.values(tokenState.tokens).reduce((accum, token) => {
+      const poolValue = valueCalculators.pool(tokenState.prices, token);
+      return accum.plus(poolValue);
+    }, BIG_ZERO);
+
+    return {
+      totalLiquidity,
+    };
+
+  }, [tokenState, valueCalculators]);
+
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <Box className={classes.banner}>
@@ -40,7 +60,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
           <Grid container spacing={2}>
             <Grid item xs={12} md={4}>
               <StatsCard heading="Total Value Locked">
-                <Text marginBottom={2} variant="h1" className={classes.statistic} isPlaceholder>$8,691,498</Text>
+                <Text marginBottom={2} variant="h1" className={classes.statistic}>${totalLiquidity.toFormat(2)}</Text>
                 <Box display="flex" flexDirection="row" alignItems="center">
                   <ArrowDropUpRounded className={classes.subtitleIcon} color="primary" />
                   <Text color="primary">3.0%</Text>

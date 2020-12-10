@@ -3,6 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { AmountLabel, PoolRouteIcon, Text } from "app/components";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
+import { useValueCalculators } from "app/utils";
 import { ZIL_TOKEN_NAME } from "app/utils/contants";
 import { bnOrZero } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
@@ -29,6 +30,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 const SwapTxRow: React.FC<Props> = (props: Props) => {
   const { children, className, transaction, ...rest } = props;
+  const valueCalculators = useValueCalculators();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const classes = useStyles();
 
@@ -37,6 +39,7 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
     inToken,
     outToken,
     swapRoute,
+    totalValue,
     inAmount,
     outAmount,
   } = React.useMemo(() => {
@@ -48,11 +51,13 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
     // in - into the users address (out of contract)
     // out - out of the users address (into the contract)
 
-    let inToken: TokenInfo | undefined;
-    let outToken: TokenInfo | undefined;
+    let inToken!: TokenInfo;
+    let outToken!: TokenInfo;
 
     let inAmount!: BigNumber;
     let outAmount!: BigNumber;
+
+    let totalValue!: BigNumber;
 
     if (poolAddress) {
       switch (transaction.data?._tag) {
@@ -65,6 +70,8 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
           inAmount = bnOrZero(transaction.internalTransfers?.[0]?.value);
           const transferEvent = transaction.events.find(event => event.name === "TransferFromSuccess");
           outAmount = bnOrZero(transferEvent?.params?.amount);
+
+          totalValue = valueCalculators.amount(tokenState.prices, outToken, outAmount);
           break;
         };
         case "SwapExactZILForTokens": {
@@ -76,6 +83,8 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
           outAmount = transaction.value;
           const transferEvent = transaction.events.find(event => event.name === "TransferSuccess");
           inAmount = bnOrZero(transferEvent?.params?.amount);
+
+          totalValue = valueCalculators.amount(tokenState.prices, outToken, outAmount);
           break;
         };
         case "SwapExactTokensForTokens": {
@@ -95,6 +104,9 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
 
           const transferInEvent = transaction.events.find(event => event.name === "TransferSuccess");
           inAmount = bnOrZero(transferInEvent?.params?.amount);
+
+          totalValue = valueCalculators.amount(tokenState.prices, outToken, outAmount);
+          break;
         };
       }
     }
@@ -106,8 +118,9 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
       swapRoute,
       inAmount,
       outAmount,
+      totalValue,
     };
-  }, [transaction, tokenState]);
+  }, [transaction, tokenState, valueCalculators]);
 
   return (
     <TableRow {...rest} className={cls(classes.root, className)}>
@@ -125,7 +138,9 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
               <Text className={classes.text}>{swapRoute.join(" - ")}</Text>
             </Box>
           </TableCell>
-          <TableCell align="right">$4,123</TableCell>
+          <TableCell align="right">
+            ${totalValue.toFormat(2)}
+          </TableCell>
           <TableCell align="right">
             {!!outToken && (
               <AmountLabel

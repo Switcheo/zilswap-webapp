@@ -1,4 +1,4 @@
-import { Box, BoxProps, Checkbox, CircularProgress, Container, FormControlLabel, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import { Box, BoxProps, CircularProgress, Container, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { KeyboardArrowLeftRounded as KeyboardArrowLeftIcon, KeyboardArrowRightRounded as KeyboardArrowRightIcon } from "@material-ui/icons";
 import { PoolsNavigationTabs, PoolsOverviewBanner, Text } from "app/components";
@@ -61,7 +61,7 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
 
   const [pageNumber, setPageNumber] = useState<number>(1);
-  const [showAllTransactions, setShowAllTransactions] = useState<boolean>(true);
+  // const [showAllTransactions, setShowAllTransactions] = useState<boolean>(true);
   const [transactions, setTransactions] = useState<ZilTransaction[]>([]);
   const [runQueryEvents, queryLoading, queryError] = useAsyncTask("queryEvents");
   const classes = useStyles();
@@ -84,9 +84,9 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
     // eslint-disable-next-line
   }, [network, pageNumber]);
 
-  const onChangeShowAll = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setShowAllTransactions(!event.target.checked);
-  };
+  // const onChangeShowAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setShowAllTransactions(!event.target.checked);
+  // };
 
   const onPage = (change: number) => {
     return (event: React.MouseEvent) => {
@@ -107,13 +107,13 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
 
             <Box flex={1} />
 
-            <FormControlLabel
+            {/* <FormControlLabel
               label={<Text color="textSecondary">Your Transactions Only</Text>}
               control={(
                 <Checkbox color="primary"
                   checked={!showAllTransactions}
                   onChange={onChangeShowAll} />
-              )} />
+              )} /> */}
           </Box>
 
           {!!queryError && (

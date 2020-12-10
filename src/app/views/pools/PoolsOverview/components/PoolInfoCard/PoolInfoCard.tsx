@@ -3,12 +3,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import { MoreVertOutlined } from "@material-ui/icons";
 import { AmountLabel, KeyValueDisplay, PoolLogo, Text } from "app/components";
 import { actions } from "app/store";
-import { TokenInfo } from "app/store/types";
+import { RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
+import { useValueCalculators } from "app/utils";
+import { BIG_ZERO } from "app/utils/contants";
+import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 
 interface Props extends CardProps {
@@ -53,10 +56,10 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
   const { children, className, token, ...rest } = props;
   const dispatch = useDispatch();
   const history = useHistory();
+  const valueCalculators = useValueCalculators();
+  const tokenPrices = useSelector<RootState, { [index: string]: BigNumber }>(state => state.token.prices);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const classes = useStyles();
-
-  if (token.isZil) return null;
 
   const onShowActions = (event: React.MouseEvent<HTMLButtonElement>) => {
     setMenuAnchor(event.currentTarget);
@@ -71,6 +74,21 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     dispatch(actions.Layout.showPoolType("add"));
     history.push("/pool");
   }
+
+  const { totalLiquidity } = React.useMemo(() => {
+    if (token.isZil) {
+      return { totalLiquidity: BIG_ZERO };
+    }
+
+    const totalLiquidity = valueCalculators.pool(tokenPrices, token);
+
+    return {
+      totalLiquidity,
+    };
+  }, [tokenPrices, token, valueCalculators]);
+
+
+  if (token.isZil) return null;
 
   return (
     <Card {...rest} className={cls(classes.root, className)}>
@@ -122,10 +140,10 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
 
         <Box display="flex" flexDirection="column">
           <KeyValueDisplay marginBottom={2.25} kkey="Total Liquidity" ValueComponent="span">
-            <Text isPlaceholder>$1,820,852.21</Text>
+            <Text>${totalLiquidity.toFormat(2)}</Text>
           </KeyValueDisplay>
           <KeyValueDisplay marginBottom={2.25} kkey="Volume (24hrs)" ValueComponent="span">
-            <Text isPlaceholder>$61,387,541</Text>
+            <Text isPlaceholder>-</Text>
           </KeyValueDisplay>
           <KeyValueDisplay marginBottom={2.25} kkey="Current Pool Size" ValueComponent="span">
             <Box display="flex" flexDirection="column" alignItems="flex-end">
