@@ -1,4 +1,4 @@
-import { Box, Button, Drawer, DrawerProps, List, ListItem } from "@material-ui/core";
+import { Box, Button, Chip, Drawer, DrawerProps, List, ListItem } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
@@ -69,6 +69,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   buttonLeafActive: {
     color: theme.palette.colors.zilliqa.neutral[100],
   },
+  badge: {
+    height: "auto",
+    padding: theme.spacing(.5, 1.5),
+    borderRadius: theme.spacing(.5),
+    "& .MuiChip-label": {
+      paddingLeft: 0,
+      paddingRight: 0,
+    },
+  },
 }));
 const NavDrawer: React.FC<DrawerProps> = (props: any) => {
   const { children, className, onClose, ...rest } = props;
@@ -95,6 +104,14 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
                     to={page.href}
                     exact={false}>
                     {page.title}
+                    {!!page.badge && (
+                      <Box display="flex" alignItems="center" marginLeft={2}>
+                        <Chip
+                          className={classes.badge}
+                          color="primary"
+                          label={page.badge} />
+                      </Box>
+                    )}
                   </Button>
                 ) : (
                     <Button

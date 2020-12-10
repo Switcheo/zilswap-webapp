@@ -7,6 +7,7 @@ const navigationConfig: NavigationOptions[] = [{
   }, {
     title: "Pools Overview",
     href: "/pools",
+    badge: "New",
   }, {
     title: "About",
     href: "https://docs.zilswap.org/#/?id=introduction",

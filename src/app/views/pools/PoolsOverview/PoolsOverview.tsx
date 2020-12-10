@@ -27,7 +27,7 @@ const PoolsOverview: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
       <Box marginTop={6.5}>
         <Container maxWidth="lg">
           <PoolsNavigationTabs />
-          <PoolsSearchInput onSearch={onSearch} marginTop={4} marginBottom={2} />
+          <PoolsSearchInput onSearch={onSearch} marginY={4} />
           <PoolsListing query={searchQuery} />
         </Container>
       </Box>

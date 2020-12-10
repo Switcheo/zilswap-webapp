@@ -1,5 +1,6 @@
 import { Divider, Tab, Tabs, TabsProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { TypographyOptions } from "@material-ui/core/styles/createTypography";
 import { AppTheme } from "app/theme/types";
 import clsx from "clsx";
 import React from "react";
@@ -9,6 +10,9 @@ interface Props extends Omit<TabsProps, "value"> { }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    "& .MuiTab-wrapper": {
+      ...(theme.typography as TypographyOptions).h1,
+    },
   },
   divider: {
     backgroundColor: "rgba(20, 155, 163, 0.3)",

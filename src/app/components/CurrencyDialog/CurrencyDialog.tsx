@@ -1,4 +1,5 @@
 import { Box, Button, CircularProgress, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import { SearchOutlined } from "@material-ui/icons";
 import ArrayOpenedIcon from "@material-ui/icons/ArrowDropDown";
 import ArrayClosedIcon from "@material-ui/icons/ArrowRight";
 import { DialogModal } from "app/components";
@@ -10,7 +11,6 @@ import clsx from "clsx";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { CurrencyList } from "./components";
-import { ReactComponent as SearchIcon } from "./SearchIcon.svg";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -149,7 +149,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
             onChange={(e) => setSearch(e.target.value)}
             startAdornment={
               <InputAdornment position="start">
-                <SearchIcon />
+                <SearchOutlined color="primary" />
               </InputAdornment>
             }
           />
