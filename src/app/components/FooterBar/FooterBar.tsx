@@ -1,11 +1,12 @@
-import { Box, IconButton, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Box } from "@material-ui/core";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React from "react";
-import SocialLinkGroup from "../SocialLinkGroup";
 import NetworkToggle from "../NetworkToggle";
-import { ReactComponent as SwitcheoIcon } from "./switcheo.svg";
+import SocialLinkGroup from "../SocialLinkGroup";
+import { ReactComponent as SwitcheoLogoDark } from "./SwitcheoTradehubOnDark.svg";
+import { ReactComponent as SwitcheoLogoLight } from "./SwitcheoTradehubOnLight.svg";
 
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -36,16 +37,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     justifyContent: "center",
     alignItems: "center",
     color: theme.palette.colors.zilliqa.neutral[140],
-    "& p": {
-      fontSize: 12,
-    },
-    "& a": {
-      borderRadius: 42,
-      padding: theme.spacing(1),
-    },
-    "& path": {
-      fill: theme.palette.switcheoLogo,
-    },
+    paddingTop: 4,
     [theme.breakpoints.down("xs")]: {
       justifyContent: "flex-start",
     },
@@ -55,15 +47,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const FooterBar: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
+  const theme = useTheme()
 
   return (
     <Box {...rest} className={cls(classes.root, className)} elevation={1}>
       <SocialLinkGroup className={classes.socialLinks} />
       <Box className={classes.switcheoBrand}>
-        <Typography variant="body1">By</Typography>
-        <IconButton href="https://switcheo.network">
-          <SwitcheoIcon />
-        </IconButton>
+        <a href="https://switcheo.network" target="_blank" rel="noopener noreferrer">
+          {theme.palette.type === 'light' && <SwitcheoLogoLight />}
+          {theme.palette.type === 'dark' && <SwitcheoLogoDark />}
+        </a>
       </Box>
       <NetworkToggle />
     </Box>
