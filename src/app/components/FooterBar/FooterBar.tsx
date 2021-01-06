@@ -33,6 +33,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   switcheoBrand: {
     display: "flex",
+    fontSize: theme.spacing(1.75),
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
