@@ -80,8 +80,9 @@ const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => 
 
         const token = await ZilswapConnector.addPoolToken({ address: inputAddress });
         const contract = token.contract
+        const contractInitRaw = contract.init ?? await contract.getInit();
 
-        const contractInit = zilParamsToMap(contract.init);
+        const contractInit = zilParamsToMap(contractInitRaw);
 
         const contractBalanceState = await getBalancesMap(token.contract);
 

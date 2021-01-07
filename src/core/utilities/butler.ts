@@ -189,7 +189,11 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     const zilswapTokens = ZilswapConnector.getTokens();
 
     const tokens: { [index: string]: TokenInfo } = {};
-    zilswapTokens.map(mapZilswapToken).forEach(token => tokens[token.address] = token);
+    zilswapTokens
+      .map(mapZilswapToken)
+      // uncomment to test create pool
+      // .filter(token => token.address !== "zil10a9z324aunx2qj64984vke93gjdnzlnl5exygv")
+      .forEach(token => tokens[token.address] = token);
 
     // initialize store TokenState
     dispatch(actions.Token.init({ tokens }));
