@@ -1,10 +1,11 @@
 import { SwapVolume } from "core/utilities";
 import { ActionTypes } from "./actions";
-import { PoolSwapVolumeMap, StatsState } from "./types";
+import { PoolLiquidityMap, PoolSwapVolumeMap, StatsState } from "./types";
 
 
 const initial_state: StatsState = {
   dailySwapVolumes: {},
+  liquidityChange24h: {},
 };
 
 const reducer = (state: StatsState = initial_state, actions: any) => {
@@ -21,6 +22,12 @@ const reducer = (state: StatsState = initial_state, actions: any) => {
       return {
         ...state,
         dailySwapVolumes,
+      };
+    case ActionTypes.SET_LIQUIDITY_CHANGE_24H:
+      const liquidityChange24h = actions.liquidityChange24h as PoolLiquidityMap;
+      return {
+        ...state,
+        liquidityChange24h,
       };
     default:
       return state;

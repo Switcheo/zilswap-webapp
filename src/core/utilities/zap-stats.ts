@@ -29,6 +29,11 @@ export interface SwapTransaction {
 	is_sending_zil: boolean;
 }
 
+export interface PoolLiquidity {
+	pool: string;
+	amount: BigNumber;
+}
+
 export interface SwapVolume {
 	pool: string;
 	in_zil_amount: BigNumber;
@@ -38,11 +43,11 @@ export interface SwapVolume {
 }
 
 export interface EpochInfo {
-  epoch_start: number;
-  max_epoch: number;
-  epoch_period: number;
-  next_epoch: number;
-  current_epoch: number;
+	epoch_start: number;
+	max_epoch: number;
+	epoch_period: number;
+	next_epoch: number;
+	current_epoch: number;
 }
 
 export interface QueryOptions {
@@ -112,11 +117,15 @@ export class ZAPStats {
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
-	static getLiquidity = async ({ network }: GetLiquidityOpts): Promise<any> => {
+	static getLiquidity = async ({ network, ...query }: GetLiquidityOpts): Promise<PoolLiquidity[]> => {
 		const http = ZAPStats.getApi(network);
-		const url = http.path("liquidity");
+		const url = http.path("liquidity", {}, query);
 		const response = await http.get({ url });
-		return await response.json();
+		const result = await response.json();
+		return result.map((pool: any) => ({
+			...pool,
+			amount: bnOrZero(pool.amount),
+		}));
 	}
 
 	/**

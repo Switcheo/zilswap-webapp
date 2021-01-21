@@ -137,9 +137,9 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
       <CardContent className={classes.content}>
         <Box display="flex">
           <Box display="flex" flexDirection="column" flex={1}>
-            <Text color="textSecondary" variant="subtitle2" marginBottom={1.5}>ZAP Rewards</Text>
+            <Text color="textSecondary" variant="subtitle2" marginBottom={1.5}>ZWAP Rewards</Text>
             <Box display="flex" alignItems="baseline">
-              <Text color="primary" className={classes.rewardValue} marginRight={1}>{zapRewards.toFormat()} ZAP</Text>
+              <Text color="primary" className={classes.rewardValue} marginRight={1}>{zapRewards.toFormat()} ZWAP</Text>
               <Text color="textPrimary" variant="subtitle2" className={classes.thinSubtitle}>/ next epoch</Text>
             </Box>
           </Box>

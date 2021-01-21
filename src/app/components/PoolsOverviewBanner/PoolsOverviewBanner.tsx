@@ -2,10 +2,11 @@ import { Box, BoxProps, Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowDropUpRounded } from "@material-ui/icons";
 import { StatsCard, Text } from "app/components";
-import { RewardsState, RootState, TokenState } from "app/store/types";
+import { RewardsState, RootState, StatsState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZWAP_REWARDS_PER_EPOCH } from "app/utils/constants";
+import { bnOrZero } from "app/utils/strings/strings";
 import cls from "classnames";
 import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
@@ -45,6 +46,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
+  const statsState = useSelector<RootState, StatsState>(state => state.stats);
   const valueCalculators = useValueCalculators();
   const [countdown, setCountdown] = useState<Countdown | null>(null);
   const classes = useStyles();
@@ -57,18 +59,32 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
     // eslint-disable-next-line
   }, [rewardsState.epochInfo]);
 
-  const { totalLiquidity } = React.useMemo(() => {
+  const { totalLiquidity, liquidityChangePercent } = React.useMemo(() => {
 
     const totalLiquidity = Object.values(tokenState.tokens).reduce((accum, token) => {
       const poolValue = valueCalculators.pool(tokenState.prices, token);
       return accum.plus(poolValue);
     }, BIG_ZERO);
 
+    const previousLiquidity = Object.values(tokenState.tokens).reduce((accum, token) => {
+      const liquidityChange = statsState.liquidityChange24h[token.address] ?? BIG_ZERO;
+      const totalContribution = bnOrZero(token.pool?.totalContribution);
+      const previousContribution = totalContribution.minus(liquidityChange);
+      if (previousContribution.isZero()) return accum;
+
+      const factor = previousContribution.div(totalContribution);
+      const poolValue = valueCalculators.pool(tokenState.prices, token).times(factor);
+      return accum.plus(poolValue);
+    }, BIG_ZERO);
+
+    const liquidityChangePercent = previousLiquidity.isZero() ? BIG_ZERO : (totalLiquidity.minus(previousLiquidity)).div(previousLiquidity).shiftedBy(2);
+
     return {
       totalLiquidity,
+      liquidityChangePercent,
     };
 
-  }, [tokenState, valueCalculators]);
+  }, [tokenState, valueCalculators, statsState.liquidityChange24h]);
 
   const totalRewards = useMemo(() => {
     if (!rewardsState.epochInfo) return BIG_ZERO;
@@ -105,12 +121,12 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
                 <Text marginBottom={2} variant="h1" className={classes.statistic}>${totalLiquidity.toFormat(2)}</Text>
                 <Box display="flex" flexDirection="row" alignItems="center">
                   <ArrowDropUpRounded className={classes.subtitleIcon} color="primary" />
-                  <Text color="primary">3.0%</Text>
+                  <Text color="primary">{liquidityChangePercent.toFormat(2)}%</Text>
                 </Box>
               </StatsCard>
             </Grid>
             <Grid item xs={12} md={4}>
-              <StatsCard heading="Total ZAP Rewards">
+              <StatsCard heading="Total ZWAP Rewards">
                 <Text marginBottom={2} variant="h1" className={classes.statistic}>
                   {totalRewards.toFormat(0)}
                 </Text>
