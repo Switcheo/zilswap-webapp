@@ -4,7 +4,7 @@ import { AmountLabel, PoolRouteIcon, Text } from "app/components";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
-import { ZIL_TOKEN_NAME } from "app/utils/contants";
+import { ZIL_TOKEN_NAME } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import cls from "classnames";

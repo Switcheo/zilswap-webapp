@@ -151,7 +151,7 @@ export class ZAPStats {
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
-	static getSwaps = async ({ network, ...query }: GetSwapsOpts): Promise<SwapTransaction[]> => {
+	static getSwaps = async ({ network, ...query }: GetSwapVolumeOpts): Promise<SwapTransaction[]> => {
 		const http = ZAPStats.getApi(network);
 		const url = http.path("swaps", {}, query);
 		const response = await http.get({ url });
@@ -170,7 +170,7 @@ export class ZAPStats {
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
-	static getSwapVolume = async ({ network, ...query }: GetSwapsOpts = {}): Promise<any> => {
+	static getSwapVolume = async ({ network, ...query }: GetSwapVolumeOpts = {}): Promise<any> => {
 		const http = ZAPStats.getApi(network);
 		const url = http.path("volume", {}, query);
 		const response = await http.get({ url });

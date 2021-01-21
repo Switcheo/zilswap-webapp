@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { BIG_ZERO } from "../contants";
+import { BIG_ZERO } from "../constants";
 
 export const uuidv4 = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {

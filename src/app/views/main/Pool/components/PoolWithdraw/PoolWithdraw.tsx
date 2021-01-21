@@ -9,7 +9,7 @@ import { actions } from "app/store";
 import { LayoutState, PoolFormState, RootState, SwapFormState, TokenInfo, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useMoneyFormatter } from "app/utils";
-import { BIG_ZERO, DefaultFallbackNetwork } from "app/utils/contants";
+import { BIG_ZERO, DefaultFallbackNetwork } from "app/utils/constants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";

@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { KeyValueDisplay } from "app/components";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
-import { ZIL_TOKEN_NAME } from "app/utils/contants";
+import { ZIL_TOKEN_NAME } from "app/utils/constants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import cls from "classnames";
 import React from "react";

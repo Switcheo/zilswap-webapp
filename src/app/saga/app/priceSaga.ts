@@ -1,6 +1,6 @@
 import actions from "app/store/actions";
 import { RootState, TokenInfo } from "app/store/types";
-import { BIG_ONE, PRICE_REFRESH_RATE, ZIL_TOKEN_NAME } from "app/utils/contants";
+import { BIG_ONE, PRICE_REFRESH_RATE, ZIL_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
 import { CoinGecko, CoinGeckoPriceResult } from "core/utilities/coingecko";

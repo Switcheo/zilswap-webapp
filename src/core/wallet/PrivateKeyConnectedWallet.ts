@@ -1,5 +1,5 @@
 import { Account } from "@zilliqa-js/account";
-import { DefaultFallbackNetwork } from "app/utils/contants";
+import { DefaultFallbackNetwork } from "app/utils/constants";
 import moment from "moment";
 import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectedWallet, WalletAccountInfo, WalletConnectType } from "./ConnectedWallet";

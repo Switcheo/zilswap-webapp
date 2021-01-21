@@ -3,14 +3,14 @@ import { makeStyles } from "@material-ui/core/styles";
 import { MoreVertOutlined } from "@material-ui/icons";
 import { AmountLabel, KeyValueDisplay, PoolLogo, Text } from "app/components";
 import { actions } from "app/store";
-import { PoolSwapVolumeMap, RootState, TokenInfo } from "app/store/types";
+import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
-import { BIG_ZERO } from "app/utils/contants";
+import { BIG_ZERO, POOL_WEIGHTS, TOTAL_POOL_WEIGHTS, ZIL_TOKEN_NAME, ZWAP_REWARDS_PER_EPOCH } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 
@@ -57,7 +57,8 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const valueCalculators = useValueCalculators();
-  const tokenPrices = useSelector<RootState, { [index: string]: BigNumber }>(state => state.token.prices);
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
   const swapVolumes = useSelector<RootState, PoolSwapVolumeMap>(state => state.stats.dailySwapVolumes)
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const classes = useStyles();
@@ -76,17 +77,34 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     history.push("/pool");
   }
 
-  const { totalLiquidity } = React.useMemo(() => {
+  const zapRewards = useMemo(() => {
+    const rewardWeight = POOL_WEIGHTS[token.address];
+    if (!rewardWeight) return BIG_ZERO;
+
+    const info = rewardsState.epochInfo;
+
+    // info not loaded || past rewards emission phase
+    if (!info || info.current > info.maxEpoch) 
+      return BIG_ZERO;
+
+    const rewardShare = new BigNumber(rewardWeight).div(TOTAL_POOL_WEIGHTS);
+    return ZWAP_REWARDS_PER_EPOCH.times(rewardShare).decimalPlaces(5);
+  }, [rewardsState.epochInfo, token.address]);
+
+  const { totalLiquidity, totalZilVolumeUSD } = useMemo(() => {
     if (token.isZil) {
-      return { totalLiquidity: BIG_ZERO };
+      return { totalLiquidity: BIG_ZERO, totalZilVolumeUSD: BIG_ZERO };
     }
 
-    const totalLiquidity = valueCalculators.pool(tokenPrices, token);
+    const totalLiquidity = valueCalculators.pool(tokenState.prices, token);
+    const totalZilVolume = swapVolumes[token.address]?.totalZilVolume ?? BIG_ZERO;
+    const totalZilVolumeUSD = valueCalculators.amount(tokenState.prices, tokenState.tokens[ZIL_TOKEN_NAME], totalZilVolume);
 
     return {
       totalLiquidity,
+      totalZilVolumeUSD,
     };
-  }, [tokenPrices, token, valueCalculators]);
+  }, [tokenState, token, valueCalculators, swapVolumes]);
 
 
   if (token.isZil) return null;
@@ -121,7 +139,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
           <Box display="flex" flexDirection="column" flex={1}>
             <Text color="textSecondary" variant="subtitle2" marginBottom={1.5}>ZAP Rewards</Text>
             <Box display="flex" alignItems="baseline">
-              <Text color="primary" className={classes.rewardValue} marginRight={1} isPlaceholder>281,180 ZAP</Text>
+              <Text color="primary" className={classes.rewardValue} marginRight={1}>{zapRewards.toFormat()} ZAP</Text>
               <Text color="textPrimary" variant="subtitle2" className={classes.thinSubtitle}>/ next epoch</Text>
             </Box>
           </Box>
@@ -129,7 +147,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
           <Box display="flex" flexDirection="column" flex={1}>
             <Text color="textSecondary" align="right" variant="subtitle2" marginBottom={1.5}>ROI</Text>
             <Box display="flex" alignItems="baseline" justifyContent="flex-end">
-              <Text color="textPrimary" className={classes.rewardValue} marginRight={1} isPlaceholder>1.42%</Text>
+              <Text color="textPrimary" className={classes.rewardValue} marginRight={1}>-</Text>
               <Text color="textPrimary" variant="subtitle2" className={classes.thinSubtitle}>/ daily</Text>
             </Box>
           </Box>
@@ -146,8 +164,12 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
           <KeyValueDisplay marginBottom={2.25} kkey="Volume (24hrs)" ValueComponent="span">
             <AmountLabel
               hideIcon
+              justifyContent="flex-end"
               currency="ZIL"
               amount={swapVolumes[token.address]?.totalZilVolume} />
+            <Text align="right" variant="body2" color="textSecondary">
+              ${totalZilVolumeUSD.toFormat(2)}
+            </Text>
           </KeyValueDisplay>
           <KeyValueDisplay marginBottom={2.25} kkey="Current Pool Size" ValueComponent="span">
             <Box display="flex" flexDirection="column" alignItems="flex-end">

@@ -1,6 +1,6 @@
 import { Types } from "./actions";
 import { WalletState } from "./types";
-import { LocalStorageKeys } from "app/utils/contants";
+import { LocalStorageKeys } from "app/utils/constants";
 
 const initial_state: WalletState = {
   wallet: undefined,

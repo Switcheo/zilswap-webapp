@@ -4,7 +4,7 @@ import { ArrowDropDownOutlined, ArrowDropUpOutlined } from "@material-ui/icons";
 import { AmountLabel, ContrastBox, KeyValueDisplay, PoolLogo, Text } from "app/components";
 import { TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { BIG_ZERO } from "app/utils/contants";
+import { BIG_ZERO } from "app/utils/constants";
 import { Link } from "react-router-dom";
 import cls from "classnames";
 import React, { useState } from "react";

@@ -5,10 +5,10 @@ import { StatsCard, Text } from "app/components";
 import { RewardsState, RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
-import { BIG_ZERO } from "app/utils/contants";
+import { BIG_ZERO, ZWAP_REWARDS_PER_EPOCH } from "app/utils/constants";
 import cls from "classnames";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
 interface Props extends BoxProps { }
@@ -70,6 +70,11 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
 
   }, [tokenState, valueCalculators]);
 
+  const totalRewards = useMemo(() => {
+    if (!rewardsState.epochInfo) return BIG_ZERO;
+    return ZWAP_REWARDS_PER_EPOCH.times(rewardsState.epochInfo.current);
+  }, [rewardsState.epochInfo])
+
   const updateCountdown = () => {
     if (!rewardsState.epochInfo) return setCountdown(null);
 
@@ -106,7 +111,9 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
             </Grid>
             <Grid item xs={12} md={4}>
               <StatsCard heading="Total ZAP Rewards">
-                <Text marginBottom={2} variant="h1" className={classes.statistic} isPlaceholder>482,494</Text>
+                <Text marginBottom={2} variant="h1" className={classes.statistic}>
+                  {totalRewards.toFormat(0)}
+                </Text>
                 <Box alignItems="center" display="flex" className={classes.subtitle}>
                   <Text color="textSecondary">until next epoch</Text>
                 </Box>

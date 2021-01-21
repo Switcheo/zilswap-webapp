@@ -2,7 +2,7 @@ import { Box, BoxProps, InputLabel, makeStyles, OutlinedInput, Typography } from
 import { KeyValueDisplay, LoadableArea } from "app/components";
 import { RootState, TokenBalanceMap, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
-import { PlaceholderStrings } from "app/utils/contants";
+import { PlaceholderStrings } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { zilParamsToMap } from "core/utilities";

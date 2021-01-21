@@ -11,7 +11,7 @@ import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { strings, useAsyncTask, useMoneyFormatter } from "app/utils";
-import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, PlaceholderStrings, ZIL_TOKEN_NAME } from "app/utils/contants";
+import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, PlaceholderStrings, ZIL_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";

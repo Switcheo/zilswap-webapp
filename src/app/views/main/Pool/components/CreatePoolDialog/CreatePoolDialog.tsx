@@ -3,7 +3,7 @@ import { DialogModal, FancyButton } from "app/components";
 import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
-import { BIG_ZERO, PlaceholderStrings } from "app/utils/contants";
+import { BIG_ZERO, PlaceholderStrings } from "app/utils/constants";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";

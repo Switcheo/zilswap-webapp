@@ -1,6 +1,6 @@
 import { TokenInfo } from "app/store/types";
 import BigNumber from "bignumber.js";
-import { BIG_ZERO } from "./contants";
+import { BIG_ZERO } from "./constants";
 
 const valueCalculators = {
   pool: (prices: { [index: string]: BigNumber }, token: TokenInfo) => {

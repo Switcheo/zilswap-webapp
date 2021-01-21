@@ -5,7 +5,7 @@ import CurrencyLogo from "app/components/CurrencyLogo";
 import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
-import { BIG_ZERO } from "app/utils/contants";
+import { BIG_ZERO } from "app/utils/constants";
 import useStatefulTask from "app/utils/useStatefulTask";
 import BigNumber from "bignumber.js";
 import cls from "classnames";

@@ -1,4 +1,4 @@
-import { DefaultFallbackNetwork, LocalStorageKeys } from "app/utils/contants";
+import { DefaultFallbackNetwork, LocalStorageKeys } from "app/utils/constants";
 import moment from "moment";
 import { Network } from "zilswap-sdk/lib/constants";
 import { ActionTypes } from "./actions";

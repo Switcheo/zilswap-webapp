@@ -9,7 +9,7 @@ import { APIS, Network } from 'zilswap-sdk/lib/constants';
 import { ConnectWalletResult } from "./ConnectedWallet";
 import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
 import { ZilPayConnectedWallet } from "./ZilPayConnectedWallet";
-import { DefaultFallbackNetwork, ZilPayNetworkMap } from "app/utils/contants";
+import { DefaultFallbackNetwork, ZilPayNetworkMap } from "app/utils/constants";
 
 export const parseBalanceResponse = (balanceRPCResponse: RPCResponse<any, string>) => {
   let balanceResult = null;

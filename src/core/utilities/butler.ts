@@ -2,7 +2,7 @@ import { Value } from "@zilliqa-js/contract";
 import { actions } from "app/store";
 import { LayoutState, RootState, TokenInfo, TokenState, Transaction, WalletState } from "app/store/types";
 import { strings, useAsyncTask } from "app/utils";
-import { LocalStorageKeys, ZilPayNetworkMap, ZIL_TOKEN_NAME } from "app/utils/contants";
+import { LocalStorageKeys, ZilPayNetworkMap, ZIL_TOKEN_NAME } from "app/utils/constants";
 import useStatefulTask from "app/utils/useStatefulTask";
 import BigNumber from "bignumber.js";
 import { connectWalletPrivateKey, ConnectWalletResult, connectWalletZilPay, parseBalanceResponse } from "core/wallet";

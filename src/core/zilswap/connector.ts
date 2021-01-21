@@ -1,6 +1,6 @@
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { Zilliqa } from "@zilliqa-js/zilliqa";
-import { BIG_ZERO, DefaultFallbackNetwork } from "app/utils/contants";
+import { BIG_ZERO, DefaultFallbackNetwork } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";

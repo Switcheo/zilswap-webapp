@@ -1,5 +1,5 @@
 import { ZilswapConnector } from "core/zilswap";
-import { DefaultFallbackNetwork } from "./contants";
+import { DefaultFallbackNetwork } from "./constants";
 
 export type GetNetworkOptions = {
   zilswapFormat?: boolean;

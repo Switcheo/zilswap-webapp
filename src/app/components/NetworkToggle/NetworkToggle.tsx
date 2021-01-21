@@ -5,7 +5,7 @@ import ArrowUpIcon from "@material-ui/icons/ArrowDropUp";
 import { actions } from "app/store";
 import { RootState, WalletState } from "app/store/types";
 import { useAsyncTask, useTaskSubscriber } from "app/utils";
-import { LoadingKeys } from "app/utils/contants";
+import { LoadingKeys } from "app/utils/constants";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useEffect } from "react";

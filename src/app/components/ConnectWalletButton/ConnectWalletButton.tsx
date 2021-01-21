@@ -9,7 +9,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import LoadableArea from "../LoadableArea";
 import { ReactComponent as DotIcon } from "./dot.svg";
-import { LoadingKeys } from "app/utils/contants";
+import { LoadingKeys } from "app/utils/constants";
 
 const useStyles = makeStyles(theme => ({
   root: {

@@ -5,7 +5,7 @@ import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect, Stateful
 import { actions } from "app/store";
 import { LayoutState, PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { useAsyncTask, useMoneyFormatter, strings } from "app/utils";
-import { BIG_ZERO, DefaultFallbackNetwork, ZIL_TOKEN_NAME } from "app/utils/contants";
+import { BIG_ZERO, DefaultFallbackNetwork, ZIL_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";

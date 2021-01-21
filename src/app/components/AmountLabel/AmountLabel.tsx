@@ -2,7 +2,7 @@ import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import { useMoneyFormatter } from "app/utils";
-import { BIG_ZERO } from "app/utils/contants";
+import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import React from "react";

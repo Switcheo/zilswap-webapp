@@ -5,7 +5,7 @@ import ArrayClosedIcon from "@material-ui/icons/ArrowRight";
 import { DialogModal } from "app/components";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useTaskSubscriber } from "app/utils";
-import { BIG_ZERO, LoadingKeys, sortTokens } from "app/utils/contants";
+import { BIG_ZERO, LoadingKeys, sortTokens } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
 import React, { useEffect, useState } from "react";
