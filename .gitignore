@@ -9,7 +9,7 @@
 # misc
 .DS_Store
 
-.env.*.local
+.env*.local
 
 production.toml
 local.toml

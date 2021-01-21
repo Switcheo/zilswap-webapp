@@ -2,14 +2,18 @@ import actions from "app/store/actions";
 import { RootState, TokenInfo } from "app/store/types";
 import { BIG_ONE, PRICE_REFRESH_RATE, ZIL_TOKEN_NAME } from "app/utils/contants";
 import BigNumber from "bignumber.js";
+import { logger } from "core/utilities";
 import { CoinGecko, CoinGeckoPriceResult } from "core/utilities/coingecko";
 import { ZilswapConnector } from "core/zilswap";
 import { call, delay, put, select } from "redux-saga/effects";
 
 export default function* priceSaga() {
+  logger("init price saga");
   const coinGeckoZilName = "zilliqa";
   const coinGeckoQuoteDenom = "usd";
+
   while (true) {
+    logger("run price saga");
     try {
       const tokens = (yield select((state: RootState) => state.token.tokens)) as unknown as { [index: string]: TokenInfo };
       const zilToken = tokens[ZIL_TOKEN_NAME] as TokenInfo;

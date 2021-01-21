@@ -40,5 +40,6 @@ export const sortTokens = (lhs: TokenInfo, rhs: TokenInfo) => {
 };
 
 export const PRICE_REFRESH_RATE = 10000; // ms
+export const STATS_REFRESH_RATE = 5000; // ms
 
 export const ZIL_TOKEN_NAME = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";

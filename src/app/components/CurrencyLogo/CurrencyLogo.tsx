@@ -9,6 +9,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     width: 28,
     display: "flex",
+    background: "#fff",
+    border: `1px solid ${theme.palette.primary.main}`,
+    borderRadius: 14,
+    padding: 4,
   },
   svg: {
     maxWidth: "100%",

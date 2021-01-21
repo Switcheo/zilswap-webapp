@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { MoreVertOutlined } from "@material-ui/icons";
 import { AmountLabel, KeyValueDisplay, PoolLogo, Text } from "app/components";
 import { actions } from "app/store";
-import { RootState, TokenInfo } from "app/store/types";
+import { PoolSwapVolumeMap, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/contants";
@@ -58,6 +58,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
   const history = useHistory();
   const valueCalculators = useValueCalculators();
   const tokenPrices = useSelector<RootState, { [index: string]: BigNumber }>(state => state.token.prices);
+  const swapVolumes = useSelector<RootState, PoolSwapVolumeMap>(state => state.stats.dailySwapVolumes)
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const classes = useStyles();
 
@@ -143,7 +144,10 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
             <Text>${totalLiquidity.toFormat(2)}</Text>
           </KeyValueDisplay>
           <KeyValueDisplay marginBottom={2.25} kkey="Volume (24hrs)" ValueComponent="span">
-            <Text isPlaceholder>-</Text>
+            <AmountLabel
+              hideIcon
+              currency="ZIL"
+              amount={swapVolumes[token.address]?.totalZilVolume} />
           </KeyValueDisplay>
           <KeyValueDisplay marginBottom={2.25} kkey="Current Pool Size" ValueComponent="span">
             <Box display="flex" flexDirection="column" alignItems="flex-end">

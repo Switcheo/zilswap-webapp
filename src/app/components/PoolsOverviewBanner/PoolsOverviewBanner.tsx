@@ -2,12 +2,13 @@ import { Box, BoxProps, Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowDropUpRounded } from "@material-ui/icons";
 import { StatsCard, Text } from "app/components";
-import { RootState, TokenState } from "app/store/types";
+import { RewardsState, RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/contants";
 import cls from "classnames";
-import React from "react";
+import moment from "moment";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 interface Props extends BoxProps { }
@@ -33,11 +34,28 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
+interface Countdown {
+  days: string;
+  hours: string;
+  minutes: string;
+  seconds: string;
+}
+
 const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
   const valueCalculators = useValueCalculators();
+  const [countdown, setCountdown] = useState<Countdown | null>(null);
   const classes = useStyles();
+
+  useEffect(() => {
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+
+    // eslint-disable-next-line
+  }, [rewardsState.epochInfo]);
 
   const { totalLiquidity } = React.useMemo(() => {
 
@@ -51,6 +69,25 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
     };
 
   }, [tokenState, valueCalculators]);
+
+  const updateCountdown = () => {
+    if (!rewardsState.epochInfo) return setCountdown(null);
+
+    const nextEpoch = rewardsState.epochInfo.nextEpoch;
+    const currentTime = moment();
+    const diffSeconds = Math.max(0, nextEpoch.unix() - currentTime.unix());
+    const days = Math.floor(diffSeconds / 86400);
+    const hours = Math.floor((diffSeconds % 86400) / 3600);
+    const minutes = Math.floor((diffSeconds % 3600) / 60);
+    const seconds = diffSeconds % 60;
+
+    setCountdown({
+      days: `0${days}`.substr(-2),
+      hours: `0${hours}`.substr(-2),
+      minutes: `0${minutes}`.substr(-2),
+      seconds: `0${seconds}`.substr(-2),
+    });
+  };
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
@@ -79,23 +116,38 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
               <StatsCard heading="Countdown to next epoch">
                 <Box display="flex">
                   <Box display="flex" flexDirection="column">
-                    <Text marginBottom={2} variant="h1" className={classes.statistic} isPlaceholder>05</Text>
+                    <Text marginBottom={2} variant="h1" className={classes.statistic}>
+                      {countdown?.days ?? "-"}
+                    </Text>
                     <Box alignItems="center" display="flex" className={classes.subtitle}>
                       <Text color="textSecondary">days</Text>
                     </Box>
                   </Box>
                   <Text variant="h1" className={classes.statistic} marginX={1}>:</Text>
                   <Box display="flex" flexDirection="column">
-                    <Text marginBottom={2} variant="h1" className={classes.statistic} isPlaceholder>20</Text>
+                    <Text marginBottom={2} variant="h1" className={classes.statistic}>
+                      {countdown?.hours ?? "-"}
+                    </Text>
                     <Box alignItems="center" display="flex" className={classes.subtitle}>
                       <Text color="textSecondary">hours</Text>
                     </Box>
                   </Box>
                   <Text variant="h1" className={classes.statistic} marginX={1}>:</Text>
                   <Box display="flex" flexDirection="column">
-                    <Text marginBottom={2} variant="h1" className={classes.statistic} isPlaceholder>20</Text>
+                    <Text marginBottom={2} variant="h1" className={classes.statistic}>
+                      {countdown?.minutes ?? "-"}
+                    </Text>
                     <Box alignItems="center" display="flex" className={classes.subtitle}>
                       <Text color="textSecondary">minutes</Text>
+                    </Box>
+                  </Box>
+                  <Text variant="h1" className={classes.statistic} marginX={1}>:</Text>
+                  <Box display="flex" flexDirection="column">
+                    <Text marginBottom={2} variant="h1" className={classes.statistic}>
+                      {countdown?.seconds ?? "-"}
+                    </Text>
+                    <Box alignItems="center" display="flex" className={classes.subtitle}>
+                      <Text color="textSecondary">seconds</Text>
                     </Box>
                   </Box>
                 </Box>

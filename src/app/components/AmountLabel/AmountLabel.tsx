@@ -20,9 +20,10 @@ interface Props extends BoxProps {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     display: "flex",
+    alignItems: "center",
   },
   currencyLogo: {
-    width: "1em",
+    width: "2em",
     marginRight: theme.spacing(1),
   },
 }));
