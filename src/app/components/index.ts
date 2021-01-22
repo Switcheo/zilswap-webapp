@@ -8,6 +8,7 @@ export { default as ExpiryField } from "./ExpiryField";
 export { default as FancyButton } from "./FancyButton";
 export { default as FooterBar } from "./FooterBar";
 export { default as GoogleAnalytics } from "./GoogleAnalytics";
+export { default as HelpInfo } from "./HelpInfo";
 export { default as KeyValueDisplay } from "./KeyValueDisplay";
 export { default as LoadableArea } from "./LoadableArea";
 export { default as NavDrawer } from "./NavDrawer";
@@ -28,3 +29,4 @@ export { default as StatsCard } from "./StatsCard";
 export { default as Text } from "./Text";
 export { default as TopBar } from "./TopBar";
 export { default as UserPoolMessage } from "./UserPoolMessage";
+

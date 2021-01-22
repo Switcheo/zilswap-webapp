@@ -1,16 +1,18 @@
+import { SimpleMap } from "app/utils";
 import { EpochInfo } from "core/utilities";
 import moment from "moment";
-import { ActionTypes } from "./actions";
-import { RewardsState } from "./types";
+import { RewardsActionTypes } from "./actions";
+import { PoolZWAPReward, RewardsState } from "./types";
 
 
 const initial_state: RewardsState = {
   epochInfo: null,
+  rewardByPools: {},
 };
 
 const reducer = (state: RewardsState = initial_state, actions: any) => {
   switch (actions.type) {
-    case ActionTypes.UPDATE_EPOCH_INFO:
+    case RewardsActionTypes.UPDATE_EPOCH_INFO:
       const info = actions.info as EpochInfo;
       return {
         ...state,
@@ -21,6 +23,12 @@ const reducer = (state: RewardsState = initial_state, actions: any) => {
           maxEpoch: info.max_epoch,
           raw: info,
         },
+      };
+    case RewardsActionTypes.UPDATE_ZWAP_REWARDS:
+      const rewardByPools = actions.rewards as SimpleMap<PoolZWAPReward>
+      return {
+        ...state,
+        rewardByPools,
       };
     default:
       return state;

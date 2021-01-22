@@ -6,8 +6,7 @@ import { actions } from "app/store";
 import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
-import { BIG_ZERO, POOL_WEIGHTS, TOTAL_POOL_WEIGHTS, ZIL_TOKEN_NAME, ZWAP_REWARDS_PER_EPOCH } from "app/utils/constants";
-import BigNumber from "bignumber.js";
+import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useMemo, useState } from "react";
@@ -78,18 +77,8 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
   }
 
   const zapRewards = useMemo(() => {
-    const rewardWeight = POOL_WEIGHTS[token.address];
-    if (!rewardWeight) return BIG_ZERO;
-
-    const info = rewardsState.epochInfo;
-
-    // info not loaded || past rewards emission phase
-    if (!info || info.current > info.maxEpoch) 
-      return BIG_ZERO;
-
-    const rewardShare = new BigNumber(rewardWeight).div(TOTAL_POOL_WEIGHTS);
-    return ZWAP_REWARDS_PER_EPOCH.times(rewardShare).decimalPlaces(5);
-  }, [rewardsState.epochInfo, token.address]);
+    return rewardsState.rewardByPools[token.address]?.weeklyReward ?? BIG_ZERO;
+  }, [token.address, rewardsState.rewardByPools]);
 
   const { totalLiquidity, totalZilVolumeUSD } = useMemo(() => {
     if (token.isZil) {

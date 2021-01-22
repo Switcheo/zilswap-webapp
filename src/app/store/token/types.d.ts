@@ -2,6 +2,7 @@ import { ConnectedWallet } from "core/wallet/wallet";
 import { BN } from "@zilliqa-js/util";
 import BigNumber from "bignumber.js";
 import { Pool } from "zilswap-sdk";
+import { SimpleMap } from "app/utils";
 
 export type TokenBalanceMap = {
   [index: string]: BigNumber;
@@ -27,8 +28,8 @@ export type TokenInfo = {
 
 export interface TokenState {
   initialized: boolean,
-  prices: { [index: string]: BigNumber },
-  tokens: { [index: string]: TokenInfo },
+  prices: SimpleMap<BigNumber>,
+  tokens: SimpleMap<TokenInfo>,
 };
 
 export interface TokenUpdateProps extends Partial<TokenInfo> {

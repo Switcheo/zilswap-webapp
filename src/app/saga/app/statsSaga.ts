@@ -48,7 +48,6 @@ function* queryPoolLiquidityDay({ network }: QueryOpts) {
       liquidityChange24h[key] = liquidityChange24h[key].minus(snapshot24hAgo);
     }
 
-    console.log(liquidityChange24h);
     yield put(actions.Stats.setLiquidityChange24h(liquidityChange24h));
   } catch (error) {
     console.error(error);

@@ -1,12 +1,12 @@
 import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { KeyValueDisplay } from "app/components";
-import { RootState, TokenInfo, TokenState } from "app/store/types";
+import { HelpInfo, KeyValueDisplay } from "app/components";
+import { RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
-import { ZIL_TOKEN_NAME } from "app/utils/constants";
+import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import cls from "classnames";
-import React from "react";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 
 export interface PoolDetailProps extends BoxProps {
@@ -21,6 +21,7 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
   const { children, className, token, ...rest } = props;
   const classes = useStyles();
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
+  const rewardsState = useSelector<RootState, RewardsState>(store => store.rewards);
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5, showCurrency: true });
 
   const zilFormatOpts: MoneyFormatterOptions = {
@@ -58,11 +59,30 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
     return `${contributionPercentage.toFixed(1)}%`;
   };
 
+  const [weeklyZwapRewards, potentialRewards] = useMemo(() => {
+    if (!token) return [BIG_ZERO, BIG_ZERO];
+    const weeklyZwapRewards = rewardsState.rewardByPools[token.address]?.weeklyReward ?? BIG_ZERO;
+
+    if (!token?.pool) return [weeklyZwapRewards, BIG_ZERO];
+    const potentialRewards = token.pool.contributionPercentage.shiftedBy(-2).times(weeklyZwapRewards).decimalPlaces(5);
+    return [weeklyZwapRewards, potentialRewards];
+
+    // eslint-disable-next-line
+  }, [token?.address, rewardsState.rewardByPools]);
+
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <KeyValueDisplay kkey={"Exchange Rate"} mb="8px">{getExchangeRateValue()}</KeyValueDisplay>
       <KeyValueDisplay kkey={"Current Pool Size"} mb="8px">{getPoolSizeValue()}</KeyValueDisplay>
-      <KeyValueDisplay kkey={`Your Current Pool Share (${getUserPoolShare()})`}>{getShareValue()}</KeyValueDisplay>
+      <KeyValueDisplay kkey={`Your Current Pool Share (${getUserPoolShare()})`} mb="8px">{getShareValue()}</KeyValueDisplay>
+      {weeklyZwapRewards.gt(0) && (
+        <KeyValueDisplay kkey={(
+          <span>
+            Potential ZWAP Rewards
+            <HelpInfo placement="top" title="Weekly ZWAP rewards emmitted every epoch based on your time-weighted pool share." />
+          </span>
+        )}>{potentialRewards.toFormat()} ZWAP</KeyValueDisplay>
+      )}
     </Box>
   );
 };

@@ -4,7 +4,7 @@ import cls from "classnames";
 import React from "react";
 
 interface Props extends BoxProps {
-  kkey?: string;
+  kkey?: string | React.ReactNode;
   emphasizeValue?: boolean;
   value?: string | React.ReactNode;
   ValueComponent?: string | React.FC;

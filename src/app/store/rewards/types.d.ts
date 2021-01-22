@@ -8,6 +8,12 @@ export interface PoolSwapVolume extends SwapVolume {
   totalTokenVolume: BigNumber;
 }
 
+export type PoolZWAPReward = {
+  weeklyReward: BigNumber;
+  rewardShare: BigNumber; // pool reward weight ÷ total weight
+  weight: number;
+};
+
 export interface ZAPEpochInfo {
   current: number;
   epochStart: Moment;
@@ -18,4 +24,5 @@ export interface ZAPEpochInfo {
 
 export interface RewardsState {
   epochInfo: ZAPEpochInfo | null;
+  rewardByPools: SimpleMap<PoolZWAPReward>
 };

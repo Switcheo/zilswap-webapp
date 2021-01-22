@@ -7,7 +7,7 @@ import BigNumber from "bignumber.js";
 import clsx from "clsx";
 import React, { ChangeEvent, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ReactComponent as TooltipSVG } from "./tooltip.svg";
+import HelpInfo from "../HelpInfo";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -112,11 +112,9 @@ const SlippageField: React.FC<Props> = (props: Props) => {
   return (
     <Box {...rest} className={clsx(classes.root, className)}>
       <InputLabel>{label || DEFAULT_SLIPPAGE_LABEL}
-        <Tooltip placement="top"
-          classes={{ tooltip: classes.tooltip }}
-          title="Lowering this limit decreases your risk of frontruning. However, this makes it more likely that your transaction will fail due to normal price movements.">
-          <TooltipSVG className={classes.tooltipSVG} />
-        </Tooltip>
+        <HelpInfo
+          placeholder="top"
+          title="Lowering this limit decreases your risk of frontruning. However, this makes it more likely that your transaction will fail due to normal price movements." />
       </InputLabel>
 
       <Box marginBottom={1}>
