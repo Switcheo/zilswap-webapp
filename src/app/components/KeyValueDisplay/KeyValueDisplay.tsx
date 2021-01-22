@@ -6,6 +6,7 @@ import React from "react";
 interface Props extends BoxProps {
   kkey?: string | React.ReactNode;
   emphasizeValue?: boolean;
+  valueColor?: "inherit" | "primary" | "secondary" | "textPrimary" | "textSecondary" | "initial";
   value?: string | React.ReactNode;
   ValueComponent?: string | React.FC;
   hideIfNoValue?: boolean;
@@ -16,7 +17,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 const KeyValueDisplay: React.FC<Props> = (props: Props) => {
-  const { children, className, kkey, emphasizeValue, value: inputValue, ValueComponent = Typography, hideIfNoValue, ...rest } = props;
+  const { children, className, kkey, emphasizeValue, value: inputValue, valueColor, ValueComponent = Typography, hideIfNoValue, ...rest } = props;
   const classes = useStyles();
 
   let value = inputValue;
@@ -29,7 +30,7 @@ const KeyValueDisplay: React.FC<Props> = (props: Props) => {
       <Typography color="textSecondary" variant="body1">
         {kkey}
       </Typography>
-      <ValueComponent color={emphasizeValue ? undefined : "textSecondary"} variant="body2">{value || <span>&nbsp;</span>}</ValueComponent>
+      <ValueComponent color={emphasizeValue ? valueColor : "textSecondary"} variant="body2">{value || <span>&nbsp;</span>}</ValueComponent>
     </Box>
   );
 };

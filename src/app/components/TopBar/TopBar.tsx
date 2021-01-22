@@ -1,10 +1,11 @@
 import { AppBar, Box, IconButton, Toolbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Brand } from "app/components/TopBar/components";
+import RewardsInfoButton from "app/layouts/RewardsInfoButton";
 import cls from "classnames";
 import React from "react";
-import ThemeSwitch from "../ThemeSwitch";
 import ConnectWalletButton from "../ConnectWalletButton";
+import ThemeSwitch from "../ThemeSwitch";
 import { ReactComponent as MenuIcon } from "./menu.svg";
 import { TopBarProps } from "./types";
 
@@ -55,6 +56,7 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
           <Brand />
         </Box>
         <Box display="flex" flex={1} justifyContent="flex-end" alignItems="center">
+          <RewardsInfoButton />
           <ConnectWalletButton />
           <ThemeSwitch className={classes.themeSwitch} />
         </Box>
