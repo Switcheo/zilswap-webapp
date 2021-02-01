@@ -2,14 +2,16 @@ import { Value } from "@zilliqa-js/contract";
 import { actions } from "app/store";
 import { LayoutState, RootState, TokenInfo, TokenState, Transaction, WalletState } from "app/store/types";
 import { strings, useAsyncTask } from "app/utils";
-import { LocalStorageKeys, ZilPayNetworkMap, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { DefaultFallbackNetwork, LocalStorageKeys, ZilPayNetworkMap, ZIL_TOKEN_NAME } from "app/utils/constants";
 import useStatefulTask from "app/utils/useStatefulTask";
 import BigNumber from "bignumber.js";
 import { connectWalletPrivateKey, ConnectWalletResult, connectWalletZilPay, parseBalanceResponse } from "core/wallet";
 import { RPCResponse, ZilswapConnector } from "core/zilswap";
+import { ZWAPRewards } from "core/zwap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { ObservedTx, TokenDetails, TxReceipt, TxStatus } from "zilswap-sdk";
+import { Network } from "zilswap-sdk/lib/constants";
 import { logger } from "./logger";
 import { ViewBlock } from "./viewblock";
 
@@ -27,12 +29,13 @@ export type AppButlerProps = {
  * @param zilswapToken token representation from zilswap-sdk
  * @returns mapped {@link TokenInfo} representation of the token.
  */
-const mapZilswapToken = (zilswapToken: TokenDetails): TokenInfo => {
+const mapZilswapToken = (zilswapToken: TokenDetails, network: Network = DefaultFallbackNetwork): TokenInfo => {
   return {
     initialized: false,
     whitelisted: zilswapToken.whitelisted,
     initBalance: false,
     isZil: zilswapToken.address === ZIL_TOKEN_NAME,
+    isZwap: zilswapToken.address === ZWAPRewards.TOKEN_CONTRACT[network],
     dirty: false,
     address: zilswapToken.address,
     decimals: zilswapToken.decimals,
@@ -188,13 +191,14 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
   const initTokens = () => {
     const zilswapTokens = ZilswapConnector.getTokens();
+    const network = ZilswapConnector.network;
 
     const tokens: { [index: string]: TokenInfo } = {};
     zilswapTokens
-      .map(mapZilswapToken)
+      .map((token) => mapZilswapToken(token, network))
       // uncomment to test create pool
       // .filter(token => token.address !== "zil10a9z324aunx2qj64984vke93gjdnzlnl5exygv")
-      .forEach(token => tokens[token.address] = token);
+      .forEach((token) => tokens[token.address] = token);
 
     // initialize store TokenState
     dispatch(actions.Token.init({ tokens }));
@@ -406,7 +410,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
         let { initBalance, balance, balances, allowances, name } = token;
 
-        if (initBalance) {
+        if (initBalance || token.isZwap) {
           const result = await runQueryTokenBalance(async () => {
             if (!name) {
               const contractInitParams = await tokenDetails?.contract.getInit();
@@ -447,6 +451,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
           dirty: false,
           loading: false,
           isZil: false,
+          isZwap: token.isZwap,
           initBalance, name,
 
           whitelisted: token.whitelisted,

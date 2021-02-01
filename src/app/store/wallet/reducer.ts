@@ -1,4 +1,4 @@
-import { Types } from "./actions";
+import { WalletActionTypes } from "./actions";
 import { WalletState } from "./types";
 import { LocalStorageKeys } from "app/utils/constants";
 
@@ -10,14 +10,14 @@ const initial_state: WalletState = {
 
 const reducer = (state: WalletState = initial_state, action: any) => {
   switch (action.type) {
-    case Types.WALLET_UPDATE:
+    case WalletActionTypes.WALLET_UPDATE:
       const { payload } = action;
       const { privateKey, zilpay } = payload;
       if (privateKey) localStorage.setItem(LocalStorageKeys.PrivateKey, privateKey);
       if (zilpay) localStorage.setItem(LocalStorageKeys.ZilPayConnected, "true");
       return { ...state, ...payload };
 
-    case Types.WALLET_LOGOUT:
+    case WalletActionTypes.WALLET_LOGOUT:
       localStorage.removeItem(LocalStorageKeys.PrivateKey);
       localStorage.removeItem(LocalStorageKeys.ZilPayConnected);
       return { ...initial_state, pk: "" };

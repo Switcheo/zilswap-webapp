@@ -7,8 +7,10 @@ import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } fro
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { bnOrZero } from "app/utils/strings/strings";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
+import { ZWAPRewards } from "core/zwap";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
@@ -75,11 +77,6 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     dispatch(actions.Layout.showPoolType("add"));
     history.push("/pool");
   }
-
-  const zapRewards = useMemo(() => {
-    return rewardsState.rewardByPools[token.address]?.weeklyReward ?? BIG_ZERO;
-  }, [token.address, rewardsState.rewardByPools]);
-
   const { totalLiquidity, totalZilVolumeUSD } = useMemo(() => {
     if (token.isZil) {
       return { totalLiquidity: BIG_ZERO, totalZilVolumeUSD: BIG_ZERO };
@@ -95,6 +92,35 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     };
   }, [tokenState, token, valueCalculators, swapVolumes]);
 
+
+  const {
+    potentialRewards,
+    // rewardsValue,
+    roiLabel,
+  } = React.useMemo(() => {
+    if (!ZilswapConnector.network || !rewardsState.epochInfo) return {
+      rewardsValue: BIG_ZERO,
+      potentialRewards: BIG_ZERO,
+      roiLabel: "-",
+    };
+
+    const poolRewards = bnOrZero(rewardsState.rewardByPools[token.address]?.weeklyReward);
+
+    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
+    const zapToken = tokenState.tokens[zapContractAddr];
+
+    const rewardsValue = valueCalculators.amount(tokenState.prices, zapToken, poolRewards.shiftedBy(12));
+    const roiPerEpoch = rewardsValue.dividedBy(totalLiquidity);
+    const epochDuration = rewardsState.epochInfo.raw.epoch_period;
+    const secondsInDay = 24 * 3600;
+    const roiPerDay = bnOrZero(roiPerEpoch.dividedBy(epochDuration).times(secondsInDay).shiftedBy(2).decimalPlaces(2));
+
+    return {
+      potentialRewards: poolRewards,
+      rewardsValue,
+      roiLabel: roiPerDay.isZero() ? "-" : `${roiPerDay.toFormat()}%`,
+    };
+  }, [rewardsState.epochInfo, rewardsState.rewardByPools, token, totalLiquidity, tokenState.prices, tokenState.tokens, valueCalculators]);
 
   if (token.isZil) return null;
 
@@ -128,7 +154,9 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
           <Box display="flex" flexDirection="column" flex={1}>
             <Text color="textSecondary" variant="subtitle2" marginBottom={1.5}>ZWAP Rewards</Text>
             <Box display="flex" alignItems="baseline">
-              <Text color="primary" className={classes.rewardValue} marginRight={1}>{zapRewards.toFormat()} ZWAP</Text>
+              <Text color="primary" className={classes.rewardValue} marginRight={1}>
+                {potentialRewards.toFormat()} ZWAP
+              </Text>
               <Text color="textPrimary" variant="subtitle2" className={classes.thinSubtitle}>/ next epoch</Text>
             </Box>
           </Box>
@@ -136,7 +164,9 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
           <Box display="flex" flexDirection="column" flex={1}>
             <Text color="textSecondary" align="right" variant="subtitle2" marginBottom={1.5}>ROI</Text>
             <Box display="flex" alignItems="baseline" justifyContent="flex-end">
-              <Text color="textPrimary" className={classes.rewardValue} marginRight={1}>-</Text>
+              <Text color="textPrimary" className={classes.rewardValue} marginRight={1}>
+                {roiLabel}
+              </Text>
               <Text color="textPrimary" variant="subtitle2" className={classes.thinSubtitle}>/ daily</Text>
             </Box>
           </Box>

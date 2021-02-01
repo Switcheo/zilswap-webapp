@@ -4,6 +4,7 @@ export { default as CopyIcon } from "./copy.svg";
 export { default as CurrencyInput } from "./CurrencyInput";
 export { default as CurrencyLogo } from "./CurrencyLogo";
 export { default as DialogModal } from "./DialogModal";
+export { default as EmptyStateIcon } from "./EmptyStateIcon";
 export { default as ExpiryField } from "./ExpiryField";
 export { default as FancyButton } from "./FancyButton";
 export { default as FooterBar } from "./FooterBar";

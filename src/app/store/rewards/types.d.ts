@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { EpochInfo, SwapVolume } from "core/utilities";
+import { EpochInfo, SwapVolume, ZWAPDistribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
 import moment, { Moment } from "moment";
 import { Network } from "zilswap-sdk/lib/constants";
 
@@ -22,7 +22,25 @@ export interface ZAPEpochInfo {
   raw: EpochInfo;
 };
 
+export interface ZAPRewardDist {
+  info: ZWAPDistribution;
+  claimed: boolean;
+  claimTx?: any;
+}
+
+
+export interface EpochClaimHistory {
+  [leaf: string]: any; // claim content doesnt hold relevant information
+}
+export interface GlobalClaimHistory {
+  [epoch: number]: EpochClaimHistory;
+}
+
 export interface RewardsState {
   epochInfo: ZAPEpochInfo | null;
-  rewardByPools: SimpleMap<PoolZWAPReward>
+  rewardByPools: SimpleMap<PoolZWAPReward>;
+  rewardDistributions: ZAPRewardDist[];
+  potentialPoolRewards: ZWAPPotentialRewards;
+  globalClaimHistory: GlobalClaimHistory;
+  poolWeights: ZWAPPoolWeights;
 };

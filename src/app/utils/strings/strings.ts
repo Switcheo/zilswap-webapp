@@ -10,9 +10,8 @@ export const uuidv4 = () => {
 }
 
 export const bnOrZero = (input?: string | BigNumber | number, defaultValue: BigNumber = BIG_ZERO) => {
-  if (BigNumber.isBigNumber(input)) return input;
   if (!input) return defaultValue;
-  const result = new BigNumber(input);
+  const result = BigNumber.isBigNumber(input) ? input : new BigNumber(input);
   if (!result.isFinite() || result.isNaN())
     return defaultValue;
 

@@ -43,13 +43,8 @@ export const PRICE_REFRESH_RATE = 10000; // ms
 export const STATS_REFRESH_RATE = 30000; // ms
 
 export const ZIL_TOKEN_NAME = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
-
-// to be replaced with API
-export const POOL_WEIGHTS = {
-  "zil14pzuzq6v6pmmmrfjhczywguu0e97djepxt8g3e": 2,
-  "zil1zu72vac254htqpg3mtywdcfm84l3dfd9qzww8t": 3,
-  "zilzwap": 5,
-} as { [address: string]: number };
-export const TOTAL_POOL_WEIGHTS = Object.values(POOL_WEIGHTS).reduce((sum, weight) => sum + weight, 0);
-
-export const ZWAP_REWARDS_PER_EPOCH = new BigNumber(6250);
+export class PollIntervals {
+  public static ZWAPClaimHistory = 60000;
+  public static EpochInfo = 60000;
+  public static PoolWeights = 3600000;
+}

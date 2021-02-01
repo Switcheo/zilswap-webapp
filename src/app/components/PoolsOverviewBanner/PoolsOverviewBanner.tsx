@@ -1,13 +1,15 @@
-import { Box, BoxProps, Container, Grid } from "@material-ui/core";
+import { Box, BoxProps, Container, Tooltip, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowDropUpRounded } from "@material-ui/icons";
 import { StatsCard, Text } from "app/components";
 import { RewardsState, RootState, StatsState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
-import { BIG_ZERO, ZWAP_REWARDS_PER_EPOCH } from "app/utils/constants";
+import { BIG_ZERO } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
+import BigNumber from "bignumber.js";
 import cls from "classnames";
+import { ZWAPRewards } from "core/zwap";
 import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -88,7 +90,17 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
 
   const totalRewards = useMemo(() => {
     if (!rewardsState.epochInfo) return BIG_ZERO;
-    return ZWAP_REWARDS_PER_EPOCH.times(rewardsState.epochInfo.current);
+
+    // stage 1 retroactive airdrop
+    let airdropRewards = BIG_ZERO;
+    if (rewardsState.epochInfo.current >= 0)
+      airdropRewards = ZWAPRewards.TOTAL_SUPPLY.times(ZWAPRewards.RETROACTIVE_AIRDROP_FACTOR);
+
+    // stage 2 mining rewards
+    const rewardsPerEpoch = new BigNumber(rewardsState.epochInfo.raw.tokens_per_epoch).shiftedBy(12);
+    const miningRewards = rewardsPerEpoch.times(rewardsState.epochInfo.current);
+
+    return airdropRewards.plus(miningRewards).shiftedBy(-12);
   }, [rewardsState.epochInfo])
 
   const updateCountdown = () => {
@@ -109,6 +121,8 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
       seconds: `0${seconds}`.substr(-2),
     });
   };
+
+  const epochInfo = rewardsState.epochInfo
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
@@ -131,7 +145,21 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
                   {totalRewards.toFormat(0)}
                 </Text>
                 <Box alignItems="center" display="flex" className={classes.subtitle}>
-                  <Text color="textSecondary">until next epoch</Text>
+                  {!!epochInfo && epochInfo.current < epochInfo.maxEpoch && (
+                    <Tooltip arrow title={`Last epoch at #${epochInfo.maxEpoch}`}>
+                      <span>
+                        <Text color="textSecondary">
+                          until next epoch (#{epochInfo.current + 1})
+                        </Text>
+                      </span>
+                    </Tooltip>
+                  )}
+
+                  {!!epochInfo && epochInfo.current >= epochInfo.maxEpoch && (
+                    <Text color="textSecondary">
+                      All ZWAP rewards distributed
+                    </Text>
+                  )}
                 </Box>
               </StatsCard>
             </Grid>

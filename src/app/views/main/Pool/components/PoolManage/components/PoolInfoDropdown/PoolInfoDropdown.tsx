@@ -2,15 +2,18 @@ import { Box, BoxProps, Button, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowDropDownOutlined, ArrowDropUpOutlined } from "@material-ui/icons";
 import { AmountLabel, ContrastBox, KeyValueDisplay, PoolLogo, Text } from "app/components";
-import { TokenInfo } from "app/store/types";
+import { RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { BIG_ZERO } from "app/utils/constants";
 import { Link } from "react-router-dom";
 import cls from "classnames";
 import React, { useState } from "react";
 import { actions } from "app/store";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ZilswapConnector } from "core/zilswap";
+import { bnOrZero } from "app/utils/strings/strings";
+import { useValueCalculators } from "app/utils";
+import { ZWAPRewards } from "core/zwap";
 
 interface Props extends BoxProps {
   token: TokenInfo;
@@ -35,7 +38,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
   const { children, className, token, ...rest } = props;
   const classes = useStyles();
+  const valueCalculators = useValueCalculators();
   const dispatch = useDispatch();
+  const rewardsState = useSelector<RootState, RewardsState>((state) => state.rewards);
+  const tokenState = useSelector<RootState, TokenState>((state) => state.token);
   const [active, setActive] = useState<boolean>(false);
   const poolPair: [string, string] = [token.symbol, "ZIL"];
 
@@ -44,20 +50,56 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
   };
 
   const {
-    poolShare,
+    poolShareLabel,
     tokenAmount,
     zilAmount,
+    poolShare,
   } = React.useMemo(() => {
-    const userPoolPercent = token.pool?.contributionPercentage.shiftedBy(-2);
-    const tokenAmount = userPoolPercent?.times(token.pool?.tokenReserve ?? BIG_ZERO);
-    const zilAmount = userPoolPercent?.times(token.pool?.zilReserve ?? BIG_ZERO);
+    const poolShare = token.pool?.contributionPercentage.shiftedBy(-2);
+    const tokenAmount = poolShare?.times(token.pool?.tokenReserve ?? BIG_ZERO);
+    const zilAmount = poolShare?.times(token.pool?.zilReserve ?? BIG_ZERO);
 
     return {
-      poolShare: userPoolPercent?.decimalPlaces(3).toString(10) ?? "",
+      poolShareLabel: poolShare?.shiftedBy(2).decimalPlaces(3).toString(10) ?? "",
       tokenAmount,
       zilAmount,
+      poolShare: poolShare ?? BIG_ZERO,
     }
   }, [token]);
+
+  const {
+    potentialRewards,
+    depositedValue,
+    rewardsValue,
+    roiLabel,
+  } = React.useMemo(() => {
+    if (!ZilswapConnector.network || !rewardsState.epochInfo) return {
+      rewardsValue: BIG_ZERO,
+      potentialRewards: BIG_ZERO,
+      depositedValue: BIG_ZERO,
+      roiLabel: "-",
+    };
+
+    const poolRewards = bnOrZero(rewardsState.potentialPoolRewards[token.address]);
+
+    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
+    const zapToken = tokenState.tokens[zapContractAddr];
+
+    const rewardsValue = valueCalculators.amount(tokenState.prices, zapToken, poolRewards);
+    const poolValue = valueCalculators.pool(tokenState.prices, token);
+    const depositedValue = poolShare.times(poolValue);
+    const roiPerEpoch = rewardsValue.dividedBy(depositedValue);
+    const epochDuration = rewardsState.epochInfo.raw.epoch_period;
+    const secondsInDay = 24 * 3600;
+    const roiPerDay = bnOrZero(roiPerEpoch.dividedBy(epochDuration).times(secondsInDay).shiftedBy(2).decimalPlaces(2));
+
+    return {
+      potentialRewards: poolRewards,
+      rewardsValue,
+      depositedValue,
+      roiLabel: roiPerDay.isZero() ? "-" : `${roiPerDay.toFormat()}%`,
+    };
+  }, [rewardsState.epochInfo, rewardsState.potentialPoolRewards, poolShare, token, tokenState.prices, tokenState.tokens, valueCalculators]);
 
   const onGotoAdd = () => {
     const network = ZilswapConnector.network;
@@ -85,12 +127,17 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
       {active && (
         <ContrastBox>
           <KeyValueDisplay marginBottom={1.5} kkey="Your Potential Rewards" ValueComponent="span">
-            <Text color="primary">421 ZAP</Text>
+            <Text color="primary">
+              {potentialRewards.shiftedBy(-12).decimalPlaces(5).toFormat()} ZWAP
+            </Text>
+            <Text variant="body2" color="textSecondary" align="right">
+              ≈${rewardsValue.toFormat(2)}
+            </Text>
           </KeyValueDisplay>
           <KeyValueDisplay marginBottom={1.5} kkey="ROI" ValueComponent="span">
-            <Text color="textPrimary">1.42% / daily</Text>
+            <Text color="textPrimary">{roiLabel} / daily</Text>
           </KeyValueDisplay>
-          <KeyValueDisplay kkey={`Your Pool Share ${poolShare}%`} ValueComponent="span">
+          <KeyValueDisplay kkey={`Your Pool Share ${poolShareLabel}%`} ValueComponent="span">
             <AmountLabel
               justifyContent="flex-end"
               marginBottom={1}
@@ -101,6 +148,9 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
               justifyContent="flex-end"
               currency="ZIL"
               amount={zilAmount} />
+            <Text variant="body2" color="textSecondary" align="right">
+              ≈${depositedValue.toFormat(2)}
+            </Text>
           </KeyValueDisplay>
 
           <Box display="flex" marginTop={3}>

@@ -55,6 +55,7 @@ const CreatePoolDialog = (props: any) => {
         address,
         initialized: false,
         isZil: false,
+        isZwap: false,
         whitelisted: false,
         symbol: tokenPreview.symbol,
         name: tokenPreview.name,
@@ -69,6 +70,7 @@ const CreatePoolDialog = (props: any) => {
 
       dispatch(actions.Token.add({ token }));
       dispatch(actions.Pool.select({ token, network }));
+      dispatch(actions.Layout.showPoolType("add"));
 
       return onCloseDialog();
     });

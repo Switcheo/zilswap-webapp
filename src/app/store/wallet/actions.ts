@@ -1,19 +1,19 @@
 import { WalletUpdateProps } from "./types";
 
-export const Types = {
+export const WalletActionTypes = {
   WALLET_UPDATE: "WALLET_UPDATE",
   WALLET_LOGOUT: "WALLET_LOGOUT",
 };
 
 export function update(payload: WalletUpdateProps) {
   return {
-    type: Types.WALLET_UPDATE,
+    type: WalletActionTypes.WALLET_UPDATE,
     payload
   }
 };
 
 export function logout() {
   return {
-    type: Types.WALLET_LOGOUT,
+    type: WalletActionTypes.WALLET_LOGOUT,
   }
 };

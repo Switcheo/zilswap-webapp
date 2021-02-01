@@ -14,6 +14,7 @@ const valueCalculators = {
   },
 
   amount: (prices: { [index: string]: BigNumber }, token: TokenInfo, amount: BigNumber) => {
+    if (!token) return BIG_ZERO;
     const tokenPrice = prices[token.symbol] ?? BIG_ZERO;
     const tokenValue = amount.shiftedBy(-token.decimals).times(tokenPrice) ?? BIG_ZERO;
     return tokenValue;
