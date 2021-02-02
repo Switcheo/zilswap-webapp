@@ -210,6 +210,9 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         throw new Error('Minimum contribution is 1000 ZILs.')
       }
 
+      if (zilBalance.minus(addZilAmount).lt(5)) {
+        throw new Error('Please reserve at least 5 ZIL to pay for transaction fees.')
+      }
 
       ZilswapConnector.setDeadlineBlocks(swapFormState.expiry);
 
