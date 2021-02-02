@@ -50,7 +50,7 @@ export interface ZilDataValue {
 
 export interface ZilTxData {
 	_tag: string;
-	params: ZilDataValue;
+	params: ZilDataValue[];
 };
 
 export interface ZilTransaction {

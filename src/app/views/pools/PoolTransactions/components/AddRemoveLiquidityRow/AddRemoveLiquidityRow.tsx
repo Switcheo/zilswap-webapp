@@ -1,13 +1,17 @@
+/* eslint-disable no-lone-blocks */
 import { Box, TableCell, TableRow, TableRowProps, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { AmountLabel, PoolRouteIcon, Text } from "app/components";
+import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
+import TxStatusIndicator from "app/components/TxStatusIndicator";
 import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useValueCalculators } from "app/utils";
+import { useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
-import cls from "classnames";
+import clsx from "clsx";
 import { ZilTransaction } from "core/utilities";
+import { toBech32Address } from "core/zilswap";
 import React from "react";
 import { useSelector } from "react-redux";
 
@@ -17,6 +21,14 @@ interface Props extends TableRowProps {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+  },
+  titleHeader: {
+    "& .external-link": {
+      visibility: "hidden",
+    },
+    "&:hover .external-link": {
+      visibility: "visible",
+    },
   },
   placeholderCell: {
     borderBottom: "none !important",
@@ -30,11 +42,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const AddRemoveLiquidityRow: React.FC<Props> = (props: Props) => {
   const { children, className, transaction, ...rest } = props;
   const valueCalculators = useValueCalculators();
+  const network = useNetwork();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const classes = useStyles();
 
   const {
-    addRemoveEvent,
+    isError,
     type,
     zilToken,
     poolToken,
@@ -42,11 +55,10 @@ const AddRemoveLiquidityRow: React.FC<Props> = (props: Props) => {
     tokenAmount,
     totalValue,
   } = React.useMemo(() => {
-    const addRemoveEvent = transaction.events.find(event => ["Mint", "Burnt"].includes(event.name));
-    const addRemoveParams = addRemoveEvent?.params as any;
-    const poolAddress = addRemoveParams?.pool;
+    const tokenAddressParam = transaction.data?.params.find(param => param.vname === "token_address");
+    const poolAddress = tokenAddressParam?.value ?? "";
     const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
-    const poolToken = tokenState.tokens[poolAddress];
+    const poolToken = tokenState.tokens[toBech32Address(poolAddress)];
 
     let type!: "add" | "remove";
 
@@ -61,16 +73,25 @@ const AddRemoveLiquidityRow: React.FC<Props> = (props: Props) => {
         type = "add";
         zilAmount = bnOrZero(transaction.value);
 
-        const transferEvent = transaction.events.find(event => event.name === "TransferFromSuccess");
-        tokenAmount = bnOrZero(transferEvent?.params?.amount);
+        if (transaction.events.length) {
+          const transferEvent = transaction.events.find(event => event.name === "TransferFromSuccess");
+          tokenAmount = bnOrZero(transferEvent?.params?.amount);
+        } else {
+          tokenAmount = bnOrZero(transaction.data.params.find(param => param.vname === "max_token_amount")?.value);
+        }
         break;
       };
+
       case "RemoveLiquidity": {
         type = "remove";
-        zilAmount = bnOrZero(transaction.internalTransfers?.[0]?.value);
-
-        const transferEvent = transaction.events.find(event => event.name === "TransferSuccess");
-        tokenAmount = bnOrZero(transferEvent?.params?.amount);
+        if (transaction.events) {
+          const transferEvent = transaction.events.find(event => event.name === "TransferSuccess");
+          zilAmount = bnOrZero(transaction.internalTransfers?.[0]?.value);
+          tokenAmount = bnOrZero(transferEvent?.params?.amount);
+        } else {
+          zilAmount = bnOrZero(transaction.data.params.find(param => param.vname === "min_zil_amount")?.value);
+          tokenAmount = bnOrZero(transaction.data.params.find(param => param.vname === "min_token_amount")?.value);
+        }
         break;
       };
     }
@@ -83,7 +104,7 @@ const AddRemoveLiquidityRow: React.FC<Props> = (props: Props) => {
     }
 
     return {
-      addRemoveEvent,
+      isError: !transaction.events.length,
       type,
       zilToken,
       poolToken,
@@ -94,50 +115,51 @@ const AddRemoveLiquidityRow: React.FC<Props> = (props: Props) => {
   }, [transaction, tokenState, valueCalculators]);
 
   return (
-    <TableRow {...rest} className={cls(classes.root, className)}>
+    <TableRow {...rest} className={clsx(classes.root, className)}>
       <TableCell className={classes.placeholderCell} />
-      {!!addRemoveEvent && (
-        <React.Fragment>
-          <TableCell>
+      <TableCell>
+        <TxStatusIndicator error={isError} />
+      </TableCell>
+      <TableCell className={classes.titleHeader}>
+        <Box display="flex">
+          <span>
             <Tooltip title={(transaction.data as any)?._tag}>
               <Text>{type === "add" ? "Add" : "Remove"} Liquidity</Text>
             </Tooltip>
-          </TableCell>
-          <TableCell>
-            <Box display="flex" alignItems="center">
-              <PoolRouteIcon route={[poolToken?.symbol, zilToken.symbol]} marginRight={1} />
-              <Text className={classes.text}>{poolToken?.symbol} {zilToken.symbol}</Text>
-            </Box>
-          </TableCell>
-          <TableCell align="right">
-            ${totalValue.toFormat(2)}
-          </TableCell>
-          <TableCell align="right">
-            <AmountLabel
-              hideIcon
-              justifyContent="flex-end"
-              amount={zilAmount}
-              currency={zilToken.symbol}
-              compression={zilToken.decimals} />
-            <AmountLabel
-              hideIcon
-              justifyContent="flex-end"
-              amount={tokenAmount}
-              currency={poolToken?.symbol}
-              compression={poolToken?.decimals} />
-          </TableCell>
-          <TableCell align="right">
-            {transaction.timestamp?.fromNow()}
-          </TableCell>
-        </React.Fragment>
-      )}
-      {!addRemoveEvent && (
-        <TableCell colSpan={5}>
-          <Text color="textSecondary" variant="body2" align="center">
-            Transaction Failed
-          </Text>
-        </TableCell>
-      )}
+          </span>
+          <Box className="external-link" marginLeft={1}>
+            <a target="_blank" rel="noopener noreferrer" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=${network}`}>
+              <NewLinkIcon />
+            </a>
+          </Box>
+        </Box>
+      </TableCell>
+      <TableCell>
+        <Box display="flex" alignItems="center">
+          <PoolRouteIcon route={[poolToken?.symbol, zilToken.symbol]} marginRight={1} />
+          <Text className={classes.text}>{poolToken?.symbol} {zilToken.symbol}</Text>
+        </Box>
+      </TableCell>
+      <TableCell align="right">
+        ${totalValue.toFormat(2)}
+      </TableCell>
+      <TableCell align="right">
+        <AmountLabel
+          hideIcon
+          justifyContent="flex-end"
+          amount={zilAmount}
+          currency={zilToken.symbol}
+          compression={zilToken.decimals} />
+        <AmountLabel
+          hideIcon
+          justifyContent="flex-end"
+          amount={tokenAmount}
+          currency={poolToken?.symbol}
+          compression={poolToken?.decimals} />
+      </TableCell>
+      <TableCell align="right">
+        {transaction.timestamp?.fromNow()}
+      </TableCell>
       <TableCell className={classes.placeholderCell} />
     </TableRow>
   );

@@ -18,6 +18,8 @@ export interface AppColors {
 export interface AppPalette extends PaletteOptions {
   primary: SimplePaletteColorOptions;
   secondary: SimplePaletteColorOptions;
+  error: SimplePaletteColorOptions;
+  success: SimplePaletteColorOptions;
   background: AppTypeBackground & TypeBackground;
   toolbar: SimplePaletteColorOptions;
   colors: AppColors;

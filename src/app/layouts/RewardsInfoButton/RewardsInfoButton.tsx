@@ -61,6 +61,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
   const [active, setActive] = useState(false);
   const [claimResult, setClaimResult] = useState<any>(null);
+  const [claimCount, setClaimCount] = useState(0);
   const [runClaimRewards, loading, error] = useAsyncTask("claimRewards");
   const buttonRef = useRef();
 
@@ -99,24 +100,30 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const onClaimRewards = () => {
     runClaimRewards(async () => {
       if (unclaimedRewards.isZero() || !walletState.wallet) return;
+      let claimTx = null;
+      let count = 0;
       for (const distribution of rewardsState.rewardDistributions) {
         if (distribution.claimed) continue;
 
         // drop [leaf hash, ..., root hash]
         const proof = distribution.info.proof.slice(1, distribution.info.proof.length - 1);
 
-        const claimTx = await ZWAPRewards.claim({
+        claimTx = await ZWAPRewards.claim({
           amount: distribution.info.amount,
           proof,
           epochNumber: distribution.info.epoch_number,
           wallet: walletState.wallet,
         });
 
-        setClaimResult(claimTx);
+        count++;
+      }
 
+      if (claimTx) {
+        setClaimCount(count);
+        setClaimResult(claimTx);
         setTimeout(() => {
           if (!ZilswapConnector.network) return;
-
+  
           const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
           dispatch(actions.Token.update({
             address: zapContractAddr,
@@ -196,7 +203,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
               {!!claimResult && (
                 <Box marginTop={2}>
-                  <Text variant="body1">Claim Request TX: 0x{truncate(claimResult?.id, 8, 8)}</Text>
+                  <Text variant="body1">Claimed ZWAP from {claimCount} Epochs</Text>
+                  <Text variant="body1">Last Claim TX: 0x{truncate(claimResult?.id, 8, 8)}</Text>
                 </Box>
               )}
 

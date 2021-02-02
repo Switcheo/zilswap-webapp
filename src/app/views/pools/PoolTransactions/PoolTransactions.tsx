@@ -78,6 +78,8 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
         page: pageNumber,
       });
 
+      console.log(transactions);
+
       setTransactions(transactions)
     })
 
@@ -131,6 +133,7 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
                 <TableHead className={classes.tableHead}>
                   <TableRow>
                     <TableCell className={classes.placeholderCell} />
+                    <TableCell></TableCell>
                     <TableCell>Transaction</TableCell>
                     <TableCell>Pool / Route</TableCell>
                     <TableCell align="right">Total Value</TableCell>
