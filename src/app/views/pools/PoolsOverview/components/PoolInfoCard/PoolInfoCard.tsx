@@ -37,6 +37,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   rewardValue: {
     fontSize: '20px',
     lineHeight: '22px',
+    [theme.breakpoints.down("sm")]: {
+      fontSize: '14px',
+      lineHeight: '16px',
+    },
+  },
+  rewardContainer: {
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
+    },
+  },
+  roiContainer: {
+    alignItems: "baseline",
+    justifyContent: "flex-end",
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
+      alignItems: "flex-end",
+    },
   },
   thinSubtitle: {
     fontWeight: 400,
@@ -153,7 +170,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
         <Box display="flex">
           <Box display="flex" flexDirection="column" flex={1}>
             <Text color="textSecondary" variant="subtitle2" marginBottom={1.5}>ZWAP Rewards</Text>
-            <Box display="flex" alignItems="baseline">
+            <Box display="flex" className={classes.rewardContainer} alignItems="baseline">
               <Text color="primary" className={classes.rewardValue} marginRight={1}>
                 {potentialRewards.toFormat()} ZWAP
               </Text>
@@ -163,7 +180,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
 
           <Box display="flex" flexDirection="column" flex={1}>
             <Text color="textSecondary" align="right" variant="subtitle2" marginBottom={1.5}>ROI</Text>
-            <Box display="flex" alignItems="baseline" justifyContent="flex-end">
+            <Box display="flex" className={classes.roiContainer}>
               <Text color="textPrimary" className={classes.rewardValue} marginRight={1}>
                 {roiLabel}
               </Text>
