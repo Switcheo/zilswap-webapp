@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 4,
     color: theme.palette.text?.primary,
     paddingTop: 10,
-    paddingBottom: 10
+    paddingBottom: 10,
   },
 }));
 const ProportionSelect: React.FC<ProportionSelectProps> = (props: ProportionSelectProps) => {

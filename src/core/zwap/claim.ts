@@ -1,4 +1,5 @@
 import { BN, bytes } from '@zilliqa-js/util';
+import { fromBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
 import { ConnectedWallet } from "core/wallet";
 import { ZilswapConnector } from 'core/zilswap';
@@ -52,7 +53,7 @@ export const claim = async (claimOpts: ClaimEpochOpts) => {
   if (!provider) throw new Error("Wallet not connected");
 
   const contractAddr = DIST_CONTRACT[Network.TestNet]
-  const distContract = provider.contracts.atBech32(contractAddr);
+  const distContract = provider.contracts.at(fromBech32Address(contractAddr));
 
   const address = wallet.addressInfo.byte20;
 

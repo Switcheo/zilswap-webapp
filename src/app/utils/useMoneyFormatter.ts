@@ -1,5 +1,6 @@
 import { map, active } from "./currencies";
 import BigNumber from "bignumber.js";
+import { toHumanNumber } from "./strings/strings";
 
 export type MoneyFormatterOptions = {
   currency?: any;
@@ -32,7 +33,7 @@ const formatter = (inputNumber: BigNumber | number | string = 0, opts: MoneyForm
   }
   number = number.shiftedBy(-compression);
 
-  return `${number.decimalPlaces(decPlaces).toFormat()}${showCurrency ? ` ${symbol ?? currency ?? ""}` : ""}`.trim()
+  return `${toHumanNumber(number, decPlaces)}${showCurrency ? ` ${symbol ?? currency ?? ""}` : ""}`.trim()
 };
 
 export default function (options: MoneyFormatterOptions = {}) {

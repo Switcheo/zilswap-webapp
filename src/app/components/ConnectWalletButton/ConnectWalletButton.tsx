@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Typography } from "@material-ui/core";
+import { Box, Button, Chip, Typography, useMediaQuery } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
@@ -10,10 +10,14 @@ import { useDispatch, useSelector } from "react-redux";
 import LoadableArea from "../LoadableArea";
 import { ReactComponent as DotIcon } from "./dot.svg";
 import { LoadingKeys } from "app/utils/constants";
+import { AppTheme } from "app/theme/types";
 
 const useStyles = makeStyles(theme => ({
   root: {
     minWidth: 50,
+    [theme.breakpoints.down("xs")]: {
+      marginRight: theme.spacing(1),
+    }
   },
   dotIcon: {
     marginRight: theme.spacing(1)
@@ -22,6 +26,7 @@ const useStyles = makeStyles(theme => ({
 
 const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
+  const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
   const classes = useStyles();
 
   const dispatch = useDispatch();
@@ -47,7 +52,7 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
             variant="outlined"
             label={(
               <Typography variant="button" color="textPrimary">
-                <DotIcon className={classes.dotIcon} />{truncate(wallet!.addressInfo.bech32)}
+                <DotIcon className={classes.dotIcon} />{truncate(wallet!.addressInfo.bech32, 5, isXs ? 2 : 5)}
               </Typography>
             )} />
         )}

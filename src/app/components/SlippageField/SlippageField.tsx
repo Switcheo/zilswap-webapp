@@ -55,8 +55,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 const DEFAULT_SLIPPAGE_LABEL = "Set Limit Add. Price Slippage";
 
-const PRESET_SLIPPAGE = [0.001, 0.005, 0.01];
-const PREFERRED_SLIPPAGE = 0.005;
+const PRESET_SLIPPAGE = [0.005, 0.01, 0.02];
+const PREFERRED_SLIPPAGE = 0.01;
 
 type Props = BoxProps & {
   label?: string;

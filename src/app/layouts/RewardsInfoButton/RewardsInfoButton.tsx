@@ -19,6 +19,9 @@ interface Props extends BoxProps {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     marginRight: theme.spacing(2),
+    [theme.breakpoints.down("sm")]: {
+      marginRight: theme.spacing(1),
+    },
   },
   backdrop: {
     zIndex: 1101,

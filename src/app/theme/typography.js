@@ -58,7 +58,7 @@ export default (palette) => ({
     fontSize: "16px",
     fontWeight: 600,
     lineHeight: "18px",
-    textTransform: "none"
+    textTransform: "none",
   },
   caption: {
   },

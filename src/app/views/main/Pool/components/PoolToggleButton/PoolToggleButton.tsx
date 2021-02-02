@@ -18,6 +18,14 @@ const useStyles = makeStyles(theme => ({
       borderStyle: "solid",
       borderColor: theme.palette.primary.main,
     },
+    [theme.breakpoints.down("xs")]: {
+      width: 76,
+      padding: theme.spacing(0.5, 2),
+      "& .MuiButton-label": {
+        fontSize: "14px",
+        lineHeight: "16px",
+      },
+    },
   },
 }));
 const PoolToggleButton: React.FC<ButtonGroupProps> = (props: ButtonGroupProps) => {

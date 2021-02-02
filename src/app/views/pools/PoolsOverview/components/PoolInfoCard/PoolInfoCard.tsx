@@ -7,7 +7,7 @@ import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } fro
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
-import { bnOrZero } from "app/utils/strings/strings";
+import { bnOrZero, toHumanNumber } from "app/utils/strings/strings";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
 import { ZWAPRewards } from "core/zwap";
@@ -178,7 +178,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
 
         <Box display="flex" flexDirection="column">
           <KeyValueDisplay marginBottom={2.25} kkey="Total Liquidity" ValueComponent="span">
-            <Text>${totalLiquidity.toFormat(2)}</Text>
+            <Text>${toHumanNumber(totalLiquidity)}</Text>
           </KeyValueDisplay>
           <KeyValueDisplay marginBottom={2.25} kkey="Volume (24hrs)" ValueComponent="span">
             <AmountLabel
@@ -187,7 +187,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
               currency="ZIL"
               amount={swapVolumes[token.address]?.totalZilVolume} />
             <Text align="right" variant="body2" color="textSecondary">
-              ${totalZilVolumeUSD.toFormat(2)}
+              ${toHumanNumber(totalZilVolumeUSD)}
             </Text>
           </KeyValueDisplay>
           <KeyValueDisplay marginBottom={2.25} kkey="Current Pool Size" ValueComponent="span">

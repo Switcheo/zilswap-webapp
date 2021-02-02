@@ -11,7 +11,7 @@ import React, { useState } from "react";
 import { actions } from "app/store";
 import { useDispatch, useSelector } from "react-redux";
 import { ZilswapConnector } from "core/zilswap";
-import { bnOrZero } from "app/utils/strings/strings";
+import { bnOrZero, toHumanNumber } from "app/utils/strings/strings";
 import { useValueCalculators } from "app/utils";
 import { ZWAPRewards } from "core/zwap";
 
@@ -97,7 +97,7 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
       potentialRewards: poolRewards,
       rewardsValue,
       depositedValue,
-      roiLabel: roiPerDay.isZero() ? "-" : `${roiPerDay.toFormat()}%`,
+      roiLabel: roiPerDay.isZero() ? "-" : `${toHumanNumber(roiPerDay, 2)}%`,
     };
   }, [rewardsState.epochInfo, rewardsState.potentialPoolRewards, poolShare, token, tokenState.prices, tokenState.tokens, valueCalculators]);
 
@@ -128,10 +128,10 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
         <ContrastBox>
           <KeyValueDisplay marginBottom={1.5} kkey="Your Potential Rewards" ValueComponent="span">
             <Text color="primary">
-              {potentialRewards.shiftedBy(-12).decimalPlaces(5).toFormat()} ZWAP
+              {toHumanNumber(potentialRewards.shiftedBy(-12))} ZWAP
             </Text>
             <Text variant="body2" color="textSecondary" align="right">
-              ≈${rewardsValue.toFormat(2)}
+              ≈${toHumanNumber(rewardsValue, 2)}
             </Text>
           </KeyValueDisplay>
           <KeyValueDisplay marginBottom={1.5} kkey="ROI" ValueComponent="span">
@@ -149,7 +149,7 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
               currency="ZIL"
               amount={zilAmount} />
             <Text variant="body2" color="textSecondary" align="right">
-              ≈${depositedValue.toFormat(2)}
+              ≈${toHumanNumber(depositedValue, 2)}
             </Text>
           </KeyValueDisplay>
 

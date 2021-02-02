@@ -8,7 +8,7 @@ const initial_state: SwapFormState = {
   slippage: 0.005, // percent
   expiry: 15, // minutes
 
-  percentage: new BigNumber(0.005),
+  percentage: new BigNumber(0.01),
   exactOf: "in",
   inAmount: new BigNumber(0),
   outAmount: new BigNumber(0),

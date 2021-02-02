@@ -1,8 +1,8 @@
 import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
-import { useMoneyFormatter } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
+import { toHumanNumber } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import React from "react";
@@ -29,15 +29,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 const AmountLabel: React.FC<Props> = (props: Props) => {
   const { children, className, amount = BIG_ZERO, currency, prefix, hideIcon = false, compression, ...rest } = props;
-  const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5, currency, showCurrency: true, compression });
   const classes = useStyles();
+
+  const decimals = currency === "ZIL" ? 12 : (compression ?? 0)
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       {!hideIcon && (
         <CurrencyLogo className={classes.currencyLogo} currency={currency} />
       )}
-      <Text>{prefix}{moneyFormat(amount)}</Text>
+      <Text>{prefix}{toHumanNumber(amount.shiftedBy(-decimals))} {currency}</Text>
     </Box>
   );
 };
