@@ -1,17 +1,18 @@
 import { Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, Popper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { HelpInfo, KeyValueDisplay, Text } from "app/components";
+import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
+import { actions } from "app/store";
 import { RewardsState, RootState, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
+import { truncate, useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
 import { ZWAPRewards } from "core/zwap";
 import React, { useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 interface Props extends BoxProps {
 
@@ -54,6 +55,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const valueCalculators = useValueCalculators();
   const network = useNetwork();
+  const dispatch = useDispatch();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
@@ -110,8 +112,17 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
           wallet: walletState.wallet,
         });
 
-        console.log(claimTx);
         setClaimResult(claimTx);
+
+        setTimeout(() => {
+          if (!ZilswapConnector.network) return;
+
+          const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
+          dispatch(actions.Token.update({
+            address: zapContractAddr,
+            dirty: true,
+          }));
+        }, 5000);
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));
     })
@@ -185,7 +196,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
               {!!claimResult && (
                 <Box marginTop={2}>
-                  <Text variant="body1">Claim Request TX: {claimResult?.id}</Text>
+                  <Text variant="body1">Claim Request TX: 0x{truncate(claimResult?.id, 8, 8)}</Text>
                 </Box>
               )}
 
@@ -199,7 +210,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
               )}
 
               {!!claimResult && (
-                <Button fullWidth variant="outlined" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/${claimResult?.id}?network=${network}`}>
+                <Button fullWidth variant="outlined" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/0x${claimResult?.id}?network=${network}`}>
                   View Claim TX <NewLinkIcon className={classes.buttonIcon} />
                 </Button>
               )}
