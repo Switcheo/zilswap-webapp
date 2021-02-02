@@ -1,9 +1,10 @@
 import { Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, Popper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { RewardsState, RootState, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask, useValueCalculators } from "app/utils";
+import { useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -43,16 +44,21 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     paddingTop: "2px",
     paddingBottom: "2px",
   },
+  buttonIcon: {
+    marginLeft: theme.spacing(1),
+  },
 }));
 
 const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const valueCalculators = useValueCalculators();
+  const network = useNetwork();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
   const [active, setActive] = useState(false);
+  const [claimResult, setClaimResult] = useState<any>(null);
   const [runClaimRewards, loading, error] = useAsyncTask("claimRewards");
   const buttonRef = useRef();
 
@@ -97,12 +103,15 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         // drop [leaf hash, ..., root hash]
         const proof = distribution.info.proof.slice(1, distribution.info.proof.length - 1);
 
-        await ZWAPRewards.claim({
+        const claimTx = await ZWAPRewards.claim({
           amount: distribution.info.amount,
           proof,
           epochNumber: distribution.info.epoch_number,
           wallet: walletState.wallet,
         });
+
+        console.log(claimTx);
+        setClaimResult(claimTx);
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));
     })
@@ -174,12 +183,26 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                 </Box>
               )}
 
+              {!!claimResult && (
+                <Box marginTop={2}>
+                  <Text variant="body1">Claim Request TX: {claimResult?.id}</Text>
+                </Box>
+              )}
+
               <Box marginTop={3} />
 
-              <Button fullWidth variant="contained" color="primary" disabled={unclaimedRewards.isZero()} onClick={onClaimRewards}>
-                {loading && <CircularProgress size="1em" color="inherit" />}
-                {!loading && "Claim Rewards"}
-              </Button>
+              {!claimResult && (
+                <Button fullWidth variant="contained" color="primary" disabled={unclaimedRewards.isZero()} onClick={onClaimRewards}>
+                  {loading && <CircularProgress size="1em" color="inherit" />}
+                  {!loading && "Claim Rewards"}
+                </Button>
+              )}
+
+              {!!claimResult && (
+                <Button fullWidth variant="outlined" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/${claimResult?.id}?network=${network}`}>
+                  View Claim TX <NewLinkIcon className={classes.buttonIcon} />
+                </Button>
+              )}
             </Card>
           </ClickAwayListener>
         </Box>

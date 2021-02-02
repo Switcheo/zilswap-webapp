@@ -69,5 +69,5 @@ export const claim = async (claimOpts: ClaimEpochOpts) => {
 
   const claimTx = await zilswap.callContract(distContract, "Claim", args, params, true);
 
-  console.log(claimTx);
+  return claimTx;
 };
