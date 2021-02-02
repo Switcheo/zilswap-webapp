@@ -10,7 +10,6 @@ export interface SwapFormState {
 
   recipientAddress?: string;
 
-  percentage: BigNumber;
   exactOf: ExactOfOptions;
 
   inToken?: TokenInfo;
