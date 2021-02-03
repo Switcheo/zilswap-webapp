@@ -78,8 +78,6 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
         page: pageNumber,
       });
 
-      console.log(transactions);
-
       setTransactions(transactions)
     })
 

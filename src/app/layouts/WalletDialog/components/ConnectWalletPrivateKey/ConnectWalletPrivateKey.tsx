@@ -9,9 +9,11 @@ import cls from "classnames";
 import { connectWalletPrivateKey } from "core/wallet";
 import { ConnectWalletResult } from "core/wallet/ConnectedWallet";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ConnectWalletManagerViewProps } from "../../types";
 import { ZilswapConnector } from "core/zilswap";
+import { RootState } from "app/store/types";
+import { Network } from "zilswap-sdk/lib/constants";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -64,6 +66,7 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props:
   const classes = useStyles();
   const [privateKey, setPrivateKey] = useState("");
   const dispatch = useDispatch();
+  const network = useSelector<RootState, Network>(state => state.layout.network);
   const [runConnectTask, loadingConnect, errorConnect] = useAsyncTask<void>("connectWalletPrivateKey");
 
   const onBack = () => {
@@ -79,7 +82,7 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props:
     if (loadingConnect) return;
 
     runConnectTask(async () => {
-      const walletResult: ConnectWalletResult = await connectWalletPrivateKey(privateKey);
+      const walletResult: ConnectWalletResult = await connectWalletPrivateKey(privateKey, network);
       if (walletResult.error)
         throw walletResult.error;
 
