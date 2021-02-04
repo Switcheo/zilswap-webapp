@@ -95,10 +95,11 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
     let airdropRewards = BIG_ZERO;
     if (rewardsState.epochInfo.current >= 0)
       airdropRewards = ZWAPRewards.TOTAL_SUPPLY.times(ZWAPRewards.RETROACTIVE_AIRDROP_FACTOR);
+    airdropRewards =  airdropRewards.plus(new BigNumber(8500).shiftedBy(12));
 
     // stage 2 mining rewards
     const rewardsPerEpoch = new BigNumber(rewardsState.epochInfo.raw.tokens_per_epoch).shiftedBy(12);
-    const miningRewards = rewardsPerEpoch.times(rewardsState.epochInfo.current);
+    const miningRewards = rewardsPerEpoch.times(rewardsState.epochInfo.current - 1);
 
     return airdropRewards.plus(miningRewards).shiftedBy(-12);
   }, [rewardsState.epochInfo])
