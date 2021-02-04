@@ -108,18 +108,14 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
         break;
       };
       case "SwapExactTokensForTokens": {
-        const pool0Address = transaction.data?.params.find(param => param.vname === "token0_address")?.value;
+        const pool0Address = transaction.data?.params.find(param => param.vname === "token1_address")?.value;
         inToken = tokenState.tokens[toBech32Address(pool0Address ?? "")];
         const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
         swapRoute.push(zilToken.symbol, inToken?.symbol);
 
-        const pool1Address = transaction.data?.params.find(param => param.vname === "token1_address")?.value;
-        // assumes swap route is max 2 steps
-        const swapEvent2 = transaction.events.find((event, index) => index > 0 && event.name === "Swapped");
-        if (swapEvent2) {
-          outToken = tokenState.tokens[toBech32Address(pool1Address ?? "")];
-          swapRoute.unshift(outToken?.symbol);
-        }
+        const pool1Address = transaction.data?.params.find(param => param.vname === "token0_address")?.value;
+        outToken = tokenState.tokens[toBech32Address(pool1Address ?? "")];
+        swapRoute.unshift(outToken?.symbol);
 
         if (transaction.events) {
           const transferOutEvent = transaction.events.find(event => event.name === "TransferFromSuccess");
