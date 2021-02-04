@@ -64,7 +64,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
   const { totalLiquidity, liquidityChangePercent } = React.useMemo(() => {
 
     const totalLiquidity = Object.values(tokenState.tokens).reduce((accum, token) => {
-      const poolValue = valueCalculators.pool(tokenState.prices, token);
+      const poolValue = tokenState.values[token.address]?.poolLiquidity ?? BIG_ZERO;
       return accum.plus(poolValue);
     }, BIG_ZERO);
 
@@ -122,7 +122,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
     });
   };
 
-  const epochInfo = rewardsState.epochInfo
+  const epochInfo = rewardsState.epochInfo;
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>

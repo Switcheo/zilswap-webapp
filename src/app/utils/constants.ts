@@ -46,11 +46,14 @@ export const PRODUCTION_HOSTS = [
   "www.zilswap.exchange",
 ];
 
-export const PRICE_REFRESH_RATE = 10000; // ms
 export const STATS_REFRESH_RATE = 30000; // ms
 
 export const ZIL_TOKEN_NAME = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
+
+// ms
 export class PollIntervals {
+  public static USDRates = 10000;
+
   public static ZWAPClaimHistory = 60000;
   public static EpochInfo = 60000;
   public static PoolWeights = 3600000;

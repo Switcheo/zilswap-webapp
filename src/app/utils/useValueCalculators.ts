@@ -2,7 +2,7 @@ import { TokenInfo } from "app/store/types";
 import BigNumber from "bignumber.js";
 import { BIG_ZERO } from "./constants";
 
-const valueCalculators = {
+export const valueCalculators = {
   pool: (prices: { [index: string]: BigNumber }, token: TokenInfo) => {
     const tokenPrice = prices[token.symbol] ?? BIG_ZERO;
     const zilPrice = prices.ZIL ?? BIG_ZERO;

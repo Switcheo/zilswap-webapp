@@ -3,6 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { MoreVertOutlined } from "@material-ui/icons";
 import { AmountLabel, KeyValueDisplay, PoolLogo, Text } from "app/components";
 import { actions } from "app/store";
+import { EMPTY_USD_VALUE } from "app/store/token/reducer";
 import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
@@ -94,18 +95,18 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     dispatch(actions.Layout.showPoolType("add"));
     history.push("/pool");
   }
-  const { totalLiquidity, totalZilVolumeUSD } = useMemo(() => {
+  const { totalZilVolumeUSD, usdValues } = useMemo(() => {
     if (token.isZil) {
-      return { totalLiquidity: BIG_ZERO, totalZilVolumeUSD: BIG_ZERO };
+      return { totalLiquidity: BIG_ZERO, usdValues: EMPTY_USD_VALUE };
     }
 
-    const totalLiquidity = valueCalculators.pool(tokenState.prices, token);
+    const usdValues = tokenState.values[token.address] ?? EMPTY_USD_VALUE;
     const totalZilVolume = swapVolumes[token.address]?.totalZilVolume ?? BIG_ZERO;
     const totalZilVolumeUSD = valueCalculators.amount(tokenState.prices, tokenState.tokens[ZIL_TOKEN_NAME], totalZilVolume);
 
     return {
-      totalLiquidity,
       totalZilVolumeUSD,
+      usdValues,
     };
   }, [tokenState, token, valueCalculators, swapVolumes]);
 
@@ -127,7 +128,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     const zapToken = tokenState.tokens[zapContractAddr];
 
     const rewardsValue = valueCalculators.amount(tokenState.prices, zapToken, poolRewards.shiftedBy(12));
-    const roiPerEpoch = rewardsValue.dividedBy(totalLiquidity);
+    const roiPerEpoch = rewardsValue.dividedBy(usdValues.poolLiquidity);
     const epochDuration = rewardsState.epochInfo.raw.epoch_period;
     const secondsInDay = 24 * 3600;
     const roiPerDay = bnOrZero(roiPerEpoch.dividedBy(epochDuration).times(secondsInDay).shiftedBy(2).decimalPlaces(2));
@@ -137,7 +138,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
       rewardsValue,
       roiLabel: roiPerDay.isZero() ? "-" : `${roiPerDay.toFormat()}%`,
     };
-  }, [rewardsState.epochInfo, rewardsState.rewardByPools, token, totalLiquidity, tokenState.prices, tokenState.tokens, valueCalculators]);
+  }, [rewardsState.epochInfo, rewardsState.rewardByPools, token, usdValues, tokenState.prices, tokenState.tokens, valueCalculators]);
 
   if (token.isZil) return null;
 
@@ -195,7 +196,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
 
         <Box display="flex" flexDirection="column">
           <KeyValueDisplay marginBottom={2.25} kkey="Total Liquidity" ValueComponent="span">
-            <Text>${toHumanNumber(totalLiquidity)}</Text>
+            <Text>${toHumanNumber(usdValues?.poolLiquidity)}</Text>
           </KeyValueDisplay>
           <KeyValueDisplay marginBottom={2.25} kkey="Volume (24hrs)" ValueComponent="span">
             <AmountLabel

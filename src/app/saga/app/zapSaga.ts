@@ -41,8 +41,8 @@ function* queryPoolWeights() {
       yield put(actions.Rewards.updatePoolWeights(poolWeights));
     } finally {
       const invalidated = yield race({
-        networkUpdate: take(LayoutActionTypes.UPDATE_NETWORK),
         pollDelay: delay(PollIntervals.PoolWeights),
+        networkUpdate: take(LayoutActionTypes.UPDATE_NETWORK),
       });
 
       logger("pool weights invalidated", invalidated);

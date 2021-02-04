@@ -1,6 +1,5 @@
 import { actions } from "app/store";
 import { RewardsActionTypes } from "app/store/rewards/actions";
-import { TokenActionTypes } from "app/store/token/actions";
 import { PoolZWAPReward, RootState, TokenInfo, ZAPEpochInfo } from "app/store/types";
 import { SimpleMap } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
@@ -40,7 +39,6 @@ export default function* poolsSaga() {
       console.error(error)
     } finally {
       yield race({
-        update_tokens: take(TokenActionTypes.TOKEN_UPDATE),
         update_epoch_info: take(RewardsActionTypes.UPDATE_EPOCH_INFO),
         update_pool_weights: take(RewardsActionTypes.UPDATE_POOL_WEIGHTS),
       });

@@ -3,7 +3,17 @@ import { toBech32Address, fromBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
 import moment, { Moment } from "moment";
 
-const API_KEY = process.env.REACT_APP_VIEWBLOCK_API_KEY;
+const API_KEY_LIBRARY = process.env.REACT_APP_VIEWBLOCK_API_KEY?.split(",") ?? [];
+const API_KEY = (() => {
+	const viewblockAffinity = parseInt(sessionStorage.getItem("vb-aff") ?? "-1");
+	const key = API_KEY_LIBRARY[viewblockAffinity];
+	if (key) return key;
+	const index = Math.floor(Math.random() * API_KEY_LIBRARY.length);
+	if (index >= API_KEY_LIBRARY.length) return undefined;
+	
+	sessionStorage.setItem("vb-aff", index.toString());
+	return API_KEY_LIBRARY[index];
+})();
 
 const headers = {
 	"X-APIKEY": API_KEY

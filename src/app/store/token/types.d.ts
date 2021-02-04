@@ -8,6 +8,12 @@ export type TokenBalanceMap = {
   [index: string]: BigNumber;
 };
 
+export type TokenUSDValues = {
+  balance: BigNumber;
+  poolLiquidity: BigNumber;
+  zapRewards: BigNumber;
+};
+
 export type TokenInfo = {
   initialized: boolean;
   initBalance: boolean;
@@ -31,6 +37,7 @@ export interface TokenState {
   initialized: boolean,
   prices: SimpleMap<BigNumber>,
   tokens: SimpleMap<TokenInfo>,
+  values: SimpleMap<TokenUSDValues>,
 };
 
 export interface TokenUpdateProps extends Partial<TokenInfo> {
@@ -46,4 +53,8 @@ export interface TokenAddProps {
 
 export interface UpdatePriceProps {
   [index: string]: BigNumber;
+};
+
+export interface UpdateUSDValuesProps {
+  [index: string]: TokenUSDValues;
 };

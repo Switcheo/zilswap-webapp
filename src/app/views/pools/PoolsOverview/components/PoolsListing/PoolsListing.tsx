@@ -3,6 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Text } from "app/components";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
+import { BIG_ZERO } from "app/utils/constants";
 import cls from "classnames";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -41,8 +42,20 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
     registeredTokens,
     otherTokens,
   } = React.useMemo(() => {
-    const queryRegexp = !!query ? new RegExp(query) : undefined;
+    const queryRegexp = !!query ? new RegExp(query, "i") : undefined;
     const result = Object.values(tokenState.tokens)
+      .sort((lhs, rhs) => {
+        const lhsRewardValue = tokenState.values[lhs.address]?.zapRewards ?? BIG_ZERO;
+        const rhsRewardValue = tokenState.values[rhs.address]?.zapRewards ?? BIG_ZERO;
+
+        if (!lhsRewardValue.eq(rhsRewardValue))
+          return rhsRewardValue.comparedTo(lhsRewardValue);
+
+        const lhsTVL = tokenState.values[lhs.address]?.poolLiquidity ?? BIG_ZERO;
+        const rhsTVL = tokenState.values[rhs.address]?.poolLiquidity ?? BIG_ZERO;
+
+        return rhsTVL.comparedTo(lhsTVL);
+      })
       .reduce((accum, token) => {
         if (queryRegexp) {
           const fullText = `${token.symbol}${token.name || ""}${token.address}`.toLowerCase();
@@ -68,7 +81,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
       });
 
     return result;
-  }, [tokenState.tokens, query]);
+  }, [tokenState.tokens, tokenState.values, query]);
 
   const onLoadMore = (key: keyof ListingLimits) => {
     return () => {
