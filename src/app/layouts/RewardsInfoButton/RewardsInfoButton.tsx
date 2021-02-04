@@ -1,12 +1,13 @@
-import { Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, Popper } from "@material-ui/core";
+import { Badge, Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, Popper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { RewardsState, RootState, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { truncate, useAsyncTask, useClaimEnabled, useNetwork, useValueCalculators } from "app/utils";
+import { truncate, useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
+import { formatZWAPLabel } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
@@ -54,7 +55,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const valueCalculators = useValueCalculators();
-  const showClaim = useClaimEnabled();
   const network = useNetwork();
   const dispatch = useDispatch();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
@@ -98,6 +98,10 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     return valueCalculators.amount(tokenState.prices, zapToken, zapTokenBalance);
   }, [tokenState.prices, tokenState.tokens, zapTokenBalance, valueCalculators]);
 
+  const zapBalanceLabel = useMemo(() => formatZWAPLabel(zapTokenBalance), [zapTokenBalance]);
+  const unclaimedRewardsLabel = useMemo(() => formatZWAPLabel(unclaimedRewards), [unclaimedRewards]);
+  const potentialRewardsLabel = useMemo(() => formatZWAPLabel(potentialRewards), [potentialRewards]);
+
   const onClaimRewards = () => {
     runClaimRewards(async () => {
       if (unclaimedRewards.isZero() || !walletState.wallet) return;
@@ -124,7 +128,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         setClaimResult(claimTx);
         setTimeout(() => {
           if (!ZilswapConnector.network) return;
-  
+
           const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
           dispatch(actions.Token.update({
             address: zapContractAddr,
@@ -136,8 +140,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     })
   };
 
-  
-  if (!walletState.wallet || !showClaim) return null;
+
+  if (!walletState.wallet) return null;
 
   const popperModifiers = {
     flip: {
@@ -156,14 +160,16 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <span>
-        <Button
-          size="small"
-          buttonRef={buttonRef}
-          className={classes.topbarButton}
-          variant="outlined"
-          onClick={() => setActive(!active)}>
-          {zapTokenBalance.shiftedBy(-12).toFormat(2)} ZWAP
-        </Button>
+        <Badge color="primary" variant="dot" invisible={unclaimedRewards.isZero()}>
+          <Button
+            size="small"
+            buttonRef={buttonRef}
+            className={classes.topbarButton}
+            variant="outlined"
+            onClick={() => setActive(!active)}>
+            {zapBalanceLabel} ZWAP
+          </Button>
+        </Badge>
       </span>
       <Popper
         open={active}
@@ -177,7 +183,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
             <Card className={classes.card}>
               <Text variant="body1" color="textSecondary">Your ZWAP Balance</Text>
               <Text variant="h1" marginTop={1} className={classes.statistic}>
-                {zapTokenBalance.shiftedBy(-12).toFormat(2)} ZWAP
+                {zapBalanceLabel} ZWAP
               </Text>
               <Text variant="body1" color="textSecondary">
                 ≈${zapTokenValue.toFormat(2)}
@@ -189,10 +195,14 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   <HelpInfo placement="bottom" title="Estimated based on current liquidity and may fluctuate." />
                 </span>
               )}>
-                {potentialRewards.shiftedBy(-12).toFormat(2)} ZWAP
+                {potentialRewardsLabel} ZWAP
               </KeyValueDisplay>
               <KeyValueDisplay marginTop={1} emphasizeValue kkey={"Unclaimed Rewards"}>
-                {unclaimedRewards.shiftedBy(-12).toFormat(2)} ZWAP
+                <Badge color="primary" variant="dot" invisible={unclaimedRewards.isZero()}>
+                  <Text variant="body2">
+                    {unclaimedRewardsLabel} ZWAP
+                  </Text>
+                </Badge>
               </KeyValueDisplay>
 
               {!!error && (

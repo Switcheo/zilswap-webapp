@@ -36,3 +36,9 @@ export const toHumanNumber = (input?: string | BigNumber | number, dp: number = 
 
   return `${value.shiftedBy(-9).decimalPlaces(3).toFormat()}B`
 };
+
+export const formatZWAPLabel = (input: BigNumber) => {
+  const amount = input.shiftedBy(-12);
+  if (!amount.isZero() && amount.lt(0.01)) return "<0.01";
+  return amount.toFormat(2);
+};

@@ -21,9 +21,11 @@ export interface ClaimEpochOpts {
   proof: string[];
 };
 
-const chainId = 333; // chainId of the developer testnet
+const CHAIN_ID = {
+  [Network.TestNet]: 333, // chainId of the developer testnet
+  [Network.MainNet]: 1, // chainId of the mainnet
+}
 const msgVersion = 1; // current msgVersion
-const VERSION = bytes.pack(chainId, msgVersion);
 
 const getTxArgs = (epoch: number, proof: string[], address: string, amount: BigNumber) => {
   return [{
@@ -51,8 +53,10 @@ export const claim = async (claimOpts: ClaimEpochOpts) => {
   const provider = (zilswap?.walletProvider || zilswap?.zilliqa);
 
   if (!provider) throw new Error("Wallet not connected");
+  if (!ZilswapConnector.network) throw new Error("Wallet not initialized");
 
-  const contractAddr = DIST_CONTRACT[Network.TestNet]
+  const contractAddr = DIST_CONTRACT[ZilswapConnector.network]
+  const chainId = CHAIN_ID[ZilswapConnector.network];
   const distContract = provider.contracts.at(fromBech32Address(contractAddr));
 
   const address = wallet.addressInfo.byte20;
@@ -64,7 +68,7 @@ export const claim = async (claimOpts: ClaimEpochOpts) => {
     amount: new BN(0),
     gasPrice: new BN(minGasPrice),
     gasLimit: "30000",
-    version: VERSION,
+    version: bytes.pack(chainId, msgVersion),
   };
 
   const claimTx = await zilswap.callContract(distContract, "Claim", args, params, true);
