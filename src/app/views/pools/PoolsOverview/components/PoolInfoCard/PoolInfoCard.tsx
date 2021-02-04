@@ -172,7 +172,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
             <Text color="textSecondary" variant="subtitle2" marginBottom={1.5}>ZWAP Rewards</Text>
             <Box display="flex" className={classes.rewardContainer} alignItems="baseline">
               <Text color="primary" className={classes.rewardValue} marginRight={1}>
-                {potentialRewards.toFormat()} ZWAP
+                {potentialRewards.isZero() ? "-" : potentialRewards.toFormat()} ZWAP
               </Text>
               <Text color="textPrimary" variant="subtitle2" className={classes.thinSubtitle}>/ next epoch</Text>
             </Box>

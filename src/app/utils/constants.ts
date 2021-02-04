@@ -39,6 +39,13 @@ export const sortTokens = (lhs: TokenInfo, rhs: TokenInfo) => {
   return lhsPriority - rhsPriority;
 };
 
+export const PRODUCTION_HOSTS = [
+  "zilswap.io",
+  "www.zilswap.io",
+  "zilswap.exchange",
+  "www.zilswap.exchange",
+];
+
 export const PRICE_REFRESH_RATE = 10000; // ms
 export const STATS_REFRESH_RATE = 30000; // ms
 

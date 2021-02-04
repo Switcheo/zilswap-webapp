@@ -5,7 +5,7 @@ import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { RewardsState, RootState, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { truncate, useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
+import { truncate, useAsyncTask, useClaimEnabled, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -54,6 +54,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const valueCalculators = useValueCalculators();
+  const showClaim = useClaimEnabled();
   const network = useNetwork();
   const dispatch = useDispatch();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
@@ -135,7 +136,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     })
   };
 
-  if (!walletState.wallet) return null;
+  
+  if (!walletState.wallet || !showClaim) return null;
 
   const popperModifiers = {
     flip: {

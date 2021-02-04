@@ -1,6 +1,7 @@
 import { Box, Button, Chip, Drawer, DrawerProps, List, ListItem } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
+import { useClaimEnabled } from "app/utils";
 import cls from "classnames";
 import React, { forwardRef } from "react";
 import { NavLink as RouterLink } from "react-router-dom";
@@ -81,7 +82,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 const NavDrawer: React.FC<DrawerProps> = (props: any) => {
   const { children, className, onClose, ...rest } = props;
+  const claimEnabled = useClaimEnabled();
   const classes = useStyles();
+
   return (
     <Drawer PaperProps={{ className: classes.paper }} onClose={onClose} {...rest} className={cls(classes.root, className)}>
       <Box className={classes.header}>
@@ -94,7 +97,7 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
       <Box className={classes.content}>
         {navigationConfig.map((navigation, index) => (
           <List key={index}>
-            {navigation.pages.map((page, index) => (
+            {navigation.pages.filter(navigation => navigation.show || claimEnabled).map((page, index) => (
               <ListItem className={classes.listItem} disableGutters button key={index}>
                 {!page.external ? (
                   <Button

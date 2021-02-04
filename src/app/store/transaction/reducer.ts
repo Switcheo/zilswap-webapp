@@ -1,6 +1,6 @@
 import { Types } from "./actions";
 import { WalletActionTypes as WalletTypes } from "../wallet/actions";
-import { ActionTypes as LayoutTypes } from "../layout/actions";
+import { LayoutActionTypes as LayoutTypes } from "../layout/actions";
 import { ObserveTxProps, Transaction, TransactionsInitProps, TransactionState, TransactionUpdateProps, TransactionRemoveProps, SubmittedTx, WalletObservedTx } from "./types";
 import { ObservedTx } from "zilswap-sdk";
 import { ConnectedWallet } from "core/wallet";

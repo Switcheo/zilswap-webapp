@@ -1,7 +1,7 @@
 import { DefaultFallbackNetwork, LocalStorageKeys } from "app/utils/constants";
 import moment from "moment";
 import { Network } from "zilswap-sdk/lib/constants";
-import { ActionTypes } from "./actions";
+import { LayoutActionTypes } from "./actions";
 import { LayoutState } from "./types";
 
 const storedNetworkString = localStorage.getItem(LocalStorageKeys.Network);
@@ -22,36 +22,36 @@ const initial_state: LayoutState = {
 const reducer = (state: LayoutState = initial_state, actions: any) => {
   let loadingTask = null, taskName;
   switch (actions.type) {
-    case ActionTypes.TOGGLE_SHOW_WALLET:
+    case LayoutActionTypes.TOGGLE_SHOW_WALLET:
       return {
         ...state,
         showWalletDialog: !actions.override ? !state.showWalletDialog : actions.override === "open",
       };
-    case ActionTypes.SHOW_POOL_TYPE:
+    case LayoutActionTypes.SHOW_POOL_TYPE:
       return {
         ...state,
         showPoolType: actions.poolType,
       };
-    case ActionTypes.TOGGLE_SHOW_CREATE_POOL:
+    case LayoutActionTypes.TOGGLE_SHOW_CREATE_POOL:
       return {
         ...state,
         showCreatePool: !actions.override ? !state.showWalletDialog : actions.override === "open",
       };
 
-    case ActionTypes.HIDE_LIQUIDITY_EARN:
+    case LayoutActionTypes.HIDE_LIQUIDITY_EARN:
       return {
         ...state,
         liquidityEarnHidden: actions.hide === undefined ? true : actions.hide,
       };
 
-    case ActionTypes.UPDATE_NETWORK:
+    case LayoutActionTypes.UPDATE_NETWORK:
       localStorage.setItem(LocalStorageKeys.Network, actions.network);
       return {
         ...state,
         network: actions.network,
       };
 
-    case ActionTypes.ADD_BACKGROUND_LOADING:
+    case LayoutActionTypes.ADD_BACKGROUND_LOADING:
       loadingTask = state.loadingTasks[actions.name] || {};
       loadingTask[actions.uuid] = moment();
       state.tasksRegistry[actions.uuid] = actions.name;
@@ -65,7 +65,7 @@ const reducer = (state: LayoutState = initial_state, actions: any) => {
           ...state.tasksRegistry,
         },
       };
-    case ActionTypes.REMOVE_BACKGROUND_LOADING:
+    case LayoutActionTypes.REMOVE_BACKGROUND_LOADING:
       taskName = state.tasksRegistry[actions.uuid];
       if (!taskName)
         return state;

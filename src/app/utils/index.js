@@ -11,6 +11,7 @@ export { default as strings } from "./strings";
 export { default as truncate } from "./truncate";
 export * from "./types";
 export { default as useAsyncTask } from "./useAsyncTask";
+export { default as useClaimEnabled } from "./useClaimEnabled";
 export { default as useErrorCatcher } from "./useErrorCatcher";
 export { default as useFilter } from "./useFilter";
 export { default as useFormHandler } from "./useFormHandler";

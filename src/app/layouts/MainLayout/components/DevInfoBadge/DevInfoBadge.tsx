@@ -1,19 +1,13 @@
 import { Chip, Tooltip, BoxProps, Box, Avatar, useMediaQuery } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
+import { PRODUCTION_HOSTS } from "app/utils/constants";
 import cls from "classnames";
 import React from "react";
 
 interface Props extends BoxProps {
 
 }
-
-const PRODUCTION_HOSTS = [
-  "zilswap.io",
-  "www.zilswap.io",
-  "zilswap.exchange",
-  "www.zilswap.exchange",
-];
 
 const getAvatar = (hostname: string) => {
   if (hostname === "localhost") return "L";

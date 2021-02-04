@@ -3,6 +3,7 @@ export type NavigationPageOptions = {
   href: string;
   external?: boolean;
   badge?: string;
+  show?: boolean;
 }
 
 export type NavigationOptions = {

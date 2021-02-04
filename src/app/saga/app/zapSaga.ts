@@ -1,4 +1,5 @@
 import { actions } from "app/store";
+import { LayoutActionTypes } from "app/store/layout/actions";
 import { RewardsActionTypes } from "app/store/rewards/actions";
 import { GlobalClaimHistory, RootState, WalletState, ZAPRewardDist } from "app/store/types";
 import { WalletActionTypes } from "app/store/wallet/actions";
@@ -40,6 +41,7 @@ function* queryPoolWeights() {
       yield put(actions.Rewards.updatePoolWeights(poolWeights));
     } finally {
       const invalidated = yield race({
+        networkUpdate: take(LayoutActionTypes.UPDATE_NETWORK),
         pollDelay: delay(PollIntervals.PoolWeights),
       });
 
@@ -73,6 +75,7 @@ function* queryDistribution() {
       yield put(actions.Rewards.updateDistributions(rewardDistributions));
     } finally {
       const invalidated = yield race({
+        networkUpdate: take(LayoutActionTypes.UPDATE_NETWORK),
         epochUpdated: take(RewardsActionTypes.UPDATE_EPOCH_INFO),
         walletUpdated: take(WalletActionTypes.WALLET_UPDATE),
       });
