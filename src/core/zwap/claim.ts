@@ -67,7 +67,7 @@ export const claim = async (claimOpts: ClaimEpochOpts) => {
   const params: any = {
     amount: new BN(0),
     gasPrice: new BN(minGasPrice),
-    gasLimit: "30000",
+    gasLimit: "5000",
     version: bytes.pack(chainId, msgVersion),
   };
 
