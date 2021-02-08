@@ -6,7 +6,7 @@ import React from "react";
 import Text from "../Text";
 
 interface Props extends CardProps {
-  heading?: string;
+  heading?: string | React.ReactNode;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({

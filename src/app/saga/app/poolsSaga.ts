@@ -27,7 +27,7 @@ export default function* poolsSaga() {
           const weight = poolWeights[tokenAddress] ?? BIG_ZERO;
 
           const rewardShare = weight.div(totalPoolWeight);
-          const rewardsPerEpoch = new BigNumber(epochInfo.raw.tokens_per_epoch);
+          const rewardsPerEpoch = new BigNumber(epochInfo.raw.tokens_per_epoch).times(0.85);
           const weeklyReward = rewardsPerEpoch.times(rewardShare).decimalPlaces(5);
 
           poolZwapRewards[tokenAddress] = { weight: weight.toNumber(), rewardShare, weeklyReward };

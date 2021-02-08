@@ -1,4 +1,4 @@
-import { Box, BoxProps, Container, Tooltip, Grid } from "@material-ui/core";
+import { Box, BoxProps, Container, Grid, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowDropUpRounded } from "@material-ui/icons";
 import { StatsCard, Text } from "app/components";
@@ -7,12 +7,11 @@ import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
-import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ZWAPRewards } from "core/zwap";
 import moment from "moment";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { ReactComponent as TooltipSVG } from "./tooltip.svg";
 
 interface Props extends BoxProps { }
 
@@ -34,6 +33,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   subtitleIcon: {
     height: theme.spacing(3),
     width: theme.spacing(3),
+  },
+  helpIcon: {
+    verticalAlign: "middle",
+    marginLeft: theme.spacing(1),
   },
 }));
 
@@ -79,7 +82,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
       return accum.plus(poolValue);
     }, BIG_ZERO);
 
-    const liquidityChangePercent = previousLiquidity.isZero() ? BIG_ZERO : (totalLiquidity.minus(previousLiquidity)).div(previousLiquidity).shiftedBy(2);
+    const liquidityChangePercent = previousLiquidity.isZero() ? BIG_ZERO : bnOrZero((totalLiquidity.minus(previousLiquidity)).div(previousLiquidity).shiftedBy(2));
 
     return {
       totalLiquidity,
@@ -88,20 +91,9 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
 
   }, [tokenState, valueCalculators, statsState.liquidityChange24h]);
 
-  const totalRewards = useMemo(() => {
+  const nextRewards = useMemo(() => {
     if (!rewardsState.epochInfo) return BIG_ZERO;
-
-    // stage 1 retroactive airdrop
-    let airdropRewards = BIG_ZERO;
-    if (rewardsState.epochInfo.current >= 0)
-      airdropRewards = ZWAPRewards.TOTAL_SUPPLY.times(ZWAPRewards.RETROACTIVE_AIRDROP_FACTOR);
-    airdropRewards =  airdropRewards.plus(new BigNumber(8500).shiftedBy(12));
-
-    // stage 2 mining rewards
-    const rewardsPerEpoch = new BigNumber(rewardsState.epochInfo.raw.tokens_per_epoch).shiftedBy(12);
-    const miningRewards = rewardsPerEpoch.times(rewardsState.epochInfo.current - 1);
-
-    return airdropRewards.plus(miningRewards).shiftedBy(-12);
+    return bnOrZero(rewardsState.epochInfo.raw.tokens_per_epoch);
   }, [rewardsState.epochInfo])
 
   const updateCountdown = () => {
@@ -109,7 +101,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
 
     const nextEpoch = rewardsState.epochInfo.nextEpoch;
     const currentTime = moment();
-    const diffSeconds = Math.max(0, nextEpoch.unix() - currentTime.unix());
+    const diffSeconds = Math.max(0, nextEpoch.unix() - currentTime.unix()) % rewardsState.epochInfo.raw.epoch_period;
     const days = Math.floor(diffSeconds / 86400);
     const hours = Math.floor((diffSeconds % 86400) / 3600);
     const minutes = Math.floor((diffSeconds % 3600) / 60);
@@ -141,19 +133,24 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
               </StatsCard>
             </Grid>
             <Grid item xs={12} md={4}>
-              <StatsCard heading="Total ZWAP Rewards">
+              <StatsCard heading={(
+                <span>
+                  ZWAP next epoch
+                  <Tooltip title="Click to learn more about ZWAP rewards">
+                    <a href="https://blog.switcheo.network/introducing-zwap/" target="_blank" rel="noopener noreferrer">
+                      <TooltipSVG className={classes.helpIcon} />
+                    </a>
+                  </Tooltip>
+                </span>
+              )}>
                 <Text marginBottom={2} variant="h1" className={classes.statistic}>
-                  {totalRewards.toFormat(0)}
+                  {nextRewards.toFormat(0)}
                 </Text>
                 <Box alignItems="center" display="flex" className={classes.subtitle}>
                   {!!epochInfo && epochInfo.current < epochInfo.maxEpoch && (
-                    <Tooltip arrow title={`Last epoch at #${epochInfo.maxEpoch}`}>
-                      <span>
-                        <Text color="textSecondary">
-                          until next epoch (#{epochInfo.current + 1})
-                        </Text>
-                      </span>
-                    </Tooltip>
+                    <Text color="textSecondary">
+                      until next epoch
+                    </Text>
                   )}
 
                   {!!epochInfo && epochInfo.current >= epochInfo.maxEpoch && (
