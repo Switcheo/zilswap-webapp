@@ -12,6 +12,8 @@ export type PoolZWAPReward = {
   weeklyReward: BigNumber;
   rewardShare: BigNumber; // pool reward weight ÷ total weight
   weight: number;
+
+  weightedLiquidity: BigNumber;
 };
 
 export interface ZAPEpochInfo {

@@ -86,7 +86,8 @@ export interface GetLiquidityOpts extends QueryOptions {
 }
 
 export interface GetWeightedLiquidityOpts extends QueryOptions {
-	timestamp?: number;
+	from?: number;
+	until?: number;
 	address?: string;
 }
 
@@ -167,11 +168,15 @@ export class ZAPStats {
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
-	static getWeightedLiquidity = async ({ network }: GetWeightedLiquidityOpts): Promise<any> => {
+	static getWeightedLiquidity = async ({ network, from, until }: GetWeightedLiquidityOpts): Promise<PoolLiquidity[]> => {
 		const http = ZAPStats.getApi(network);
-		const url = http.path("liquidity/weighted");
+		const url = http.path("liquidity/weighted", {}, { from, until });
 		const response = await http.get({ url });
-		return await response.json();
+		const result = await response.json();
+		return result?.map((pool: any) => ({
+			...pool,
+			amount: bnOrZero(pool.amount),
+		}));
 	}
 
 	/**

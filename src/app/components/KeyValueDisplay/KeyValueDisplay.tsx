@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import React from "react";
 
-interface Props extends BoxProps {
+export interface Props extends BoxProps {
   kkey?: string | React.ReactNode;
   emphasizeValue?: boolean;
   valueColor?: "inherit" | "primary" | "secondary" | "textPrimary" | "textSecondary" | "initial";

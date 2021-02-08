@@ -20,6 +20,7 @@ export { default as PoolLogo } from "./PoolLogo";
 export { default as PoolRouteIcon } from "./PoolRouteIcon";
 export { default as PoolsNavigationTabs } from "./PoolsNavigationTabs";
 export { default as PoolsOverviewBanner } from "./PoolsOverviewBanner";
+export { default as PotentialRewardInfo } from "./PotentialRewardInfo";
 export { default as ProportionSelect } from "./ProportionSelect";
 export { default as RandomAsciiEmoji } from "./RandomAsciiEmoji";
 export { default as ScrollReset } from "./ScrollReset";
