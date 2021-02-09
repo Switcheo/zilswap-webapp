@@ -42,6 +42,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fontSize: '14px',
       lineHeight: '16px',
     },
+    [theme.breakpoints.up("sm")]: {
+      marginRight: theme.spacing(1),
+    },
   },
   rewardContainer: {
     [theme.breakpoints.down("sm")]: {
@@ -58,6 +61,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   thinSubtitle: {
     fontWeight: 400,
+    [theme.breakpoints.down("xs")]: {
+      display: "none",
+    },
   },
 
   dropdown: {
@@ -68,6 +74,26 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   dropdownItem: {
     borderRadius: theme.spacing(.5),
     minWidth: theme.spacing(15),
+  },
+  statContainer: {
+    display: "flex",
+    flexDirection: "row",
+    [theme.breakpoints.down("xs")]: {
+      flexDirection: "column",
+    },
+  },
+  statItem: {
+    flex: 1,
+    flexDirection: "column",
+    [theme.breakpoints.down("xs")]: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginBottom: theme.spacing(1),
+      "& $rewardContainer": {
+        alignItems: "flex-end",
+      },
+    },
   },
 }));
 
@@ -115,11 +141,13 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     potentialRewards,
     // rewardsValue,
     roiLabel,
+    apy,
   } = React.useMemo(() => {
     if (!ZilswapConnector.network || !rewardsState.epochInfo) return {
       rewardsValue: BIG_ZERO,
       potentialRewards: BIG_ZERO,
       roiLabel: "-",
+      apy: BIG_ZERO,
     };
 
     const poolRewards = bnOrZero(rewardsState.rewardByPools[token.address]?.weeklyReward);
@@ -129,6 +157,8 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
 
     const rewardsValue = valueCalculators.amount(tokenState.prices, zapToken, poolRewards.shiftedBy(12));
     const roiPerEpoch = rewardsValue.dividedBy(usdValues.poolLiquidity);
+    const epochsPerYear = 52
+    const apy = bnOrZero(roiPerEpoch.plus(1).pow(epochsPerYear).minus(1).shiftedBy(2).decimalPlaces(1));
     const epochDuration = rewardsState.epochInfo.raw.epoch_period;
     const secondsInDay = 24 * 3600;
     const roiPerDay = bnOrZero(roiPerEpoch.dividedBy(epochDuration).times(secondsInDay).shiftedBy(2).decimalPlaces(2));
@@ -137,6 +167,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
       potentialRewards: poolRewards,
       rewardsValue,
       roiLabel: roiPerDay.isZero() ? "-" : `${roiPerDay.toFormat()}%`,
+      apy,
     };
   }, [rewardsState.epochInfo, rewardsState.rewardByPools, token, usdValues, tokenState.prices, tokenState.tokens, valueCalculators]);
 
@@ -168,24 +199,37 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
         </Box>
       </CardContent>
       <CardContent className={classes.content}>
-        <Box display="flex">
-          <Box display="flex" flexDirection="column" flex={1}>
+        <Box display="flex" className={classes.statContainer}>
+          <Box display="flex" className={classes.statItem}>
             <Text color="textSecondary" variant="subtitle2" marginBottom={1.5}>ZWAP Rewards</Text>
             <Box display="flex" className={classes.rewardContainer} alignItems="baseline">
-              <Text color="primary" className={classes.rewardValue} marginRight={1}>
+              <Text color="primary" className={classes.rewardValue}>
                 {potentialRewards.isZero() ? "-" : potentialRewards.toFormat()} ZWAP
               </Text>
               <Text color="textPrimary" variant="subtitle2" className={classes.thinSubtitle}>/ next epoch</Text>
             </Box>
           </Box>
 
-          <Box display="flex" flexDirection="column" flex={1}>
-            <Text color="textSecondary" align="right" variant="subtitle2" marginBottom={1.5}>ROI</Text>
+          <Box display="flex" className={classes.statItem}>
+            <Text color="textSecondary" align="right" variant="subtitle2" marginBottom={1.5}>Daily ROI</Text>
             <Box display="flex" className={classes.roiContainer}>
-              <Text color="textPrimary" className={classes.rewardValue} marginRight={1}>
+              <Text color="textPrimary" className={classes.rewardValue}>
                 {roiLabel}
               </Text>
-              <Text color="textPrimary" variant="subtitle2" className={classes.thinSubtitle}>/ daily</Text>
+            </Box>
+          </Box>
+
+          <Box display="flex" className={classes.statItem}>
+            <Text color="textSecondary" align="right" variant="subtitle2" marginBottom={1.5}>APY</Text>
+            <Box display="flex" className={classes.roiContainer}>
+              <Text color="textPrimary" className={classes.rewardValue}>
+                {!apy.isZero() && (
+                  <span>{toHumanNumber(apy, 1)}%</span>
+                )}
+                {apy.isZero() && (
+                  <span>-</span>
+                )}
+              </Text>
             </Box>
           </Box>
         </Box>

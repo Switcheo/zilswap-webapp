@@ -29,12 +29,12 @@ export const toHumanNumber = (input?: string | BigNumber | number, dp: number = 
     return value.decimalPlaces(dp).toFormat();
 
   if (value.lt(MILLION))
-    return `${value.shiftedBy(-3).decimalPlaces(3).toFormat()}K`
+    return `${value.shiftedBy(-3).decimalPlaces(dp).toFormat()}K`
 
   if (value.lt(BILLION))
-    return `${value.shiftedBy(-6).decimalPlaces(3).toFormat()}M`
+    return `${value.shiftedBy(-6).decimalPlaces(dp).toFormat()}M`
 
-  return `${value.shiftedBy(-9).decimalPlaces(3).toFormat()}B`
+  return `${value.shiftedBy(-9).decimalPlaces(dp).toFormat()}B`
 };
 
 export const formatZWAPLabel = (input: BigNumber) => {

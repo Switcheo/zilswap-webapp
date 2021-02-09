@@ -1,11 +1,12 @@
 import { Box, Button, IconButton, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import { WarningRounded } from "@material-ui/icons";
 import AddIcon from "@material-ui/icons/Add";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import RemoveIcon from "@material-ui/icons/Remove";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { validation as ZilValidation } from "@zilliqa-js/util";
-import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect, StatefulText } from "app/components";
+import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect, StatefulText, Text } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
@@ -128,6 +129,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   addressError: {
     justifySelf: "flex-end",
     marginLeft: "auto",
+  },
+  warningText: {
+    color: theme.palette.colors.zilliqa.warning,
+    "& svg": {
+      verticalAlign: "middle",
+      fontSize: "inherit",
+    }
   },
   errorMessage: {
     marginTop: theme.spacing(1),
@@ -589,6 +597,9 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
                 value={swapFormState.recipientAddress || ""}
                 placeholder={PlaceholderStrings.ZilAddress}
                 onChange={onRecipientAddressChange} />
+              <Text className={classes.warningText}>
+                <WarningRounded color="inherit" />  Do not send tokens directly to an exchange address as it may result in failure to receive your fund.
+              </Text>
             </>
           )}
         </Box>
