@@ -3,6 +3,7 @@ import { LayoutActionTypes } from "app/store/layout/actions";
 import { RewardsActionTypes } from "app/store/rewards/actions";
 import { GlobalClaimHistory, RootState, WalletState, ZAPRewardDist } from "app/store/types";
 import { WalletActionTypes } from "app/store/wallet/actions";
+import { SimpleMap } from "app/utils";
 import { PollIntervals } from "app/utils/constants";
 import { logger, ZAPStats, ZWAPDistribution, ZWAPPotentialRewards } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
@@ -54,6 +55,14 @@ function* queryDistribution() {
   logger("query distributions");
   while (true) {
     try {
+      const zilswap = yield getZilswapSDK();
+      if (!zilswap) continue;
+
+      const zwapDistContract = yield getDistributorContract(zilswap);
+
+      const uploadState = yield call([zwapDistContract, zwapDistContract.getSubState], "merkle_roots");
+      const merkleRoots = (uploadState?.merkle_roots ?? {}) as SimpleMap<string>;
+
       const network = yield select((state: RootState) => state.layout.network);
       const walletState: WalletState = yield select((state: RootState) => state.wallet);
 
@@ -70,6 +79,7 @@ function* queryDistribution() {
       const rewardDistributions = distributions.map((info: ZWAPDistribution): ZAPRewardDist => ({
         info,
         claimed: false,
+        readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
       }));
 
       yield put(actions.Rewards.updateDistributions(rewardDistributions));
@@ -89,18 +99,10 @@ function* queryClaimHistory() {
   logger("query claim history");
   while (true) {
     try {
-      const network: Network = yield select((state: RootState) => state.layout.network);
-
-      // wait until zilswap is initialized
-      while (!ZilswapConnector.connectorState?.zilswap) {
-        yield new Promise(resolve => setTimeout(resolve, 1000));
-      };
-
-      const zilswap: any = ZilswapConnector.connectorState?.zilswap;
+      const zilswap = yield getZilswapSDK();
       if (!zilswap) continue;
 
-      const zwapDistContractAddress = ZWAPRewards.DIST_CONTRACT[network];
-      const zwapDistContract = (zilswap.walletProvider || zilswap.zilliqa).contracts.at(zwapDistContractAddress);
+      const zwapDistContract = yield getDistributorContract(zilswap);
 
       const claimedState = yield call([zwapDistContract, zwapDistContract.getSubState], "claimed_leafs");
       const globalClaimHistory = (claimedState?.claimed_leafs ?? {}) as GlobalClaimHistory;
@@ -154,4 +156,19 @@ export default function* zapSaga() {
   yield fork(queryClaimHistory);
   yield fork(queryPotentialRewards);
   yield fork(queryPotentialRewards);
+}
+
+function* getZilswapSDK() {
+  // wait until zilswap is initialized
+  while (!ZilswapConnector.connectorState?.zilswap) {
+    yield new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  return ZilswapConnector.connectorState!.zilswap;
+}
+
+function* getDistributorContract(zilswap: any) {
+  const network: Network = yield select((state: RootState) => state.layout.network);
+  const zwapDistContractAddress = ZWAPRewards.DIST_CONTRACT[network];
+  return (zilswap.walletProvider || zilswap.zilliqa).contracts.at(zwapDistContractAddress);
 }

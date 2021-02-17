@@ -1,4 +1,4 @@
-import { Badge, Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, Popper } from "@material-ui/core";
+import { Badge, Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, Popper, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
@@ -73,12 +73,33 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     }, BIG_ZERO);
   }, [rewardsState.potentialPoolRewards]);
 
-  const unclaimedRewards = useMemo(() => {
-    const totalDistribution = rewardsState.rewardDistributions.reduce((sum, dist) => {
+  const {
+    unclaimedRewards,
+    claimableRewards,
+    claimTooltip,
+  } = useMemo(() => {
+    const unclaimedRewards = rewardsState.rewardDistributions.reduce((sum, dist) => {
       return dist.claimed ? sum : sum.plus(dist.info.amount);
     }, BIG_ZERO);
 
-    return totalDistribution;
+    const claimableRewards = rewardsState.rewardDistributions.reduce((sum, dist) => {
+      return (!dist.claimed && dist.readyToClaim) ? sum.plus(dist.info.amount) : sum;
+    }, BIG_ZERO);
+
+    let claimTooltip = "No ZWAP to claim";
+    if (!unclaimedRewards.isZero()) {
+      if (unclaimedRewards.eq(claimableRewards)) {
+        claimTooltip = "Click to claim your ZWAP!";
+      } else if (unclaimedRewards.gt(claimableRewards)) {
+        claimTooltip = "ZWAP emission is being prepared, please try again in a few seconds.";
+      }
+    }
+
+    return {
+      unclaimedRewards,
+      claimableRewards,
+      claimTooltip,
+    };
   }, [rewardsState.rewardDistributions]);
 
   const zapTokenBalance: BigNumber = useMemo(() => {
@@ -223,10 +244,14 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
               <Box marginTop={3} />
 
               {!claimResult && (
-                <Button fullWidth variant="contained" color="primary" disabled={unclaimedRewards.isZero()} onClick={onClaimRewards}>
-                  {loading && <CircularProgress size="1em" color="inherit" />}
-                  {!loading && "Claim Rewards"}
-                </Button>
+                <Tooltip title={claimTooltip}>
+                  <span>
+                    <Button fullWidth variant="contained" color="primary" disabled={claimableRewards.isZero()} onClick={onClaimRewards}>
+                      {loading && <CircularProgress size="1em" color="inherit" />}
+                      {!loading && "Claim Rewards"}
+                    </Button>
+                  </span>
+                </Tooltip>
               )}
 
               {!!claimResult && (

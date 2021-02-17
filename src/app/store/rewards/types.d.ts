@@ -27,6 +27,7 @@ export interface ZAPEpochInfo {
 export interface ZAPRewardDist {
   info: ZWAPDistribution;
   claimed: boolean;
+  readyToClaim: boolean;
   claimTx?: any;
 }
 
