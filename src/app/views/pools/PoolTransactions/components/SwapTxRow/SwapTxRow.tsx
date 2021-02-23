@@ -6,17 +6,15 @@ import TxStatusIndicator from "app/components/TxStatusIndicator";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useNetwork, useValueCalculators } from "app/utils";
-import { ZIL_TOKEN_NAME } from "app/utils/constants";
-import { bnOrZero } from "app/utils/strings/strings";
+import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ZilTransaction } from "core/utilities";
-import { toBech32Address } from "core/zilswap";
+import { PoolTransaction } from "core/utilities";
 import React from "react";
 import { useSelector } from "react-redux";
 
 interface Props extends TableRowProps {
-  transaction: ZilTransaction;
+  transaction: PoolTransaction;
 };
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -57,84 +55,41 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
   } = React.useMemo(() => {
     const swapRoute: string[] = [];
 
-    // in - into the users address (out of contract)
-    // out - out of the users address (into the contract)
-
-    let inToken!: TokenInfo;
-    let outToken!: TokenInfo;
+    // in - into the contract (out of users address)
+    // out - out of the contract (into the users address)
 
     let inAmount!: BigNumber;
     let outAmount!: BigNumber;
 
     let totalValue!: BigNumber;
 
-    switch (transaction.data?._tag) {
-      case "SwapExactTokensForZIL": {
-        const poolAddress = transaction.data?.params.find(param => param.vname === "token_address")?.value;
-        inToken = tokenState.tokens[ZIL_TOKEN_NAME];
-        outToken = tokenState.tokens[toBech32Address(poolAddress ?? "")];
+    let inToken!: TokenInfo;
+    let outToken!: TokenInfo;
 
-        swapRoute.push(inToken?.symbol, outToken?.symbol);
-
-        if (transaction.events.length) {
-          inAmount = bnOrZero(transaction.internalTransfers?.[0]?.value);
-          const transferEvent = transaction.events.find(event => event.name === "TransferFromSuccess");
-          outAmount = bnOrZero(transferEvent?.params?.amount);
-        } else {
-          inAmount = bnOrZero(transaction.data?.params.find(param => param.vname === "min_zil_amount")?.value);
-          outAmount = bnOrZero(transaction.data?.params.find(param => param.vname === "token_amount")?.value);
-        }
-
-        totalValue = valueCalculators.amount(tokenState.prices, outToken, outAmount);
-        break;
-      };
-      case "SwapExactZILForTokens": {
-        const poolAddress = transaction.data?.params.find(param => param.vname === "token_address")?.value;
-        inToken = tokenState.tokens[toBech32Address(poolAddress ?? "")];
-        outToken = tokenState.tokens[ZIL_TOKEN_NAME];
-
-        swapRoute.push(inToken?.symbol, outToken?.symbol);
-
-        if (!transaction.events.length) {
-          outAmount = transaction.value;
-          const transferEvent = transaction.events.find(event => event.name === "TransferSuccess");
-          inAmount = bnOrZero(transferEvent?.params?.amount);
-        } else {
-          inAmount = bnOrZero(transaction.data?.params.find(param => param.vname === "min_token_amount")?.value);
-          outAmount = bnOrZero(transaction.value);
-        }
-
-        totalValue = valueCalculators.amount(tokenState.prices, outToken, outAmount);
-        break;
-      };
-      case "SwapExactTokensForTokens": {
-        const pool0Address = transaction.data?.params.find(param => param.vname === "token1_address")?.value;
-        inToken = tokenState.tokens[toBech32Address(pool0Address ?? "")];
-        const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
-        swapRoute.push(zilToken.symbol, inToken?.symbol);
-
-        const pool1Address = transaction.data?.params.find(param => param.vname === "token0_address")?.value;
-        outToken = tokenState.tokens[toBech32Address(pool1Address ?? "")];
-        swapRoute.unshift(outToken?.symbol);
-
-        if (transaction.events) {
-          const transferOutEvent = transaction.events.find(event => event.name === "TransferFromSuccess");
-          outAmount = bnOrZero(transferOutEvent?.params?.amount);
-
-          const transferInEvent = transaction.events.find(event => event.name === "TransferSuccess");
-          inAmount = bnOrZero(transferInEvent?.params?.amount);
-        } else {
-          inAmount = bnOrZero(transaction.data?.params.find(param => param.vname === "min_token1_amount")?.value);
-          outAmount = bnOrZero(transaction.data?.params.find(param => param.vname === "token0_amount")?.value);
-        }
-
-        totalValue = valueCalculators.amount(tokenState.prices, outToken, outAmount);
-        break;
-      };
+    if (transaction.swap0_is_sending_zil) {
+      inToken = tokenState.tokens[ZIL_TOKEN_NAME];
+      outToken = tokenState.tokens[transaction.token_address];
+      swapRoute.push(inToken.symbol, outToken.symbol);
+      inAmount = transaction.zil_amount;
+      outAmount = transaction.token_amount;
+    } else {
+      inToken = tokenState.tokens[transaction.token_address];
+      outToken = tokenState.tokens[ZIL_TOKEN_NAME];
+      swapRoute.push(inToken.symbol, outToken.symbol);
+      inAmount = transaction.token_amount;
+      outAmount = transaction.zil_amount;
     }
 
+    if (transaction.swap1_token_address) {
+      inToken = tokenState.tokens[transaction.swap1_token_address];
+      swapRoute.unshift(inToken.symbol);
+      inAmount = transaction.swap1_token_amount ?? BIG_ZERO;
+    }
+
+    totalValue = valueCalculators.amount(tokenState.prices, outToken, outAmount);
+
     return {
-      isError: !transaction.events.length,
+      isError: false,
       inToken,
       outToken,
       swapRoute,
@@ -152,13 +107,13 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
       </TableCell>
       <TableCell className={classes.titleHeader}>
         <Box display="flex">
-          <Tooltip title={(transaction.data as any)?._tag}>
+          <Tooltip title={""}>
             <span>
-              <Text>Swap {outToken?.symbol} for {inToken?.symbol}</Text>
+              <Text>Swap {inToken?.symbol} for {outToken?.symbol}</Text>
             </span>
           </Tooltip>
           <Box className="external-link" marginLeft={1}>
-            <a target="_blank" rel="noopener noreferrer" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=${network}`}>
+            <a target="_blank" rel="noopener noreferrer" href={`https://viewblock.io/zilliqa/tx/${transaction.transaction_hash}?network=${network}`}>
               <NewLinkIcon />
             </a>
           </Box>
@@ -174,26 +129,26 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
         ${totalValue.toFormat(2)}
       </TableCell>
       <TableCell align="right">
-        {!!outToken && (
-          <AmountLabel
-            hideIcon
-            prefix="-"
-            justifyContent="flex-end"
-            amount={outAmount}
-            currency={outToken.symbol}
-            compression={outToken.decimals} />
-        )}
         {!!inToken && (
           <AmountLabel
             hideIcon
+            prefix="-"
             justifyContent="flex-end"
             amount={inAmount}
             currency={inToken.symbol}
             compression={inToken.decimals} />
         )}
+        {!!outToken && (
+          <AmountLabel
+            hideIcon
+            justifyContent="flex-end"
+            amount={outAmount}
+            currency={outToken.symbol}
+            compression={outToken.decimals} />
+        )}
       </TableCell>
       <TableCell align="right">
-        {transaction.timestamp?.fromNow()}
+        {transaction.block_timestamp.fromNow()}
       </TableCell>
       <TableCell className={classes.placeholderCell} />
     </TableRow>

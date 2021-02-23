@@ -3,7 +3,7 @@ import { RewardsActionTypes } from "app/store/rewards/actions";
 import { TokenActionTypes } from "app/store/token/actions";
 import { RewardsState, RootState, TokenInfo, TokenState, TokenUSDValues } from "app/store/types";
 import { SimpleMap, valueCalculators } from "app/utils";
-import { BIG_ONE, PollIntervals, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { BIG_ONE, BIG_ZERO, PollIntervals, ZIL_TOKEN_NAME } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
@@ -33,7 +33,7 @@ function* updatePoolUSDValues() {
         const balance = valueCalculators.amount(tokenState.prices, token, bnOrZero(token.balance));
         const poolLiquidity = valueCalculators.pool(tokenState.prices, token);
         const weeklyReward = rewardsState.rewardByPools[token.address]?.weeklyReward
-        const zapRewards = valueCalculators.amount(tokenState.prices, zapToken, weeklyReward);
+        const zapRewards = valueCalculators.amount(tokenState.prices, zapToken, weeklyReward ?? BIG_ZERO);
 
         usdValues[token.address] = {
           balance,

@@ -13,7 +13,7 @@ import { useDispatch, useSelector, useStore } from "react-redux";
 import { ObservedTx, TokenDetails, TxReceipt, TxStatus } from "zilswap-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 import { logger } from "./logger";
-import { ViewBlock } from "./viewblock";
+import { PoolTransaction, ZAPStats } from "./zap-stats";
 
 /**
  * Component constructor properties for {@link AppButler}
@@ -329,12 +329,13 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
       runReloadTransactions(async () => {
         if (!walletState.wallet) return;
-        const viewblockTxs = await ViewBlock.listTransactions({
-          network: ZilswapConnector.network!.toLowerCase(),
+        const { records } = await ZAPStats.getPoolTransactions({
+          network: ZilswapConnector.network!,
           address: walletState.wallet!.addressInfo.bech32,
+          per_page: 50,
         });
-        const transactions: Transaction[] = viewblockTxs.map((tx: any) => ({
-          hash: tx.hash.replace(/^0x/, ""),
+        const transactions: Transaction[] = records.map((tx: PoolTransaction) => ({
+          hash: tx.transaction_hash,
           status: "confirmed",
         }));
 

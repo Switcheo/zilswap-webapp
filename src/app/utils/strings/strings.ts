@@ -13,13 +13,17 @@ export const uuidv4 = () => {
   });
 }
 
-export const bnOrZero = (input?: string | BigNumber | number, defaultValue: BigNumber = BIG_ZERO) => {
-  if (!input) return defaultValue;
+export const parseBN = (input?: string | BigNumber | number, defaultValue?: BigNumber) => {
+  if (!input && input !== 0) return defaultValue;
   const result = BigNumber.isBigNumber(input) ? input : new BigNumber(input);
   if (!result.isFinite() || result.isNaN())
     return defaultValue;
 
   return result;
+};
+
+export const bnOrZero = (input?: string | BigNumber | number, defaultValue: BigNumber = BIG_ZERO) => {
+  return parseBN(input, defaultValue)!;
 };
 
 export const toHumanNumber = (input?: string | BigNumber | number, dp: number = 5) => {

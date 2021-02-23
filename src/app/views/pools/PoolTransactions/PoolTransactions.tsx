@@ -1,15 +1,16 @@
-import { Box, BoxProps, CircularProgress, Container, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import { Box, BoxProps, Checkbox, CircularProgress, Container, FormControlLabel, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { KeyboardArrowLeftRounded as KeyboardArrowLeftIcon, KeyboardArrowRightRounded as KeyboardArrowRightIcon } from "@material-ui/icons";
+import { Pagination } from "@material-ui/lab";
 import { PoolsNavigationTabs, PoolsOverviewBanner, Text } from "app/components";
 import Page from "app/layouts/Page";
+import { RootState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
 import cls from "classnames";
-import { ViewBlock, ZilTransaction } from "core/utilities";
+import { PoolTransaction, ZAPStats } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
-import { CONTRACTS as ZilswapContract } from "zilswap-sdk/lib/constants";
+import { useSelector } from "react-redux";
 import { AddRemoveLiquidityRow, SwapTxRow } from "./components";
 
 interface Props extends BoxProps {
@@ -57,12 +58,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
+interface QueryOptions {
+  page: number;
+  address?: string;
+};
+
+const defaultOpts: QueryOptions = {
+  page: 1,
+};
+
 const PoolTransactions: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
 
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  // const [showAllTransactions, setShowAllTransactions] = useState<boolean>(true);
-  const [transactions, setTransactions] = useState<ZilTransaction[]>([]);
+  const [queryOpts, setQueryOpts] = useState<QueryOptions>(defaultOpts);
+  const [pagesCount, setPagesCount] = useState<number>(0);
+  const [transactions, setTransactions] = useState<PoolTransaction[]>([]);
+  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const [runQueryEvents, queryLoading, queryError] = useAsyncTask("queryEvents");
   const classes = useStyles();
 
@@ -71,27 +82,37 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
   useEffect(() => {
     runQueryEvents(async () => {
       if (!network) return;
-      const transactions = await ViewBlock.listTransactions({
-        address: ZilswapContract[network],
-        limit: 10,
-        network: network.toLowerCase(),
-        page: pageNumber,
+      const { records, total_pages } = await ZAPStats.getPoolTransactions({
+        per_page: 25,
+        network,
+        ...queryOpts,
       });
 
-      setTransactions(transactions)
+      setPagesCount(total_pages);
+      setTransactions(records);
     })
 
     // eslint-disable-next-line
-  }, [network, pageNumber]);
+  }, [network, queryOpts]);
 
-  // const onChangeShowAll = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   setShowAllTransactions(!event.target.checked);
-  // };
+  const onChangeShowAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!walletState.wallet) return;
 
-  const onPage = (change: number) => {
-    return (event: React.MouseEvent) => {
-      setPageNumber(Math.max(pageNumber + change, 0));
-    };
+    setQueryOpts({
+      ...queryOpts,
+      address: undefined,
+
+      ...!queryOpts.address && {
+        address: walletState.wallet?.addressInfo.bech32,
+      },
+    });
+  };
+
+  const onPage = (event: React.ChangeEvent<any>, newPage: number) => {
+    setQueryOpts({
+      ...queryOpts,
+      page: Math.max(newPage, 1)
+    });
   };
 
   return (
@@ -107,13 +128,13 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
 
             <Box flex={1} />
 
-            {/* <FormControlLabel
+            <FormControlLabel
               label={<Text color="textSecondary">Your Transactions Only</Text>}
               control={(
                 <Checkbox color="primary"
-                  checked={!showAllTransactions}
+                  checked={!!queryOpts.address}
                   onChange={onChangeShowAll} />
-              )} /> */}
+              )} />
           </Box>
 
           {!!queryError && (
@@ -142,11 +163,11 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
                 </TableHead>
                 <TableBody className={classes.tableBody}>
                   {transactions.map((transaction) => (
-                    <React.Fragment key={transaction.hash}>
-                      {["SwapExactTokensForZIL", "SwapExactZILForTokens", "SwapExactTokensForTokens"].includes(transaction.data?._tag ?? "") && (
+                    <React.Fragment key={transaction.id}>
+                      {transaction.tx_type === "swap" && (
                         <SwapTxRow transaction={transaction} />
                       )}
-                      {["AddLiquidity", "RemoveLiquidity"].includes(transaction.data?._tag ?? "") && (
+                      {transaction.tx_type === "liquidity" && (
                         <AddRemoveLiquidityRow transaction={transaction} />
                       )}
                     </React.Fragment>
@@ -155,20 +176,8 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
               </Table>
             </TableContainer>
 
-            <Box display="flex" justifyContent="flex-end" alignItems="center" paddingRight={4}>
-              {/* <IconButton>
-                <FirstPageIcon color="primary" />
-              </IconButton> */}
-              <IconButton disabled={pageNumber === 1} onClick={onPage(-1)}>
-                <KeyboardArrowLeftIcon color="primary" />
-              </IconButton>
-              <Text>{pageNumber}</Text>
-              <IconButton onClick={onPage(+1)}>
-                <KeyboardArrowRightIcon color="primary" />
-              </IconButton>
-              {/* <IconButton>
-                <LastPageIcon color="primary" />
-              </IconButton> */}
+            <Box display="flex" justifyContent="flex-end" alignItems="center" paddingTop={2} paddingBottom={2} paddingRight={4}>
+              <Pagination count={pagesCount} page={queryOpts.page} onChange={onPage} showFirstButton showLastButton />
             </Box>
           </Paper>
         </Container>

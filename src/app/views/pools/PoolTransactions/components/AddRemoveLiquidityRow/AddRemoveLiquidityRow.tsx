@@ -8,15 +8,14 @@ import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
-import { bnOrZero } from "app/utils/strings/strings";
+import BigNumber from "bignumber.js";
 import clsx from "clsx";
-import { ZilTransaction } from "core/utilities";
-import { toBech32Address } from "core/zilswap";
+import { PoolTransaction } from "core/utilities";
 import React from "react";
 import { useSelector } from "react-redux";
 
 interface Props extends TableRowProps {
-  transaction: ZilTransaction;
+  transaction: PoolTransaction;
 };
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -55,46 +54,17 @@ const AddRemoveLiquidityRow: React.FC<Props> = (props: Props) => {
     tokenAmount,
     totalValue,
   } = React.useMemo(() => {
-    const tokenAddressParam = transaction.data?.params.find(param => param.vname === "token_address");
-    const poolAddress = tokenAddressParam?.value ?? "";
     const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
-    const poolToken = tokenState.tokens[toBech32Address(poolAddress)];
+    const poolToken = tokenState.tokens[transaction.token_address];
 
     let type!: "add" | "remove";
 
-    let zilValue = BIG_ZERO;
-    let tokenValue = BIG_ZERO;
-    let totalValue = BIG_ZERO;
-    let tokenAmount = BIG_ZERO;
-    let zilAmount = BIG_ZERO;
+    let tokenAmount = transaction.token_amount;
+    let zilAmount = transaction.zil_amount;
 
-    switch (transaction.data?._tag) {
-      case "AddLiquidity": {
-        type = "add";
-        zilAmount = bnOrZero(transaction.value);
-
-        if (transaction.events.length) {
-          const transferEvent = transaction.events.find(event => event.name === "TransferFromSuccess");
-          tokenAmount = bnOrZero(transferEvent?.params?.amount);
-        } else {
-          tokenAmount = bnOrZero(transaction.data.params.find(param => param.vname === "max_token_amount")?.value);
-        }
-        break;
-      };
-
-      case "RemoveLiquidity": {
-        type = "remove";
-        if (transaction.events) {
-          const transferEvent = transaction.events.find(event => event.name === "TransferSuccess");
-          zilAmount = bnOrZero(transaction.internalTransfers?.[0]?.value);
-          tokenAmount = bnOrZero(transferEvent?.params?.amount);
-        } else {
-          zilAmount = bnOrZero(transaction.data.params.find(param => param.vname === "min_zil_amount")?.value);
-          tokenAmount = bnOrZero(transaction.data.params.find(param => param.vname === "min_token_amount")?.value);
-        }
-        break;
-      };
-    }
+    let zilValue: BigNumber = BIG_ZERO;
+    let tokenValue: BigNumber = BIG_ZERO;
+    let totalValue: BigNumber = BIG_ZERO;
 
 
     if (poolToken) {
@@ -104,7 +74,7 @@ const AddRemoveLiquidityRow: React.FC<Props> = (props: Props) => {
     }
 
     return {
-      isError: !transaction.events.length,
+      isError: false,
       type,
       zilToken,
       poolToken,
@@ -123,12 +93,12 @@ const AddRemoveLiquidityRow: React.FC<Props> = (props: Props) => {
       <TableCell className={classes.titleHeader}>
         <Box display="flex">
           <span>
-            <Tooltip title={(transaction.data as any)?._tag}>
+            <Tooltip title={""}>
               <Text>{type === "add" ? "Add" : "Remove"} Liquidity</Text>
             </Tooltip>
           </span>
           <Box className="external-link" marginLeft={1}>
-            <a target="_blank" rel="noopener noreferrer" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=${network}`}>
+            <a target="_blank" rel="noopener noreferrer" href={`https://viewblock.io/zilliqa/tx/${transaction.transaction_hash}?network=${network}`}>
               <NewLinkIcon />
             </a>
           </Box>
@@ -158,7 +128,7 @@ const AddRemoveLiquidityRow: React.FC<Props> = (props: Props) => {
           compression={poolToken?.decimals} />
       </TableCell>
       <TableCell align="right">
-        {transaction.timestamp?.fromNow()}
+        {transaction.block_timestamp?.fromNow()}
       </TableCell>
       <TableCell className={classes.placeholderCell} />
     </TableRow>

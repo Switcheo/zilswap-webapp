@@ -10,6 +10,7 @@ const PATHS = {
 	"liquidity": "/liquidity",
 	"swaps": "/swaps",
 	"volume": "/volume",
+	"transactions": "/transactions",
 	"epoch/info": "/epoch/info",
 	"distribution/data": "/distribution/data/:address",
 	"distribution/weights": "/distribution/pool_weights",
@@ -30,6 +31,34 @@ export interface SwapTransaction {
 	token_amount: BigNumber;
 	zil_amount: BigNumber;
 	is_sending_zil: boolean;
+}
+
+export interface PoolTransaction {
+	id: string;
+	transaction_hash: string;
+	block_height: number;
+	block_timestamp: Moment;
+	initiator_address: string;
+	token_address: string;
+
+	token_amount: BigNumber;
+	zil_amount: BigNumber;
+
+	tx_type: "liquidity" | "swap";
+
+	swap0_is_sending_zil?: boolean;
+
+	swap1_token_address?: string;
+	swap1_token_amount?: BigNumber;
+	swap1_zil_amount?: BigNumber;
+	swap1_is_sending_zil?: boolean;
+
+	change_amount?: BigNumber;
+}
+
+export interface PoolTransactionResult {
+	records: PoolTransaction[];
+	total_pages: number;
 }
 
 export interface PoolLiquidity {
@@ -101,7 +130,7 @@ export interface GetSwapsOpts extends PaginationOptions, QueryOptions {
 	pool?: string;
 }
 
-export interface GetSwapVolumeOpts extends PaginationOptions, QueryOptions {
+export interface TxOpts extends PaginationOptions, QueryOptions {
 	address?: string;
 	pool?: string;
 	from?: number;
@@ -198,7 +227,35 @@ export class ZAPStats {
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
-	static getSwaps = async ({ network, ...query }: GetSwapVolumeOpts): Promise<SwapTransaction[]> => {
+	static getPoolTransactions = async ({ network, ...query }: TxOpts): Promise<PoolTransactionResult> => {
+		const http = ZAPStats.getApi(network);
+		const url = http.path("transactions", {}, query);
+		const response = await http.get({ url });
+		const result = await response.json();
+		return {
+			...result,
+			records: result?.records?.map((tx: any) => ({
+				...tx,
+				block_timestamp: moment(tx.block_timestamp),
+
+				token_amount: bnOrZero(tx.token_amount),
+				zil_amount: bnOrZero(tx.zil_amount),
+
+				swap1_token_amount: bnOrZero(tx.swap1_token_amount),
+				swap1_zil_amount: bnOrZero(tx.swap1_zil_amount),
+
+				change_amount: bnOrZero(tx.change_amount),
+			})) ?? [],
+		} as PoolTransactionResult;
+	}
+
+	/**
+	 * 
+	 * 
+	 * @param network MainNet | TestNet - defaults to `MainNet`
+	 * @returns response in JSON
+	 */
+	static getSwaps = async ({ network, ...query }: TxOpts): Promise<SwapTransaction[]> => {
 		const http = ZAPStats.getApi(network);
 		const url = http.path("swaps", {}, query);
 		const response = await http.get({ url });
@@ -217,7 +274,7 @@ export class ZAPStats {
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
-	static getSwapVolume = async ({ network, ...query }: GetSwapVolumeOpts = {}): Promise<any> => {
+	static getSwapVolume = async ({ network, ...query }: TxOpts = {}): Promise<any> => {
 		const http = ZAPStats.getApi(network);
 		const url = http.path("volume", {}, query);
 		const response = await http.get({ url });
