@@ -3,7 +3,7 @@ import { BIG_ZERO } from "app/utils/constants";
 import moment from "moment";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { HelpInfo } from "..";
+import HelpInfo from "../HelpInfo";
 import KeyValueDisplay, { Props as KeyValueDisplayProps } from "../KeyValueDisplay";
 
 interface Props extends KeyValueDisplayProps {

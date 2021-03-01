@@ -1,7 +1,7 @@
 import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { KeyValueDisplay, PotentialRewardInfo } from "app/components";
-import { RootState, TokenInfo, TokenState } from "app/store/types";
+import { LayoutState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
 import { ZIL_TOKEN_NAME } from "app/utils/constants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
@@ -21,6 +21,7 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
   const { children, className, token, ...rest } = props;
   const classes = useStyles();
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
+  const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5, showCurrency: true });
 
   const zilFormatOpts: MoneyFormatterOptions = {
@@ -63,7 +64,9 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
       <KeyValueDisplay kkey={"Exchange Rate"} mb="8px">{getExchangeRateValue()}</KeyValueDisplay>
       <KeyValueDisplay kkey={"Current Pool Size"} mb="8px">{getPoolSizeValue()}</KeyValueDisplay>
       <KeyValueDisplay kkey={`Your Current Pool Share (${getUserPoolShare()})`} mb="8px">{getShareValue()}</KeyValueDisplay>
-      <PotentialRewardInfo />
+      {layoutState.showPoolType === "add" && (
+        <PotentialRewardInfo />
+      )}
     </Box>
   );
 };
