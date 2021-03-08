@@ -77,15 +77,15 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
       {userToken && (
         isPool ?
           <UserPoolMessage token={userToken}>
-            Liquidity pools created by other users are not screened by Zilswap.
+            Liquidity pools created by other users are not screened by ZilSwap.
             All tokens (including ZIL) deposited to the pool may be lost if the ZRC-2 token contract
             is malicious or otherwise exploited.
             Please verify the legitimacy of this token yourself before contributing liquidity.
           </UserPoolMessage>
           :
           <UserPoolMessage token={userToken}>
-            ZRC-2 tokens issued by other users are not screened or audited by Zilswap.
-            There is no gaurantee that your purchased tokens will remain tradeable or maintain any value.
+            ZRC-2 tokens issued by other users are not screened or audited by ZilSwap.
+            There is no guarantee that your purchased tokens will remain tradeable or maintain any value.
             Please verify the legitimacy of this token yourself before swapping.
           </UserPoolMessage>
       )}
