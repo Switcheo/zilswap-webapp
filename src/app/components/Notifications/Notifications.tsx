@@ -77,15 +77,15 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
       {userToken && (
         isPool ?
           <UserPoolMessage token={userToken}>
-            Liquidity pools created by other users may result in the loss of all deposited tokens
-            if the token for the pool does not fully comform to the ZRC-2 token specifications.
-            This includes all ZILs deposited into the pool.
+            Liquidity pools created by other users are not screened by Zilswap.
+            All tokens (including ZIL) deposited to the pool may be lost if the ZRC-2 token contract
+            is malicious or otherwise exploited.
             Please verify the legitimacy of this token yourself before contributing liquidity.
           </UserPoolMessage>
           :
           <UserPoolMessage token={userToken}>
-            Liquidity pools created by other users may involve tokens that do not comply with
-            ZRC-2 token specifications, and can result in loss of all funds sent.
+            ZRC-2 tokens issued by other users are not screened or audited by Zilswap.
+            There is no gaurantee that your purchased tokens will remain tradeable or maintain any value.
             Please verify the legitimacy of this token yourself before swapping.
           </UserPoolMessage>
       )}

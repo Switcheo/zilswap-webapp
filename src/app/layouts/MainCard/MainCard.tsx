@@ -97,10 +97,10 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
       (isPool && !layoutState.liquidityEarnHidden && layoutState.showPoolType === "add") ||
 
       // show user created token warning for pool
-      (isPool && !poolToken?.loading && poolToken?.pool && !poolToken?.whitelisted) ||
+      (isPool && !poolToken?.loading && poolToken?.pool && !poolToken?.registered) ||
 
       // show user created token warning for swap
-      (isSwap && ((swapState.inToken && !swapState.inToken.whitelisted) || (swapState.outToken && !swapState.outToken.whitelisted))) ||
+      (isSwap && ((swapState.inToken && !swapState.inToken.registered) || (swapState.outToken && !swapState.outToken.registered))) ||
 
       // show generic notification
       !!layoutState.notification ||

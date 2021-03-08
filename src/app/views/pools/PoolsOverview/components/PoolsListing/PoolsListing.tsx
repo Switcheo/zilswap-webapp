@@ -68,7 +68,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
           return accum;
         }
 
-        if (token.whitelisted) {
+        if (token.registered) {
           accum.registeredTokens.push(token);
         } else {
           accum.otherTokens.push(token);

@@ -63,12 +63,12 @@ export interface CurrencyDialogProps extends DialogProps {
 };
 
 type FormState = {
-  showWhitelisted: boolean;
+  showRegistered: boolean;
   showOthers: boolean;
 };
 
 const initialFormState: FormState = {
-  showWhitelisted: true,
+  showRegistered: true,
   showOthers: true,
 };
 
@@ -100,22 +100,22 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     })
   };
 
-  const filterSearch = (token: TokenInfo, whitelisted?: boolean): boolean => {
+  const filterSearch = (token: TokenInfo, registered?: boolean): boolean => {
     const searchTerm = search.toLowerCase().trim();
     if (token.isZil && hideZil) return false;
     if (!token.isZil && !token.pool && hideNoPool) return false;
-    if (!searchTerm.length && whitelisted === undefined) return true;
+    if (!searchTerm.length && registered === undefined) return true;
 
-    if (whitelisted && !token.whitelisted) return false;
-    if (!whitelisted && token.whitelisted) return false;
+    if (registered && !token.registered) return false;
+    if (!registered && token.registered) return false;
 
     return token.address.toLowerCase() === searchTerm ||
       (typeof token.name === "string" && token.name?.toLowerCase().includes(searchTerm)) ||
       token.symbol.toLowerCase().includes(searchTerm);
   };
 
-  const getTokenFilter = (type: "whitelisted" | "unverified") => {
-    return (token: TokenInfo) => filterSearch(token, type === "whitelisted")
+  const getTokenFilter = (type: "registered" | "unverified") => {
+    return (token: TokenInfo) => filterSearch(token, type === "registered")
   };
 
   const sortResult = (lhs: TokenInfo, rhs: TokenInfo) => {
@@ -134,7 +134,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     return difference !== 0 ? difference : lhs.symbol.localeCompare(rhs.symbol);
   };
 
-  const verifiedTokens = tokens.filter(getTokenFilter("whitelisted")).sort(sortResult);
+  const verifiedTokens = tokens.filter(getTokenFilter("registered")).sort(sortResult);
   const unverifiedTokens = tokens.filter(getTokenFilter("unverified")).sort(sortResult);
   return (
     <DialogModal header="Select a Token" {...rest} className={clsx(classes.root, className)}>
@@ -170,9 +170,9 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
           <Box className={classes.currenciesContainer}>
             <Button color="inherit" component="h3" variant="text"
               className={classes.currenciesHeader}
-              onClick={() => onToggleFormState("showWhitelisted")}>
+              onClick={() => onToggleFormState("showRegistered")}>
               Registered tokens
-              {formState.showWhitelisted ? <ArrayOpenedIcon /> : <ArrayClosedIcon />}
+              {formState.showRegistered ? <ArrayOpenedIcon /> : <ArrayClosedIcon />}
             </Button>
             <CurrencyList
               tokens={verifiedTokens}
@@ -180,7 +180,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
               emptyStateLabel={`No verified tokens found for "${search}"`}
               showContribution={showContribution}
               onSelectCurrency={onSelectCurrency}
-              className={clsx(classes.currencies, { [classes.currenciesHidden]: !formState.showWhitelisted })} />
+              className={clsx(classes.currencies, { [classes.currenciesHidden]: !formState.showRegistered })} />
 
             <Button color="inherit" component="h3" variant="text"
               className={classes.currenciesHeader}

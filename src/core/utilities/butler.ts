@@ -32,6 +32,7 @@ export type AppButlerProps = {
 const mapZilswapToken = (zilswapToken: TokenDetails, network: Network = DefaultFallbackNetwork): TokenInfo => {
   return {
     initialized: false,
+    registered: zilswapToken.registered,
     whitelisted: zilswapToken.whitelisted,
     initBalance: false,
     isZil: zilswapToken.address === ZIL_TOKEN_NAME,
@@ -455,6 +456,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
           isZwap: token.isZwap,
           initBalance, name,
 
+          registered: token.registered,
           whitelisted: token.whitelisted,
           address: token.address,
           decimals: token.decimals,

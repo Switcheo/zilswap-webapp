@@ -101,7 +101,7 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
           focusRipple
           onClick={() => onSelect(token)}>
           <ContrastBox className={classes.currencyBox}>
-            <CurrencyLogo className={classes.currencyLogo} currency={token.whitelisted && token.symbol} />
+            <CurrencyLogo className={classes.currencyLogo} currency={token.registered && token.symbol} />
             <Box display="flex" flexDirection="column">
               <Typography variant="h2">{token.symbol}</Typography>
 

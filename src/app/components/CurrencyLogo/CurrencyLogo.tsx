@@ -24,22 +24,27 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 const CurrencyLogo = (props: any) => {
   const { currency, className }: {
-    currency: string;
+    currency: string | false;
     className: string;
   } = props;
   const classes = useStyles();
   return (
     <div className={cls(classes.root, className)}>
-      <SVG
-        className={classes.svg}
-        src={`https://raw.githubusercontent.com/Switcheo/zilswap-token-list/master/logos/${currency}.svg`}
-        title={`${currency} Token Logo`}
-        description={`${currency} Token Logo`}
-        cacheRequests={true}
-        loader={<SvgTokenPlaceholder />}
-      >
+      {
+        currency ?
+        <SVG
+          className={classes.svg}
+          src={`https://raw.githubusercontent.com/Switcheo/zilswap-token-list/master/logos/${currency}.svg`}
+          title={`${currency} Token Logo`}
+          description={`${currency} Token Logo`}
+          cacheRequests={true}
+          loader={<SvgTokenPlaceholder />}
+        >
+          <SvgTokenPlaceholder />
+        </SVG>
+        :
         <SvgTokenPlaceholder />
-      </SVG>
+      }
     </div>
   )
 };

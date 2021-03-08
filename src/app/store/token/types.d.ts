@@ -21,6 +21,7 @@ export type TokenInfo = {
   loading?: boolean;
   isZil: boolean;
   isZwap: boolean;
+  registered: boolean;
   whitelisted: boolean;
   listPriority?: number;
   symbol: string;
