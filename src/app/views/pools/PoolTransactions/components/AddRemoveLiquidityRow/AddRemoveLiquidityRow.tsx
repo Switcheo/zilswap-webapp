@@ -57,7 +57,7 @@ const AddRemoveLiquidityRow: React.FC<Props> = (props: Props) => {
     const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
     const poolToken = tokenState.tokens[transaction.token_address];
 
-    let type!: "add" | "remove";
+    let type = transaction.change_amount?.isPositive() ? "add": "remove";
 
     let tokenAmount = transaction.token_amount;
     let zilAmount = transaction.zil_amount;
