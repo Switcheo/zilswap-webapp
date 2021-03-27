@@ -81,6 +81,7 @@ export interface ZilTransaction {
 };
 
 /**
+ * @deprecated not used due to rate limits on API
  * ViewBlock API abstraction object
  */
 export class ViewBlock {

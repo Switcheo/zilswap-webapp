@@ -1,0 +1,78 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      # image with node, npm and yarn installed
+      - image: circleci/node:13.7.0-buster
+    steps:
+      # checkout workspace to repo code
+      - checkout
+
+      # restore workspace if available
+      # to skip re-installing node_modules
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "yarn.lock" }}
+            - v1-dependencies-
+
+      # install dependencies
+      - run: yarn --ignore-engines
+
+      # save node_modules to cache
+      - save_cache:
+          paths:
+            - node_modules
+            - ~/.npm 
+            - ~/.cache
+          key: v1-dependencies-{{ checksum "yarn.lock" }}
+
+      # build code to production file
+      - run:
+          name: yarn build according to branch
+          command: |
+            yarn build
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - build
+
+  deploy:
+    docker:
+      - image: circleci/node:13.7.0-buster
+    steps:
+
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: install AWS CLI
+          command: |
+            sudo apt-get update
+            sudo apt-get install awscli
+
+      - run:
+          name: deploy to aws
+          command: |
+            if [ "${CIRCLE_BRANCH}" = "staging" ]; then
+              aws s3 sync build s3://zilswap-ui-staging/ --delete
+              aws cloudfront create-invalidation --distribution-id="E4QZBREBNL47S" --paths=/*
+            elif [ "${CIRCLE_BRANCH}" = "master" ]; then
+              aws s3 sync build s3://zilswap-ui/ --delete
+              aws cloudfront create-invalidation --distribution-id="ESU80N8RF88HZ" --paths=/*
+            fi
+
+workflows: 
+  deploy-staging:
+    jobs:
+      - build:
+          context: org-switcheo
+          filters:
+            branches:
+              only: 
+                - master
+                - staging
+      - deploy: 
+          context: org-switcheo
+          requires:
+            - build
