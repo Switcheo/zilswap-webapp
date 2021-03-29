@@ -1,4 +1,5 @@
 import { TokenInfo } from "app/store/types";
+import { Network } from "zilswap-sdk/lib/constants";
 import { ZilswapConnector } from "./connector";
 
 interface BatchRequestItem {
@@ -68,8 +69,12 @@ export const tokenAllowancesBatchRequest = (token: TokenInfo, walletAddress: str
   };
 }
 
-export const sendBatchRequest = async (requests: BatchRequest[]): Promise<BatchResponse[]> => {
-  const res = await fetch("https://api.zilliqa.com/", {
+export const sendBatchRequest = async (network: Network, requests: BatchRequest[]): Promise<BatchResponse[]> => {
+  var baseUrl = "https://api.zilliqa.com/"
+  if(network == Network.TestNet) {
+    baseUrl = "https://dev-api.zilliqa.com/"
+  }
+  const res = await fetch(baseUrl, {
     method: "POST",
     body: JSON.stringify(requests.flatMap(request => request.item)),
   });

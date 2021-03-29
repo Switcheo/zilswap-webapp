@@ -443,7 +443,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     }
 
     runQueryToken(async () => {
-      const batchResults = await sendBatchRequest(batchRequests)
+      const batchResults = await sendBatchRequest(layoutState.network, batchRequests)
       
       batchResults.forEach(result => {
         let token = result.request.token;
