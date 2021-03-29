@@ -2,6 +2,12 @@ import { TokenInfo } from "app/store/types";
 import { Network } from "zilswap-sdk/lib/constants";
 import { ZilswapConnector } from "./connector";
 
+export enum BatchRequestType {
+  Balance = "balance",
+  TokenBalance = "tokenBalance",
+  TokenAllowance = "tokenAllowance"
+};
+
 interface BatchRequestItem {
   id: string;
   jsonrpc: string;
@@ -20,9 +26,18 @@ interface BatchResponse {
   result: any;
 }
 
+
+
+/**
+ * Create a `GetBalance` request.
+ *
+ * @param TokenInfo The token for which it's requested.
+ * @param string The wallet address.
+ * @returns BatchRequest
+ */
 export const balanceBatchRequest = (token: TokenInfo, address: string): BatchRequest => {
   return {
-    type: 'balance',
+    type: BatchRequestType.Balance,
     token: token,
     item: {
       id: "1",
@@ -33,10 +48,17 @@ export const balanceBatchRequest = (token: TokenInfo, address: string): BatchReq
   };
 }
 
+/**
+ * Create a `GetSmartContractSubState` request for the balances variable.
+ *
+ * @param TokenInfo The token for which it's requested.
+ * @param string The wallet address.
+ * @returns BatchRequest
+ */
 export const tokenBalanceBatchRequest = (token: TokenInfo, walletAddress: string): BatchRequest => {
   const contract = ZilswapConnector.getToken(token.address)!.contract;
   return {
-    type: 'tokenBalance',
+    type: BatchRequestType.TokenBalance,
     token: token,
     item: {
       id: "1",
@@ -51,10 +73,17 @@ export const tokenBalanceBatchRequest = (token: TokenInfo, walletAddress: string
   };
 }
 
+/**
+ * Create a `GetSmartContractSubState` request for the allowances variable.
+ *
+ * @param TokenInfo The token for which it's requested.
+ * @param string The wallet address.
+ * @returns BatchRequest
+ */
 export const tokenAllowancesBatchRequest = (token: TokenInfo, walletAddress: string): BatchRequest => {
   const contract = ZilswapConnector.getToken(token.address)!.contract;
   return {
-    type: 'tokenAllowance',
+    type: BatchRequestType.TokenAllowance,
     token: token,
     item: {
       id: "1",
@@ -69,6 +98,13 @@ export const tokenAllowancesBatchRequest = (token: TokenInfo, walletAddress: str
   };
 }
 
+/**
+ * Sends a series of requests as a batch to the Zilliqa API.
+ *
+ * @param Network The currently selected network.
+ * @param BatchRequest[] An array of RPC requests.
+ * @returns Promise<BatchResponse[]> Zilswap instance initialized with wallet properties (network and provider).
+ */
 export const sendBatchRequest = async (network: Network, requests: BatchRequest[]): Promise<BatchResponse[]> => {
   var baseUrl = "https://api.zilliqa.com/"
   if(network == Network.TestNet) {

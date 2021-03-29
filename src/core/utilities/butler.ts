@@ -23,7 +23,7 @@ import {
   connectWalletZilPay,
   parseBalanceResponse,
 } from "core/wallet";
-import { balanceBatchRequest, sendBatchRequest, tokenAllowancesBatchRequest, tokenBalanceBatchRequest, ZilswapConnector } from "core/zilswap";
+import { balanceBatchRequest, BatchRequestType, sendBatchRequest, tokenAllowancesBatchRequest, tokenBalanceBatchRequest, ZilswapConnector } from "core/zilswap";
 import { ZWAPRewards } from "core/zwap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
@@ -417,6 +417,8 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
     if (!initializedTokens || !walletState.wallet) { return }
 
+    logger("butler", "retrieving token balances/allowances");
+
     const batchRequests: any[] = [];
     for (const address in tokens) {
       const token = tokens[address];
@@ -450,7 +452,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         let lowerCaseWalletAddress = walletState.wallet!.addressInfo.byte20.toLowerCase()
 
         switch(result.request.type) {
-          case 'balance': {
+          case BatchRequestType.Balance: {
             let balance: BigNumber | undefined;
             balance = strings.bnOrZero(result.result.balance);
 
@@ -473,7 +475,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
             break;
           }
 
-          case 'tokenBalance': {
+          case BatchRequestType.TokenBalance: {
             const tokenDetails = ZilswapConnector.getToken(token.address);
             const pool = ZilswapConnector.getPool(token.address) || undefined;
 
@@ -514,7 +516,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
             break;
           }
 
-          case 'tokenAllowance': {
+          case BatchRequestType.TokenAllowance: {
             let { allowances } = token;
             if(result.result) {
               allowances = result.result.allowances[lowerCaseWalletAddress] || {};
@@ -530,8 +532,6 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         }
       })
     })
-
-    
   }, [initializedTokens, walletState.wallet])
 
   return null;
