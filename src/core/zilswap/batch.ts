@@ -1,4 +1,5 @@
 import { TokenInfo } from "app/store/types";
+import { HTTP } from "core/utilities";
 import { Network } from "zilswap-sdk/lib/constants";
 import { ZilswapConnector } from "./connector";
 
@@ -25,8 +26,6 @@ interface BatchResponse {
   request: BatchRequest;
   result: any;
 }
-
-
 
 /**
  * Create a `GetBalance` request.
@@ -103,21 +102,24 @@ export const tokenAllowancesBatchRequest = (token: TokenInfo, walletAddress: str
  *
  * @param Network The currently selected network.
  * @param BatchRequest[] An array of RPC requests.
- * @returns Promise<BatchResponse[]> Zilswap instance initialized with wallet properties (network and provider).
+ * @returns Promise<BatchResponse[]> Array of responses.
  */
 export const sendBatchRequest = async (network: Network, requests: BatchRequest[]): Promise<BatchResponse[]> => {
   var baseUrl = "https://api.zilliqa.com/"
-  if(network == Network.TestNet) {
+  if (network == Network.TestNet) {
     baseUrl = "https://dev-api.zilliqa.com/"
   }
-  const res = await fetch(baseUrl, {
-    method: "POST",
-    body: JSON.stringify(requests.flatMap(request => request.item)),
-  });
 
-  const results = await res.json();
+  const http = new HTTP(baseUrl, { '/': '/' });
+  const url = http.path("/");
+  const response = await http.post({
+    url,
+    data: requests.flatMap(request => request.item)
+  })
 
-  if(!Array.isArray(results)) {
+  const results = await response.json();
+
+  if (!Array.isArray(results)) {
     return []
   }
 

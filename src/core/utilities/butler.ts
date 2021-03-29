@@ -415,6 +415,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   useEffect(() => {
     const tokens: TokenInfo[] = store.getState().token.tokens;
 
+    // If the tokens or wallet isn't initialized we wait for that first.
     if (!initializedTokens || !walletState.wallet) { return }
 
     logger("butler", "retrieving token balances/allowances");
@@ -435,9 +436,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
       );
 
       if (token.isZil) {
-        batchRequests.push(
-          balanceBatchRequest(token, walletState.wallet!.addressInfo.byte20.replace("0x", "").toLowerCase()),
-        )
+        batchRequests.push(balanceBatchRequest(token, walletState.wallet!.addressInfo.byte20.replace("0x", "").toLowerCase()))
       } else {
         batchRequests.push(tokenBalanceBatchRequest(token, walletState.wallet!.addressInfo.byte20.toLowerCase()))
         batchRequests.push(tokenAllowancesBatchRequest(token, walletState.wallet!.addressInfo.byte20.toLowerCase()))
