@@ -141,13 +141,13 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     potentialRewards,
     // rewardsValue,
     roiLabel,
-    apy,
+    apr,
   } = React.useMemo(() => {
     if (!ZilswapConnector.network || !rewardsState.epochInfo) return {
       rewardsValue: BIG_ZERO,
       potentialRewards: BIG_ZERO,
       roiLabel: "-",
-      apy: BIG_ZERO,
+      apr: BIG_ZERO,
     };
 
     const poolRewards = bnOrZero(rewardsState.rewardByPools[token.address]?.weeklyReward);
@@ -158,7 +158,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     const rewardsValue = valueCalculators.amount(tokenState.prices, zapToken, poolRewards.shiftedBy(12));
     const roiPerEpoch = rewardsValue.dividedBy(usdValues.poolLiquidity);
     const epochsPerYear = 52
-    const apy = bnOrZero(roiPerEpoch.plus(1).pow(epochsPerYear).minus(1).shiftedBy(2).decimalPlaces(1));
+    const apr = bnOrZero(roiPerEpoch.times(epochsPerYear).shiftedBy(2).decimalPlaces(1));
     const epochDuration = rewardsState.epochInfo.raw.epoch_period;
     const secondsInDay = 24 * 3600;
     const roiPerDay = bnOrZero(roiPerEpoch.dividedBy(epochDuration).times(secondsInDay).shiftedBy(2).decimalPlaces(2));
@@ -167,7 +167,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
       potentialRewards: poolRewards,
       rewardsValue,
       roiLabel: roiPerDay.isZero() ? "-" : `${roiPerDay.toFormat()}%`,
-      apy,
+      apr,
     };
   }, [rewardsState.epochInfo, rewardsState.rewardByPools, token, usdValues, tokenState.prices, tokenState.tokens, valueCalculators]);
 
@@ -220,13 +220,13 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
           </Box>
 
           <Box display="flex" className={classes.statItem}>
-            <Text color="textSecondary" align="right" variant="subtitle2" marginBottom={1.5}>APY</Text>
+            <Text color="textSecondary" align="right" variant="subtitle2" marginBottom={1.5}>APR</Text>
             <Box display="flex" className={classes.roiContainer}>
               <Text color="textPrimary" className={classes.rewardValue}>
-                {!apy.isZero() && (
-                  <span>{toHumanNumber(apy, 1)}%</span>
+                {!apr.isZero() && (
+                  <span>{toHumanNumber(apr, 1)}%</span>
                 )}
-                {apy.isZero() && (
+                {apr.isZero() && (
                   <span>-</span>
                 )}
               </Text>
