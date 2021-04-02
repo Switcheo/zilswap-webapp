@@ -410,6 +410,22 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   useEffect(() => {
     const tokens: TokenInfo[] = store.getState().token.tokens;
 
+    logger("butler", "initializing tokens");
+    
+    for (const address in tokens) {
+      const token = tokens[address];
+
+      dispatch(
+        actions.Token.update({
+          address,
+          loading: false,
+          dirty: false,
+          initialized: true,
+          pool: ZilswapConnector.getPool(token.address) || undefined,
+        })
+      );
+    }
+
     // If the tokens or wallet isn't initialized we wait for that first.
     if (!initializedTokens || !walletState.wallet) { return }
 
@@ -418,17 +434,6 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     const batchRequests: any[] = [];
     for (const address in tokens) {
       const token = tokens[address];
-
-      logger(`butler update:${token.symbol}`);
-
-      dispatch(
-        actions.Token.update({
-          address,
-          loading: true,
-          dirty: false,
-          initialized: true,
-        })
-      );
 
       if (token.isZil) {
         batchRequests.push(balanceBatchRequest(token, walletState.wallet!.addressInfo.byte20.replace("0x", "").toLowerCase()))
@@ -444,6 +449,8 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
       batchResults.forEach(result => {
         let token = result.request.token;
         let lowerCaseWalletAddress = walletState.wallet!.addressInfo.byte20.toLowerCase()
+
+        logger(`butler update:${token.symbol}`);
 
         switch(result.request.type) {
           case BatchRequestType.Balance: {
@@ -471,7 +478,6 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
           case BatchRequestType.TokenBalance: {
             const tokenDetails = ZilswapConnector.getToken(token.address);
-            const pool = ZilswapConnector.getPool(token.address) || undefined;
 
             let { balance, balances } = token
 
@@ -502,7 +508,6 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
               symbol: tokenDetails?.symbol ?? "",
 
-              pool: pool,
               balance: balance,
               balances: balances,
             };
