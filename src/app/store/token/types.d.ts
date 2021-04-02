@@ -1,5 +1,3 @@
-import { ConnectedWallet } from "core/wallet/wallet";
-import { BN } from "@zilliqa-js/util";
 import BigNumber from "bignumber.js";
 import { Pool } from "zilswap-sdk";
 import { SimpleMap } from "app/utils";

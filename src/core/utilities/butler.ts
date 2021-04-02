@@ -4,7 +4,6 @@ import {
   LayoutState,
   RootState,
   TokenInfo,
-  TokenState,
   Transaction,
   WalletState,
 } from "app/store/types";
@@ -15,13 +14,11 @@ import {
   ZilPayNetworkMap,
   ZIL_TOKEN_NAME,
 } from "app/utils/constants";
-import useStatefulTask from "app/utils/useStatefulTask";
 import BigNumber from "bignumber.js";
 import {
   connectWalletPrivateKey,
   ConnectWalletResult,
   connectWalletZilPay,
-  parseBalanceResponse,
 } from "core/wallet";
 import { balanceBatchRequest, BatchRequestType, sendBatchRequest, tokenAllowancesBatchRequest, tokenBalanceBatchRequest, ZilswapConnector } from "core/zilswap";
 import { ZWAPRewards } from "core/zwap";
@@ -126,7 +123,6 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   const layoutState = useSelector<RootState, LayoutState>(
     (state) => state.layout
   );
-  const tokenState = useSelector<RootState, TokenState>((state) => state.token);
   const store = useStore();
   const [zilswapReady, setZilswapReady] = useState(false);
   const [initializedTokens, setInitializedTokens] = useState(false);
@@ -134,7 +130,6 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   const [runInitWallet] = useAsyncTask<void>("initWallet");
   const [runInitZilswap] = useAsyncTask<void>("initZilswap");
   const [runReloadTransactions] = useAsyncTask<void>("reloadTransactions");
-  const runQueryTokenBalance = useStatefulTask<Partial<TokenInfo>>();
   const dispatch = useDispatch();
 
   const registerObserver = () => {
@@ -445,7 +440,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
     runQueryToken(async () => {
       const batchResults = await sendBatchRequest(layoutState.network, batchRequests)
-      
+
       batchResults.forEach(result => {
         let token = result.request.token;
         let lowerCaseWalletAddress = walletState.wallet!.addressInfo.byte20.toLowerCase()
@@ -490,7 +485,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
               balance = strings.bnOrZero(balances[lowerCaseWalletAddress]);
             }
-            
+
             const tokenInfo: TokenInfo = {
               initialized: true,
               dirty: false,
@@ -531,6 +526,8 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         }
       })
     })
+
+    // eslint-disable-next-line
   }, [initializedTokens, walletState.wallet])
 
   return null;

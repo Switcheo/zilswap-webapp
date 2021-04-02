@@ -1,7 +1,6 @@
 import BigNumber from "bignumber.js";
 import { EpochInfo, SwapVolume, ZWAPDistribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
-import moment, { Moment } from "moment";
-import { Network } from "zilswap-sdk/lib/constants";
+import { Moment } from "moment";
 
 export interface PoolSwapVolume extends SwapVolume {
   totalZilVolume: BigNumber;

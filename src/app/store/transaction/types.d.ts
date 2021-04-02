@@ -1,5 +1,3 @@
-import { ConnectedWallet } from "core/wallet/wallet";
-import { BigNumber } from "bignumber.js";
 import { ObservedTx, TxReceipt, TxStatus } from "zilswap-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 
