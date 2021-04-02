@@ -8,6 +8,7 @@ import { ReactComponent as SvgTokenPlaceholder } from "./token-placeholder.svg";
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     width: 28,
+    height: 28,
     display: "flex",
     background: "#fff",
     border: `1px solid ${theme.palette.primary.main}`,
