@@ -159,7 +159,8 @@ export class ZilswapConnector {
 
   private static setState = async (props: StateUpdateProps) => {
     const { wallet, network, providerOrKey } = props;
-    const zilswap = new Zilswap(network, providerOrKey);
+    const options = network === Network.MainNet ? { rpcEndpoint: 'https://api2.zilliqa.com' } : {}
+    const zilswap = new Zilswap(network, providerOrKey, options);
 
     await ZilswapConnector.connectorState?.zilswap.teardown();
 
