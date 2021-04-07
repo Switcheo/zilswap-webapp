@@ -121,7 +121,7 @@ function* updateTokensState() {
 
   logger("tokens saga", {result});
   for (const [key, value] of Object.entries(result)) {
-    console.log(`updating ${value.symbol}: ${key}`);
+    logger(`updating ${value.symbol}: ${key}`);
     yield put(actions.Token.update(value));
   }
 }
