@@ -1,7 +1,9 @@
+
+import { fromBech32Address } from "@zilliqa-js/crypto";
+import { Network } from "zilswap-sdk/lib/constants";
+
 import { TokenInfo } from "app/store/types";
 import { HTTP } from "core/utilities";
-import { Network } from "zilswap-sdk/lib/constants";
-import { ZilswapConnector } from "./connector";
 
 export enum BatchRequestType {
   Balance = "balance",
@@ -55,7 +57,6 @@ export const balanceBatchRequest = (token: TokenInfo, address: string): BatchReq
  * @returns BatchRequest
  */
 export const tokenBalanceBatchRequest = (token: TokenInfo, walletAddress: string): BatchRequest => {
-  const contract = ZilswapConnector.getToken(token.address)!.contract;
   return {
     type: BatchRequestType.TokenBalance,
     token: token,
@@ -64,7 +65,7 @@ export const tokenBalanceBatchRequest = (token: TokenInfo, walletAddress: string
       jsonrpc: "2.0",
       method: "GetSmartContractSubState",
       params: [
-        contract.address!.replace("0x", "").toLowerCase(),
+        fromBech32Address(token.address).replace("0x", "").toLowerCase(),
         "balances",
         [walletAddress],
       ],
@@ -80,7 +81,6 @@ export const tokenBalanceBatchRequest = (token: TokenInfo, walletAddress: string
  * @returns BatchRequest
  */
 export const tokenAllowancesBatchRequest = (token: TokenInfo, walletAddress: string): BatchRequest => {
-  const contract = ZilswapConnector.getToken(token.address)!.contract;
   return {
     type: BatchRequestType.TokenAllowance,
     token: token,
@@ -89,7 +89,7 @@ export const tokenAllowancesBatchRequest = (token: TokenInfo, walletAddress: str
       jsonrpc: "2.0",
       method: "GetSmartContractSubState",
       params: [
-        contract.address!.replace("0x", "").toLowerCase(),
+        fromBech32Address(token.address).replace("0x", "").toLowerCase(),
         "allowances",
         [walletAddress],
       ],
