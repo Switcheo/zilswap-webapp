@@ -24,7 +24,7 @@ interface ListingLimits {
 };
 
 const initialLimits = {
-  registered: 4,
+  registered: 6,
   others: 2,
 };
 
