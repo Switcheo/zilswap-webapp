@@ -70,6 +70,7 @@ const CreatePoolDialog = (props: any) => {
       dispatch(actions.Token.add({ token }));
       dispatch(actions.Pool.select({ token, network }));
       dispatch(actions.Layout.showPoolType("add"));
+      setTimeout(() => { dispatch(actions.Token.updateState()) })
 
       return onCloseDialog();
     });
