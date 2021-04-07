@@ -2,6 +2,8 @@ import { Box, CircularProgress, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import CheckmarkIcon from "@material-ui/icons/CheckOutlined";
 import TimeoutIcon from "@material-ui/icons/TimerOutlined";
+import FailIcon from "@material-ui/icons/CancelOutlined";
+import PendingIcon from '@material-ui/icons/UpdateOutlined';
 import { actions } from "app/store";
 import { LayoutState, PoolFormState, RootState, SubmittedTx, SwapFormState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -72,6 +74,21 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
     dispatch(actions.Layout.toggleShowWallet());
   };
 
+  const txStatusIcon = (status: TxStatus | "pending") => {
+    switch (status) {
+      case 'confirmed':
+        return CheckmarkIcon;
+      case 'rejected':
+        return FailIcon;
+      case 'expired':
+        return TimeoutIcon;
+      case 'pending':
+        return PendingIcon;
+      default:
+        throw new Error("Unknown tx status!")
+    }
+  }
+
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       {userToken && (
@@ -107,7 +124,7 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
       {submittedTxs.map((submittedTx: SubmittedTx, index) => (
         <NotificationBox
           key={index}
-          IconComponent={submittedTx.status === "expired" ? TimeoutIcon : CheckmarkIcon}
+          IconComponent={txStatusIcon(submittedTx.status)}
           onRemove={() => onRemoveConfirmedTx(submittedTx)}
         >
           <Typography variant="body2" className={classes.notificationMessage}>

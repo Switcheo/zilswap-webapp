@@ -14,7 +14,7 @@ export type Transaction = {
 };
 export type SubmittedTx = {
   hash: string;
-  status: string;
+  status: "pending" | TxStatus;
 };
 
 export interface TransactionState {
