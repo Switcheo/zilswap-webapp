@@ -162,8 +162,8 @@ export class ZAPStats {
 	}
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
@@ -175,8 +175,8 @@ export class ZAPStats {
 	}
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
@@ -192,8 +192,8 @@ export class ZAPStats {
 	}
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
@@ -209,8 +209,8 @@ export class ZAPStats {
 	}
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
@@ -222,8 +222,8 @@ export class ZAPStats {
 	}
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
@@ -236,7 +236,7 @@ export class ZAPStats {
 			...result,
 			records: result?.records?.map((tx: any) => ({
 				...tx,
-				block_timestamp: moment(tx.block_timestamp),
+				block_timestamp: moment(tx.block_timestamp + 'Z'),
 
 				token_amount: bnOrZero(tx.token_amount),
 				zil_amount: bnOrZero(tx.zil_amount),
@@ -250,8 +250,8 @@ export class ZAPStats {
 	}
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
@@ -262,15 +262,15 @@ export class ZAPStats {
 		const result = await response.json();
 		return result?.records?.map((tx: any) => ({
 			...tx,
-			block_timestamp: moment(tx.block_timestamp),
+			block_timestamp: moment(tx.block_timestamp + 'Z'),
 			token_amount: bnOrZero(tx.token_amount),
 			zil_amount: bnOrZero(tx.zil_amount),
 		})) ?? [];
 	}
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
@@ -289,8 +289,8 @@ export class ZAPStats {
 	}
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
@@ -307,8 +307,8 @@ export class ZAPStats {
 	}
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
@@ -326,8 +326,8 @@ export class ZAPStats {
 		return output;
 	}
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */

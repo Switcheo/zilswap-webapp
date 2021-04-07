@@ -91,13 +91,13 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
 
   const hasNotification =
     // show new pool warning
-    ((isPool && poolToken && !poolToken?.loading && !poolToken?.pool) ||
+    ((isPool && poolToken && !poolToken?.pool) ||
 
       // show liquidity fee (add liquidity incentive) message
       (isPool && !layoutState.liquidityEarnHidden && layoutState.showPoolType === "add") ||
 
       // show user created token warning for pool
-      (isPool && !poolToken?.loading && poolToken?.pool && !poolToken?.registered) ||
+      (isPool && poolToken?.pool && !poolToken?.registered) ||
 
       // show user created token warning for swap
       (isSwap && ((swapState.inToken && !swapState.inToken.registered) || (swapState.outToken && !swapState.outToken.registered))) ||

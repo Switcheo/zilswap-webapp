@@ -166,7 +166,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
           </Box>
         )}
 
-        {tokenState.initialized && (
+        {(
           <Box className={classes.currenciesContainer}>
             <Button color="inherit" component="h3" variant="text"
               className={classes.currenciesHeader}

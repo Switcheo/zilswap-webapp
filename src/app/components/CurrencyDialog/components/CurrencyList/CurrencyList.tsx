@@ -78,8 +78,6 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
 
         dispatch(actions.Token.update({
           address: token.address,
-          dirty: true,
-          initBalance: true,
         }));
       }, `rueryTokenBalance-${token.address}`);
     }
@@ -110,7 +108,7 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
               )}
             </Box>
             <Box flex={1}>
-              {!!token.balance && (
+              {!!walletState.wallet && (
                 <Typography align="right" variant="h6" component="p">
                   {moneyFormat(getTokenBalance(token), {
                     symbol: token.symbol,
@@ -120,11 +118,11 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
                   })}
                 </Typography>
               )}
-              {!token.balance && (
+              {/* {!token.balance && (
                 <Typography align="right" color="textSecondary" variant="body2" className={classes.subtleText}>
                   {!!walletState.wallet ? "Select to load" : ""}
                 </Typography>
-              )}
+              )} */}
               {showContribution && (
                 <Typography align="right" color="textSecondary" variant="body2">
                   {moneyFormat(getContributionPercentage(token), {

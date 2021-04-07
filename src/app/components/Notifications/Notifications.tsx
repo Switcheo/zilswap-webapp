@@ -10,7 +10,7 @@ import cls from "classnames";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
-import { ObservedTx } from "zilswap-sdk";
+import { ObservedTx, TxStatus } from "zilswap-sdk";
 import NotificationBox from "../NotificationBox";
 import UserPoolMessage from "../UserPoolMessage";
 
@@ -105,7 +105,11 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
         </NotificationBox>
       )}
       {submittedTxs.map((submittedTx: SubmittedTx, index) => (
-        <NotificationBox key={index} IconComponent={submittedTx.status === "expired" ? TimeoutIcon : CheckmarkIcon} onRemove={() => onRemoveConfirmedTx(submittedTx)}>
+        <NotificationBox
+          key={index}
+          IconComponent={submittedTx.status === "expired" ? TimeoutIcon : CheckmarkIcon}
+          onRemove={() => onRemoveConfirmedTx(submittedTx)}
+        >
           <Typography variant="body2" className={classes.notificationMessage}>
             Transaction 0x{truncate(submittedTx.hash)} {submittedTx.status || "status unknown"}.{" "}
             {submittedTx.status !== "expired" && (

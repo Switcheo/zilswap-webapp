@@ -64,8 +64,6 @@ const CreatePoolDialog = (props: any) => {
         balance: BIG_ZERO,
         balances: tokenPreview.balances,
         allowances: {},
-        dirty: true,
-        initBalance: true,
       };
       const network = ZilswapConnector.network;
 

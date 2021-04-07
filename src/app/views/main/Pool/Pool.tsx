@@ -46,7 +46,7 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       <Notifications />
-      {!poolToken?.loading && !poolToken?.pool && (
+      {!poolToken?.pool && (
         <NewPoolMessage token={poolToken || undefined} />
       )}
       <AddLiquidityEarnMessage />

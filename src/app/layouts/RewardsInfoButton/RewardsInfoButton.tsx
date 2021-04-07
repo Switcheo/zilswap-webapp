@@ -153,7 +153,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
           const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
           dispatch(actions.Token.update({
             address: zapContractAddr,
-            dirty: true,
           }));
         }, 5000);
       }

@@ -1,23 +1,28 @@
 import { TokenUpdateProps, TokenInitProps, TokenAddProps, UpdatePriceProps, UpdateUSDValuesProps } from "./types";
 
 export const TokenActionTypes = {
-  TOKEN_UPDATE: "TOKEN_UPDATE",
+  TOKEN_UPDATE_STATE: "TOKEN_UPDATE_STATE",
   TOKEN_INIT: "TOKEN_INIT",
+  TOKEN_UPDATE: "TOKEN_UPDATE",
   TOKEN_ADD: "TOKEN_ADD",
   TOKEN_UPDATE_PRICES: "TOKEN_UPDATE_PRICES",
-  TOKEN_INVALIDATE: "TOKEN_INVALIDATE",
   TOKEN_UPDATE_VALUES: "TOKEN_UPDATE_VALUES",
 };
 
-export function update(payload: TokenUpdateProps) {
+export function updateState() {
   return {
-    type: TokenActionTypes.TOKEN_UPDATE,
-    payload,
+    type: TokenActionTypes.TOKEN_UPDATE_STATE,
   }
 };
 export function init(payload: TokenInitProps) {
   return {
     type: TokenActionTypes.TOKEN_INIT,
+    payload,
+  }
+};
+export function update(payload: TokenUpdateProps) {
+  return {
+    type: TokenActionTypes.TOKEN_UPDATE,
     payload,
   }
 };
@@ -38,9 +43,4 @@ export function updateUSDValues(payload: UpdateUSDValuesProps) {
     type: TokenActionTypes.TOKEN_UPDATE_VALUES,
     payload,
   }
-};
-export function invalidate() {
-  return {
-    type: TokenActionTypes.TOKEN_INVALIDATE,
-  };
 };

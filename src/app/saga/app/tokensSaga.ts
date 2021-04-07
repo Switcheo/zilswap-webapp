@@ -15,8 +15,8 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
   logger("tokens saga", "retrieving token balances/allowances");
 
   const batchRequests: any[] = [];
-  for (const address in tokens) {
-    const token = tokens[address];
+  for (const t in tokens) {
+    const token = tokens[t];
 
     if (token.isZil) {
       batchRequests.push(balanceBatchRequest(token, address.replace("0x", "")))
@@ -31,8 +31,6 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
 
   batchResults.forEach(result => {
     let token = result.request.token;
-
-    logger(`tokens update:${token.symbol}`);
 
     switch(result.request.type) {
       case BatchRequestType.Balance: {
@@ -49,8 +47,6 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
               [address]: balance!,
             }),
           },
-          loading: false,
-          dirty: false,
           initialized: true,
         }
         break;
@@ -74,11 +70,8 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
 
         const tokenInfo: TokenInfo = {
           initialized: true,
-          dirty: false,
-          loading: false,
           isZil: false,
           isZwap: token.isZwap,
-          initBalance: token.initBalance,
           name: token.name,
 
           registered: token.registered,
@@ -114,6 +107,7 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
 }
 
 function* updateTokensState() {
+  logger("tokens saga", "called updateTokensState")
   const wallet: ConnectedWallet = yield select((state: RootState) => state.wallet.wallet);
 
   if (!wallet) { return }
@@ -125,30 +119,19 @@ function* updateTokensState() {
 
   const result: SimpleMap<TokenInfo> = yield call(fetchTokensState, network, tokens, address);
 
+  logger("tokens saga", {result});
   for (const [key, value] of Object.entries(result)) {
     console.log(`updating ${value.symbol}: ${key}`);
-    yield put(actions.Token.update(value))
+    yield put(actions.Token.update(value));
   }
 }
 
 function* watchUpdateTokensState() {
-  yield takeLatest('UPDATE_TOKENS_STATE', updateTokensState)
+  yield takeLatest(actions.Token.TokenActionTypes.TOKEN_UPDATE_STATE, updateTokensState)
+
 }
 
 export default function* tokensSaga() {
   logger("init tokens saga");
   yield fork(watchUpdateTokensState);
-
-  // for (const address in tokens) {
-  //   const token = tokens[address];
-
-  //   yield put(
-  //     actions.Token.update({
-  //       address,
-  //       loading: false,
-  //       dirty: false,
-  //       initialized: true,
-  //       pool: ZilswapConnector.getPool(token.address) || undefined,
-  //     })
-  //   );
 }

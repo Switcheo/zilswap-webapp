@@ -14,9 +14,6 @@ export type TokenUSDValues = {
 
 export type TokenInfo = {
   initialized: boolean;
-  initBalance: boolean;
-  dirty: boolean;
-  loading?: boolean;
   isZil: boolean;
   isZwap: boolean;
   registered: boolean;
