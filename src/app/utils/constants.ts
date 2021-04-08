@@ -30,6 +30,11 @@ export const ZilPayNetworkMap = {
   testnet: Network.TestNet,
 } as { [index: string]: Network };
 
+export const RPCEndpoints: { [key in Network]: string } = {
+  [Network.MainNet]: 'https://api2.zilliqa.com',
+  [Network.TestNet]: 'https://dev-api.zilliqa.com'
+};
+
 export const BIG_ZERO = new BigNumber(0);
 export const BIG_ONE = new BigNumber(1);
 

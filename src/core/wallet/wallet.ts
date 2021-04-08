@@ -5,11 +5,11 @@ import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { RPCHandler } from "core/utilities";
 import moment from "moment";
 import { WalletProvider } from "zilswap-sdk";
-import { APIS, Network } from 'zilswap-sdk/lib/constants';
+import { Network } from 'zilswap-sdk/lib/constants';
 import { ConnectWalletResult } from "./ConnectedWallet";
 import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
 import { ZilPayConnectedWallet } from "./ZilPayConnectedWallet";
-import { DefaultFallbackNetwork, ZilPayNetworkMap } from "app/utils/constants";
+import { DefaultFallbackNetwork, ZilPayNetworkMap, RPCEndpoints } from "app/utils/constants";
 
 export const parseBalanceResponse = (balanceRPCResponse: RPCResponse<any, string>) => {
   let balanceResult = null;
@@ -33,7 +33,7 @@ export const connectWalletPrivateKey = async (inputPrivateKey: string, network: 
   if (!validation.isPrivateKey(inputPrivateKey))
     throw new Error("Invalid private key");
 
-  const zilliqa = new Zilliqa(APIS[network]);
+  const zilliqa = new Zilliqa(RPCEndpoints[network]);
   zilliqa.wallet.addByPrivateKey(inputPrivateKey);
   const account: Account = zilliqa.wallet.defaultAccount!;
   const timestamp = moment();

@@ -5,7 +5,8 @@ import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
 import { ConnectedWallet, WalletConnectType } from "core/wallet/ConnectedWallet";
 import { ObservedTx, OnUpdate, Pool, TokenDetails, TxReceipt, TxStatus, WalletProvider, Zilswap } from "zilswap-sdk";
-import { APIS, Network } from "zilswap-sdk/lib/constants";
+import { Network } from "zilswap-sdk/lib/constants";
+import { RPCEndpoints } from "app/utils/constants";
 import { getAllowancesMap, getBalancesMap } from "./utils";
 
 export interface ConnectProps {
@@ -159,8 +160,7 @@ export class ZilswapConnector {
 
   private static setState = async (props: StateUpdateProps) => {
     const { wallet, network, providerOrKey } = props;
-    const options = network === Network.MainNet ? { rpcEndpoint: 'https://api2.zilliqa.com' } : {}
-    const zilswap = new Zilswap(network, providerOrKey, options);
+    const zilswap = new Zilswap(network, providerOrKey, { rpcEndpoint: RPCEndpoints[network] });
 
     await ZilswapConnector.connectorState?.zilswap.teardown();
 
@@ -204,7 +204,7 @@ export class ZilswapConnector {
    */
   static getZilliqa = () => {
     const { zilswap } = ZilswapConnector.getState();
-    return new Zilliqa(APIS[zilswap.network]);
+    return new Zilliqa(RPCEndpoints[zilswap.network]);
   };
 
   /**
