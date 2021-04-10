@@ -19,7 +19,7 @@ import {
   ConnectWalletResult,
   connectWalletZilPay,
 } from "core/wallet";
-import { ZilswapConnector } from "core/zilswap";
+import { ZilswapConnector, updateTitle } from "core/zilswap";
 import { ZWAPRewards } from "core/zwap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
@@ -122,6 +122,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   const [runInitWallet] = useAsyncTask<void>("initWallet");
   const [runInitZilswap] = useAsyncTask<void>("initZilswap");
   const [runReloadTransactions] = useAsyncTask<void>("reloadTransactions");
+  const [runUpdateTitle] = useAsyncTask<void>("updateTitlePrice");
   const dispatch = useDispatch();
 
   const registerObserver = () => {
@@ -334,6 +335,14 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
   useEffect(() => {
     logger("butler mount");
     registerObserver();
+    runUpdateTitle(async () => {
+      await updateTitle();
+    })
+    let updateTitleTimer = setInterval(() => {
+      runUpdateTitle(async () => {
+        await updateTitle();
+      })
+    }, 60000);
 
     const privateKey = localStorage.getItem(LocalStorageKeys.PrivateKey);
     const savedZilpay = localStorage.getItem(LocalStorageKeys.ZilPayConnected);
@@ -350,6 +359,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     return () => {
       mounted = false;
       clearObserver();
+      clearInterval(updateTitleTimer);
     };
 
     // eslint-disable-next-line

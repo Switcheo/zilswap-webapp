@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js";
 import { Contract } from "./reexport";
+import { HTTP } from "core/utilities";
 
 /**
  * Helper function to convert numeric input to basispoints form.
@@ -47,4 +48,26 @@ export const getAllowancesMap = async (contract: Contract) => {
   result = await contract.getSubState("allowances");
   contractAllowancesMap = result?.allowances;
   return contractAllowancesMap;
+}
+
+export const updateTitle = async (): Promise<void> => {
+  const zilStreamUrl = "https://api.zilstream.com";
+  const http = new HTTP(zilStreamUrl, { rates: "/rates" });
+  const url = http.path("rates");
+  const response = await http.get({ url });
+  const results  = await response.json();
+  let zwapValue = new BigNumber(0);
+  let zilValue = new BigNumber(0);
+
+  if(Array.isArray(results)) {
+    results.forEach(token => {
+      if (token.token_id === 1) zilValue = new BigNumber(token.value);
+      if (token.token_id === 3) zwapValue = new BigNumber(token.value);
+    })
+  }
+
+  if(!zwapValue.isZero() && zwapValue.isPositive() && !zilValue.isZero() && zilValue.isPositive()) {
+    const zwap_price_label = zwapValue.div(new BigNumber(1).div(zilValue)).toFixed(2);
+    window.document.title = "Zilswap - $" + zwap_price_label;
+  }
 }
