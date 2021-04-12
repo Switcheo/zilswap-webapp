@@ -84,11 +84,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   mainFont: {
     fontSize: "16px!important",
   },
-  itemFont: {
+  secondaryFont: {
     fontSize: "12px!important",
   },
   secondaryPadding: {
     paddingLeft: theme.spacing(1.5),
+  }, 
+  specialTextColor: {
+    color: theme.palette.colors.zilliqa.primary[100],
   }
 }));
 const NavDrawer: React.FC<DrawerProps> = (props: any) => {
@@ -98,12 +101,13 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
   const [expand, setExpand] = useState();
 
   const FilterPage = (props: any) => {
-    const { page, index, secondary } = props
+    const { page, index, secondary } = props;
+    if(!page)return <></>;
     if (page.external) {
       return  (
         <ListItem className={cls(classes.listItem, secondary && classes.secondaryPadding)} disableGutters button key={index}>
           <Button
-          className={cls(classes.buttonLeaf, secondary && classes.itemFont)}
+            className={cls(page.specialTitle && classes.specialTextColor, classes.buttonLeaf, secondary && classes.secondaryFont)}
             href={page.href}
             target="_blank">
             {page.title}
@@ -114,7 +118,7 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
     if(page.expand) {
       return (
         <>
-          <ListItem className={cls(classes.listItem, classes.buttonLeaf)} disableGutters button key={index} onClick={() => setExpand(page.title === expand ? null : page.title)}>
+          <ListItem className={cls(classes.listItem, classes.buttonLeaf, page.specialTitle && classes.specialTextColor)} disableGutters button key={index} onClick={() => setExpand(page.title === expand ? null : page.title)}>
           <ListItemText primary={page.title} primaryTypographyProps={{ className: classes.mainFont }} />
             { expand === page.title ? <ArrowDropUp /> : <ArrowDropDown /> }
           </ListItem>
@@ -131,7 +135,7 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
     return (
       <ListItem className={cls(classes.listItem, secondary && classes.secondaryPadding)} disableGutters button key={index}>
         <Button
-          className={cls(classes.buttonLeaf, secondary && classes.itemFont)}
+          className={cls(page.specialTitle && classes.specialTextColor, classes.buttonLeaf, secondary && classes.secondaryFont)}
           activeClassName={classes.buttonLeafActive}
           component={CustomRouterLink}
           to={page.href}
