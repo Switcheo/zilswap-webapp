@@ -54,6 +54,7 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
 
       case BatchRequestType.TokenBalance: {
         const tokenDetails = ZilswapConnector.getToken(token.address);
+        const tokenPool = ZilswapConnector.getPool(token.address);
 
         let { balance, balances } = token
 
@@ -80,6 +81,7 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
           decimals: token.decimals,
 
           symbol: tokenDetails?.symbol ?? "",
+          pool: tokenPool ?? undefined,
 
           balance: balance,
           balances: balances,
