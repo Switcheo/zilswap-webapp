@@ -68,6 +68,6 @@ export const updateTitle = async (): Promise<void> => {
 
   if(!zwapValue.isZero() && zwapValue.isPositive() && !zilValue.isZero() && zilValue.isPositive()) {
     const zwap_price_label = zwapValue.div(new BigNumber(1).div(zilValue)).toFixed(2);
-    window.document.title = "Zilswap - $" + zwap_price_label;
+    window.document.title = "Zilswap | $ZWAP - $" + zwap_price_label;
   }
 }
