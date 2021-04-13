@@ -19,7 +19,7 @@ export interface ConnectWalletProps {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    maxWidth: theme.spacing(80),
+    maxWidth: theme.spacing(82),
   },
   extraSpacious: {
     marginTop: theme.spacing(2),
@@ -53,10 +53,12 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
         <NotificationBox IconComponent={WarningOutlinedIcon} marginTop={2}>
           <Box>
             <Typography variant="body1" className={classes.notificationMessage}>
-              <strong>Do not enter your private key on ZilSwap.</strong>
+              <strong>For the safety of our users, login via private key has been disabled permanently.</strong>
             </Typography>
             <Typography variant="body2" className={classes.notificationMessage}>
-              Connect wallet via Private Key has been removed due to increased number of illegitimate replica sites that phish for the private key.
+              To access your liquidity pools, please connect to ZilSwap via a ZilPay wallet.
+              <br />
+              Click <Link href="https://docs.zilswap.io/more/help/use-zilpay-on-zilswap" target="_blank">here</Link> to learn more.
             </Typography>
           </Box>
         </NotificationBox>
