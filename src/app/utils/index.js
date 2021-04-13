@@ -19,6 +19,7 @@ export { default as useMessageSubscriber } from "./useMessageSubscriber";
 export { default as useMoneyFormatter } from "./useMoneyFormatter";
 export { default as useNetwork } from "./useNetwork";
 export { default as useRouter } from "./useRouter";
+export { default as useSearchParam } from "./useSearchParam";
 export { default as useTaskSubscriber } from "./useTaskSubscriber";
 export * from "./useValueCalculators";
 export { default as useValueCalculators } from "./useValueCalculators";
