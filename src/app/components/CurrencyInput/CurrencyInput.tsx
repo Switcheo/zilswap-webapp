@@ -151,7 +151,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
             {!fixedToZil && (
               <Button className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
                 <Box display="flex" alignItems="center">
-                  {token && <CurrencyLogo currency={token.registered && token.symbol} className={classes.currencyLogo} />}
+                  {token && <CurrencyLogo currency={token.registered && token.symbol} address={token.address} className={classes.currencyLogo} />}
                   <Typography variant="button">{token?.symbol || "Select Token"}</Typography>
                 </Box>
                 <ExpandMoreIcon className={classes.expandIcon} />

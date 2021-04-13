@@ -7,6 +7,7 @@ import CurrencyLogo from "../CurrencyLogo";
 
 interface Props extends BoxProps {
   pair: [string, string];
+  tokenAddress: string;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -19,14 +20,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 const PoolLogo: React.FC<Props> = (props: Props) => {
-  const { children, className, pair, ...rest } = props;
+  const { children, className, pair, tokenAddress, ...rest } = props;
   const [quote, base] = pair
   const classes = useStyles();
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <CurrencyLogo className={classes.baseIcon} currency={base} />
-      <CurrencyLogo currency={quote} />
+      <CurrencyLogo currency={quote} address={tokenAddress} />
     </Box>
   );
 };

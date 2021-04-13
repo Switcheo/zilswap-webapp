@@ -117,7 +117,7 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
     <Box {...rest} className={cls(classes.root, className)}>
       <Button variant="text" fullWidth className={classes.buttonWrapper} onClick={onToggleDropdown}>
         <Box flex={1} display="flex" alignItems="center">
-          <PoolLogo pair={poolPair} />
+          <PoolLogo pair={poolPair} tokenAddress={token.address} />
           <Text marginLeft={1}>{poolPair.join(" - ")}</Text>
           <Box flex={1} />
           {active && <ArrowDropUpOutlined color="primary" />}
@@ -142,11 +142,13 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
               justifyContent="flex-end"
               marginBottom={1}
               currency={token.symbol}
+              address={token.address}
               amount={tokenAmount}
               compression={token.decimals} />
             <AmountLabel
               justifyContent="flex-end"
               currency="ZIL"
+              address=""
               amount={zilAmount} />
             <Text variant="body2" color="textSecondary" align="right">
               ≈${toHumanNumber(depositedValue, 2)}

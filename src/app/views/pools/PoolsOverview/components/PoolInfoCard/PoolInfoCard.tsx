@@ -177,7 +177,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     <Card {...rest} className={cls(classes.root, className)}>
       <CardContent className={classes.title}>
         <Box display="flex" alignItems="center">
-          <PoolLogo className={classes.poolIcon} pair={[token.symbol, "ZIL"]} />
+          <PoolLogo className={classes.poolIcon} pair={[token.symbol, "ZIL"]} tokenAddress={token.address} />
           <Text variant="h2">{token.symbol} - ZIL</Text>
           <Box flex={1} />
           <IconButton onClick={onShowActions} size="small">
@@ -247,6 +247,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
               hideIcon
               justifyContent="flex-end"
               currency="ZIL"
+              address=""
               amount={swapVolumes[token.address]?.totalZilVolume} />
             <Text align="right" variant="body2" color="textSecondary">
               ${toHumanNumber(totalZilVolumeUSD)}
@@ -257,10 +258,12 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
               <AmountLabel
                 marginBottom={1}
                 currency={token.symbol}
+                address={token.address}
                 amount={token.pool?.tokenReserve}
                 compression={token.decimals} />
               <AmountLabel
                 currency="ZIL"
+                address=""
                 amount={token.pool?.zilReserve} />
             </Box>
           </KeyValueDisplay>

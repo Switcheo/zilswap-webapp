@@ -1,12 +1,13 @@
 import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React from "react";
 import CurrencyLogo from "../CurrencyLogo";
 
 interface Props extends BoxProps {
-  route?: string[]
+  route?: TokenInfo[]
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -26,11 +27,12 @@ const PoolRouteIcon: React.FC<Props> = (props: Props) => {
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      {route.reverse().map((currency, index) => (
+      {route.reverse().map((token, index) => (
         <CurrencyLogo
           key={index}
           className={classes.icon}
-          currency={currency} />
+          currency={token.symbol}
+          address={token.address} />
       ))}
     </Box>
   );

@@ -11,6 +11,7 @@ import Text from "../Text";
 
 interface Props extends BoxProps {
   currency: string;
+  address: string;
   amount?: BigNumber;
   compression?: number;
   hideIcon?: boolean;
@@ -28,7 +29,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 const AmountLabel: React.FC<Props> = (props: Props) => {
-  const { children, className, amount = BIG_ZERO, currency, prefix, hideIcon = false, compression, ...rest } = props;
+  const { children, className, amount = BIG_ZERO, currency, address, prefix, hideIcon = false, compression, ...rest } = props;
   const classes = useStyles();
 
   const decimals = currency === "ZIL" ? 12 : (compression ?? 0)
@@ -36,7 +37,7 @@ const AmountLabel: React.FC<Props> = (props: Props) => {
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       {!hideIcon && (
-        <CurrencyLogo className={classes.currencyLogo} currency={currency} />
+        <CurrencyLogo className={classes.currencyLogo} currency={currency} address={address} />
       )}
       <Text>{prefix}{toHumanNumber(amount.shiftedBy(-decimals))} {currency}</Text>
     </Box>
