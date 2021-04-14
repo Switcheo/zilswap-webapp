@@ -11303,9 +11303,9 @@ typescript-tuple@^2.2.1:
     typescript-compare "^0.0.2"
 
 typescript@^3.8.3:
-  version "3.8.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.8.3.tgz#409eb8544ea0335711205869ec458ab109ee1061"
-  integrity sha512-MYlEfn5VrLNsgudQTVJeNaQFUAI7DkhnOjdpAp4T+ku1TfQClewlbSuTVHiA+8skNBgaf02TL/kLOvig4y3G8w==
+  version "3.9.9"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.9.tgz#e69905c54bc0681d0518bd4d587cc6f2d0b1a674"
+  integrity sha512-kdMjTiekY+z/ubJCATUPlRDl39vXYiMV9iyeMuEuXZh2we6zz80uovNN2WlAxmmdE/Z/YQe+EbOEXB5RHEED3w==
 
 uglify-js@3.4.x:
   version "3.4.10"
@@ -12133,10 +12133,10 @@ yargs@^7.0.0:
     y18n "^3.2.1"
     yargs-parser "^5.0.0"
 
-zilswap-sdk@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/zilswap-sdk/-/zilswap-sdk-1.2.0.tgz#fa8c1c044256853fcf78e0390a922d26a612d504"
-  integrity sha512-XxoU62uGjUvsW8ft0foT+iMAokocvpDXIy7qFz0nvjkil62Tm1M+3TJtXogzg5rE/dH4cnfKgCpR134N13S1mw==
+zilswap-sdk@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/zilswap-sdk/-/zilswap-sdk-1.2.1.tgz#7f2cf6bd48d89a5a5793bdae9792e3dd87128509"
+  integrity sha512-NB+XzckiBb202JOCLaK57mzy4ButcmfNIzcnUxIbM912NJ182An78YcXgHLHJS6FFcsXsJx96qcldQgzx8Vnzg==
   dependencies:
     "@zilliqa-js/zilliqa" "^1.0.0"
     async-mutex "^0.2.2"
