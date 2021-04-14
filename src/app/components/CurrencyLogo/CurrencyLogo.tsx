@@ -1,9 +1,7 @@
 import { makeStyles } from "@material-ui/core";
-import SVG from 'react-inlinesvg';
 import cls from "classnames";
 import React from "react";
 import { AppTheme } from "app/theme/types";
-import { ReactComponent as SvgTokenPlaceholder } from "./token-placeholder.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -24,28 +22,32 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const CurrencyLogo = (props: any) => {
-  const { currency, className }: {
+  const { currency, address, className }: {
     currency: string | false;
+    address: string;
     className: string;
   } = props;
   const classes = useStyles();
   return (
     <div className={cls(classes.root, className)}>
       {
-        currency ?
-        <SVG
-          className={classes.svg}
-          src={`https://raw.githubusercontent.com/Switcheo/zilswap-token-list/master/logos/${currency}.svg`}
-          title={`${currency} Token Logo`}
-          description={`${currency} Token Logo`}
-          cacheRequests={true}
-          loader={<SvgTokenPlaceholder />}
-        >
-          <SvgTokenPlaceholder />
-        </SVG>
-        :
-        <SvgTokenPlaceholder />
+        currency === 'ZIL' ? (
+          <img 
+            className={classes.svg} 
+            src={`https://meta.viewblock.io/ZIL/logo`}
+            alt={`${currency} Token Logo`}
+            loading="lazy"
+          />
+        ) : (
+          <img 
+            className={classes.svg} 
+            src={`https://meta.viewblock.io/ZIL.${address}/logo`}
+            alt={`${currency} Token Logo`}
+            loading="lazy"
+          />
+        )
       }
+      
     </div>
   )
 };

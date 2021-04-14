@@ -1,7 +1,5 @@
-import { Box, Button, CircularProgress, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import { Box, CircularProgress, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
 import { SearchOutlined } from "@material-ui/icons";
-import ArrayOpenedIcon from "@material-ui/icons/ArrowDropDown";
-import ArrayClosedIcon from "@material-ui/icons/ArrowRight";
 import { DialogModal } from "app/components";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useTaskSubscriber } from "app/utils";
@@ -62,22 +60,12 @@ export interface CurrencyDialogProps extends DialogProps {
   showContribution?: boolean;
 };
 
-type FormState = {
-  showRegistered: boolean;
-  showOthers: boolean;
-};
-
-const initialFormState: FormState = {
-  showRegistered: true,
-  showOthers: true,
-};
-
 const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProps) => {
   const { children, className, onSelectCurrency, hideZil, hideNoPool, showContribution, ...rest } = props;
   const classes = useStyles();
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const [search, setSearch] = useState("");
-  const [formState, setFormState] = useState<FormState>({ ...initialFormState });
+
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const [loadingConnectWallet] = useTaskSubscriber(...LoadingKeys.connectWallet);
@@ -93,29 +81,23 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     setTokens(tokens.sort(sortTokens));
   }, [tokenState.tokens]);
 
-  const onToggleFormState = (key: keyof FormState) => {
-    setFormState({
-      ...formState,
-      [key]: !formState[key],
-    })
-  };
-
-  const filterSearch = (token: TokenInfo, registered?: boolean): boolean => {
+  const filterSearch = (token: TokenInfo): boolean => {
     const searchTerm = search.toLowerCase().trim();
     if (token.isZil && hideZil) return false;
     if (!token.isZil && !token.pool && hideNoPool) return false;
-    if (!searchTerm.length && registered === undefined) return true;
+    if(searchTerm === "" && !token.registered) return false;
 
-    if (registered && !token.registered) return false;
-    if (!registered && token.registered) return false;
+    if(!token.registered) {
+      return token.address.toLowerCase() === searchTerm
+    }
 
     return token.address.toLowerCase() === searchTerm ||
       (typeof token.name === "string" && token.name?.toLowerCase().includes(searchTerm)) ||
       token.symbol.toLowerCase().includes(searchTerm);
   };
 
-  const getTokenFilter = (type: "registered" | "unverified") => {
-    return (token: TokenInfo) => filterSearch(token, type === "registered")
+  const getTokenFilter = () => {
+    return (token: TokenInfo) => filterSearch(token)
   };
 
   const sortResult = (lhs: TokenInfo, rhs: TokenInfo) => {
@@ -134,8 +116,8 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     return difference !== 0 ? difference : lhs.symbol.localeCompare(rhs.symbol);
   };
 
-  const verifiedTokens = tokens.filter(getTokenFilter("registered")).sort(sortResult);
-  const unverifiedTokens = tokens.filter(getTokenFilter("unverified")).sort(sortResult);
+  const filteredTokens = tokens.filter(getTokenFilter()).sort(sortResult);
+  
   return (
     <DialogModal header="Select a Token" {...rest} className={clsx(classes.root, className)}>
       <DialogContent>
@@ -168,33 +150,13 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
 
         {(
           <Box className={classes.currenciesContainer}>
-            <Button color="inherit" component="h3" variant="text"
-              className={classes.currenciesHeader}
-              onClick={() => onToggleFormState("showRegistered")}>
-              Registered tokens
-              {formState.showRegistered ? <ArrayOpenedIcon /> : <ArrayClosedIcon />}
-            </Button>
             <CurrencyList
-              tokens={verifiedTokens}
+              tokens={filteredTokens}
               search={search}
-              emptyStateLabel={`No verified tokens found for "${search}"`}
+              emptyStateLabel={`No tokens found for "${search}"`}
               showContribution={showContribution}
               onSelectCurrency={onSelectCurrency}
-              className={clsx(classes.currencies, { [classes.currenciesHidden]: !formState.showRegistered })} />
-
-            <Button color="inherit" component="h3" variant="text"
-              className={classes.currenciesHeader}
-              onClick={() => onToggleFormState("showOthers")}>
-              Others
-              {formState.showOthers ? <ArrayOpenedIcon /> : <ArrayClosedIcon />}
-            </Button>
-            <CurrencyList
-              tokens={unverifiedTokens}
-              search={search}
-              emptyStateLabel={`No other tokens found for "${search}"`}
-              showContribution={showContribution}
-              onSelectCurrency={onSelectCurrency}
-              className={clsx(classes.currencies, { [classes.currenciesHidden]: !formState.showOthers })} />
+              className={clsx(classes.currencies)} />
           </Box>
         )}
       </DialogContent>

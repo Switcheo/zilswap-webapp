@@ -53,7 +53,7 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
     inAmount,
     outAmount,
   } = React.useMemo(() => {
-    const swapRoute: string[] = [];
+    const swapRoute: TokenInfo[] = [];
 
     // in - into the contract (out of users address)
     // out - out of the contract (into the users address)
@@ -69,20 +69,20 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
     if (transaction.swap0_is_sending_zil) {
       inToken = tokenState.tokens[ZIL_TOKEN_NAME];
       outToken = tokenState.tokens[transaction.token_address];
-      swapRoute.push(inToken.symbol, outToken.symbol);
+      swapRoute.push(inToken, outToken);
       inAmount = transaction.zil_amount;
       outAmount = transaction.token_amount;
     } else {
       inToken = tokenState.tokens[transaction.token_address];
       outToken = tokenState.tokens[ZIL_TOKEN_NAME];
-      swapRoute.push(inToken.symbol, outToken.symbol);
+      swapRoute.push(inToken, outToken);
       inAmount = transaction.token_amount;
       outAmount = transaction.zil_amount;
     }
 
     if (transaction.swap1_token_address) {
       inToken = tokenState.tokens[transaction.swap1_token_address];
-      swapRoute.unshift(inToken.symbol);
+      swapRoute.unshift(inToken);
       inAmount = transaction.swap1_token_amount ?? BIG_ZERO;
     }
 
@@ -122,7 +122,7 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
       <TableCell>
         <Box display="flex" alignItems="center">
           <PoolRouteIcon route={[...swapRoute]} marginRight={1} />
-          <Text className={classes.text}>{swapRoute.join(" - ")}</Text>
+          <Text className={classes.text}>{swapRoute.map(token => token.symbol).join(" - ")}</Text>
         </Box>
       </TableCell>
       <TableCell align="right">
@@ -136,6 +136,7 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
             justifyContent="flex-end"
             amount={inAmount}
             currency={inToken.symbol}
+            address={inToken.address}
             compression={inToken.decimals} />
         )}
         {!!outToken && (
@@ -144,6 +145,7 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
             justifyContent="flex-end"
             amount={outAmount}
             currency={outToken.symbol}
+            address={outToken.address}
             compression={outToken.decimals} />
         )}
       </TableCell>
