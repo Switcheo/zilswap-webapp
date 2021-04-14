@@ -2,7 +2,7 @@ import { Switch } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
-import cls from "classnames";
+import clsx from "clsx";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import pathDarkSvg from "./dark.svg";
@@ -20,10 +20,9 @@ const BASE_STYLE_TOGGLE_ICON = {
   backgroundRepeat: "no-repeat",
   backgroundSize: "contain",
   top: 3,
-};
+} as const;
 
-// @ts-ignore
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   root: (props: ThemeSwitchProps) => ({
     "& .MuiSwitch-track": {
       position: "relative",
@@ -62,7 +61,7 @@ const ThemeSwitch: React.FC<ThemeSwitchProps> = (props: ThemeSwitchProps) => {
       checked={themeType === THEME_TOGGLE_SELECTED}
       onChange={() => onToggleTheme()}
       {...rest}
-      className={cls(classes.root, className)} />
+      className={clsx(classes.root, className)} />
   );
 };
 
