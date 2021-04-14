@@ -5,7 +5,7 @@ export type NavigationPageOptions = {
   badge?: string;
   show?: boolean;
   expand?: boolean;
-  specialTitle?: boolean;
+  highlight?: boolean;
   items?: NavigationPageOptions[];
 }
 

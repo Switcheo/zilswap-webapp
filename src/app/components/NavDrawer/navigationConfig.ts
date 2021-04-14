@@ -2,7 +2,7 @@ import { NavigationOptions } from "./types";
 
 const navigationConfig: NavigationOptions[] = [{
   pages: [{
-    title: "Swap",
+    title: "Swap + Pool",
     href: "/swap",
     show: true,
   }, {
@@ -61,7 +61,7 @@ const navigationConfig: NavigationOptions[] = [{
     href: "https://transak.com/",
     external: true,
     show: true,
-    specialTitle: true
+    highlight: true
   }],
 }];
 

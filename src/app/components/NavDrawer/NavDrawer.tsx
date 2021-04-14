@@ -1,23 +1,15 @@
-import { Box, Button, Chip, Drawer, DrawerProps, List, ListItem, Collapse, ListItemText } from "@material-ui/core";
+import { Box, Button, Drawer, DrawerProps, List } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import { useClaimEnabled } from "app/utils";
 import cls from "classnames";
-import React, { forwardRef, useState } from "react";
-import { NavLink as RouterLink } from "react-router-dom";
+import React from "react";
 import SocialLinkGroup from "../SocialLinkGroup";
 import ThemeSwitch from "../ThemeSwitch";
 import { ReactComponent as CloseSVG } from "./close.svg";
+import { NavigationContent } from "./components";
 import { ReactComponent as LogoSVG } from "./logo.svg";
 import navigationConfig from "./navigationConfig";
-import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
-import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
-
-const CustomRouterLink = forwardRef((props: any, ref: any) => (
-  <div ref={ref} style={{ flexGrow: 1 }} >
-    <RouterLink {...props} />
-  </div>
-));
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -58,20 +50,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "row",
   },
-  listItem: {
-    padding: 0,
-  },
-  buttonLeaf: {
-    padding: theme.spacing(2, 4),
-    justifyContent: "flex-start",
-    textTransform: "none",
-    width: "100%",
-    borderRadius: 0,
-    color: theme.palette.colors.zilliqa.neutral[140],
-  },
-  buttonLeafActive: {
-    color: theme.palette.colors.zilliqa.neutral[100],
-  },
   badge: {
     height: "auto",
     padding: theme.spacing(.5, 1.5),
@@ -81,79 +59,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       paddingRight: 0,
     },
   },
-  mainFont: {
-    fontSize: "16px!important",
-  },
-  secondaryFont: {
-    fontSize: "12px!important",
-  },
-  secondaryPadding: {
-    paddingLeft: theme.spacing(1.5),
-  }, 
-  specialTextColor: {
-    color: theme.palette.colors.zilliqa.primary[100],
-  }
 }));
 const NavDrawer: React.FC<DrawerProps> = (props: any) => {
   const { children, className, onClose, ...rest } = props;
   const claimEnabled = useClaimEnabled();
   const classes = useStyles();
-  const [expand, setExpand] = useState();
-
-  const FilterPage = (props: any) => {
-    const { page, index, secondary } = props;
-    if(!page)return <></>;
-    if (page.external) {
-      return  (
-        <ListItem className={cls(classes.listItem, secondary && classes.secondaryPadding)} disableGutters button key={index}>
-          <Button
-            className={cls(page.specialTitle && classes.specialTextColor, classes.buttonLeaf, secondary && classes.secondaryFont)}
-            href={page.href}
-            target="_blank">
-            {page.title}
-          </Button>
-        </ListItem>
-      )
-    }
-    if(page.expand) {
-      return (
-        <>
-          <ListItem className={cls(classes.listItem, classes.buttonLeaf, page.specialTitle && classes.specialTextColor)} disableGutters button key={index} onClick={() => setExpand(page.title === expand ? null : page.title)}>
-          <ListItemText primary={page.title} primaryTypographyProps={{ className: classes.mainFont }} />
-            { expand === page.title ? <ArrowDropUp /> : <ArrowDropDown /> }
-          </ListItem>
-          <Collapse in={expand === page.title}>
-            <List>
-            {page.items.map((item: any, index: number) => (
-               <FilterPage page={item} index={index} secondary={true} />
-            ))}
-            </List>
-          </Collapse>      
-        </>
-      )
-    }
-    return (
-      <ListItem className={cls(classes.listItem, secondary && classes.secondaryPadding)} disableGutters button key={index}>
-        <Button
-          className={cls(page.specialTitle && classes.specialTextColor, classes.buttonLeaf, secondary && classes.secondaryFont)}
-          activeClassName={classes.buttonLeafActive}
-          component={CustomRouterLink}
-          to={page.href}
-          exact={false}
-        >
-          {page.title}
-          {!!page.badge && (
-            <Box display="flex" alignItems="center" marginLeft={2}>
-              <Chip
-                className={classes.badge}
-                color="primary"
-                label={page.badge} />
-            </Box>
-          )}
-        </Button>
-      </ListItem>
-    )
-  }
 
   return (
     <Drawer PaperProps={{ className: classes.paper }} onClose={onClose} {...rest} className={cls(classes.root, className)}>
@@ -168,7 +78,7 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
         {navigationConfig.map((navigation, index) => (
           <List key={index}>
             {navigation.pages.filter(navigation => navigation.show || claimEnabled).map((page, index) => (
-              <FilterPage page={page} index={index}/>
+              <NavigationContent navigation={page} listIndex={index} />
             ))}
           </List>
         ))}
