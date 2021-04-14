@@ -1,4 +1,4 @@
-import { makeStyles } from "@material-ui/core";
+import { makeStyles, useTheme } from "@material-ui/core";
 import cls from "classnames";
 import React from "react";
 import { AppTheme } from "app/theme/types";
@@ -8,10 +8,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: 28,
     height: 28,
     display: "flex",
-    background: "#fff",
-    border: `1px solid ${theme.palette.primary.main}`,
     borderRadius: 14,
-    padding: 4,
+    padding: 2,
   },
   svg: {
     maxWidth: "100%",
@@ -28,26 +26,18 @@ const CurrencyLogo = (props: any) => {
     className: string;
   } = props;
   const classes = useStyles();
+  const theme = useTheme();
+
+  const tokenKey = currency === 'ZIL' ? '' : `.${address}`
+
   return (
     <div className={cls(classes.root, className)}>
-      {
-        currency === 'ZIL' ? (
-          <img 
-            className={classes.svg} 
-            src={`https://meta.viewblock.io/ZIL/logo`}
-            alt={`${currency} Token Logo`}
-            loading="lazy"
-          />
-        ) : (
-          <img 
-            className={classes.svg} 
-            src={`https://meta.viewblock.io/ZIL.${address}/logo`}
-            alt={`${currency} Token Logo`}
-            loading="lazy"
-          />
-        )
-      }
-      
+      <img 
+        className={classes.svg} 
+        src={`https://meta.viewblock.io/ZIL${tokenKey}/logo${theme.palette.type === "dark" ? '?t=dark' : ''}`}
+        alt={`${currency} Token Logo`}
+        loading="lazy"
+      />
     </div>
   )
 };
