@@ -50,7 +50,7 @@ function* updatePoolUSDValues() {
       const zapToken = tokenState.tokens[zapContractAddr];
 
       for (const token of Object.values(tokenState.tokens)) {
-        if (token.isZil || !token.initialized) continue;
+        if (token.isZil) continue;
 
         const balance = valueCalculators.amount(tokenState.prices, token, bnOrZero(token.balance));
         const poolLiquidity = valueCalculators.pool(tokenState.prices, token);
@@ -64,10 +64,13 @@ function* updatePoolUSDValues() {
         };
       }
 
-      const prices = computeTokenPrice(tokenState.prices["ZIL"], tokenState.tokens);
-      if(prices !== tokenState.prices)
-      yield put(actions.Token.updatePrices(prices));
       yield put(actions.Token.updateUSDValues(usdValues));
+      const zilPrice = tokenState.prices["ZIL"];
+      if(zilPrice) {
+        const prices = computeTokenPrice(zilPrice, tokenState.tokens);
+        if(prices !== tokenState.prices)
+          yield put(actions.Token.updatePrices(prices));
+      }
     } finally {
       yield race({
         rewardsUpdated: take(RewardsActionTypes.UPDATE_ZWAP_REWARDS),
