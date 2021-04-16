@@ -82,6 +82,10 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     setTokens(tokens.sort(sortTokens));
   }, [tokenState.tokens]);
 
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN, JSON.stringify(userWhitelisted));
+  }, [{...userWhitelisted}]);
+
   const filterSearch = (token: TokenInfo): boolean => {
     const searchTerm = search.toLowerCase().trim();
     if (token.isZil && hideZil) return false;
