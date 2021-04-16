@@ -15,8 +15,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "row-reverse",
   },
+  poolIcon: {
+    borderRadius: '50%',
+    backgroundColor: theme.palette.type === "dark" ? "#303637": "#F7FAFA",
+    padding: 4
+  },
   baseIcon: {
-    marginLeft: theme.spacing(-1)
+    marginLeft: -10,
   },
 }));
 const PoolLogo: React.FC<Props> = (props: Props) => {
@@ -26,8 +31,8 @@ const PoolLogo: React.FC<Props> = (props: Props) => {
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <CurrencyLogo className={classes.baseIcon} currency={base} />
-      <CurrencyLogo currency={quote} address={tokenAddress} />
+      <CurrencyLogo className={cls(classes.baseIcon, classes.poolIcon)} currency={base} />
+      <CurrencyLogo className={classes.poolIcon} currency={quote} address={tokenAddress} />
     </Box>
   );
 };

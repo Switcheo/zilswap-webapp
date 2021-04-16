@@ -24,8 +24,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignItems: "center",
   },
   currencyLogo: {
-    width: "2em",
-    marginRight: theme.spacing(1),
+    marginLeft: theme.spacing(1),
   },
 }));
 const AmountLabel: React.FC<Props> = (props: Props) => {
@@ -36,10 +35,10 @@ const AmountLabel: React.FC<Props> = (props: Props) => {
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
+      <Text>{prefix}{toHumanNumber(amount.shiftedBy(-decimals))} {currency}</Text>
       {!hideIcon && (
         <CurrencyLogo className={classes.currencyLogo} currency={currency} address={address} />
       )}
-      <Text>{prefix}{toHumanNumber(amount.shiftedBy(-decimals))} {currency}</Text>
     </Box>
   );
 };
