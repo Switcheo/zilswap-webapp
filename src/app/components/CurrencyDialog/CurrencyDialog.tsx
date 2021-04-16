@@ -3,7 +3,7 @@ import { SearchOutlined } from "@material-ui/icons";
 import { DialogModal } from "app/components";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useTaskSubscriber } from "app/utils";
-import { BIG_ZERO, LoadingKeys, sortTokens } from "app/utils/constants";
+import { BIG_ZERO, LoadingKeys, sortTokens, LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
 import React, { useEffect, useState } from "react";
@@ -69,6 +69,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const [loadingConnectWallet] = useTaskSubscriber(...LoadingKeys.connectWallet);
+  const [whitelistedTokens, ] = useState<any>(JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN) || "{}"));
 
   useEffect(() => {
     if (!tokenState.tokens) return setTokens([]);
@@ -85,9 +86,9 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     const searchTerm = search.toLowerCase().trim();
     if (token.isZil && hideZil) return false;
     if (!token.isZil && !token.pool && hideNoPool) return false;
-    if(searchTerm === "" && !token.registered) return false;
+    if(searchTerm === "" && !token.registered && !whitelistedTokens[token.address]) return false;
 
-    if(!token.registered) {
+    if(!token.registered && !whitelistedTokens[token.address]) {
       return token.address.toLowerCase() === searchTerm
     }
 

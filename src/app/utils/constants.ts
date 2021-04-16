@@ -56,6 +56,8 @@ export const STATS_REFRESH_RATE = 30000; // ms
 export const ZIL_TOKEN_NAME = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
 export const ZIL_DECIMALS = 12;
 
+export const LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN = "zilswap:userwhitelisttoken";
+
 // ms
 export class PollIntervals {
   public static USDRates = 10000;
