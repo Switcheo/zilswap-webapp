@@ -69,9 +69,10 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const [loadingConnectWallet] = useTaskSubscriber(...LoadingKeys.connectWallet);
-  const [whitelistedTokens, ] = useState<any>(JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN) || "{}"));
+  const [whitelistedTokens, setWhitelistedTokens] = useState<any>({});
 
   useEffect(() => {
+    setWhitelistedTokens(JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN) || "{}"));
     if (!tokenState.tokens) return setTokens([]);
     const tokens = [];
     for (const address in tokenState.tokens!) {

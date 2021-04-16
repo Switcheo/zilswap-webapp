@@ -43,6 +43,9 @@ const useStyles = makeStyles(theme => ({
     fontStyle: "italic",
     opacity: .5,
   },
+  addRemoveFont: {
+    fontSize: "10px",
+  },
 }));
 const CurrencyList: React.FC<CurrencyListProps> = (props) => {
   const { children, className, onSelectCurrency, emptyStateLabel, showContribution, search, tokens, ...rest } = props;
@@ -97,8 +100,8 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
   }
 
   const addOrRemove = (token: TokenInfo) => {
-    if(!whitelisted[token.address]) return <Box><u onClick={() => addToUserWhiteList(token)}>add</u></Box>;
-    return <Box><u onClick={() => removeFromUserWhiteList(token)}>Remove</u></Box>
+    if(!whitelisted[token.address]) return <u  className={classes.addRemoveFont} onClick={() => addToUserWhiteList(token)}>add</u>;
+    return <u className={classes.addRemoveFont} onClick={() => removeFromUserWhiteList(token)}>Remove</u>;
   }
 
   return (
