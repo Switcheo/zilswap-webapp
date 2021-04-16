@@ -3,7 +3,7 @@ import { SearchOutlined } from "@material-ui/icons";
 import { DialogModal } from "app/components";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useTaskSubscriber } from "app/utils";
-import { BIG_ZERO, LoadingKeys, sortTokens, LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN } from "app/utils/constants";
+import { BIG_ZERO, LoadingKeys, sortTokens, LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN, UserWhitelistTokenProps } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
 import React, { useEffect, useState } from "react";
@@ -69,10 +69,9 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const [loadingConnectWallet] = useTaskSubscriber(...LoadingKeys.connectWallet);
-  const [whitelistedTokens, setWhitelistedTokens] = useState<any>({});
+  const [userWhitelisted, setUserWhitelisted] = useState<UserWhitelistTokenProps>(JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN) || "{}"));
 
   useEffect(() => {
-    setWhitelistedTokens(JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN) || "{}"));
     if (!tokenState.tokens) return setTokens([]);
     const tokens = [];
     for (const address in tokenState.tokens!) {
@@ -87,9 +86,9 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     const searchTerm = search.toLowerCase().trim();
     if (token.isZil && hideZil) return false;
     if (!token.isZil && !token.pool && hideNoPool) return false;
-    if(searchTerm === "" && !token.registered && !whitelistedTokens[token.address]) return false;
+    if(searchTerm === "" && !token.registered && !userWhitelisted[token.address]) return false;
 
-    if(!token.registered && !whitelistedTokens[token.address]) {
+    if(!token.registered && !userWhitelisted[token.address]) {
       return token.address.toLowerCase() === searchTerm
     }
 
@@ -154,6 +153,8 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
           <Box className={classes.currenciesContainer}>
             <CurrencyList
               tokens={filteredTokens}
+              updateUserWhitelist={setUserWhitelisted}
+              userWhitelisted={userWhitelisted}
               search={search}
               emptyStateLabel={`No tokens found for "${search}"`}
               showContribution={showContribution}

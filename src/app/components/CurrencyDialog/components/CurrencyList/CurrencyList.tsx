@@ -5,12 +5,12 @@ import CurrencyLogo from "app/components/CurrencyLogo";
 import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
-import { BIG_ZERO, LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN } from "app/utils/constants";
+import { BIG_ZERO, UserWhitelistTokenProps } from "app/utils/constants";
 import useStatefulTask from "app/utils/useStatefulTask";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
-import React, { useState } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 type CurrencyListProps = BoxProps & {
@@ -19,6 +19,8 @@ type CurrencyListProps = BoxProps & {
   showContribution?: boolean;
   emptyStateLabel?: string;
   onSelectCurrency: (token: TokenInfo) => void;
+  updateUserWhitelist: (whitelisted: UserWhitelistTokenProps) => void;
+  userWhitelisted: UserWhitelistTokenProps;
 };
 
 const useStyles = makeStyles(theme => ({
@@ -48,14 +50,13 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 const CurrencyList: React.FC<CurrencyListProps> = (props) => {
-  const { children, className, onSelectCurrency, emptyStateLabel, showContribution, search, tokens, ...rest } = props;
+  const { children, className, userWhitelisted, updateUserWhitelist, onSelectCurrency, emptyStateLabel, showContribution, search, tokens, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 12 });
   const runQueryTokenBalance = useStatefulTask<void>();
-  const [whitelisted] = useState<any>(JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN) || "{}"));
 
   const getTokenBalance = (token: TokenInfo): BigNumber => {
     if (!walletState.wallet) return BIG_ZERO;
@@ -85,22 +86,21 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
         }));
       }, `rueryTokenBalance-${token.address}`);
     }
-    if(!token.registered && !whitelisted[token.address]) return;
+    if(!token.registered && !userWhitelisted[token.address]) return;
     onSelectCurrency(token)
   };
 
   const addToUserWhiteList = (token: TokenInfo) => {
-    whitelisted[token.address] = token;
-    localStorage.setItem(LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN, JSON.stringify(whitelisted));
+    updateUserWhitelist({ ...userWhitelisted, [token.address]: token });
   }
 
   const removeFromUserWhiteList = (token: TokenInfo) => {
-    delete whitelisted[token.address]
-    localStorage.setItem(LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN, JSON.stringify(whitelisted));
+    delete userWhitelisted[token.address]
+    updateUserWhitelist({ ...userWhitelisted });
   }
 
   const addOrRemove = (token: TokenInfo) => {
-    if(!whitelisted[token.address]) return <u  className={classes.addRemoveFont} onClick={() => addToUserWhiteList(token)}>add</u>;
+    if(!userWhitelisted[token.address]) return <u  className={classes.addRemoveFont} onClick={() => addToUserWhiteList(token)}>Add</u>;
     return <u className={classes.addRemoveFont} onClick={() => removeFromUserWhiteList(token)}>Remove</u>;
   }
 

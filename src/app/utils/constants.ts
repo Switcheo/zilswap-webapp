@@ -58,6 +58,9 @@ export const ZIL_DECIMALS = 12;
 
 export const LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN = "zilswap:userwhitelisttoken";
 
+export type UserWhitelistTokenProps = {
+  [key:string]: TokenInfo
+};
 // ms
 export class PollIntervals {
   public static USDRates = 10000;
