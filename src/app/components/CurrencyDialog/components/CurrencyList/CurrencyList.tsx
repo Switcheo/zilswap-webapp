@@ -5,7 +5,7 @@ import CurrencyLogo from "app/components/CurrencyLogo";
 import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
-import { BIG_ZERO, UserWhitelistTokenProps } from "app/utils/constants";
+import { BIG_ZERO } from "app/utils/constants";
 import useStatefulTask from "app/utils/useStatefulTask";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -19,8 +19,8 @@ type CurrencyListProps = BoxProps & {
   showContribution?: boolean;
   emptyStateLabel?: string;
   onSelectCurrency: (token: TokenInfo) => void;
-  updateUserWhitelist: (whitelisted: UserWhitelistTokenProps) => void;
-  userWhitelisted: UserWhitelistTokenProps;
+  onToggleUserToken: (token: TokenInfo) => void;
+  userTokens: string[];
 };
 
 const useStyles = makeStyles(theme => ({
@@ -47,10 +47,12 @@ const useStyles = makeStyles(theme => ({
   },
   addRemoveFont: {
     fontSize: "10px",
+    textDecoration: "underline",
   },
 }));
+
 const CurrencyList: React.FC<CurrencyListProps> = (props) => {
-  const { children, className, userWhitelisted, updateUserWhitelist, onSelectCurrency, emptyStateLabel, showContribution, search, tokens, ...rest } = props;
+  const { children, className, onSelectCurrency, onToggleUserToken, userTokens, emptyStateLabel, showContribution, search, tokens, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
@@ -86,22 +88,13 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
         }));
       }, `rueryTokenBalance-${token.address}`);
     }
-    if(!token.registered && !userWhitelisted[token.address]) return;
     onSelectCurrency(token)
   };
 
-  const addToUserWhiteList = (token: TokenInfo) => {
-    updateUserWhitelist({ ...userWhitelisted, [token.address]: token });
-  }
+  const onAddRemove = (e: React.MouseEvent, token: TokenInfo) => {
+    e.stopPropagation();
 
-  const removeFromUserWhiteList = (token: TokenInfo) => {
-    delete userWhitelisted[token.address]
-    updateUserWhitelist({ ...userWhitelisted });
-  }
-
-  const addOrRemove = (token: TokenInfo) => {
-    if(!userWhitelisted[token.address]) return <u  className={classes.addRemoveFont} onClick={() => addToUserWhiteList(token)}>Add</u>;
-    return <u className={classes.addRemoveFont} onClick={() => removeFromUserWhiteList(token)}>Remove</u>;
+    onToggleUserToken(token);
   }
 
   return (
@@ -126,7 +119,11 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
                 {!!token.name && (
                   <Typography color="textSecondary" variant="body2">{token.name}</Typography>
                 )}
-                {!token.registered && (addOrRemove(token))}
+                {!token.registered && (
+                  <Typography className={classes.addRemoveFont} onClick={(e) => onAddRemove(e, token)}>
+                    {userTokens.includes(token.address) ? "Remove" : "Add"}
+                  </Typography>
+                )}
               </Box>
             </Box>
             <Box flex={1}>

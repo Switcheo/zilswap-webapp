@@ -3,7 +3,7 @@ import { SearchOutlined } from "@material-ui/icons";
 import { DialogModal } from "app/components";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useTaskSubscriber } from "app/utils";
-import { BIG_ZERO, LoadingKeys, sortTokens, LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN, UserWhitelistTokenProps } from "app/utils/constants";
+import { BIG_ZERO, LoadingKeys, LocalStorageKeys, sortTokens } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
 import React, { useEffect, useState } from "react";
@@ -65,35 +65,45 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const classes = useStyles();
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const [search, setSearch] = useState("");
+  const [userTokens, setUserTokens] = useState<string[]>([]);
 
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const [loadingConnectWallet] = useTaskSubscriber(...LoadingKeys.connectWallet);
-  const [userWhitelisted, setUserWhitelisted] = useState<UserWhitelistTokenProps>(JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN) || "{}"));
 
   useEffect(() => {
-    if (!tokenState.tokens) return setTokens([]);
-    const tokens = [];
-    for (const address in tokenState.tokens!) {
-      const token = tokenState.tokens![address];
-      tokens.push(token);
-    }
+    const savedTokensData = localStorage.getItem(LocalStorageKeys.UserTokenList);
+    if (!savedTokensData) return;
 
-    setTokens(tokens.sort(sortTokens));
+    try {
+      const savedTokensAddresses = JSON.parse(savedTokensData) as string[];
+      const savedTokens = savedTokensAddresses.reduce((result, address) => {
+        if (tokenState.tokens[address])
+          result.push(address);
+
+        return result;
+      }, [] as string[]);
+
+      setUserTokens(savedTokens);
+    } catch (error) {
+      console.error("error loading saved tokens");
+      console.error(error);
+    }
   }, [tokenState.tokens]);
 
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN, JSON.stringify(userWhitelisted));
-  }, [{...userWhitelisted}]);
+    if (!tokenState.tokens) return setTokens([]);
+    setTokens(Object.values(tokenState.tokens).sort(sortTokens));
+  }, [tokenState.tokens]);
 
   const filterSearch = (token: TokenInfo): boolean => {
     const searchTerm = search.toLowerCase().trim();
     if (token.isZil && hideZil) return false;
     if (!token.isZil && !token.pool && hideNoPool) return false;
-    if(searchTerm === "" && !token.registered && !userWhitelisted[token.address]) return false;
+    if (searchTerm === "" && !token.registered && !userTokens.includes(token.address)) return false;
 
-    if(!token.registered && !userWhitelisted[token.address]) {
-      return token.address.toLowerCase() === searchTerm
+    if (!token.registered && !userTokens.includes(token.address)) {
+      return token.address.toLowerCase() === searchTerm;
     }
 
     return token.address.toLowerCase() === searchTerm ||
@@ -103,6 +113,18 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
 
   const getTokenFilter = () => {
     return (token: TokenInfo) => filterSearch(token)
+  };
+
+  const onToggleUserToken = (token: TokenInfo) => {
+    if (userTokens.indexOf(token.address) >= 0) {
+      userTokens.splice(userTokens.indexOf(token.address), 1);
+    } else {
+      userTokens.push(token.address);
+    }
+
+    const savedTokensData = JSON.stringify(userTokens);
+    localStorage.setItem(LocalStorageKeys.UserTokenList, savedTokensData);
+    setUserTokens([...userTokens]);
   };
 
   const sortResult = (lhs: TokenInfo, rhs: TokenInfo) => {
@@ -122,7 +144,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   };
 
   const filteredTokens = tokens.filter(getTokenFilter()).sort(sortResult);
-  
+
   return (
     <DialogModal header="Select a Token" {...rest} className={clsx(classes.root, className)}>
       <DialogContent>
@@ -153,19 +175,17 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
           </Box>
         )}
 
-        {(
-          <Box className={classes.currenciesContainer}>
-            <CurrencyList
-              tokens={filteredTokens}
-              updateUserWhitelist={setUserWhitelisted}
-              userWhitelisted={userWhitelisted}
-              search={search}
-              emptyStateLabel={`No tokens found for "${search}"`}
-              showContribution={showContribution}
-              onSelectCurrency={onSelectCurrency}
-              className={clsx(classes.currencies)} />
-          </Box>
-        )}
+        <Box className={classes.currenciesContainer}>
+          <CurrencyList
+            tokens={filteredTokens}
+            search={search}
+            emptyStateLabel={`No tokens found for "${search}"`}
+            showContribution={showContribution}
+            userTokens={userTokens}
+            onToggleUserToken={onToggleUserToken}
+            onSelectCurrency={onSelectCurrency}
+            className={clsx(classes.currencies)} />
+        </Box>
       </DialogContent>
     </DialogModal>
   )

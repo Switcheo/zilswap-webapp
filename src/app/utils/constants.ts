@@ -18,6 +18,7 @@ export const LocalStorageKeys = {
   PrivateKey: "zilswap:private-key",
   ZilPayConnected: "zilswap:zilpay-connected",
   Network: "zilswap:network",
+  UserTokenList: "zilswap:user-token-list",
 };
 
 export const PlaceholderStrings = {
@@ -56,11 +57,6 @@ export const STATS_REFRESH_RATE = 30000; // ms
 export const ZIL_TOKEN_NAME = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
 export const ZIL_DECIMALS = 12;
 
-export const LOCAL_STORAGE_KEY_WHITE_LIST_TOKEN = "zilswap:userwhitelisttoken";
-
-export type UserWhitelistTokenProps = {
-  [key:string]: TokenInfo
-};
 // ms
 export class PollIntervals {
   public static USDRates = 10000;
