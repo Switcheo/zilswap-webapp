@@ -36,10 +36,10 @@ const SocialLinkGroup: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: 
   const classes = useStyles();
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <Button href="https://discord.com/invite/Cpsxb2d">
+      <Button href="http://discord.gg/ESVqQ3qtvk">
         <Discord />
       </Button>
-      <Button href="https://twitter.com/SwitcheoNetwork">
+      <Button href="https://twitter.com/ZilSwap">
         <TwitterIcon />
       </Button>
       <Button href="https://medium.com/Switcheo">
