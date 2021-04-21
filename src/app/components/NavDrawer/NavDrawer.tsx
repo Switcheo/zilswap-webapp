@@ -78,7 +78,7 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
         {navigationConfig.map((navigation, index) => (
           <List key={index}>
             {navigation.pages.filter(navigation => navigation.show || claimEnabled).map((page, index) => (
-              <NavigationContent navigation={page} listIndex={index} />
+              <NavigationContent onClose={onClose} navigation={page} listIndex={index} />
             ))}
           </List>
         ))}

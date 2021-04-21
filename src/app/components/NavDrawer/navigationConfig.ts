@@ -54,7 +54,7 @@ const navigationConfig: NavigationOptions[] = [{
   }, {
     title: "Buy ZIL",
     href: "https://transak.com/",
-    external: true,
+    purchase: true,
     show: true,
     highlight: true
   }],

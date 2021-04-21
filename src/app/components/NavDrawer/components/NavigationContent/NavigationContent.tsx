@@ -7,6 +7,8 @@ import cls from "classnames";
 import React, { forwardRef, useState } from "react";
 import { NavLink as RouterLink } from "react-router-dom";
 import { NavigationPageOptions } from "../../types";
+import transakSDK from "@transak/transak-sdk";
+import { TRANSAK_API_KEY } from "app/utils/constants";
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1 }} >
@@ -46,12 +48,35 @@ type NavigationContentProps = {
   navigation: NavigationPageOptions,
   listIndex: number,
   secondary?: boolean,
+  onClose?: any
 }
 
 const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationContentProps) => {
-  const { navigation, secondary, listIndex } = props;
+  const { navigation, secondary, listIndex, onClose } = props;
   const classes = useStyles();
   const [expand, setExpand] = useState<any>(null);
+  const [widgetOpen, setWidgetOpen] = useState(false);
+
+  const initWidget = (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    setWidgetOpen(true);
+    if(typeof onClose === "function") onClose(ev);
+    let transak = new transakSDK({
+      apiKey: !process.env.NODE_ENV || process.env.NODE_ENV === "development" ? TRANSAK_API_KEY.DEVELOPMENT : TRANSAK_API_KEY.PRODUCTION ,  // Your API Key
+      environment: !process.env.NODE_ENV || process.env.NODE_ENV === "development" ? "STAGING" : "PRODUCTION", // STAGING/PRODUCTION
+      defaultCryptoCurrency: 'ZIL',
+      walletAddress: '', // Your customer's wallet address
+      themeColor: '0E828A', // App theme color
+      fiatCurrency: '', // INR/GBP
+      email: '', // Your customer's email address
+      redirectURL: '',
+      hostURL: window.location.origin,
+      widgetHeight: '600px',
+      widgetWidth: '450px'
+    });
+    
+    transak.init();
+    transak.on(transak.EVENTS?.TRANSAK_WIDGET_CLOSE, () =>  setWidgetOpen(false));
+  }
 
   return (
     <>
@@ -91,7 +116,20 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
           </Collapse>
         </>
       )}
-      {!navigation.external && !navigation.expand &&(
+      {navigation.purchase && (
+        <ListItem className={classes.listItem} disableGutters button>
+          <Button
+            className={cls({
+              [classes.highlightTitle]: navigation.highlight,
+              [classes.secondaryFont]: secondary
+            }, classes.buttonLeaf)}
+            onClick={(ev) => !widgetOpen && initWidget(ev)}
+          >
+            {navigation.title}
+          </Button>
+        </ListItem>
+      )}
+      {!navigation.external && !navigation.expand && !navigation.purchase && (
         <ListItem className={classes.listItem} disableGutters button>
           <Button
             className={cls({
