@@ -22,6 +22,7 @@ import { CONTRACTS } from "zilswap-sdk/lib/constants";
 import { ShowAdvanced } from "./components";
 import { ReactComponent as SwitchSVG } from "./swap-icon.svg";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
+import { useLocation } from "react-router";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -156,6 +157,11 @@ type CalculateAmountProps = {
   outAmount?: BigNumber;
 };
 
+interface initTokenProps {
+  inToken?: TokenInfo,
+  outToken?: TokenInfo
+} 
+
 const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
@@ -173,6 +179,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [reversedRate, setReversedRate] = useState(false);
+  const queryParams = new URLSearchParams(useLocation().search);
 
   useEffect(() => {
     if (!swapFormState.forNetwork) return
@@ -189,6 +196,31 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
     // eslint-disable-next-line
   }, [layoutState.network]);
+
+  useEffect(() => {
+    if(inToken || outToken) return;
+    const queryInput = queryParams.get("tokenIn");
+    const queryOutput = queryParams.get("tokenOut");
+    if(queryInput === queryOutput && queryOutput) return;
+    const newIntoken = queryInput ? tokenState.tokens[queryInput] : null;
+    const newOuttoken = queryOutput ? tokenState.tokens[queryOutput] : null;
+
+    if(newIntoken && newOuttoken) {
+      initNewToken({ inToken: newIntoken, outToken: newOuttoken });
+    } else if (newIntoken) {
+      initNewToken({ inToken: newIntoken });
+    } else if (newOuttoken)
+      initNewToken({ outToken: newOuttoken });
+
+    // eslint-disable-next-line
+  }, [tokenState.tokens]);
+
+  const initNewToken = (newTokens: initTokenProps) => {
+    dispatch(actions.Swap.update({
+      forNetwork: ZilswapConnector.network || null,
+      ...newTokens,
+    }));
+  }
 
   const getExchangeRateLabel = () => {
     let exchangeRate = swapFormState.expectedExchangeRate || BIG_ZERO;
