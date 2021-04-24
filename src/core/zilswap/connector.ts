@@ -133,7 +133,14 @@ export class ZilswapConnector {
         await ZilswapConnector.setState({
           network,
           wallet, observedTxs,
-          providerOrKey: wallet.addressInfo.privateKey,
+          providerOrKey: wallet.provider,
+        });
+        return;
+      case WalletConnectType.Zeeves:
+        await ZilswapConnector.setState({
+          network,
+          wallet, observedTxs,
+          providerOrKey: wallet.provider,
         });
         return;
       case WalletConnectType.Moonlet:

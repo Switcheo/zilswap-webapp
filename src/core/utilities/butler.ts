@@ -17,6 +17,7 @@ import {
 import {
   connectWalletPrivateKey,
   ConnectWalletResult,
+  connectWalletZeeves,
   connectWalletZilPay,
 } from "core/wallet";
 import { ZilswapConnector } from "core/zilswap";
@@ -165,6 +166,20 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     }
   };
 
+  const getConnectedZeeves = async() => {
+    const zeeves = (window as any).Zeeves;
+    try {
+      if (typeof zeeves !== "undefined") {
+        const result = await zeeves.getSession();
+        if (result) {
+          return zeeves;
+        }
+      }
+    } catch (e) {
+      console.error('Error when connecting Zeeves - ' + (e && e.stack ? e.stack : JSON.stringify(e)));
+    }
+  }
+
   const watchZilPayAccount = (zilPay: any) => {
     if (!zilPay || zilPayWatcherSubscribed) return;
 
@@ -265,6 +280,55 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     });
   };
 
+  const processWalletResult = async (walletResult: ConnectWalletResult | undefined) => {
+    const storeState: RootState = store.getState();
+    if (walletResult?.wallet) {
+      const { wallet } = walletResult;
+      const { network } = wallet;
+      await ZilswapConnector.connect({
+        wallet,
+        network,
+        observedTxs: storeState.transaction.observingTxs,
+      });
+      dispatch(actions.Layout.updateNetwork(network));
+      dispatch(actions.Wallet.update({ wallet, zilpay: true }));
+    } else {
+      await ZilswapConnector.initialise({
+        network: storeState.layout.network,
+      });
+      dispatch(
+        actions.Wallet.update({
+          wallet: undefined,
+          privateKey: undefined,
+          zilpay: undefined,
+        })
+      );
+    }
+
+    initZilswap();
+  }
+
+  const initWithZeeves = () => {
+    logger("butler", "initWithZeeves");
+    runInitWallet(async () => {
+      let walletResult: ConnectWalletResult | undefined;
+      const zeeves = await getConnectedZeeves();
+      if (zeeves) {
+        try {
+          walletResult = await connectWalletZeeves(zeeves);
+        } catch (e) {
+          dispatch(
+            actions.Layout.updateNotification({
+              type: "",
+              message: e.message,
+            })
+          );
+        }
+      }
+      await processWalletResult(walletResult);
+    });
+  }
+
   const initWithZilPay = () => {
     logger("butler", "initWithZilPay");
     runInitWallet(async () => {
@@ -283,32 +347,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
           );
         }
       }
-
-      const storeState: RootState = store.getState();
-      if (walletResult?.wallet) {
-        const { wallet } = walletResult;
-        const { network } = wallet;
-        await ZilswapConnector.connect({
-          wallet,
-          network,
-          observedTxs: storeState.transaction.observingTxs,
-        });
-        dispatch(actions.Layout.updateNetwork(network));
-        dispatch(actions.Wallet.update({ wallet, zilpay: true }));
-      } else {
-        await ZilswapConnector.initialise({
-          network: storeState.layout.network,
-        });
-        dispatch(
-          actions.Wallet.update({
-            wallet: undefined,
-            privateKey: undefined,
-            zilpay: undefined,
-          })
-        );
-      }
-
-      initZilswap();
+      await processWalletResult(walletResult);
     });
   };
 
@@ -337,11 +376,14 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
     const privateKey = localStorage.getItem(LocalStorageKeys.PrivateKey);
     const savedZilpay = localStorage.getItem(LocalStorageKeys.ZilPayConnected);
+    const savedZeeves = localStorage.getItem(LocalStorageKeys.ZeevesConnected);
 
     if (typeof privateKey === "string") {
       initWithPrivateKey(privateKey);
     } else if (savedZilpay === "true") {
       initWithZilPay();
+    } else if (savedZeeves === "true") {
+      initWithZeeves();
     } else {
       initWithoutWallet();
     }

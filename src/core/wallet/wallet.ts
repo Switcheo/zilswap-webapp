@@ -9,7 +9,8 @@ import { Network } from 'zilswap-sdk/lib/constants';
 import { ConnectWalletResult } from "./ConnectedWallet";
 import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
 import { ZilPayConnectedWallet } from "./ZilPayConnectedWallet";
-import { DefaultFallbackNetwork, ZilPayNetworkMap, RPCEndpoints } from "app/utils/constants";
+import { DefaultFallbackNetwork, ZilPayNetworkMap, RPCEndpoints, ZeevesNetworkMap } from "app/utils/constants";
+import { ZeevesConnectedWallet } from "./ZeevesConnectedWallet";
 
 export const parseBalanceResponse = (balanceRPCResponse: RPCResponse<any, string>) => {
   let balanceResult = null;
@@ -68,4 +69,29 @@ export const connectWalletZilPay = async (zilPay: any): Promise<ConnectWalletRes
   });
 
   return { wallet };
+};
+
+export const connectWalletZeeves = async (zeeves: any): Promise<ConnectWalletResult> => {
+  try {
+    const account = await zeeves.getSession();
+    const timestamp = moment();
+
+    const net = "mainnet"; //TODO: Add TestNet support for SDK
+    const network = ZeevesNetworkMap[net];
+    if (!network)
+      throw new Error(`Unsupported Zeeves network: ${net}`);
+  
+    const wallet = new ZeevesConnectedWallet({
+      network, 
+      timestamp,
+      zeeves: zeeves as WalletProvider,
+      bech32: account!.bech32,
+      byte20: account!.byte20
+    });
+  
+    return { wallet };
+  } catch(err) {
+    console.error(err.stack);
+    throw new Error("Error connecting Zeeves wallet");
+  }
 };

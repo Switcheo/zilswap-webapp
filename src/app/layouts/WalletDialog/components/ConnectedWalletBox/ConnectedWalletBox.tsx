@@ -139,7 +139,7 @@ const ConnectedWalletBox = (props: any) => {
       <ContrastBox className={classes.walletDetail}>
         <Icon className={classes.icon} />
         <Box className={classes.label}>
-          <Typography variant="h3">Connected to {wallet.type === WalletConnectType.ZilPay ? "ZilPay" : "Private Key"}</Typography>
+          <Typography variant="h3">Connected to {wallet.type === WalletConnectType.PrivateKey ? "Private Key" : WalletConnectType[wallet.type]}</Typography>
           <Box mt={"8px"} display="flex" flexDirection="row" alignItems="center">
             <Typography color="textSecondary" variant="body1">{is_xs_media ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
             <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network}`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>

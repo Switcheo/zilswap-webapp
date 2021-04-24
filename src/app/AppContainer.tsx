@@ -8,7 +8,7 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { renderRoutes } from "react-router-config";
 import { Router } from "react-router-dom";
-import { GoogleAnalytics, ScrollReset } from "./components";
+import { GoogleAnalytics, ScrollReset, Zeeves } from "./components";
 import routes from "./routes";
 import { startSagas } from "./saga";
 import { RootState } from "./store/types";
@@ -32,6 +32,7 @@ const AppContainer: React.FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
+      <Zeeves />
       <AppButler />
       <CssBaseline />
       <MuiPickersUtilsProvider utils={MomentUtils}>

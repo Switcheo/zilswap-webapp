@@ -2,10 +2,10 @@ import moment from "moment";
 import { WalletProvider } from "zilswap-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 
-export type ConnectOptionType = "zilpay" | "privateKey";
+export type ConnectOptionType = "zilpay" | "privateKey" | "zeeves";
 
 export enum WalletConnectType {
-  Moonlet, PrivateKey, ZilPay
+  Moonlet, PrivateKey, ZilPay, Zeeves
 };
 
 export type WalletAccountInfo = {

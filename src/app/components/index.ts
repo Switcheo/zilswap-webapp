@@ -9,6 +9,7 @@ export { default as ExpiryField } from "./ExpiryField";
 export { default as FancyButton } from "./FancyButton";
 export { default as FooterBar } from "./FooterBar";
 export { default as GoogleAnalytics } from "./GoogleAnalytics";
+export { default as Zeeves } from "./Zeeves";
 export { default as HelpInfo } from "./HelpInfo";
 export { default as KeyValueDisplay } from "./KeyValueDisplay";
 export { default as LoadableArea } from "./LoadableArea";
