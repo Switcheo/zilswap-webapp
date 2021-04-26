@@ -37,7 +37,7 @@ export const ZeevesNetworkMap = {
 } as { [index: string]: Network };
 
 export const RPCEndpoints: { [key in Network]: string } = {
-  [Network.MainNet]: 'https://api2.zilliqa.com',
+  [Network.MainNet]: 'https://api.zilliqa.com',
   [Network.TestNet]: 'https://dev-api.zilliqa.com'
 };
 
