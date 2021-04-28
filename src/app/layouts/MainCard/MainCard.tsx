@@ -4,9 +4,10 @@ import { LayoutState, RootState, SwapFormState, TokenInfo, TransactionState } fr
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import { PaperProps } from "material-ui";
-import React, { forwardRef } from "react";
+import React, { forwardRef, useRef, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { NavLink as RouterLink, useRouteMatch } from "react-router-dom";
+import { TokenGraph } from "app/components";
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1, flexBasis: 1 }} >
@@ -19,12 +20,34 @@ const CARD_BORDER_RADIUS = 4;
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     flex: 1,
-    padding: theme.spacing(8, 0, 2),
+    padding: theme.spacing(8, 8, 2),
+    justifyContent: "center",
     [theme.breakpoints.down("sm")]: {
       padding: theme.spacing(6, 0, 2),
+      display: "block",
     },
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(6, 2, 2),
+      display: "block",
+    },
+    [theme.breakpoints.up("md")]: {
+      display: "flex",
+      flexDirection: "row" 
+    },
+    [theme.breakpoints.down("md")]: {
+      display: "block",
+    }
+  },
+  graph: {
+    [theme.breakpoints.down("sm")]: {
+      height: 400,
+    },
+    [theme.breakpoints.down("xs")]: {
+    },
+    [theme.breakpoints.down("md")]: {
+      padding: theme.spacing(6, 0, 2),
+      flexDirection: "row",
+      width: "100%"
     },
   },
   card: {
@@ -88,6 +111,15 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
   const swapState = useSelector<RootState, SwapFormState>(state => state.swap);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
+  const boxRef = useRef<HTMLDivElement | null>(null);
+  const [boxHeight, setBoxHeight] = useState<number>(0);
+
+  useEffect(() => {
+    if(boxRef.current?.clientHeight) {
+      setBoxHeight(boxRef.current?.clientHeight || 0);
+    }
+      // eslint-disable-next-line
+  }, [boxRef.current?.clientHeight])
 
   const hasNotification =
     // show new pool warning
@@ -111,30 +143,37 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
       // show confirmed tx message
       transactionState.submittedTxs.length > 0);
 
+  const showGraph = (isSwap && (swapState.inToken || swapState.outToken))
+
   return (
     <Box className={classes.root}>
-      <Paper {...rest} className={classes.card}>
-        <Box className={classes.tabs}>
-          <Button
-            disableElevation
-            color="primary"
-            variant="contained"
-            className={cls(classes.tab, classes.tabCornerLeft)}
-            activeClassName={cls(classes.tabActive, { [classes.tabNoticeOpposite]: hasNotification })}
-            component={CustomRouterLink}
-            to="/swap">Swap</Button>
-          <Button
-            disableElevation
-            color="primary"
-            variant="contained"
-            className={cls(classes.tab, classes.tabCornerRight)}
-            activeClassName={cls(classes.tabActive, { [classes.tabNoticeOpposite]: hasNotification })}
-            component={CustomRouterLink}
-            to="/pool">Pool</Button>
-        </Box>
-        <Box>{children}</Box>
-      </Paper>
-    </Box>
+      <Box justifyContent="center">
+        <Paper {...{ ref:boxRef }} {...rest} className={classes.card}>
+          <Box className={classes.tabs}>
+            <Button
+              disableElevation
+              color="primary"
+              variant="contained"
+              className={cls(classes.tab, classes.tabCornerLeft)}
+              activeClassName={cls(classes.tabActive, { [classes.tabNoticeOpposite]: hasNotification })}
+              component={CustomRouterLink}
+              to="/swap">Swap</Button>
+            <Button
+              disableElevation
+              color="primary"
+              variant="contained"
+              className={cls(classes.tab, classes.tabCornerRight)}
+              activeClassName={cls(classes.tabActive, { [classes.tabNoticeOpposite]: hasNotification })}
+              component={CustomRouterLink}
+              to="/pool">Pool</Button>
+          </Box>
+          <Box>{children}</Box>
+        </Paper>
+      </Box>
+        {showGraph && (
+          <TokenGraph boxHeight={boxHeight} inToken={swapState.inToken} outToken={swapState.outToken} />
+        )}
+      </Box>
   );
 };
 

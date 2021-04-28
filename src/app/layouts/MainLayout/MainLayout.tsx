@@ -20,6 +20,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "row",
     paddingBottom: theme.spacing(8),
+    [theme.breakpoints.down("sm")]: {
+      display: "block",
+    }
   },
 }));
 
