@@ -22,6 +22,7 @@ import { CONTRACTS } from "zilswap-sdk/lib/constants";
 import { ShowAdvanced } from "./components";
 import { ReactComponent as SwitchSVG } from "./swap-icon.svg";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
+import { isAddressBlacklisted } from "core/utilities";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -135,6 +136,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& svg": {
       verticalAlign: "middle",
       fontSize: "inherit",
+    },
+    paddingBottom: theme.spacing(0.5),
+  },
+  errorText: {
+    color: theme.palette.colors.zilliqa.danger,
+    "& svg": {
+      verticalAlign: "middle",
+      fontSize: "inherit",
     }
   },
   errorMessage: {
@@ -167,16 +176,25 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
   const walletState = useSelector<RootState, WalletState>(store => store.wallet);
   const [runSwap, loading, error, clearSwapError] = useAsyncTask("swap");
+  // const [runBlacklist] = useAsyncTask("initBlacklist");
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
   const [errorRecipientAddress, setErrorRecipientAddress] = useState<string | undefined>();
-
+  const receivingAddrBlacklisted = isAddressBlacklisted(swapFormState.recipientAddress);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [reversedRate, setReversedRate] = useState(false);
 
+  // useEffect(() => {
+  //   runBlacklist(async () => {
+  //     await initBlacklistedAddress();
+  //   })
+  //   return () => {};
+  //   // eslint-disable-next-line
+  // }, [])
+
   useEffect(() => {
     if (!swapFormState.forNetwork) return
-
+  
     // clear form if network changed
     if (swapFormState.forNetwork !== layoutState.network) {
       setFormState({
@@ -597,6 +615,11 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
                 value={swapFormState.recipientAddress || ""}
                 placeholder={PlaceholderStrings.ZilAddress}
                 onChange={onRecipientAddressChange} />
+              {receivingAddrBlacklisted && (
+                <Text className={classes.errorText}>
+                  <WarningRounded color="error" />  Address appears to be a known CEX/DEX address. Please ensure you have entered a correct address!
+                </Text>
+              )}
               <Text className={classes.warningText}>
                 <WarningRounded color="inherit" />  Do not send tokens directly to an exchange address as it may result in failure to receive your fund.
               </Text>
@@ -617,7 +640,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onClickTxApprove={onApproveTx}
           variant="contained"
           color="primary"
-          disabled={!inToken || !outToken}
+          disabled={!inToken || !outToken || receivingAddrBlacklisted}
           onClick={onSwap}>
           Swap
         </FancyButton>
