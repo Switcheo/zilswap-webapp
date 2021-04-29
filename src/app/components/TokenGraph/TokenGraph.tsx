@@ -10,6 +10,7 @@ import { useAsyncTask } from "app/utils";
 import { ReactComponent as SwapSVG } from "./components/swap.svg";
 import BigNumber from "bignumber.js";
 import { useSelector } from "react-redux";
+import { Skeleton } from "@material-ui/lab";
 
 interface Props extends BoxProps {
   inToken?: TokenInfo,
@@ -234,7 +235,9 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
   }, [inTokenRates, outTokenRates])
 
   useEffect(() => {
-    if(!chart) return
+    if(!chart) {
+      return;
+    }
     const chartOptions = chart.options()
     chartOptions.layout.textColor = themeType === "dark" ? "#F7FAFA" : "#313131";
     chartOptions.grid.vertLines.color = themeType === 'dark' ? 'rgba(220, 220, 220, 0.1)' : 'rgba(220, 220, 220, 0.8)';
@@ -291,7 +294,9 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     } else {
       inRates.forEach((rate) => {
         outRates.forEach((outRate) => {
-          if (Date.parse(rate.time) !== Date.parse(outRate.time)) return ;
+          if (Date.parse(rate.time) !== Date.parse(outRate.time)) {
+            return;
+          }
           else {
             returnResult.push({
               time: (Date.parse(rate.time)/1000) as UTCTimestamp,
@@ -311,12 +316,18 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
   }
 
   const setIntervalAndPeriod = (interval?: string, period?: string) => {
-    if(interval) setCurrentInterval(interval);
-    if(period) setCurrentPeriod(period);
+    if(interval) {
+      setCurrentInterval(interval);
+    }
+    if(period) {
+      setCurrentPeriod(period);
+    }
   }
 
   const getColor = (interval: string) => {
-    if(interval === currentInterval) return "default";
+    if(interval === currentInterval) {
+      return "default";
+    }
     return "inherit"
   }
 
@@ -334,26 +345,41 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
 
   return (
      <Box {...{ ref:containerRef }} {...rest} className={cls(classes.root, className)}>
-        <Box className={classes.stats}>
-          <Box className={classes.label}>
-            <SwapSVG className={classes.swapSvg} /><Typography className={classes.textPadding} variant="h3">{" "}{inToken?.symbol || "ZIL"} / {outToken?.symbol || "ZIL"}</Typography>
-          </Box>
-          <Typography variant="h1">{ new BigNumber(currentRate?.close || 0).toFixed(6)|| "0.00"}</Typography>
-          <Box className={classes.buttonGroup}>
-            <Typography className={growth > 0 ? classes.priceUp : classes.priceDown}>{getRates()}{`(${new BigNumber(growth).toFixed(8)}%)`}</Typography><Typography>Past 1 Hour</Typography>
-            <Box flexGrow="1" />
-            <Box display="flex" justifyContent="flex-end">
-              <ButtonGroup variant="text">
-                {/* <Button color={getColor("1month")} onClick={() => setIntervalAndPeriod("1month", "24month")} className={classes.noBorder}><Typography>1M</Typography></Button> */}
-                <Button color={getColor("1w")} onClick={() => setIntervalAndPeriod("1w", "1y")} className={classes.noBorder}><Typography>1W</Typography></Button>
-                <Button color={getColor("1d")} onClick={() => setIntervalAndPeriod("1d", "8w")} className={classes.noBorder}><Typography>1D</Typography></Button>
-                <Button color={getColor("1h")} onClick={() => setIntervalAndPeriod("1h", "2w")} className={classes.noBorder}><Typography>1H</Typography></Button>
-                <Button color={getColor("15m")}  onClick={() => setIntervalAndPeriod("15m", "1w")} className={classes.noBorder}><Typography>15M</Typography></Button>
-              </ButtonGroup>
-            </Box>
-          </Box>
+      <Box className={classes.stats}>
+        <Box className={classes.label}>
+          <SwapSVG className={classes.swapSvg} /><Typography className={classes.textPadding} variant="h3">{" "}{inToken?.symbol || "ZIL"} / {outToken?.symbol || "ZIL"}</Typography>
         </Box>
+        {(inTokenRates || outTokenRates) && (     
+          <>
+            <Typography variant="h1">{ new BigNumber(currentRate?.close || 0).toFixed(6)|| "0.00"}</Typography>
+            <Box className={classes.buttonGroup}>
+              <Typography className={growth > 0 ? classes.priceUp : classes.priceDown}>{getRates()}{` (${new BigNumber(growth).toFixed(8)}%)`}</Typography><Typography>Past 1 Hour</Typography>
+              <Box flexGrow="1" />
+              <Box display="flex" justifyContent="flex-end">
+                <ButtonGroup variant="text">
+                  {/* <Button color={getColor("1month")} onClick={() => setIntervalAndPeriod("1month", "24month")} className={classes.noBorder}><Typography>1M</Typography></Button> */}
+                  <Button color={getColor("1w")} onClick={() => setIntervalAndPeriod("1w", "1y")} className={classes.noBorder}><Typography>1W</Typography></Button>
+                  <Button color={getColor("1d")} onClick={() => setIntervalAndPeriod("1d", "8w")} className={classes.noBorder}><Typography>1D</Typography></Button>
+                  <Button color={getColor("1h")} onClick={() => setIntervalAndPeriod("1h", "2w")} className={classes.noBorder}><Typography>1H</Typography></Button>
+                  <Button color={getColor("15m")}  onClick={() => setIntervalAndPeriod("15m", "1w")} className={classes.noBorder}><Typography>15M</Typography></Button>
+                </ButtonGroup>
+              </Box>
+            </Box>
+          </>     
+        )}
+        {(!inTokenRates && !outTokenRates) && (
+          <>
+            <Skeleton variant="text" />
+            <Skeleton className={classes.buttonGroup}  variant="rect" />
+          </>
+        )}
+      </Box>
+      {(inTokenRates || outTokenRates) && (
         <Box component={Paper} className={classes.graph} {...{ ref:graphRef }}></Box>
+      )}
+      {(!inTokenRates && !outTokenRates) && (
+        <Skeleton  className={classes.graph}  variant="rect" />
+      )}
      </Box>
   );
 };
