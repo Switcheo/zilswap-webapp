@@ -157,7 +157,7 @@ type CalculateAmountProps = {
   outAmount?: BigNumber;
 };
 
-interface initTokenProps {
+interface InitTokenProps {
   inToken?: TokenInfo,
   outToken?: TokenInfo
 } 
@@ -198,24 +198,29 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   }, [layoutState.network]);
 
   useEffect(() => {
-    if(inToken || outToken) return;
+    if (inToken || outToken) {
+      return;
+    }
     const queryInput = queryParams.get("tokenIn");
     const queryOutput = queryParams.get("tokenOut");
-    if(queryInput === queryOutput && queryOutput) return;
+    if (queryInput === queryOutput && queryOutput) {
+      return;
+    }
     const newIntoken = queryInput ? tokenState.tokens[queryInput] : null;
     const newOuttoken = queryOutput ? tokenState.tokens[queryOutput] : null;
 
-    if(newIntoken && newOuttoken) {
+    if (newIntoken && newOuttoken) {
       initNewToken({ inToken: newIntoken, outToken: newOuttoken });
     } else if (newIntoken) {
       initNewToken({ inToken: newIntoken });
-    } else if (newOuttoken)
+    } else if (newOuttoken) {
       initNewToken({ outToken: newOuttoken });
+    }
 
     // eslint-disable-next-line
   }, [tokenState.tokens]);
 
-  const initNewToken = (newTokens: initTokenProps) => {
+  const initNewToken = (newTokens: InitTokenProps) => {
     dispatch(actions.Swap.update({
       forNetwork: ZilswapConnector.network || null,
       ...newTokens,
