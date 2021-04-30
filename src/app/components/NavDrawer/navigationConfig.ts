@@ -32,8 +32,8 @@ const navigationConfig: NavigationOptions[] = [{
     title: "More",
     expand: true,
     items: [{
-      title: "ZilStream",
-      href: "https://zilstream.com",
+      title: "Developer",
+      href: "https://docs.zilswap.org/#/smart-contract",
       external: true,
       show: true,
     }, {
@@ -47,8 +47,8 @@ const navigationConfig: NavigationOptions[] = [{
       external: true,
       show: true,
     }, {
-      title: "Developer",
-      href: "https://docs.zilswap.org/#/smart-contract",
+      title: "ZilStream",
+      href: "https://zilstream.com",
       external: true,
       show: true,
     }]
