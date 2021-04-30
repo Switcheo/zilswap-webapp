@@ -10,19 +10,10 @@ const navigationConfig: NavigationOptions[] = [{
     href: "/pools",
     badge: "New",
   }, {
-    title: "Docs",
-    expand: true,
-    items: [{
-      title: "Guide",
-      href: "https://zilswap.gitbook.io/zilswap/",
-      external: true,
-      show: true,
-    }, {
-      title: "API Docs",
-      href: "https://docs.zilswap.org/#/smart-contract",
-      external: true,
-      show: true,
-    }]
+    title: "Guide",
+    href: "https://zilswap.gitbook.io/zilswap/",
+    external: true,
+    show: true,
   }, {
     title: "Governance",
     expand: true,
@@ -41,20 +32,30 @@ const navigationConfig: NavigationOptions[] = [{
     title: "More",
     expand: true,
     items: [{
-      title: "ZilStream",
-      href: "https://zilstream.com",
+      title: "Developer",
+      href: "https://docs.zilswap.org/#/smart-contract",
       external: true,
       show: true,
     }, {
       title: "Github",
+      href: "https://github.com/Switcheo/zilswap",
+      external: true,
+      show: true,
+    }, {
+      title: "SDK",
       href: "https://github.com/Switcheo/zilswap-sdk",
+      external: true,
+      show: true,
+    }, {
+      title: "ZilStream",
+      href: "https://zilstream.com",
       external: true,
       show: true,
     }]
   }, {
     title: "Buy ZIL",
     href: "https://transak.com/",
-    external: true,
+    purchase: true,
     show: true,
     highlight: true
   }],
