@@ -214,7 +214,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
           minMove: (ratesData && ratesData?.[0].low < 0.01) ? 0.00001 : 0.01
         }
       })
-
+      
       newSeries.setData(ratesData);
       setChart(newChart);
       setSeries(newSeries);
@@ -386,12 +386,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
           </>
         )}
       </Box>
-      {(inTokenRates || outTokenRates) && (
-        <Box component={Paper} className={classes.graph} {...{ ref: graphRef }}></Box>
-      )}
-      {(!inTokenRates && !outTokenRates) && (
-        <Skeleton className={classes.graph} variant="rect" />
-      )}
+      <Box component={Paper} className={classes.graph} {...{ ref: graphRef }}></Box>
     </Box>
   );
 };
