@@ -122,10 +122,10 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     const filter: TimeFilter = { period: currentPeriod, interval: currentInterval };
 
     runGetTokenRates(async () => {
-      if(inToken && !inToken.isZil) {
+      if((inToken && !inToken.isZil) || (inToken?.isZil && !outToken)) {
         inRates = await getZilStreamTokenRates(inToken.symbol, filter);
       } 
-      if(outToken && !outToken.isZil) {
+      if((outToken && !outToken.isZil) || (outToken?.isZil && !inToken)) {
         outRates = await getZilStreamTokenRates(outToken.symbol, filter);
       }
       setInTokenRate((inToken && !inToken.isZil) ? tokenState.prices[inToken.symbol] : undefined);
@@ -138,10 +138,10 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     let inStats: ZilStreamRates[], outStats: ZilStreamRates[];
     let changes: number;
     runGetTokenStats(async () => {
-      if(inToken && !inToken.isZil) {
+      if((inToken && !inToken.isZil) || (inToken?.isZil && !outToken)) {
         inStats = await getZilStreamTokenRates(inToken.symbol, statsFilter);
       }
-      if(outToken && !outToken.isZil) {
+      if((outToken && !outToken.isZil) || (outToken?.isZil && !inToken)) {
         outStats = await getZilStreamTokenRates(outToken.symbol, statsFilter);
       }
       if(inStats?.length && outStats?.length) {
@@ -272,15 +272,27 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
   const calculateData = (inRates?: ZilStreamRates[], outRates?: ZilStreamRates[]): CandleDataPoint[] => {
     let returnResult = new Array<CandleDataPoint>();
     if(!inRates) {
-      outRates?.forEach(rate => {
-        returnResult.push({
-          time: (Date.parse(rate.time)/1000) as UTCTimestamp,
-          low: 1 / rate.low,
-          high: 1 / rate.high,
-          open: 1 / rate.open,
-          close: 1 / rate.close,
+      if(outToken?.isZil) {
+        outRates?.forEach(rate => {
+          returnResult.push({
+            time: (Date.parse(rate.time)/1000) as UTCTimestamp,
+            low: rate.low,
+            high: rate.high,
+            open: rate.open,
+            close: rate.close,
+          })
         })
-      })
+      } else {
+        outRates?.forEach(rate => {
+          returnResult.push({
+            time: (Date.parse(rate.time)/1000) as UTCTimestamp,
+            low: 1 / rate.low,
+            high: 1 / rate.high,
+            open: 1 / rate.open,
+            close: 1 / rate.close,
+          })
+        })
+      }
     } else if (!outRates) {
       inRates?.forEach(rate => {
         returnResult.push({
