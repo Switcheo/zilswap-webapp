@@ -22,9 +22,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flex: 1,
     padding: theme.spacing(8, 8, 2),
     justifyContent: "center",
-    [theme.breakpoints.up("md")]: {
-      display: "flex",
-      flexDirection: "row" 
+    display: "flex",
+    flexDirection: "row",
+    [theme.breakpoints.down("sm")]: {
+      padding: theme.spacing(6, 0, 2),
+    },
+    [theme.breakpoints.down("xs")]: {
+      padding: theme.spacing(6, 2, 2),
     },
   },
   graph: {
