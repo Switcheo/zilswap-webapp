@@ -22,24 +22,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flex: 1,
     padding: theme.spacing(8, 8, 2),
     justifyContent: "center",
-    [theme.breakpoints.down("sm")]: {
-      padding: theme.spacing(6, 0, 2),
-      display: "flex",
-      flexDirection: "column-reverse",
-    },
-    [theme.breakpoints.down("xs")]: {
-      padding: theme.spacing(6, 2, 2),
-      display: "flex",
-      flexDirection: "column-reverse",
-    },
     [theme.breakpoints.up("md")]: {
       display: "flex",
       flexDirection: "row" 
     },
-    [theme.breakpoints.down("md")]: {
-      display: "flex",
-      flexDirection: "column-reverse",
-    }
   },
   graph: {
     [theme.breakpoints.down("sm")]: {

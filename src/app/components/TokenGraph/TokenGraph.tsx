@@ -36,8 +36,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     overflow: "hidden",
     height: "auto",
     margin: "0 20px",
-    width: "100%",
     maxWidth: 746,
+    flex: 1,
     [theme.breakpoints.down("md")]: {
       margin: "0 auto",
       marginTop: theme.spacing(2),

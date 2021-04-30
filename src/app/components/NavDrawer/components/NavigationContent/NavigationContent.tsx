@@ -57,7 +57,8 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
 
   const initWidget = (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setWidgetOpen(true);
-    if (typeof onClose === "function") onClose(ev);
+    onClose?.(ev);
+
     let transak = new transakSDK({
       apiKey: process.env.NODE_ENV === "production" ? TRANSAK_API_KEY.PRODUCTION : TRANSAK_API_KEY.DEVELOPMENT,  // Your API Key
       environment: process.env.NODE_ENV === "production" ? "PRODUCTION" : "STAGING", // STAGING/PRODUCTION

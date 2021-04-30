@@ -59,8 +59,8 @@ export const ZWAP_TOKEN_NAME = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
 export const ZIL_DECIMALS = 12;
 
 export const TRANSAK_API_KEY = {
-  DEVELOPMENT: "00e2800b-5150-4a39-ba2f-5cd8421291b3",
-  PRODUCTION: "7f3a221c-e31c-4430-b311-b3a275cc7af7",
+  DEVELOPMENT: process.env.REACT_APP_TRANSAK_DEV,
+  PRODUCTION: process.env.REACT_APP_TRANSAK_PROD,
 }
 
 // ms
