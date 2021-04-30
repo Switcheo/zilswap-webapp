@@ -83,7 +83,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   swapSvg: {
     paddingTop: "2px",
-  }, 
+  },
   buttonGroup: {
     display: "flex",
     marginTop: theme.spacing(1),
@@ -109,8 +109,8 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
   const [currentInterval, setCurrentInterval] = useState(DEFAULT_INTERVAL);
   const [currentPeriod, setCurrentPeriod] = useState(DEFAULT_PERIOD);
   const [growth, setGrowth] = useState(0);
-  const [chart, setChart] = useState<IChartApi|null>(null);
-  const [series, setSeries] = useState<ISeriesApi<"Candlestick">|null>(null);
+  const [chart, setChart] = useState<IChartApi | null>(null);
+  const [series, setSeries] = useState<ISeriesApi<"Candlestick"> | null>(null);
   const themeType = useSelector<RootState, string>(state => state.preference.theme);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
@@ -122,10 +122,10 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     const filter: TimeFilter = { period: currentPeriod, interval: currentInterval };
 
     runGetTokenRates(async () => {
-      if((inToken && !inToken.isZil) || (inToken?.isZil && !outToken)) {
+      if ((inToken && !inToken.isZil) || (inToken?.isZil && !outToken)) {
         inRates = await getZilStreamTokenRates(inToken.symbol, filter);
-      } 
-      if((outToken && !outToken.isZil) || (outToken?.isZil && !inToken)) {
+      }
+      if ((outToken && !outToken.isZil) || (outToken?.isZil && !inToken)) {
         outRates = await getZilStreamTokenRates(outToken.symbol, filter);
       }
       setInTokenRate((inToken && !inToken.isZil) ? tokenState.prices[inToken.symbol] : undefined);
@@ -138,23 +138,23 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     let inStats: ZilStreamRates[], outStats: ZilStreamRates[];
     let changes: number;
     runGetTokenStats(async () => {
-      if((inToken && !inToken.isZil) || (inToken?.isZil && !outToken)) {
+      if ((inToken && !inToken.isZil) || (inToken?.isZil && !outToken)) {
         inStats = await getZilStreamTokenRates(inToken.symbol, statsFilter);
       }
-      if((outToken && !outToken.isZil) || (outToken?.isZil && !inToken)) {
+      if ((outToken && !outToken.isZil) || (outToken?.isZil && !inToken)) {
         outStats = await getZilStreamTokenRates(outToken.symbol, statsFilter);
       }
-      if(inStats?.length && outStats?.length) {
+      if (inStats?.length && outStats?.length) {
         if (inStats.length < 60 || outStats.length < 60) {
           return;
         }
         changes = ((inStats[0].close / outStats[0].close) - (inStats[59].close / outStats[59].close)) / (inStats[59].close / outStats[59].close);
-      } else if (inStats.length) {
+      } else if (inStats?.length) {
         if (inStats.length < 60) {
           return;
         }
         changes = (inStats[0].close - inStats[59].close) / inStats[59].close;
-      } else if (outStats.length) {
+      } else if (outStats?.length) {
         if (outStats.length < 60) {
           return;
         }
@@ -166,7 +166,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
   }, [inToken, outToken, currentInterval]);
 
   useEffect(() => {
-    if(boxHeight && containerRef.current) {
+    if (boxHeight && containerRef.current) {
       containerRef.current.style.height = boxHeight + "px";
       updateSize()
     }
@@ -174,12 +174,12 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
   }, [boxHeight])
 
   useEffect(() => {
-    if(!inTokenRates && !outTokenRates) 
+    if (!inTokenRates && !outTokenRates)
       return;
     let ratesData = calculateData(inTokenRates || undefined, outTokenRates || undefined);
-    if(graphRef.current && !chart) {
+    if (graphRef.current && !chart) {
       const newChart = createChart(graphRef.current, {
-        width: graphRef.current.clientWidth, 
+        width: graphRef.current.clientWidth,
         height: graphRef.current.clientHeight,
         layout: {
           backgroundColor: 'rgba(0,0,0, 0.0)',
@@ -211,7 +211,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
       const newSeries = newChart.addCandlestickSeries({
         priceFormat: {
           precision: (ratesData && ratesData?.[0].low < 0.01) ? 5 : 2,
-          minMove: (ratesData && ratesData?.[0].low < 0.01)? 0.00001 : 0.01
+          minMove: (ratesData && ratesData?.[0].low < 0.01) ? 0.00001 : 0.01
         }
       })
 
@@ -221,11 +221,11 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
 
       window.addEventListener('resize', updateSize)
     }
-    if(chart && series) {
+    if (chart && series) {
       series.applyOptions({
         priceFormat: {
           precision: (ratesData && ratesData?.[0].low < 0.01) ? 5 : 2,
-          minMove: (ratesData && ratesData?.[0].low < 0.01)? 0.00001 : 0.01
+          minMove: (ratesData && ratesData?.[0].low < 0.01) ? 0.00001 : 0.01
         }
       })
       series.setData(ratesData);
@@ -235,7 +235,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
   }, [inTokenRates, outTokenRates])
 
   useEffect(() => {
-    if(!chart) {
+    if (!chart) {
       return;
     }
     const chartOptions = chart.options()
@@ -247,7 +247,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
   }, [themeType])
 
   const updateSize = () => {
-    if(graphRef.current) {
+    if (graphRef.current) {
       chart?.resize(graphRef.current.clientWidth, graphRef.current.clientHeight);
       setVisibleRange();
     }
@@ -264,18 +264,18 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     }
 
     chart?.timeScale().setVisibleRange({
-      from: ((new Date()).getTime() / 1000) - (numberOfDays*24*60*60) as UTCTimestamp,
+      from: ((new Date()).getTime() / 1000) - (numberOfDays * 24 * 60 * 60) as UTCTimestamp,
       to: (new Date()).getTime() / 1000 as UTCTimestamp,
     })
   }
 
   const calculateData = (inRates?: ZilStreamRates[], outRates?: ZilStreamRates[]): CandleDataPoint[] => {
     let returnResult = new Array<CandleDataPoint>();
-    if(!inRates) {
-      if(outToken?.isZil) {
+    if (!inRates) {
+      if (outToken?.isZil) {
         outRates?.forEach(rate => {
           returnResult.push({
-            time: (Date.parse(rate.time)/1000) as UTCTimestamp,
+            time: (Date.parse(rate.time) / 1000) as UTCTimestamp,
             low: rate.low,
             high: rate.high,
             open: rate.open,
@@ -285,7 +285,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
       } else {
         outRates?.forEach(rate => {
           returnResult.push({
-            time: (Date.parse(rate.time)/1000) as UTCTimestamp,
+            time: (Date.parse(rate.time) / 1000) as UTCTimestamp,
             low: 1 / rate.low,
             high: 1 / rate.high,
             open: 1 / rate.open,
@@ -296,7 +296,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     } else if (!outRates) {
       inRates?.forEach(rate => {
         returnResult.push({
-          time: (Date.parse(rate.time)/1000) as UTCTimestamp,
+          time: (Date.parse(rate.time) / 1000) as UTCTimestamp,
           low: rate.low,
           high: rate.high,
           open: rate.open,
@@ -311,7 +311,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
           }
           else {
             returnResult.push({
-              time: (Date.parse(rate.time)/1000) as UTCTimestamp,
+              time: (Date.parse(rate.time) / 1000) as UTCTimestamp,
               low: rate.low / outRate.low,
               high: rate.high / outRate.high,
               open: rate.open / outRate.open,
@@ -322,31 +322,31 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
       })
       returnResult.filter(rat => !!rat);
     }
-    returnResult.sort((a,b) => (a.time > b.time) ? 1 : -1);
+    returnResult.sort((a, b) => (a.time > b.time) ? 1 : -1);
     setCurrentRate(returnResult[returnResult.length - 1]);
     return returnResult;
   }
 
   const setIntervalAndPeriod = (interval?: string, period?: string) => {
-    if(interval) {
+    if (interval) {
       setCurrentInterval(interval);
     }
-    if(period) {
+    if (period) {
       setCurrentPeriod(period);
     }
   }
 
   const getColor = (interval: string) => {
-    if(interval === currentInterval) {
+    if (interval === currentInterval) {
       return "default";
     }
     return "inherit"
   }
 
   const getRates = () => {
-    if(inTokenRate && outTokenRate) {
+    if (inTokenRate && outTokenRate) {
       return "$" + inTokenRate.div(outTokenRate).toFixed(2);
-    } else if(inTokenRate) {
+    } else if (inTokenRate) {
       return "$" + inTokenRate.toFixed(2);
     } else if (outTokenRate) {
       return "$" + new BigNumber(1).div(outTokenRate).toFixed(2);
@@ -356,14 +356,14 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
   }
 
   return (
-     <Box {...{ ref:containerRef }} {...rest} className={cls(classes.root, className)}>
+    <Box {...{ ref: containerRef }} {...rest} className={cls(classes.root, className)}>
       <Box className={classes.stats}>
         <Box className={classes.label}>
           <SwapSVG className={classes.swapSvg} /><Typography className={classes.textPadding} variant="h3">{" "}{inToken?.symbol || "ZIL"} / {outToken?.symbol || "ZIL"}</Typography>
         </Box>
-        {(inTokenRates || outTokenRates) && (     
+        {(inTokenRates || outTokenRates) && (
           <>
-            <Typography variant="h1">{ new BigNumber(currentRate?.close || 0).toFixed(6)|| "0.00"}</Typography>
+            <Typography variant="h1">{new BigNumber(currentRate?.close || 0).toFixed(6) || "0.00"}</Typography>
             <Box className={classes.buttonGroup}>
               <Typography className={growth > 0 ? classes.priceUp : classes.priceDown}>{getRates()}{` (${new BigNumber(growth).toFixed(8)}%)`}</Typography><Typography>Past 1 Hour</Typography>
               <Box flexGrow="1" />
@@ -373,26 +373,26 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
                   <Button color={getColor("1w")} onClick={() => setIntervalAndPeriod("1w", "1y")} className={classes.noBorder}><Typography>1W</Typography></Button>
                   <Button color={getColor("1d")} onClick={() => setIntervalAndPeriod("1d", "8w")} className={classes.noBorder}><Typography>1D</Typography></Button>
                   <Button color={getColor("1h")} onClick={() => setIntervalAndPeriod("1h", "2w")} className={classes.noBorder}><Typography>1H</Typography></Button>
-                  <Button color={getColor("15m")}  onClick={() => setIntervalAndPeriod("15m", "1w")} className={classes.noBorder}><Typography>15M</Typography></Button>
+                  <Button color={getColor("15m")} onClick={() => setIntervalAndPeriod("15m", "1w")} className={classes.noBorder}><Typography>15M</Typography></Button>
                 </ButtonGroup>
               </Box>
             </Box>
-          </>     
+          </>
         )}
         {(!inTokenRates && !outTokenRates) && (
           <>
             <Skeleton variant="text" />
-            <Skeleton className={classes.buttonGroup}  variant="rect" />
+            <Skeleton className={classes.buttonGroup} variant="rect" />
           </>
         )}
       </Box>
       {(inTokenRates || outTokenRates) && (
-        <Box component={Paper} className={classes.graph} {...{ ref:graphRef }}></Box>
+        <Box component={Paper} className={classes.graph} {...{ ref: graphRef }}></Box>
       )}
       {(!inTokenRates && !outTokenRates) && (
-        <Skeleton  className={classes.graph}  variant="rect" />
+        <Skeleton className={classes.graph} variant="rect" />
       )}
-     </Box>
+    </Box>
   );
 };
 
