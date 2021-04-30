@@ -12,7 +12,7 @@ import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { strings, useAsyncTask, useBlacklistAddress, useMoneyFormatter } from "app/utils";
-import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, PlaceholderStrings, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, PlaceholderStrings, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
@@ -211,20 +211,22 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       return;
     }
     const queryInput = queryParams.get("tokenIn");
-    const queryOutput = queryParams.get("tokenOut");
+    const queryOutput = queryParams.get("tokenOut") ?? ZWAP_TOKEN_NAME;
     if (queryInput === queryOutput && queryOutput) {
       return;
     }
     const newIntoken = queryInput ? tokenState.tokens[queryInput] : null;
     const newOuttoken = queryOutput ? tokenState.tokens[queryOutput] : null;
 
-    if (newIntoken && newOuttoken) {
-      initNewToken({ inToken: newIntoken, outToken: newOuttoken });
-    } else if (newIntoken) {
-      initNewToken({ inToken: newIntoken });
-    } else if (newOuttoken) {
-      initNewToken({ outToken: newOuttoken });
-    }
+    initNewToken({
+      ...newIntoken && {
+        inToken: newIntoken,
+      },
+
+      ...newOuttoken && {
+        outToken: newOuttoken,
+      },
+    });
 
     // eslint-disable-next-line
   }, [tokenState.tokens]);
