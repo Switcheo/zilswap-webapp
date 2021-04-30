@@ -44,15 +44,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }))
 
 type NavigationContentProps = {
-  className?: any,
   navigation: NavigationPageOptions,
-  listIndex: number,
   secondary?: boolean,
   onClose?: any
 }
 
 const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationContentProps) => {
-  const { navigation, secondary, listIndex, onClose } = props;
+  const { navigation, secondary, onClose } = props;
   const classes = useStyles();
   const [expand, setExpand] = useState<any>(null);
   const [widgetOpen, setWidgetOpen] = useState(false);
@@ -81,7 +79,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
   return (
     <>
       {navigation.external && navigation.href && (
-        <ListItem className={classes.listItem} disableGutters button key={listIndex}>
+        <ListItem className={classes.listItem} disableGutters button>
           <Button
             className={cls({
               [classes.highlightTitle]: navigation.highlight,
@@ -110,7 +108,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
           <Collapse in={expand === navigation.title}>
             <List className={classes.listItem}>
               {navigation.items && navigation.items.map((item: NavigationPageOptions, index: number) => (
-                <NavigationContent navigation={item} listIndex={index} secondary={true} />
+                <NavigationContent key={index} navigation={item} secondary={true} />
               ))}
             </List>
           </Collapse>

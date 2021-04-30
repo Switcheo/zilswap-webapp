@@ -75,10 +75,10 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
         </Button>
       </Box>
       <Box className={classes.content}>
-        {navigationConfig.map((navigation, index) => (
-          <List key={index}>
+        {navigationConfig.map((navigation, listIndex) => (
+          <List key={listIndex}>
             {navigation.pages.filter(navigation => navigation.show || claimEnabled).map((page, index) => (
-              <NavigationContent onClose={onClose} navigation={page} listIndex={index} />
+              <NavigationContent key={index} navigation={page} />
             ))}
           </List>
         ))}
