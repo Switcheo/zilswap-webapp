@@ -24,18 +24,21 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     justifyContent: "center",
     [theme.breakpoints.down("sm")]: {
       padding: theme.spacing(6, 0, 2),
-      display: "block",
+      display: "flex",
+      flexDirection: "column-reverse",
     },
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(6, 2, 2),
-      display: "block",
+      display: "flex",
+      flexDirection: "column-reverse",
     },
     [theme.breakpoints.up("md")]: {
       display: "flex",
       flexDirection: "row" 
     },
     [theme.breakpoints.down("md")]: {
-      display: "block",
+      display: "flex",
+      flexDirection: "column-reverse",
     }
   },
   graph: {
@@ -147,6 +150,9 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
 
   return (
     <Box className={classes.root}>
+      {showGraph && (
+        <TokenGraph boxHeight={boxHeight} inToken={swapState.inToken} outToken={swapState.outToken} />
+      )}
       <Box justifyContent="center">
         <Paper {...{ ref:boxRef }} {...rest} className={classes.card}>
           <Box className={classes.tabs}>
@@ -170,10 +176,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
           <Box>{children}</Box>
         </Paper>
       </Box>
-        {showGraph && (
-          <TokenGraph boxHeight={boxHeight} inToken={swapState.inToken} outToken={swapState.outToken} />
-        )}
-      </Box>
+    </Box>
   );
 };
 

@@ -41,6 +41,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("md")]: {
       margin: "0 auto",
       marginTop: theme.spacing(2),
+    },
+    [theme.breakpoints.down("sm")]: {
+      display: "none",
     }
   },
   graph: {
@@ -214,7 +217,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
           minMove: (ratesData && ratesData?.[0].low < 0.01) ? 0.00001 : 0.01
         }
       })
-      
+
       newSeries.setData(ratesData);
       setChart(newChart);
       setSeries(newSeries);
