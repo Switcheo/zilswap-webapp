@@ -59,7 +59,7 @@ export const ZIL_DECIMALS = 12;
 
 export const TRANSAK_API_KEY = {
   DEVELOPMENT: "00e2800b-5150-4a39-ba2f-5cd8421291b3",
-  PRODUCTION: "7f3a221c-e31c-4430-b311-b3a275cc7af7"
+  PRODUCTION: "7f3a221c-e31c-4430-b311-b3a275cc7af7",
 }
 
 // ms

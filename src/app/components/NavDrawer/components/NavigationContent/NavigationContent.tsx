@@ -2,13 +2,13 @@ import { Button, Collapse, List, ListItem, ListItemText } from "@material-ui/cor
 import { makeStyles } from "@material-ui/core/styles";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
+import transakSDK from "@transak/transak-sdk";
 import { AppTheme } from "app/theme/types";
+import { TRANSAK_API_KEY } from "app/utils/constants";
 import cls from "classnames";
 import React, { forwardRef, useState } from "react";
 import { NavLink as RouterLink } from "react-router-dom";
 import { NavigationPageOptions } from "../../types";
-import transakSDK from "@transak/transak-sdk";
-import { TRANSAK_API_KEY } from "app/utils/constants";
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1 }} >
@@ -59,10 +59,10 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
 
   const initWidget = (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setWidgetOpen(true);
-    if(typeof onClose === "function") onClose(ev);
+    if (typeof onClose === "function") onClose(ev);
     let transak = new transakSDK({
-      apiKey: !process.env.NODE_ENV || process.env.NODE_ENV === "development" ? TRANSAK_API_KEY.DEVELOPMENT : TRANSAK_API_KEY.PRODUCTION ,  // Your API Key
-      environment: !process.env.NODE_ENV || process.env.NODE_ENV === "development" ? "STAGING" : "PRODUCTION", // STAGING/PRODUCTION
+      apiKey: process.env.NODE_ENV === "production" ? TRANSAK_API_KEY.PRODUCTION : TRANSAK_API_KEY.DEVELOPMENT,  // Your API Key
+      environment: process.env.NODE_ENV === "production" ? "PRODUCTION" : "STAGING", // STAGING/PRODUCTION
       defaultCryptoCurrency: 'ZIL',
       walletAddress: '', // Your customer's wallet address
       themeColor: '0E828A', // App theme color
@@ -73,9 +73,9 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
       widgetHeight: '600px',
       widgetWidth: '450px'
     });
-    
+
     transak.init();
-    transak.on(transak.EVENTS?.TRANSAK_WIDGET_CLOSE, () =>  setWidgetOpen(false));
+    transak.on(transak.EVENTS?.TRANSAK_WIDGET_CLOSE, () => setWidgetOpen(false));
   }
 
   return (
@@ -96,7 +96,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
       )}
       {navigation.expand && (
         <>
-          <ListItem 
+          <ListItem
             className={cls({
               [classes.highlightTitle]: navigation.highlight,
               [classes.secondaryFont]: secondary
@@ -105,11 +105,11 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             onClick={() => setExpand(navigation.title === expand ? null : navigation.title)}
           >
             <ListItemText primary={navigation.title} primaryTypographyProps={{ className: classes.mainFont }} />
-            { expand === navigation.title ?  <ArrowDropUp /> : <ArrowDropDown /> }
+            {expand === navigation.title ? <ArrowDropUp /> : <ArrowDropDown />}
           </ListItem>
           <Collapse in={expand === navigation.title}>
             <List className={classes.listItem}>
-              {navigation.items && navigation.items.map(( item: NavigationPageOptions, index: number ) => (
+              {navigation.items && navigation.items.map((item: NavigationPageOptions, index: number) => (
                 <NavigationContent navigation={item} listIndex={index} secondary={true} />
               ))}
             </List>
