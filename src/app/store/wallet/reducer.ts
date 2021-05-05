@@ -22,7 +22,10 @@ const reducer = (state: WalletState = initial_state, action: any) => {
       const { wallet, privateKey, zilpay } = payload;
       if (privateKey) localStorage.setItem(LocalStorageKeys.PrivateKey, privateKey);
       if (zilpay) localStorage.setItem(LocalStorageKeys.ZilPayConnected, "true");
-      if (wallet?.type === WalletConnectType.Zeeves) localStorage.setItem(LocalStorageKeys.ZeevesConnected, "true");
+      if (wallet?.type === WalletConnectType.Zeeves) {
+        logoutRemovedKeys.forEach(key => localStorage.removeItem(key)); //remove all other keys to be sure
+        localStorage.setItem(LocalStorageKeys.ZeevesConnected, "true");
+      }
       return { ...state, ...payload };
 
     case WalletActionTypes.WALLET_LOGOUT:

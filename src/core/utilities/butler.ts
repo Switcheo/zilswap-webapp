@@ -280,7 +280,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
     });
   };
 
-  const processWalletResult = async (walletResult: ConnectWalletResult | undefined) => {
+  const processWalletResult = async (walletResult: ConnectWalletResult | undefined, isZilpay: boolean) => {
     const storeState: RootState = store.getState();
     if (walletResult?.wallet) {
       const { wallet } = walletResult;
@@ -291,7 +291,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
         observedTxs: storeState.transaction.observingTxs,
       });
       dispatch(actions.Layout.updateNetwork(network));
-      dispatch(actions.Wallet.update({ wallet, zilpay: true }));
+      dispatch(actions.Wallet.update({ wallet, zilpay: isZilpay }));
     } else {
       await ZilswapConnector.initialise({
         network: storeState.layout.network,
@@ -325,7 +325,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
           );
         }
       }
-      await processWalletResult(walletResult);
+      await processWalletResult(walletResult, false);
     });
   }
 
@@ -347,7 +347,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
           );
         }
       }
-      await processWalletResult(walletResult);
+      await processWalletResult(walletResult, true);
     });
   };
 

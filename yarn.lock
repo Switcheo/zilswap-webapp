@@ -12133,6 +12133,11 @@ yargs@^7.0.0:
     y18n "^3.2.1"
     yargs-parser "^5.0.0"
 
+zeeves-auth-sdk-js@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/zeeves-auth-sdk-js/-/zeeves-auth-sdk-js-2.0.4.tgz#4970d511fb7fb4a21a594b4ec028304a3fa93c65"
+  integrity sha512-A1/IhhW9O3hEXI99ta1TFSdseZDCv59+ksCwsYNIb4Udjxr2HV9s9nFgESzHulHacm4ss24wGM39UtdXqRL8Lg==
+
 zilswap-sdk@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/zilswap-sdk/-/zilswap-sdk-1.2.1.tgz#7f2cf6bd48d89a5a5793bdae9792e3dd87128509"
