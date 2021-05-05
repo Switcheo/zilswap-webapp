@@ -107,7 +107,6 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
   const [outTokenRates, setOutTokenRates] = useState<null | ZilStreamRates[]>(null);
   // local rates from token price
   const [inTokenRate, setInTokenRate] = useState<BigNumber>();
-  const [outTokenRate, setOutTokenRate] = useState<BigNumber>();
   const [currentRate, setCurrentRate] = useState<CandleDataPoint | null>(null)
   const [currentInterval, setCurrentInterval] = useState(DEFAULT_INTERVAL);
   const [currentPeriod, setCurrentPeriod] = useState(DEFAULT_PERIOD);
@@ -131,8 +130,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
       if ((outToken && !outToken.isZil) || (outToken?.isZil && !inToken)) {
         outRates = await getZilStreamTokenRates(outToken.symbol, filter);
       }
-      setInTokenRate((inToken && !inToken.isZil) ? tokenState.prices[inToken.symbol] : undefined);
-      setOutTokenRate((outToken && !outToken.isZil) ? tokenState.prices[outToken.symbol] : undefined);
+      setInTokenRate(inToken ? tokenState.prices[inToken.symbol] : tokenState.prices["ZIL"]);
       setInTokenRates(inRates);
       setOutTokenRates(outRates);
     })
@@ -347,15 +345,11 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
   }
 
   const getRates = () => {
-    if (inTokenRate && outTokenRate) {
-      return "$" + inTokenRate.div(outTokenRate).toFixed(2);
-    } else if (inTokenRate) {
+    if (inTokenRate) {
       return "$" + inTokenRate.toFixed(2);
-    } else if (outTokenRate) {
-      return "$" + new BigNumber(1).div(outTokenRate).toFixed(2);
-    } else {
-      return "-";
     }
+    return "-";
+    
   }
 
   return (
