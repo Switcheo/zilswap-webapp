@@ -84,6 +84,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "#EF534F",
     marginRight: theme.spacing(1),
   },
+  noChange: {
+    marginRight: theme.spacing(1),
+  },
   swapSvg: {
     paddingTop: "2px",
   },
@@ -110,7 +113,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
   const [currentRate, setCurrentRate] = useState<CandleDataPoint | null>(null)
   const [currentInterval, setCurrentInterval] = useState(DEFAULT_INTERVAL);
   const [currentPeriod, setCurrentPeriod] = useState(DEFAULT_PERIOD);
-  const [growth, setGrowth] = useState(0);
+  const [growth, setGrowth] = useState<BigNumber>(new BigNumber(0));
   const [chart, setChart] = useState<IChartApi | null>(null);
   const [series, setSeries] = useState<ISeriesApi<"Candlestick"> | null>(null);
   const themeType = useSelector<RootState, string>(state => state.preference.theme);
@@ -136,32 +139,19 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     })
 
     const statsFilter = { period: "2h", interval: "1m" };
-    let inStats: ZilStreamRates[], outStats: ZilStreamRates[];
+    let inStats: ZilStreamRates[];
     let changes: number;
     runGetTokenStats(async () => {
-      if ((inToken && !inToken.isZil) || (inToken?.isZil && !outToken)) {
-        inStats = await getZilStreamTokenRates(inToken.symbol, statsFilter);
-      }
-      if ((outToken && !outToken.isZil) || (outToken?.isZil && !inToken)) {
-        outStats = await getZilStreamTokenRates(outToken.symbol, statsFilter);
-      }
-      if (inStats?.length && outStats?.length) {
-        if (inStats.length < 60 || outStats.length < 60) {
-          return;
-        }
-        changes = ((inStats[0].close / outStats[0].close) - (inStats[59].close / outStats[59].close)) / (inStats[59].close / outStats[59].close);
-      } else if (inStats?.length) {
+      // get token records of past 2 hour as there may be missing records inbetween
+      inStats = await getZilStreamTokenRates(inToken?.symbol || "ZIL", statsFilter);
+
+      if (inStats?.length) {
         if (inStats.length < 60) {
           return;
         }
         changes = (inStats[0].close - inStats[59].close) / inStats[59].close;
-      } else if (outStats?.length) {
-        if (outStats.length < 60) {
-          return;
-        }
-        changes = (outStats[0].close - outStats[59].close) / outStats[59].close;
       }
-      setGrowth(changes * 100);
+      setGrowth(new BigNumber(changes * 100));
     })
     // eslint-disable-next-line
   }, [inToken, outToken, currentInterval]);
@@ -362,7 +352,10 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
           <>
             <Typography variant="h1">{new BigNumber(currentRate?.close || 0).toFixed(6) || "0.00"}</Typography>
             <Box className={classes.buttonGroup}>
-              <Typography className={growth > 0 ? classes.priceUp : classes.priceDown}>{getRates()}{` (${new BigNumber(growth).toFixed(8)}%)`}</Typography><Typography>Past 1 Hour</Typography>
+              <Typography className={growth.isZero() ? classes.noChange : (growth.isPositive() ? classes.priceUp : classes.priceDown)}>
+                {getRates()}{` (${growth.isGreaterThan(0) ? "+" : ""}${growth.toFixed(growth.isZero() ? 2 : 8)}%)`}
+              </Typography>
+              <Typography>Past 1 Hour</Typography>
               <Box flexGrow="1" />
               <Box display="flex" justifyContent="flex-end">
                 <ButtonGroup variant="text">
