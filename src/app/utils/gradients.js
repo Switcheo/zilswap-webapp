@@ -10,7 +10,7 @@ const green = buildGradient(colors.green[400], colors.green[600]);
 const orange = buildGradient(colors.orange[400], colors.orange[700]);
 const red = buildGradient(colors.red[500], colors.red[700]);
 
-export default {
+const gradients = {
   grey,
   blue,
   indigo,
@@ -18,3 +18,5 @@ export default {
   orange,
   red
 };
+
+export default gradients;

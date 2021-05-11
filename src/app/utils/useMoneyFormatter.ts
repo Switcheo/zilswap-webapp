@@ -36,8 +36,10 @@ const formatter = (inputNumber: BigNumber | number | string = 0, opts: MoneyForm
   return `${toHumanNumber(number, decPlaces)}${showCurrency ? ` ${symbol ?? currency ?? ""}` : ""}`.trim()
 };
 
-export default function (options: MoneyFormatterOptions = {}) {
+const useMoneyFormatter = function (options: MoneyFormatterOptions = {}) {
   return (number: number | string | undefined | BigNumber, adhocOptions: MoneyFormatterOptions = {}) => {
     return formatter(number, { ...options, ...adhocOptions });
   }
 };
+
+export default useMoneyFormatter;

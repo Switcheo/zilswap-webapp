@@ -1,3 +1,5 @@
-export default () => {
+const useClaimEnabled = () => {
   return true;
 };
+
+export default useClaimEnabled;

@@ -5,9 +5,11 @@ export type GetNetworkOptions = {
   zilswapFormat?: boolean;
 };
 
-export default (opts: GetNetworkOptions = {}) => {
+const useNetwork = (opts: GetNetworkOptions = {}) => {
   const network = ZilswapConnector.network || DefaultFallbackNetwork;
   if (opts.zilswapFormat)
     return network;
   return network.toLowerCase();
 };
+
+export default useNetwork;

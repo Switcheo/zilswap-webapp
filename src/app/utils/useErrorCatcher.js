@@ -16,7 +16,7 @@ const parse_error = (original) => {
   return error;
 };
 
-export default function (error_catcher) {
+const useErrorCatcher = function (error_catcher) {
   let cleanup = () => {
     if (error_catcher) error_catcher(null);
   };
@@ -32,3 +32,5 @@ export default function (error_catcher) {
       });
   };
 };
+
+export default useErrorCatcher;
