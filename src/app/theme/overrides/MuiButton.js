@@ -1,4 +1,4 @@
-export default theme => ({
+const MuiButton = theme => ({
   root: {
     borderRadius: "4242px",
     textTransform: "none",
@@ -34,3 +34,5 @@ export default theme => ({
     }
   },
 });
+
+export default MuiButton;

@@ -105,7 +105,7 @@ export const tokenAllowancesBatchRequest = (token: TokenInfo, walletAddress: str
  * @returns Promise<BatchResponse[]> Array of responses.
  */
 export const sendBatchRequest = async (network: Network, requests: BatchRequest[]): Promise<BatchResponse[]> => {
-  var baseUrl = "https://api2.zilliqa.com/"
+  var baseUrl = "https://api.zilliqa.com/"
   if (network === Network.TestNet) {
     baseUrl = "https://dev-api.zilliqa.com/"
   }

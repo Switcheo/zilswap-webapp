@@ -65,8 +65,8 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
 
     const wallet: ConnectedWallet = walletState.wallet!;
     if (showContribution) {
-      const contribution = token.pool?.userContribution || BIG_ZERO;
-      return contribution;
+      const contribution = token.pool?.userContribution ?? BIG_ZERO;
+      return contribution as BigNumber;
     } else {
       const amount = token.balances && token.balances[wallet.addressInfo.byte20.toLowerCase()];
       if (!amount) return BIG_ZERO;
@@ -76,7 +76,7 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
   };
   const getContributionPercentage = (token: TokenInfo) => {
     if (!walletState.wallet) return BIG_ZERO;
-    return token.pool?.contributionPercentage || BIG_ZERO;
+    return (token.pool?.contributionPercentage ?? BIG_ZERO) as BigNumber;
   };
 
   const onSelect = (token: TokenInfo) => {

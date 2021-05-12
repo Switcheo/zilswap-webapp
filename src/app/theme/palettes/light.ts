@@ -6,7 +6,7 @@ const TEXT_COLORS = {
   secondary: zilliqa.neutral[140],
 };
 
-export default {
+const theme = {
   type: "light",
   toolbar: {
     main: zilliqa.primary["004"],
@@ -48,3 +48,5 @@ export default {
   switcheoLogo: switcheo.logoLight,
   colors: { zilliqa, switcheo },
 };
+
+export default theme;

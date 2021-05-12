@@ -23,7 +23,7 @@ const defaultFormState = {
   touched: {},
 }
 
-export default function (initialFormState: FormState = defaultFormState, errorPrinter: Function): [FormState, Dispatch<SetStateAction<FormState>>, (error: FormError) => void, ChangeHandler] {
+const useFormHandler = function (initialFormState: FormState = defaultFormState, errorPrinter: Function): [FormState, Dispatch<SetStateAction<FormState>>, (error: FormError) => void, ChangeHandler] {
   const [formState, setFormState] = useState(initialFormState);
 
   const _errorPrinter = errorPrinter || console.error;
@@ -76,3 +76,4 @@ export default function (initialFormState: FormState = defaultFormState, errorPr
 
   return [formState, setFormState, errorHandler, changeHandler]
 };
+export default useFormHandler;

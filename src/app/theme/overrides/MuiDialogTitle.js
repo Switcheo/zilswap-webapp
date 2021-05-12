@@ -1,4 +1,4 @@
-export default theme => ({
+const MuiDialogTitle = theme => ({
   root: {
     padding: theme.spacing(4.5, 8),
     paddingBottom: 0,
@@ -7,3 +7,5 @@ export default theme => ({
     },
   },
 });
+
+export default MuiDialogTitle;

@@ -1,4 +1,4 @@
-export default (str) => {
+const snakeToTitle = (str) => {
   if (!str) str = "";
   str = str.toLowerCase();
   str = str.split('_');
@@ -9,3 +9,5 @@ export default (str) => {
 
   return str.join(' ');
 }
+
+export default snakeToTitle;

@@ -1,4 +1,4 @@
-export default (bytes, decimals = 2) => {
+const bytesToSize = (bytes, decimals = 2) => {
   if (bytes === 0) return '0 Bytes';
 
   const k = 1024;
@@ -9,3 +9,5 @@ export default (bytes, decimals = 2) => {
 
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
+
+export default bytesToSize;

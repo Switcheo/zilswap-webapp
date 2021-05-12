@@ -8,4 +8,5 @@ import * as Pool from "./pool/actions";
 import * as Rewards from "./rewards/actions";
 import * as Transaction from "./transaction/actions";
 
-export default { Preference, Layout, Wallet, Swap, Stats, Token, Pool, Rewards, Transaction };
+const actions = { Preference, Layout, Wallet, Swap, Stats, Token, Pool, Rewards, Transaction };
+export default actions;

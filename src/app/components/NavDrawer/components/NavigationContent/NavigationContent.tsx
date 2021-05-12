@@ -2,7 +2,9 @@ import { Button, Collapse, List, ListItem, ListItemText } from "@material-ui/cor
 import { makeStyles } from "@material-ui/core/styles";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
+import transakSDK from "@transak/transak-sdk";
 import { AppTheme } from "app/theme/types";
+import { TRANSAK_API_KEY } from "app/utils/constants";
 import cls from "classnames";
 import React, { forwardRef, useState } from "react";
 import { NavLink as RouterLink } from "react-router-dom";
@@ -42,21 +44,43 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }))
 
 type NavigationContentProps = {
-  className?: any,
   navigation: NavigationPageOptions,
-  listIndex: number,
   secondary?: boolean,
+  onClose?: any
 }
 
 const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationContentProps) => {
-  const { navigation, secondary, listIndex } = props;
+  const { navigation, secondary, onClose } = props;
   const classes = useStyles();
   const [expand, setExpand] = useState<any>(null);
+  const [widgetOpen, setWidgetOpen] = useState(false);
+
+  const initWidget = (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    setWidgetOpen(true);
+    onClose?.(ev);
+
+    let transak = new transakSDK({
+      apiKey: process.env.NODE_ENV === "production" ? TRANSAK_API_KEY.PRODUCTION : TRANSAK_API_KEY.DEVELOPMENT,  // Your API Key
+      environment: process.env.NODE_ENV === "production" ? "PRODUCTION" : "STAGING", // STAGING/PRODUCTION
+      defaultCryptoCurrency: 'ZIL',
+      walletAddress: '', // Your customer's wallet address
+      themeColor: '0E828A', // App theme color
+      fiatCurrency: '', // INR/GBP
+      email: '', // Your customer's email address
+      redirectURL: '',
+      hostURL: window.location.origin,
+      widgetHeight: '600px',
+      widgetWidth: '450px'
+    });
+
+    transak.init();
+    transak.on(transak.EVENTS?.TRANSAK_WIDGET_CLOSE, () => setWidgetOpen(false));
+  }
 
   return (
     <>
       {navigation.external && navigation.href && (
-        <ListItem className={classes.listItem} disableGutters button key={listIndex}>
+        <ListItem className={classes.listItem} disableGutters button>
           <Button
             className={cls({
               [classes.highlightTitle]: navigation.highlight,
@@ -71,7 +95,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
       )}
       {navigation.expand && (
         <>
-          <ListItem 
+          <ListItem
             className={cls({
               [classes.highlightTitle]: navigation.highlight,
               [classes.secondaryFont]: secondary
@@ -80,18 +104,31 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             onClick={() => setExpand(navigation.title === expand ? null : navigation.title)}
           >
             <ListItemText primary={navigation.title} primaryTypographyProps={{ className: classes.mainFont }} />
-            { expand === navigation.title ?  <ArrowDropUp /> : <ArrowDropDown /> }
+            {expand === navigation.title ? <ArrowDropUp /> : <ArrowDropDown />}
           </ListItem>
           <Collapse in={expand === navigation.title}>
             <List className={classes.listItem}>
-              {navigation.items && navigation.items.map(( item: NavigationPageOptions, index: number ) => (
-                <NavigationContent navigation={item} listIndex={index} secondary={true} />
+              {navigation.items && navigation.items.map((item: NavigationPageOptions, index: number) => (
+                <NavigationContent key={index} navigation={item} secondary={true} />
               ))}
             </List>
           </Collapse>
         </>
       )}
-      {!navigation.external && !navigation.expand &&(
+      {navigation.purchase && (
+        <ListItem className={classes.listItem} disableGutters button>
+          <Button
+            className={cls({
+              [classes.highlightTitle]: navigation.highlight,
+              [classes.secondaryFont]: secondary
+            }, classes.buttonLeaf)}
+            onClick={(ev) => !widgetOpen && initWidget(ev)}
+          >
+            {navigation.title}
+          </Button>
+        </ListItem>
+      )}
+      {!navigation.external && !navigation.expand && !navigation.purchase && (
         <ListItem className={classes.listItem} disableGutters button>
           <Button
             className={cls({

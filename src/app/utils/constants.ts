@@ -32,7 +32,7 @@ export const ZilPayNetworkMap = {
 } as { [index: string]: Network };
 
 export const RPCEndpoints: { [key in Network]: string } = {
-  [Network.MainNet]: 'https://api2.zilliqa.com',
+  [Network.MainNet]: 'https://api.zilliqa.com',
   [Network.TestNet]: 'https://dev-api.zilliqa.com'
 };
 
@@ -55,7 +55,13 @@ export const PRODUCTION_HOSTS = [
 export const STATS_REFRESH_RATE = 30000; // ms
 
 export const ZIL_TOKEN_NAME = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
+export const ZWAP_TOKEN_NAME = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
 export const ZIL_DECIMALS = 12;
+
+export const TRANSAK_API_KEY = {
+  DEVELOPMENT: process.env.REACT_APP_TRANSAK_DEV,
+  PRODUCTION: process.env.REACT_APP_TRANSAK_PROD,
+}
 
 // ms
 export class PollIntervals {

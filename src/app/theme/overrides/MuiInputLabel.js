@@ -1,4 +1,4 @@
-export default theme => ({
+const MuiInputLabel = theme => ({
   root: {
     fontSize: "12px",
     lineHeight: "14px",
@@ -8,3 +8,5 @@ export default theme => ({
     fontFamily: "Avenir Next"
   },
 });
+
+export default MuiInputLabel;

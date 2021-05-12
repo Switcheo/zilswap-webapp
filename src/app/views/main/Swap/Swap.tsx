@@ -11,8 +11,8 @@ import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { strings, useAsyncTask, useMoneyFormatter } from "app/utils";
-import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, PlaceholderStrings, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { strings, useAsyncTask, useBlacklistAddress, useMoneyFormatter } from "app/utils";
+import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, PlaceholderStrings, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
@@ -22,6 +22,7 @@ import { CONTRACTS } from "zilswap-sdk/lib/constants";
 import { ShowAdvanced } from "./components";
 import { ReactComponent as SwitchSVG } from "./swap-icon.svg";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
+import { useLocation } from "react-router";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -135,6 +136,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& svg": {
       verticalAlign: "middle",
       fontSize: "inherit",
+    },
+    paddingBottom: theme.spacing(0.5),
+  },
+  errorText: {
+    color: theme.palette.colors.zilliqa.danger,
+    "& svg": {
+      verticalAlign: "middle",
+      fontSize: "inherit",
     }
   },
   errorMessage: {
@@ -156,6 +165,11 @@ type CalculateAmountProps = {
   outAmount?: BigNumber;
 };
 
+interface InitTokenProps {
+  inToken?: TokenInfo,
+  outToken?: TokenInfo
+}
+
 const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
@@ -167,12 +181,14 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
   const walletState = useSelector<RootState, WalletState>(store => store.wallet);
   const [runSwap, loading, error, clearSwapError] = useAsyncTask("swap");
+  const [isBlacklisted] = useBlacklistAddress();
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
   const [errorRecipientAddress, setErrorRecipientAddress] = useState<string | undefined>();
-
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [reversedRate, setReversedRate] = useState(false);
+  const queryParams = new URLSearchParams(useLocation().search);
+  const [recipientAddrBlacklisted, setRecipientAddrBlacklisted] = useState(false);
 
   useEffect(() => {
     if (!swapFormState.forNetwork) return
@@ -189,6 +205,43 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
     // eslint-disable-next-line
   }, [layoutState.network]);
+
+  useEffect(() => {
+    if (inToken || outToken) {
+      return;
+    }
+    const queryInput = queryParams.get("tokenIn");
+    const queryOutput = queryParams.get("tokenOut") ?? ZWAP_TOKEN_NAME;
+    if (queryInput === queryOutput && queryOutput) {
+      return;
+    }
+    const newIntoken = queryInput ? tokenState.tokens[queryInput] : null;
+    const newOuttoken = queryOutput ? tokenState.tokens[queryOutput] : null;
+
+    initNewToken({
+      ...newIntoken && {
+        inToken: newIntoken,
+      },
+
+      ...newOuttoken && {
+        outToken: newOuttoken,
+      },
+    });
+
+    // eslint-disable-next-line
+  }, [tokenState.tokens]);
+
+  useEffect(() => {
+    const blacklisted = !!swapFormState.recipientAddress ? isBlacklisted(swapFormState.recipientAddress) : false;
+    setRecipientAddrBlacklisted(blacklisted)
+  }, [swapFormState.recipientAddress, isBlacklisted]);
+
+  const initNewToken = (newTokens: InitTokenProps) => {
+    dispatch(actions.Swap.update({
+      forNetwork: ZilswapConnector.network || null,
+      ...newTokens,
+    }));
+  }
 
   const getExchangeRateLabel = () => {
     let exchangeRate = swapFormState.expectedExchangeRate || BIG_ZERO;
@@ -597,6 +650,11 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
                 value={swapFormState.recipientAddress || ""}
                 placeholder={PlaceholderStrings.ZilAddress}
                 onChange={onRecipientAddressChange} />
+              {recipientAddrBlacklisted && (
+                <Text className={classes.errorText}>
+                  <WarningRounded color="error" />  Address appears to be a known CEX/DEX address. Please ensure you have entered a correct address!
+                </Text>
+              )}
               <Text className={classes.warningText}>
                 <WarningRounded color="inherit" />  Do not send tokens directly to an exchange address as it may result in failure to receive your fund.
               </Text>
@@ -617,7 +675,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onClickTxApprove={onApproveTx}
           variant="contained"
           color="primary"
-          disabled={!inToken || !outToken}
+          disabled={!inToken || !outToken || recipientAddrBlacklisted}
           onClick={onSwap}>
           Swap
         </FancyButton>
