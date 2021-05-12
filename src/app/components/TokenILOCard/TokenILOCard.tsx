@@ -2,9 +2,10 @@ import React, { useState } from 'react'
 import { Box, makeStyles } from '@material-ui/core'
 import { CurrencyInput, FancyButton, Text } from 'app/components'
 import ProgressBar from 'app/components/ProgressBar'
-import { TokenState } from "app/store/types";
+import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { ZIL_TOKEN_NAME } from 'app/utils/constants';
 import BigNumber from 'bignumber.js';
+import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -36,7 +37,6 @@ const useStyles = makeStyles(theme => ({
 }));
 
 interface Props {
-  tokenState: TokenState
   expanded?: boolean
 }
 
@@ -50,9 +50,11 @@ const TokenILOCard = (props: Props) => {
   const [expanded, setExpanded] = useState<boolean>(props.expanded ?? false)
   const classes = useStyles();
 
-  const zwapToken = props.tokenState.tokens['zil1p5suryq6q647usxczale29cu3336hhp376c627']
-  const zilToken = props.tokenState.tokens[ZIL_TOKEN_NAME]
-  const exchangeRate: BigNumber = zwapToken.pool?.exchangeRate || new BigNumber(0)
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
+
+  const zwapToken = tokenState.tokens['zil1p5suryq6q647usxczale29cu3336hhp376c627']
+  const zilToken = tokenState.tokens[ZIL_TOKEN_NAME]
+  const exchangeRate: BigNumber = zwapToken?.pool?.exchangeRate || new BigNumber(0)
 
 
   const onZwapChange = (amount: string = "0") => {

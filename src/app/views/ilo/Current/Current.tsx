@@ -12,7 +12,8 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   return (
     <ILOCard {...rest}>
       <Notifications />
-      <TokenILOCard tokenState={tokenState} expanded={true} />
+      <TokenILOCard 
+        expanded={true} />
     </ILOCard>
   )
 }

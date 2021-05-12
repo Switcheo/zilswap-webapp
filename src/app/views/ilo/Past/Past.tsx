@@ -14,7 +14,8 @@ const PastView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
     <ILOCard {...rest}>
       <Notifications />
       
-      <TokenILOCard tokenState={tokenState} />
+      <TokenILOCard 
+        expanded={false} />
     </ILOCard>
   )
 }
