@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Box, makeStyles } from '@material-ui/core'
 import { CurrencyInput, FancyButton, Text } from 'app/components'
 import ProgressBar from 'app/components/ProgressBar'
-import { RootState, TokenInfo, TokenState } from "app/store/types";
+import { RootState, TokenState } from "app/store/types";
 import { ZIL_TOKEN_NAME } from 'app/utils/constants';
 import BigNumber from 'bignumber.js';
 import { useSelector } from 'react-redux';
