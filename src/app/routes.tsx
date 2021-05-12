@@ -19,6 +19,20 @@ const routes: RouteConfig[] = [{
     component: () => <Redirect to="/pools/overview"></Redirect>
   }]
 }, {
+  path: '/ilo',
+  component: MainLayout,
+  routes: [{
+    path: '/ilo/current',
+    exact: true,
+    component: lazy(() => import('./views/ilo/Current'))
+  }, {
+    path: '/ilo/past',
+    exact: true,
+    component: lazy(() => import('./views/ilo/Past'))
+  }, {
+    component: () => <Redirect to="/ilo/current"></Redirect>
+  }]
+}, {
   path: '/',
   component: MainLayout,
   routes: [{
