@@ -52,10 +52,9 @@ const TokenILOCard = (props: Props) => {
 
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
-  const zwapToken = tokenState.tokens['zil1p5suryq6q647usxczale29cu3336hhp376c627']
+  const zwapToken = Object.values(tokenState.tokens).filter(token => token.isZwap)[0]
   const zilToken = tokenState.tokens[ZIL_TOKEN_NAME]
   const exchangeRate: BigNumber = zwapToken?.pool?.exchangeRate || new BigNumber(0)
-
 
   const onZwapChange = (amount: string = "0") => {
     let _amount = new BigNumber(amount);
