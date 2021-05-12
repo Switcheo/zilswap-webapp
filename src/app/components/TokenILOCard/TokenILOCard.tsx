@@ -4,6 +4,7 @@ import { CurrencyInput, FancyButton, Text } from 'app/components'
 import ProgressBar from 'app/components/ProgressBar'
 import { TokenState } from "app/store/types";
 import { ZIL_TOKEN_NAME } from 'app/utils/constants';
+import BigNumber from 'bignumber.js';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -45,9 +46,39 @@ const initialFormState = {
 };
 
 const TokenILOCard = (props: Props) => {
-  const [formState] = useState<typeof initialFormState>(initialFormState);
+  const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const [expanded, setExpanded] = useState<boolean>(props.expanded ?? false)
   const classes = useStyles();
+
+  const zwapToken = props.tokenState.tokens['zil1p5suryq6q647usxczale29cu3336hhp376c627']
+  const zilToken = props.tokenState.tokens[ZIL_TOKEN_NAME]
+  const exchangeRate: BigNumber = zwapToken.pool?.exchangeRate || new BigNumber(0)
+
+
+  const onZwapChange = (amount: string = "0") => {
+    let _amount = new BigNumber(amount);
+    let _afterExchangeRate = _amount.times(exchangeRate)
+    let _totalValue = _afterExchangeRate.dividedBy(30).times(100)
+    let _zilAmount = _totalValue.times(0.7);
+
+    setFormState({
+      ...formState,
+      zwapAmount: amount,
+      zilAmount: _zilAmount.toString()
+    });
+  };
+
+  const onZilChange = (amount: string = "0") => {
+    let _amount = new BigNumber(amount);
+    let _totalValue = _amount.dividedBy(70).times(100)
+    let _zwapAmount = _totalValue.times(0.3).dividedBy(exchangeRate);
+
+    setFormState({
+      ...formState,
+      zwapAmount: _zwapAmount.toString(),
+      zilAmount: amount,
+    });
+  };
 
   return (
     <Box>
@@ -91,17 +122,19 @@ const TokenILOCard = (props: Props) => {
             <Box marginTop={2}>
               <CurrencyInput fixedToToken
                 label=""
-                token={props.tokenState.tokens['zil1p5suryq6q647usxczale29cu3336hhp376c627']}
+                token={zwapToken}
                 amount={formState.zwapAmount}
-                hideBalance={true}
-                disabled={true} />
+                hideBalance={false}
+                disabled={false}
+                onAmountChange={onZwapChange} />
 
               <CurrencyInput fixedToToken
                 label=""
-                token={props.tokenState.tokens[ZIL_TOKEN_NAME]}
+                token={zilToken}
                 amount={formState.zilAmount}
-                hideBalance={true}
-                disabled={true} />
+                hideBalance={false}
+                disabled={false}
+                onAmountChange={onZilChange} />
             </Box>
           </Box>
 
