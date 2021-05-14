@@ -1,4 +1,4 @@
-import { Account } from "@zilliqa-js/account";
+import { Account } from "@zilliqa-js/account/dist/account";
 import { RPCResponse } from "@zilliqa-js/core";
 import { validation } from "@zilliqa-js/util";
 import { Zilliqa } from "@zilliqa-js/zilliqa";
@@ -35,7 +35,7 @@ export const connectWalletPrivateKey = async (inputPrivateKey: string, network: 
 
   const zilliqa = new Zilliqa(RPCEndpoints[network]);
   zilliqa.wallet.addByPrivateKey(inputPrivateKey);
-  const account: Account = zilliqa.wallet.defaultAccount!;
+  const account = zilliqa.wallet.defaultAccount! as unknown as Account;
   const timestamp = moment();
 
   const wallet = new PrivateKeyConnectedWallet(account, {

@@ -10,6 +10,10 @@ const navigationConfig: NavigationOptions[] = [{
     href: "/pools",
     badge: "New",
   }, {
+    title: "ZILO",
+    href: "/ilo",
+    badge: "New",
+  }, {
     title: "Guide",
     href: "https://zilswap.gitbook.io/zilswap/",
     external: true,
