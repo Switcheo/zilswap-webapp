@@ -15,7 +15,8 @@ const PastView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
       
       {pastILOs.map(ilo => (
         <TokenILOCard 
-          expanded={false} />   
+          expanded={false}
+          canExpand={true} />   
       ))}
 
       {pastILOs.length === 0 &&

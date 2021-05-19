@@ -38,6 +38,7 @@ const useStyles = makeStyles(theme => ({
 
 interface Props {
   expanded?: boolean
+  canExpand?: boolean
 }
 
 const initialFormState = {
@@ -93,7 +94,7 @@ const TokenILOCard = (props: Props) => {
 
   return (
     <Box>
-      <button onClick={() => setExpanded(!expanded)} className={classes.expandButton}>
+      <button onClick={() => props.canExpand && setExpanded(!expanded)} className={classes.expandButton}>
         <Box marginTop={3}>
           <img
             className={classes.svg}
