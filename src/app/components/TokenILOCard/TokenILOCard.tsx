@@ -49,12 +49,16 @@ const TokenILOCard = (props: Props) => {
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const [expanded, setExpanded] = useState<boolean>(props.expanded ?? false)
   const classes = useStyles();
-
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
   const zwapToken = Object.values(tokenState.tokens).filter(token => token.isZwap)[0]
   const zilToken = tokenState.tokens[ZIL_TOKEN_NAME]
   const exchangeRate: BigNumber = zwapToken?.pool?.exchangeRate || new BigNumber(0)
+
+  const toRaise: BigNumber = new BigNumber(240000)
+  const committed: BigNumber = new BigNumber(400000)
+  const committedPercentage: BigNumber = committed.dividedBy(toRaise).times(100)
+  const zwapToBurn: BigNumber = toRaise.dividedBy(70).times(100).times(0.3)
 
   const onZwapChange = (amount: string = "0") => {
     let _amount = new BigNumber(amount);
@@ -100,20 +104,20 @@ const TokenILOCard = (props: Props) => {
 
             <Text variant="h1" color="primary" marginTop={3}>00:59:59</Text>
 
-            <ProgressBar progress={92} marginTop={3} />
+            <ProgressBar progress={committedPercentage} marginTop={3} />
 
             <Box marginTop={1}>
               <Box display="flex" marginTop={0.5}>
                 <Text color="textSecondary" flexGrow={1} align="left">Total Committed</Text>
-                <Text color="textSecondary">$928,636.02 (92%)</Text>
+                <Text color="textSecondary">${committed.toFormat(0)} ({committedPercentage.toFixed(0)}%)</Text>
               </Box>
               <Box display="flex" marginTop={0.5}>
                 <Text color="textSecondary" flexGrow={1} align="left">Funds to Raise</Text>
-                <Text color="textSecondary">$1,000,000</Text>
+                <Text color="textSecondary">${toRaise.toFormat(0)}</Text>
               </Box>
               <Box display="flex" marginTop={0.5}>
                 <Text color="textSecondary" flexGrow={1} align="left">ZWAP to Burn</Text>
-                <Text color="textSecondary">$300,000</Text>
+                <Text color="textSecondary">${zwapToBurn.toFormat(0)}</Text>
               </Box>
             </Box>
 
