@@ -60,6 +60,12 @@ const TokenILOCard = (props: Props) => {
   const committedPercentage: BigNumber = committed.dividedBy(toRaise).times(100)
   const zwapToBurn: BigNumber = toRaise.dividedBy(70).times(100).times(0.3)
 
+  const manifest = {
+    banner: "https://placehold.co/600x250",
+    description: "ZilSteam's premium membership token",
+    link: "https://zilstream.com"
+  };
+
   const onZwapChange = (amount: string = "0") => {
     let _amount = new BigNumber(amount);
     let _afterExchangeRate = _amount.times(exchangeRate)
@@ -91,7 +97,7 @@ const TokenILOCard = (props: Props) => {
         <Box marginTop={3}>
           <img
             className={classes.svg}
-            src={`https://placehold.co/600x250`}
+            src={manifest.banner}
             alt={`ILOs header`}
           />
         </Box>
@@ -100,7 +106,7 @@ const TokenILOCard = (props: Props) => {
         <Box display="flex" flexDirection="column" className={classes.container}>
           <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
             <Text variant="h1">ZilStream (STREAM)</Text>
-            <Text marginTop={1}>ZilSteam's premium membership token</Text>
+            <Text marginTop={1}>{manifest.description}</Text>
 
             <Text variant="h1" color="primary" marginTop={3}>00:59:59</Text>
 
