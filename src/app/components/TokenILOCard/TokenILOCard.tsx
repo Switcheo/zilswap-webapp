@@ -64,7 +64,9 @@ const TokenILOCard = (props: Props) => {
   const manifest = {
     banner: "https://placehold.co/600x250",
     description: "ZilSteam's premium membership token",
-    link: "https://zilstream.com"
+    link: "https://zilstream.com",
+    symbol: "STREAM",
+    name: "ZilStream"
   };
 
   const onZwapChange = (amount: string = "0") => {
@@ -99,14 +101,14 @@ const TokenILOCard = (props: Props) => {
           <img
             className={classes.svg}
             src={manifest.banner}
-            alt={`ILOs header`}
+            alt={`${manifest.name} ILO`}
           />
         </Box>
       </button>
       {expanded &&
         <Box display="flex" flexDirection="column" className={classes.container}>
           <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
-            <Text variant="h1">ZilStream (STREAM)</Text>
+            <Text variant="h1">{manifest.name} ({manifest.symbol})</Text>
             <Text marginTop={1}>{manifest.description}</Text>
 
             <Text variant="h1" color="primary" marginTop={3}>00:59:59</Text>
