@@ -11,7 +11,7 @@ import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { strings, useAsyncTask, useBlacklistAddress, useMoneyFormatter } from "app/utils";
+import { strings, useAsyncTask, useBlacklistAddress, useMoneyFormatter, useSearchParam } from "app/utils";
 import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, PlaceholderStrings, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -173,6 +173,7 @@ interface InitTokenProps {
 const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
+  const enableChangeRecipient = useSearchParam("enableChangeRecipient") === "true";
   const [buttonRotate, setButtonRotate] = useState(false);
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const swapFormState: SwapFormState = useSelector<RootState, SwapFormState>(store => store.swap);
@@ -630,37 +631,39 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           </Box>
         )}
 
-        <Box display="flex" flexDirection="column" marginTop={3}>
-          {!formState.showRecipientAddress && (
-            <Button variant="text" className={classes.addAddressButton} onClick={() => setFormState({ ...formState, showRecipientAddress: true })}>
-              <AddIcon className={classes.accordionButton} />
-              <span>Add Receiving Address</span>
-            </Button>
-          )}
-          {formState.showRecipientAddress && (
-            <>
-              <InputLabel className={classes.addressLabel}>
-                <RemoveIcon className={classes.accordionButton} onClick={() => setFormState({ ...formState, showRecipientAddress: false })} />
-                <span>Receiving Address</span>
-                {!!errorRecipientAddress && <Typography className={classes.addressError} component="span" color="error">{errorRecipientAddress}</Typography>}
-              </InputLabel>
-              <OutlinedInput
-                onBlur={onEnterRecipientAddress}
-                className={classes.addressInput}
-                value={swapFormState.recipientAddress || ""}
-                placeholder={PlaceholderStrings.ZilAddress}
-                onChange={onRecipientAddressChange} />
-              {recipientAddrBlacklisted && (
-                <Text className={classes.errorText}>
-                  <WarningRounded color="error" />  Address appears to be a known CEX/DEX address. Please ensure you have entered a correct address!
-                </Text>
-              )}
-              <Text className={classes.warningText}>
-                <WarningRounded color="inherit" />  Do not send tokens directly to an exchange address as it may result in failure to receive your fund.
+        {enableChangeRecipient && (
+          <Box display="flex" flexDirection="column" marginTop={3}>
+            {!formState.showRecipientAddress && (
+              <Button variant="text" className={classes.addAddressButton} onClick={() => setFormState({ ...formState, showRecipientAddress: true })}>
+                <AddIcon className={classes.accordionButton} />
+                <span>Add Receiving Address</span>
+              </Button>
+            )}
+            {formState.showRecipientAddress && (
+              <>
+                <InputLabel className={classes.addressLabel}>
+                  <RemoveIcon className={classes.accordionButton} onClick={() => setFormState({ ...formState, showRecipientAddress: false })} />
+                  <span>Receiving Address</span>
+                  {!!errorRecipientAddress && <Typography className={classes.addressError} component="span" color="error">{errorRecipientAddress}</Typography>}
+                </InputLabel>
+                <OutlinedInput
+                  onBlur={onEnterRecipientAddress}
+                  className={classes.addressInput}
+                  value={swapFormState.recipientAddress || ""}
+                  placeholder={PlaceholderStrings.ZilAddress}
+                  onChange={onRecipientAddressChange} />
+                {recipientAddrBlacklisted && (
+                  <Text className={classes.errorText}>
+                    <WarningRounded color="error" />  Address appears to be a known CEX/DEX address. Please ensure you have entered a correct address!
+                  </Text>
+                )}
+                <Text className={classes.warningText}>
+                  <WarningRounded color="inherit" />  Do not send tokens directly to an exchange address as it may result in failure to receive your fund.
               </Text>
-            </>
-          )}
-        </Box>
+              </>
+            )}
+          </Box>
+        )}
 
         <Typography className={classes.errorMessage} color="error">{error?.message || errorApproveTx?.message}</Typography>
         {swapFormState.isInsufficientReserves && (
