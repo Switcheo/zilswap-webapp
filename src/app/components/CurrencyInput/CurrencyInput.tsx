@@ -60,7 +60,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   token: TokenInfo | null;
   amount: string;
   showCurrencyDialog?: boolean;
-  fixedToZil?: boolean;
+  fixedToToken?: boolean;
   disabled?: boolean;
   hideBalance?: boolean;
   showContribution?: boolean;
@@ -75,7 +75,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
 const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
   const {
     children, className,
-    label, fixedToZil, amount, disabled,
+    label, fixedToToken, amount, disabled,
     showCurrencyDialog: showDialogOverride,
     onCloseDialog: onCloseDialogListener,
     showContribution, hideBalance, dialogOpts = {},
@@ -150,7 +150,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
         endAdornment={
           <InputAdornment position="end">
 
-            {!fixedToZil && (
+            {!fixedToToken && (
               <Button className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
                 <Box display="flex" alignItems="center">
                   {token && <CurrencyLogo currency={token.registered && token.symbol} address={token.address} className={classes.currencyLogo} />}
@@ -160,11 +160,11 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
               </Button>
             )}
 
-            {fixedToZil && (
+            {fixedToToken && (
               <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
                 <Box display="flex" alignItems="center">
-                  <CurrencyLogo currency="ZIL" className={classes.currencyLogo} />
-                  <Typography variant="button">ZIL</Typography>
+                  <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />
+                  <Typography variant="button">{token?.symbol}</Typography>
                 </Box>
               </Box>
             )}

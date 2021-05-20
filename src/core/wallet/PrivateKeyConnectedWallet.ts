@@ -1,4 +1,4 @@
-import { Account } from "@zilliqa-js/account";
+import { Account } from "@zilliqa-js/account/dist/account";
 import { DefaultFallbackNetwork } from "app/utils/constants";
 import moment from "moment";
 import { Network } from "zilswap-sdk/lib/constants";

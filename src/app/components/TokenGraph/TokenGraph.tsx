@@ -129,23 +129,25 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
       if ((outToken && !outToken.isZil) || (outToken?.isZil && !inToken)) {
         outRates = await getZilStreamTokenRates(outToken.symbol, filter);
       }
-      setInTokenRate(inToken ? tokenState.prices[inToken.symbol] : tokenState.prices["ZIL"]);
+      setInTokenRate(outToken ? tokenState.prices[outToken.symbol] : tokenState.prices["ZIL"]);
       setInTokenRates(inRates);
       setOutTokenRates(outRates);
     })
 
     const statsFilter = { period: "2h", interval: "1m" };
-    let inStats: ZilStreamRates[];
+    let outStats: ZilStreamRates[];
     let changes: number;
     runGetTokenStats(async () => {
       // get token records of past 2 hour as there may be missing records inbetween
-      inStats = await getZilStreamTokenRates(inToken?.symbol || "ZIL", statsFilter);
+      outStats = await getZilStreamTokenRates(outToken?.symbol || "ZIL", statsFilter);
 
-      if (inStats?.length) {
-        if (inStats.length < 60) {
+      if (outStats?.length) {
+        if (outStats.length < 60) {
           return;
         }
-        changes = (inStats[0].close - inStats[59].close) / inStats[59].close;
+        changes = (outStats[0].close - outStats[59].close) / outStats[59].close;
+
+        console.log({ changes }, outStats[0].close, outStats[59].close, outStats[0].close - outStats[59].close, outStats[0].time, outStats[59].time)
       }
       setGrowth(new BigNumber(changes * 100));
     })
@@ -273,20 +275,20 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
         outRates?.forEach(rate => {
           returnResult.push({
             time: (Date.parse(rate.time) / 1000) as UTCTimestamp,
-            low: rate.low,
-            high: rate.high,
-            open: rate.open,
-            close: rate.close,
+            low: 1 / rate.low,
+            high: 1 / rate.high,
+            open: 1 / rate.open,
+            close: 1 / rate.close,
           })
         })
       } else {
         outRates?.forEach(rate => {
           returnResult.push({
             time: (Date.parse(rate.time) / 1000) as UTCTimestamp,
-            low: 1 / rate.low,
-            high: 1 / rate.high,
-            open: 1 / rate.open,
-            close: 1 / rate.close,
+            low: rate.low,
+            high: rate.high,
+            open: rate.open,
+            close: rate.close,
           })
         })
       }
@@ -294,25 +296,25 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
       inRates?.forEach(rate => {
         returnResult.push({
           time: (Date.parse(rate.time) / 1000) as UTCTimestamp,
-          low: rate.low,
-          high: rate.high,
-          open: rate.open,
-          close: rate.close,
+          low: 1 / rate.low,
+          high: 1 / rate.high,
+          open: 1 / rate.open,
+          close: 1 / rate.close,
         })
       })
     } else {
-      inRates.forEach((rate) => {
-        outRates.forEach((outRate) => {
-          if (Date.parse(rate.time) !== Date.parse(outRate.time)) {
+      outRates.forEach((rate) => {
+        inRates.forEach((inRate) => {
+          if (Date.parse(rate.time) !== Date.parse(inRate.time)) {
             return;
           }
           else {
             returnResult.push({
               time: (Date.parse(rate.time) / 1000) as UTCTimestamp,
-              low: rate.low / outRate.low,
-              high: rate.high / outRate.high,
-              open: rate.open / outRate.open,
-              close: rate.close / outRate.close,
+              low: rate.low / inRate.low,
+              high: rate.high / inRate.high,
+              open: rate.open / inRate.open,
+              close: rate.close / inRate.close,
             })
           }
         })
@@ -352,7 +354,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     <Box {...{ ref: containerRef }} {...rest} className={cls(classes.root, className)}>
       <Box className={classes.stats}>
         <Box className={classes.label}>
-          <Typography variant="h3">{" "}{inToken?.symbol || "ZIL"}<span className={classes.slash}> / </span>{outToken?.symbol || "ZIL"}</Typography>
+          <SwapSVG className={classes.swapSvg} /><Typography className={classes.textPadding} variant="h3">{" "}{outToken?.symbol || "ZIL"} / {inToken?.symbol || "ZIL"}</Typography>
         </Box>
         {(inTokenRates || outTokenRates) && (
           <>

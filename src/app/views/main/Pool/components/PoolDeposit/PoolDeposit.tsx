@@ -323,7 +323,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
         <PoolIcon type="plus" />
 
-        <CurrencyInput fixedToZil
+        <CurrencyInput fixedToToken
           label="Deposit"
           token={tokenState.tokens[ZIL_TOKEN_NAME]}
           amount={formState.zilAmount}

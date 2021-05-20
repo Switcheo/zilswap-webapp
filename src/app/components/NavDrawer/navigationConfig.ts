@@ -12,6 +12,10 @@ const navigationConfig: NavigationOptions[] = [{
     icon: "Layers",
     badge: "New",
   }, {
+    title: "ZILO",
+    href: "/ilo",
+    badge: "New",
+  }, {
     title: "Guide",
     href: "https://zilswap.gitbook.io/zilswap/",
     icon: "FileCopy",
