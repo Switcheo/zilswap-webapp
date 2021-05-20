@@ -5,7 +5,6 @@ import RewardsInfoButton from "app/layouts/RewardsInfoButton";
 import cls from "classnames";
 import React from "react";
 import ConnectWalletButton from "../ConnectWalletButton";
-import ThemeSwitch from "../ThemeSwitch";
 import { ReactComponent as MenuIcon } from "./menu.svg";
 import { TopBarProps } from "./types";
 
@@ -15,6 +14,10 @@ const useStyles = makeStyles(theme => ({
   },
   toolBar: {
     paddingLeft: 0,
+    borderBottom: "1px solid transparent",
+    borderImage: theme.palette.type === "dark" 
+                  ? "linear-gradient(to left, #003340 1%, #00FFB0  50%, #003340 100%) 0 0 100% 0/0 0 1px 0 stretch"
+                  : "",
     [theme.breakpoints.up("sm")]: {
       "&>div": {
         flex: 1,
@@ -38,6 +41,12 @@ const useStyles = makeStyles(theme => ({
   chipText: {
     color: theme.palette.text.primary
   },
+  drawerHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(0, 2),
+    justifyContent: 'flex-start',
+  },
 }));
 
 const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -48,9 +57,11 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
     <AppBar {...rest} elevation={0} position="static" className={cls(classes.root, className)}>
       <Toolbar className={classes.toolBar} variant="dense">
         <Box justifyContent="flex-start">
-          <IconButton onClick={onToggleDrawer}>
-            <MenuIcon />
-          </IconButton>
+          <div className={classes.drawerHeader}>
+            <IconButton onClick={onToggleDrawer}>
+              <MenuIcon />
+            </IconButton>
+          </div>
         </Box>
         <Box justifyContent="center">
           <Brand />
@@ -58,7 +69,6 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
         <Box display="flex" flex={1} justifyContent="flex-end" alignItems="center">
           <RewardsInfoButton />
           <ConnectWalletButton />
-          <ThemeSwitch className={classes.themeSwitch} />
         </Box>
       </Toolbar>
     </AppBar >

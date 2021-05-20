@@ -25,13 +25,13 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-around",
-    padding: theme.spacing(0, 8, 2),
+    padding: theme.spacing(0, 4, 2),
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(0, 2, 2),
     },
   },
   proportionSelect: {
-    margin: theme.spacing(1.5, 0, 0),
+    marginTop: "0.5em",
   },
   actionButton: {
     marginTop: theme.spacing(4),
@@ -295,15 +295,18 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           onCurrencyChange={onPoolChange}
           dialogOpts={{ hideZil: true }} />
 
-        <ProportionSelect fullWidth
+        <Box display="flex" justifyContent="flex-end">
+          <ProportionSelect
           color="primary"
+          size="small"
           className={classes.proportionSelect}
           onSelectProp={onPercentage} />
+        </Box>
 
         <KeyValueDisplay
           className={classes.keyValueLabel}
           hideIfNoValue
-          kkey="You Have"
+          kkey="Balance:"
           ValueComponent="span">
           {!!poolToken && (
             <StatefulText loadingKey={`rueryTokenBalance-${poolToken.address}`}>

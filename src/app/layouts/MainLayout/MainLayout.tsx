@@ -13,6 +13,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flex: 1,
     display: "flex",
     flexDirection: "column",
+    background: theme.palette.type === "dark" ? "#13222C" : "#F6FFFC",
+    mixBlendMode: theme.palette.type === "dark" ? "soft-light" : "normal"
   },
   content: {
     position: "relative",

@@ -4,18 +4,22 @@ const navigationConfig: NavigationOptions[] = [{
   pages: [{
     title: "Swap + Pool",
     href: "/swap",
+    icon: "SwapHoriz",
     show: true,
   }, {
     title: "Pools Overview",
     href: "/pools",
+    icon: "Layers",
     badge: "New",
   }, {
     title: "Guide",
     href: "https://zilswap.gitbook.io/zilswap/",
+    icon: "FileCopy",
     external: true,
     show: true,
   }, {
     title: "Governance",
+    icon: "HowToVote",
     expand: true,
     items: [{
       title: "Voting",
@@ -30,6 +34,7 @@ const navigationConfig: NavigationOptions[] = [{
     }]
   }, {
     title: "More",
+    icon: "MoreHoriz",
     expand: true,
     items: [{
       title: "Developer",
@@ -55,6 +60,7 @@ const navigationConfig: NavigationOptions[] = [{
   }, {
     title: "Buy ZIL",
     href: "https://transak.com/",
+    icon: "LocalAtm",
     purchase: true,
     show: true,
     highlight: true

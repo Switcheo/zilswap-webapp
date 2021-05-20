@@ -19,7 +19,7 @@ interface Props extends BoxProps {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    padding: theme.spacing(0, 8, 0),
+    padding: theme.spacing(0, 4, 0),
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(0, 2, 0),
     },

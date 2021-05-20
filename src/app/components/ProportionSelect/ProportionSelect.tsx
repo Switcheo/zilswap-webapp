@@ -11,10 +11,11 @@ const useStyles = makeStyles(theme => ({
   root: {
   },
   percentageButton: {
-    borderRadius: 4,
-    color: theme.palette.text?.primary,
-    paddingTop: 10,
-    paddingBottom: 10,
+    borderRadius: 5,
+    color: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#003340",
+    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    border: 0,
+    margin: 4,
   },
 }));
 const ProportionSelect: React.FC<ProportionSelectProps> = (props: ProportionSelectProps) => {
@@ -27,16 +28,16 @@ const ProportionSelect: React.FC<ProportionSelectProps> = (props: ProportionSele
   return (
     <ButtonGroup {...rest} className={cls(classes.root, className)}>
       <Button onClick={() => onSelect(0.25)} className={classes.percentageButton}>
-        <Typography variant="button">25%</Typography>
+        <Typography>25%</Typography>
       </Button>
       <Button onClick={() => onSelect(0.5)} className={classes.percentageButton}>
-        <Typography variant="button">50%</Typography>
+        <Typography>50%</Typography>
       </Button>
       <Button onClick={() => onSelect(0.75)} className={classes.percentageButton}>
-        <Typography variant="button">75%</Typography>
+        <Typography>75%</Typography>
       </Button>
       <Button onClick={() => onSelect(1)} className={classes.percentageButton}>
-        <Typography variant="button">100%</Typography>
+        <Typography>MAX</Typography>
       </Button>
     </ButtonGroup>
   );

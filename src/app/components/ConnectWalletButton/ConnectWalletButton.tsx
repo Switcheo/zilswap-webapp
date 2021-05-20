@@ -17,7 +17,11 @@ const useStyles = makeStyles(theme => ({
     minWidth: 50,
     [theme.breakpoints.down("xs")]: {
       marginRight: theme.spacing(1),
-    }
+    },
+  },
+  button: {
+    border: "2px solid #00FFB0",
+    color: '#DEFFFF',
   },
   dotIcon: {
     marginRight: theme.spacing(1)
@@ -42,7 +46,7 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
     <Box {...rest} className={cls(classes.root, className)}>
       <LoadableArea loading={loading}>
         {!wallet && (
-          <Button onClick={onConnectWallet}>Connect Wallet</Button>
+          <Button className={classes.button} onClick={onConnectWallet}>Connect</Button>
         )}
         {!!wallet && (
           <Chip

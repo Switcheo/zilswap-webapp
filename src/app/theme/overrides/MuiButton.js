@@ -2,7 +2,7 @@ export default theme => ({
   root: {
     borderRadius: "4242px",
     textTransform: "none",
-    color: theme.palette.primary.main,
+    color: theme.palette.button.primary,
 
     [theme.breakpoints.down("xs")]: {
       "& .MuiTypography-root.MuiTypography-button": {
@@ -12,7 +12,7 @@ export default theme => ({
     },
   },
   contained: {
-    borderRadius: "4px",
+    borderRadius: "12px",
     boxShadow: "none",
     "&:hover": {
       boxShadow: "none",
@@ -20,7 +20,7 @@ export default theme => ({
     "&$disabled": {
       color: "#FFFFFF",
       opacity: .2,
-      backgroundColor: `${theme.palette.primary.main}`
+      backgroundColor: `${theme.palette.primary.light}`
     },
   },
   text: {
@@ -33,4 +33,7 @@ export default theme => ({
       opacity: .2,
     }
   },
+  outlinedSizeSmall: {
+    padding: "2px 4px",
+  }
 });

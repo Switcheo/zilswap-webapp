@@ -3,19 +3,19 @@ import { colors } from '@material-ui/core';
 import { zilliqa, switcheo } from "./colors";
 
 const TEXT_COLORS = {
-  primary: "#DEFFFF",
-  secondary: "rgba(222, 255, 255, 0.5)",
+  primary: zilliqa.neutral[100],
+  secondary: zilliqa.neutral[140],
 };
 
 export default {
   type: "dark",
   toolbar: {
-    main: "#0D1B24",
+    main: zilliqa.neutral[190],
   },
   primary: {
-    contrastText: "#DEFFFF",
+    contrastText: zilliqa.neutral[100],
     dark: zilliqa.primary["130"],
-    main: "#003340",
+    main: zilliqa.primary["100"],
     light: zilliqa.neutral["200"],
   },
   error: {
@@ -33,26 +33,18 @@ export default {
   text: {
     primary: TEXT_COLORS.primary,
     secondary: TEXT_COLORS.secondary,
-    disabled: "rgba(222, 255, 255, 0.5)",
-  },
-  button: {
-    primary: "#00FFB0",
   },
   background: {
-    default: "#13222C",
+    default: zilliqa.neutral[200],
     contrast: zilliqa.neutral[190],
     paper: zilliqa.black,
     paperOpposite: zilliqa.neutral[100],
     tooltip: zilliqa.primary["195"],
     readOnly: zilliqa.neutral["195"]
   },
-  action: {
-    active: "#13222C",
-    disabled: "#0D1B24",
-  },
   mainBoxShadow: "none",
   cardBoxShadow: "0 4px 8px 1px rgba(0, 0, 0, 0.2)",
-  navbar: "#0D1B24",
+  navbar: zilliqa.neutral[200],
   switcheoLogo: switcheo.logoDark,
   colors: { zilliqa, switcheo },
 };

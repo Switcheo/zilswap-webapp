@@ -8,9 +8,10 @@ import { useDispatch, useSelector } from "react-redux";
 
 const useStyles = makeStyles(theme => ({
   root: {
+
   },
   button: {
-    borderRadius: 4,
+    borderRadius: 12,
     width: 90,
     padding: theme.spacing(1.5, 4),
     "&.MuiButton-contained": {
@@ -25,6 +26,14 @@ const useStyles = makeStyles(theme => ({
         fontSize: "14px",
         lineHeight: "16px",
       },
+    },
+    '&:not(:first-child)': {
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0,
+    },
+    '&:not(:last-child)': {
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
     },
   },
 }));

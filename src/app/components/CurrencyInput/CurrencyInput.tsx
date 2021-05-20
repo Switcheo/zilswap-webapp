@@ -15,10 +15,12 @@ const useStyles = makeStyles(theme => ({
   root: {
   },
   inputRow: {
-    paddingLeft: 0
+    paddingLeft: 0,
+    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    border: 0
   },
   input: {
-    textAlign: "right",
+    textAlign: "left",
   },
   currencyButton: {
     borderRadius: 0,
@@ -145,8 +147,8 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
         disabled={disabled}
         type="number"
         inputProps={{ className: classes.input }}
-        startAdornment={
-          <InputAdornment position="start">
+        endAdornment={
+          <InputAdornment position="end">
 
             {!fixedToZil && (
               <Button className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>

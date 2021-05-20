@@ -1,6 +1,9 @@
+import { SvgIcon } from "material-ui"
+
 export type NavigationPageOptions = {
   title: string;
   href?: string;
+  icon?: string;
   external?: boolean;
   badge?: string;
   show?: boolean;

@@ -1,18 +1,14 @@
-import { Box, Button, IconButton, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
-import { WarningRounded } from "@material-ui/icons";
-import AddIcon from "@material-ui/icons/Add";
+import { Box, IconButton, makeStyles, Typography } from "@material-ui/core";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import RemoveIcon from "@material-ui/icons/Remove";
 import { fromBech32Address } from "@zilliqa-js/crypto";
-import { validation as ZilValidation } from "@zilliqa-js/util";
-import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect, StatefulText, Text } from "app/components";
+import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect, StatefulText } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { strings, useAsyncTask, useBlacklistAddress, useMoneyFormatter } from "app/utils";
-import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, PlaceholderStrings, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
+import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
@@ -23,12 +19,13 @@ import { ShowAdvanced } from "./components";
 import { ReactComponent as SwitchSVG } from "./swap-icon.svg";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
 import { useLocation } from "react-router";
+import SwapDetail from "./components/SwapDetail";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   container: {
-    padding: theme.spacing(4, 8, 0),
+    padding: theme.spacing(4, 4, 0),
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(4, 2, 0),
     },
@@ -58,7 +55,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     paddingLeft: 0
   },
   proportionSelect: {
-    marginTop: 12,
+    marginTop: "0.5em",
   },
   currencyButton: {
     borderRadius: 0,
@@ -148,6 +145,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   errorMessage: {
     marginTop: theme.spacing(1),
+  },
+  swapIcon: {
+    "& path": {
+      fill: theme.palette.type === "dark" ? "#00FFB0" : "#003340" 
+    }
   }
 }));
 
@@ -184,7 +186,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [isBlacklisted] = useBlacklistAddress();
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
-  const [errorRecipientAddress, setErrorRecipientAddress] = useState<string | undefined>();
+  // const [errorRecipientAddress, setErrorRecipientAddress] = useState<string | undefined>();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [reversedRate, setReversedRate] = useState(false);
   const queryParams = new URLSearchParams(useLocation().search);
@@ -460,11 +462,11 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }));
   };
 
-  const onRecipientAddressChange = (event: any) => {
-    dispatch(actions.Swap.update({
-      recipientAddress: event.target.value,
-    }));
-  };
+  // const onRecipientAddressChange = (event: any) => {
+  //   dispatch(actions.Swap.update({
+  //     recipientAddress: event.target.value,
+  //   }));
+  // };
 
   const onSwap = () => {
     const { outToken, inToken, inAmount, outAmount, exactOf, slippage, expiry, recipientAddress } = swapFormState;
@@ -543,17 +545,6 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     });
   };
 
-  const onEnterRecipientAddress = () => {
-    const address = swapFormState.recipientAddress;
-    let error = undefined;
-    if (address && !ZilValidation.isBech32(address)) {
-      error = "Invalid address format";
-    }
-
-    if (error !== errorRecipientAddress)
-      setErrorRecipientAddress(error);
-  };
-
   const { outToken, inToken } = swapFormState;
   const tokenBalance = strings.bnOrZero(inToken?.balances?.[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString());
   let showTxApprove = false;
@@ -569,7 +560,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       <Notifications />
       <Box display="flex" flexDirection="column" className={classes.container}>
         <CurrencyInput
-          label="You Give"
+          label="From"
           hideBalance
           token={inToken || null}
           amount={formState.inAmount}
@@ -578,11 +569,12 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onEditorBlur={onDoneEditing}
           onAmountChange={onInAmountChange}
           onCurrencyChange={onInCurrencyChange} />
-        <ProportionSelect fullWidth color="primary" className={classes.proportionSelect} onSelectProp={onPercentage} />
-
+        <Box display="flex" justifyContent="flex-end">
+          <ProportionSelect color="primary" size="small" className={classes.proportionSelect} onSelectProp={onPercentage} />
+        </Box>
         <KeyValueDisplay className={classes.keyValueLabel}
           hideIfNoValue
-          kkey="You Have"
+          kkey="Balance:"
           ValueComponent="span">
           {!!inToken && (
             <StatefulText loadingKey={`rueryTokenBalance-${inToken.address}`}>
@@ -597,16 +589,16 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           )}
         </KeyValueDisplay>
 
-        <Box display="flex" mt={2} mb={3} justifyContent="center">
+        <Box display="flex" justifyContent="center">
           <IconButton
             disabled={!inToken || !outToken}
             onClick={() => onReverse()}
             className={cls(classes.swapButton, { [classes.rotateSwapButton]: buttonRotate })}>
-            <SwapSVG />
+            <SwapSVG className={classes.swapIcon}/>
           </IconButton>
         </Box>
         <CurrencyInput
-          label="You Receive"
+          label="To"
           token={outToken || null}
           amount={formState.outAmount}
           disabled={!outToken}
@@ -630,38 +622,6 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           </Box>
         )}
 
-        <Box display="flex" flexDirection="column" marginTop={3}>
-          {!formState.showRecipientAddress && (
-            <Button variant="text" className={classes.addAddressButton} onClick={() => setFormState({ ...formState, showRecipientAddress: true })}>
-              <AddIcon className={classes.accordionButton} />
-              <span>Add Receiving Address</span>
-            </Button>
-          )}
-          {formState.showRecipientAddress && (
-            <>
-              <InputLabel className={classes.addressLabel}>
-                <RemoveIcon className={classes.accordionButton} onClick={() => setFormState({ ...formState, showRecipientAddress: false })} />
-                <span>Receiving Address</span>
-                {!!errorRecipientAddress && <Typography className={classes.addressError} component="span" color="error">{errorRecipientAddress}</Typography>}
-              </InputLabel>
-              <OutlinedInput
-                onBlur={onEnterRecipientAddress}
-                className={classes.addressInput}
-                value={swapFormState.recipientAddress || ""}
-                placeholder={PlaceholderStrings.ZilAddress}
-                onChange={onRecipientAddressChange} />
-              {recipientAddrBlacklisted && (
-                <Text className={classes.errorText}>
-                  <WarningRounded color="error" />  Address appears to be a known CEX/DEX address. Please ensure you have entered a correct address!
-                </Text>
-              )}
-              <Text className={classes.warningText}>
-                <WarningRounded color="inherit" />  Do not send tokens directly to an exchange address as it may result in failure to receive your fund.
-              </Text>
-            </>
-          )}
-        </Box>
-
         <Typography className={classes.errorMessage} color="error">{error?.message || errorApproveTx?.message}</Typography>
         {swapFormState.isInsufficientReserves && (
           <Typography color="error">Pool reserve is too small to fulfill desired output.</Typography>
@@ -679,6 +639,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onClick={onSwap}>
           Swap
         </FancyButton>
+        <SwapDetail />
         <Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
           Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </Typography>

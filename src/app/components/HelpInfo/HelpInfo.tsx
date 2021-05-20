@@ -22,8 +22,32 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   tooltipSVG: {
     marginLeft: theme.spacing(1),
     height: 12,
-    verticalAlign: "middle"
-  },
+    verticalAlign: "middle",
+    "& #helpInfo": {
+      "& #Oval": {
+        stroke: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "rgba(0, 51, 64, 0.5)"
+      },
+      "& #questionMarkTop": {
+        fill: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "rgba(0, 51, 64, 0.5)"
+      },
+      "& #questionMarkBottom": {
+        fill: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "rgba(0, 51, 64, 0.5)"
+      }
+    },
+    "&:hover": {
+      "& #helpInfo": {
+        "& #Oval": {
+          stroke: theme.palette.type === "dark" ? "#00FFB0" : "#003340"
+        },
+        "& #questionMarkTop": {
+          fill: theme.palette.type === "dark" ? "#00FFB0" : "#003340"
+        },
+        "& #questionMarkBottom": {
+          fill: theme.palette.type === "dark" ? "#00FFB0" : "#003340"
+        }
+      }
+    }
+  }
 }));
 
 const HelpInfo: React.FC<Props> = (props: Props) => {

@@ -1,4 +1,5 @@
 import { Box, Button, Drawer, DrawerProps, List } from "@material-ui/core";
+import Divider from '@material-ui/core/Divider';
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import { useClaimEnabled } from "app/utils";
@@ -59,6 +60,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       paddingRight: 0,
     },
   },
+  drawerHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(0, 1),
+    justifyContent: 'flex-start',
+    minHeight: "49px",
+    borderBottom: theme.palette.type === "dark" ? "1px solid #003340" : "1px solid transparent",
+    backgroundColor: theme.palette.toolbar.main
+  },
 }));
 const NavDrawer: React.FC<DrawerProps> = (props: any) => {
   const { children, className, onClose, ...rest } = props;
@@ -67,18 +77,23 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
 
   return (
     <Drawer PaperProps={{ className: classes.paper }} onClose={onClose} {...rest} className={cls(classes.root, className)}>
-      <Box className={classes.header}>
+      {/* <Box className={classes.header}>
         <LogoSVG />
         <Box flex={1} />
         <Button onClick={onClose}>
           <CloseSVG />
         </Button>
-      </Box>
+      </Box> */}
+      <div className={classes.drawerHeader}>
+        <Button onClick={onClose}>
+          <CloseSVG />
+        </Button>
+      </div>
       <Box className={classes.content}>
         {navigationConfig.map((navigation, listIndex) => (
           <List key={listIndex}>
             {navigation.pages.filter(navigation => navigation.show || claimEnabled).map((page, index) => (
-              <NavigationContent onClose={onClose} key={index} navigation={page} />
+              <NavigationContent onClose={onClose} key={index} navigation={page}/>
             ))}
           </List>
         ))}

@@ -26,13 +26,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-around",
-    padding: theme.spacing(0, 8, 0),
+    padding: theme.spacing(0, 4, 0),
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(0, 2, 0),
     },
   },
   proportionSelect: {
-    marginTop: 12,
+    marginTop: "0.5em",
   },
   input: {
     marginTop: 12,
@@ -271,10 +271,13 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
             hideZil: true,
           }} />
 
-        <ProportionSelect fullWidth
+        <Box display="flex" justifyContent="flex-end">
+          <ProportionSelect
           color="primary"
+          size="small"
           className={classes.proportionSelect}
           onSelectProp={onPercentage} />
+        </Box>
 
         <KeyValueDisplay className={classes.keyValueLabel} hideIfNoValue kkey="In Pool">
           {!!poolToken && formatMoney(inPoolAmount || 0, formatOpts)}

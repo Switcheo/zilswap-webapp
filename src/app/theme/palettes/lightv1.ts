@@ -2,20 +2,20 @@ import { colors } from '@material-ui/core';
 import { zilliqa, switcheo } from './colors';
 
 const TEXT_COLORS = {
-  primary: "#003340",
-  secondary: "rgba(0, 51, 64, 0.5)",
+  primary: zilliqa.neutral[200],
+  secondary: zilliqa.neutral[140],
 };
 
 export default {
   type: "light",
   toolbar: {
-    main: "#003340",
+    main: zilliqa.primary["004"],
   },
   primary: {
-    contrastText: "#003340",
+    contrastText: zilliqa.neutral[100],
     dark: zilliqa.primary["130"],
     main: zilliqa.primary["100"],
-    light: "rgba(0, 51, 64, 0.5)",
+    light: zilliqa.primary["020"],
   },
   error: {
     contrastText: TEXT_COLORS.secondary,
@@ -32,13 +32,9 @@ export default {
   text: {
     primary: TEXT_COLORS.primary,
     secondary: TEXT_COLORS.secondary,
-    disabled: "rgba(222, 255, 255, 1)",
-  },
-  button: {
-    primary: "#14707C",
   },
   background: {
-    default: "#F6FFFC",
+    default: zilliqa.neutral[100],
     contrast: zilliqa.primary["002"],
     contrastAlternate: zilliqa.primary["010"],
     paper: zilliqa.neutral[100],
@@ -46,13 +42,9 @@ export default {
     tooltip: zilliqa.primary["195"],
     readOnly: zilliqa.primary["004"]
   },
-  action: {
-    active: "#F6FFFC",
-    disabled: "#003340",
-  },
   mainBoxShadow: "0 8px 16px 0 rgba(20,155,163,0.16)",
   cardBoxShadow: "0 4px 8px 2px rgba(20, 155, 163, 0.16)",
-  navbar: "#DEFFF5",
+  navbar: zilliqa.neutral[200],
   switcheoLogo: switcheo.logoLight,
   colors: { zilliqa, switcheo },
 };

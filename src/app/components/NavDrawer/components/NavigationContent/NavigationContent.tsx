@@ -1,4 +1,4 @@
-import { Button, Collapse, List, ListItem, ListItemText } from "@material-ui/core";
+import { Button, Collapse, List, ListItem, ListItemText, ListItemIcon } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
@@ -9,6 +9,8 @@ import cls from "classnames";
 import React, { forwardRef, useState } from "react";
 import { NavLink as RouterLink } from "react-router-dom";
 import { NavigationPageOptions } from "../../types";
+import * as IconModule from '../icons';
+import InboxIcon from '@material-ui/icons/MoveToInbox';
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1 }} >
@@ -27,13 +29,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     textTransform: "none",
     width: "100%",
     borderRadius: 0,
-    color: theme.palette.colors.zilliqa.neutral[140],
+    color: theme.palette.text?.primary,
   },
   buttonLeafActive: {
     color: theme.palette.colors.zilliqa.neutral[100],
   },
   highlightTitle: {
-    color: theme.palette.colors.zilliqa.primary[100]
+    color: theme.palette.type === "dark" ? "#00FFB0" : ""
   },
   mainFont: {
     fontSize: "16px!important",
@@ -41,19 +43,28 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   secondaryFont: {
     fontSize: "14px!important",
   },
+  icon: {
+    marginRight: "12px",
+    "& path": {
+      fill: theme.palette.type === "dark" ? "#00FFB0" : "#003340" 
+    }
+  }
 }))
 
 type NavigationContentProps = {
   navigation: NavigationPageOptions,
   secondary?: boolean,
-  onClose?: any
+  onClose?: any,
 }
+
+const Icons = (IconModule as unknown) as { [key: string]: React.FC };
 
 const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationContentProps) => {
   const { navigation, secondary, onClose } = props;
   const classes = useStyles();
   const [expand, setExpand] = useState<any>(null);
   const [widgetOpen, setWidgetOpen] = useState(false);
+  const Icon = navigation.icon ? Icons[navigation.icon] : InboxIcon;
 
   const initWidget = (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setWidgetOpen(true);
@@ -79,7 +90,22 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
 
   return (
     <>
-      {navigation.external && navigation.href && (
+      {navigation.external && navigation.href && navigation.icon && (
+        <ListItem className={classes.listItem} disableGutters button>
+          <Button
+            className={cls({
+              [classes.highlightTitle]: navigation.highlight,
+              [classes.secondaryFont]: secondary
+            }, classes.buttonLeaf)}
+            href={navigation.href}
+            target="_blank"
+          >
+            <Icon width="24px" className={classes.icon}/>
+            {navigation.title}
+          </Button>
+        </ListItem>
+      )}
+      {navigation.external && navigation.href && !navigation.icon && (
         <ListItem className={classes.listItem} disableGutters button>
           <Button
             className={cls({
@@ -103,13 +129,14 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             button
             onClick={() => setExpand(navigation.title === expand ? null : navigation.title)}
           >
+            <Icon width="24px" className={classes.icon}/>
             <ListItemText primary={navigation.title} primaryTypographyProps={{ className: classes.mainFont }} />
             {expand === navigation.title ? <ArrowDropUp /> : <ArrowDropDown />}
           </ListItem>
           <Collapse in={expand === navigation.title}>
             <List className={classes.listItem}>
               {navigation.items && navigation.items.map((item: NavigationPageOptions, index: number) => (
-                <NavigationContent key={index} navigation={item} secondary={true} />
+                <NavigationContent key={index} navigation={item} secondary={true}/>
               ))}
             </List>
           </Collapse>
@@ -124,6 +151,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             }, classes.buttonLeaf)}
             onClick={(ev) => !widgetOpen && initWidget(ev)}
           >
+            <Icon width="24px" className={classes.icon}/>
             {navigation.title}
           </Button>
         </ListItem>
@@ -140,6 +168,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             to={navigation.href}
             exact={false}
           >
+            <Icon width="24px" className={classes.icon}/>
             {navigation.title}
           </Button>
         </ListItem>

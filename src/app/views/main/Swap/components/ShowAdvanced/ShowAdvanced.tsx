@@ -9,7 +9,6 @@ import { ExpiryField, SlippageField } from "app/components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-
   },
   showAdvanced: {
     padding: theme.spacing(2.5, 8, 6.5),

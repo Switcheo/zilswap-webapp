@@ -1,4 +1,5 @@
 import MuiButton from './MuiButton';
+import MuiButtonGroup from './MuiButtonGroup';
 import MuiCollapse from "./MuiCollapse";
 import MuiCssBaseline from './MuiCssBaseline';
 import MuiDialog from './MuiDialog';
@@ -13,6 +14,7 @@ import MuiToolbar from './MuiToolbar';
 
 export default {
   MuiButton,
+  MuiButtonGroup,
   MuiCollapse,
   MuiCssBaseline,
   MuiDialog,

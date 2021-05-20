@@ -7,7 +7,7 @@ import React from "react";
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     padding: theme.spacing(3),
-    borderRadius: 4,
+    borderRadius: 12,
     backgroundColor: theme.palette.background.contrast,
     "&+$root": {
       marginTop: theme.spacing(4),
