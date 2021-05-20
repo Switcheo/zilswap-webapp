@@ -99,7 +99,6 @@ export const zilParamsToMap = (params: Value[]): { [index: string]: any } => {
 };
 
 // eslint-disable-next-line
-let mounted = false;
 let zilPayWatcherSubscribed = false;
 /**
  * Helper service to run continuous update or polling tasks
@@ -346,9 +345,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
       initWithoutWallet();
     }
 
-    mounted = true;
     return () => {
-      mounted = false;
       clearObserver();
     };
 

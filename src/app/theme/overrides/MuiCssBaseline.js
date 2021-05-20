@@ -11,8 +11,10 @@ const AvenirNext = {
   `,
 };
 
-export default () => ({
+const MuiCssBaseline = () => ({
   "@global": {
     "@font-face": [AvenirNext],
   }
 });
+
+export default MuiCssBaseline;

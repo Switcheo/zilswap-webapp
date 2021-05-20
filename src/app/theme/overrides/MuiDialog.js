@@ -1,4 +1,4 @@
-export default theme => ({
+const MuiDialog = theme => ({
   root: {
     display: "flex",
     flexDirection: "column",
@@ -23,3 +23,5 @@ export default theme => ({
     },
   }
 });
+
+export default MuiDialog;

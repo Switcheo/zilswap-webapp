@@ -2,7 +2,7 @@ import { LoadingTasks, RootState } from "app/store/types";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
-export default (...tasks: string[]) => {
+const useTaskSubscriber = (...tasks: string[]) => {
   const loadingTasks = useSelector<RootState, LoadingTasks>(store => store.layout.loadingTasks);
   const [loading, setLoading] = useState<boolean>(false);
   useEffect(() => {
@@ -13,3 +13,5 @@ export default (...tasks: string[]) => {
 
   return [loading];
 };
+
+export default useTaskSubscriber;

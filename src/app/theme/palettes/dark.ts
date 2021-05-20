@@ -7,7 +7,7 @@ const TEXT_COLORS = {
   secondary: "rgba(222, 255, 255, 0.5)",
 };
 
-export default {
+const theme = {
   type: "dark",
   toolbar: {
     main: "#0D1B24",
@@ -56,3 +56,5 @@ export default {
   switcheoLogo: switcheo.logoDark,
   colors: { zilliqa, switcheo },
 };
+
+export default theme;

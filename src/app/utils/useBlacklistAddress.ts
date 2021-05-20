@@ -31,7 +31,9 @@ const isBlacklisted = (address: string) => {
   return addresses?.includes(address) === true;
 };
 
-export default () => {
+const useBlacklistAddress = () => {
   initializeList();
   return [isBlacklisted];
 };
+
+export default useBlacklistAddress;

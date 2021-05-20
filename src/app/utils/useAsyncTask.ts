@@ -12,7 +12,7 @@ const parseError = (original: Error): Error => {
   return error;
 };
 
-export default <T>(taskname: string): AsyncTaskOutput<T> => {
+const useAsyncTask = <T>(taskname: string): AsyncTaskOutput<T> => {
   const [error, setError] = useState<Error | null>(null);
   const loadingTasks = useSelector<RootState, LoadingTasks>(store => store.layout.loadingTasks);
 
@@ -40,3 +40,5 @@ export default <T>(taskname: string): AsyncTaskOutput<T> => {
   const loadingState = !!loadingTasks[taskname];
   return [asyncTaskRunner, loadingState, error, clearError];
 };
+
+export default useAsyncTask;

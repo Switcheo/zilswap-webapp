@@ -2,7 +2,7 @@ import actions from "app/store/actions";
 import { strings } from "app/utils";
 import { useDispatch } from "react-redux";
 
-export default <T>() => {
+const useStatefulTask = <T>() => {
   const dispatch = useDispatch();
   return async (runnable: () => Promise<T>, taskName = strings.uuidv4()): Promise<T> => {
     if (typeof runnable !== "function") 
@@ -16,3 +16,5 @@ export default <T>() => {
     }
   }
 };
+
+export default useStatefulTask;

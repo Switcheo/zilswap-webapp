@@ -1,6 +1,6 @@
 import { fade } from "@material-ui/core/styles/colorManipulator";
 
-export default theme => ({
+const MuiSwitch = theme => ({
   root: {
     width: 34 + 12 * 2,
     height: 14 + 12 * 2,
@@ -41,3 +41,5 @@ export default theme => ({
     }
   },
 });
+
+export default MuiSwitch;

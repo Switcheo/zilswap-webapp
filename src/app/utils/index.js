@@ -1,6 +1,5 @@
 export { default as bytesToSize } from "./bytesToSize";
 export * from "./component";
-export { default as getInitials } from "./getInitials";
 export { default as gradients } from "./gradients";
 export { default as hexToRGB } from "./hexToRGB";
 export { default as hexToRGBA } from "./hexToRGBA";

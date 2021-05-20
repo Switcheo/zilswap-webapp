@@ -1,4 +1,4 @@
-export default (palette) => ({
+const typography = (palette) => ({
   fontFamily: [
     "Roboto"
   ].join(","),
@@ -63,3 +63,5 @@ export default (palette) => ({
   caption: {
   },
 });
+
+export default typography;

@@ -47,6 +47,8 @@ const subscriber = (listener: MessageListener): (() => void) => {
   return () => removeListener(listenerId);
 };
 
-export default (): (listener: MessageListener) => (() => void) => {
+const useMessageSubscriber = (): (listener: MessageListener) => (() => void) => {
   return subscriber;
 };
+
+export default useMessageSubscriber;

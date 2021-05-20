@@ -25,7 +25,7 @@ export interface PartialBoxProps {
   position?: 'relative' | 'absolute' | 'fixed' | 'initial' | 'unset'
 }
 
-export default (props: any) => {
+const extractBoxProps = (props: any) => {
   const {
     margin,
     marginBottom,
@@ -88,3 +88,5 @@ export default (props: any) => {
     restProps,
   }
 }
+
+export default extractBoxProps;

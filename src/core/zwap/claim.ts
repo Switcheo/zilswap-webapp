@@ -27,17 +27,18 @@ const CHAIN_ID = {
 }
 const msgVersion = 1; // current msgVersion
 
-const getTxArgs = (epoch: number, proof: string[], address: string, amount: BigNumber) => {
+const getTxArgs = (epoch: number, proof: string[], address: string, amount: BigNumber, contractAddr: string) => {
+  const contractAddrByStr20 = fromBech32Address(contractAddr).toLowerCase();
   return [{
     vname: "claim",
-    type: "Claim",
+    type: `${contractAddrByStr20}.Claim`,
     value: {
-      constructor: "Claim",
+      constructor: `${contractAddrByStr20}.Claim`,
       argtypes: [],
       arguments: [
         epoch.toString(),
         {
-          constructor: "DistributionLeaf",
+          constructor: `${contractAddrByStr20}.DistributionLeaf`,
           argtypes: [],
           arguments: [address, amount.toString(10)],
         },
@@ -61,7 +62,7 @@ export const claim = async (claimOpts: ClaimEpochOpts) => {
 
   const address = wallet.addressInfo.byte20;
 
-  const args: any = getTxArgs(epochNumber, proof, address, amount);
+  const args: any = getTxArgs(epochNumber, proof, address, amount, contractAddr);
 
   const minGasPrice = (await provider.blockchain.getMinimumGasPrice()).result as string;
   const params: any = {

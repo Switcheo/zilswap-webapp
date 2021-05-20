@@ -12,7 +12,7 @@ import MuiPaper from './MuiPaper';
 import MuiSwitch from './MuiSwitch';
 import MuiToolbar from './MuiToolbar';
 
-export default {
+const overrides = {
   MuiButton,
   MuiButtonGroup,
   MuiCollapse,
@@ -27,3 +27,4 @@ export default {
   MuiSwitch,
   MuiToolbar,
 };
+export default overrides;

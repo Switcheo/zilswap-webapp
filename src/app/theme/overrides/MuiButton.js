@@ -1,4 +1,4 @@
-export default theme => ({
+const MuiButton = theme => ({
   root: {
     borderRadius: "4242px",
     textTransform: "none",
@@ -37,3 +37,5 @@ export default theme => ({
     padding: "2px 4px",
   }
 });
+
+export default MuiButton;
