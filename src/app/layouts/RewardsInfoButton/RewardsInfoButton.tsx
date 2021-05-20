@@ -79,11 +79,11 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     claimTooltip,
   } = useMemo(() => {
     const unclaimedRewards = rewardsState.rewardDistributions.reduce((sum, dist) => {
-      return dist.claimed ? sum : sum.plus(dist.info.amount);
+      return dist.claimed === false ? sum.plus(dist.info.amount) : sum;
     }, BIG_ZERO);
 
     const claimableRewards = rewardsState.rewardDistributions.reduce((sum, dist) => {
-      return (!dist.claimed && dist.readyToClaim) ? sum.plus(dist.info.amount) : sum;
+      return (dist.claimed === false && dist.readyToClaim) ? sum.plus(dist.info.amount) : sum;
     }, BIG_ZERO);
 
     let claimTooltip = "No ZWAP to claim";
