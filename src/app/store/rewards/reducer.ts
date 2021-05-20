@@ -1,10 +1,45 @@
-import { SimpleMap } from "app/utils";
+import { LocalStoragePackage, SimpleMap } from "app/utils";
+import { LocalStorageKeys } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import { EpochInfo, logger, ZWAPPoolWeights } from "core/utilities";
 import moment from "moment";
 import { RewardsActionTypes } from "./actions";
-import { GlobalClaimHistory, PoolZWAPReward, RewardsState, ZAPRewardDist } from "./types";
+import { GlobalClaimHistory, PendingClaimTx, PendingClaimTxCache, PoolZWAPReward, RewardsState, ZAPRewardDist } from "./types";
 
+const PENDING_CLAIM_TX_STORAGE_VERSION = 1;
+type PendingTxPackage = LocalStoragePackage<SimpleMap<PendingClaimTxCache>>;
+const loadClaimTxs = (): SimpleMap<PendingClaimTxCache> => {
+  const savedData = localStorage.getItem(LocalStorageKeys.PendingClaimedTxs);
+  logger("load stored pending claim txs", savedData);
+
+  if (!savedData) return {};
+
+  try {
+    const savedPendingTxs = JSON.parse(savedData) as PendingTxPackage;
+    if (savedPendingTxs.version !== PENDING_CLAIM_TX_STORAGE_VERSION) return {};
+
+    // hydrate date objects
+    for (const address in savedPendingTxs.data) {
+      const pendingTxs = savedPendingTxs.data[address];
+      for (const hash in pendingTxs) {
+        pendingTxs[hash].dispatchedAt = moment(pendingTxs[hash].dispatchedAt);
+      }
+    }
+
+    logger("pending claim txs parse success", savedPendingTxs.data);
+    return savedPendingTxs.data;
+  } catch (error) {
+    return {};
+  }
+};
+
+const saveClaimTxs = (claimTxs: SimpleMap<PendingClaimTxCache>) => {
+  const content: PendingTxPackage = {
+    version: PENDING_CLAIM_TX_STORAGE_VERSION,
+    data: claimTxs,
+  };
+  localStorage.setItem(LocalStorageKeys.PendingClaimedTxs, JSON.stringify(content));
+};
 
 const initial_state: RewardsState = {
   epochInfo: null,
@@ -13,6 +48,7 @@ const initial_state: RewardsState = {
   potentialPoolRewards: {},
   globalClaimHistory: {},
   poolWeights: {},
+  claimTxs: loadClaimTxs(),
 };
 
 const updateDistributionClaims = (distributions: ZAPRewardDist[], globalClaimHistory: GlobalClaimHistory) => {
@@ -78,6 +114,44 @@ const reducer = (state: RewardsState = initial_state, actions: any) => {
       return {
         ...state,
         potentialPoolRewards,
+      };
+    case RewardsActionTypes.ADD_PENDING_CLAIM_TX:
+      const address = actions.bech32Address as string;
+      const pendingTx = actions.pendingTx as PendingClaimTx;
+
+      const claimTxs = {
+        ...state.claimTxs,
+        [address]: {
+          ...state.claimTxs[address],
+          [pendingTx.txHash]: pendingTx,
+        }
+      };
+
+      saveClaimTxs(claimTxs);
+
+      return {
+        ...state,
+        claimTxs,
+      };
+    case RewardsActionTypes.REMOVE_PENDING_CLAIM_TX:
+      const hash = actions.hash as string;
+
+      for (const address in state.claimTxs) {
+        if (state.claimTxs[address][hash]) {
+          delete state.claimTxs[address][hash];
+          // recreate state the refresh ui
+          state.claimTxs[address] = {
+            ...state.claimTxs[address],
+          };
+        }
+      }
+      saveClaimTxs(state.claimTxs);
+
+      return {
+        ...state,
+        claimTxs: {
+          ...state.claimTxs,
+        },
       };
     default:
       return state;

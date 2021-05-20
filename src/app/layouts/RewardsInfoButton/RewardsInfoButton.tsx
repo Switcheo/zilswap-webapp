@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
-import { RewardsState, RootState, TokenState, WalletState } from "app/store/types";
+import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { truncate, useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
@@ -12,6 +12,7 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ZilswapConnector } from "core/zilswap";
 import { ZWAPRewards } from "core/zwap";
+import moment from "moment";
 import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -66,6 +67,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const [runClaimRewards, loading, error] = useAsyncTask("claimRewards");
   const buttonRef = useRef();
 
+  const walletAddress = useMemo(() => walletState.wallet?.addressInfo.bech32, [walletState.wallet]);
+
   const potentialRewards = useMemo(() => {
     return Object.keys(rewardsState.potentialPoolRewards).reduce((accum, poolAddress) => {
       const reward = rewardsState.potentialPoolRewards[poolAddress];
@@ -78,11 +81,16 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     claimableRewards,
     claimTooltip,
   } = useMemo(() => {
+    const pendingClaimTxs = rewardsState.claimTxs[walletAddress ?? ""] ?? {};
+    const pendingClaimEpochs = Object.values(pendingClaimTxs).map(pendingTx => pendingTx.epoch);
+
     const unclaimedRewards = rewardsState.rewardDistributions.reduce((sum, dist) => {
+      if (pendingClaimEpochs.includes(dist.info.epoch_number)) return sum;
       return dist.claimed === false ? sum.plus(dist.info.amount) : sum;
     }, BIG_ZERO);
 
     const claimableRewards = rewardsState.rewardDistributions.reduce((sum, dist) => {
+      if (pendingClaimEpochs.includes(dist.info.epoch_number)) return sum;
       return (dist.claimed === false && dist.readyToClaim) ? sum.plus(dist.info.amount) : sum;
     }, BIG_ZERO);
 
@@ -100,7 +108,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       claimableRewards,
       claimTooltip,
     };
-  }, [rewardsState.rewardDistributions]);
+  }, [walletAddress, rewardsState.claimTxs, rewardsState.rewardDistributions]);
 
   const zapTokenBalance: BigNumber = useMemo(() => {
     if (!ZilswapConnector.network) return BIG_ZERO;
@@ -140,6 +148,17 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
           epochNumber: distribution.info.epoch_number,
           wallet: walletState.wallet,
         });
+
+        const pendingTx: PendingClaimTx = {
+          dispatchedAt: moment(),
+          epoch: distribution.info.epoch_number,
+          txHash: claimTx.hash,
+        };
+
+        dispatch(actions.Rewards.addPendingClaimTx(
+          walletState.wallet.addressInfo.bech32,
+          pendingTx,
+        ));
 
         count++;
       }
@@ -236,7 +255,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
               {!!claimResult && (
                 <Box marginTop={2}>
                   <Text variant="body1">Claimed ZWAP from {claimCount} Epochs</Text>
-                  <Text variant="body1">Last Claim TX: 0x{truncate(claimResult?.id, 8, 8)}</Text>
+                  <Text variant="body1">Last Claim TX: 0x{truncate(claimResult?.hash, 8, 8)}</Text>
                 </Box>
               )}
 
@@ -254,7 +273,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
               )}
 
               {!!claimResult && (
-                <Button fullWidth variant="outlined" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/0x${claimResult?.id}?network=${network}`}>
+                <Button fullWidth variant="outlined" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/0x${claimResult?.hash}?network=${network}`}>
                   View Claim TX <NewLinkIcon className={classes.buttonIcon} />
                 </Button>
               )}

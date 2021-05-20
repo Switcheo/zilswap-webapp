@@ -2,22 +2,23 @@ import { Value } from "@zilliqa-js/contract";
 import { actions } from "app/store";
 import {
   LayoutState,
+
   RootState,
   TokenInfo,
   Transaction,
-  WalletState,
+  WalletState
 } from "app/store/types";
 import { useAsyncTask } from "app/utils";
 import {
   DefaultFallbackNetwork,
   LocalStorageKeys,
   ZilPayNetworkMap,
-  ZIL_TOKEN_NAME,
+  ZIL_TOKEN_NAME
 } from "app/utils/constants";
 import {
   connectWalletPrivateKey,
   ConnectWalletResult,
-  connectWalletZilPay,
+  connectWalletZilPay
 } from "core/wallet";
 import { ZilswapConnector } from "core/zilswap";
 import { ZWAPRewards } from "core/zwap";
@@ -128,6 +129,8 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
       (tx: ObservedTx, status: TxStatus, receipt?: TxReceipt) => {
         logger("butler observed tx", tx.hash, status);
 
+        dispatch(actions.Rewards.removePendingClaimTx(tx.hash));
+
         dispatch(
           actions.Transaction.update({
             hash: tx.hash,
@@ -235,7 +238,7 @@ export const AppButler: React.FC<AppButlerProps> = (props: AppButlerProps) => {
 
       try {
         walletResult = await connectWalletPrivateKey(privateKey);
-      } catch (e) {}
+      } catch (e) { }
 
       const storeState: RootState = store.getState();
       if (walletResult?.wallet) {

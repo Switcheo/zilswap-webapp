@@ -19,6 +19,7 @@ export const LocalStorageKeys = {
   ZilPayConnected: "zilswap:zilpay-connected",
   Network: "zilswap:network",
   UserTokenList: "zilswap:user-token-list",
+  PendingClaimedTxs: "zilswap:pending-claimed-txs",
 };
 
 export const PlaceholderStrings = {
