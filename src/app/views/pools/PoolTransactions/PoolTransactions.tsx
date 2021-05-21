@@ -5,10 +5,9 @@ import { PoolsNavigationTabs, PoolsOverviewBanner, Text } from "app/components";
 import Page from "app/layouts/Page";
 import { RootState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask } from "app/utils";
+import { useAsyncTask, useNetwork } from "app/utils";
 import cls from "classnames";
 import { PoolTransaction, ZAPStats } from "core/utilities";
-import { ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { AddRemoveLiquidityRow, SwapTxRow } from "./components";
@@ -76,8 +75,7 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const [runQueryEvents, queryLoading, queryError] = useAsyncTask("queryEvents");
   const classes = useStyles();
-
-  const network = ZilswapConnector.network;
+  const network = useNetwork();
 
   useEffect(() => {
     runQueryEvents(async () => {

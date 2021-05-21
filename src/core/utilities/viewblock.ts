@@ -1,7 +1,7 @@
 import { HTTP } from "./http";
 import { toBech32Address, fromBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
-import moment, { Moment } from "moment";
+import dayjs from "dayjs";
 
 const API_KEY_LIBRARY = process.env.REACT_APP_VIEWBLOCK_API_KEY?.split(",") ?? [];
 const API_KEY = (() => {
@@ -10,7 +10,7 @@ const API_KEY = (() => {
 	if (key) return key;
 	const index = Math.floor(Math.random() * API_KEY_LIBRARY.length);
 	if (index >= API_KEY_LIBRARY.length) return undefined;
-	
+
 	sessionStorage.setItem("vb-aff", index.toString());
 	return API_KEY_LIBRARY[index];
 })();
@@ -69,7 +69,7 @@ export interface ZilTransaction {
 	blockHeight: number;
 	fee: BigNumber;
 	value: BigNumber;
-	timestamp: Moment;
+	timestamp: dayjs.Dayjs;
 	direction: "in";
 	receiptSuccess: boolean;
 
@@ -88,7 +88,7 @@ export class ViewBlock {
 
 	/**
 	 * Static function to retrieve transactions from ViewBlock given a ZIL address.
-	 * 
+	 *
 	 * @param address address to query.
 	 * @param network mainnet | testnet - defaults to `testnet`
 	 * @param page pagination - defaults to 1
@@ -107,7 +107,7 @@ export class ViewBlock {
 				...tx,
 				value: new BigNumber(tx.value),
 				fee: new BigNumber(tx.fee),
-				timestamp: moment.unix(tx.timestamp / 1000),
+				timestamp: dayjs.unix(tx.timestamp / 1000),
 				data,
 			} as ZilTransaction;
 		})
@@ -115,7 +115,7 @@ export class ViewBlock {
 
 	/**
 	 * Static function to retrieve ZIL balance from ViewBlock given a ZIL address.
-	 * 
+	 *
 	 * @param address address to query.
 	 * @param network mainnet | testnet - defaults to `testnet`
 	 * @returns response in JSON representation
@@ -128,7 +128,7 @@ export class ViewBlock {
 
 	/**
 	 * Static function to query Contract Events from ViewBlock given a contact address and event name.
-	 * 
+	 *
 	 * @param address address to query.
 	 * @param network mainnet | testnet - defaults to `testnet`
 	 * @param event event types to query.
@@ -147,7 +147,7 @@ export class ViewBlock {
 				...tx,
 				value: new BigNumber(tx.value),
 				fee: new BigNumber(tx.fee),
-				timestamp: moment.unix(tx.timestamp / 1000),
+				timestamp: dayjs.unix(tx.timestamp / 1000),
 				data,
 			} as ZilTransaction;
 		})

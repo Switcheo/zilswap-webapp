@@ -41,6 +41,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: "100%",
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(2),
+    marginBottom: theme.spacing(3),
     borderRadius: 0,
     backgroundColor: theme.palette.primary.dark,
     "&:hover": {
@@ -78,12 +79,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }))
 
 const ILOCard: React.FC<PaperProps> = (props: any) => {
-  const { children, className, staticContext, ...rest } = props;
+  const { children, className, staticContext } = props;
   const classes = useStyles();
 
   return (
     <Box className={classes.root}>
-      <Paper {...rest} className={classes.card}>
+      <Paper className={classes.card}>
         <Box className={classes.tabs}>
           <Button
             disableElevation

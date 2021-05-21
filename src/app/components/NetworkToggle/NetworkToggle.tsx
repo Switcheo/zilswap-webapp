@@ -4,10 +4,10 @@ import ArrowDownIcon from "@material-ui/icons/ArrowDropDown";
 import ArrowUpIcon from "@material-ui/icons/ArrowDropUp";
 import { actions } from "app/store";
 import { RootState, WalletState } from "app/store/types";
-import { useAsyncTask, useTaskSubscriber } from "app/utils";
+import { useAsyncTask, useTaskSubscriber, useNetwork } from "app/utils";
 import { LoadingKeys } from "app/utils/constants";
 import cls from "classnames";
-import { ZilswapConnector } from "core/zilswap";
+import { WalletConnectType } from "core/wallet";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Network } from "zilswap-sdk/lib/constants";
@@ -54,6 +54,7 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
   const classes = useStyles();
   const dispatch = useDispatch();
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null);
+  const network = useNetwork();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const [runNetworkChange, loadingNetworkChange, errorNetworkChange, clearError] = useAsyncTask("networkChange");
   const [loadingConnectWallet] = useTaskSubscriber(...LoadingKeys.connectWallet);
@@ -71,33 +72,26 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
     // eslint-disable-next-line
   }, [errorNetworkChange, clearError]);
 
-  const network = ZilswapConnector.network;
-  useEffect(() => {
-    // need to listen to wallet state
-    // to trigger react component reload
-    // when network changes.
-  }, [walletState]);
-
   const onOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setMenuAnchor(event.currentTarget);
   };
   const onCloseMenu = () => {
     setMenuAnchor(null);
   };
-  const onSelectNetwork = (network: Network) => {
+  const onSelectNetwork = (newNetwork: Network) => {
     setMenuAnchor(null);
-    if (network === ZilswapConnector.network) return;
+    if (newNetwork === network) return;
 
     runNetworkChange(async () => {
-      if (walletState.zilpay) {
+      const { wallet } = walletState
+      if (wallet?.type === WalletConnectType.ZilPay) {
         dispatch(actions.Layout.updateNotification({
           type: "",
-          message: "Please change network using your Zilpay wallet.",
+          message: "Please change network using your ZilPay wallet.",
         }));
         return
       }
-      await ZilswapConnector.changeNetwork({ network });
-      dispatch(actions.Layout.updateNetwork(network));
+      dispatch(actions.Blockchain.initialize({ wallet, network: newNetwork }))
     });
   };
 

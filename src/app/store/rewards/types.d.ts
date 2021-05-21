@@ -1,7 +1,7 @@
 import { SimpleMap } from "app/utils";
 import BigNumber from "bignumber.js";
 import { EpochInfo, SwapVolume, ZWAPDistribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
-import { Moment } from "moment";
+import { Dayjs } from "dayjs";
 import { ObservedTx } from "zilswap-sdk";
 
 export interface PoolSwapVolume extends SwapVolume {
@@ -19,8 +19,8 @@ export type PoolZWAPReward = {
 
 export interface ZAPEpochInfo {
   current: number;
-  epochStart: Moment;
-  nextEpoch: Moment;
+  epochStart: Dayjs;
+  nextEpoch: Dayjs;
   maxEpoch: number;
   raw: EpochInfo;
 };
@@ -43,7 +43,7 @@ export interface GlobalClaimHistory {
 export interface PendingClaimTx {
   epoch: number;
   txHash: string;
-  dispatchedAt: Moment;
+  dispatchedAt: Dayjs;
 }
 export interface PendingClaimTxCache {
   [hash: string]: PendingClaimTx;

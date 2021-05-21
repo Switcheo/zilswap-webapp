@@ -1,17 +1,17 @@
 import { Box, Divider, CircularProgress, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { ContrastBox } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { RootState, Transaction, TransactionState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useAsyncTask, useNetwork } from "app/utils";
-import cls from "classnames";
+import { hexToRGBA, truncate, useNetwork, useTaskSubscriber } from "app/utils";
+import { LoadingKeys } from "app/utils/constants";
 import { ConnectedWallet, WalletConnectType } from "core/wallet";
-import { ZilswapConnector } from "core/zilswap";
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { ReactComponent as CheckCompleteIcon } from "./check_complete.svg";
 import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
 
@@ -91,17 +91,17 @@ type CopyMap = {
 };
 
 const ConnectedWalletBox = (props: any) => {
-  const { onLogout, className, icon: Icon } = props;
+  const { className, onBack, icon: Icon } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const network = useNetwork();
-  const wallet = useSelector<RootState, ConnectedWallet | undefined>(state => state.wallet.wallet);
+  const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
-  const [runDisconnectZilswap, loadingDisconnectZilswap] = useAsyncTask<void>("disconnectZilswap");
   const [includeCompleted, setIncludeCompleted] = useState(true);
+  const [isLoading] = useTaskSubscriber(...LoadingKeys.connectWallet)
   const [copyMap, setCopyMap] = useState<CopyMap>({});
   const theme = useTheme();
-  const is_xs_media = useMediaQuery(theme.breakpoints.down("xs"));
+  const isMediaXS = useMediaQuery(theme.breakpoints.down("xs"));
 
   const formatStatusLabel = (status: string) => {
     if (!status) return "Unknown";
@@ -122,12 +122,8 @@ const ConnectedWalletBox = (props: any) => {
   }
 
   const onDisconnect = () => {
-    if (loadingDisconnectZilswap) return;
-    runDisconnectZilswap(async () => {
-      await ZilswapConnector.initialise();
-      dispatch(actions.Wallet.logout());
-      if (typeof onLogout === "function") onLogout();
-    });
+    dispatch(actions.Blockchain.initialize({ wallet: null, network }));
+    onBack();
   };
 
   if (!wallet) return null;
@@ -141,7 +137,7 @@ const ConnectedWalletBox = (props: any) => {
         <Box className={classes.label}>
           <Typography variant="h3">Connected to {wallet.type === WalletConnectType.ZilPay ? "ZilPay" : "Private Key"}</Typography>
           <Box mt={"8px"} display="flex" flexDirection="row" alignItems="center">
-            <Typography color="textSecondary" variant="body1">{is_xs_media ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
+            <Typography color="textSecondary" variant="body1">{isMediaXS ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
             <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network}`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
             <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(humanAddress)} open={!!copyMap[humanAddress]} title="Copied!">
               <IconButton className={classes.copy} size="small"><CopyIcon /></IconButton>
@@ -151,7 +147,7 @@ const ConnectedWalletBox = (props: any) => {
             <Typography className={cls(classes.info, classes.logout)} onClick={onDisconnect} color="primary" variant="body1">
               Disconnect
             </Typography>
-            {loadingDisconnectZilswap && <CircularProgress size={12} />}
+            {isLoading && <CircularProgress size={12} />}
           </Box>
         </Box>
       </ContrastBox>

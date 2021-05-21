@@ -9,7 +9,8 @@ import token from "./token/reducer";
 import pool from "./pool/reducer";
 import rewards from "./rewards/reducer";
 import transaction from "./transaction/reducer";
+import blockchain from "./blockchain/reducer";
 
 export default combineReducers({
-  preference, wallet, layout, stats, swap, token, pool, rewards, transaction,
+  preference, wallet, layout, stats, swap, token, pool, rewards, transaction, blockchain,
 });

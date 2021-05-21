@@ -1,8 +1,8 @@
-import moment from "moment";
+import { Dayjs } from "dayjs";
 import { Network } from "zilswap-sdk/lib/constants";
 
 export interface LoadingTask {
-  [index: string]: moment.Moment;
+  [index: string]: Dayjs;
 };
 export interface LoadingTasks {
   [index: string]: LoadingTask;
@@ -19,7 +19,6 @@ export interface LayoutState {
   liquidityEarnHidden: boolean;
   showPoolType: PoolType;
   notification?: FormNotification;
-  network: Network;
   loadingTasks: LoadingTasks;
   tasksRegistry: any,
 };

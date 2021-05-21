@@ -3,9 +3,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect, StatefulText } from "app/components";
 import { actions } from "app/store";
-import { LayoutState, PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
-import { useAsyncTask, useMoneyFormatter, strings } from "app/utils";
-import { BIG_ZERO, DefaultFallbackNetwork, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
+import { useAsyncTask, useMoneyFormatter, useNetwork, strings } from "app/utils";
+import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
@@ -76,9 +76,9 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const [runAddLiquidity, loading, error, clearPoolError] = useAsyncTask("poolAddLiquidity");
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const dispatch = useDispatch();
+  const network = useNetwork();
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
   const swapFormState = useSelector<RootState, SwapFormState>(state => state.swap);
-  const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
@@ -95,7 +95,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     if (!poolFormState.forNetwork) return
 
     // clear form if network changed
-    if (poolFormState.forNetwork !== layoutState.network) {
+    if (poolFormState.forNetwork !== network) {
       setFormState({
         zilAmount: "0",
         tokenAmount: "0",
@@ -104,7 +104,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     }
 
     // eslint-disable-next-line
-  }, [layoutState.network]);
+  }, [network]);
 
 
   const onPercentage = (percentage: number) => {
@@ -118,7 +118,6 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
   const onPoolChange = (token: TokenInfo) => {
     if (token.symbol === "ZIL") return;
-    const network = ZilswapConnector.network;
     dispatch(actions.Pool.select({ token, network }));
     onTokenChange("0");
   };
@@ -144,7 +143,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       });
 
       dispatch(actions.Pool.update({
-        forNetwork: ZilswapConnector.network,
+        forNetwork: network,
         addZilAmount: bnZilAmount,
 
         // only update counter currency if exchange rate is available
@@ -174,7 +173,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       });
 
       dispatch(actions.Pool.update({
-        forNetwork: ZilswapConnector.network,
+        forNetwork: network,
         addTokenAmount: bnTokenAmount,
 
         // only update counter currency if exchange rate is available
@@ -225,7 +224,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       const walletObservedTx: WalletObservedTx = {
         ...observedTx,
         address: walletState.wallet?.addressInfo.bech32 || "",
-        network: walletState.wallet?.network || DefaultFallbackNetwork,
+        network,
       };
 
       const updatedPool = ZilswapConnector.getPool(tokenAddress) || undefined;
@@ -254,7 +253,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       const walletObservedTx: WalletObservedTx = {
         ...observedTx!,
         address: walletState.wallet?.addressInfo.bech32 || "",
-        network: walletState.wallet?.network || DefaultFallbackNetwork,
+        network,
       };
 
       if (!observedTx)
@@ -270,7 +269,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     });
   };
 
-  const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || DefaultFallbackNetwork];
+  const zilswapContractAddress = CONTRACTS[network];
   const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
   let showTxApprove = false;
   if (poolToken) {
@@ -320,7 +319,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
         <PoolIcon type="plus" />
 
-        <CurrencyInput fixedToToken
+        <CurrencyInput fixedToken
           label="Deposit"
           token={tokenState.tokens[ZIL_TOKEN_NAME]}
           amount={formState.zilAmount}

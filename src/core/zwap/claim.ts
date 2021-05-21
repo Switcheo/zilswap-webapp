@@ -17,6 +17,7 @@ export const fetchClaimHistory = async () => {
 }
 
 export interface ClaimEpochOpts {
+  network: Network
   wallet: ConnectedWallet
   epochNumber: number;
   amount: BigNumber;
@@ -51,22 +52,20 @@ const getTxArgs = (epoch: number, proof: string[], address: string, amount: BigN
 };
 
 export const claim = async (claimOpts: ClaimEpochOpts): Promise<ObservedTx> => {
-  const { wallet, epochNumber, proof, amount } = claimOpts;
-  const zilswap = ZilswapConnector.connectorState?.zilswap as any;
-  const provider = (zilswap?.walletProvider || zilswap?.zilliqa);
+  const { network, wallet, epochNumber, proof, amount } = claimOpts;
+  const zilswap = ZilswapConnector.getSDK()
 
-  if (!provider) throw new Error("Wallet not connected");
-  if (!ZilswapConnector.network) throw new Error("Wallet not initialized");
+  if (!zilswap.zilliqa) throw new Error("Wallet not connected");
 
-  const contractAddr = DIST_CONTRACT[ZilswapConnector.network]
-  const chainId = CHAIN_ID[ZilswapConnector.network];
-  const distContract = provider.contracts.at(fromBech32Address(contractAddr));
+  const contractAddr = DIST_CONTRACT[network]
+  const chainId = CHAIN_ID[network];
+  const distContract = zilswap.zilliqa.contracts.at(fromBech32Address(contractAddr));
 
   const address = wallet.addressInfo.byte20;
 
   const args: any = getTxArgs(epochNumber, proof, address, amount, contractAddr);
 
-  const minGasPrice = (await provider.blockchain.getMinimumGasPrice()).result as string;
+  const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
   const params: any = {
     amount: new BN(0),
     gasPrice: new BN(minGasPrice),

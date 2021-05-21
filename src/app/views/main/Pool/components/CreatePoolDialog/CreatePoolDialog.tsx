@@ -2,10 +2,9 @@ import { DialogContent, makeStyles, Typography } from "@material-ui/core";
 import { DialogModal, FancyButton } from "app/components";
 import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
-import { useAsyncTask } from "app/utils";
+import { useAsyncTask, useNetwork } from "app/utils";
 import { BIG_ZERO, PlaceholderStrings } from "app/utils/constants";
 import cls from "classnames";
-import { ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AddressInput } from "./components";
@@ -35,6 +34,7 @@ const CreatePoolDialog = (props: any) => {
   const { children, className, open, onCloseDialog, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
+  const network = useNetwork();
   const [tokenPreview, setTokenPreview] = useState<TokenPreview | undefined>();
   const [runAsyncTask, loading, error] = useAsyncTask("createPool");
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
@@ -65,7 +65,6 @@ const CreatePoolDialog = (props: any) => {
         balances: tokenPreview.balances,
         allowances: {},
       };
-      const network = ZilswapConnector.network;
 
       dispatch(actions.Token.add({ token }));
       dispatch(actions.Pool.select({ token, network }));

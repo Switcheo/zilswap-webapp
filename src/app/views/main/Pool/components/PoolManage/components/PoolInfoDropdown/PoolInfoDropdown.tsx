@@ -1,18 +1,18 @@
 import { Box, BoxProps, Button, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowDropDownOutlined, ArrowDropUpOutlined } from "@material-ui/icons";
-import { AmountLabel, ContrastBox, KeyValueDisplay, PoolLogo, Text } from "app/components";
-import { RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
-import { AppTheme } from "app/theme/types";
-import { BIG_ZERO } from "app/utils/constants";
 import { Link } from "react-router-dom";
 import cls from "classnames";
 import React, { useState } from "react";
 import { actions } from "app/store";
 import { useDispatch, useSelector } from "react-redux";
-import { ZilswapConnector } from "core/zilswap";
+
+import { AmountLabel, ContrastBox, KeyValueDisplay, PoolLogo, Text } from "app/components";
+import { RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
+import { AppTheme } from "app/theme/types";
+import { BIG_ZERO } from "app/utils/constants";
 import { bnOrZero, toHumanNumber } from "app/utils/strings/strings";
-import { useValueCalculators } from "app/utils";
+import { useValueCalculators, useNetwork } from "app/utils";
 import { ZWAPRewards } from "core/zwap";
 
 interface Props extends BoxProps {
@@ -40,6 +40,7 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const valueCalculators = useValueCalculators();
   const dispatch = useDispatch();
+  const network = useNetwork();
   const rewardsState = useSelector<RootState, RewardsState>((state) => state.rewards);
   const tokenState = useSelector<RootState, TokenState>((state) => state.token);
   const [active, setActive] = useState<boolean>(false);
@@ -73,7 +74,7 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
     rewardsValue,
     roiLabel,
   } = React.useMemo(() => {
-    if (!ZilswapConnector.network || !rewardsState.epochInfo) return {
+    if (!rewardsState.epochInfo) return {
       rewardsValue: BIG_ZERO,
       potentialRewards: BIG_ZERO,
       depositedValue: BIG_ZERO,
@@ -82,7 +83,7 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
 
     const poolRewards = bnOrZero(rewardsState.potentialPoolRewards[token.address]);
 
-    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
+    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[network] ?? "";
     const zapToken = tokenState.tokens[zapContractAddr];
 
     const rewardsValue = valueCalculators.amount(tokenState.prices, zapToken, poolRewards);
@@ -99,16 +100,14 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
       depositedValue,
       roiLabel: roiPerDay.isZero() ? "-" : `${toHumanNumber(roiPerDay, 2)}%`,
     };
-  }, [rewardsState.epochInfo, rewardsState.potentialPoolRewards, poolShare, token, tokenState.prices, tokenState.tokens, valueCalculators]);
+  }, [network, rewardsState.epochInfo, rewardsState.potentialPoolRewards, poolShare, token, tokenState.prices, tokenState.tokens, valueCalculators]);
 
   const onGotoAdd = () => {
-    const network = ZilswapConnector.network;
     dispatch(actions.Pool.select({ token, network }));
     dispatch(actions.Layout.showPoolType("add"));
   };
 
   const onGotoRemove = () => {
-    const network = ZilswapConnector.network;
     dispatch(actions.Pool.select({ token, network }));
     dispatch(actions.Layout.showPoolType("remove"));
   };

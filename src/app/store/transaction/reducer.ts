@@ -1,6 +1,6 @@
 import { Types } from "./actions";
 import { WalletActionTypes as WalletTypes } from "../wallet/actions";
-import { LayoutActionTypes as LayoutTypes } from "../layout/actions";
+import { BlockchainActionTypes as BlockchainTypes } from "../blockchain/actions";
 import { ObserveTxProps, Transaction, TransactionsInitProps, TransactionState, TransactionUpdateProps, TransactionRemoveProps, SubmittedTx, WalletObservedTx } from "./types";
 import { ObservedTx } from "zilswap-sdk";
 import { ConnectedWallet } from "core/wallet";
@@ -89,9 +89,9 @@ const reducer = (state: TransactionState = initial_state, action: any): Transact
         submittedTxs: state.submittedTxs.filter(tx => tx.hash !== removeProps.hash),
       };
     case WalletTypes.WALLET_UPDATE:
-    case LayoutTypes.UPDATE_NETWORK:
+    case BlockchainTypes.SET_NETWORK:
       const wallet: ConnectedWallet | undefined = action.payload?.wallet;
-      const network: Network | undefined = wallet?.network || action.network;
+      const network: Network = wallet?.network || action.network; // XXX: is this right??
 
       const relevantObservingTxs = state.observingTxs.filter(tx => {
         if (wallet && wallet.addressInfo.bech32 !== tx.address)
@@ -103,12 +103,8 @@ const reducer = (state: TransactionState = initial_state, action: any): Transact
 
       return {
         ...state,
-        observingTxs: relevantObservingTxs,
-      };
-    case WalletTypes.WALLET_LOGOUT:
-      return {
         transactions: [],
-        observingTxs: [],
+        observingTxs: relevantObservingTxs,
         submittedTxs: [],
       };
     default:

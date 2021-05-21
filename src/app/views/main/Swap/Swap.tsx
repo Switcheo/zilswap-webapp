@@ -9,10 +9,10 @@ import { validation as ZilValidation } from "@zilliqa-js/util";
 import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect, StatefulText, Text } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
-import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
+import { ExactOfOptions, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { strings, useAsyncTask, useBlacklistAddress, useMoneyFormatter, useSearchParam } from "app/utils";
-import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, PlaceholderStrings, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
+import { strings, useAsyncTask, useBlacklistAddress, useMoneyFormatter, useNetwork, useSearchParam } from "app/utils";
+import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
@@ -176,8 +176,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const enableChangeRecipient = useSearchParam("enableChangeRecipient") === "true";
   const [buttonRotate, setButtonRotate] = useState(false);
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
+  const network = useNetwork()
   const swapFormState: SwapFormState = useSelector<RootState, SwapFormState>(store => store.swap);
-  const layoutState: LayoutState = useSelector<RootState, LayoutState>(store => store.layout);
   const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
   const walletState = useSelector<RootState, WalletState>(store => store.wallet);
@@ -195,7 +195,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (!swapFormState.forNetwork) return
 
     // clear form if network changed
-    if (swapFormState.forNetwork !== layoutState.network) {
+    if (swapFormState.forNetwork !== network) {
       setFormState({
         ...formState,
         inAmount: "0",
@@ -205,7 +205,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }
 
     // eslint-disable-next-line
-  }, [layoutState.network]);
+  }, [network]);
 
   useEffect(() => {
     if (inToken || outToken) {
@@ -239,7 +239,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const initNewToken = (newTokens: InitTokenProps) => {
     dispatch(actions.Swap.update({
-      forNetwork: ZilswapConnector.network || null,
+      forNetwork: network,
       ...newTokens,
     }));
   }
@@ -391,7 +391,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       inAmount: result.inAmount.toString(),
     });
     dispatch(actions.Swap.update({
-      forNetwork: ZilswapConnector.network || null,
+      forNetwork: network,
       ...result,
     }));
   };
@@ -412,7 +412,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       outAmount: result.outAmount.toString(),
     });
     dispatch(actions.Swap.update({
-      forNetwork: ZilswapConnector.network || null,
+      forNetwork: network,
       ...result,
     }));
   };
@@ -434,7 +434,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     });
 
     dispatch(actions.Swap.update({
-      forNetwork: ZilswapConnector.network || null,
+      forNetwork: network,
       ...result,
     }));
   };
@@ -456,7 +456,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     });
 
     dispatch(actions.Swap.update({
-      forNetwork: ZilswapConnector.network || null,
+      forNetwork: network,
       ...result,
     }));
   };
@@ -501,7 +501,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       const walletObservedTx: WalletObservedTx = {
         ...observedTx,
         address: walletState.wallet?.addressInfo.bech32 || "",
-        network: walletState.wallet?.network || DefaultFallbackNetwork,
+        network,
       };
 
       dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
@@ -530,7 +530,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       const walletObservedTx: WalletObservedTx = {
         ...observedTx!,
         address: walletState.wallet?.addressInfo.bech32 || "",
-        network: walletState.wallet?.network || DefaultFallbackNetwork,
+        network,
       };
       dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     });
@@ -559,7 +559,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const tokenBalance = strings.bnOrZero(inToken?.balances?.[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString());
   let showTxApprove = false;
   if (inToken && !inToken?.isZil) {
-    const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || DefaultFallbackNetwork];
+    const zilswapContractAddress = CONTRACTS[network];
     const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
     const unitlessInAmount = swapFormState.inAmount.shiftedBy(swapFormState.inToken!.decimals);
     showTxApprove = strings.bnOrZero(inToken?.allowances?.[byte20ContractAddress]).comparedTo(unitlessInAmount) < 0;

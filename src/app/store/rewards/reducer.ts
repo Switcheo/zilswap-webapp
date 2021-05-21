@@ -2,7 +2,7 @@ import { LocalStoragePackage, SimpleMap } from "app/utils";
 import { LocalStorageKeys } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import { EpochInfo, logger, ZWAPPoolWeights } from "core/utilities";
-import moment from "moment";
+import dayjs from "dayjs";
 import { RewardsActionTypes } from "./actions";
 import { GlobalClaimHistory, PendingClaimTx, PendingClaimTxCache, PoolZWAPReward, RewardsState, ZAPRewardDist } from "./types";
 
@@ -22,7 +22,7 @@ const loadClaimTxs = (): SimpleMap<PendingClaimTxCache> => {
     for (const address in savedPendingTxs.data) {
       const pendingTxs = savedPendingTxs.data[address];
       for (const hash in pendingTxs) {
-        pendingTxs[hash].dispatchedAt = moment(pendingTxs[hash].dispatchedAt);
+        pendingTxs[hash].dispatchedAt = dayjs(pendingTxs[hash].dispatchedAt);
       }
     }
 
@@ -73,8 +73,8 @@ const reducer = (state: RewardsState = initial_state, actions: any) => {
         ...state,
         epochInfo: {
           current: info.current_epoch,
-          epochStart: moment.unix(info.first_epoch_start),
-          nextEpoch: moment.unix(info.next_epoch_start),
+          epochStart: dayjs.unix(info.first_epoch_start),
+          nextEpoch: dayjs.unix(info.next_epoch_start),
           maxEpoch: info.total_epoch,
           raw: info,
         },

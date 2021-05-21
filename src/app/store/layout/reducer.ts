@@ -1,19 +1,12 @@
-import { DefaultFallbackNetwork, LocalStorageKeys } from "app/utils/constants";
-import moment from "moment";
-import { Network } from "zilswap-sdk/lib/constants";
+import dayjs from "dayjs";
 import { LayoutActionTypes } from "./actions";
 import { LayoutState } from "./types";
-
-const storedNetworkString = localStorage.getItem(LocalStorageKeys.Network);
-const networks: { [index: string]: Network | undefined } = Network;
-const storedNetwork = networks[storedNetworkString || ""] || DefaultFallbackNetwork;
 
 const initial_state: LayoutState = {
   showWalletDialog: false,
   showCreatePool: false,
   liquidityEarnHidden: false,
   notification: undefined,
-  network: storedNetwork,
   showPoolType: "add",
   loadingTasks: {},
   tasksRegistry: {},
@@ -44,25 +37,19 @@ const reducer = (state: LayoutState = initial_state, actions: any) => {
         liquidityEarnHidden: actions.hide === undefined ? true : actions.hide,
       };
 
-    case LayoutActionTypes.UPDATE_NETWORK:
-      localStorage.setItem(LocalStorageKeys.Network, actions.network);
-      return {
-        ...state,
-        network: actions.network,
-      };
-
     case LayoutActionTypes.ADD_BACKGROUND_LOADING:
-      loadingTask = state.loadingTasks[actions.name] || {};
-      loadingTask[actions.uuid] = moment();
-      state.tasksRegistry[actions.uuid] = actions.name;
       return {
         ...state,
         loadingTasks: {
           ...state.loadingTasks,
-          [actions.name]: loadingTask,
+          [actions.name]: {
+            ...(state.loadingTasks[actions.name] || {}),
+            [actions.uuid]: dayjs(),
+          },
         },
         tasksRegistry: {
           ...state.tasksRegistry,
+          [actions.uuid]: actions.name,
         },
       };
     case LayoutActionTypes.REMOVE_BACKGROUND_LOADING:

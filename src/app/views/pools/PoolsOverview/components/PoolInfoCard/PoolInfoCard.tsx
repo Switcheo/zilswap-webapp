@@ -6,11 +6,10 @@ import { actions } from "app/store";
 import { EMPTY_USD_VALUE } from "app/store/token/reducer";
 import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useValueCalculators } from "app/utils";
+import { useValueCalculators, useNetwork } from "app/utils";
 import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import { bnOrZero, toHumanNumber } from "app/utils/strings/strings";
 import cls from "classnames";
-import { ZilswapConnector } from "core/zilswap";
 import { ZWAPRewards } from "core/zwap";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -106,6 +105,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
   const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
   const swapVolumes = useSelector<RootState, PoolSwapVolumeMap>(state => state.stats.dailySwapVolumes)
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const network = useNetwork();
   const classes = useStyles();
 
   const onShowActions = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -116,7 +116,6 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
   };
 
   const onGotoAddLiquidity = () => {
-    const network = ZilswapConnector.network;
     dispatch(actions.Pool.select({ network, token }));
     dispatch(actions.Layout.showPoolType("add"));
     history.push("/pool");
@@ -143,7 +142,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     roiLabel,
     apr,
   } = React.useMemo(() => {
-    if (!ZilswapConnector.network || !rewardsState.epochInfo) return {
+    if (!rewardsState.epochInfo) return {
       rewardsValue: BIG_ZERO,
       potentialRewards: BIG_ZERO,
       roiLabel: "-",
@@ -152,7 +151,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
 
     const poolRewards = bnOrZero(rewardsState.rewardByPools[token.address]?.weeklyReward);
 
-    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
+    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[network];
     const zapToken = tokenState.tokens[zapContractAddr];
 
     const rewardsValue = valueCalculators.amount(tokenState.prices, zapToken, poolRewards.shiftedBy(12));
@@ -169,7 +168,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
       roiLabel: roiPerDay.isZero() ? "-" : `${roiPerDay.toFormat()}%`,
       apr,
     };
-  }, [rewardsState.epochInfo, rewardsState.rewardByPools, token, usdValues, tokenState.prices, tokenState.tokens, valueCalculators]);
+  }, [network, rewardsState.epochInfo, rewardsState.rewardByPools, token, usdValues, tokenState.prices, tokenState.tokens, valueCalculators]);
 
   if (token.isZil) return null;
 

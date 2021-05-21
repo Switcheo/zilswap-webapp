@@ -1,4 +1,4 @@
-import moment from "moment";
+import { Dayjs } from "dayjs";
 import { WalletProvider } from "zilswap-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 
@@ -19,7 +19,7 @@ export type ConnectedWallet = {
   type: WalletConnectType;
   network: Network;
 
-  timestamp: moment.Moment;
+  timestamp: Dayjs;
   addressInfo: WalletAccountInfo;
 };
 

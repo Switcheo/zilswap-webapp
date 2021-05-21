@@ -11,6 +11,7 @@ export const LoadingKeys = {
     "connectWalletZilPay",
     "connectWalletPrivateKey",
     "initWallet",
+    "initChain",
   ],
 };
 
@@ -71,4 +72,6 @@ export class PollIntervals {
   public static ZWAPClaimHistory = 60000;
   public static EpochInfo = 60000;
   public static PoolWeights = 3600000;
+
+  public static RetryAfterError = 5000;
 }

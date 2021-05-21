@@ -31,11 +31,7 @@ const useStyles = makeStyles(theme => ({
     justifyContent: "space-between"
   },
   label: {
-    fontSize: "12px",
-    lineHeight: "14px",
-    fontWeight: "bold",
-    letterSpacing: 0,
-    marginBottom: theme.spacing(1),
+    color: theme.palette.text.secondary,
   },
   form: {
     display: "flex",
@@ -58,7 +54,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   token: TokenInfo | null;
   amount: string;
   showCurrencyDialog?: boolean;
-  fixedToToken?: boolean;
+  fixedToken?: boolean;
   disabled?: boolean;
   hideBalance?: boolean;
   showContribution?: boolean;
@@ -73,7 +69,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
 const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
   const {
     children, className,
-    label, fixedToToken, amount, disabled,
+    label, fixedToken, amount, disabled,
     showCurrencyDialog: showDialogOverride,
     onCloseDialog: onCloseDialogListener,
     showContribution, hideBalance, dialogOpts = {},
@@ -123,7 +119,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
 
   return (
     <form className={cls(classes.form, className)} noValidate autoComplete="off">
-      <Box display="flex" justifyContent="space-between">
+      <Box className={classes.label} display="flex" justifyContent="space-between">
         <InputLabel>{label}</InputLabel>
         {tokenBalance && !hideBalance && (
           <Typography variant="body2">
@@ -147,8 +143,15 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
         inputProps={{ className: classes.input }}
         startAdornment={
           <InputAdornment position="start">
-
-            {!fixedToToken && (
+            {fixedToken ? (
+              <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
+                <Box display="flex" alignItems="center">
+                  <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />
+                  <Typography variant="button">{token?.symbol}</Typography>
+                </Box>
+              </Box>
+              ) :
+              (
               <Button className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
                 <Box display="flex" alignItems="center">
                   {token && <CurrencyLogo currency={token.registered && token.symbol} address={token.address} className={classes.currencyLogo} />}
@@ -156,17 +159,8 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
                 </Box>
                 <ExpandMoreIcon className={classes.expandIcon} />
               </Button>
-            )}
-
-            {fixedToToken && (
-              <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
-                <Box display="flex" alignItems="center">
-                  <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />
-                  <Typography variant="button">{token?.symbol}</Typography>
-                </Box>
-              </Box>
-            )}
-
+              )
+            }
           </InputAdornment>
         }
       />

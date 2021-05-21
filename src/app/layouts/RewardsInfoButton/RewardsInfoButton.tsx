@@ -8,11 +8,10 @@ import { AppTheme } from "app/theme/types";
 import { truncate, useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import { formatZWAPLabel } from "app/utils/strings/strings";
+import { ZWAPRewards } from "core/zwap";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ZilswapConnector } from "core/zilswap";
-import { ZWAPRewards } from "core/zwap";
-import moment from "moment";
+import dayjs from "dayjs";
 import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -111,21 +110,19 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   }, [walletAddress, rewardsState.claimTxs, rewardsState.rewardDistributions]);
 
   const zapTokenBalance: BigNumber = useMemo(() => {
-    if (!ZilswapConnector.network) return BIG_ZERO;
-
-    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
+    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[network] ?? "";
     return tokenState.tokens[zapContractAddr]?.balance ?? BIG_ZERO;
-  }, [tokenState.tokens]);
+  }, [network, tokenState.tokens]);
 
   const zapTokenValue: BigNumber = useMemo(() => {
-    if (!ZilswapConnector.network || zapTokenBalance.isZero()) return BIG_ZERO;
+    if (zapTokenBalance.isZero()) return BIG_ZERO;
 
-    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
+    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[network] ?? "";
     const zapToken = tokenState.tokens[zapContractAddr];
     if (!zapToken) return BIG_ZERO;
 
     return valueCalculators.amount(tokenState.prices, zapToken, zapTokenBalance);
-  }, [tokenState.prices, tokenState.tokens, zapTokenBalance, valueCalculators]);
+  }, [network, tokenState.prices, tokenState.tokens, zapTokenBalance, valueCalculators]);
 
   const zapBalanceLabel = useMemo(() => formatZWAPLabel(zapTokenBalance), [zapTokenBalance]);
   const unclaimedRewardsLabel = useMemo(() => formatZWAPLabel(unclaimedRewards), [unclaimedRewards]);
@@ -143,6 +140,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         const proof = distribution.info.proof.slice(1, distribution.info.proof.length - 1);
 
         claimTx = await ZWAPRewards.claim({
+          network,
           amount: distribution.info.amount,
           proof,
           epochNumber: distribution.info.epoch_number,
@@ -150,7 +148,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         });
 
         const pendingTx: PendingClaimTx = {
-          dispatchedAt: moment(),
+          dispatchedAt: dayjs(),
           epoch: distribution.info.epoch_number,
           txHash: claimTx.hash,
         };
@@ -167,12 +165,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         setClaimCount(count);
         setClaimResult(claimTx);
         setTimeout(() => {
-          if (!ZilswapConnector.network) return;
-
-          const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
-          dispatch(actions.Token.update({
-            address: zapContractAddr,
-          }));
+          dispatch(actions.Token.updateState());
         }, 5000);
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));

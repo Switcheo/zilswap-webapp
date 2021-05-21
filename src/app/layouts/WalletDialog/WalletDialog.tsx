@@ -7,7 +7,7 @@ import { WalletState } from "app/store/wallet/types";
 import cls from "classnames";
 import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ConnectedWallet, ConnectOptionType, WalletConnectType } from "../../../core/wallet/ConnectedWallet";
+import { ConnectOptionType, WalletConnectType } from "../../../core/wallet/ConnectedWallet";
 import { ConnectWallet, ConnectWalletPrivateKey, ConnectWalletZilPay } from "./components";
 import ConnectedWalletBox from "./components/ConnectedWalletBox";
 import { ReactComponent as PrivateKeyIconDark } from "./components/ConnectWallet/private-key-dark.svg";
@@ -23,18 +23,18 @@ const useStyles = makeStyles(theme => ({
   root: {
   },
 }));
+
 const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
-  const classes = useStyles();
-
-  const [connectWalletType, setConnectWalletType] = useState<ConnectOptionType | null>("privateKey");
-  const showWalletDialog = useSelector<RootState, boolean>(state => state.layout.showWalletDialog);
-  const dispatch = useDispatch();
   const theme = useTheme();
+  const classes = useStyles();
+  const dispatch = useDispatch();
+  const [connectWalletType, setConnectWalletType] = useState<ConnectOptionType | null>("privateKey");
   const [error, setError] = useState<string | null>();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+  const showWalletDialog = useSelector<RootState, boolean>(state => state.layout.showWalletDialog);
 
-  const get_icon = () => {
+  const getIcon = () => {
     if (walletState.wallet?.type === WalletConnectType.ZilPay) return ZilPayIcon;
     return theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon;
   }
@@ -51,13 +51,13 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     dispatch(actions.Layout.toggleShowWallet("close"));
   };
 
-  const onSelectConnectOption = async (connectType: ConnectOptionType) => {
+  const onSelect = async (connectType: ConnectOptionType) => {
     setConnectWalletType(connectType);
     setError(null);
   };
-  const onConnectWalletResult = (wallet: ConnectedWallet | null) => {
-    if (!wallet)
-      setConnectWalletType(null);
+
+  const onBack = () => {
+    setConnectWalletType(null);
   };
 
   const getDialogHeader = () => {
@@ -75,7 +75,8 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       open={showWalletDialog}
       onClose={onCloseDialog}
       {...rest}
-      className={cls(classes.root, className)}>
+      className={cls(classes.root, className)}
+    >
       {error && (
         <DialogContent>
           <InputLabel>
@@ -83,22 +84,22 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           </InputLabel>
         </DialogContent>
       )}
-      {!walletState.wallet && (
-        <Fragment>
-          {!connectWalletType && (
-            <ConnectWallet onSelectConnectOption={onSelectConnectOption} />
-          )}
-          {connectWalletType === "privateKey" && (
-            <ConnectWalletPrivateKey onResult={onConnectWalletResult} />
-          )}
-          {connectWalletType === "zilpay" && (
-            <ConnectWalletZilPay onResult={onConnectWalletResult} />
-          )}
-        </Fragment>
-      )}
-      {walletState.wallet && (
-        <ConnectedWalletBox onLogout={() => { setConnectWalletType(null) }} icon={get_icon()} />
-      )}
+      {
+        walletState.wallet ?
+          <ConnectedWalletBox onBack={onBack} icon={getIcon()} />
+          :
+          <Fragment>
+            {!connectWalletType && (
+              <ConnectWallet onSelectConnectOption={onSelect} />
+            )}
+            {connectWalletType === "privateKey" && (
+              <ConnectWalletPrivateKey onBack={onBack} />
+            )}
+            {connectWalletType === "zilpay" && (
+              <ConnectWalletZilPay onBack={onBack} />
+            )}
+          </Fragment>
+      }
     </DialogModal>
   );
 };

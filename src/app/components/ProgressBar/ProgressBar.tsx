@@ -1,22 +1,40 @@
-import { Box } from "@material-ui/core";
-import { extractBoxProps, PartialBoxProps } from "app/utils";
+import { Box, Typography, makeStyles } from '@material-ui/core'
+import { hexToRGBA, extractBoxProps, PartialBoxProps } from "app/utils";
 import React from "react";
 
 interface Props extends PartialBoxProps {
   progress: number
 }
 
+const useStyles = makeStyles(theme => ({
+  progressBar: {
+    border: `1px solid rgba${hexToRGBA(theme.palette.primary.main, 0.3)}`,
+  },
+  text: {
+    color: 'white',
+  },
+  lowProgressText: {
+    color: theme.palette.text.primary,
+  }
+}));
+
+
 const ProgressBar: React.FC<Props> = (props: Props) => {
-  const { boxProps, restProps } = extractBoxProps(props)
-  const { children, className, ...rest } = restProps;
+  const { boxProps } = extractBoxProps(props)
+  const { progress } = props
+  const classes = useStyles()
 
-  return <Box {...boxProps} {...rest} position="relative" display="flex" alignItems="stretch" bgcolor="background.default" borderRadius={4}>
-    <Box bgcolor="primary.main" padding={2} width={`${props.progress}%`} borderRadius={4} /> 
+  return (
+    <Box {...boxProps} className={classes.progressBar} border={1} position="relative" display="flex" alignItems="stretch" bgcolor="background.default" borderRadius={4}>
+      <Box bgcolor="primary.main" padding={2} width={`${progress}%`} borderRadius={4} />
 
-    <Box position="absolute" top={0} bottom={0} left={0} right={0} display="flex" alignItems="center" justifyContent="center">
-      <span>{props.progress}%</span>
+      <Box position="absolute" top={0} bottom={0} left={0} right={0} display="flex" alignItems="center" justifyContent="center">
+        <Typography className={progress >= 55 ? classes.text : classes.lowProgressText}>
+          {props.progress}%
+        </Typography>
+      </Box>
     </Box>
-  </Box>
+  )
 }
 
 export default ProgressBar

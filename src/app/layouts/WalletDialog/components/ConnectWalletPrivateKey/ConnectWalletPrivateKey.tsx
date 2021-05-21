@@ -1,19 +1,17 @@
 import { Box, Button, DialogContent, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import cls from "classnames";
 import { ContrastBox, FancyButton } from "app/components";
 import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask } from "app/utils";
-import cls from "classnames";
+import { useAsyncTask, useNetwork, useTaskSubscriber } from "app/utils";
+import { LoadingKeys } from "app/utils/constants";
 import { connectWalletPrivateKey } from "core/wallet";
 import { ConnectWalletResult } from "core/wallet/ConnectedWallet";
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { ConnectWalletManagerViewProps } from "../../types";
-import { ZilswapConnector } from "core/zilswap";
-import { RootState } from "app/store/types";
-import { Network } from "zilswap-sdk/lib/constants";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -62,16 +60,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props: any) => {
-  const { children, className, onResult, ...rest } = props;
-  const classes = useStyles();
+  const { children, className, onBack: _onBack, ...rest } = props;
   const [privateKey, setPrivateKey] = useState("");
+  const [runConnectTask, _, errorConnect] = useAsyncTask<void>("connectWalletPrivateKey");
+  const [isLoading] = useTaskSubscriber(...LoadingKeys.connectWallet)
+  const classes = useStyles();
   const dispatch = useDispatch();
-  const network = useSelector<RootState, Network>(state => state.layout.network);
-  const [runConnectTask, loadingConnect, errorConnect] = useAsyncTask<void>("connectWalletPrivateKey");
+  const network = useNetwork();
 
   const onBack = () => {
-    if (typeof onResult === "function")
-      onResult(null);
+    if (isLoading) return;
+    _onBack(null);
   };
 
   const onTextChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,7 +78,7 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props:
   }
 
   const connect = () => {
-    if (loadingConnect) return;
+    if (isLoading) return;
 
     runConnectTask(async () => {
       const walletResult: ConnectWalletResult = await connectWalletPrivateKey(privateKey, network);
@@ -87,12 +86,7 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props:
         throw walletResult.error;
 
       if (walletResult.wallet) {
-        const { network } = walletResult.wallet!;
-        await ZilswapConnector.connect({
-          network,
-          wallet: walletResult.wallet,
-        });
-        dispatch(actions.Wallet.update({ wallet: walletResult.wallet!, privateKey }));
+        dispatch(actions.Blockchain.initialize({ wallet: walletResult.wallet!, network }));
       }
     });
   }
@@ -111,7 +105,7 @@ const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props:
             <OutlinedInput className={classes.addressInput} value={privateKey} onChange={onTextChange} />
             {/* <InputLabel>Enter a Password</InputLabel>
             <OutlinedInput type="password" value={password} onChange={onPasswordChange} /> */}
-            <FancyButton fullWidth loading={loadingConnect} onClick={connect} className={classes.submitButton} variant="contained" color="primary">
+            <FancyButton fullWidth loading={isLoading} onClick={connect} className={classes.submitButton} variant="contained" color="primary">
               Connect
             </FancyButton>
           </form>
