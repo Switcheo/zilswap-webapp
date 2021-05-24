@@ -39,6 +39,7 @@
     "redux-thunk": "^2.3.0",
     "uuid": "^3.3.3",
     "validate.js": "^0.13.1",
+    "zeeves-auth-sdk-js": "^2.0.12",
     "zilswap-sdk": "^1.2.2"
   },
   "scripts": {

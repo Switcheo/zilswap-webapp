@@ -54,7 +54,7 @@ const initialFormState = {
 const TokenILOCard = (props: Props) => {
   const { data } = props
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
-  const [expanded, _] = useState<boolean>(props.expanded ?? true)
+  const [expanded] = useState<boolean>(props.expanded ?? true)
   const classes = useStyles();
 
   const tokenState = useSelector<RootState, TokenState>(state => state.token);

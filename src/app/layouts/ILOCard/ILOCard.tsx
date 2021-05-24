@@ -79,7 +79,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }))
 
 const ILOCard: React.FC<PaperProps> = (props: any) => {
-  const { children, className, staticContext } = props;
+  const { children } = props;
   const classes = useStyles();
 
   return (

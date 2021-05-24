@@ -61,6 +61,7 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
   // auto-click connect
   useEffect(() => {
     connect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const onBack = () => {

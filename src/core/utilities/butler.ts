@@ -4,13 +4,14 @@ import {
   LocalStorageKeys,
 } from "app/utils/constants";
 import {
-  connectWalletPrivateKey,
+  connectWalletPrivateKey, connectWalletZeeves,
   connectWalletZilPay,
 } from "core/wallet";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { logger } from "./logger";
 import { getConnectedZilPay } from "./zilpay";
+import {getConnectedZeeves} from "./zeeves";
 
 /**
  * Component constructor properties for {@link AppButler}
@@ -35,6 +36,24 @@ export const AppButler: React.FC<AppButlerProps> = (_props: AppButlerProps) => {
         const { wallet } = walletResult;
         dispatch(actions.Blockchain.initialize({ wallet, network }));
         return
+      }
+    } catch (e) { }
+
+    dispatch(actions.Blockchain.initialize({ wallet: null, network }));
+  };
+
+  const initWithZeeves = async () => {
+    logger("butler", "initWithZeeves");
+    try {
+      const zeeves = await getConnectedZeeves();
+      if (zeeves) {
+        const walletInfo = await connectWalletZeeves(zeeves);
+        if (walletInfo?.wallet) {
+          const { wallet } = walletInfo;
+          const { network } = wallet;
+          dispatch(actions.Blockchain.initialize({ wallet, network }));
+          return
+        }
       }
     } catch (e) { }
 
@@ -70,16 +89,19 @@ export const AppButler: React.FC<AppButlerProps> = (_props: AppButlerProps) => {
 
     const privateKey = localStorage.getItem(LocalStorageKeys.PrivateKey);
     const savedZilpay = localStorage.getItem(LocalStorageKeys.ZilPayConnected);
+    const zeevesConnected = localStorage.getItem(LocalStorageKeys.ZeevesConnected);
 
     runInitWallet(async () => {
       if (typeof privateKey === "string") {
         initWithPrivateKey(privateKey);
       } else if (savedZilpay === "true") {
         initWithZilPay();
+      } else if (zeevesConnected === 'true') {
+        initWithZeeves();
       } else {
         initWithoutWallet();
       }
-    })
+    });
 
     // eslint-disable-next-line
   }, []);

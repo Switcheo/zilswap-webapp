@@ -18,6 +18,7 @@ export const LoadingKeys = {
 export const LocalStorageKeys = {
   PrivateKey: "zilswap:private-key",
   ZilPayConnected: "zilswap:zilpay-connected",
+  ZeevesConnected: "zilswap:zeeves-connected",
   Network: "zilswap:network",
   UserTokenList: "zilswap:user-token-list",
   PendingClaimedTxs: "zilswap:pending-claimed-txs",
@@ -31,6 +32,10 @@ export const PlaceholderStrings = {
 export const ZilPayNetworkMap = {
   mainnet: Network.MainNet,
   testnet: Network.TestNet,
+} as { [index: string]: Network };
+
+export const ZeevesNetworkMap = {
+  mainnet: Network.MainNet,
 } as { [index: string]: Network };
 
 export const RPCEndpoints: { [key in Network]: string } = {
