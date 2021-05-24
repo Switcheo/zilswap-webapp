@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const ConnectWalletPrivateKey: React.FC<ConnectWalletManagerViewProps> = (props: any) => {
   const { children, className, onBack: _onBack, ...rest } = props;
   const [privateKey, setPrivateKey] = useState("");
-  const [runConnectTask, _, errorConnect] = useAsyncTask<void>("connectWalletPrivateKey");
+  const [runConnectTask, , errorConnect] = useAsyncTask<void>("connectWalletPrivateKey");
   const [isLoading] = useTaskSubscriber(...LoadingKeys.connectWallet)
   const classes = useStyles();
   const dispatch = useDispatch();

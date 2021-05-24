@@ -16,7 +16,7 @@ import { AppState, ObservedTx, TxReceipt, TxStatus, Zilswap } from "zilswap-sdk"
 import { getWallet, getTransactions } from '../selectors'
 
 const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
-  if (!wallet) return undefined;
+  if (!wallet) return null;
 
   switch (wallet.type) {
     case WalletConnectType.PrivateKey:
@@ -87,7 +87,7 @@ function* initialize(action: ChainInitAction) {
     const providerOrKey = getProviderOrKeyFromWallet(wallet)
     const { observingTxs } = getTransactions(yield select());
 
-    sdk = new Zilswap(network, providerOrKey, { rpcEndpoint: RPCEndpoints[network] });
+    sdk = new Zilswap(network, providerOrKey ?? undefined, { rpcEndpoint: RPCEndpoints[network] });
     logger('sdk initialized')
 
     yield call([sdk, sdk.initialize], txObserver, observingTxs)

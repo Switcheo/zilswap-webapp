@@ -1,7 +1,7 @@
 import { Box, Button, DialogContent, InputLabel, Typography, Link } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import React from "react";
+import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import cls from "classnames";
 import { ContrastBox, FancyButton } from "app/components";
@@ -32,7 +32,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   submitButton: {
-    marginTop: theme.spacing(6),
     minWidth: 240,
     alignSelf: "center",
     height: 46
@@ -40,6 +39,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   extraSpacious: {
     display: "flex",
     flexDirection: "column",
+    marginTop: theme.spacing(5),
     marginBottom: theme.spacing(5),
     [theme.breakpoints.down("sm")]: {
       marginTop: theme.spacing(3),
@@ -55,8 +55,13 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
   const { children, className, onBack: _onBack, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [runConnectTask, _, errorConnect] = useAsyncTask<void>("connectWalletZilPay");
+  const [runConnectTask, isCheckingZilPay, errorConnect] = useAsyncTask<void>("connectWalletZilPay");
   const [isLoading] = useTaskSubscriber(...LoadingKeys.connectWallet);
+
+  // auto-click connect
+  useEffect(() => {
+    connect()
+  }, [])
 
   const onBack = () => {
     if (isLoading) return;
@@ -92,7 +97,7 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
       <DialogContent>
         <ContrastBox className={classes.container}>
           <Box display="flex" flexDirection="row" justifyContent="space-between">
-            {isLoading && (
+            {isCheckingZilPay && (
               <InputLabel>Checking ZilPay Extension</InputLabel>
             )}
             {errorConnect && (
