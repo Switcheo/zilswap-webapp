@@ -15,10 +15,9 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(1.5, 4),
     [theme.breakpoints.down("xs")]: {
       width: 76,
-      padding: theme.spacing(0.5, 2),
+      padding: theme.spacing(1, 2),
       "& .MuiButton-label": {
         fontSize: "14px",
-        lineHeight: "16px",
       },
     },
     '&:not(:first-child)': {
