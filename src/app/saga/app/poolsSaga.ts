@@ -15,7 +15,7 @@ function* watchPools() {
     try {
       const { network } = getBlockchain(yield select())
       const { epochInfo, poolWeights } = getRewards(yield select());
-      if (!epochInfo) continue;
+      if (!epochInfo || Object.keys(poolWeights).length === 0) continue;
 
       const until = epochInfo.raw.next_epoch_start;
       const from = until - epochInfo.raw.epoch_period;

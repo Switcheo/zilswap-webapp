@@ -170,6 +170,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     };
   }, [network, rewardsState.epochInfo, rewardsState.rewardByPools, token, usdValues, tokenState.prices, tokenState.tokens, valueCalculators]);
 
+
   if (token.isZil) return null;
 
   return (

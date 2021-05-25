@@ -5,6 +5,7 @@ import { ZiloContractState } from "zilswap-sdk/lib/zilo";
 import { ConnectedWallet } from "core/wallet";
 
 export interface BlockchainState {
+  ready: boolean
   network: Network
   tokens: {}
   contracts: {

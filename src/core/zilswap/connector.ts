@@ -29,6 +29,7 @@ export interface ExchangeRateQueryProps extends ConnectorCallProps {
 export interface ApproveTxProps {
   tokenID: string;
   tokenAmount: BigNumber;
+  spenderAddress?: string
 };
 
 export interface AddTokenProps {

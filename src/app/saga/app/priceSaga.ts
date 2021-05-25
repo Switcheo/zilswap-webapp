@@ -105,6 +105,8 @@ function* queryUSDValues() {
 
       if (result)
         yield put(actions.Token.updatePrices(prices));
+    } catch (e) {
+      console.error(e)
     } finally {
       yield delay(PollIntervals.USDRates);
     }

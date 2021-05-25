@@ -1,6 +1,7 @@
 import { ConnectedWallet, WalletConnectType } from "core/wallet";
 import { actions } from "app/store";
 import { ChainInitAction } from "app/store/blockchain/actions";
+import { WalletAction, WalletActionTypes } from "app/store/wallet/actions";
 import { Transaction, TokenInfo } from "app/store/types";
 import { RPCEndpoints, ZIL_TOKEN_NAME } from "app/utils/constants";
 import { ZILO_DATA } from "core/zilo/constants";
@@ -13,7 +14,7 @@ import { PoolTransaction, PoolTransactionResult, ZAPStats } from "core/utilities
 import { eventChannel, EventChannel } from "redux-saga";
 import { fork, call, put, select, take, cancelled } from "redux-saga/effects";
 import { AppState, ObservedTx, TxReceipt, TxStatus, Zilswap } from "zilswap-sdk";
-import { getWallet, getTransactions } from '../selectors'
+import { getBlockchain, getWallet, getTransactions } from '../selectors'
 
 const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
   if (!wallet) return null;
@@ -82,10 +83,12 @@ function* initialize(action: ChainInitAction) {
   let sdk: Zilswap | null = null;
   try {
     yield put(actions.Layout.addBackgroundLoading('initChain', 'INIT_CHAIN'))
+    yield put(actions.Wallet.update({ wallet: null }))
 
     const { network, wallet } = action.payload
     const providerOrKey = getProviderOrKeyFromWallet(wallet)
     const { observingTxs } = getTransactions(yield select());
+    const { network: prevNetwork } = getBlockchain(yield select());
 
     sdk = new Zilswap(network, providerOrKey ?? undefined, { rpcEndpoint: RPCEndpoints[network] });
     logger('sdk initialized')
@@ -123,8 +126,8 @@ function* initialize(action: ChainInitAction) {
     }, {} as { [index: string]: TokenInfo })
 
     yield put(actions.Token.init({ tokens }));
-    yield put(actions.Blockchain.setNetwork(network))
     yield put(actions.Wallet.update({ wallet }))
+    if (network !== prevNetwork) yield put(actions.Blockchain.setNetwork(network))
 
     if (wallet) {
       const result: PoolTransactionResult = yield call(ZAPStats.getPoolTransactions, {
@@ -145,6 +148,7 @@ function* initialize(action: ChainInitAction) {
     }
 
     yield put(actions.Token.updateState());
+    yield put(actions.Blockchain.initialized());
   } catch (error) {
     console.error(error)
     sdk = yield call(teardown, sdk)
@@ -172,8 +176,20 @@ function* watchInitialize() {
 }
 
 function* watchZilPay() {
-  const zilPay = yield call(getConnectedZilPay);
-  const chan = (yield call(zilPayObserver, zilPay)) as EventChannel<ConnectedWallet>;
+  let chan
+  while (true) {
+    try {
+      const action: WalletAction = yield take(WalletActionTypes.WALLET_UPDATE)
+      if (action.payload.wallet?.type === WalletConnectType.ZilPay) {
+        logger("starting to watch zilpay")
+        const zilPay = (yield call(getConnectedZilPay)) as unknown as any;
+        chan = (yield call(zilPayObserver, zilPay)) as EventChannel<ConnectedWallet>;
+        break
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
   try {
     while (true) {
       const newWallet = (yield take(chan)) as ConnectedWallet
@@ -194,4 +210,5 @@ export default function* blockchainSaga() {
   logger("init blockchain saga");
   yield fork(watchInitialize);
   yield fork(watchZilPay);
+  yield put(actions.Blockchain.ready())
 }

@@ -8,6 +8,7 @@ const networks: { [index: string]: Network | undefined } = Network;
 const storedNetwork = networks[storedNetworkString || ""] || DefaultFallbackNetwork;
 
 const initial_state: BlockchainState = {
+  ready: false,
   network: storedNetwork,
   tokens: {},
   contracts: {
@@ -23,6 +24,8 @@ const initial_state: BlockchainState = {
 
 const reducer = (state: BlockchainState = initial_state, actions: any) => {
   switch (actions.type) {
+    case BlockchainActionTypes.READY:
+      return { ...state, ready: true }
     case BlockchainActionTypes.SET_NETWORK:
       localStorage.setItem(LocalStorageKeys.Network, actions.network);
       return {

@@ -1,13 +1,18 @@
 import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import BigNumber from 'bignumber.js'
 import { Box, makeStyles } from '@material-ui/core'
+import { fromBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyInputILO, FancyButton, Text } from 'app/components'
 import ProgressBar from 'app/components/ProgressBar'
-import { RootState, TokenState } from "app/store/types";
+import { actions } from "app/store";
+import { RootState, TokenState, WalletObservedTx, WalletState } from "app/store/types"
+import { useAsyncTask, useNetwork } from "app/utils"
 import { ZIL_TOKEN_NAME } from 'app/utils/constants';
-import BigNumber from 'bignumber.js';
-import { useSelector } from 'react-redux';
-import HelpInfo from "../HelpInfo";
+import { ZilswapConnector } from "core/zilswap";
 import { ILOData } from 'core/zilo/constants';
+
+import HelpInfo from "../HelpInfo";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -61,15 +66,22 @@ const initialFormState = {
 
 const TokenILOCard = (props: Props) => {
   const { data } = props
+  const dispatch = useDispatch();
+  const network = useNetwork();
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const [expanded, _] = useState<boolean>(props.expanded ?? true)
+  const [runCommit, loading, error, clearCommitError] = useAsyncTask("commitILO");
+  const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const classes = useStyles();
 
-  const tokenState = useSelector<RootState, TokenState>(state => state.token);
-
-  const zwapToken = Object.values(tokenState.tokens).filter(token => token.isZwap)[0]
+  const zwapToken = Object.values(tokenState.tokens).filter(token => token.isZwap)[0]!
   const zilToken = tokenState.tokens[ZIL_TOKEN_NAME]
   const exchangeRate: BigNumber = zwapToken?.pool?.exchangeRate || new BigNumber(0)
+  const contractAddrHex = fromBech32Address(data.contractAddress).toLowerCase();
+  const unitlessInAmount = new BigNumber(formState.zwapAmount).shiftedBy(zwapToken.decimals).integerValue();
+  const showTxApprove = new BigNumber(zwapToken.allowances![contractAddrHex] || '0').comparedTo(unitlessInAmount) < 0;
 
   const onZwapChange = (amount: string = "0") => {
     let _amount = new BigNumber(amount);
@@ -96,6 +108,33 @@ const TokenILOCard = (props: Props) => {
       zilAmount: amount,
     });
   };
+
+  const onApproveTx = () => {
+    if (loading) return;
+
+    clearCommitError();
+
+    runApproveTx(async () => {
+      const tokenAmount = new BigNumber(formState.zwapAmount);
+      const observedTx = await ZilswapConnector.approveTokenTransfer({
+        tokenAmount: tokenAmount.shiftedBy(zwapToken.decimals),
+        tokenID: zwapToken.address,
+      });
+
+      if (!observedTx)
+        throw new Error("Transfer allowance already sufficient for specified amount");
+
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx!,
+        address: walletState.wallet!.addressInfo.bech32,
+        network,
+      };
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
+    });
+  };
+
+  // TODO: check state if can commit
+  // TODO: monitor active state
 
   return (
     <Box className={classes.root}>
@@ -164,13 +203,12 @@ const TokenILOCard = (props: Props) => {
 
           <FancyButton walletRequired
             className={classes.actionButton}
-            // showTxApprove={showTxApprove}
-            // loadingTxApprove={loadingApproveTx}
-            // onClickTxApprove={onApproveTx}
+            showTxApprove={showTxApprove}
+            loadingTxApprove={loadingApproveTx}
+            onClickTxApprove={onApproveTx}
             variant="contained"
             color="primary"
-            // disabled={!inToken || !outToken}
-            // onClick={onSwap}
+            // onClick={onCommit}
           >
             Commit
           </FancyButton>

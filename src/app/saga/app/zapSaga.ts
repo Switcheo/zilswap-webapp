@@ -124,7 +124,7 @@ function* queryPotentialRewards() {
       const walletState: WalletState = getWallet(yield select());
 
       if (!walletState.wallet) {
-        yield put(actions.Rewards.updateDistributions([]));
+        yield put(actions.Rewards.updatePotentialRewards({}));
         continue;
       }
 
@@ -147,12 +147,11 @@ function* queryPotentialRewards() {
 
 export default function* zapSaga() {
   logger("init zap saga");
-  yield take(WalletActionTypes.WALLET_UPDATE) // wait for first init
+  yield take(BlockchainActionTypes.INITIALIZED) // wait for first init
   yield fork(queryEpochInfo);
   yield fork(queryPoolWeights);
   yield fork(queryDistribution);
   yield fork(queryClaimHistory);
-  yield fork(queryPotentialRewards);
   yield fork(queryPotentialRewards);
 }
 

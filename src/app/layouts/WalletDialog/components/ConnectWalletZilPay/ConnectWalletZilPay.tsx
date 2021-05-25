@@ -58,11 +58,6 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
   const [runConnectTask, isCheckingZilPay, errorConnect] = useAsyncTask<void>("connectWalletZilPay");
   const [isLoading] = useTaskSubscriber(...LoadingKeys.connectWallet);
 
-  // auto-click connect
-  useEffect(() => {
-    connect()
-  }, [])
-
   const onBack = () => {
     if (isLoading) return;
     _onBack(null);
@@ -91,6 +86,12 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
       }
     });
   }
+
+  // auto-click connect
+  useEffect(() => {
+    connect()
+    // eslint-disable-next-line
+  }, [])
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>

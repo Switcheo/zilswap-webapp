@@ -26,6 +26,7 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         ZILO_DATA[network!].map(data => {
         return (
           <TokenILOCard
+            key={data.contractAddress}
             expanded={true}
             data={data}
           />
