@@ -13218,10 +13218,10 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-zilswap-sdk@^1.2.2:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/zilswap-sdk/-/zilswap-sdk-1.2.2.tgz#ec20638ab0a647c8940b421900486ec4f4abc9b3"
-  integrity sha512-dDlR8H6n0b4EiioSTGz/ijfJBqv2zAdOyH03ZrgKNc/2cl/H83ozKIEbbKpASVZ3kI0tEZAMMa31cjvKlf+Bag==
+zilswap-sdk@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/zilswap-sdk/-/zilswap-sdk-1.3.0.tgz#b9d71fe8aeaf6b9465c9df5c6c1c31f978310f71"
+  integrity sha512-S4BiA937+js406oyLrdHqRk42MhdCOjCZIEn2SUa+Gu/CVXFVBxBaEaiBK3ujKgQonKlPapSAfYSoSossmnN6w==
   dependencies:
     "@zilliqa-js/zilliqa" "^2.2.0"
     async-mutex "^0.2.2"

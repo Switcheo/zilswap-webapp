@@ -93,8 +93,7 @@ function* initialize(action: ChainInitAction) {
     yield call([sdk, sdk.initialize], txObserver, observingTxs)
     for (let i = 0; i++; i < ZILO_DATA[network].length) {
       const data = ZILO_DATA[network][i]
-      const zilo = sdk.initZilo(data.contractAddress)
-      yield call([zilo, zilo.initialize], ziloStateObserver)
+      yield call([sdk, sdk.registerZilo], data.contractAddress, ziloStateObserver)
       logger('zilo sdk initialized')
     }
     ZilswapConnector.setSDK(sdk)
