@@ -1,4 +1,4 @@
-import { Button, Collapse, List, ListItem, ListItemText, ListItemIcon } from "@material-ui/core";
+import { Button, Collapse, List, ListItem, ListItemText } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";

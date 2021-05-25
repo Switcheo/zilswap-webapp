@@ -1,4 +1,4 @@
-export default theme => ({
+const MuiButtonGroup = theme => ({
     groupedHorizontal: {
         '&:not(:first-child)': {
             borderTopLeftRadius: "5px",
@@ -10,4 +10,6 @@ export default theme => ({
         },
     }
 });
+
+export default MuiButtonGroup;
   

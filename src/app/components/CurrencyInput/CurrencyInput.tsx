@@ -1,4 +1,4 @@
-import { Box, Button, InputAdornment, InputLabel, FormControl, OutlinedInput, Typography } from "@material-ui/core";
+import { Box, Button, InputAdornment, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { CurrencyLogo } from "app/components";

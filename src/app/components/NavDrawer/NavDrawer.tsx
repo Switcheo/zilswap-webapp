@@ -1,5 +1,5 @@
 import { Box, Button, Drawer, DrawerProps, List } from "@material-ui/core";
-import Divider from '@material-ui/core/Divider';
+// import Divider from '@material-ui/core/Divider';
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import { useClaimEnabled } from "app/utils";
@@ -9,7 +9,7 @@ import SocialLinkGroup from "../SocialLinkGroup";
 import ThemeSwitch from "../ThemeSwitch";
 import { ReactComponent as CloseSVG } from "./close.svg";
 import { NavigationContent } from "./components";
-import { ReactComponent as LogoSVG } from "./logo.svg";
+// import { ReactComponent as LogoSVG } from "./logo.svg";
 import navigationConfig from "./navigationConfig";
 
 const useStyles = makeStyles((theme: AppTheme) => ({

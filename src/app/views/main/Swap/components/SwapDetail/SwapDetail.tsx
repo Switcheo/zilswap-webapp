@@ -1,7 +1,7 @@
 import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { KeyValueDisplay, HelpInfo } from "app/components";
-import { LayoutState, RootState, TokenInfo, TokenState } from "app/store/types";
+import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
 import { ZIL_TOKEN_NAME } from "app/utils/constants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
@@ -21,7 +21,7 @@ const SwapDetail: React.FC<SwapDetailProps> = (props: SwapDetailProps) => {
   const { children, className, token, ...rest } = props;
   const classes = useStyles();
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
-  const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
+  // const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5, showCurrency: true });
 
   const zilFormatOpts: MoneyFormatterOptions = {
@@ -53,11 +53,11 @@ const SwapDetail: React.FC<SwapDetailProps> = (props: SwapDetailProps) => {
     const zilContribution = share.times(zilReserve);
     return `${moneyFormat(zilContribution, zilFormatOpts)} + ${moneyFormat(tokenContribution, formatOpts)}`;
   };
-  const getUserPoolShare = () => {
-    if (!token?.pool) return "%";
-    const { contributionPercentage } = token.pool;
-    return `${contributionPercentage.toFixed(1)}%`;
-  };
+  // const getUserPoolShare = () => {
+  //   if (!token?.pool) return "%";
+  //   const { contributionPercentage } = token.pool;
+  //   return `${contributionPercentage.toFixed(1)}%`;
+  // };
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
