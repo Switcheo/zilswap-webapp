@@ -1,17 +1,18 @@
 import React, { useState } from 'react'
 import { Box, makeStyles } from '@material-ui/core'
-import { CurrencyInput, FancyButton, Text } from 'app/components'
+import { CurrencyInputILO, FancyButton, Text } from 'app/components'
 import ProgressBar from 'app/components/ProgressBar'
 import { RootState, TokenState } from "app/store/types";
 import { ZIL_TOKEN_NAME } from 'app/utils/constants';
 import BigNumber from 'bignumber.js';
 import { useSelector } from 'react-redux';
+import HelpInfo from "../HelpInfo";
 
 const useStyles = makeStyles(theme => ({
   root: {
   },
   container: {
-    padding: theme.spacing(4, 8, 0),
+    padding: theme.spacing(4, 4, 0),
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(2, 2, 0),
     },
@@ -24,6 +25,7 @@ const useStyles = makeStyles(theme => ({
     width: "unset",
     height: "unset",
     flex: 1,
+    borderRadius: "12px 12px 0 0"
   },
   actionButton: {
     marginTop: theme.spacing(4),
@@ -33,6 +35,12 @@ const useStyles = makeStyles(theme => ({
   expandButton: {
     background: "none",
     border: "none"
+  },
+  textGreen: {
+    color: theme.palette.type === "dark" ? "#00FFB0" : "#003340"
+  },
+  secondaryText: {
+    marginTop: theme.spacing(1)
   }
 }));
 
@@ -84,7 +92,7 @@ const TokenILOCard = (props: Props) => {
   return (
     <Box>
       <button onClick={() => setExpanded(!expanded)} className={classes.expandButton}>
-        <Box marginTop={3}>
+        <Box>
           <img
             className={classes.svg}
             src={`https://placehold.co/600x250`}
@@ -96,16 +104,19 @@ const TokenILOCard = (props: Props) => {
         <Box display="flex" flexDirection="column" className={classes.container}>
           <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
             <Text variant="h1">ZilStream (STREAM)</Text>
-            <Text marginTop={1}>ZilSteam's premium membership token</Text>
+            <Text color="textSecondary" marginTop={1}>ZilStream's premium membership token</Text>
 
-            <Text variant="h1" color="primary" marginTop={3}>00:59:59</Text>
+            <Text variant="h1" marginTop={2} className={classes.textGreen}>
+              00:59:59
+              <HelpInfo placement="top" title="To be changed." />
+            </Text>
 
             <ProgressBar progress={92} marginTop={3} />
 
             <Box marginTop={1}>
               <Box display="flex" marginTop={0.5}>
                 <Text color="textSecondary" flexGrow={1} align="left">Total Committed</Text>
-                <Text color="textSecondary">$928,636.02 (92%)</Text>
+                <Text color="textSecondary">~$928,636.02 (92%)</Text>
               </Box>
               <Box display="flex" marginTop={0.5}>
                 <Text color="textSecondary" flexGrow={1} align="left">Funds to Raise</Text>
@@ -120,17 +131,17 @@ const TokenILOCard = (props: Props) => {
             <Text marginTop={3}>Commit your tokens in a fixed ratio.</Text>
             <Text color="textSecondary">30% ZWAP - 70% ZIL</Text>
 
-            <Box marginTop={2}>
-              <CurrencyInput fixedToToken
-                label=""
+            <Box marginTop={2} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
+              <CurrencyInputILO fixedToToken
+                label="to Burn:"
                 token={zwapToken}
                 amount={formState.zwapAmount}
                 hideBalance={false}
                 disabled={false}
                 onAmountChange={onZwapChange} />
 
-              <CurrencyInput fixedToToken
-                label=""
+              <CurrencyInputILO fixedToToken
+                label="to Fund Project:"
                 token={zilToken}
                 amount={formState.zilAmount}
                 hideBalance={false}
@@ -151,6 +162,13 @@ const TokenILOCard = (props: Props) => {
           >
             Commit
           </FancyButton>
+        </Box>
+      }
+
+      {!expanded &&
+        <Box display="flex" flexDirection="column" className={classes.container} textAlign="center" mb={4}>
+          <Text variant="h1">No active listings.</Text>
+          <Text className={classes.secondaryText} color="textSecondary">Click here to view past ILOs.</Text>
         </Box>
       }
     </Box>

@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
     justifyContent: "flex-end",
   },
   button: {
-    color: theme.palette.text.primary,
+    color: theme.palette.type === "dark" ? "DEFFFF" : "#A4A4A4",
   },
   progress: {
     position: "absolute",
@@ -36,16 +36,18 @@ const useStyles = makeStyles(theme => ({
   dropdownItem: {
     minWidth: 116,
     justifyContent: "center",
-    borderRadius: theme.spacing(.5),
+    borderRadius: "12px",
     minHeight: theme.spacing(6),
     ...theme.typography.subtitle1,
     "&.Mui-selected": {
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.primary.contrastText,
+      borderRadius: "12px"
     },
     "&.Mui-selected:hover": {
       backgroundColor: theme.palette.primary.dark,
       color: theme.palette.primary.contrastText,
+      borderRadius: "12px"
     },
   },
 }));

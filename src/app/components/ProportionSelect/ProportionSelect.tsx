@@ -1,7 +1,8 @@
 import { Button, ButtonGroup, ButtonGroupProps, Typography } from "@material-ui/core";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import React from "react";
+import React, { useState } from "react";
 
 export interface ProportionSelectProps extends ButtonGroupProps {
   onSelectProp?: (proportion: number) => void;
@@ -18,28 +19,31 @@ const useStyles = makeStyles(theme => ({
     margin: 4,
   },
 }));
+
 const ProportionSelect: React.FC<ProportionSelectProps> = (props: ProportionSelectProps) => {
+  const [currentSelection, setCurrentSelection] = useState<string | null>(null);
   const { className, onSelectProp, ...rest } = props;
   const classes = useStyles();
   const onSelect = (proportion: number) => {
     if (typeof onSelectProp === "function")
       onSelectProp(proportion);
   };
+
   return (
-    <ButtonGroup {...rest} className={cls(classes.root, className)}>
-      <Button onClick={() => onSelect(0.25)} className={classes.percentageButton}>
+    <ToggleButtonGroup exclusive {...rest} className={cls(classes.root, className)} value={currentSelection} onChange={(event, newSelection) => {setCurrentSelection(newSelection)}}>
+      <ToggleButton value="0.25" onClick={() => onSelect(0.25)} className={classes.percentageButton}>
         <Typography>25%</Typography>
-      </Button>
-      <Button onClick={() => onSelect(0.5)} className={classes.percentageButton}>
+      </ToggleButton>
+      <ToggleButton value="0.5" onClick={() => onSelect(0.5)} className={classes.percentageButton}>
         <Typography>50%</Typography>
-      </Button>
-      <Button onClick={() => onSelect(0.75)} className={classes.percentageButton}>
+      </ToggleButton>
+      <ToggleButton value="0.75" onClick={() => onSelect(0.75)} className={classes.percentageButton}>
         <Typography>75%</Typography>
-      </Button>
-      <Button onClick={() => onSelect(1)} className={classes.percentageButton}>
+      </ToggleButton>
+      <ToggleButton value="1" onClick={() => onSelect(1)} className={classes.percentageButton}>
         <Typography>MAX</Typography>
-      </Button>
-    </ButtonGroup>
+      </ToggleButton>
+    </ToggleButtonGroup>
   );
 };
 

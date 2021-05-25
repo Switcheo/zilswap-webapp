@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.text?.primary,
   },
   buttonLeafActive: {
-    color: theme.palette.colors.zilliqa.neutral[100],
+    color: theme.palette.text?.primary,
   },
   highlightTitle: {
     color: theme.palette.type === "dark" ? "#00FFB0" : ""
@@ -90,7 +90,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
 
   return (
     <>
-      {navigation.external && navigation.href && navigation.icon && (
+      {navigation.external && navigation.href && (
         <ListItem className={classes.listItem} disableGutters button>
           <Button
             className={cls({
@@ -100,21 +100,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             href={navigation.href}
             target="_blank"
           >
-            <Icon width="24px" className={classes.icon}/>
-            {navigation.title}
-          </Button>
-        </ListItem>
-      )}
-      {navigation.external && navigation.href && !navigation.icon && (
-        <ListItem className={classes.listItem} disableGutters button>
-          <Button
-            className={cls({
-              [classes.highlightTitle]: navigation.highlight,
-              [classes.secondaryFont]: secondary
-            }, classes.buttonLeaf)}
-            href={navigation.href}
-            target="_blank"
-          >
+            <Icon width="20px" className={classes.icon}/>
             {navigation.title}
           </Button>
         </ListItem>
@@ -129,7 +115,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             button
             onClick={() => setExpand(navigation.title === expand ? null : navigation.title)}
           >
-            <Icon width="24px" className={classes.icon}/>
+            <Icon width="20px" className={classes.icon}/>
             <ListItemText primary={navigation.title} primaryTypographyProps={{ className: classes.mainFont }} />
             {expand === navigation.title ? <ArrowDropUp /> : <ArrowDropDown />}
           </ListItem>
@@ -151,7 +137,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             }, classes.buttonLeaf)}
             onClick={(ev) => !widgetOpen && initWidget(ev)}
           >
-            <Icon width="24px" className={classes.icon}/>
+            <Icon width="20px" className={classes.icon}/>
             {navigation.title}
           </Button>
         </ListItem>
@@ -168,7 +154,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             to={navigation.href}
             exact={false}
           >
-            <Icon width="24px" className={classes.icon}/>
+            <Icon width="20px" className={classes.icon}/>
             {navigation.title}
           </Button>
         </ListItem>

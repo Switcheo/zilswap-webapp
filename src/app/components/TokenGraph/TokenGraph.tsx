@@ -92,7 +92,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   slash: {
-    color: theme.palette.type === "dark" ? "#00FFB0" : "#003340",
+    color: theme.palette.primary.dark
   },
 }));
 
@@ -354,7 +354,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     <Box {...{ ref: containerRef }} {...rest} className={cls(classes.root, className)}>
       <Box className={classes.stats}>
         <Box className={classes.label}>
-          <SwapSVG className={classes.swapSvg} /><Typography className={classes.textPadding} variant="h3">{" "}{outToken?.symbol || "ZIL"} / {inToken?.symbol || "ZIL"}</Typography>
+          <Typography variant="h3">{" "}{outToken?.symbol || "ZIL"}<span className={classes.slash}> / </span>{inToken?.symbol || "ZIL"}</Typography>
         </Box>
         {(inTokenRates || outTokenRates) && (
           <>

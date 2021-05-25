@@ -1,7 +1,7 @@
-import { Box, Button, InputAdornment, InputLabel, FormControl, OutlinedInput, Typography } from "@material-ui/core";
+import { Box, Button, InputAdornment, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { CurrencyLogo } from "app/components";
+import { CurrencyLogo, Text } from "app/components";
 import CurrencyDialog from "app/components/CurrencyDialog";
 import { RootState, TokenInfo, WalletState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
@@ -10,15 +10,18 @@ import cls from "classnames";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { CurrencyDialogProps } from "../CurrencyDialog/CurrencyDialog";
-import { AppTheme } from "app/theme/types";
 
-const useStyles = makeStyles((theme: AppTheme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
   },
-  inputRow: {
-    paddingLeft: 0,
-    backgroundColor: theme.palette.currencyInput,
-    border: 0
+  box: {
+    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    border: "3px solid rgba(0, 255, 176, 0.2)",
+    margin: "2px",
+  },
+  outlinedInput: {
+    border: 0,
+    paddingLeft: "4px"
   },
   input: {
     textAlign: "left",
@@ -28,17 +31,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderTopLeftRadius: 4,
     borderBottomLeftRadius: 4,
     minHeight: 52,
-    color: theme.palette.text?.primary,
+    color: theme.palette.text.primary,
     fontWeight: 600,
     display: "flex",
     justifyContent: "space-between"
-  },
-  label: {
-    fontSize: "12px",
-    lineHeight: "14px",
-    fontWeight: "bold",
-    letterSpacing: 0,
-    marginBottom: theme.spacing(1),
   },
   form: {
     display: "flex",
@@ -54,6 +50,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginLeft: theme.spacing(1),
     color: theme.palette.primary.main
   },
+  allowedBalance: {
+    paddingLeft: "16px"
+  },
+  label: {
+    paddingLeft: "16px"
+  },
+  balance: {
+    paddingLeft: "16px",
+    marginBottom: theme.spacing(1)
+  }
 }));
 
 export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement> {
@@ -73,7 +79,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   onCloseDialog?: () => void;
 };
 
-const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
+const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
   const {
     children, className,
     label, fixedToToken, amount, disabled,
@@ -126,57 +132,57 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
 
   return (
     <form className={cls(classes.form, className)} noValidate autoComplete="off">
-      <Box display="flex" justifyContent="space-between">
-        <InputLabel>{label}</InputLabel>
-        {tokenBalance && !hideBalance && (
-          <Typography variant="body2">
-            {moneyFormat(tokenBalance, {
-              symbol: token?.symbol,
-              compression: token?.decimals,
-              showCurrency: true,
-            })}
-          </Typography>
-        )}
-      </Box>
-            
-      <OutlinedInput
-        className={classes.inputRow}
-        placeholder={"0.00"}
-        value={amount.toString()}
-        onChange={onChange}
-        onBlur={onEditorBlur}
-        disabled={disabled}
-        type="number"
-        inputProps={{ className: classes.input }}
-        endAdornment={
-          <InputAdornment position="end">
+        <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" borderRadius={12}>
+                {!fixedToToken && (
+                    <Button className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
+                    <Box display="flex" alignItems="center">
+                        {token && <CurrencyLogo currency={token.registered && token.symbol} address={token.address} className={classes.currencyLogo} />}
+                        <Typography variant="button">{token?.symbol || "Select Token"}</Typography>
+                    </Box>
+                    <ExpandMoreIcon className={classes.expandIcon} />
+                    </Button>
+                )}
 
-            {!fixedToToken && (
-              <Button className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
-                <Box display="flex" alignItems="center">
-                  {token && <CurrencyLogo currency={token.registered && token.symbol} address={token.address} className={classes.currencyLogo} />}
-                  <Typography variant="button">{token?.symbol || "Select Token"}</Typography>
-                </Box>
-                <ExpandMoreIcon className={classes.expandIcon} />
-              </Button>
+                {fixedToToken && (
+                    <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
+                    <Box display="flex" alignItems="center">
+                        <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />
+                        <Typography variant="button">{token?.symbol}</Typography>
+                    </Box>
+                    </Box>
+                )}
+            <Text color="textSecondary" className={classes.label}>
+                {label}
+            </Text>
+            <OutlinedInput
+                className={classes.outlinedInput}
+                placeholder={"0.00"}
+                value={amount.toString()}
+                onChange={onChange}
+                onBlur={onEditorBlur}
+                disabled={disabled}
+                type="number"
+                inputProps={{ className: classes.input }}/>
+            <InputLabel className={classes.allowedBalance}>Allowed Balance:</InputLabel>
+            {tokenBalance && !hideBalance && (
+                <Text color="textSecondary" className={classes.balance}>
+                {moneyFormat(tokenBalance, {
+                    symbol: token?.symbol,
+                    compression: token?.decimals,
+                    showCurrency: true,
+                })}
+                </Text>
             )}
-
-            {fixedToToken && (
-              <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
-                <Box display="flex" alignItems="center">
-                  <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />
-                  <Typography variant="button">{token?.symbol}</Typography>
-                </Box>
-              </Box>
+            {!tokenBalance && !hideBalance && (
+                <Typography color="textSecondary" variant="body2" className={classes.balance}>
+                    0
+                </Typography>
             )}
-
-          </InputAdornment>
-        }
-      />
-      {children}
-      <CurrencyDialog {...dialogOpts} open={showCurrencyDialog || showDialogOverride || false} onSelectCurrency={onCurrencySelect} onClose={onCloseDialog} />
+        </Box>
+        {children}
+        <CurrencyDialog {...dialogOpts} open={showCurrencyDialog || showDialogOverride || false} onSelectCurrency={onCurrencySelect} onClose={onCloseDialog} />
     </form>
   );
 };
 
-export default CurrencyInput;
+export default CurrencyInputILO;

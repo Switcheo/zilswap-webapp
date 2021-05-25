@@ -14,7 +14,7 @@ const theme = {
   },
   primary: {
     contrastText: "#DEFFFF",
-    dark: zilliqa.primary["130"],
+    dark: "#00FFB0",
     main: "#003340",
     light: zilliqa.neutral["200"],
   },
@@ -40,7 +40,7 @@ const theme = {
   },
   background: {
     default: "#13222C",
-    contrast: zilliqa.neutral[190],
+    contrastAlternate: "#262626",
     paper: zilliqa.black,
     paperOpposite: zilliqa.neutral[100],
     tooltip: zilliqa.primary["195"],
@@ -48,13 +48,23 @@ const theme = {
   },
   action: {
     active: "#13222C",
-    disabled: "#0D1B24",
+    disabled: "rgba(222, 255, 255, 0.5)",
+    disabledBackground: "#003340",
+    selected: "#00FFB0"
+  },
+  tab: {
+    active: "#13222C",
+    disabled: "rgba(222, 255, 255, 0.5)",
+    disabledBackground: "#0D1B24",
+    selected: "#DEFFFF"
   },
   mainBoxShadow: "none",
   cardBoxShadow: "0 4px 8px 1px rgba(0, 0, 0, 0.2)",
   navbar: "#0D1B24",
   switcheoLogo: switcheo.logoDark,
   colors: { zilliqa, switcheo },
+  currencyInput: "rgba(222, 255, 255, 0.1)",
+  icon: "#00FFB0"
 };
 
 export default theme;

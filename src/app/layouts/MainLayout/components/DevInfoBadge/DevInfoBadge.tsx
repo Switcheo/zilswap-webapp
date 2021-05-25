@@ -25,6 +25,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       right: theme.spacing(2),
     },
   },
+  chip: {
+    borderColor: theme.palette.type === "dark" ? "#29475A" : "#D2E5DF",
+    "& .MuiChip-avatarColorPrimary": {
+      backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#003340",
+    },
+    "& .MuiChip-label": {
+      color: theme.palette.text?.primary
+    }
+  },
 }));
 const DevInfoBadge: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
@@ -42,6 +51,7 @@ const DevInfoBadge: React.FC<Props> = (props: Props) => {
     <Box {...rest} className={cls(classes.root, className)}>
       <Tooltip placement="left" title={`You are using ZilSwap on ${hostname}`} arrow>
         <Chip
+          className={classes.chip}
           avatar={<Avatar>{avatar}</Avatar>}
           size={isSm ? "small" : "medium"}
           color="primary"

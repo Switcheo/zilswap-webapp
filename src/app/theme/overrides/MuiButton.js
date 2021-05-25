@@ -18,9 +18,8 @@ const MuiButton = theme => ({
       boxShadow: "none",
     },
     "&$disabled": {
-      color: "#FFFFFF",
-      opacity: .2,
-      backgroundColor: `${theme.palette.primary.light}`
+      color: theme.palette.action.disabled,
+      backgroundColor: theme.palette.action.disabledBackground
     },
   },
   text: {
@@ -35,7 +34,23 @@ const MuiButton = theme => ({
   },
   outlinedSizeSmall: {
     padding: "2px 4px",
-  }
+  },
+  containedSecondary: {
+    backgroundColor: theme.palette.tab.active,
+    color: theme.palette.tab.selected,
+    "&:hover": {
+      backgroundColor: theme.palette.tab.active,
+      color: theme.palette.tab.selected,
+    },
+  },
+  outlinedSecondary: {
+    backgroundColor: theme.palette.tab.disabledBackground,
+    color: theme.palette.tab.disabled,
+    "&:hover": {
+      backgroundColor: theme.palette.tab.active,
+      color: theme.palette.tab.selected
+    }
+  },
 });
 
 export default MuiButton;

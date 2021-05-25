@@ -1,4 +1,4 @@
-import { Badge, Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, Popper, Tooltip } from "@material-ui/core";
+import { Backdrop, Badge, Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, Popper, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
@@ -41,13 +41,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     zIndex: 1102,
   },
   topbarButton: {
-    padding: "2px"
+    padding: "2px",
+    color: "#DEFFFF",
+    border: "1px solid #00FFB0",
   },
   buttonIcon: {
     marginLeft: theme.spacing(1),
   },
   text: {
-    color: theme.palette.type === "dark" ? "#00FFB0" : "#003340"
+    color: theme.palette.primary.dark
   },
   currencyLogo: {
     marginLeft: "2px",
@@ -61,7 +63,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   claimRewardsButton: {
     padding: "16px",
-  }
+  },
 }));
 
 const ZWAP_TOKEN_ADDRESS = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
@@ -195,7 +197,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <span>
-        <Badge color="primary" variant="dot" invisible={unclaimedRewards.isZero()}>
+        <Badge variant="dot" invisible={unclaimedRewards.isZero()}>
           <Button
             size="small"
             buttonRef={buttonRef}
@@ -289,6 +291,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
           </ClickAwayListener>
         </Box>
       </Popper>
+      {/* <Backdrop className={classes.backdrop} open={active} onClick={() => setActive(!active)}>
+      </Backdrop> */}
     </Box>
   );
 };

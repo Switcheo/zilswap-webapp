@@ -148,7 +148,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   swapIcon: {
     "& path": {
-      fill: theme.palette.type === "dark" ? "#00FFB0" : "#003340" 
+      fill: theme.palette.icon
     }
   }
 }));
@@ -212,7 +212,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (inToken || outToken) {
       return;
     }
-    const queryInput = queryParams.get("tokenIn");
+    const queryInput = queryParams.get("tokenIn") ?? ZIL_TOKEN_NAME;
     const queryOutput = queryParams.get("tokenOut") ?? ZWAP_TOKEN_NAME;
     if (queryInput === queryOutput && queryOutput) {
       return;
@@ -570,7 +570,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onAmountChange={onInAmountChange}
           onCurrencyChange={onInCurrencyChange} />
         <Box display="flex" justifyContent="flex-end">
-          <ProportionSelect color="primary" size="small" className={classes.proportionSelect} onSelectProp={onPercentage} />
+          <ProportionSelect size="small" className={classes.proportionSelect} onSelectProp={onPercentage} />
         </Box>
         <KeyValueDisplay className={classes.keyValueLabel}
           hideIfNoValue

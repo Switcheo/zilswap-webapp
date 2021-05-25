@@ -8,7 +8,6 @@ import { ConnectedWallet } from "core/wallet";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import LoadableArea from "../LoadableArea";
-import { ReactComponent as DotIcon } from "./dot.svg";
 import { LoadingKeys } from "app/utils/constants";
 import { AppTheme } from "app/theme/types";
 
@@ -20,12 +19,12 @@ const useStyles = makeStyles(theme => ({
     },
   },
   button: {
-    border: "2px solid #00FFB0",
+    border: "1px solid #00FFB0",
     color: '#DEFFFF',
   },
-  dotIcon: {
-    marginRight: theme.spacing(1)
-  },
+  textWhite: {
+    color: "#DEFFFF"
+  }
 }));
 
 const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -54,9 +53,10 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
             color="primary"
             size="small"
             variant="outlined"
+            className={classes.button}
             label={(
-              <Typography variant="button" color="textPrimary">
-                <DotIcon className={classes.dotIcon} />{truncate(wallet!.addressInfo.bech32, 5, isXs ? 2 : 5)}
+              <Typography variant="button" className={classes.textWhite}>
+                {truncate(wallet!.addressInfo.bech32, 5, isXs ? 2 : 5)}
               </Typography>
             )} />
         )}

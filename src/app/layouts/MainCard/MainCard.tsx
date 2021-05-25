@@ -20,7 +20,7 @@ const CARD_BORDER_RADIUS = 12;
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     flex: 1,
-    padding: theme.spacing(8, 8, 2),
+    padding: theme.spacing(8, 0, 2),
     display: "flex",
     flexDirection: "column",
     [theme.breakpoints.down("sm")]: {
@@ -55,14 +55,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   tabs: {
     display: "flex",
-    width: "30%",
-    marginBottom: "2rem",
+    width: "488px",
+    marginBottom: "2em",
     [theme.breakpoints.down("sm")]: {
       maxWidth: 450,
-      width: "100%"
-    },
-    [theme.breakpoints.down("xs")]: {
-      padding: theme.spacing(1.4)
     },
   },
   tab: {
@@ -71,10 +67,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 0,
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(2),
-    backgroundColor: theme.palette.action?.disabled,
-    color: theme.palette.text?.disabled,
+    backgroundColor: theme.palette.tab.disabledBackground,
+    color: theme.palette.tab.disabled,
     "&:hover": {
-      backgroundColor: theme.palette.action?.active,
+      backgroundColor: theme.palette.tab.active,
+      color: theme.palette.tab.selected
     }
   },
   tabLeft: {
@@ -86,34 +83,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderTopRightRadius: CARD_BORDER_RADIUS,
     borderBottomRightRadius: CARD_BORDER_RADIUS,
     border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderWidth: "1px 1px 1px 0"
+    borderWidth: "1px 1px 1px 0",
   },
   tabActive: {
-    backgroundColor: theme.palette.action?.active,
-    color: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.tab.active,
+    color: theme.palette.tab.selected,
     "&:hover": {
-      backgroundColor: theme.palette.action?.active,
+      backgroundColor: theme.palette.tab.active,
+      color: theme.palette.tab.selected,
     },
-    // "&:after": {
-    //   content: "''",
-    //   width: 0,
-    //   height: 0,
-    //   borderLeft: "8px solid transparent",
-    //   borderRight: "8px solid transparent",
-    //   borderBottom: `8px solid ${theme.palette.background.paper}`,
-    //   position: "absolute",
-    //   bottom: 0,
-    //   left: "calc(50% - 8px)",
-    // }
   },
   tabNoticeOpposite: {
     "&:after": {
       borderBottom: `8px solid ${theme.palette.background.paperOpposite!}`,
     }
-  },
-  flexRow: {
-    display: "flex",
-    justifyContent: "center"
   },
 }));
 const MainCard: React.FC<PaperProps> = (props: any) => {
@@ -162,7 +145,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
   return (
     <Fragment>
       <Box className={classes.root}>
-        <Box className={classes.flexRow}>
+        <Box display="flex" justifyContent="center">
           <Box className={classes.tabs}>
             <Button
               disableElevation
@@ -182,11 +165,11 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
               to="/pool">Pool</Button>
           </Box>
         </Box>
-        <Box className={classes.flexRow}>
+        <Box display="flex" justifyContent="center">
           {showGraph && (
             <TokenGraph boxHeight={boxHeight} inToken={swapState.inToken} outToken={swapState.outToken} />
           )}
-          <Box>
+          <Box width={488}>
             <Paper {...{ ref:boxRef }} {...rest} className={classes.card}>
               <Box>{children}</Box>
             </Paper>

@@ -11,6 +11,8 @@ import MuiOutlinedInput from './MuiOutlinedInput';
 import MuiPaper from './MuiPaper';
 import MuiSwitch from './MuiSwitch';
 import MuiToolbar from './MuiToolbar';
+import MuiToggleButton from './MuiToggleButton';
+import MuiToggleButtonGroup from './MuiToggleButtonGroup';
 
 const overrides = {
   MuiButton,
@@ -26,5 +28,7 @@ const overrides = {
   MuiPaper,
   MuiSwitch,
   MuiToolbar,
+  MuiToggleButton,
+  MuiToggleButtonGroup,
 };
 export default overrides;

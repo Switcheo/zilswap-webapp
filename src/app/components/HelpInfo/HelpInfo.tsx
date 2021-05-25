@@ -25,25 +25,25 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     verticalAlign: "middle",
     "& #helpInfo": {
       "& #Oval": {
-        stroke: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "rgba(0, 51, 64, 0.5)"
+        stroke: theme.palette.text?.secondary
       },
       "& #questionMarkTop": {
-        fill: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "rgba(0, 51, 64, 0.5)"
+        fill: theme.palette.text?.secondary
       },
       "& #questionMarkBottom": {
-        fill: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "rgba(0, 51, 64, 0.5)"
+        fill: theme.palette.text?.secondary
       }
     },
     "&:hover": {
       "& #helpInfo": {
         "& #Oval": {
-          stroke: theme.palette.type === "dark" ? "#00FFB0" : "#003340"
+          stroke: theme.palette.icon
         },
         "& #questionMarkTop": {
-          fill: theme.palette.type === "dark" ? "#00FFB0" : "#003340"
+          fill: theme.palette.icon
         },
         "& #questionMarkBottom": {
-          fill: theme.palette.type === "dark" ? "#00FFB0" : "#003340"
+          fill: theme.palette.icon
         }
       }
     }

@@ -77,13 +77,6 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
 
   return (
     <Drawer PaperProps={{ className: classes.paper }} onClose={onClose} {...rest} className={cls(classes.root, className)}>
-      {/* <Box className={classes.header}>
-        <LogoSVG />
-        <Box flex={1} />
-        <Button onClick={onClose}>
-          <CloseSVG />
-        </Button>
-      </Box> */}
       <div className={classes.drawerHeader}>
         <Button onClick={onClose}>
           <CloseSVG />
