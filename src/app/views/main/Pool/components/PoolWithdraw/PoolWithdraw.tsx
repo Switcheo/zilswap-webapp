@@ -6,10 +6,10 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { ContrastBox, CurrencyInput, ExpiryField, FancyButton, KeyValueDisplay, ProportionSelect, SlippageField, Text } from "app/components";
 import { actions } from "app/store";
-import { LayoutState, PoolFormState, RootState, SwapFormState, TokenInfo, WalletObservedTx, WalletState } from "app/store/types";
+import { PoolFormState, RootState, SwapFormState, TokenInfo, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useAsyncTask, useMoneyFormatter } from "app/utils";
-import { BIG_ZERO, DefaultFallbackNetwork } from "app/utils/constants";
+import { hexToRGBA, useAsyncTask, useMoneyFormatter, useNetwork } from "app/utils";
+import { BIG_ZERO } from "app/utils/constants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
@@ -111,8 +111,8 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const [currencyDialogOverride, setCurrencyDialogOverride] = useState<boolean>(false);
   const [runRemoveLiquidity, loading, error] = useAsyncTask("poolRemoveLiquidity");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const network = useNetwork();
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
-  const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
   const swapFormState = useSelector<RootState, SwapFormState>(state => state.swap);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
@@ -140,17 +140,16 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     if (!poolFormState.forNetwork) return
 
     // clear form if network changed
-    if (poolFormState.forNetwork !== layoutState.network) {
+    if (poolFormState.forNetwork !== network) {
       setFormState({ ...initialFormState })
       dispatch(actions.Pool.clear());
     }
 
     // eslint-disable-next-line
-  }, [layoutState.network]);
+  }, [network]);
 
   const onPoolChange = (token: TokenInfo) => {
     if (!token.pool) return;
-    const network = ZilswapConnector.network;
     dispatch(actions.Pool.select({ token, network }));
     onTokenChange("0");
   };
@@ -165,7 +164,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
     if (poolToken?.pool) {
       const zilAmount = tokenAmount.times(poolToken.pool.exchangeRate).decimalPlaces(poolToken.decimals);
       dispatch(actions.Pool.update({
-        forNetwork: ZilswapConnector.network,
+        forNetwork: network,
         removeZilAmount: zilAmount.shiftedBy(poolToken.decimals),
         removeTokenAmount: tokenAmount.shiftedBy(poolToken.decimals),
       }));
@@ -220,7 +219,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       const walletObservedTx: WalletObservedTx = {
         ...observedTx!,
         address: walletState.wallet?.addressInfo.bech32 || "",
-        network: walletState.wallet?.network || DefaultFallbackNetwork,
+        network,
       };
 
       const updatedPool = ZilswapConnector.getPool(tokenAddress) || undefined;

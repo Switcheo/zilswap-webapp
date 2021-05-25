@@ -40,6 +40,7 @@ const theme = {
   },
   background: {
     default: "#13222C",
+    contrast: "rgba(222, 255, 255, 0.1)",
     contrastAlternate: "#262626",
     paper: zilliqa.black,
     paperOpposite: zilliqa.neutral[100],

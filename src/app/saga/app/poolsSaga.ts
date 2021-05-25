@@ -1,21 +1,20 @@
 import { actions } from "app/store";
 import { RewardsActionTypes } from "app/store/rewards/actions";
-import { PoolZWAPReward, RootState, TokenInfo, ZAPEpochInfo } from "app/store/types";
+import { PoolZWAPReward } from "app/store/types";
 import { SimpleMap } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
-import { logger, PoolLiquidity, ZAPStats, ZWAPPoolWeights } from "core/utilities";
-import { put, race, select, take } from "redux-saga/effects";
+import { logger, PoolLiquidity, ZAPStats } from "core/utilities";
+import { fork, put, race, select, take } from "redux-saga/effects";
+import { getBlockchain, getTokens, getRewards } from '../selectors'
 
-export default function* poolsSaga() {
-  logger("init pools saga");
-
+function* watchPools() {
+  logger("run watch pools");
   while (true) {
-    logger("run pools saga");
     try {
-      const network = yield select((state: RootState) => state.layout.network);
-      const epochInfo = (yield select((state: RootState) => state.rewards.epochInfo)) as unknown as ZAPEpochInfo | null;
+      const { network } = getBlockchain(yield select())
+      const { epochInfo, poolWeights } = getRewards(yield select());
       if (!epochInfo) continue;
 
       const until = epochInfo.raw.next_epoch_start;
@@ -26,8 +25,7 @@ export default function* poolsSaga() {
         return accum;
       }, {} as SimpleMap<PoolLiquidity>);
 
-      const tokens = (yield select((state: RootState) => state.token.tokens)) as unknown as SimpleMap<TokenInfo>;
-      const poolWeights = (yield select((state: RootState) => state.rewards.poolWeights)) as unknown as ZWAPPoolWeights;
+      const { tokens } = getTokens(yield select())
 
       const poolZwapRewards: SimpleMap<PoolZWAPReward> = {};
 
@@ -63,4 +61,9 @@ export default function* poolsSaga() {
       });
     }
   }
+}
+
+export default function* poolsSaga() {
+  logger("init pools saga");
+  yield fork(watchPools);
 }

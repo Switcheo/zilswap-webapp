@@ -1,14 +1,18 @@
-import { Box, IconButton, makeStyles, Typography } from "@material-ui/core";
+import { Box, Button, IconButton, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import { WarningRounded } from "@material-ui/icons";
+import AddIcon from "@material-ui/icons/Add";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import RemoveIcon from "@material-ui/icons/Remove";
 import { fromBech32Address } from "@zilliqa-js/crypto";
-import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect, StatefulText } from "app/components";
+import { validation as ZilValidation } from "@zilliqa-js/util";
+import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect, StatefulText, Text } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
-import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
+import { ExactOfOptions, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { strings, useAsyncTask, useBlacklistAddress, useMoneyFormatter } from "app/utils";
-import { BIG_ONE, BIG_ZERO, DefaultFallbackNetwork, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
+import { strings, useAsyncTask, useBlacklistAddress, useMoneyFormatter, useNetwork, useSearchParam } from "app/utils";
+import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
@@ -175,10 +179,11 @@ interface InitTokenProps {
 const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
+  const enableChangeRecipient = useSearchParam("enableChangeRecipient") === "true";
   const [buttonRotate, setButtonRotate] = useState(false);
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
+  const network = useNetwork()
   const swapFormState: SwapFormState = useSelector<RootState, SwapFormState>(store => store.swap);
-  const layoutState: LayoutState = useSelector<RootState, LayoutState>(store => store.layout);
   const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
   const walletState = useSelector<RootState, WalletState>(store => store.wallet);
@@ -186,7 +191,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [isBlacklisted] = useBlacklistAddress();
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
-  // const [errorRecipientAddress, setErrorRecipientAddress] = useState<string | undefined>();
+  const [errorRecipientAddress, setErrorRecipientAddress] = useState<string | undefined>();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [reversedRate, setReversedRate] = useState(false);
   const queryParams = new URLSearchParams(useLocation().search);
@@ -196,7 +201,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (!swapFormState.forNetwork) return
 
     // clear form if network changed
-    if (swapFormState.forNetwork !== layoutState.network) {
+    if (swapFormState.forNetwork !== network) {
       setFormState({
         ...formState,
         inAmount: "0",
@@ -206,7 +211,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }
 
     // eslint-disable-next-line
-  }, [layoutState.network]);
+  }, [network]);
 
   useEffect(() => {
     if (inToken || outToken) {
@@ -240,7 +245,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const initNewToken = (newTokens: InitTokenProps) => {
     dispatch(actions.Swap.update({
-      forNetwork: ZilswapConnector.network || null,
+      forNetwork: network,
       ...newTokens,
     }));
   }
@@ -392,7 +397,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       inAmount: result.inAmount.toString(),
     });
     dispatch(actions.Swap.update({
-      forNetwork: ZilswapConnector.network || null,
+      forNetwork: network,
       ...result,
     }));
   };
@@ -413,7 +418,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       outAmount: result.outAmount.toString(),
     });
     dispatch(actions.Swap.update({
-      forNetwork: ZilswapConnector.network || null,
+      forNetwork: network,
       ...result,
     }));
   };
@@ -435,7 +440,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     });
 
     dispatch(actions.Swap.update({
-      forNetwork: ZilswapConnector.network || null,
+      forNetwork: network,
       ...result,
     }));
   };
@@ -457,16 +462,16 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     });
 
     dispatch(actions.Swap.update({
-      forNetwork: ZilswapConnector.network || null,
+      forNetwork: network,
       ...result,
     }));
   };
 
-  // const onRecipientAddressChange = (event: any) => {
-  //   dispatch(actions.Swap.update({
-  //     recipientAddress: event.target.value,
-  //   }));
-  // };
+  const onRecipientAddressChange = (event: any) => {
+    dispatch(actions.Swap.update({
+      recipientAddress: event.target.value,
+    }));
+  };
 
   const onSwap = () => {
     const { outToken, inToken, inAmount, outAmount, exactOf, slippage, expiry, recipientAddress } = swapFormState;
@@ -502,7 +507,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       const walletObservedTx: WalletObservedTx = {
         ...observedTx,
         address: walletState.wallet?.addressInfo.bech32 || "",
-        network: walletState.wallet?.network || DefaultFallbackNetwork,
+        network,
       };
 
       dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
@@ -531,7 +536,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       const walletObservedTx: WalletObservedTx = {
         ...observedTx!,
         address: walletState.wallet?.addressInfo.bech32 || "",
-        network: walletState.wallet?.network || DefaultFallbackNetwork,
+        network,
       };
       dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     });
@@ -545,11 +550,22 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     });
   };
 
+  const onEnterRecipientAddress = () => {
+    const address = swapFormState.recipientAddress;
+    let error = undefined;
+    if (address && !ZilValidation.isBech32(address)) {
+      error = "Invalid address format";
+    }
+
+    if (error !== errorRecipientAddress)
+      setErrorRecipientAddress(error);
+  };
+
   const { outToken, inToken } = swapFormState;
   const tokenBalance = strings.bnOrZero(inToken?.balances?.[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString());
   let showTxApprove = false;
   if (inToken && !inToken?.isZil) {
-    const zilswapContractAddress = CONTRACTS[ZilswapConnector.network || DefaultFallbackNetwork];
+    const zilswapContractAddress = CONTRACTS[network];
     const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
     const unitlessInAmount = swapFormState.inAmount.shiftedBy(swapFormState.inToken!.decimals);
     showTxApprove = strings.bnOrZero(inToken?.allowances?.[byte20ContractAddress]).comparedTo(unitlessInAmount) < 0;
@@ -619,6 +635,40 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
               className={cls(classes.switchIcon, {
                 [classes.activeSwitchIcon]: reversedRate,
               })} />
+          </Box>
+        )}
+
+        {enableChangeRecipient && (
+          <Box display="flex" flexDirection="column" marginTop={3}>
+            {!formState.showRecipientAddress && (
+              <Button variant="text" className={classes.addAddressButton} onClick={() => setFormState({ ...formState, showRecipientAddress: true })}>
+                <AddIcon className={classes.accordionButton} />
+                <span>Add Receiving Address</span>
+              </Button>
+            )}
+            {formState.showRecipientAddress && (
+              <>
+                <InputLabel className={classes.addressLabel}>
+                  <RemoveIcon className={classes.accordionButton} onClick={() => setFormState({ ...formState, showRecipientAddress: false })} />
+                  <span>Receiving Address</span>
+                  {!!errorRecipientAddress && <Typography className={classes.addressError} component="span" color="error">{errorRecipientAddress}</Typography>}
+                </InputLabel>
+                <OutlinedInput
+                  onBlur={onEnterRecipientAddress}
+                  className={classes.addressInput}
+                  value={swapFormState.recipientAddress || ""}
+                  placeholder={PlaceholderStrings.ZilAddress}
+                  onChange={onRecipientAddressChange} />
+                {recipientAddrBlacklisted && (
+                  <Text className={classes.errorText}>
+                    <WarningRounded color="error" />  Address appears to be a known CEX/DEX address. Please ensure you have entered a correct address!
+                  </Text>
+                )}
+                <Text className={classes.warningText}>
+                  <WarningRounded color="inherit" />  Do not send tokens directly to an exchange address as it may result in failure to receive your fund.
+              </Text>
+              </>
+            )}
           </Box>
         )}
 

@@ -1,6 +1,11 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime'
+import updateLocale from 'dayjs/plugin/updateLocale'
 
-moment.updateLocale('en', {
+dayjs.extend(relativeTime)
+dayjs.extend(updateLocale)
+
+dayjs.updateLocale('en', {
   relativeTime: {
     future: 'in %s',
     past: '%s ago',

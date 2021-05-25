@@ -4,7 +4,7 @@
 //   network: Network ;
 
 //   balance: string = "";
-//   timestamp: moment.Moment = moment();
+//   timestamp: Dayjs = dayjs();
 //   addressInfo: WalletAccountInfo = {};
 
 // }

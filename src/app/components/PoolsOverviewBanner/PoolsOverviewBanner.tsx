@@ -8,7 +8,7 @@ import { useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
 import cls from "classnames";
-import moment from "moment";
+import dayjs from "dayjs";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { ReactComponent as TooltipSVG } from "./tooltip.svg";
@@ -100,7 +100,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
     if (!rewardsState.epochInfo) return setCountdown(null);
 
     const nextEpoch = rewardsState.epochInfo.nextEpoch;
-    const currentTime = moment();
+    const currentTime = dayjs();
     const diffSeconds = Math.max(0, nextEpoch.unix() - currentTime.unix()) % rewardsState.epochInfo.raw.epoch_period;
     const days = Math.floor(diffSeconds / 86400);
     const hours = Math.floor((diffSeconds % 86400) / 3600);

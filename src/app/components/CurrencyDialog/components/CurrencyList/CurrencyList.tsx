@@ -2,16 +2,14 @@ import { Box, BoxProps, ButtonBase, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ContrastBox from "app/components/ContrastBox";
 import CurrencyLogo from "app/components/CurrencyLogo";
-import { actions } from "app/store";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
-import useStatefulTask from "app/utils/useStatefulTask";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 type CurrencyListProps = BoxProps & {
   tokens: TokenInfo[];
@@ -54,11 +52,9 @@ const useStyles = makeStyles(theme => ({
 const CurrencyList: React.FC<CurrencyListProps> = (props) => {
   const { children, className, onSelectCurrency, onToggleUserToken, userTokens, emptyStateLabel, showContribution, search, tokens, ...rest } = props;
   const classes = useStyles();
-  const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 12 });
-  const runQueryTokenBalance = useStatefulTask<void>();
 
   const getTokenBalance = (token: TokenInfo): BigNumber => {
     if (!walletState.wallet) return BIG_ZERO;
@@ -80,14 +76,6 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
   };
 
   const onSelect = (token: TokenInfo) => {
-    if (!token.balance && walletState.wallet) {
-      runQueryTokenBalance(async () => {
-
-        dispatch(actions.Token.update({
-          address: token.address,
-        }));
-      }, `rueryTokenBalance-${token.address}`);
-    }
     onSelectCurrency(token)
   };
 

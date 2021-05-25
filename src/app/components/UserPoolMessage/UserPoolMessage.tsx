@@ -3,8 +3,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { NotificationBox } from "app/components";
 import { TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
+import { useNetwork } from "app/utils";
 import cls from "classnames";
-import { ZilswapConnector } from "core/zilswap";
 import React from "react";
 import { ReactComponent as LinkLogo } from "./link_logo.svg";
 import { ReactComponent as WarningLogo } from "./warning_logo.svg";
@@ -50,11 +50,11 @@ const VIEWBLOCK_URL = "https://viewblock.io/zilliqa/address/:address?network=:ne
 
 const UserPoolMessage: React.FC<UserPoolMessageProps> = (props: UserPoolMessageProps) => {
   const { children, className, token, ...rest } = props;
+  const network = useNetwork();
   const classes = useStyles();
 
   if (!token) return null;
 
-  const network = ZilswapConnector.network || "";
   const infoUrl = VIEWBLOCK_URL.replace(":address", token.address)
     .replace(":network", network.toLowerCase());
 

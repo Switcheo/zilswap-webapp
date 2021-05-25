@@ -1,15 +1,8 @@
-import { ZilswapConnector } from "core/zilswap";
-import { DefaultFallbackNetwork } from "./constants";
 
-export type GetNetworkOptions = {
-  zilswapFormat?: boolean;
-};
+import { RootState } from "app/store/types";
+import { useSelector } from "react-redux";
+import { Network } from "zilswap-sdk/lib/constants";
 
-const useNetwork = (opts: GetNetworkOptions = {}) => {
-  const network = ZilswapConnector.network || DefaultFallbackNetwork;
-  if (opts.zilswapFormat)
-    return network;
-  return network.toLowerCase();
-};
+const useNetwork = () => useSelector<RootState, Network>(state => state.blockchain.network);
 
 export default useNetwork;

@@ -1,10 +1,11 @@
 import { actions } from "app/store";
-import { PoolLiquidityMap, RootState } from "app/store/types";
+import { PoolLiquidityMap } from "app/store/types";
 import { STATS_REFRESH_RATE } from "app/utils/constants";
-import { logger, ZAPStats, GetLiquidityOpts } from "core/utilities";
-import moment from "moment";
+import { logger, ZAPStats, SwapVolume, GetLiquidityOpts } from "core/utilities";
+import dayjs from "dayjs";
 import { delay, fork, put, select } from "redux-saga/effects";
 import { Network } from "zilswap-sdk/lib/constants";
+import { getBlockchain } from "../selectors";
 
 interface QueryOpts {
   network: Network;
@@ -21,9 +22,9 @@ const fetchPoolLiquidity = async (opts: GetLiquidityOpts) => {
 
 function* queryVolumeDay({ network }: QueryOpts) {
   try {
-    const volumeDay = yield ZAPStats.getSwapVolume({
+    const volumeDay: SwapVolume[] = yield ZAPStats.getSwapVolume({
       network,
-      from: moment().add(-1, "d").unix(),
+      from: dayjs().add(-1, "d").unix(),
     });
 
     yield put(actions.Stats.setSwapVolumes(volumeDay));
@@ -36,7 +37,7 @@ function* queryPoolLiquidityDay({ network }: QueryOpts) {
   try {
     const liquiditySnapshot24hAgo: PoolLiquidityMap = yield fetchPoolLiquidity({
       network,
-      timestamp: moment().add(-1, "d").unix(),
+      timestamp: dayjs().add(-1, "d").unix(),
     });
     const liquiditySnapshotNow: PoolLiquidityMap = yield fetchPoolLiquidity({
       network,
@@ -54,12 +55,10 @@ function* queryPoolLiquidityDay({ network }: QueryOpts) {
   }
 };
 
-export default function* statsSaga() {
-  logger("init stats saga");
-
+function* watchStats() {
+  logger("run watch stats");
   while (true) {
-    logger("run stats saga");
-    const network = yield select((state: RootState) => state.layout.network);
+    const { network } = getBlockchain(yield select())
     const queryOpts = { network };
     try {
       yield fork(queryVolumeDay, queryOpts);
@@ -70,4 +69,9 @@ export default function* statsSaga() {
       yield delay(STATS_REFRESH_RATE);
     }
   }
+}
+
+export default function* statsSaga() {
+  logger("init stats saga");
+  yield fork(watchStats);
 }

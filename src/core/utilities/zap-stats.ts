@@ -1,6 +1,6 @@
 import { bnOrZero } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
-import moment, { Moment } from "moment";
+import dayjs, { Dayjs } from "dayjs";
 import { Network } from "zilswap-sdk/lib/constants";
 import { HTTP } from "./http";
 
@@ -25,7 +25,7 @@ export interface SwapTransaction {
 	transaction_hash: string;
 	event_sequence: number;
 	block_height: number;
-	block_timestamp: Moment;
+	block_timestamp: Dayjs;
 	initiator_address: string;
 	token_address: string;
 	token_amount: BigNumber;
@@ -37,7 +37,7 @@ export interface PoolTransaction {
 	id: string;
 	transaction_hash: string;
 	block_height: number;
-	block_timestamp: Moment;
+	block_timestamp: Dayjs;
 	initiator_address: string;
 	token_address: string;
 
@@ -236,7 +236,7 @@ export class ZAPStats {
 			...result,
 			records: result?.records?.map((tx: any) => ({
 				...tx,
-				block_timestamp: moment(tx.block_timestamp + 'Z'),
+				block_timestamp: dayjs(tx.block_timestamp + 'Z'),
 
 				token_amount: bnOrZero(tx.token_amount),
 				zil_amount: bnOrZero(tx.zil_amount),
@@ -262,7 +262,7 @@ export class ZAPStats {
 		const result = await response.json();
 		return result?.records?.map((tx: any) => ({
 			...tx,
-			block_timestamp: moment(tx.block_timestamp + 'Z'),
+			block_timestamp: dayjs(tx.block_timestamp + 'Z'),
 			token_amount: bnOrZero(tx.token_amount),
 			zil_amount: bnOrZero(tx.zil_amount),
 		})) ?? [];

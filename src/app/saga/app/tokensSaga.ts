@@ -4,12 +4,12 @@ import { Network } from "zilswap-sdk/lib/constants";
 import { call, put, fork, select, takeLatest } from "redux-saga/effects";
 
 import { actions } from "app/store";
-import { RootState, TokenInfo } from "app/store/types";
+import { TokenInfo } from "app/store/types";
 import { SimpleMap, strings } from "app/utils";
-import { ConnectedWallet } from "core/wallet";
 import { logger } from "core/utilities";
 import { balanceBatchRequest, BatchRequestType, sendBatchRequest,
   tokenAllowancesBatchRequest, tokenBalanceBatchRequest, ZilswapConnector } from "core/zilswap";
+import { getWallet, getTokens, getBlockchain } from "../selectors";
 
 const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string) => {
   logger("tokens saga", "retrieving token balances/allowances");
@@ -110,12 +110,12 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
 
 function* updateTokensState() {
   logger("tokens saga", "called updateTokensState")
-  const wallet: ConnectedWallet = yield select((state: RootState) => state.wallet.wallet);
+  const { wallet } = getWallet(yield select());
 
-  if (!wallet) { return }
+  if (!wallet) return;
 
-  const tokens: SimpleMap<TokenInfo> = yield select((state: RootState) => state.token.tokens);
-  const network: Network = yield select((state: RootState) => state.layout.network);
+  const { tokens } = getTokens(yield select());
+  const { network } = getBlockchain(yield select());
 
   const address = wallet!.addressInfo.byte20.toLowerCase();
 

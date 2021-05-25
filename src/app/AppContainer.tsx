@@ -1,4 +1,4 @@
-import MomentUtils from "@date-io/moment";
+import DayJsUtils from "@date-io/dayjs";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import { ThemeProvider } from "@material-ui/styles";
@@ -34,7 +34,7 @@ const AppContainer: React.FC = () => {
     <ThemeProvider theme={theme}>
       <AppButler />
       <CssBaseline />
-      <MuiPickersUtilsProvider utils={MomentUtils}>
+      <MuiPickersUtilsProvider utils={DayJsUtils}>
         <Router history={history}>
           <ScrollReset />
           <GoogleAnalytics />

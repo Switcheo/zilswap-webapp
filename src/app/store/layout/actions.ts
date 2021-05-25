@@ -1,4 +1,3 @@
-import { Network } from "zilswap-sdk/lib/constants";
 import { OpenCloseState, PoolType, FormNotification } from "./types";
 
 export const LayoutActionTypes = {
@@ -8,8 +7,6 @@ export const LayoutActionTypes = {
   HIDE_LIQUIDITY_EARN: "HIDE_LIQUIDITY_EARN",
   UPDATE_NOTIFICATION: "UPDATE_NOTIFICATION",
 
-  UPDATE_NETWORK: "UPDATE_NETWORK",
-  
   ADD_BACKGROUND_LOADING: "ADD_BACKGROUND_LOADING",
   REMOVE_BACKGROUND_LOADING: "REMOVE_BACKGROUND_LOADING",
 };
@@ -44,13 +41,6 @@ export function updateNotification(notification?: FormNotification) {
   return {
     type: LayoutActionTypes.UPDATE_NOTIFICATION,
     notification,
-  }
-};
-
-export function updateNetwork(network: Network) {
-  return {
-    type: LayoutActionTypes.UPDATE_NETWORK,
-    network,
   }
 };
 

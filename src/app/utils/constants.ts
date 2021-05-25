@@ -11,6 +11,7 @@ export const LoadingKeys = {
     "connectWalletZilPay",
     "connectWalletPrivateKey",
     "initWallet",
+    "initChain",
   ],
 };
 
@@ -19,6 +20,7 @@ export const LocalStorageKeys = {
   ZilPayConnected: "zilswap:zilpay-connected",
   Network: "zilswap:network",
   UserTokenList: "zilswap:user-token-list",
+  PendingClaimedTxs: "zilswap:pending-claimed-txs",
 };
 
 export const PlaceholderStrings = {
@@ -70,4 +72,6 @@ export class PollIntervals {
   public static ZWAPClaimHistory = 60000;
   public static EpochInfo = 60000;
   public static PoolWeights = 3600000;
+
+  public static RetryAfterError = 5000;
 }

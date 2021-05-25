@@ -47,6 +47,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: "100%",
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(2),
+    marginBottom: theme.spacing(3),
     borderRadius: CARD_BORDER_RADIUS,
     backgroundColor: theme.palette.tab.disabledBackground,
     color: theme.palette.tab.disabled,
@@ -114,4 +115,4 @@ const ILOCard: React.FC<PaperProps> = (props: any) => {
   )
 }
 
-export default ILOCard
+export default ILOCard;

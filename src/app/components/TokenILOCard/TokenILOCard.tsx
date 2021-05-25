@@ -7,9 +7,11 @@ import { ZIL_TOKEN_NAME } from 'app/utils/constants';
 import BigNumber from 'bignumber.js';
 import { useSelector } from 'react-redux';
 import HelpInfo from "../HelpInfo";
+import { ILOData } from 'core/zilo/constants';
 
 const useStyles = makeStyles(theme => ({
   root: {
+    paddingBottom: theme.spacing(3),
   },
   container: {
     padding: theme.spacing(4, 4, 0),
@@ -36,17 +38,21 @@ const useStyles = makeStyles(theme => ({
     background: "none",
     border: "none"
   },
-  textGreen: {
-    color: theme.palette.type === "dark" ? "#00FFB0" : "#003340"
+  timer: {
+    color: theme.palette.primary.dark
   },
   secondaryText: {
     marginTop: theme.spacing(1)
+  },
+  input: {
+    marginBottom: theme.spacing(1),
   }
 }));
 
 interface Props {
   expanded?: boolean
-}
+  data: ILOData
+};
 
 const initialFormState = {
   zwapAmount: "0",
@@ -54,8 +60,9 @@ const initialFormState = {
 };
 
 const TokenILOCard = (props: Props) => {
+  const { data } = props
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
-  const [expanded, setExpanded] = useState<boolean>(props.expanded ?? false)
+  const [expanded, _] = useState<boolean>(props.expanded ?? true)
   const classes = useStyles();
 
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
@@ -77,6 +84,7 @@ const TokenILOCard = (props: Props) => {
     });
   };
 
+  // TODO: use proper ratio
   const onZilChange = (amount: string = "0") => {
     let _amount = new BigNumber(amount);
     let _totalValue = _amount.dividedBy(70).times(100)
@@ -90,28 +98,28 @@ const TokenILOCard = (props: Props) => {
   };
 
   return (
-    <Box>
-      <button onClick={() => setExpanded(!expanded)} className={classes.expandButton}>
-        <Box>
+    <Box className={classes.root}>
+      <Box>
+        <button className={classes.expandButton}>
           <img
             className={classes.svg}
-            src={`https://placehold.co/600x250`}
-            alt={`ILOs header`}
+            src={data.imageURL}
+            alt={data.tokenName}
           />
-        </Box>
-      </button>
+        </button>
+      </Box>
       {expanded &&
         <Box display="flex" flexDirection="column" className={classes.container}>
           <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
-            <Text variant="h1">ZilStream (STREAM)</Text>
-            <Text color="textSecondary" marginTop={1}>ZilStream's premium membership token</Text>
+            <Text variant="h1">{data.tokenName} ({data.tokenSymbol})</Text>
+            <Text color="textSecondary" marginTop={1}>{data.description}</Text>
 
-            <Text variant="h1" marginTop={2} className={classes.textGreen}>
+            <Text variant="h1" marginTop={2} className={classes.timer}>
               00:59:59
               <HelpInfo placement="top" title="To be changed." />
             </Text>
 
-            <ProgressBar progress={92} marginTop={3} />
+            <ProgressBar progress={0} marginTop={3} />
 
             <Box marginTop={1}>
               <Box display="flex" marginTop={0.5}>
@@ -119,7 +127,7 @@ const TokenILOCard = (props: Props) => {
                 <Text color="textSecondary">~$928,636.02 (92%)</Text>
               </Box>
               <Box display="flex" marginTop={0.5}>
-                <Text color="textSecondary" flexGrow={1} align="left">Funds to Raise</Text>
+                <Text color="textSecondary" flexGrow={1} align="left">ZIL to Raise</Text>
                 <Text color="textSecondary">$1,000,000</Text>
               </Box>
               <Box display="flex" marginTop={0.5}>
@@ -128,7 +136,7 @@ const TokenILOCard = (props: Props) => {
               </Box>
             </Box>
 
-            <Text marginTop={3}>Commit your tokens in a fixed ratio.</Text>
+            <Text marginTop={3} marginBottom={0.5}>Commit your tokens in a fixed ratio.</Text>
             <Text color="textSecondary">30% ZWAP - 70% ZIL</Text>
 
             <Box marginTop={2} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
@@ -138,7 +146,9 @@ const TokenILOCard = (props: Props) => {
                 amount={formState.zwapAmount}
                 hideBalance={false}
                 disabled={false}
-                onAmountChange={onZwapChange} />
+                onAmountChange={onZwapChange}
+                className={classes.input}
+              />
 
               <CurrencyInputILO fixedToToken
                 label="to Fund Project:"
@@ -146,7 +156,9 @@ const TokenILOCard = (props: Props) => {
                 amount={formState.zilAmount}
                 hideBalance={false}
                 disabled={false}
-                onAmountChange={onZilChange} />
+                onAmountChange={onZilChange}
+                className={classes.input}
+              />
             </Box>
           </Box>
 

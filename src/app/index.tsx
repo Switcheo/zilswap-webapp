@@ -1,7 +1,7 @@
 import React from "react";
 import { Provider } from "react-redux";
 import "./assets/scss/index.scss";
-import "./mixins/moment";
+import "./mixins/dayjs";
 import "./mixins/prismjs";
 import "./mixins/validate";
 import store from "./store";

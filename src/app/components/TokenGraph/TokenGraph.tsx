@@ -146,8 +146,6 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
           return;
         }
         changes = (outStats[0].close - outStats[59].close) / outStats[59].close;
-
-        console.log({ changes }, outStats[0].close, outStats[59].close, outStats[0].close - outStats[59].close, outStats[0].time, outStats[59].time)
       }
       setGrowth(new BigNumber(changes * 100));
     })
@@ -347,7 +345,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
       return "$" + inTokenRate.toFixed(2);
     }
     return "-";
-    
+
   }
 
   return (

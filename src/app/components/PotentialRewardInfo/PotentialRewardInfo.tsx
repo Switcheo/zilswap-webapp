@@ -1,6 +1,6 @@
 import { PoolFormState, PoolZWAPReward, RewardsState, RootState } from "app/store/types";
 import { BIG_ZERO } from "app/utils/constants";
-import moment from "moment";
+import dayjs from "dayjs";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import HelpInfo from "../HelpInfo";
@@ -15,15 +15,15 @@ const PotentialRewardInfo: React.FC<Props> = (props: Props) => {
   const rewardsState = useSelector<RootState, RewardsState>(store => store.rewards);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const weeklyRewards = useMemo(() => rewardsState.rewardByPools[poolState?.token?.address]?.weeklyReward ?? BIG_ZERO, [poolState?.token?.address, rewardsState.rewardByPools]);
+  const weeklyRewards = useMemo(() => rewardsState.rewardByPools[poolState?.token?.address ?? ""]?.weeklyReward ?? BIG_ZERO, [poolState?.token?.address, rewardsState.rewardByPools]);
 
   const potentialRewards = useMemo(() => {
     const { token, addZilAmount } = poolState;
-    const poolRewards: PoolZWAPReward | undefined = rewardsState.rewardByPools[token?.address];
+    const poolRewards: PoolZWAPReward | undefined = rewardsState.rewardByPools[token?.address ?? ""];
 
     if (!poolRewards || !rewardsState.epochInfo || !token?.pool || weeklyRewards.isZero()) return BIG_ZERO;
 
-    const epochTimeLeftSeconds = Math.max(0, -moment().diff(rewardsState.epochInfo.nextEpoch, "second")) % rewardsState.epochInfo.raw.epoch_period;
+    const epochTimeLeftSeconds = Math.max(0, -dayjs().diff(rewardsState.epochInfo.nextEpoch, "second")) % rewardsState.epochInfo.raw.epoch_period;
     const timeWeight = epochTimeLeftSeconds / 3600;
 
     const zilReserveHuman = token.pool.zilReserve.shiftedBy(-12);

@@ -34,7 +34,7 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
 
   const dispatch = useDispatch();
 
-  const wallet = useSelector<RootState, ConnectedWallet | undefined>(state => state.wallet.wallet);
+  const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
   const [loading] = useTaskSubscriber(...LoadingKeys.connectWallet);
 
   const onConnectWallet = () => {

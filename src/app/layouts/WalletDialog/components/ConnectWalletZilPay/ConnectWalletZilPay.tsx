@@ -1,16 +1,17 @@
 import { Box, Button, DialogContent, InputLabel, Typography, Link } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import cls from "classnames";
 import { ContrastBox, FancyButton } from "app/components";
 import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask } from "app/utils";
-import cls from "classnames";
+import { useAsyncTask, useTaskSubscriber } from "app/utils";
+import { LoadingKeys } from "app/utils/constants";
 import { ConnectWalletResult, connectWalletZilPay } from "core/wallet";
-import { ZilswapConnector } from "core/zilswap";
-import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
 import { ConnectWalletManagerViewProps } from "../../types";
+
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
@@ -31,7 +32,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   submitButton: {
-    marginTop: theme.spacing(6),
     minWidth: 240,
     alignSelf: "center",
     height: 46
@@ -52,25 +52,26 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any) => {
-  const { children, className, onResult, ...rest } = props;
+  const { children, className, onBack: _onBack, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [runConnectTask, loadingConnect, errorConnect] = useAsyncTask<void>("connectWalletZilPay");
+  const [runConnectTask, isCheckingZilPay, errorConnect] = useAsyncTask<void>("connectWalletZilPay");
+  const [isLoading] = useTaskSubscriber(...LoadingKeys.connectWallet);
 
+  // auto-click connect
   useEffect(() => {
-    connect();
-    // eslint-disable-next-line
-  }, []);
+    connect()
+  }, [])
 
   const onBack = () => {
-    if (typeof onResult === "function")
-      onResult(null);
+    if (isLoading) return;
+    _onBack(null);
   };
 
   const connect = () => {
-    if (loadingConnect) return;
-
     runConnectTask(async () => {
+      if (isLoading) return;
+
       const zilPay = (window as any).zilPay;
       if (typeof zilPay === "undefined")
         throw new Error("ZilPay extension not installed");
@@ -86,12 +87,7 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
       if (walletResult.wallet) {
         const { wallet } = walletResult
         const { network } = wallet
-        await ZilswapConnector.connect({
-          network,
-          wallet,
-        });
-        dispatch(actions.Layout.updateNetwork(network));
-        dispatch(actions.Wallet.update({ wallet, zilpay: true }));
+        dispatch(actions.Blockchain.initialize({ network, wallet }))
       }
     });
   }
@@ -101,7 +97,7 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
       <DialogContent>
         <ContrastBox className={classes.container}>
           <Box display="flex" flexDirection="row" justifyContent="space-between">
-            {loadingConnect && (
+            {isCheckingZilPay && (
               <InputLabel>Checking ZilPay Extension</InputLabel>
             )}
             {errorConnect && (
@@ -114,8 +110,8 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
                   New to ZilPay? Download it
                   {" "}
                   <Link
-                    rel="noopener noreferrer" 
-                    target="_blank" 
+                    rel="noopener noreferrer"
+                    target="_blank"
                     href="https://chrome.google.com/webstore/detail/zilpay/klnaejjgbibmhlephnhpmaofohgkpgkd">
                     here
                   </Link>!
@@ -123,7 +119,7 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
               </Box>
             )}
           </Box>
-          <FancyButton fullWidth loading={loadingConnect} onClick={connect} className={classes.submitButton} variant="contained" color="primary">
+          <FancyButton fullWidth loading={isLoading} onClick={connect} className={classes.submitButton} variant="contained" color="primary">
             Connect
           </FancyButton>
         </ContrastBox>

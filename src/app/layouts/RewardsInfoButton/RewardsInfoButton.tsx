@@ -3,15 +3,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import { HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
-import { RewardsState, RootState, TokenState, WalletState } from "app/store/types";
+import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { truncate, useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import { formatZWAPLabel } from "app/utils/strings/strings";
+import { ZWAPRewards } from "core/zwap";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ZilswapConnector } from "core/zilswap";
-import { ZWAPRewards } from "core/zwap";
+import dayjs from "dayjs";
 import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CurrencyLogo } from "app/components";
@@ -83,6 +83,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const [runClaimRewards, loading, error] = useAsyncTask("claimRewards");
   const buttonRef = useRef();
 
+  const walletAddress = useMemo(() => walletState.wallet?.addressInfo.bech32, [walletState.wallet]);
+
   const potentialRewards = useMemo(() => {
     return Object.keys(rewardsState.potentialPoolRewards).reduce((accum, poolAddress) => {
       const reward = rewardsState.potentialPoolRewards[poolAddress];
@@ -95,12 +97,17 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     claimableRewards,
     claimTooltip,
   } = useMemo(() => {
+    const pendingClaimTxs = rewardsState.claimTxs[walletAddress ?? ""] ?? {};
+    const pendingClaimEpochs = Object.values(pendingClaimTxs).map(pendingTx => pendingTx.epoch);
+
     const unclaimedRewards = rewardsState.rewardDistributions.reduce((sum, dist) => {
-      return dist.claimed ? sum : sum.plus(dist.info.amount);
+      if (pendingClaimEpochs.includes(dist.info.epoch_number)) return sum;
+      return dist.claimed === false ? sum.plus(dist.info.amount) : sum;
     }, BIG_ZERO);
 
     const claimableRewards = rewardsState.rewardDistributions.reduce((sum, dist) => {
-      return (!dist.claimed && dist.readyToClaim) ? sum.plus(dist.info.amount) : sum;
+      if (pendingClaimEpochs.includes(dist.info.epoch_number)) return sum;
+      return (dist.claimed === false && dist.readyToClaim) ? sum.plus(dist.info.amount) : sum;
     }, BIG_ZERO);
 
     let claimTooltip = "No ZWAP to claim";
@@ -117,24 +124,22 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       claimableRewards,
       claimTooltip,
     };
-  }, [rewardsState.rewardDistributions]);
+  }, [walletAddress, rewardsState.claimTxs, rewardsState.rewardDistributions]);
 
   const zapTokenBalance: BigNumber = useMemo(() => {
-    if (!ZilswapConnector.network) return BIG_ZERO;
-
-    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
+    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[network] ?? "";
     return tokenState.tokens[zapContractAddr]?.balance ?? BIG_ZERO;
-  }, [tokenState.tokens]);
+  }, [network, tokenState.tokens]);
 
   const zapTokenValue: BigNumber = useMemo(() => {
-    if (!ZilswapConnector.network || zapTokenBalance.isZero()) return BIG_ZERO;
+    if (zapTokenBalance.isZero()) return BIG_ZERO;
 
-    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
+    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[network] ?? "";
     const zapToken = tokenState.tokens[zapContractAddr];
     if (!zapToken) return BIG_ZERO;
 
     return valueCalculators.amount(tokenState.prices, zapToken, zapTokenBalance);
-  }, [tokenState.prices, tokenState.tokens, zapTokenBalance, valueCalculators]);
+  }, [network, tokenState.prices, tokenState.tokens, zapTokenBalance, valueCalculators]);
 
   const zapBalanceLabel = useMemo(() => formatZWAPLabel(zapTokenBalance), [zapTokenBalance]);
   const unclaimedRewardsLabel = useMemo(() => formatZWAPLabel(unclaimedRewards), [unclaimedRewards]);
@@ -152,11 +157,23 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         const proof = distribution.info.proof.slice(1, distribution.info.proof.length - 1);
 
         claimTx = await ZWAPRewards.claim({
+          network,
           amount: distribution.info.amount,
           proof,
           epochNumber: distribution.info.epoch_number,
           wallet: walletState.wallet,
         });
+
+        const pendingTx: PendingClaimTx = {
+          dispatchedAt: dayjs(),
+          epoch: distribution.info.epoch_number,
+          txHash: claimTx.hash,
+        };
+
+        dispatch(actions.Rewards.addPendingClaimTx(
+          walletState.wallet.addressInfo.bech32,
+          pendingTx,
+        ));
 
         count++;
       }
@@ -165,12 +182,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         setClaimCount(count);
         setClaimResult(claimTx);
         setTimeout(() => {
-          if (!ZilswapConnector.network) return;
-
-          const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[ZilswapConnector.network] ?? "";
-          dispatch(actions.Token.update({
-            address: zapContractAddr,
-          }));
+          dispatch(actions.Token.updateState());
         }, 5000);
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -265,7 +277,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
               {!!claimResult && (
                 <Box marginTop={2}>
                   <Text variant="body1">Claimed ZWAP from {claimCount} Epochs</Text>
-                  <Text variant="body1">Last Claim TX: 0x{truncate(claimResult?.id, 8, 8)}</Text>
+                  <Text variant="body1">Last Claim TX: 0x{truncate(claimResult?.hash, 8, 8)}</Text>
                 </Box>
               )}
 
@@ -283,7 +295,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
               )}
 
               {!!claimResult && (
-                <Button fullWidth variant="outlined" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/0x${claimResult?.id}?network=${network}`}>
+                <Button fullWidth variant="outlined" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/0x${claimResult?.hash}?network=${network}`}>
                   View Claim TX <NewLinkIcon className={classes.buttonIcon} />
                 </Button>
               )}
