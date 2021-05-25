@@ -27,7 +27,7 @@ const ProgressBar: React.FC<Props> = (props: Props) => {
 
   return (
     <Box marginTop={3} bgcolor="background.contrast" display="flex" flexDirection="column" borderRadius={12} padding={1}>
-      <Box {...boxProps} position="relative" display="flex" alignItems="stretch" bgcolor="background.default" borderRadius={12}>
+      <Box {...boxProps} position="relative" display="flex" alignItems="stretch" bgcolor="background.default" borderRadius={12} mt={0}>
         <Box padding={2} width={`${progress}%`} borderRadius={12} className={classes.background}/> 
           <Box className={classes.text} fontWeight="fontWeightBold" position="absolute" top={0} bottom={0} left={0} right={0} display="flex" alignItems="center" justifyContent="center">
             <Typography className={progress >= 55 ? classes.text : classes.lowProgressText}>
