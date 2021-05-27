@@ -187,7 +187,8 @@ function* watchZilPay() {
         break
       }
     } catch (e) {
-      console.error(e)
+      console.warn('Watch Zilpay failed, will automatically retry on reconnect. Error:')
+      console.warn(e)
     }
   }
   try {

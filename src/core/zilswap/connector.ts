@@ -149,7 +149,8 @@ export class ZilswapConnector {
     if (!zilswap) throw new Error('not initialized');
     logger(props.tokenID);
     logger(props.tokenAmount.toString());
-    const observedTx = await zilswap.approveTokenTransferIfRequired(props.tokenID, props.tokenAmount);
+    logger(props.spenderAddress);
+    const observedTx = await zilswap.approveTokenTransferIfRequired(props.tokenID, props.tokenAmount, props.spenderAddress);
     if (observedTx)
       handleObservedTx(observedTx);
 

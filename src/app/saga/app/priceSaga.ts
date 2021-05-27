@@ -73,7 +73,8 @@ function* updatePoolUSDValues() {
           yield put(actions.Token.updatePrices(prices));
       }
     } catch (e) {
-      console.error(e)
+      console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn(e)
     } finally {
       yield race({
         rewardsUpdated: take(RewardsActionTypes.UPDATE_ZWAP_REWARDS),
@@ -106,7 +107,8 @@ function* queryUSDValues() {
       if (result)
         yield put(actions.Token.updatePrices(prices));
     } catch (e) {
-      console.error(e)
+            console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn(e)
     } finally {
       yield delay(PollIntervals.USDRates);
     }

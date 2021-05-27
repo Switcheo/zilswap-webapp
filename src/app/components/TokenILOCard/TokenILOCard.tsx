@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import BigNumber from 'bignumber.js'
-import { Box, makeStyles } from '@material-ui/core'
+import { Box, CircularProgress, makeStyles } from '@material-ui/core'
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyInputILO, FancyButton, Text } from 'app/components'
 import ProgressBar from 'app/components/ProgressBar'
@@ -76,9 +76,14 @@ const TokenILOCard = (props: Props) => {
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const classes = useStyles();
 
-  const zwapToken = Object.values(tokenState.tokens).filter(token => token.isZwap)[0]!
+  const zwapToken = Object.values(tokenState.tokens).filter(token => token.isZwap)[0]
+
+  if (!zwapToken) {
+    return  <CircularProgress color="primary" size={24} />
+  }
+
   const zilToken = tokenState.tokens[ZIL_TOKEN_NAME]
-  const exchangeRate: BigNumber = zwapToken?.pool?.exchangeRate || new BigNumber(0)
+  const exchangeRate: BigNumber = zwapToken.pool?.exchangeRate || new BigNumber(0)
   const contractAddrHex = fromBech32Address(data.contractAddress).toLowerCase();
   const unitlessInAmount = new BigNumber(formState.zwapAmount).shiftedBy(zwapToken.decimals).integerValue();
   const showTxApprove = new BigNumber(zwapToken.allowances![contractAddrHex] || '0').comparedTo(unitlessInAmount) < 0;
@@ -119,6 +124,7 @@ const TokenILOCard = (props: Props) => {
       const observedTx = await ZilswapConnector.approveTokenTransfer({
         tokenAmount: tokenAmount.shiftedBy(zwapToken.decimals),
         tokenID: zwapToken.address,
+        spenderAddress: contractAddrHex,
       });
 
       if (!observedTx)

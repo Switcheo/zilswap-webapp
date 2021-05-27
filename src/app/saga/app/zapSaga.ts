@@ -20,6 +20,9 @@ function* queryEpochInfo() {
       const info = yield ZAPStats.getEpochInfo({ network });
 
       yield put(actions.Rewards.updateEpochInfo(info));
+    } catch (e) {
+      console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn(e)
     } finally {
       const invalidated = yield race({
         minutePoll: delay(PollIntervals.EpochInfo),
@@ -40,6 +43,9 @@ function* queryPoolWeights() {
       const poolWeights: ZWAPPoolWeights = yield ZAPStats.getPoolWeights({ network });
 
       yield put(actions.Rewards.updatePoolWeights(poolWeights));
+    } catch (e) {
+      console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn(e)
     } finally {
       const invalidated = yield race({
         pollDelay: delay(PollIntervals.PoolWeights),
@@ -81,6 +87,9 @@ function* queryDistribution() {
       }));
 
       yield put(actions.Rewards.updateDistributions(rewardDistributions));
+    } catch (e) {
+      console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn(e)
     } finally {
       const invalidated = yield race({
         networkUpdate: take(BlockchainActionTypes.SET_NETWORK),
@@ -105,6 +114,9 @@ function* queryClaimHistory() {
       const globalClaimHistory = (claimedState?.claimed_leafs ?? {}) as GlobalClaimHistory;
 
       yield put(actions.Rewards.updateClaimHistory(globalClaimHistory));
+    } catch (e) {
+      console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn(e)
     } finally {
       const invalidated = yield race({
         minutePoll: delay(PollIntervals.ZWAPClaimHistory),
@@ -134,6 +146,9 @@ function* queryPotentialRewards() {
       });
 
       yield put(actions.Rewards.updatePotentialRewards(rewardsByPool));
+    } catch (e) {
+      console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn(e)
     } finally {
       const invalidated = yield race({
         epochUpdated: take(RewardsActionTypes.UPDATE_EPOCH_INFO),

@@ -10,16 +10,13 @@ import { connectWalletPrivateKey, connectWalletZilPay } from "core/wallet";
 import { logger } from "./logger";
 import { getConnectedZilPay } from "./zilpay";
 
-/**
- * Component constructor properties for {@link AppButler}
- *
- */
-export type AppButlerProps = {};
+const privateKey = localStorage.getItem(LocalStorageKeys.PrivateKey);
+const savedZilpay = localStorage.getItem(LocalStorageKeys.ZilPayConnected);
 
 /**
  * Mock component to initialize saved wallet on app load.
  */
-export const AppButler: React.FC<AppButlerProps> = (_props: AppButlerProps) => {
+export const AppButler: React.FC<{}> = (_props: {}) => {
   const network = useNetwork();
   const { ready } = useSelector<RootState, BlockchainState>(state => state.blockchain);
   const [runInitWallet] = useAsyncTask<void>("initWallet");
@@ -35,7 +32,9 @@ export const AppButler: React.FC<AppButlerProps> = (_props: AppButlerProps) => {
         dispatch(actions.Blockchain.initialize({ wallet, network }));
         return
       }
-    } catch (e) { }
+    } catch (e) {
+      console.error(e)
+    }
 
     dispatch(actions.Blockchain.initialize({ wallet: null, network }));
   };
@@ -52,8 +51,12 @@ export const AppButler: React.FC<AppButlerProps> = (_props: AppButlerProps) => {
           dispatch(actions.Blockchain.initialize({ wallet, network }));
           return
         }
+        console.warn('Failed to connect ZilPay!')
       }
-    } catch (e) { }
+      console.warn('Failed to get ZilPay!')
+    } catch (e) {
+      console.error(e)
+    }
 
     dispatch(actions.Blockchain.initialize({ wallet: null, network }));
   };
@@ -67,9 +70,6 @@ export const AppButler: React.FC<AppButlerProps> = (_props: AppButlerProps) => {
     if (!ready) return
 
     logger("butler init");
-
-    const privateKey = localStorage.getItem(LocalStorageKeys.PrivateKey);
-    const savedZilpay = localStorage.getItem(LocalStorageKeys.ZilPayConnected);
 
     runInitWallet(async () => {
       if (typeof privateKey === "string") {

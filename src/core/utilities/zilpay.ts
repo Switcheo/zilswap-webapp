@@ -1,5 +1,9 @@
 export const getConnectedZilPay = async () => {
-  const zilPay = (window as any).zilPay;
+  let zilPay = (window as any).zilPay;
+  if (!zilPay) {
+    await delay(1500) // wallet injection may sometimes be slow
+    zilPay = (window as any).zilPay;
+  }
   try {
     if (typeof zilPay !== "undefined") {
       const result = await zilPay.wallet.connect();
@@ -12,3 +16,5 @@ export const getConnectedZilPay = async () => {
   }
   return null;
 };
+
+const delay = (ms: number) =>  new Promise(resolve => setTimeout(resolve, ms));

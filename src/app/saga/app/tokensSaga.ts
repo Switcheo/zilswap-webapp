@@ -4,7 +4,7 @@ import { Network } from "zilswap-sdk/lib/constants";
 import { call, put, fork, select, takeLatest } from "redux-saga/effects";
 
 import { actions } from "app/store";
-import { TokenInfo } from "app/store/types";
+import { TokenInfo, TokenBalanceMap } from "app/store/types";
 import { SimpleMap, strings } from "app/utils";
 import { logger } from "core/utilities";
 import { balanceBatchRequest, BatchRequestType, sendBatchRequest,
@@ -29,26 +29,42 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
   const batchResults = await sendBatchRequest(network, batchRequests)
   const updates: SimpleMap<TokenInfo> = {};
 
-  batchResults.forEach(result => {
-    let token = result.request.token;
+  batchResults.forEach(r => {
+    const { request, result } = r;
+    const { token } = request;
 
-    switch(result.request.type) {
+    if (!updates[token.address]) {
+      updates[token.address] = {
+        initialized: token.initialized,
+        isZil: token.isZil,
+        isZwap: token.isZwap,
+        name: token.name,
+        symbol: token.symbol,
+        registered: token.registered,
+        whitelisted: token.whitelisted,
+        address: token.address,
+        decimals: token.decimals
+      }
+    }
+
+    switch(request.type) {
       case BatchRequestType.Balance: {
-        let balance: BigNumber | undefined;
-        balance = strings.bnOrZero(result.result.balance);
-        updates[token.address] = {
+        let balance: BigNumber | undefined = strings.bnOrZero(result.balance);
+
+        const tokenInfo: Partial<TokenInfo> = {
           ...updates[token.address],
+          initialized: true,
           name: "Zilliqa",
-          address: token.address,
-          balance: balance,
+          balance,
           balances: {
             ...(balance && {
-              // initialize with own wallet balance
+              // fake the zrc-2 balances map by initializing with own zil balance
               [address]: balance!,
             }),
           },
-          initialized: true,
-        }
+        };
+
+        updates[token.address] = { ...updates[token.address], ...tokenInfo };
         break;
       }
 
@@ -56,50 +72,35 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
         const tokenDetails = ZilswapConnector.getToken(token.address);
         const tokenPool = ZilswapConnector.getPool(token.address);
 
-        let { balance, balances } = token
+        let { balance } = token
+        let balances: TokenBalanceMap =  {};
 
-        balances = {};
-
-        if(result.result) {
-          for (const address in result.result.balances)
+        if(result) {
+          for (const address in result.balances)
             balances[address] = strings.bnOrZero(
-              result.result.balances[address]
+              result.balances[address]
             );
-
           balance = strings.bnOrZero(balances[address]);
         }
 
-        const tokenInfo: TokenInfo = {
+        const tokenInfo: Partial<TokenInfo> = {
           initialized: true,
-          isZil: false,
-          isZwap: token.isZwap,
-          name: token.name,
-
-          registered: token.registered,
-          whitelisted: token.whitelisted,
-          address: token.address,
-          decimals: token.decimals,
-
           symbol: tokenDetails?.symbol ?? "",
           pool: tokenPool ?? undefined,
-
-          balance: balance,
-          balances: balances,
+          balance,
+          balances,
         };
+
         updates[token.address] = { ...updates[token.address], ...tokenInfo };
         break;
       }
 
       case BatchRequestType.TokenAllowance: {
-        let { allowances } = token;
-        if(result.result) {
-          allowances = result.result.allowances[address] || {};
+        let { address } = token;
+        const allowances = result?.allowances
+        if (allowances) {
+          updates[address] = { ...updates[address], allowances };
         }
-        updates[token.address] = {
-          ...updates[token.address],
-          address: token.address,
-          allowances: allowances,
-        };
         break;
       }
     }
