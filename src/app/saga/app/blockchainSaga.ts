@@ -11,8 +11,8 @@ import { connectWalletZilPay } from "core/wallet";
 import { logger } from "core/utilities";
 import { getConnectedZilPay } from "core/utilities/zilpay";
 import { PoolTransaction, PoolTransactionResult, ZAPStats } from "core/utilities/zap-stats";
-import { eventChannel, EventChannel } from "redux-saga";
-import { fork, call, put, select, take, cancelled } from "redux-saga/effects";
+import { channel, Channel, eventChannel, EventChannel } from "redux-saga";
+import { fork, call, put, select, take, takeEvery, cancelled } from "redux-saga/effects";
 import { AppState, ObservedTx, TxReceipt, TxStatus, Zilswap } from "zilswap-sdk";
 import { getBlockchain, getWallet, getTransactions } from '../selectors'
 
@@ -62,8 +62,17 @@ const zilPayObserver = (zilPay: any) => {
   })
 }
 
-function* txObserver(tx: ObservedTx, status: TxStatus, receipt?: TxReceipt) {
-  logger('observedtx', tx)
+type TxObservedPayload = { tx: ObservedTx, status: TxStatus, receipt?: TxReceipt }
+const txObserver = (channel: Channel<TxObservedPayload>) => {
+  return (tx: ObservedTx, status: TxStatus, receipt?: TxReceipt) => {
+    logger('tx observed', tx)
+    channel.put({ tx, status, receipt })
+  }
+}
+
+function* txObserved(payload: TxObservedPayload) {
+  logger('tx observed action', payload)
+  const { tx, status, receipt } = payload
 
   yield put(actions.Rewards.removePendingClaimTx(tx.hash));
   yield put(actions.Transaction.update({ hash: tx.hash, status: status, txReceipt: receipt }));
@@ -75,11 +84,20 @@ function* txObserver(tx: ObservedTx, status: TxStatus, receipt?: TxReceipt) {
   }
 }
 
-function* ziloStateObserver() {
-
+type StateChangeObservedPayload = { type: string }
+const ziloStateObserver = (channel: Channel<StateChangeObservedPayload>) => {
+  return () => {
+    logger('zilo state changed observed',)
+    channel.put({ type: 'ZIL_STATE_CHANGED' })
+  }
 }
 
-function* initialize(action: ChainInitAction) {
+function* stateChangeObserved(payload: StateChangeObservedPayload) {
+  logger('zilo state change action')
+  yield put(payload)
+}
+
+function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPayload>, stateChannel: Channel<any>) {
   let sdk: Zilswap | null = null;
   try {
     yield put(actions.Layout.addBackgroundLoading('initChain', 'INIT_CHAIN'))
@@ -93,10 +111,10 @@ function* initialize(action: ChainInitAction) {
     sdk = new Zilswap(network, providerOrKey ?? undefined, { rpcEndpoint: RPCEndpoints[network] });
     logger('sdk initialized')
 
-    yield call([sdk, sdk.initialize], txObserver, observingTxs)
+    yield call([sdk, sdk.initialize], txObserver(txChannel), observingTxs)
     for (let i = 0; i++; i < ZILO_DATA[network].length) {
       const data = ZILO_DATA[network][i]
-      yield call([sdk, sdk.registerZilo], data.contractAddress, ziloStateObserver)
+      yield call([sdk, sdk.registerZilo], data.contractAddress, ziloStateObserver(stateChannel))
       logger('zilo sdk initialized')
     }
     ZilswapConnector.setSDK(sdk)
@@ -167,11 +185,20 @@ function* teardown(sdk: Zilswap | null) {
 }
 
 function* watchInitialize() {
+  const txChannel: Channel<TxObservedPayload> = channel()
+  const stateChannel: Channel<StateChangeObservedPayload> = channel()
   let sdk: Zilswap | null = null;
-  while (true) {
-    const action: ChainInitAction = yield take(actions.Blockchain.BlockchainActionTypes.CHAIN_INIT)
-    sdk = yield call(teardown, sdk)
-    sdk = yield call(initialize, action)
+  try {
+    yield takeEvery(txChannel, txObserved)
+    yield takeEvery(stateChannel, stateChangeObserved)
+    while (true) {
+      const action: ChainInitAction = yield take(actions.Blockchain.BlockchainActionTypes.CHAIN_INIT)
+      sdk = yield call(teardown, sdk)
+      sdk = yield call(initialize, action, txChannel, stateChannel)
+    }
+  } finally {
+    txChannel.close()
+    stateChannel.close()
   }
 }
 

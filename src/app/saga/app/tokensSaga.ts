@@ -96,10 +96,9 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
       }
 
       case BatchRequestType.TokenAllowance: {
-        let { address } = token;
-        const allowances = result?.allowances
+        const allowances = result?.allowances[address]
         if (allowances) {
-          updates[address] = { ...updates[address], allowances };
+          updates[token.address] = { ...updates[token.address], allowances };
         }
         break;
       }

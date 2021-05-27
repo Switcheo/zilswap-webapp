@@ -138,7 +138,7 @@ const ConnectedWalletBox = (props: any) => {
           <Typography variant="h3">Connected to {wallet.type === WalletConnectType.ZilPay ? "ZilPay" : "Private Key"}</Typography>
           <Box mt={"8px"} display="flex" flexDirection="row" alignItems="center">
             <Typography color="textSecondary" variant="body1">{isMediaXS ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
-            <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network}`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
+            <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network.toLowerCase()}`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
             <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(humanAddress)} open={!!copyMap[humanAddress]} title="Copied!">
               <IconButton className={classes.copy} size="small"><CopyIcon /></IconButton>
             </Tooltip>
@@ -177,7 +177,7 @@ const ConnectedWalletBox = (props: any) => {
               <Box display="flex" flexDirection="row" justifyContent="space-between">
                 <Box display="flex" flexDirection="row" alignItems="center">
                   <Typography variant="body2">0x{truncate(transaction.hash, 10, 10)}</Typography>
-                  <IconButton target="_blank" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=${network}`} className={classes.newLinkTransaction} size="small">
+                  <IconButton target="_blank" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=${network.toLowerCase()}`} className={classes.newLinkTransaction} size="small">
                     <NewLinkIcon />
                   </IconButton>
                   <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(transaction.hash)} open={!!copyMap[transaction.hash]} title="Copied!">
