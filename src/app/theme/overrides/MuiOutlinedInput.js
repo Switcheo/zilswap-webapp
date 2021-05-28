@@ -11,7 +11,7 @@ const MuiOutlinedInput = theme => ({
       padding: "34px 18px 12px",
       [theme.breakpoints.down("md")]: {
         fontSize: 22,
-        padding: "24px 14px 12px",
+        padding: "32px 18px 10px",
       },
       // remove number spinner
       "&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": {

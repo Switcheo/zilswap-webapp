@@ -4,7 +4,7 @@ const MuiButton = theme => ({
     textTransform: "none",
     color: theme.palette.button.primary,
 
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("md")]: {
       "& .MuiTypography-root.MuiTypography-button": {
         fontSize: "14px",
         lineHeight: "16px",
