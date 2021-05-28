@@ -1,6 +1,7 @@
 import MuiButton from './MuiButton';
 import MuiButtonGroup from './MuiButtonGroup';
 import MuiCollapse from "./MuiCollapse";
+import MuiCircularProgress from "./MuiCircularProgress";
 import MuiCssBaseline from './MuiCssBaseline';
 import MuiDialog from './MuiDialog';
 import MuiDialogContent from './MuiDialogContent';
@@ -19,6 +20,7 @@ const overrides = {
   MuiButton,
   MuiButtonGroup,
   MuiCollapse,
+  MuiCircularProgress,
   MuiCssBaseline,
   MuiDialog,
   MuiDialogContent,
