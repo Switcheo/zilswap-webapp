@@ -36,6 +36,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   swapButton: {
     padding: 0,
+    marginTop: -49,
+    marginBottom: -15,
     transform: "rotate(0)",
     transition: "transform .5s ease-in-out",
   },
@@ -59,7 +61,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     paddingLeft: 0
   },
   proportionSelect: {
-    marginTop: "0.5em",
+    marginTop: 3,
+    marginBottom: 4,
   },
   currencyButton: {
     borderRadius: 0,
@@ -577,7 +580,6 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       <Box display="flex" flexDirection="column" className={classes.container}>
         <CurrencyInput
           label="From"
-          hideBalance
           token={inToken || null}
           amount={formState.inAmount}
           disabled={!inToken}
@@ -588,23 +590,6 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         <Box display="flex" justifyContent="flex-end">
           <ProportionSelect size="small" className={classes.proportionSelect} onSelectProp={onPercentage} />
         </Box>
-        <KeyValueDisplay className={classes.keyValueLabel}
-          hideIfNoValue
-          kkey="Balance:"
-          ValueComponent="span">
-          {!!inToken && (
-            <StatefulText loadingKey={`rueryTokenBalance-${inToken.address}`}>
-              <Typography color="textSecondary" variant="body2">
-                {moneyFormat(tokenBalance, {
-                  symbol: inToken!.symbol,
-                  compression: inToken!.decimals,
-                  showCurrency: true,
-                })}
-              </Typography>
-            </StatefulText>
-          )}
-        </KeyValueDisplay>
-
         <Box display="flex" justifyContent="center">
           <IconButton
             disabled={!inToken || !outToken}
@@ -618,7 +603,6 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           token={outToken || null}
           amount={formState.outAmount}
           disabled={!outToken}
-          hideBalance={true}
           dialogOpts={{ hideNoPool: true }}
           onEditorBlur={onDoneEditing}
           onAmountChange={onOutAmountChange}

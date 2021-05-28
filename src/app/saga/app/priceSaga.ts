@@ -37,7 +37,7 @@ const computeTokenPrice = (zilPrice: BigNumber, tokens: SimpleMap<TokenInfo>) =>
 
 function* updatePoolUSDValues() {
   while (true) {
-    logger("update pool USD values");
+    logger("price saga", "update pool USD values");
     try {
       const tokenState = getTokens(yield select())
       const rewardsState = getRewards(yield select())
@@ -79,7 +79,8 @@ function* updatePoolUSDValues() {
       yield race({
         rewardsUpdated: take(RewardsActionTypes.UPDATE_ZWAP_REWARDS),
         usdUpdated: take(TokenActionTypes.TOKEN_UPDATE_PRICES),
-        usdOnTokenUpdated: take(TokenActionTypes.TOKEN_UPDATE_STATE),
+        tokenUpdated: take(TokenActionTypes.TOKEN_UPDATE),
+        allTokensUpdated: take(TokenActionTypes.TOKEN_UPDATE_ALL),
       });
     }
   }
@@ -90,7 +91,7 @@ function* queryUSDValues() {
   const coinGeckoQuoteDenom = "usd";
 
   while (true) {
-    logger("query USD values");
+    logger("price saga", "query USD values");
     try {
       const { tokens } = getTokens(yield select())
       const result = (yield call(CoinGecko.getPrice, {
@@ -107,7 +108,7 @@ function* queryUSDValues() {
       if (result)
         yield put(actions.Token.updatePrices(prices));
     } catch (e) {
-            console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn('Fetch failed, will automatically retry later. Error:')
       console.warn(e)
     } finally {
       yield delay(PollIntervals.USDRates);

@@ -21,10 +21,13 @@ const useStyles = makeStyles(theme => ({
   },
   outlinedInput: {
     border: 0,
-    paddingLeft: "4px"
   },
   input: {
     textAlign: "left",
+  },
+  strongInput: {
+    textAlign: "left",
+    color: theme.palette.primary.dark
   },
   currencyButton: {
     borderRadius: 0,
@@ -67,8 +70,8 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   token: TokenInfo | null;
   amount: string;
   showCurrencyDialog?: boolean;
-  fixedToToken?: boolean;
   disabled?: boolean;
+  disabledStyle?: 'muted' | 'strong';
   hideBalance?: boolean;
   showContribution?: boolean;
   dialogOpts?: Partial<CurrencyDialogProps>;
@@ -81,8 +84,8 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
 
 const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
   const {
-    children, className,
-    label, fixedToToken, amount, disabled,
+    children, className, disabledStyle = 'muted',
+    label, amount, disabled,
     showCurrencyDialog: showDialogOverride,
     onCloseDialog: onCloseDialogListener,
     showContribution, hideBalance, dialogOpts = {},
@@ -133,50 +136,38 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
   return (
     <form className={cls(classes.form, className)} noValidate autoComplete="off">
         <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" borderRadius={12}>
-                {!fixedToToken && (
-                    <Button className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
-                    <Box display="flex" alignItems="center">
-                        {token && <CurrencyLogo currency={token.registered && token.symbol} address={token.address} className={classes.currencyLogo} />}
-                        <Typography variant="button">{token?.symbol || "Select Token"}</Typography>
-                    </Box>
-                    <ExpandMoreIcon className={classes.expandIcon} />
-                    </Button>
-                )}
-
-                {fixedToToken && (
-                    <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
-                    <Box display="flex" alignItems="center">
-                        <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />
-                        <Typography variant="button">{token?.symbol}</Typography>
-                    </Box>
-                    </Box>
-                )}
+            <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
+              <Box display="flex" alignItems="center">
+                <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />
+                <Typography variant="button">{token?.symbol}</Typography>
+              </Box>
+            </Box>
             <Text color="textSecondary" className={classes.label}>
-                {label}
+              {label}
             </Text>
             <OutlinedInput
-                className={classes.outlinedInput}
-                placeholder={"0.00"}
-                value={amount.toString()}
-                onChange={onChange}
-                onBlur={onEditorBlur}
-                disabled={disabled}
-                type="number"
-                inputProps={{ className: classes.input }}/>
-            <InputLabel className={classes.allowedBalance}>Allowed Balance:</InputLabel>
+              className={classes.outlinedInput}
+              placeholder={"0.00"}
+              value={amount}
+              onChange={onChange}
+              onBlur={onEditorBlur}
+              disabled={disabled}
+              type={amount === '-' ? 'string' : 'number'}
+              inputProps={{ className: disabled && disabledStyle === 'strong' ? classes.strongInput : classes.input }}
+            />
             {tokenBalance && !hideBalance && (
+              [
+                <InputLabel className={classes.allowedBalance}>Your Balance:</InputLabel>,
                 <Text color="textSecondary" className={classes.balance}>
-                {moneyFormat(tokenBalance, {
-                    symbol: token?.symbol,
-                    compression: token?.decimals,
-                    showCurrency: true,
-                })}
+                {
+                  moneyFormat(tokenBalance, {
+                      symbol: token?.symbol,
+                      compression: token?.decimals,
+                      showCurrency: true,
+                  })
+                }
                 </Text>
-            )}
-            {!tokenBalance && !hideBalance && (
-                <Typography color="textSecondary" variant="body2" className={classes.balance}>
-                    0
-                </Typography>
+              ]
             )}
         </Box>
         {children}

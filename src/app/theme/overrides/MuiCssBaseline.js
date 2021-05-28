@@ -1,8 +1,9 @@
 import AvenirNextDemiBoldWoff from "../fonts/AvenirNext-DemiBold.woff";
+import AvenirNextBoldWoff from "../fonts/AvenirNext-DemiBold.woff";
 
 
-const AvenirNext = {
-  fontFamily: 'Avenir Next',
+const AvenirNextDemiBold = {
+  fontFamily: '"Avenir Next"',
   fontStyle: 'normal',
   fontDisplay: 'swap',
   fontWeight: 600,
@@ -11,9 +12,19 @@ const AvenirNext = {
   `,
 };
 
+const AvenirNextBold = {
+  fontFamily: '"Avenir Next"',
+  fontStyle: 'normal',
+  fontDisplay: 'swap',
+  fontWeight: 'bold', // 700
+  src: `
+    url(${ AvenirNextBoldWoff}) format('woff')
+  `,
+};
+
 const MuiCssBaseline = () => ({
   "@global": {
-    "@font-face": [AvenirNext],
+    "@font-face": [AvenirNextDemiBold, AvenirNextBold],
   }
 });
 

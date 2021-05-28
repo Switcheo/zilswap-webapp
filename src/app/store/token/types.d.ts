@@ -40,6 +40,10 @@ export interface TokenUpdateProps extends Partial<TokenInfo> {
   address: string;
 };
 
+export interface TokenUpdateAllProps {
+  [index: string]: TokenUpdateProps;
+};
+
 export interface TokenInitProps {
   tokens: { [index: string]: TokenInfo };
 };

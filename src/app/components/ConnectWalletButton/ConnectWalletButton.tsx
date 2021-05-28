@@ -20,10 +20,10 @@ const useStyles = makeStyles(theme => ({
   },
   button: {
     border: "1px solid #00FFB0",
-    color: '#DEFFFF',
+    color: theme.palette.primary.contrastText,
   },
   textWhite: {
-    color: "#DEFFFF"
+    color: theme.palette.primary.contrastText,
   }
 }));
 

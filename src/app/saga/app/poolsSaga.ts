@@ -10,7 +10,6 @@ import { fork, put, race, select, take } from "redux-saga/effects";
 import { getBlockchain, getTokens, getRewards } from '../selectors'
 
 function* watchPools() {
-  logger("run watch pools");
   while (true) {
     try {
       const { network } = getBlockchain(yield select())

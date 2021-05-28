@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
     justifyContent: "flex-end",
   },
   button: {
-    color: theme.palette.type === "dark" ? "DEFFFF" : "#A4A4A4",
+    color: theme.palette.type === "dark" ? theme.palette.primary.contrastText : "#A4A4A4",
   },
   progress: {
     position: "absolute",

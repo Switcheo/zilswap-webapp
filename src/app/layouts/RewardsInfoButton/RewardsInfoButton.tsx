@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   topbarButton: {
     padding: "2px",
-    color: "#DEFFFF",
+    color: theme.palette.primary.contrastText,
     border: "1px solid #00FFB0",
   },
   buttonIcon: {
@@ -182,7 +182,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         setClaimCount(count);
         setClaimResult(claimTx);
         setTimeout(() => {
-          dispatch(actions.Token.updateState());
+          dispatch(actions.Token.refetchState());
         }, 5000);
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));

@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 import { TokenActionTypes } from "../token/actions";
-import { TokenUpdateProps } from "../token/types";
+import { TokenUpdateProps, TokenUpdateAllProps } from "../token/types";
 import { PoolActionTypes } from "./actions";
 import { PoolFormState, PoolSelectProps } from "./types";
 
@@ -33,6 +33,19 @@ const reducer = (state: PoolFormState = initial_state, action: any) => {
 
     case PoolActionTypes.UPDATE:
       return { ...state, ...payload };
+
+
+    case TokenActionTypes.TOKEN_UPDATE_ALL:
+      const updateAllProps: TokenUpdateAllProps = payload;
+      const token = updateAllProps[state.token?.address || ""]
+      if (!token) return state;
+      return {
+        ...state,
+        token: {
+          ...state.token,
+          ...token,
+        }
+      }
 
     case TokenActionTypes.TOKEN_UPDATE:
       const updateProps: TokenUpdateProps = payload;

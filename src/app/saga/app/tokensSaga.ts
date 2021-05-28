@@ -1,7 +1,8 @@
 
 import BigNumber from "bignumber.js";
 import { Network } from "zilswap-sdk/lib/constants";
-import { call, put, fork, select, takeLatest } from "redux-saga/effects";
+import { Task } from "redux-saga";
+import { call, put, fork, select, race, delay, take, cancel } from "redux-saga/effects";
 
 import { actions } from "app/store";
 import { TokenInfo, TokenBalanceMap } from "app/store/types";
@@ -10,6 +11,7 @@ import { logger } from "core/utilities";
 import { balanceBatchRequest, BatchRequestType, sendBatchRequest,
   tokenAllowancesBatchRequest, tokenBalanceBatchRequest, ZilswapConnector } from "core/zilswap";
 import { getWallet, getTokens, getBlockchain } from "../selectors";
+import { PollIntervals } from "app/utils/constants";
 
 const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string) => {
   logger("tokens saga", "retrieving token balances/allowances");
@@ -121,19 +123,24 @@ function* updateTokensState() {
 
   const result: SimpleMap<TokenInfo> = yield call(fetchTokensState, network, tokens, address);
 
-  logger("tokens saga", {result});
-  for (const [key, value] of Object.entries(result)) {
-    logger(`updating ${value.symbol}: ${key}`);
-    yield put(actions.Token.update(value));
-  }
+  yield put(actions.Token.updateAll(result));
 }
 
-function* watchUpdateTokensState() {
-  yield takeLatest(actions.Token.TokenActionTypes.TOKEN_UPDATE_STATE, updateTokensState)
-
+function* watchRefetchTokensState() {
+  let lastTask: Task | null = null
+  while (true) {
+    yield race({
+      poll: delay(PollIntervals.TokenState), // refetch at least once every N seconds
+      refetch: take(actions.Token.TokenActionTypes.TOKEN_REFETCH_STATE),
+    });
+    if (lastTask) {
+      yield cancel(lastTask)
+    }
+    lastTask = yield fork(updateTokensState)
+  }
 }
 
 export default function* tokensSaga() {
   logger("init tokens saga");
-  yield fork(watchUpdateTokensState);
+  yield fork(watchRefetchTokensState);
 }

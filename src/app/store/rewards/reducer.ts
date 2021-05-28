@@ -65,10 +65,10 @@ const updateDistributionClaims = (distributions: ZAPRewardDist[], globalClaimHis
   }
 };
 
-const reducer = (state: RewardsState = initial_state, actions: any) => {
-  switch (actions.type) {
+const reducer = (state: RewardsState = initial_state, action: any) => {
+  switch (action.type) {
     case RewardsActionTypes.UPDATE_EPOCH_INFO:
-      const info = actions.info as EpochInfo;
+      const info = action.info as EpochInfo;
       return {
         ...state,
         epochInfo: {
@@ -80,19 +80,19 @@ const reducer = (state: RewardsState = initial_state, actions: any) => {
         },
       };
     case RewardsActionTypes.UPDATE_ZWAP_REWARDS:
-      const rewardByPools = actions.rewards as SimpleMap<PoolZWAPReward>;
+      const rewardByPools = action.rewards as SimpleMap<PoolZWAPReward>;
       return {
         ...state,
         rewardByPools,
       };
     case RewardsActionTypes.UPDATE_POOL_WEIGHTS:
-      const poolWeights = actions.poolWeights as ZWAPPoolWeights;
+      const poolWeights = action.poolWeights as ZWAPPoolWeights;
       return {
         ...state,
         poolWeights,
       };
     case RewardsActionTypes.UPDATE_DISTRIBUTIONS: {
-      const rewardDistributions = actions.distributions as ZAPRewardDist[];
+      const rewardDistributions = action.distributions as ZAPRewardDist[];
       updateDistributionClaims(rewardDistributions, state.globalClaimHistory);
       return {
         ...state,
@@ -100,7 +100,7 @@ const reducer = (state: RewardsState = initial_state, actions: any) => {
       };
     }
     case RewardsActionTypes.UPDATE_CLAIM_HISTORY: {
-      const globalClaimHistory = actions.history as GlobalClaimHistory;
+      const globalClaimHistory = action.history as GlobalClaimHistory;
       const rewardDistributions = state.rewardDistributions;
       updateDistributionClaims(rewardDistributions, globalClaimHistory);
       return {
@@ -110,14 +110,14 @@ const reducer = (state: RewardsState = initial_state, actions: any) => {
       };
     }
     case RewardsActionTypes.UPDATE_POTENTIAL_REWARDS:
-      const potentialPoolRewards = actions.potentialPoolRewards as BigNumber;
+      const potentialPoolRewards = action.potentialPoolRewards as BigNumber;
       return {
         ...state,
         potentialPoolRewards,
       };
     case RewardsActionTypes.ADD_PENDING_CLAIM_TX:
-      const address = actions.bech32Address as string;
-      const pendingTx = actions.pendingTx as PendingClaimTx;
+      const address = action.bech32Address as string;
+      const pendingTx = action.pendingTx as PendingClaimTx;
 
       const claimTxs = {
         ...state.claimTxs,
@@ -134,7 +134,7 @@ const reducer = (state: RewardsState = initial_state, actions: any) => {
         claimTxs,
       };
     case RewardsActionTypes.REMOVE_PENDING_CLAIM_TX:
-      const hash = actions.hash as string;
+      const hash = action.hash as string;
 
       for (const address in state.claimTxs) {
         if (state.claimTxs[address][hash]) {

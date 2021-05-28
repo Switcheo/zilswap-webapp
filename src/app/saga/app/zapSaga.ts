@@ -12,8 +12,8 @@ import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { getWallet, getBlockchain } from "../selectors";
 
 function* queryEpochInfo() {
-  logger("query epoch info");
   while (true) {
+    logger("zap saga", "query epoch info");
     const { network } = getBlockchain(yield select());;
 
     try {
@@ -29,14 +29,14 @@ function* queryEpochInfo() {
         walletUpdated: take(WalletActionTypes.WALLET_UPDATE),
       });
 
-      logger("epoch info invalidated", invalidated);
+      logger("zap saga", "epoch info invalidated", invalidated);
     }
   }
 }
 
 function* queryPoolWeights() {
-  logger("query pool weights");
   while (true) {
+    logger("zap saga", "query pool weights");
     const { network } = getBlockchain(yield select());;
 
     try {
@@ -52,15 +52,15 @@ function* queryPoolWeights() {
         networkUpdate: take(BlockchainActionTypes.SET_NETWORK),
       });
 
-      logger("pool weights invalidated", invalidated);
+      logger("zap saga", "pool weights invalidated", invalidated);
     }
   }
 }
 
 function* queryDistribution() {
-  logger("query distributions");
   while (true) {
     try {
+      logger("zap saga", "query distributions");
       const zilswap = ZilswapConnector.getSDK();
 
       const zwapDistContract = yield getDistributorContract(zilswap);
@@ -97,14 +97,14 @@ function* queryDistribution() {
         walletUpdated: take(WalletActionTypes.WALLET_UPDATE),
       });
 
-      logger("epoch info invalidated", invalidated);
+      logger("zap saga", "epoch info invalidated", invalidated);
     }
   }
 }
 
 function* queryClaimHistory() {
-  logger("query claim history");
   while (true) {
+    logger("zap saga", "query claim history");
     try {
       const zilswap = ZilswapConnector.getSDK();
 
@@ -123,14 +123,14 @@ function* queryClaimHistory() {
         epochUpdated: take(RewardsActionTypes.UPDATE_EPOCH_INFO),
       });
 
-      logger("claim history invalidated", invalidated);
+      logger("zap saga", "claim history invalidated", invalidated);
     }
   }
 }
 
 function* queryPotentialRewards() {
-  logger("query potential rewards");
   while (true) {
+    logger("zap saga", "query potential rewards");
     try {
       const { network } = getBlockchain(yield select());;
       const walletState: WalletState = getWallet(yield select());
@@ -155,7 +155,7 @@ function* queryPotentialRewards() {
         walletUpdated: take(WalletActionTypes.WALLET_UPDATE),
       });
 
-      logger("epoch info invalidated", invalidated);
+      logger("zap saga", "epoch info invalidated", invalidated);
     }
   }
 }

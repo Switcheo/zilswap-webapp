@@ -1,17 +1,32 @@
-import { Notifications } from "app/components";
+import React, { useEffect } from "react";
+import { useSelector } from 'react-redux'
+import { Box, makeStyles } from '@material-ui/core'
+import { Text, Notifications } from "app/components";
 import TokenILOCard from "app/components/TokenILOCard";
 import ILOCard from "app/layouts/ILOCard";
 import { RootState, WalletState } from "app/store/types";
 import { useNetwork } from "app/utils";
 import { ZILO_DATA } from "core/zilo/constants";
-import React, { useEffect } from "react";
-import { useSelector } from 'react-redux'
+
+const useStyles = makeStyles(theme => ({
+  container: {
+    padding: theme.spacing(4, 4, 0),
+    [theme.breakpoints.down("xs")]: {
+      padding: theme.spacing(2, 2, 0),
+    },
+  },
+  secondaryText: {
+    marginTop: theme.spacing(1)
+  },
+}))
 
 const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
 
+  const classes = useStyles();
   const network = useNetwork();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+  const ziloData = ZILO_DATA[network!]
 
   useEffect(() => {
     // need to listen to wallet state
@@ -23,15 +38,21 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     <ILOCard {...rest}>
       <Notifications />
       {
-        ZILO_DATA[network!].map(data => {
-        return (
-          <TokenILOCard
-            key={data.contractAddress}
-            expanded={true}
-            data={data}
-          />
-          )
-        })
+        ziloData.length === 0 ?
+          <Box display="flex" flexDirection="column" className={classes.container} textAlign="center" mb={4}>
+            <Text variant="h1">No active listings.</Text>
+            <Text className={classes.secondaryText} color="textSecondary">Click here to view past ILOs.</Text>
+          </Box>
+        :
+        ziloData.map(data => {
+          return (
+            <TokenILOCard
+              key={data.contractAddress}
+              expanded={true}
+              data={data}
+            />
+            )
+          })
       }
     </ILOCard>
   )

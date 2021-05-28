@@ -13,10 +13,11 @@ const useStyles = makeStyles(theme => ({
   },
   percentageButton: {
     borderRadius: 5,
+    padding: '3px 7px',
     color: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#003340",
     backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
     border: 0,
-    margin: 4,
+    margin: '4px 5px',
   },
 }));
 
