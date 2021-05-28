@@ -135,7 +135,7 @@ const ConnectedWalletBox = (props: any) => {
       <ContrastBox className={classes.walletDetail}>
         <Icon className={classes.icon} />
         <Box className={classes.label}>
-          <Typography variant="h3">Connected to {wallet.type === WalletConnectType.ZilPay ? "ZilPay" : "Private Key"}</Typography>
+          <Typography variant="h4">Connected to {wallet.type === WalletConnectType.ZilPay ? "ZilPay" : "Private Key"}</Typography>
           <Box mt={"8px"} display="flex" flexDirection="row" alignItems="center">
             <Typography color="textSecondary" variant="body1">{isMediaXS ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
             <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network.toLowerCase()}`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
@@ -154,7 +154,7 @@ const ConnectedWalletBox = (props: any) => {
       <Box mt={"36px"} overflow="hidden" display="flex" flexDirection="column">
         <Box className={classes.transactionsHeader}>
           <Box display="flex" flexDirection="row" justifyContent="space-between">
-            <Typography variant="h3">Transaction History</Typography>
+            <Typography variant="h4">Transaction History</Typography>
             <Box display="flex" flexDirection="row" alignItems="center">
               {includeCompleted && (<IconButton size="small" className={classes.checkbox} onClick={() => setIncludeCompleted(false)}><CheckCompleteIcon /></IconButton>)}
               {!includeCompleted && (<IconButton size="small" className={classes.checkbox} onClick={() => setIncludeCompleted(true)}><CheckEmptyIcon /></IconButton>)}

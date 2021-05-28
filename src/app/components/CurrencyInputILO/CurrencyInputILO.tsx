@@ -1,6 +1,5 @@
-import { Box, Button, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
+import { Box, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { CurrencyLogo, Text } from "app/components";
 import CurrencyDialog from "app/components/CurrencyDialog";
 import { RootState, TokenInfo, WalletState } from "app/store/types";
@@ -23,25 +22,31 @@ const useStyles = makeStyles(theme => ({
     border: 0,
   },
   input: {
+    padding: "8px 14px 12px!important",
     textAlign: "left",
+  },
+  label: {
+    paddingLeft: "16px"
   },
   strongInput: {
     textAlign: "left",
     color: theme.palette.primary.dark
   },
   currencyButton: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "12px 12px 15px",
     borderRadius: 0,
     borderTopLeftRadius: 4,
     borderBottomLeftRadius: 4,
-    minHeight: 52,
-    color: theme.palette.text.primary,
-    fontWeight: 600,
-    display: "flex",
-    justifyContent: "space-between"
+    color: theme.palette.text?.primary,
   },
   form: {
     display: "flex",
     flexDirection: "column",
+  },
+  currencyText: {
+    fontSize: 20,
   },
   currencyLogo: {
     marginRight: theme.spacing(1),
@@ -53,14 +58,11 @@ const useStyles = makeStyles(theme => ({
     marginLeft: theme.spacing(1),
     color: theme.palette.primary.main
   },
-  allowedBalance: {
-    paddingLeft: "16px"
-  },
-  label: {
-    paddingLeft: "16px"
-  },
   balance: {
-    paddingLeft: "16px",
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'space-between',
+    padding: "0 16px",
     marginBottom: theme.spacing(1)
   }
 }));
@@ -139,7 +141,7 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
             <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
               <Box display="flex" alignItems="center">
                 <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />
-                <Typography variant="button">{token?.symbol}</Typography>
+                <Typography variant="button" className={classes.currencyText}>{token?.symbol}</Typography>
               </Box>
             </Box>
             <Text color="textSecondary" className={classes.label}>
@@ -157,16 +159,20 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
             />
             {tokenBalance && !hideBalance && (
               [
-                <InputLabel className={classes.allowedBalance}>Your Balance:</InputLabel>,
-                <Text color="textSecondary" className={classes.balance}>
-                {
-                  moneyFormat(tokenBalance, {
+                <InputLabel className={classes.balance}>
+                  <Typography>
+                    Your Balance:
+                  </Typography>
+                  <Typography>
+                  {
+                    moneyFormat(tokenBalance, {
                       symbol: token?.symbol,
                       compression: token?.decimals,
                       showCurrency: true,
-                  })
-                }
-                </Text>
+                    })
+                  }
+                  </Typography>
+                </InputLabel>,
               ]
             )}
         </Box>

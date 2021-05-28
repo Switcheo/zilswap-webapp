@@ -3,30 +3,33 @@ const typography = (palette) => ({
     "Roboto"
   ].join(","),
   h1: {
-    fontSize: "24px",
-    lineHeight: "24px",
+    fontSize: "26px",
+    lineHeight: "26px",
     fontWeight: "600",
     letterSpacing: "-0.2px",
   },
   h2: {
+    fontFamily: "Avenir Next",
+    fontWeight: "bold",
+    fontSize: 26,
+  },
+  h3: {
     fontSize: "18px",
     lineHeight: "20px",
     fontWeight: "bold",
     letterSpacing: "-0.2px",
   },
-  h3: {
+  h4: {
     fontFamily: "Avenir Next",
     fontSize: "16px",
     lightHeight: "18px",
     fontWeight: 500
   },
-  h4: {
-  },
   h5: {
   },
   h6: {
     fontFamily: "Roboto",
-    fontWeight: "500",
+    fontWeight: 600,
     fontSize: "14px"
   },
   subtitle1: {

@@ -69,7 +69,7 @@ const PoolManage: React.FC<Props> = (props: Props) => {
 
   return (
     <Box display="flex" flexDirection="column" {...rest} className={cls(classes.root, className)}>
-      <Text variant="h3">Your Pools</Text>
+      <Text variant="h4">Your Pools</Text>
 
       {!loadingConnectWallet && (
         <Box marginTop={2} marginBottom={5}>

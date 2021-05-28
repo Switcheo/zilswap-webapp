@@ -13,6 +13,14 @@ const MuiOutlinedInput = theme => ({
         fontSize: 22,
         padding: "24px 14px 12px",
       },
+      // remove number spinner
+      "&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": {
+        "-webkit-appearance": "none",
+        margin: 0,
+      },
+      '&:[type=number]': {
+        "-moz-appearance": "textfield",
+      },
     },
   },
   adornedEnd: {

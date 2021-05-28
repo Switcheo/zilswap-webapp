@@ -94,7 +94,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <Text variant="h2" margin={2}>Registered Pools ({registeredTokens.length})</Text>
+      <Text variant="h3" margin={2}>Registered Pools ({registeredTokens.length})</Text>
       <Grid container spacing={2}>
         {registeredTokens.slice(0, limits.registered).map((token) => (
           <Grid key={token.address} item xs={12} md={6}>
@@ -111,7 +111,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
           Load more
         </Button>
       </Box>
-      <Text variant="h2" margin={2}>Other Pools ({otherTokens.length})</Text>
+      <Text variant="h3" margin={2}>Other Pools ({otherTokens.length})</Text>
       <Grid container spacing={2}>
         {otherTokens.slice(0, limits.others).map((token) => (
           <Grid key={token.address} item xs={12} md={6}>

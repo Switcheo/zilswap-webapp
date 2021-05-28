@@ -19,8 +19,9 @@ const useStyles = makeStyles(theme => ({
     },
   },
   button: {
-    border: "1px solid #00FFB0",
+    padding: "2px 5px",
     color: theme.palette.primary.contrastText,
+    border: "1px solid #00FFB0",
   },
   textWhite: {
     color: theme.palette.primary.contrastText,

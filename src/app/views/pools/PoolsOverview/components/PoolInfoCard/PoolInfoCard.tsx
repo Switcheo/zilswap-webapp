@@ -178,7 +178,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
       <CardContent className={classes.title}>
         <Box display="flex" alignItems="center">
           <PoolLogo className={classes.poolIcon} pair={[token.symbol, "ZIL"]} tokenAddress={token.address} />
-          <Text variant="h2">{token.symbol} - ZIL</Text>
+          <Text variant="h3">{token.symbol} - ZIL</Text>
           <Box flex={1} />
           <IconButton onClick={onShowActions} size="small">
             <MoreVertOutlined />

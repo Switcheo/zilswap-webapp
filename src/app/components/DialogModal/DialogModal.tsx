@@ -37,7 +37,7 @@ const DialogModal: React.FC<DialogModalProps> = (props: DialogModalProps) => {
       {...rest}
       className={cls(classes.root, className)} >
       <DialogTitle disableTypography>
-        <Typography variant="h2">{header}</Typography>
+        <Typography variant="h3">{header}</Typography>
         <IconButton aria-label="close" className={classes.closeButton} onClick={onCloseButton}>
           <CloseIcon />
         </IconButton>

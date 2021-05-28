@@ -204,7 +204,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
           precision: (ratesData && ratesData?.[0].low < 0.01) ? 5 : 2,
           minMove: (ratesData && ratesData?.[0].low < 0.01) ? 0.00001 : 0.01
         },
-        upColor: themeType === "dark" ? "#00FFB0" : "#02586D", 
+        upColor: themeType === "dark" ? "#00FFB0" : "#02586D",
         wickUpColor: themeType === "dark" ? "#00FFB0" : "#02586D",
         borderUpColor: themeType === "dark" ? "#00FFB0" : "#02586D",
         downColor: "#FF5252",
@@ -352,7 +352,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     <Box {...{ ref: containerRef }} {...rest} className={cls(classes.root, className)}>
       <Box className={classes.stats}>
         <Box className={classes.label}>
-          <Typography variant="h3">{" "}{outToken?.symbol || "ZIL"}<span className={classes.slash}> / </span>{inToken?.symbol || "ZIL"}</Typography>
+          <Typography variant="h4">{" "}{outToken?.symbol || "ZIL"}<span className={classes.slash}> / </span>{inToken?.symbol || "ZIL"}</Typography>
         </Box>
         {(inTokenRates || outTokenRates) && (
           <>

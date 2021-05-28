@@ -92,7 +92,7 @@ const ConnectWalletOption: React.FC<ConnectWalletOptionProps & React.HTMLAttribu
     <ContrastBox {...rest} className={cls(classes.root, className)}>
       <Icon className={classes.icon} />
       <Box className={classes.label}>
-        <Typography variant="h3">{label}</Typography>
+        <Typography variant="h4">{label}</Typography>
         <Typography variant="subtitle2" color="textSecondary">
           Security Level
           <SecurityLevelIcon className={cls(classes.securityLevelIcon, securityLevelClass)} />
