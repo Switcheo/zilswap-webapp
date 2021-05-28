@@ -141,7 +141,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
   return (
     <Box className={classes.root}>
       {showGraph && (
-        <TokenGraph boxHeight={boxHeight} inToken={swapState.inToken} outToken={swapState.outToken} />
+        <TokenGraph boxHeight={boxHeight} outToken={swapState.inToken} inToken={swapState.outToken} />
       )}
       <Box justifyContent="center">
         <Paper {...{ ref:boxRef }} {...rest} className={classes.card}>

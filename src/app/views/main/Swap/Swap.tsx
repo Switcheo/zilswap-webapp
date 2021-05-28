@@ -210,7 +210,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (inToken || outToken) {
       return;
     }
-    const queryInput = queryParams.get("tokenIn");
+    const queryInput = queryParams.get("tokenIn") ?? ZIL_TOKEN_NAME;
     const queryOutput = queryParams.get("tokenOut") ?? ZWAP_TOKEN_NAME;
     if (queryInput === queryOutput && queryOutput) {
       return;
