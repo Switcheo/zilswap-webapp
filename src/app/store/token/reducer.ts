@@ -1,6 +1,11 @@
 import { BIG_ZERO } from "app/utils/constants";
 import { TokenActionTypes } from "./actions";
-import { TokenAddProps, TokenInitProps, TokenState, TokenUpdateProps, TokenUSDValues, UpdatePriceProps, UpdateUSDValuesProps } from "./types";
+import {
+  TokenState, TokenAddProps, TokenInitProps,
+  TokenUpdateProps, TokenUpdateAllProps,
+  UpdatePriceProps, UpdateUSDValuesProps,
+  TokenUSDValues, TokenInfo,
+} from "./types";
 
 const initial_state: TokenState = {
   initialized: false,
@@ -48,7 +53,21 @@ const reducer = (state: TokenState = initial_state, action: any) => {
         }
       };
 
-    case TokenActionTypes.TOKEN_UPDATE_VALUES:
+    case TokenActionTypes.TOKEN_UPDATE_ALL:
+      const updateAllProps: TokenUpdateAllProps = payload;
+      const newTokensState: { [index: string]: TokenInfo } = {}
+      for (const k in state.tokens) {
+        newTokensState[k] = { ...state.tokens[k] }
+      }
+      for (const k in updateAllProps) {
+        newTokensState[k] = { ...newTokensState[k], ...updateAllProps[k] }
+      }
+      return {
+        ...state,
+        tokens: newTokensState,
+      };
+
+    case TokenActionTypes.TOKEN_UPDATE_USD:
       const usdValueProps: UpdateUSDValuesProps = payload;
       return {
         ...state,

@@ -22,7 +22,7 @@ const Text: React.FC<Props> = (props: Props) => {
   const { boxProps, restProps } = extractBoxProps(props)
   const { className, children, isPlaceholder, ...rest } = restProps
 
-  const classes = useStyles(props)
+  const classes = useStyles()
 
   return (
     <Box {...boxProps}>

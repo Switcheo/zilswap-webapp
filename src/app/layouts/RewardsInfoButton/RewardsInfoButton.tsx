@@ -41,8 +41,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     zIndex: 1102,
   },
   topbarButton: {
-    padding: "2px",
-    color: "#DEFFFF",
+    padding: "2px 8px",
+    color: theme.palette.primary.contrastText,
     border: "1px solid #00FFB0",
   },
   buttonIcon: {
@@ -182,7 +182,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         setClaimCount(count);
         setClaimResult(claimTx);
         setTimeout(() => {
-          dispatch(actions.Token.updateState());
+          dispatch(actions.Token.refetchState());
         }, 5000);
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -234,17 +234,17 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
               <Box display="flex" flexDirection="column" alignItems="center">
                 <Text variant="h6" color="textPrimary">Your Balance</Text>
                 <Box display="flex" alignItems="center" marginTop={2}>
-                  <Text variant="h1" className={classes.text}>
+                  <Text variant="h2" className={classes.text}>
                     {zapBalanceLabel}
                   </Text>
                   <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} className={classes.currencyLogo}/>
                 </Box>
-                <Text variant="h6" marginTop={1} className={classes.text}>
+                <Text variant="h6" marginTop={0} className={classes.text}>
                   ≈ {zapTokenValue.toFormat(2)} USD
                 </Text>
               </Box>
 
-              <KeyValueDisplay marginTop={1} alignItems="center" emphasizeValue kkey="Rewards This Epoch">
+              <KeyValueDisplay marginTop={2} alignItems="center" emphasizeValue kkey="Rewards This Epoch">
                 <Box display="flex" alignItems="center">
                   <Text variant="body2" color="textPrimary">
                     ≈ {potentialRewardsLabel}
@@ -295,7 +295,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
               )}
 
               {!!claimResult && (
-                <Button fullWidth variant="outlined" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/0x${claimResult?.hash}?network=${network}`}>
+                <Button fullWidth variant="outlined" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/0x${claimResult?.hash}?network=${network.toLowerCase()}`}>
                   View Claim TX <NewLinkIcon className={classes.buttonIcon} />
                 </Button>
               )}

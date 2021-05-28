@@ -23,6 +23,13 @@ const useStyles = makeStyles(theme => ({
     fontSize: "12px",
     padding: "2px 16px"
   },
+  progress: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -8,
+    marginLeft: -8,
+  },
   dropdown: {
     "& .MuiMenu-list": {
       padding: theme.spacing(.5),

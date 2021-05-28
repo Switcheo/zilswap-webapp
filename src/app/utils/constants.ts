@@ -67,6 +67,8 @@ export const TRANSAK_API_KEY = {
 
 // ms
 export class PollIntervals {
+  public static TokenState = 30000;
+
   public static USDRates = 10000;
 
   public static ZWAPClaimHistory = 60000;

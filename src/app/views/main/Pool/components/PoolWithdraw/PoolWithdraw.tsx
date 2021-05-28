@@ -249,7 +249,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
         <Box display="flex" justifyContent="flex-start" alignItems="center" marginY={4}>
           <Button variant="text" onClick={onBack} className={classes.backButton}>
             <ArrowBack color="disabled" />
-            <Text variant="h3" marginLeft={1}>Remove Liquidity</Text>
+            <Text variant="h4" marginLeft={1}>Remove Liquidity</Text>
           </Button>
         </Box>
 

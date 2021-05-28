@@ -19,12 +19,13 @@ const useStyles = makeStyles(theme => ({
     },
   },
   button: {
+    padding: "4px 10px",
     border: "1px solid #00FFB0",
     color: '#DEFFFF',
     marginRight: theme.spacing(2)
   },
   textWhite: {
-    color: "#DEFFFF"
+    color: theme.palette.primary.contrastText,
   }
 }));
 

@@ -10,12 +10,11 @@ import { fork, put, race, select, take } from "redux-saga/effects";
 import { getBlockchain, getTokens, getRewards } from '../selectors'
 
 function* watchPools() {
-  logger("run watch pools");
   while (true) {
     try {
       const { network } = getBlockchain(yield select())
       const { epochInfo, poolWeights } = getRewards(yield select());
-      if (!epochInfo) continue;
+      if (!epochInfo || Object.keys(poolWeights).length === 0) continue;
 
       const until = epochInfo.raw.next_epoch_start;
       const from = until - epochInfo.raw.epoch_period;

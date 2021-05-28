@@ -170,7 +170,7 @@ const ConnectedWalletBox = (props: any) => {
       {/* <Box mt={"36px"} overflow="hidden" display="flex" flexDirection="column">
         <Box className={classes.transactionsHeader}>
           <Box display="flex" flexDirection="row" justifyContent="space-between">
-            <Typography variant="h3">Transaction History</Typography>
+            <Typography variant="h4">Transaction History</Typography>
             <Box display="flex" flexDirection="row" alignItems="center">
               {includeCompleted && (<IconButton size="small" className={classes.checkbox} onClick={() => setIncludeCompleted(false)}><CheckCompleteIcon /></IconButton>)}
               {!includeCompleted && (<IconButton size="small" className={classes.checkbox} onClick={() => setIncludeCompleted(true)}><CheckEmptyIcon /></IconButton>)}
@@ -193,7 +193,7 @@ const ConnectedWalletBox = (props: any) => {
               <Box display="flex" flexDirection="row" justifyContent="space-between">
                 <Box display="flex" flexDirection="row" alignItems="center">
                   <Typography variant="body2">0x{truncate(transaction.hash, 10, 10)}</Typography>
-                  <IconButton target="_blank" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=${network}`} className={classes.newLinkTransaction} size="small">
+                  <IconButton target="_blank" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=${network.toLowerCase()}`} className={classes.newLinkTransaction} size="small">
                     <NewLinkIcon />
                   </IconButton>
                   <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(transaction.hash)} open={!!copyMap[transaction.hash]} title="Copied!">

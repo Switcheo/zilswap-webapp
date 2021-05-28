@@ -29,6 +29,7 @@ export interface ExchangeRateQueryProps extends ConnectorCallProps {
 export interface ApproveTxProps {
   tokenID: string;
   tokenAmount: BigNumber;
+  spenderAddress?: string
 };
 
 export interface AddTokenProps {
@@ -148,7 +149,8 @@ export class ZilswapConnector {
     if (!zilswap) throw new Error('not initialized');
     logger(props.tokenID);
     logger(props.tokenAmount.toString());
-    const observedTx = await zilswap.approveTokenTransferIfRequired(props.tokenID, props.tokenAmount);
+    logger(props.spenderAddress);
+    const observedTx = await zilswap.approveTokenTransferIfRequired(props.tokenID, props.tokenAmount, props.spenderAddress);
     if (observedTx)
       handleObservedTx(observedTx);
 

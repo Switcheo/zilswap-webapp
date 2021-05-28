@@ -1,4 +1,4 @@
-import { Box, CircularProgress, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import { Box, CircularProgress, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput } from "@material-ui/core";
 import { SearchOutlined } from "@material-ui/icons";
 import { DialogModal } from "app/components";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
@@ -170,13 +170,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
             }
           />
         )}
-        {!loadingConnectWallet && !tokenState.initialized && (
-          <Box>
-            <Typography color="error">Connect wallet to view tokens</Typography>
-          </Box>
-        )}
-
-        {loadingConnectWallet && (
+        {(loadingConnectWallet || !tokenState.initialized) && (
           <Box display="flex" justifyContent="center">
             <CircularProgress color="primary" />
           </Box>

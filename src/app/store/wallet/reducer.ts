@@ -14,10 +14,10 @@ const reducer = (state: WalletState = initial_state, action: any) => {
       const wallet: ConnectedWallet | null = payload.wallet;
       switch (wallet?.type) {
         case WalletConnectType.ZilPay:
-          localStorage.setItem(LocalStorageKeys.PrivateKey, wallet.addressInfo.privateKey!);
+          localStorage.setItem(LocalStorageKeys.ZilPayConnected, "true");
           break;
         case WalletConnectType.PrivateKey:
-          localStorage.setItem(LocalStorageKeys.ZilPayConnected, "true");
+          localStorage.setItem(LocalStorageKeys.PrivateKey, wallet.addressInfo.privateKey!);
           break;
         default:
           localStorage.removeItem(LocalStorageKeys.PrivateKey);

@@ -36,7 +36,7 @@ const PotentialRewardInfo: React.FC<Props> = (props: Props) => {
     const potentialRewards = weeklyRewards.times(rewardsShare).decimalPlaces(5);
 
     return potentialRewards;
-  }, [poolState, rewardsState, weeklyRewards]);
+  }, [poolState, rewardsState.epochInfo, rewardsState.rewardByPools, weeklyRewards]);
 
   if (weeklyRewards.isZero()) return null;
 

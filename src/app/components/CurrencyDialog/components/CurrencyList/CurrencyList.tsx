@@ -101,7 +101,7 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
           <ContrastBox className={classes.currencyBox}>
             <CurrencyLogo className={classes.currencyLogo} currency={token.registered && token.symbol} address={token.address} />
             <Box display="flex" flexDirection="column">
-              <Typography variant="h2">{token.symbol}</Typography>
+              <Typography variant="h3">{token.symbol}</Typography>
 
               <Box display="flex" flexDirection="row">
                 {!!token.name && (

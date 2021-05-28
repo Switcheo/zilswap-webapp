@@ -1,6 +1,5 @@
-import { Box, Button, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
+import { Box, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { CurrencyLogo, Text } from "app/components";
 import CurrencyDialog from "app/components/CurrencyDialog";
 import { RootState, TokenInfo, WalletState } from "app/store/types";
@@ -21,24 +20,30 @@ const useStyles = makeStyles(theme => ({
   },
   outlinedInput: {
     border: 0,
-    paddingLeft: "4px"
   },
   input: {
+    padding: "8px 14px 12px!important",
     textAlign: "left",
   },
+  strongInput: {
+    textAlign: "left",
+    color: theme.palette.primary.dark
+  },
   currencyButton: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "12px 12px 15px",
     borderRadius: 0,
     borderTopLeftRadius: 4,
     borderBottomLeftRadius: 4,
-    minHeight: 52,
-    color: theme.palette.text.primary,
-    fontWeight: 600,
-    display: "flex",
-    justifyContent: "space-between"
+    color: theme.palette.text?.primary,
   },
   form: {
     display: "flex",
     flexDirection: "column",
+  },
+  currencyText: {
+    fontSize: 20,
   },
   currencyLogo: {
     marginRight: theme.spacing(1),
@@ -55,7 +60,10 @@ const useStyles = makeStyles(theme => ({
     color: "#DEFFFF"
   },
   balance: {
-    paddingLeft: "16px",
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'space-between',
+    padding: "0 16px",
     marginBottom: theme.spacing(1)
   }
 }));
@@ -65,8 +73,8 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   token: TokenInfo | null;
   amount: string;
   showCurrencyDialog?: boolean;
-  fixedToToken?: boolean;
   disabled?: boolean;
+  disabledStyle?: 'muted' | 'strong';
   hideBalance?: boolean;
   showContribution?: boolean;
   dialogOpts?: Partial<CurrencyDialogProps>;
@@ -79,8 +87,8 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
 
 const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
   const {
-    children, className,
-    label, fixedToToken, amount, disabled,
+    children, className, disabledStyle = 'muted',
+    label, amount, disabled,
     showCurrencyDialog: showDialogOverride,
     onCloseDialog: onCloseDialogListener,
     showContribution, hideBalance, dialogOpts = {},
@@ -131,50 +139,42 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
   return (
     <form className={cls(classes.form, className)} noValidate autoComplete="off">
         <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" borderRadius={12}>
-                {!fixedToToken && (
-                    <Button className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
-                    <Box display="flex" alignItems="center">
-                        {token && <CurrencyLogo currency={token.registered && token.symbol} address={token.address} className={classes.currencyLogo} />}
-                        <Typography variant="button">{token?.symbol || "Select Token"}</Typography>
-                    </Box>
-                    <ExpandMoreIcon className={classes.expandIcon} />
-                    </Button>
-                )}
-
-                {fixedToToken && (
-                    <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
-                    <Box display="flex" alignItems="center">
-                        <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />
-                        <Typography variant="button">{token?.symbol}</Typography>
-                    </Box>
-                    </Box>
-                )}
-            <Text className={classes.label}>
-                {label}
+            <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
+              <Box display="flex" alignItems="center">
+                <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />
+                <Typography variant="button" className={classes.currencyText}>{token?.symbol}</Typography>
+              </Box>
+            </Box>
+            <Text color="textSecondary" className={classes.label}>
+              {label}
             </Text>
             <OutlinedInput
-                className={classes.outlinedInput}
-                placeholder={"0.00"}
-                value={amount.toString()}
-                onChange={onChange}
-                onBlur={onEditorBlur}
-                disabled={disabled}
-                type="number"
-                inputProps={{ className: classes.input }}/>
-            <InputLabel className={classes.label}>Allowed Balance:</InputLabel>
+              className={classes.outlinedInput}
+              placeholder={"0.00"}
+              value={amount}
+              onChange={onChange}
+              onBlur={onEditorBlur}
+              disabled={disabled}
+              type={amount === '-' ? 'string' : 'number'}
+              inputProps={{ className: disabled && disabledStyle === 'strong' ? classes.strongInput : classes.input }}
+            />
             {tokenBalance && !hideBalance && (
-                <Text className={classes.balance}>
-                {moneyFormat(tokenBalance, {
-                    symbol: token?.symbol,
-                    compression: token?.decimals,
-                    showCurrency: true,
-                })}
-                </Text>
-            )}
-            {!tokenBalance && !hideBalance && (
-                <Typography variant="body2" className={classes.balance}>
-                    0
-                </Typography>
+              [
+                <InputLabel className={classes.balance}>
+                  <Typography>
+                    Your Balance:
+                  </Typography>
+                  <Typography>
+                  {
+                    moneyFormat(tokenBalance, {
+                      symbol: token?.symbol,
+                      compression: token?.decimals,
+                      showCurrency: true,
+                    })
+                  }
+                  </Typography>
+                </InputLabel>,
+              ]
             )}
         </Box>
         {children}
