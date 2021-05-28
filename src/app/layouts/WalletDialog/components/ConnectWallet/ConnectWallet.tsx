@@ -20,6 +20,11 @@ export interface ConnectWalletProps {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     maxWidth: theme.spacing(82),
+    backgroundColor: theme.palette.background.default,
+    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF", 
+    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF", 
+    borderRadius: "0 0 12px 12px"
   },
   extraSpacious: {
     marginTop: theme.spacing(2),
@@ -58,7 +63,7 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
             <Typography variant="body2" className={classes.notificationMessage}>
               To access your liquidity pools, please connect to ZilSwap via a ZilPay wallet.
               <br />
-              Click <Link href="https://docs.zilswap.io/more/help/use-zilpay-on-zilswap" target="_blank">here</Link> to learn more.
+              Click <Link href="https://docs.zilswap.io/more/help/use-zilpay-on-zilswap" target="_blank" >here</Link> to learn more.
             </Typography>
           </Box>
         </NotificationBox>
@@ -67,7 +72,7 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
         <Typography color="textPrimary" variant="body2" align="center">
           No wallet yet? Download ZilPay
           {" "}
-          <Link rel="noopener noreferrer" target="_blank" href="https://chrome.google.com/webstore/detail/zilpay/klnaejjgbibmhlephnhpmaofohgkpgkd">here</Link>.
+          <Link rel="noopener noreferrer" target="_blank" href="https://chrome.google.com/webstore/detail/zilpay/klnaejjgbibmhlephnhpmaofohgkpgkd" style={{ color: theme.palette.type === "dark" ? "#00FFB0" : "#003340" }}>here</Link>.
         </Typography>
       </DialogContent>
     </Box>

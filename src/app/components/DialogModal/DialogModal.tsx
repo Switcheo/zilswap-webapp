@@ -17,6 +17,13 @@ const useStyles = makeStyles(theme => ({
     top: theme.spacing(1),
     color: theme.palette.grey[500],
   },
+  dialogTitle: {
+    backgroundColor: theme.palette.background.default,
+    borderTop: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderRadius: "12px 12px 0 0"
+  }
 }));
 const DialogModal: React.FC<DialogModalProps> = (props: DialogModalProps) => {
   const { children, className, header, onClose, ...rest } = props;
@@ -36,7 +43,7 @@ const DialogModal: React.FC<DialogModalProps> = (props: DialogModalProps) => {
       BackdropProps={{ timeout: 500 }}
       {...rest}
       className={cls(classes.root, className)} >
-      <DialogTitle disableTypography>
+      <DialogTitle disableTypography className={classes.dialogTitle}>
         <Typography variant="h2">{header}</Typography>
         <IconButton aria-label="close" className={classes.closeButton} onClick={onCloseButton}>
           <CloseIcon />

@@ -21,7 +21,7 @@ const useStyles = makeStyles(theme => ({
     },
   },
   createButton: {
-    borderRadius: 4,
+    borderRadius: 12,
   },
   actionButton: {
     marginTop: 45,

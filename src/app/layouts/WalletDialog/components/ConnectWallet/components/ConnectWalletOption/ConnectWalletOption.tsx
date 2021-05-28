@@ -60,22 +60,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   securityLevel1: {
     "& path:first-child": {
-      fill: theme.palette.primary.main,
+      fill: theme.palette.text?.secondary,
     },
   },
   securityLevel2: {
     "& path:first-child+path": {
-      fill: theme.palette.primary.main,
+      fill: theme.palette.text?.secondary,
     },
   },
   securityLevel3: {
     "& path:first-child+path+path": {
-      fill: theme.palette.primary.main,
+      fill: theme.palette.text?.secondary,
     },
   },
   securityLevel4: {
     "& path:first-child+path+path+path": {
-      fill: theme.palette.primary.main,
+      fill: theme.palette.text?.secondary,
     },
   },
 }));

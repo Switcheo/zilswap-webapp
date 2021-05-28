@@ -52,7 +52,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginLeft: theme.spacing(-2),
   },
   readOnly: {
-    backgroundColor: theme.palette.background.readOnly,
     textAlign: "right",
     color: theme.palette.text?.primary,
     padding: theme.spacing(2, 3),

@@ -1,9 +1,8 @@
-import { Box, Divider, CircularProgress, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@material-ui/core";
+import { Box, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ContrastBox } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
@@ -12,29 +11,29 @@ import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate, useNetwork, useTaskSubscriber } from "app/utils";
 import { LoadingKeys } from "app/utils/constants";
 import { ConnectedWallet, WalletConnectType } from "core/wallet";
-import { ReactComponent as CheckCompleteIcon } from "./check_complete.svg";
-import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
+import { FancyButton } from "app/components";
+// import { ReactComponent as CheckCompleteIcon } from "./check_complete.svg";
+// import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    flex: 1,
     overflow: "hidden",
+    backgroundColor: theme.palette.background.default,
+    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF", 
+    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF", 
+    borderRadius: "0 0 12px 12px"
   },
   walletDetail: {
+    margin: theme.spacing(16, 8, 0),
     display: "flex",
-    flexDirection: "row",
-    margin: theme.spacing(4, 8, 0),
-    [theme.breakpoints.down("sm")]: {
-      margin: theme.spacing(2, 3, 0),
-    }
+    flexDirection: "column",
+    alignItems: "center"
   },
   icon: {
     height: 40,
     width: 40,
-    marginRight: theme.spacing(4),
-    [theme.breakpoints.down("sm")]: {
-      display: "none",
-    }
+    marginRight: theme.spacing(2),
   },
   label: {
     flex: 1,
@@ -46,10 +45,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginRight: 8,
   },
   copy: {
-    marginLeft: 10,
+    marginTop: 14
   },
   newLink: {
-    marginLeft: 4,
+    marginTop: 12
   },
   newLinkTransaction: {
     marginLeft: 6,
@@ -70,20 +69,37 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   logout: {
     cursor: "pointer"
   },
-  transactionsHeader: {
-    margin: theme.spacing(4, 8, 0),
+  // transactionsHeader: {
+  //   margin: theme.spacing(4, 8, 0),
+  //   [theme.breakpoints.down("sm")]: {
+  //     margin: theme.spacing(2, 3, 0),
+  //   }
+  // },
+  // transactions: {
+  //   padding: theme.spacing(1.5, 8, 8),
+  //   [theme.breakpoints.down("sm")]: {
+  //     padding: theme.spacing(1.5, 3, 4),
+  //   },
+  //   "-ms-overflow-style": "none",
+  // },
+  buttonBox: {
+    padding: theme.spacing(16, 8, 2),
     [theme.breakpoints.down("sm")]: {
-      margin: theme.spacing(2, 3, 0),
-    }
-  },
-  transactions: {
-    padding: theme.spacing(1.5, 8, 8),
-    [theme.breakpoints.down("sm")]: {
-      padding: theme.spacing(1.5, 3, 4),
+      padding: theme.spacing(16, 3, 2),
     },
-    "-ms-overflow-style": "none",
+  },
+  button: {
+    padding: "16px",
+    marginBottom: 14,
+    minHeight: "50px"
+  },
+  zilpayWallet: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(2)
+  },
+  iconText: {
+    marginLeft: 8
   }
-
 }));
 
 type CopyMap = {
@@ -132,26 +148,26 @@ const ConnectedWalletBox = (props: any) => {
   const transactions = transactionState.transactions.filter(filterTXs);
   return (
     <Box display="flex" flexDirection="column" className={cls(classes.root, className)}>
-      <ContrastBox className={classes.walletDetail}>
-        <Icon className={classes.icon} />
-        <Box className={classes.label}>
-          <Typography variant="h3">Connected to {wallet.type === WalletConnectType.ZilPay ? "ZilPay" : "Private Key"}</Typography>
-          <Box mt={"8px"} display="flex" flexDirection="row" alignItems="center">
-            <Typography color="textSecondary" variant="body1">{isMediaXS ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
-            <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network}`} className={classes.newLink} size="small"><NewLinkIcon /></IconButton>
-            <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(humanAddress)} open={!!copyMap[humanAddress]} title="Copied!">
-              <IconButton className={classes.copy} size="small"><CopyIcon /></IconButton>
-            </Tooltip>
-          </Box>
-          <Box display="flex" flexDirection="row" marginTop={1}>
-            <Typography className={cls(classes.info, classes.logout)} onClick={onDisconnect} color="primary" variant="body1">
-              Disconnect
-            </Typography>
-            {isLoading && <CircularProgress size={12} />}
-          </Box>
+      <Box className={classes.walletDetail}>
+        <Typography variant="h6">You are connected to</Typography>
+        <Box display="flex" alignItems="center" justifyContent="center" className={classes.zilpayWallet}>
+          <Icon className={classes.icon} />
+          <Typography variant="h1">{wallet.type === WalletConnectType.ZilPay ? "ZilPay Wallet" : "Private Key"}</Typography>
         </Box>
-      </ContrastBox>
-      <Box mt={"36px"} overflow="hidden" display="flex" flexDirection="column">
+        <Typography variant="h3">{isMediaXS ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
+        <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(humanAddress)} open={!!copyMap[humanAddress]} title="Copied!">
+          <IconButton className={classes.copy} size="small">
+            <CopyIcon />
+            <Typography color="textSecondary" className={classes.iconText}>Copy Address</Typography>
+          </IconButton>
+        </Tooltip>
+        <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network}`} className={classes.newLink} size="small">
+          <NewLinkIcon />
+          <Typography color="textSecondary" className={classes.iconText}>View on Explorer</Typography>
+        </IconButton>
+      </Box>
+
+      {/* <Box mt={"36px"} overflow="hidden" display="flex" flexDirection="column">
         <Box className={classes.transactionsHeader}>
           <Box display="flex" flexDirection="row" justifyContent="space-between">
             <Typography variant="h3">Transaction History</Typography>
@@ -171,7 +187,7 @@ const ConnectedWalletBox = (props: any) => {
             <Divider className={cls(classes.divider, classes.rowHeader)} />
           </Box>
         </Box>
-        <Box overflow="scroll" className={classes.transactions}>
+        <Box className={classes.transactions}>
           {transactions.map((transaction: Transaction, index: number) => (
             <Box key={index}>
               <Box display="flex" flexDirection="row" justifyContent="space-between">
@@ -195,6 +211,15 @@ const ConnectedWalletBox = (props: any) => {
             <Typography align="center" variant="body2" color="textSecondary">No transactions found.</Typography>
           )}
         </Box>
+      </Box> */}
+
+      <Box display="flex" flexDirection="column" className={classes.buttonBox}>
+        <FancyButton className={classes.button} variant="contained" color="primary">
+            View Past Transactions
+        </FancyButton>
+        <FancyButton fullWidth loading={isLoading} onClick={onDisconnect} className={classes.button} variant="contained" color="primary">
+            Disconnect Wallet
+        </FancyButton>
       </Box>
     </Box>
   );
