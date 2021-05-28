@@ -43,7 +43,7 @@ const theme = {
     contrastAlternate: "#F6FFFC",
     paper: zilliqa.neutral[100],
     paperOpposite: zilliqa.neutral[190],
-    tooltip: zilliqa.primary["195"],
+    tooltip: "#F6FFFC",
     readOnly: zilliqa.primary["004"]
   },
   action: {

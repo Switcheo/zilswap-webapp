@@ -1,7 +1,5 @@
 import { Box, Button, CircularProgress, Menu, MenuItem } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import ArrowDownIcon from "@material-ui/icons/ArrowDropDown";
-import ArrowUpIcon from "@material-ui/icons/ArrowDropUp";
 import { actions } from "app/store";
 import { RootState, WalletState } from "app/store/types";
 import { useAsyncTask, useTaskSubscriber, useNetwork } from "app/utils";
@@ -15,18 +13,15 @@ import { Network } from "zilswap-sdk/lib/constants";
 const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
-    flexDirection: "row",
-    justifyContent: "flex-end",
+    flexDirection: "column",
+    justifyContent: "center",
   },
   button: {
-    color: theme.palette.type === "dark" ? "DEFFFF" : "#A4A4A4",
-  },
-  progress: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -8,
-    marginLeft: -8,
+    color: theme.palette.primary.dark,
+    border: `1px solid ${theme.palette.primary.dark}`,
+    borderRadius: "20px",
+    fontSize: "12px",
+    padding: "2px 16px"
   },
   dropdown: {
     "& .MuiMenu-list": {
@@ -101,16 +96,10 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <Button className={classes.button} onClick={onOpenMenu}>
-        {!isLoading && (
-          <>
-            {network} {menuAnchor ? <ArrowUpIcon /> : <ArrowDownIcon />}
-          </>
-        )}
-
-        {isLoading && (
-          <CircularProgress size={16} className={classes.progress} />
-        )}
-
+        { !isLoading
+          ? <>{network.toUpperCase()}</>
+          : <CircularProgress size={16} />
+        }
       </Button>
       <Menu
         className={classes.dropdown}

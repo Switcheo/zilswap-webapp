@@ -21,6 +21,7 @@ const useStyles = makeStyles(theme => ({
   button: {
     border: "1px solid #00FFB0",
     color: '#DEFFFF',
+    marginRight: theme.spacing(2)
   },
   textWhite: {
     color: "#DEFFFF"

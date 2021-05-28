@@ -1,6 +1,6 @@
 import { Box, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
-import { FooterBar, NavDrawer, TopBar } from "app/components";
+import { NavDrawer, TopBar } from "app/components";
 import { AppTheme } from "app/theme/types";
 import React, { Suspense, useState } from "react";
 import { renderRoutes } from "react-router-config";
@@ -13,8 +13,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flex: 1,
     display: "flex",
     flexDirection: "column",
-    background: theme.palette.type === "dark" ? "#13222C" : "#F6FFFC",
-    mixBlendMode: theme.palette.type === "dark" ? "soft-light" : "normal"
+    background: theme.palette.background.default,
   },
   content: {
     position: "relative",
@@ -46,7 +45,6 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           {renderRoutes(route.routes)}
         </Suspense>
       </main>
-      <FooterBar />
       <WalletDialog />
       <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />
     </Box>

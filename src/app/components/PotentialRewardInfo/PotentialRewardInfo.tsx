@@ -44,9 +44,8 @@ const PotentialRewardInfo: React.FC<Props> = (props: Props) => {
     <KeyValueDisplay kkey={(
       <span>
         Est. Potential ZWAP Rewards
-        <HelpInfo placement="top" title="Your time-weighted pool share estimated based on current liquidity." />
       </span>
-    )} {...props}>{potentialRewards.toFormat()} ZWAP</KeyValueDisplay>
+    )} {...props}>{potentialRewards.toFormat()} ZWAP <HelpInfo placement="top" title="Your time-weighted pool share estimated based on current liquidity." /></KeyValueDisplay>
   );
 };
 

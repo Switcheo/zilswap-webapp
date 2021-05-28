@@ -50,11 +50,9 @@ const useStyles = makeStyles(theme => ({
     marginLeft: theme.spacing(1),
     color: theme.palette.primary.main
   },
-  allowedBalance: {
-    paddingLeft: "16px"
-  },
   label: {
-    paddingLeft: "16px"
+    paddingLeft: "16px",
+    color: "#DEFFFF"
   },
   balance: {
     paddingLeft: "16px",
@@ -151,7 +149,7 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
                     </Box>
                     </Box>
                 )}
-            <Text color="textSecondary" className={classes.label}>
+            <Text className={classes.label}>
                 {label}
             </Text>
             <OutlinedInput
@@ -163,9 +161,9 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
                 disabled={disabled}
                 type="number"
                 inputProps={{ className: classes.input }}/>
-            <InputLabel className={classes.allowedBalance}>Allowed Balance:</InputLabel>
+            <InputLabel className={classes.label}>Allowed Balance:</InputLabel>
             {tokenBalance && !hideBalance && (
-                <Text color="textSecondary" className={classes.balance}>
+                <Text className={classes.balance}>
                 {moneyFormat(tokenBalance, {
                     symbol: token?.symbol,
                     compression: token?.decimals,
@@ -174,7 +172,7 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
                 </Text>
             )}
             {!tokenBalance && !hideBalance && (
-                <Typography color="textSecondary" variant="body2" className={classes.balance}>
+                <Typography variant="body2" className={classes.balance}>
                     0
                 </Typography>
             )}

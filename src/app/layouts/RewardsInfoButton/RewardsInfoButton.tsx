@@ -1,4 +1,4 @@
-import { Badge, Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, Popper, Tooltip } from "@material-ui/core";
+import { Backdrop, Badge, Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, Popper, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
@@ -303,8 +303,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
           </ClickAwayListener>
         </Box>
       </Popper>
-      {/* <Backdrop className={classes.backdrop} open={active} onClick={() => setActive(!active)}>
-      </Backdrop> */}
+      <Backdrop className={classes.backdrop} open={active} onClick={() => setActive(!active)}>
+      </Backdrop>
     </Box>
   );
 };

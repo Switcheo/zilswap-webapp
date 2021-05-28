@@ -44,9 +44,6 @@ const useStyles = makeStyles(theme => ({
   secondaryText: {
     marginTop: theme.spacing(1)
   },
-  input: {
-    marginBottom: theme.spacing(1),
-  }
 }));
 
 interface Props {
@@ -112,7 +109,7 @@ const TokenILOCard = (props: Props) => {
         <Box display="flex" flexDirection="column" className={classes.container}>
           <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
             <Text variant="h1">{data.tokenName} ({data.tokenSymbol})</Text>
-            <Text color="textSecondary" marginTop={1}>{data.description}</Text>
+            <Text marginTop={1}>{data.description}</Text>
 
             <Text variant="h1" marginTop={2} className={classes.timer}>
               00:59:59
@@ -137,9 +134,9 @@ const TokenILOCard = (props: Props) => {
             </Box>
 
             <Text marginTop={3} marginBottom={0.5}>Commit your tokens in a fixed ratio.</Text>
-            <Text color="textSecondary">30% ZWAP - 70% ZIL</Text>
+            <Text >30% ZWAP - 70% ZIL</Text>
 
-            <Box marginTop={2} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
+            <Box marginTop={2} display="flex" bgcolor="background.contrast" alignItems="center" padding={0.5} borderRadius={12}>
               <CurrencyInputILO fixedToToken
                 label="to Burn:"
                 token={zwapToken}
@@ -147,7 +144,6 @@ const TokenILOCard = (props: Props) => {
                 hideBalance={false}
                 disabled={false}
                 onAmountChange={onZwapChange}
-                className={classes.input}
               />
 
               <CurrencyInputILO fixedToToken
@@ -157,7 +153,6 @@ const TokenILOCard = (props: Props) => {
                 hideBalance={false}
                 disabled={false}
                 onAmountChange={onZilChange}
-                className={classes.input}
               />
             </Box>
           </Box>

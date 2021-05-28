@@ -20,10 +20,11 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CONTRACTS } from "zilswap-sdk/lib/constants";
 import { ShowAdvanced } from "./components";
-import { ReactComponent as SwitchSVG } from "./swap-icon.svg";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
 import { useLocation } from "react-router";
 import SwapDetail from "./components/SwapDetail";
+import BrightnessLowIcon from '@material-ui/icons/BrightnessLow';
+import AutorenewIcon from '@material-ui/icons/Autorenew';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -154,6 +155,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& path": {
       fill: theme.palette.icon
     }
+  },
+  iconButton: {
+    color: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#003340",
+    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    borderRadius: 12,
+    padding: 5,
+    marginLeft: 5,
   }
 }));
 
@@ -575,6 +583,14 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     <MainCard {...rest} className={cls(classes.root, className)}>
       <Notifications />
       <Box display="flex" flexDirection="column" className={classes.container}>
+        <Box display="flex" justifyContent="flex-end">
+          <IconButton className={classes.iconButton}>
+            <BrightnessLowIcon />
+          </IconButton>
+          <IconButton className={classes.iconButton}>
+            <AutorenewIcon />
+          </IconButton>
+        </Box>
         <CurrencyInput
           label="From"
           hideBalance
@@ -623,20 +639,6 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onEditorBlur={onDoneEditing}
           onAmountChange={onOutAmountChange}
           onCurrencyChange={onOutCurrencyChange} />
-
-        {!!(inToken && outToken) && (
-          <Box display="flex" flexDirection="row" marginTop={1}>
-            <KeyValueDisplay className={classes.exchangeRateLabel}
-              kkey="Exchange Rate">
-              {getExchangeRateLabel()}
-            </KeyValueDisplay>
-            <SwitchSVG
-              onClick={() => setReversedRate(!reversedRate)}
-              className={cls(classes.switchIcon, {
-                [classes.activeSwitchIcon]: reversedRate,
-              })} />
-          </Box>
-        )}
 
         {enableChangeRecipient && (
           <Box display="flex" flexDirection="column" marginTop={3}>
@@ -689,7 +691,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onClick={onSwap}>
           Swap
         </FancyButton>
-        <SwapDetail />
+        <SwapDetail token={ outToken || undefined}/>
         <Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
           Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </Typography>

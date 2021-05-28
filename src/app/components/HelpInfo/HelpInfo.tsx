@@ -12,12 +12,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   tooltip: {
+    borderRadius: 12,
     backgroundColor: theme.palette.background.tooltip,
-  },
-  tooltipArrow: {
-    "&::before": {
-      color: theme.palette.background.tooltip,
-    },
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    color: theme.palette.text?.secondary
   },
   tooltipSVG: {
     marginLeft: theme.spacing(1),
@@ -55,8 +53,8 @@ const HelpInfo: React.FC<Props> = (props: Props) => {
   const classNames = useStyles();
 
   return (
-    <Tooltip arrow {...rest} className={cls(classNames.root, className)}
-      classes={{ tooltip: classNames.tooltip, arrow: classNames.tooltipArrow, ...classes }}>
+    <Tooltip {...rest} className={cls(classNames.root, className)}
+      classes={{ tooltip: classNames.tooltip, ...classes }}>
       <TooltipSVG className={classNames.tooltipSVG} />
     </Tooltip>
   );

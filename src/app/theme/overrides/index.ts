@@ -6,6 +6,7 @@ import MuiDialog from './MuiDialog';
 import MuiDialogContent from './MuiDialogContent';
 import MuiDialogTitle from './MuiDialogTitle';
 import MuiDrawer from './MuiDrawer';
+import MuiIconButton from './MuiIconButton';
 import MuiInputLabel from './MuiInputLabel';
 import MuiOutlinedInput from './MuiOutlinedInput';
 import MuiPaper from './MuiPaper';
@@ -23,6 +24,7 @@ const overrides = {
   MuiDialogContent,
   MuiDialogTitle,
   MuiDrawer,
+  MuiIconButton,
   MuiInputLabel,
   MuiOutlinedInput,
   MuiPaper,

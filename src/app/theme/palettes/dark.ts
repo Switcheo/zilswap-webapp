@@ -39,12 +39,12 @@ const theme = {
     primary: "#00FFB0",
   },
   background: {
-    default: "#13222C",
+    default: "#0D1B24",
     contrast: "rgba(222, 255, 255, 0.1)",
     contrastAlternate: "#262626",
     paper: zilliqa.black,
     paperOpposite: zilliqa.neutral[100],
-    tooltip: zilliqa.primary["195"],
+    tooltip: "#13222C",
     readOnly: zilliqa.neutral["195"]
   },
   action: {

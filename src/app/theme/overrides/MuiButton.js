@@ -1,3 +1,5 @@
+import { hexToRGBA } from "app/utils";
+
 const MuiButton = theme => ({
   root: {
     borderRadius: "4242px",
@@ -34,6 +36,17 @@ const MuiButton = theme => ({
   },
   outlinedSizeSmall: {
     padding: "2px 4px",
+  },
+  containedPrimary: {
+    color: "#003340",
+    backgroundColor: "#6BE1FF",
+    '&:hover': {
+      backgroundColor: `rgba${hexToRGBA("#6BE1FF", 0.8)}`,
+      // Reset on touch devices, it doesn't add specificity
+      '@media (hover: none)': {
+        backgroundColor: theme.palette.primary.main,
+      },
+    },
   },
   containedSecondary: {
     backgroundColor: theme.palette.tab.active,
