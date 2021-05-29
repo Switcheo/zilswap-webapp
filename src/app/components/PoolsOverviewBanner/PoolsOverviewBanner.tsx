@@ -67,6 +67,9 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
   const { totalLiquidity, liquidityChangePercent } = React.useMemo(() => {
 
     const totalLiquidity = Object.values(tokenState.tokens).reduce((accum, token) => {
+      // TODO: proper token blacklist
+      if (token.address === "zil13c62revrh5h3rd6u0mlt9zckyvppsknt55qr3u")
+        return accum;
       const poolValue = tokenState.values[token.address]?.poolLiquidity ?? BIG_ZERO;
       return accum.plus(poolValue);
     }, BIG_ZERO);

@@ -461,6 +461,10 @@ export class ZilswapConnector {
     logger(props.amount.toString());
     logger(props.maxAdditionalSlippage);
     logger(props.recipientAddress);
+
+    // TODO: proper token blacklist
+    if (props.tokenOutID === "zil13c62revrh5h3rd6u0mlt9zckyvppsknt55qr3u")
+      throw new Error("Suspected malicious token detected, swap disabled");
     const observedTx = await swapFunction(
       props.tokenInID,
       props.tokenOutID,
