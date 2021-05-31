@@ -4,12 +4,13 @@ import cls from "classnames";
 import React from "react";
 import { ReactComponent as SvgMinus } from "./minus_pool.svg";
 import { ReactComponent as SvgPlus } from "./plus_pool.svg";
+import { AppTheme } from "app/theme/types";
 
 export interface PoolIconProps extends React.HTMLAttributes<HTMLDivElement> {
   type: "plus" | "minus";
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     borderRadius: 12,
     margin: "16px auto",
@@ -21,6 +22,9 @@ const useStyles = makeStyles(theme => ({
   icon: {
     height: 12,
     width: 12,
+    "& path": {
+      fill: theme.palette.icon
+    }
   }
 }));
 const PoolIcon: React.FC<PoolIconProps> = (props: PoolIconProps) => {

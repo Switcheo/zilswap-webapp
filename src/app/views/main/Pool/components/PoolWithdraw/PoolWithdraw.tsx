@@ -32,7 +32,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   proportionSelect: {
-    marginTop: "0.5em",
+    marginTop: 3,
+    marginBottom: 4,
   },
   input: {
     marginTop: 12,
@@ -48,17 +49,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     height: 46
   },
   backButton: {
-    borderRadius: theme.spacing(.5),
+    borderRadius: 12,
     marginLeft: theme.spacing(-2),
   },
   readOnly: {
-    textAlign: "right",
+    textAlign: "left",
     color: theme.palette.text?.primary,
-    padding: theme.spacing(2, 3),
+    padding: theme.spacing(1.5, 3),
   },
   previewAmount: {
     fontSize: 20,
     lineHeight: "24px",
+    marginBottom: 2
   },
   keyValueLabel: {
     marginTop: theme.spacing(1),
@@ -94,6 +96,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   errorMessage: {
     marginTop: theme.spacing(1),
+  },
+  poolIcon: {
+    marginTop: -30,
+    marginBottom: 0
+  },
+  label: {
+    // display: "inline-block",
+    // marginBottom: 8,
+    color: theme.palette.primary.contrastText,
   }
 }));
 
@@ -276,15 +287,17 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           className={classes.proportionSelect}
           onSelectProp={onPercentage} />
         </Box>
-
+{/* 
         <KeyValueDisplay className={classes.keyValueLabel} hideIfNoValue kkey="In Pool">
           {!!poolToken && formatMoney(inPoolAmount || 0, formatOpts)}
-        </KeyValueDisplay>
+        </KeyValueDisplay> */}
 
-        <PoolIcon type="minus" />
-        <InputLabel>You Receive (Estimate)</InputLabel>
+        <Box display="flex" justifyContent="center">
+          <PoolIcon type="minus" className={classes.poolIcon} />
+        </Box>
 
         <ContrastBox className={classes.readOnly}>
+          <InputLabel className={classes.label}>You Receive (Estimate)</InputLabel>
           <Typography className={classes.previewAmount}>
             <span>{formatMoney(poolFormState.removeZilAmount, zilFormatOpts)}</span>
             <span> + {formatMoney(poolFormState.removeTokenAmount, formatOpts)}</span>

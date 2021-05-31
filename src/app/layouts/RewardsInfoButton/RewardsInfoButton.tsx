@@ -233,7 +233,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
             <Card className={classes.card}>
               <Box display="flex" flexDirection="column" alignItems="center">
                 <Text variant="h6" color="textPrimary">Your Balance</Text>
-                <Box display="flex" alignItems="center" marginTop={2}>
+                <Box display="flex" marginTop={2}>
                   <Text variant="h2" className={classes.text}>
                     {zapBalanceLabel}
                   </Text>

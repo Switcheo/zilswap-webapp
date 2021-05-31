@@ -31,7 +31,8 @@ const useStyles = makeStyles(theme => ({
     },
   },
   proportionSelect: {
-    marginTop: "0.5em",
+    marginTop: 3,
+    marginBottom: 4,
   },
   actionButton: {
     marginTop: theme.spacing(4),
@@ -61,6 +62,10 @@ const useStyles = makeStyles(theme => ({
   primaryColor: {
     color: theme.palette.primary.main
   },
+  poolIcon: {
+    marginTop: -30,
+    marginBottom: 0,
+  }
 }));
 
 const initialFormState = {
@@ -282,7 +287,6 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       <Box className={classes.container}>
 
         <CurrencyInput
-          hideBalance
           label="Deposit"
           token={poolToken}
           showCurrencyDialog={currencyDialogOverride}
@@ -302,25 +306,9 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           onSelectProp={onPercentage} />
         </Box>
 
-        <KeyValueDisplay
-          className={classes.keyValueLabel}
-          hideIfNoValue
-          kkey="Balance:"
-          ValueComponent="span">
-          {!!poolToken && (
-            <StatefulText loadingKey={`rueryTokenBalance-${poolToken.address}`}>
-              <Typography color="textSecondary" variant="body2">
-                {formatMoney(poolToken?.balance?.toString(), {
-                  symbol: poolToken?.symbol,
-                  compression: poolToken?.decimals,
-                })}
-              </Typography>
-            </StatefulText>
-          )}
-        </KeyValueDisplay>
-
-
-        <PoolIcon type="plus" />
+        <Box display="flex" justifyContent="center">
+          <PoolIcon type="plus" className={classes.poolIcon} />
+        </Box>
 
         <CurrencyInput fixedToken
           label="Deposit"
