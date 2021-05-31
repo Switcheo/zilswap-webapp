@@ -6,12 +6,13 @@ import { AppTheme } from "app/theme/types";
 import { useSearchParam } from "app/utils";
 import cls from "classnames";
 import { ConnectOptionType } from "core/wallet";
-import React from "react";
+import React, { Fragment } from "react";
 import { ConnectWalletOption } from "./components";
 import { ReactComponent as PrivateKeyIconDark } from "./private-key-dark.svg";
 import { ReactComponent as PrivateKeyIcon } from "./private-key.svg";
 import { ReactComponent as ZilPayIcon } from "./zilpay.svg";
 import { ReactComponent as ZeevesIcon } from "./zeeves.svg";
+import { PRODUCTION_HOSTS } from "app/utils/constants";
 
 export interface ConnectWalletProps {
   onSelectConnectOption: (option: ConnectOptionType) => void;
@@ -44,6 +45,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { loading, children, className, onSelectConnectOption, ...rest } = props;
+
+  // temporary hide Zeeves wallet option until 
+  // ZILO launched.
+  const hostname = window.location.hostname;
+  const isProduction = !hostname || PRODUCTION_HOSTS.includes(hostname);
+  const showZeevesOption = useSearchParam("zeevesLogin") === "true" || !isProduction;
+
   const showPrivateKeyOption = useSearchParam("pkLogin") === "true";
   const classes = useStyles();
   const theme = useTheme();
@@ -52,7 +60,9 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
     <Box {...rest} className={cls(classes.root, className)}>
       <DialogContent>
         <ConnectWalletOption label="ZilPay" icon={ZilPayIcon} secureLevel={4} buttonText="Connect ZilPay" onSelect={() => onSelectConnectOption("zilpay")} />
-        <ConnectWalletOption label="Zeeves" icon={ZeevesIcon} secureLevel={4} buttonText="Connect Zeeves" onSelect={() => onSelectConnectOption("zeeves")} />
+        {showZeevesOption && (
+          <ConnectWalletOption label="Zeeves" icon={ZeevesIcon} secureLevel={4} buttonText="Connect Zeeves" onSelect={() => onSelectConnectOption("zeeves")} />
+        )}
         {showPrivateKeyOption && (
           <ConnectWalletOption label="Private Key" icon={theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon} secureLevel={1} buttonText="Enter Private Key" onSelect={() => onSelectConnectOption("privateKey")} />
         )}
@@ -81,15 +91,19 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
           >
             here
           </Link>.
-          <br />
-          <br />Or try{" "}
-          <Link rel="noopener noreferrer" target="_blank"
-            href="https://t.me/zilliqawalletbot"
-          >
-            Zeeves
-          </Link>,
-          {" "}
-          a Telegram-based wallet.
+          {showZeevesOption && (
+            <Fragment>
+              <br />
+              <br />Or try{" "}
+              <Link rel="noopener noreferrer" target="_blank"
+                href="https://t.me/zilliqawalletbot"
+              >
+                Zeeves
+              </Link>,
+              {" "}
+              a Telegram-based wallet.
+            </Fragment>
+          )}
         </Typography>
       </DialogContent>
     </Box>
