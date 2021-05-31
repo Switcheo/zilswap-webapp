@@ -45,6 +45,8 @@ function* queryPoolLiquidityDay({ network }: QueryOpts) {
 
     const liquidityChange24h = liquiditySnapshotNow;
     for (const key in liquiditySnapshot24hAgo) {
+      // TODO: proper token blacklist
+      if (key === "zil13c62revrh5h3rd6u0mlt9zckyvppsknt55qr3u") continue;
       const snapshot24hAgo = liquiditySnapshot24hAgo[key]
       liquidityChange24h[key] = liquidityChange24h[key].minus(snapshot24hAgo);
     }
