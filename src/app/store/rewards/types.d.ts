@@ -2,7 +2,6 @@ import { SimpleMap } from "app/utils";
 import BigNumber from "bignumber.js";
 import { EpochInfo, SwapVolume, ZWAPDistribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
 import { Dayjs } from "dayjs";
-import { ObservedTx } from "zilswap-sdk";
 
 export interface PoolSwapVolume extends SwapVolume {
   totalZilVolume: BigNumber;

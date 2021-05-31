@@ -1,17 +1,18 @@
 
+import { actions } from "app/store";
+import { BlockchainState, RootState } from "app/store/types";
+import { useAsyncTask, useNetwork } from "app/utils";
+import { LocalStorageKeys } from "app/utils/constants";
+import { connectWalletPrivateKey, connectWalletZeeves, connectWalletZilPay } from "core/wallet";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
-import { actions } from "app/store";
-import { useAsyncTask, useNetwork } from "app/utils";
-import { RootState, BlockchainState } from "app/store/types"
-import {   LocalStorageKeys } from "app/utils/constants";
-import { connectWalletPrivateKey, connectWalletZilPay } from "core/wallet";
 import { logger } from "./logger";
+import { getConnectedZeeves } from "./zeeves";
 import { getConnectedZilPay } from "./zilpay";
 
 const privateKey = localStorage.getItem(LocalStorageKeys.PrivateKey);
 const savedZilpay = localStorage.getItem(LocalStorageKeys.ZilPayConnected);
+const zeevesConnected = localStorage.getItem(LocalStorageKeys.ZeevesConnected);
 
 /**
  * Mock component to initialize saved wallet on app load.
@@ -35,6 +36,24 @@ export const AppButler: React.FC<{}> = (_props: {}) => {
     } catch (e) {
       console.error(e)
     }
+
+    dispatch(actions.Blockchain.initialize({ wallet: null, network }));
+  };
+
+  const initWithZeeves = async () => {
+    logger("butler", "initWithZeeves");
+    try {
+      const zeeves = await getConnectedZeeves();
+      if (zeeves) {
+        const walletInfo = await connectWalletZeeves(zeeves);
+        if (walletInfo?.wallet) {
+          const { wallet } = walletInfo;
+          const { network } = wallet;
+          dispatch(actions.Blockchain.initialize({ wallet, network }));
+          return
+        }
+      }
+    } catch (e) { }
 
     dispatch(actions.Blockchain.initialize({ wallet: null, network }));
   };
@@ -76,10 +95,12 @@ export const AppButler: React.FC<{}> = (_props: {}) => {
         initWithPrivateKey(privateKey);
       } else if (savedZilpay === "true") {
         initWithZilPay();
+      } else if (zeevesConnected === 'true') {
+        initWithZeeves();
       } else {
         initWithoutWallet();
       }
-    })
+    });
 
     // eslint-disable-next-line
   }, [ready]);

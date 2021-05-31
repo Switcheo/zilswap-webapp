@@ -2,7 +2,7 @@ import DayJsUtils from "@date-io/dayjs";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import { ThemeProvider } from "@material-ui/styles";
-import { AppButler } from "core/utilities";
+import { AppButler, isDebug } from "core/utilities";
 import { createBrowserHistory } from "history";
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
@@ -13,6 +13,12 @@ import routes from "./routes";
 import { startSagas } from "./saga";
 import { RootState } from "./store/types";
 import { darkTheme, lightTheme } from "./theme";
+
+import "zeeves-auth-sdk-js";
+
+if ((window as any).Zeeves) {
+  (window as any).Zeeves.properties.isDebug = isDebug();
+}
 
 const history = createBrowserHistory();
 const themes: any = {

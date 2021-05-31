@@ -69,7 +69,7 @@ const initialFormState = {
 };
 
 const TokenILOCard = (props: Props) => {
-  const { data } = props;
+  const { data, expanded = true } = props;
   const contractAddrHex = fromBech32Address(data.contractAddress).toLowerCase();
   const dispatch = useDispatch();
   const network = useNetwork();
@@ -78,7 +78,6 @@ const TokenILOCard = (props: Props) => {
   const txState = useSelector<RootState, TransactionState>(state => state.transaction);
   const ziloState = useSelector<RootState, ZiloAppState>(state => state.blockchain.contracts.zilo[contractAddrHex]);
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
-  const [expanded,] = useState<boolean>(props.expanded ?? true)
   const [approveTxHash, setApproveTxHash] = useState<string | null>(null)
   const [runCommit, loading, error, clearCommitError] = useAsyncTask("commitILO");
   const [runApprove, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");

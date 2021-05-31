@@ -1,5 +1,4 @@
 import { Dayjs } from "dayjs";
-import { Network } from "zilswap-sdk/lib/constants";
 
 export interface LoadingTask {
   [index: string]: Dayjs;
