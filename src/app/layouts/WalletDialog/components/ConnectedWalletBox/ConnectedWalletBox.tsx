@@ -4,7 +4,7 @@ import { FancyButton } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
-import { RootState, Transaction, TransactionState } from "app/store/types";
+import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate, useNetwork, useTaskSubscriber } from "app/utils";
 import { LoadingKeys } from "app/utils/constants";
@@ -112,22 +112,15 @@ const ConnectedWalletBox = (props: any) => {
   const dispatch = useDispatch();
   const network = useNetwork();
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
-  const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
-  const [includeCompleted, setIncludeCompleted] = useState(true);
+  // const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
   const [isLoading] = useTaskSubscriber(...LoadingKeys.connectWallet)
   const [copyMap, setCopyMap] = useState<CopyMap>({});
   const theme = useTheme();
   const isMediaXS = useMediaQuery(theme.breakpoints.down("xs"));
 
-  const formatStatusLabel = (status: string) => {
-    if (!status) return "Unknown";
-    return `${status.charAt(0).toUpperCase()}${status.substring(1)}`;
-  };
-
-  const filterTXs = (transaction: Transaction) => {
-    if (includeCompleted) return true;
-    return transaction.status !== "confirmed";
-  };
+  // const filterTXs = (transaction: Transaction) => {
+  //   return transaction.status !== "confirmed";
+  // };
 
   const onCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -145,7 +138,7 @@ const ConnectedWalletBox = (props: any) => {
   if (!wallet) return null;
   const address = wallet.addressInfo.byte20;
   const humanAddress = wallet.addressInfo.bech32;
-  const transactions = transactionState.transactions.filter(filterTXs);
+  // const transactions = transactionState.transactions.filter(filterTXs);
   return (
     <Box display="flex" flexDirection="column" className={cls(classes.root, className)}>
       <Box className={classes.walletDetail}>

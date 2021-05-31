@@ -6,7 +6,7 @@ import { fromBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyInput, FancyButton, ProportionSelect } from "app/components";
 import { actions } from "app/store";
 import { PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
-import { strings, useAsyncTask, useMoneyFormatter, useNetwork } from "app/utils";
+import { strings, useAsyncTask, useNetwork } from "app/utils";
 import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
@@ -87,7 +87,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
+  // const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
