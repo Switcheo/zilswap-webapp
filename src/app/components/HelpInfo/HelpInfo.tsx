@@ -12,18 +12,40 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   tooltip: {
+    borderRadius: 12,
     backgroundColor: theme.palette.background.tooltip,
-  },
-  tooltipArrow: {
-    "&::before": {
-      color: theme.palette.background.tooltip,
-    },
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    color: theme.palette.text?.secondary
   },
   tooltipSVG: {
     marginLeft: theme.spacing(1),
     height: 12,
-    verticalAlign: "middle"
-  },
+    verticalAlign: "middle",
+    "& #helpInfo": {
+      "& #Oval": {
+        stroke: theme.palette.text?.secondary
+      },
+      "& #questionMarkTop": {
+        fill: theme.palette.text?.secondary
+      },
+      "& #questionMarkBottom": {
+        fill: theme.palette.text?.secondary
+      }
+    },
+    "&:hover": {
+      "& #helpInfo": {
+        "& #Oval": {
+          stroke: theme.palette.icon
+        },
+        "& #questionMarkTop": {
+          fill: theme.palette.icon
+        },
+        "& #questionMarkBottom": {
+          fill: theme.palette.icon
+        }
+      }
+    }
+  }
 }));
 
 const HelpInfo: React.FC<Props> = (props: Props) => {
@@ -31,8 +53,8 @@ const HelpInfo: React.FC<Props> = (props: Props) => {
   const classNames = useStyles();
 
   return (
-    <Tooltip arrow {...rest} className={cls(classNames.root, className)}
-      classes={{ tooltip: classNames.tooltip, arrow: classNames.tooltipArrow, ...classes }}>
+    <Tooltip {...rest} className={cls(classNames.root, className)}
+      classes={{ tooltip: classNames.tooltip, ...classes }}>
       <TooltipSVG className={classNames.tooltipSVG} />
     </Tooltip>
   );

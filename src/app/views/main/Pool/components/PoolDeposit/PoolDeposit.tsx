@@ -1,15 +1,15 @@
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { fromBech32Address } from "@zilliqa-js/crypto";
-import { CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect, StatefulText } from "app/components";
+import { CurrencyInput, FancyButton, ProportionSelect } from "app/components";
 import { actions } from "app/store";
 import { PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
-import { useAsyncTask, useMoneyFormatter, useNetwork, strings } from "app/utils";
+import { strings, useAsyncTask, useNetwork } from "app/utils";
 import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,13 +25,14 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-around",
-    padding: theme.spacing(0, 8, 2),
+    padding: theme.spacing(0, 4, 2),
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(0, 2, 2),
     },
   },
   proportionSelect: {
-    margin: theme.spacing(1.5, 0, 0),
+    marginTop: 3,
+    marginBottom: 4,
   },
   actionButton: {
     marginTop: theme.spacing(4),
@@ -61,6 +62,10 @@ const useStyles = makeStyles(theme => ({
   primaryColor: {
     color: theme.palette.primary.main
   },
+  poolIcon: {
+    marginTop: -30,
+    marginBottom: 0,
+  }
 }));
 
 const initialFormState = {
@@ -82,7 +87,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
+  // const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
@@ -282,7 +287,6 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       <Box className={classes.container}>
 
         <CurrencyInput
-          hideBalance
           label="Deposit"
           token={poolToken}
           showCurrencyDialog={currencyDialogOverride}
@@ -294,30 +298,17 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           onCurrencyChange={onPoolChange}
           dialogOpts={{ hideZil: true }} />
 
-        <ProportionSelect fullWidth
+        <Box display="flex" justifyContent="flex-end">
+          <ProportionSelect
           color="primary"
+          size="small"
           className={classes.proportionSelect}
           onSelectProp={onPercentage} />
+        </Box>
 
-        <KeyValueDisplay
-          className={classes.keyValueLabel}
-          hideIfNoValue
-          kkey="You Have"
-          ValueComponent="span">
-          {!!poolToken && (
-            <StatefulText loadingKey={`rueryTokenBalance-${poolToken.address}`}>
-              <Typography color="textSecondary" variant="body2">
-                {formatMoney(poolToken?.balance?.toString(), {
-                  symbol: poolToken?.symbol,
-                  compression: poolToken?.decimals,
-                })}
-              </Typography>
-            </StatefulText>
-          )}
-        </KeyValueDisplay>
-
-
-        <PoolIcon type="plus" />
+        <Box display="flex" justifyContent="center">
+          <PoolIcon type="plus" className={classes.poolIcon} />
+        </Box>
 
         <CurrencyInput fixedToken
           label="Deposit"

@@ -17,7 +17,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    borderBottom: `1px solid ${theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "170" : "120"]}`
+    borderBottom: `1px solid ${theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "170" : "120"]}`,
+    borderRadius: "12px"
   },
   notificationDetail: {
     display: 'flex',

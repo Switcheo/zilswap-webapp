@@ -72,7 +72,7 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
   const getDialogHeader = () => {
     if (walletState.wallet) {
-      return "Connected Wallet"
+      return "Your Wallet"
     } else if (connectWalletType === null) {
       return "Connect Wallet"
     } else {

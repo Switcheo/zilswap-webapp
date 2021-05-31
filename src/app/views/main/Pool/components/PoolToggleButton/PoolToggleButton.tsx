@@ -9,22 +9,26 @@ import { useDispatch, useSelector } from "react-redux";
 const useStyles = makeStyles(theme => ({
   root: {
   },
-  button: {
-    borderRadius: 4,
+  tab: {
+    borderRadius: 12,
     width: 90,
     padding: theme.spacing(1.5, 4),
-    "&.MuiButton-contained": {
-      borderWidth: 1,
-      borderStyle: "solid",
-      borderColor: theme.palette.primary.main,
-    },
     [theme.breakpoints.down("xs")]: {
       width: 76,
-      padding: theme.spacing(0.5, 2),
+      padding: theme.spacing(1, 2),
       "& .MuiButton-label": {
         fontSize: "14px",
-        lineHeight: "16px",
       },
+    },
+    '&:not(:first-child)': {
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0,
+      border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    },
+    '&:not(:last-child)': {
+      borderTopRightRadius: 0,
+      borderBottomRightRadius: 0,
+      border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     },
   },
 }));
@@ -40,17 +44,17 @@ const PoolToggleButton: React.FC<ButtonGroupProps> = (props: ButtonGroupProps) =
   };
 
   return (
-    <ButtonGroup {...rest} color="primary" className={cls(classes.root, className)}>
+    <ButtonGroup {...rest} color="secondary" className={cls(classes.root, className)}>
       <Button
         onClick={() => onTypeChange("add")}
         variant={poolType === "add" ? "contained" : "outlined"}
-        className={classes.button}>
+        className={classes.tab}>
         Add
       </Button>
       <Button
         onClick={() => onTypeChange("manage")}
         variant={poolType === "manage" ? "contained" : "outlined"}
-        className={classes.button}>
+        className={classes.tab}>
         Manage
       </Button>
     </ButtonGroup>

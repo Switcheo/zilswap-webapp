@@ -6,7 +6,6 @@ import cls from "classnames";
 import React, { useState } from "react";
 import { actions } from "app/store";
 import { useDispatch, useSelector } from "react-redux";
-
 import { AmountLabel, ContrastBox, KeyValueDisplay, PoolLogo, Text } from "app/components";
 import { RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -23,16 +22,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   buttonWrapper: {
-    borderRadius: theme.spacing(.5),
+    borderRadius: "12px",
     padding: theme.spacing(1),
   },
   divider: {
     backgroundColor: "rgba(20,155,163,0.3)",
     margin: theme.spacing(1, 0),
   },
-  removeButton: {
-    borderRadius: theme.spacing(.5),
-  },
+  textGreen: {
+    color: theme.palette.primary.dark
+  }
 }));
 
 const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
@@ -126,11 +125,11 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
       {active && (
         <ContrastBox>
           <KeyValueDisplay marginBottom={1.5} kkey="Your Potential Rewards" ValueComponent="span">
-            <Text color="primary">
+            <Text color="textPrimary">
               {toHumanNumber(potentialRewards.shiftedBy(-12))} ZWAP
             </Text>
-            <Text variant="body2" color="textSecondary" align="right">
-              ≈${toHumanNumber(rewardsValue, 2)}
+            <Text variant="body2" className={classes.textGreen} align="right">
+              ≈ ${toHumanNumber(rewardsValue, 2)}
             </Text>
           </KeyValueDisplay>
           <KeyValueDisplay marginBottom={1.5} kkey="ROI" ValueComponent="span">
@@ -149,8 +148,8 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
               currency="ZIL"
               address=""
               amount={zilAmount} />
-            <Text variant="body2" color="textSecondary" align="right">
-              ≈${toHumanNumber(depositedValue, 2)}
+            <Text variant="body2" className={classes.textGreen} align="right">
+              ≈ ${toHumanNumber(depositedValue, 2)}
             </Text>
           </KeyValueDisplay>
 
@@ -165,10 +164,9 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
             <Box margin={1} />
             <Button
               onClick={onGotoRemove}
-              className={classes.removeButton}
               component={Link}
               to="/pool"
-              variant="outlined"
+              variant="contained"
               color="primary"
               fullWidth>
               Remove

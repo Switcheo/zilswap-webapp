@@ -23,7 +23,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiBox-root": {
       flex: 1,
       flexBasis: 0,
-    }
+    },
+    zIndex: 10
   },
   socialLinks: {
     [theme.breakpoints.down("xs")]: {

@@ -15,13 +15,13 @@ const useStyles = makeStyles(theme => ({
   root: {
   },
   container: {
-    padding: theme.spacing(4, 8, 0),
+    padding: theme.spacing(4, 4, 0),
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(2, 2, 0),
     },
   },
   createButton: {
-    borderRadius: 4,
+    borderRadius: 12,
   },
   actionButton: {
     marginTop: 45,

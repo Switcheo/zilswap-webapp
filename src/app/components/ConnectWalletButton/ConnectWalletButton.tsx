@@ -8,7 +8,6 @@ import { ConnectedWallet } from "core/wallet";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import LoadableArea from "../LoadableArea";
-import { ReactComponent as DotIcon } from "./dot.svg";
 import { LoadingKeys } from "app/utils/constants";
 import { AppTheme } from "app/theme/types";
 
@@ -17,11 +16,17 @@ const useStyles = makeStyles(theme => ({
     minWidth: 50,
     [theme.breakpoints.down("xs")]: {
       marginRight: theme.spacing(1),
-    }
+    },
   },
-  dotIcon: {
-    marginRight: theme.spacing(1)
+  button: {
+    padding: "4px 10px",
+    border: "1px solid #00FFB0",
+    color: '#DEFFFF',
+    marginRight: theme.spacing(2)
   },
+  textWhite: {
+    color: theme.palette.primary.contrastText,
+  }
 }));
 
 const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -42,7 +47,7 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
     <Box {...rest} className={cls(classes.root, className)}>
       <LoadableArea loading={loading}>
         {!wallet && (
-          <Button onClick={onConnectWallet}>Connect Wallet</Button>
+          <Button className={classes.button} onClick={onConnectWallet}>Connect</Button>
         )}
         {!!wallet && (
           <Chip
@@ -50,9 +55,10 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
             color="primary"
             size="small"
             variant="outlined"
+            className={classes.button}
             label={(
-              <Typography variant="button" color="textPrimary">
-                <DotIcon className={classes.dotIcon} />{truncate(wallet!.addressInfo.bech32, 5, isXs ? 2 : 5)}
+              <Typography variant="button" className={classes.textWhite}>
+                {truncate(wallet!.addressInfo.bech32, 5, isXs ? 2 : 5)}
               </Typography>
             )} />
         )}

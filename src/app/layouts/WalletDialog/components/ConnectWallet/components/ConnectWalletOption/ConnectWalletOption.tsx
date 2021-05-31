@@ -60,22 +60,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   securityLevel1: {
     "& path:first-child": {
-      fill: theme.palette.primary.main,
+      fill: theme.palette.text?.secondary,
     },
   },
   securityLevel2: {
     "& path:first-child+path": {
-      fill: theme.palette.primary.main,
+      fill: theme.palette.text?.secondary,
     },
   },
   securityLevel3: {
     "& path:first-child+path+path": {
-      fill: theme.palette.primary.main,
+      fill: theme.palette.text?.secondary,
     },
   },
   securityLevel4: {
     "& path:first-child+path+path+path": {
-      fill: theme.palette.primary.main,
+      fill: theme.palette.text?.secondary,
     },
   },
 }));
@@ -92,7 +92,7 @@ const ConnectWalletOption: React.FC<ConnectWalletOptionProps & React.HTMLAttribu
     <ContrastBox {...rest} className={cls(classes.root, className)}>
       <Icon className={classes.icon} />
       <Box className={classes.label}>
-        <Typography variant="h3">{label}</Typography>
+        <Typography variant="h4">{label}</Typography>
         <Typography variant="subtitle2" color="textSecondary">
           Security Level
           <SecurityLevelIcon className={cls(classes.securityLevelIcon, securityLevelClass)} />

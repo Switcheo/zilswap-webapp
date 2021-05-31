@@ -36,7 +36,7 @@ const PotentialRewardInfo: React.FC<Props> = (props: Props) => {
     const potentialRewards = weeklyRewards.times(rewardsShare).decimalPlaces(5);
 
     return potentialRewards;
-  }, [poolState, rewardsState, weeklyRewards]);
+  }, [poolState, rewardsState.epochInfo, rewardsState.rewardByPools, weeklyRewards]);
 
   if (weeklyRewards.isZero()) return null;
 
@@ -44,9 +44,8 @@ const PotentialRewardInfo: React.FC<Props> = (props: Props) => {
     <KeyValueDisplay kkey={(
       <span>
         Est. Potential ZWAP Rewards
-        <HelpInfo placement="top" title="Your time-weighted pool share estimated based on current liquidity." />
       </span>
-    )} {...props}>{potentialRewards.toFormat()} ZWAP</KeyValueDisplay>
+    )} {...props}>{potentialRewards.toFormat()} ZWAP <HelpInfo placement="top" title="Your time-weighted pool share estimated based on current liquidity." /></KeyValueDisplay>
   );
 };
 

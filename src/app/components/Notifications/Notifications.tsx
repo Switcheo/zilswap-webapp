@@ -130,7 +130,7 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
           <Typography variant="body2" className={classes.notificationMessage}>
             Transaction 0x{truncate(submittedTx.hash)} {submittedTx.status || "status unknown"}.{" "}
             {submittedTx.status !== "expired" && (
-              <Typography className={classes.link} component="a" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/${submittedTx.hash}?network=${network}`}>
+              <Typography className={classes.link} component="a" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/${submittedTx.hash}?network=${network.toLowerCase()}`}>
                 View on explorer
               </Typography>
             )}

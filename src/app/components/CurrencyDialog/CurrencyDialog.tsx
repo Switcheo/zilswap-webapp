@@ -1,4 +1,4 @@
-import { Box, CircularProgress, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import { Box, CircularProgress, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput } from "@material-ui/core";
 import { SearchOutlined } from "@material-ui/icons";
 import { DialogModal } from "app/components";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
@@ -51,6 +51,13 @@ const useStyles = makeStyles(theme => ({
     maxHeight: "0px",
     overflow: "hidden",
   },
+  dialogContent: {
+    backgroundColor: theme.palette.background.default,
+    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderRadius: "0 0 12px 12px"
+  }
 }));
 
 export interface CurrencyDialogProps extends DialogProps {
@@ -147,7 +154,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
 
   return (
     <DialogModal header="Select a Token" {...rest} className={clsx(classes.root, className)}>
-      <DialogContent>
+      <DialogContent className={classes.dialogContent}>
         {!loadingConnectWallet && (
           <OutlinedInput
             placeholder="Search token name, symbol or address"
@@ -163,13 +170,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
             }
           />
         )}
-        {!loadingConnectWallet && !tokenState.initialized && (
-          <Box>
-            <Typography color="error">Connect wallet to view tokens</Typography>
-          </Box>
-        )}
-
-        {loadingConnectWallet && (
+        {(loadingConnectWallet || !tokenState.initialized) && (
           <Box display="flex" justifyContent="center">
             <CircularProgress color="primary" />
           </Box>

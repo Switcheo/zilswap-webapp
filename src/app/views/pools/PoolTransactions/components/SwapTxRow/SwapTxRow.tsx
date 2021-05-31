@@ -113,7 +113,7 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
             </span>
           </Tooltip>
           <Box className="external-link" marginLeft={1}>
-            <a target="_blank" rel="noopener noreferrer" href={`https://viewblock.io/zilliqa/tx/${transaction.transaction_hash}?network=${network}`}>
+            <a target="_blank" rel="noopener noreferrer" href={`https://viewblock.io/zilliqa/tx/${transaction.transaction_hash}?network=${network.toLowerCase()}`}>
               <NewLinkIcon />
             </a>
           </Box>

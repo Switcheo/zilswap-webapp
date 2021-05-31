@@ -14,6 +14,11 @@ import { ConnectWalletManagerViewProps } from "../../types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    backgroundColor: theme.palette.background.default,
+    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF", 
+    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF", 
+    borderRadius: "0 0 12px 12px"
   },
   container: {
     padding: theme.spacing(4.5, 6),
@@ -58,12 +63,6 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
   const [runConnectTask, isCheckingZilPay, errorConnect] = useAsyncTask<void>("connectWalletZilPay");
   const [isLoading] = useTaskSubscriber(...LoadingKeys.connectWallet);
 
-  // auto-click connect
-  useEffect(() => {
-    connect()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   const onBack = () => {
     if (isLoading) return;
     _onBack(null);
@@ -92,6 +91,12 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
       }
     });
   }
+
+  // auto-click connect
+  useEffect(() => {
+    connect()
+    // eslint-disable-next-line
+  }, [])
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>

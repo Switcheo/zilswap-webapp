@@ -68,12 +68,10 @@ const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => 
 
   useEffect(() => {
     if (loading) return;
-    let inputAddress = address;
-    if (ZilliqaValidate.isAddress(inputAddress))
-      inputAddress = toBech32Address(inputAddress);
+
+    const inputAddress = ZilliqaValidate.isAddress(address) ? toBech32Address(address) : address;
 
     if (ZilliqaValidate.isBech32(inputAddress)) {
-
       runAsyncTask(async () => {
         if (!walletState.wallet)
           throw new Error("Connect wallet to view token information");

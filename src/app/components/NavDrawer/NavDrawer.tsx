@@ -1,4 +1,5 @@
-import { Box, Button, Drawer, DrawerProps, List } from "@material-ui/core";
+import { Box, Drawer, DrawerProps, List, IconButton } from "@material-ui/core";
+// import Divider from '@material-ui/core/Divider';
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import { useClaimEnabled } from "app/utils";
@@ -8,8 +9,11 @@ import SocialLinkGroup from "../SocialLinkGroup";
 import ThemeSwitch from "../ThemeSwitch";
 import { ReactComponent as CloseSVG } from "./close.svg";
 import { NavigationContent } from "./components";
-import { ReactComponent as LogoSVG } from "./logo.svg";
+// import { ReactComponent as LogoSVG } from "./logo.svg";
 import navigationConfig from "./navigationConfig";
+import NetworkToggle from "../NetworkToggle";
+import { Text } from "app/components";
+import { CurrencyLogo } from "app/components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -46,9 +50,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   footer: {
-    height: theme.spacing(4.5),
     display: "flex",
-    flexDirection: "row",
+    flexDirection: "column",
+    padding: theme.spacing(2)
   },
   badge: {
     height: "auto",
@@ -59,7 +63,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       paddingRight: 0,
     },
   },
+  drawerHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: "0px 22px",
+    justifyContent: 'flex-start',
+    minHeight: "49px",
+    borderBottom: theme.palette.type === "dark" ? "1px solid #003340" : "1px solid transparent",
+    backgroundColor: theme.palette.toolbar.main
+  },
+  price: {
+    color: theme.palette.primary.dark
+  }
 }));
+
+const ZWAP_TOKEN_ADDRESS = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
+
 const NavDrawer: React.FC<DrawerProps> = (props: any) => {
   const { children, className, onClose, ...rest } = props;
   const claimEnabled = useClaimEnabled();
@@ -67,26 +86,35 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
 
   return (
     <Drawer PaperProps={{ className: classes.paper }} onClose={onClose} {...rest} className={cls(classes.root, className)}>
-      <Box className={classes.header}>
-        <LogoSVG />
-        <Box flex={1} />
-        <Button onClick={onClose}>
+      <div className={classes.drawerHeader}>
+        <IconButton onClick={onClose}>
           <CloseSVG />
-        </Button>
-      </Box>
+        </IconButton>
+      </div>
       <Box className={classes.content}>
         {navigationConfig.map((navigation, listIndex) => (
           <List key={listIndex}>
             {navigation.pages.filter(navigation => navigation.show || claimEnabled).map((page, index) => (
-              <NavigationContent onClose={onClose} key={index} navigation={page} />
+              <NavigationContent onClose={onClose} key={index} navigation={page}/>
             ))}
           </List>
         ))}
       </Box>
       <Box className={classes.footer}>
-        <SocialLinkGroup />
-        <Box flex={1} />
-        <ThemeSwitch forceDark />
+        <Box display="flex" justifyContent="space-around">
+          {/* ZWAP Price */}
+          <Box display="flex" alignItems="center">
+            <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} />
+              <Text variant="h3" className={classes.price}>
+                &nbsp;$ 363.63
+              </Text>
+          </Box>
+          <SocialLinkGroup />
+        </Box>
+        <Box display="flex" justifyContent="space-around">
+          <ThemeSwitch forceDark />
+          <NetworkToggle />
+        </Box>
       </Box>
     </Drawer>
   );

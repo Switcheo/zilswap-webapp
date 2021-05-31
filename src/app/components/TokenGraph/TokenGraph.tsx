@@ -1,4 +1,4 @@
-import { Box, BoxProps, Paper, Typography, ButtonGroup, Button } from "@material-ui/core";
+import { Box, BoxProps, Typography, ButtonGroup, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
@@ -7,7 +7,6 @@ import { CrosshairMode, createChart, Time, UTCTimestamp, IChartApi, ISeriesApi }
 import { TokenInfo, RootState, TokenState } from "app/store/types";
 import { getZilStreamTokenRates, ZilStreamRates, TimeFilter } from "core/zilswap";
 import { useAsyncTask } from "app/utils";
-import { ReactComponent as SwapSVG } from "./components/swap.svg";
 import BigNumber from "bignumber.js";
 import { useSelector } from "react-redux";
 import { Skeleton } from "@material-ui/lab";
@@ -68,27 +67,21 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexDirection: "row",
     marginBottom: 8,
   },
-  textPadding: {
-    marginLeft: 4,
-  },
   noBorder: {
     border: "none",
     borderRight: "none!important",
     padding: 0,
   },
   priceUp: {
-    color: theme.palette.colors.zilliqa.primary[100],
+    color: theme.palette.type === "dark" ? "#00FFB0" : "#02586D",
     marginRight: theme.spacing(1),
   },
   priceDown: {
-    color: "#EF534F",
+    color: "#FF5252",
     marginRight: theme.spacing(1),
   },
   noChange: {
     marginRight: theme.spacing(1),
-  },
-  swapSvg: {
-    paddingTop: "2px",
   },
   buttonGroup: {
     display: "flex",
@@ -97,7 +90,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("sm")]: {
       flexDirection: "column",
     }
-  }
+  },
+  slash: {
+    color: theme.palette.primary.dark
+  },
 }));
 
 const TokenGraph: React.FC<Props> = (props: Props) => {
@@ -174,18 +170,18 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
         height: graphRef.current.clientHeight,
         layout: {
           backgroundColor: 'rgba(0,0,0, 0.0)',
-          textColor: themeType === "dark" ? "#F7FAFA" : "#313131",
+          textColor: themeType === "dark" ? "#DEFFFF" : "#8099A0",
         },
         grid: {
           vertLines: {
             color: 'rgba(220, 220, 220, 0.1)',
             style: 1,
-            visible: true,
+            visible: false,
           },
           horzLines: {
             color: 'rgba(220, 220, 220, 0.1)',
             style: 1,
-            visible: true,
+            visible: false,
           },
         },
         timeScale: {
@@ -193,17 +189,27 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
           lockVisibleTimeRangeOnResize: true,
           timeVisible: true,
           secondsVisible: false,
+          borderColor: themeType === "dark" ? "rgba(222, 255, 255, 0.1)" : "#8099A0",
         },
         crosshair: {
           mode: CrosshairMode.Normal,
         },
+        rightPriceScale: {
+          borderColor: themeType === "dark" ? "rgba(222, 255, 255, 0.1)" : "#8099A0",
+        }
       })
 
       const newSeries = newChart.addCandlestickSeries({
         priceFormat: {
           precision: (ratesData && ratesData?.[0].low < 0.01) ? 5 : 2,
           minMove: (ratesData && ratesData?.[0].low < 0.01) ? 0.00001 : 0.01
-        }
+        },
+        upColor: themeType === "dark" ? "#00FFB0" : "#02586D",
+        wickUpColor: themeType === "dark" ? "#00FFB0" : "#02586D",
+        borderUpColor: themeType === "dark" ? "#00FFB0" : "#02586D",
+        downColor: "#FF5252",
+        borderDownColor: "#FF5252",
+        wickDownColor: "#FF5252"
       })
 
       newSeries.setData(ratesData);
@@ -230,7 +236,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
       return;
     }
     const chartOptions = chart.options()
-    chartOptions.layout.textColor = themeType === "dark" ? "#F7FAFA" : "#313131";
+    chartOptions.layout.textColor = themeType === "dark" ? "#DEFFFF" : "#8099A0";
     chartOptions.grid.vertLines.color = themeType === 'dark' ? 'rgba(220, 220, 220, 0.1)' : 'rgba(220, 220, 220, 0.8)';
     chartOptions.grid.horzLines.color = themeType === 'dark' ? 'rgba(220, 220, 220, 0.1)' : 'rgba(220, 220, 220, 0.8)';
     chart.applyOptions(chartOptions);
@@ -346,24 +352,25 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     <Box {...{ ref: containerRef }} {...rest} className={cls(classes.root, className)}>
       <Box className={classes.stats}>
         <Box className={classes.label}>
-          <SwapSVG className={classes.swapSvg} /><Typography className={classes.textPadding} variant="h3">{" "}{outToken?.symbol || "ZIL"} / {inToken?.symbol || "ZIL"}</Typography>
+          <Typography variant="h4">{" "}{outToken?.symbol || "ZIL"}<span className={classes.slash}> / </span>{inToken?.symbol || "ZIL"}</Typography>
         </Box>
         {(inTokenRates || outTokenRates) && (
           <>
-            <Typography variant="h1">{new BigNumber(currentRate?.close || 0).toFixed(6) || "0.00"}</Typography>
+            <Typography variant="h1">{new BigNumber(currentRate?.close || 0).toFixed(6) || "0.00"} {inToken?.symbol || "ZIL"}</Typography>
             <Box className={classes.buttonGroup}>
               <Typography className={growth.isZero() ? classes.noChange : (growth.isPositive() ? classes.priceUp : classes.priceDown)}>
                 {getRates()}{` (${growth.isGreaterThan(0) ? "+" : ""}${growth.toFixed(growth.isZero() ? 2 : 8)}%)`}
               </Typography>
+              {/* todo */}
               <Typography>Past 1 Hour</Typography>
               <Box flexGrow="1" />
               <Box display="flex" justifyContent="flex-end">
                 <ButtonGroup variant="text">
-                  {/* <Button color={getColor("1month")} onClick={() => setIntervalAndPeriod("1month", "24month")} className={classes.noBorder}><Typography>1M</Typography></Button> */}
-                  <Button color={getColor("1w")} onClick={() => setIntervalAndPeriod("1w", "1y")} className={classes.noBorder}><Typography>1W</Typography></Button>
-                  <Button color={getColor("1d")} onClick={() => setIntervalAndPeriod("1d", "8w")} className={classes.noBorder}><Typography>1D</Typography></Button>
-                  <Button color={getColor("1h")} onClick={() => setIntervalAndPeriod("1h", "2w")} className={classes.noBorder}><Typography>1H</Typography></Button>
                   <Button color={getColor("15m")} onClick={() => setIntervalAndPeriod("15m", "1w")} className={classes.noBorder}><Typography>15M</Typography></Button>
+                  <Button color={getColor("1h")} onClick={() => setIntervalAndPeriod("1h", "2w")} className={classes.noBorder}><Typography>1H</Typography></Button>
+                  <Button color={getColor("1d")} onClick={() => setIntervalAndPeriod("1d", "8w")} className={classes.noBorder}><Typography>1D</Typography></Button>
+                  <Button color={getColor("1w")} onClick={() => setIntervalAndPeriod("1w", "1y")} className={classes.noBorder}><Typography>1W</Typography></Button>
+                  {/* <Button color={getColor("1month")} onClick={() => setIntervalAndPeriod("1month", "24month")} className={classes.noBorder}><Typography>1M</Typography></Button> */}
                 </ButtonGroup>
               </Box>
             </Box>
@@ -376,7 +383,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
           </>
         )}
       </Box>
-      <Box component={Paper} className={classes.graph} {...{ ref: graphRef }}></Box>
+      <Box className={classes.graph} {...{ ref: graphRef }}></Box>
     </Box>
   );
 };

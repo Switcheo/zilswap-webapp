@@ -1,6 +1,6 @@
 import { SimplePaletteColorOptions, ThemeOptions } from "@material-ui/core";
 import { Breakpoints } from "@material-ui/core/styles/createBreakpoints";
-import { PaletteOptions, TypeBackground } from "@material-ui/core/styles/createPalette";
+import { PaletteOptions, TypeBackground, TypeAction } from "@material-ui/core/styles/createPalette";
 import { Spacing } from "@material-ui/core/styles/createSpacing";
 
 export type AppTypeBackground = {
@@ -21,12 +21,15 @@ export interface AppPalette extends PaletteOptions {
   error: SimplePaletteColorOptions;
   success: SimplePaletteColorOptions;
   background: AppTypeBackground & TypeBackground;
+  tab: TypeAction;
   toolbar: SimplePaletteColorOptions;
   colors: AppColors;
   switcheoLogo: string;
   navbar: string;
   mainBoxShadow: string;
   cardBoxShadow: string;
+  currencyInput: string;
+  icon: string;
 }
 
 export interface AppTheme extends ThemeOptions {

@@ -1,46 +1,35 @@
-import { Switch } from "@material-ui/core";
+import { FormControlLabel, FormGroup, Switch, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
+import { AppTheme } from "app/theme/types";
+import { hexToRGBA } from "app/utils";
 import clsx from "clsx";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import pathDarkSvg from "./dark.svg";
-import pathLightSvg from "./light.svg";
 import { ThemeSwitchProps } from "./types";
 
 const THEME_TOGGLE_SELECTED = "dark";
-const BASE_STYLE_TOGGLE_ICON = {
-  content: '""',
-  height: 12,
-  width: 12,
-  display: "block",
-  position: "absolute",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
-  backgroundSize: "contain",
-  top: 3,
-} as const;
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: (props: ThemeSwitchProps) => ({
     "& .MuiSwitch-track": {
       position: "relative",
       ...props.forceDark && {
-        backgroundColor: "#295154",
+        backgroundColor: `rgba${hexToRGBA("#003340", 0.5)}`,
       },
     },
-    "& .MuiSwitch-track::after": {
-      ...BASE_STYLE_TOGGLE_ICON,
-      right: 5,
-      backgroundImage: `url(${pathDarkSvg})`,
+    "& .Mui-checked+.MuiSwitch-track": {
+      backgroundColor: `rgba${hexToRGBA("#00FFB0", 0.5)}`,
     },
-    "& .Mui-checked+.MuiSwitch-track::after": {
-      ...BASE_STYLE_TOGGLE_ICON,
-      left: 5,
-      backgroundImage: `url(${pathLightSvg})`,
+    "& .MuiSwitch-thumb": {
+      backgroundColor: theme.palette.action?.selected
     },
   }),
+  label: {
+    marginLeft: theme.spacing(1),
+    marginRight: 0
+  },
 }));
 
 const ThemeSwitch: React.FC<ThemeSwitchProps> = (props: ThemeSwitchProps) => {
@@ -56,12 +45,19 @@ const ThemeSwitch: React.FC<ThemeSwitchProps> = (props: ThemeSwitchProps) => {
   };
 
   return (
-    <Switch
-      color="secondary"
-      checked={themeType === THEME_TOGGLE_SELECTED}
-      onChange={() => onToggleTheme()}
-      {...rest}
-      className={clsx(classes.root, className)} />
+    <FormGroup row>
+      <FormControlLabel
+        control={<Switch
+          color="secondary"
+          checked={themeType === THEME_TOGGLE_SELECTED}
+          onChange={() => onToggleTheme()}
+          {...rest}
+          className={clsx(classes.root, className)} />}
+        label={<Typography variant="h6" color="textSecondary">Classic</Typography>}
+        labelPlacement="start"
+        className={classes.label}
+      />
+    </FormGroup>
   );
 };
 

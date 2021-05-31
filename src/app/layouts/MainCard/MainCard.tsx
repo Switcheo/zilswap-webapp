@@ -4,7 +4,7 @@ import { LayoutState, RootState, SwapFormState, TokenInfo, TransactionState } fr
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import { PaperProps } from "material-ui";
-import React, { forwardRef, useRef, useEffect, useState } from "react";
+import React, { forwardRef, useRef, useEffect, useState, Fragment } from "react";
 import { useSelector } from "react-redux";
 import { NavLink as RouterLink, useRouteMatch } from "react-router-dom";
 import { TokenGraph } from "app/components";
@@ -15,15 +15,14 @@ const CustomRouterLink = forwardRef((props: any, ref: any) => (
   </div>
 ));
 
-const CARD_BORDER_RADIUS = 4;
+const CARD_BORDER_RADIUS = 12;
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     flex: 1,
-    padding: theme.spacing(8, 8, 2),
-    justifyContent: "center",
+    padding: theme.spacing(8, 0, 2),
     display: "flex",
-    flexDirection: "row",
+    flexDirection: "column",
     [theme.breakpoints.down("sm")]: {
       padding: theme.spacing(6, 0, 2),
     },
@@ -46,6 +45,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   card: {
     maxWidth: 488,
     margin: "0 auto",
+    background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     boxShadow: theme.palette.mainBoxShadow,
     borderRadius: CARD_BORDER_RADIUS,
     [theme.breakpoints.down("sm")]: {
@@ -54,40 +55,43 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   tabs: {
     display: "flex",
+    width: "488px",
+    marginBottom: "2em",
+    [theme.breakpoints.down("sm")]: {
+      maxWidth: 450,
+    },
   },
   tab: {
     position: "relative",
     width: "100%",
+    borderRadius: 0,
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(2),
-    borderRadius: 0,
-    backgroundColor: theme.palette.primary.dark,
+    backgroundColor: theme.palette.tab.disabledBackground,
+    color: theme.palette.tab.disabled,
     "&:hover": {
-      backgroundColor: theme.palette.primary.main,
+      backgroundColor: theme.palette.tab.active,
+      color: theme.palette.tab.selected
     }
   },
-  tabCornerLeft: {
+  tabLeft: {
     borderTopLeftRadius: CARD_BORDER_RADIUS,
+    borderBottomLeftRadius: CARD_BORDER_RADIUS,
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
   },
-  tabCornerRight: {
+  tabRight: {
     borderTopRightRadius: CARD_BORDER_RADIUS,
+    borderBottomRightRadius: CARD_BORDER_RADIUS,
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderWidth: "1px 1px 1px 0",
   },
   tabActive: {
-    backgroundColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.tab.active,
+    color: theme.palette.tab.selected,
     "&:hover": {
-      backgroundColor: theme.palette.primary.main,
+      backgroundColor: theme.palette.tab.active,
+      color: theme.palette.tab.selected,
     },
-    "&:after": {
-      content: "''",
-      width: 0,
-      height: 0,
-      borderLeft: "8px solid transparent",
-      borderRight: "8px solid transparent",
-      borderBottom: `8px solid ${theme.palette.background.paper}`,
-      position: "absolute",
-      bottom: 0,
-      left: "calc(50% - 8px)",
-    }
   },
   tabNoticeOpposite: {
     "&:after": {
@@ -139,18 +143,15 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
   const showGraph = (isSwap && (swapState.inToken || swapState.outToken))
 
   return (
-    <Box className={classes.root}>
-      {showGraph && (
-        <TokenGraph boxHeight={boxHeight} inToken={swapState.inToken} outToken={swapState.outToken} />
-      )}
-      <Box justifyContent="center">
-        <Paper {...{ ref:boxRef }} {...rest} className={classes.card}>
+    <Fragment>
+      <Box className={classes.root}>
+        <Box display="flex" justifyContent="center">
           <Box className={classes.tabs}>
             <Button
               disableElevation
               color="primary"
               variant="contained"
-              className={cls(classes.tab, classes.tabCornerLeft)}
+              className={cls(classes.tab, classes.tabLeft)}
               activeClassName={cls(classes.tabActive, { [classes.tabNoticeOpposite]: hasNotification })}
               component={CustomRouterLink}
               to="/swap">Swap</Button>
@@ -158,15 +159,24 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
               disableElevation
               color="primary"
               variant="contained"
-              className={cls(classes.tab, classes.tabCornerRight)}
+              className={cls(classes.tab, classes.tabRight)}
               activeClassName={cls(classes.tabActive, { [classes.tabNoticeOpposite]: hasNotification })}
               component={CustomRouterLink}
               to="/pool">Pool</Button>
           </Box>
-          <Box>{children}</Box>
-        </Paper>
+        </Box>
+        <Box display="flex" justifyContent="center">
+          {showGraph && (
+            <TokenGraph boxHeight={boxHeight} inToken={swapState.inToken} outToken={swapState.outToken} />
+          )}
+          <Box width={488}>
+            <Paper {...{ ref:boxRef }} {...rest} className={classes.card}>
+              <Box>{children}</Box>
+            </Paper>
+          </Box>
+        </Box>
       </Box>
-    </Box>
+    </Fragment>
   );
 };
 

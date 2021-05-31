@@ -11,7 +11,7 @@ const CustomRouterLink = forwardRef((props: any, ref: any) => (
   </div>
 ));
 
-const CARD_BORDER_RADIUS = 4;
+const CARD_BORDER_RADIUS = 12;
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -29,12 +29,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     margin: "0 auto",
     boxShadow: theme.palette.mainBoxShadow,
     borderRadius: CARD_BORDER_RADIUS,
+    background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     [theme.breakpoints.down("sm")]: {
       maxWidth: 450,
     },
   },
   tabs: {
     display: "flex",
+    width: "488px",
+    [theme.breakpoints.down("sm")]: {
+      maxWidth: 450,
+    },
   },
   tab: {
     position: "relative",
@@ -42,34 +48,32 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(2),
     marginBottom: theme.spacing(3),
-    borderRadius: 0,
-    backgroundColor: theme.palette.primary.dark,
+    borderRadius: CARD_BORDER_RADIUS,
+    backgroundColor: theme.palette.tab.disabledBackground,
+    color: theme.palette.tab.disabled,
     "&:hover": {
-      backgroundColor: theme.palette.primary.main,
+      backgroundColor: theme.palette.tab.active,
+      color: theme.palette.tab.selected
     }
   },
   tabCornerLeft: {
-    borderTopLeftRadius: CARD_BORDER_RADIUS,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
   },
   tabCornerRight: {
-    borderTopRightRadius: CARD_BORDER_RADIUS,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderWidth: "1px 1px 1px 0",
   },
   tabActive: {
-    backgroundColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.tab.active,
+    color: theme.palette.tab.selected,
     "&:hover": {
-      backgroundColor: theme.palette.primary.main,
+      backgroundColor: theme.palette.tab.active,
+      color: theme.palette.tab.selected,
     },
-    "&:after": {
-      content: "''",
-      width: 0,
-      height: 0,
-      borderLeft: "8px solid transparent",
-      borderRight: "8px solid transparent",
-      borderBottom: `8px solid ${theme.palette.background.paper}`,
-      position: "absolute",
-      bottom: 0,
-      left: "calc(50% - 8px)",
-    }
   },
   tabNoticeOpposite: {
     "&:after": {
@@ -79,12 +83,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }))
 
 const ILOCard: React.FC<PaperProps> = (props: any) => {
-  const { children } = props;
+  const { children, className, staticContext, ...rest } = props;
   const classes = useStyles();
 
   return (
     <Box className={classes.root}>
-      <Paper className={classes.card}>
+      <Box display="flex" justifyContent="center" marginBottom="2em">
         <Box className={classes.tabs}>
           <Button
             disableElevation
@@ -93,7 +97,7 @@ const ILOCard: React.FC<PaperProps> = (props: any) => {
             className={cls(classes.tab, classes.tabCornerLeft)}
             activeClassName={cls(classes.tabActive)}
             component={CustomRouterLink}
-            to="/ilo/current">Current ILO</Button>
+            to="/ilo/current">Present ZILO</Button>
           <Button
             disableElevation
             color="primary"
@@ -101,12 +105,14 @@ const ILOCard: React.FC<PaperProps> = (props: any) => {
             className={cls(classes.tab, classes.tabCornerRight)}
             activeClassName={cls(classes.tabActive)}
             component={CustomRouterLink}
-            to="/ilo/past">Past ILOs</Button>
+            to="/ilo/past">Past ZILOs</Button>
         </Box>
+      </Box>
+      <Paper {...rest} className={classes.card}>
         <Box>{children}</Box>
       </Paper>
     </Box>
   )
 }
 
-export default ILOCard
+export default ILOCard;

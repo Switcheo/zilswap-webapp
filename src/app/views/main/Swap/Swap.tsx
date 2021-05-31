@@ -1,40 +1,44 @@
 import { Box, Button, IconButton, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
 import { WarningRounded } from "@material-ui/icons";
 import AddIcon from "@material-ui/icons/Add";
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import BrightnessLowIcon from '@material-ui/icons/BrightnessLow';
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import RemoveIcon from "@material-ui/icons/Remove";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { validation as ZilValidation } from "@zilliqa-js/util";
-import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect, StatefulText, Text } from "app/components";
+import { CurrencyInput, FancyButton, Notifications, ProportionSelect, Text } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { strings, useAsyncTask, useBlacklistAddress, useMoneyFormatter, useNetwork, useSearchParam } from "app/utils";
+import { strings, useAsyncTask, useBlacklistAddress, useNetwork, useSearchParam } from "app/utils";
 import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router";
 import { CONTRACTS } from "zilswap-sdk/lib/constants";
 import { ShowAdvanced } from "./components";
-import { ReactComponent as SwitchSVG } from "./swap-icon.svg";
+import SwapDetail from "./components/SwapDetail";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
-import { useLocation } from "react-router";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   container: {
-    padding: theme.spacing(4, 8, 0),
+    padding: theme.spacing(4, 4, 0),
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(4, 2, 0),
     },
   },
   swapButton: {
     padding: 0,
+    marginTop: -49,
+    marginBottom: -15,
     transform: "rotate(0)",
     transition: "transform .5s ease-in-out",
   },
@@ -58,7 +62,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     paddingLeft: 0
   },
   proportionSelect: {
-    marginTop: 12,
+    marginTop: 3,
+    marginBottom: 4,
   },
   currencyButton: {
     borderRadius: 0,
@@ -148,6 +153,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   errorMessage: {
     marginTop: theme.spacing(1),
+  },
+  swapIcon: {
+    "& path": {
+      fill: theme.palette.icon
+    }
+  },
+  iconButton: {
+    color: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#003340",
+    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    borderRadius: 12,
+    padding: 5,
+    marginLeft: 5,
   }
 }));
 
@@ -184,10 +201,10 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [runSwap, loading, error, clearSwapError] = useAsyncTask("swap");
   const [isBlacklisted] = useBlacklistAddress();
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
-  const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
+  // const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
   const [errorRecipientAddress, setErrorRecipientAddress] = useState<string | undefined>();
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [reversedRate, setReversedRate] = useState(false);
+  // const [reversedRate, setReversedRate] = useState(false);
   const queryParams = new URLSearchParams(useLocation().search);
   const [recipientAddrBlacklisted, setRecipientAddrBlacklisted] = useState(false);
 
@@ -211,7 +228,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (inToken || outToken) {
       return;
     }
-    const queryInput = queryParams.get("tokenIn");
+    const queryInput = queryParams.get("tokenIn") ?? ZIL_TOKEN_NAME;
     const queryOutput = queryParams.get("tokenOut") ?? ZWAP_TOKEN_NAME;
     if (queryInput === queryOutput && queryOutput) {
       return;
@@ -244,40 +261,40 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }));
   }
 
-  const getExchangeRateLabel = () => {
-    let exchangeRate = swapFormState.expectedExchangeRate || BIG_ZERO;
+  // const getExchangeRateLabel = () => {
+  //   let exchangeRate = swapFormState.expectedExchangeRate || BIG_ZERO;
 
-    let src = inToken, dst = outToken;
-    if (reversedRate) {
-      dst = inToken;
-      src = outToken;
-    }
+  //   let src = inToken, dst = outToken;
+  //   if (reversedRate) {
+  //     dst = inToken;
+  //     src = outToken;
+  //   }
 
-    if (exchangeRate.eq(0)) {
-      try {
-        const rateResult = ZilswapConnector.getExchangeRate({
-          amount: BIG_ONE.shiftedBy(src!.decimals),
-          exactOf: reversedRate ? "out" : "in",
-          tokenInID: inToken!.address,
-          tokenOutID: outToken!.address,
-        });
-        if (!rateResult.expectedAmount.isNaN() && !rateResult.expectedAmount.isNegative())
-          exchangeRate = rateResult.expectedAmount.shiftedBy(-dst!.decimals).pow(reversedRate ? -1 : 1);
-      } catch (e) {
-        exchangeRate = BIG_ZERO;
-      }
-    }
+  //   if (exchangeRate.eq(0)) {
+  //     try {
+  //       const rateResult = ZilswapConnector.getExchangeRate({
+  //         amount: BIG_ONE.shiftedBy(src!.decimals),
+  //         exactOf: reversedRate ? "out" : "in",
+  //         tokenInID: inToken!.address,
+  //         tokenOutID: outToken!.address,
+  //       });
+  //       if (!rateResult.expectedAmount.isNaN() && !rateResult.expectedAmount.isNegative())
+  //         exchangeRate = rateResult.expectedAmount.shiftedBy(-dst!.decimals).pow(reversedRate ? -1 : 1);
+  //     } catch (e) {
+  //       exchangeRate = BIG_ZERO;
+  //     }
+  //   }
 
-    const formatterOpts = {
-      compression: 0,
-      maxFractionDigits: dst?.decimals,
-      symbol: dst?.symbol,
-    };
-    const shouldReverseRate = reversedRate && !exchangeRate.isZero();
-    const srcAmount = `1 ${src!.symbol || ""}`;
-    const dstAmount = `${moneyFormat(exchangeRate.pow(shouldReverseRate ? -1 : 1), formatterOpts)}`;
-    return `${srcAmount} = ${dstAmount}`;
-  };
+  //   const formatterOpts = {
+  //     compression: 0,
+  //     maxFractionDigits: dst?.decimals,
+  //     symbol: dst?.symbol,
+  //   };
+  //   const shouldReverseRate = reversedRate && !exchangeRate.isZero();
+  //   const srcAmount = `1 ${src!.symbol || ""}`;
+  //   const dstAmount = `${moneyFormat(exchangeRate.pow(shouldReverseRate ? -1 : 1), formatterOpts)}`;
+  //   return `${srcAmount} = ${dstAmount}`;
+  // };
 
   const onReverse = () => {
     setButtonRotate(!buttonRotate);
@@ -556,7 +573,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
 
   const { outToken, inToken } = swapFormState;
-  const tokenBalance = strings.bnOrZero(inToken?.balances?.[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString());
+  // const tokenBalance = strings.bnOrZero(inToken?.balances?.[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString());
   let showTxApprove = false;
   if (inToken && !inToken?.isZil) {
     const zilswapContractAddress = CONTRACTS[network];
@@ -569,9 +586,16 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     <MainCard {...rest} className={cls(classes.root, className)}>
       <Notifications />
       <Box display="flex" flexDirection="column" className={classes.container}>
+        <Box display="flex" justifyContent="flex-end" mb={1.5}>
+          <IconButton className={classes.iconButton}>
+            <BrightnessLowIcon />
+          </IconButton>
+          <IconButton className={classes.iconButton}>
+            <AutorenewIcon />
+          </IconButton>
+        </Box>
         <CurrencyInput
-          label="You Give"
-          hideBalance
+          label="From"
           token={inToken || null}
           amount={formState.inAmount}
           disabled={!inToken}
@@ -579,57 +603,26 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onEditorBlur={onDoneEditing}
           onAmountChange={onInAmountChange}
           onCurrencyChange={onInCurrencyChange} />
-        <ProportionSelect fullWidth color="primary" className={classes.proportionSelect} onSelectProp={onPercentage} />
-
-        <KeyValueDisplay className={classes.keyValueLabel}
-          hideIfNoValue
-          kkey="You Have"
-          ValueComponent="span">
-          {!!inToken && (
-            <StatefulText loadingKey={`rueryTokenBalance-${inToken.address}`}>
-              <Typography color="textSecondary" variant="body2">
-                {moneyFormat(tokenBalance, {
-                  symbol: inToken!.symbol,
-                  compression: inToken!.decimals,
-                  showCurrency: true,
-                })}
-              </Typography>
-            </StatefulText>
-          )}
-        </KeyValueDisplay>
-
-        <Box display="flex" mt={2} mb={3} justifyContent="center">
+        <Box display="flex" justifyContent="flex-end">
+          <ProportionSelect size="small" className={classes.proportionSelect} onSelectProp={onPercentage} />
+        </Box>
+        <Box display="flex" justifyContent="center">
           <IconButton
             disabled={!inToken || !outToken}
             onClick={() => onReverse()}
             className={cls(classes.swapButton, { [classes.rotateSwapButton]: buttonRotate })}>
-            <SwapSVG />
+            <SwapSVG className={classes.swapIcon}/>
           </IconButton>
         </Box>
         <CurrencyInput
-          label="You Receive"
+          label="To"
           token={outToken || null}
           amount={formState.outAmount}
           disabled={!outToken}
-          hideBalance={true}
           dialogOpts={{ hideNoPool: true }}
           onEditorBlur={onDoneEditing}
           onAmountChange={onOutAmountChange}
           onCurrencyChange={onOutCurrencyChange} />
-
-        {!!(inToken && outToken) && (
-          <Box display="flex" flexDirection="row" marginTop={1}>
-            <KeyValueDisplay className={classes.exchangeRateLabel}
-              kkey="Exchange Rate">
-              {getExchangeRateLabel()}
-            </KeyValueDisplay>
-            <SwitchSVG
-              onClick={() => setReversedRate(!reversedRate)}
-              className={cls(classes.switchIcon, {
-                [classes.activeSwitchIcon]: reversedRate,
-              })} />
-          </Box>
-        )}
 
         {enableChangeRecipient && (
           <Box display="flex" flexDirection="column" marginTop={3}>
@@ -682,6 +675,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           onClick={onSwap}>
           Swap
         </FancyButton>
+        <SwapDetail token={ outToken || undefined}/>
         <Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
           Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </Typography>

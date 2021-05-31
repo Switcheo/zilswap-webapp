@@ -26,13 +26,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-around",
-    padding: theme.spacing(0, 8, 0),
+    padding: theme.spacing(0, 4, 0),
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(0, 2, 0),
     },
   },
   proportionSelect: {
-    marginTop: 12,
+    marginTop: 3,
+    marginBottom: 4,
   },
   input: {
     marginTop: 12,
@@ -48,18 +49,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     height: 46
   },
   backButton: {
-    borderRadius: theme.spacing(.5),
+    borderRadius: 12,
     marginLeft: theme.spacing(-2),
   },
   readOnly: {
-    backgroundColor: theme.palette.background.readOnly,
-    textAlign: "right",
+    textAlign: "left",
     color: theme.palette.text?.primary,
-    padding: theme.spacing(2, 3),
+    padding: theme.spacing(1.5, 3),
   },
   previewAmount: {
     fontSize: 20,
     lineHeight: "24px",
+    marginBottom: 2
   },
   keyValueLabel: {
     marginTop: theme.spacing(1),
@@ -95,6 +96,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   errorMessage: {
     marginTop: theme.spacing(1),
+  },
+  poolIcon: {
+    marginTop: -30,
+    marginBottom: 0
+  },
+  label: {
+    // display: "inline-block",
+    // marginBottom: 8,
+    color: theme.palette.primary.contrastText,
   }
 }));
 
@@ -250,7 +260,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
         <Box display="flex" justifyContent="flex-start" alignItems="center" marginY={4}>
           <Button variant="text" onClick={onBack} className={classes.backButton}>
             <ArrowBack color="disabled" />
-            <Text variant="h3" marginLeft={1}>Remove Liquidity</Text>
+            <Text variant="h4" marginLeft={1}>Remove Liquidity</Text>
           </Button>
         </Box>
 
@@ -270,19 +280,24 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
             hideZil: true,
           }} />
 
-        <ProportionSelect fullWidth
+        <Box display="flex" justifyContent="flex-end">
+          <ProportionSelect
           color="primary"
+          size="small"
           className={classes.proportionSelect}
           onSelectProp={onPercentage} />
-
+        </Box>
+{/* 
         <KeyValueDisplay className={classes.keyValueLabel} hideIfNoValue kkey="In Pool">
           {!!poolToken && formatMoney(inPoolAmount || 0, formatOpts)}
-        </KeyValueDisplay>
+        </KeyValueDisplay> */}
 
-        <PoolIcon type="minus" />
-        <InputLabel>You Receive (Estimate)</InputLabel>
+        <Box display="flex" justifyContent="center">
+          <PoolIcon type="minus" className={classes.poolIcon} />
+        </Box>
 
         <ContrastBox className={classes.readOnly}>
+          <InputLabel className={classes.label}>You Receive (Estimate)</InputLabel>
           <Typography className={classes.previewAmount}>
             <span>{formatMoney(poolFormState.removeZilAmount, zilFormatOpts)}</span>
             <span> + {formatMoney(poolFormState.removeTokenAmount, formatOpts)}</span>

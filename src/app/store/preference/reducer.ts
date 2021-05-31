@@ -20,18 +20,18 @@ const checkToSaveThemePreference = (currentTheme: string, updatePayload: Prefere
     localStorage.setItem(LOCAL_STORAGE_KEY_THEME, theme);
 };
 
-const reducer = (state: PreferenceState = initial_state, actions: any) => {
-  switch (actions.type) {
+const reducer = (state: PreferenceState = initial_state, action: any) => {
+  switch (action.type) {
     case PreferenceActionTypes.INIT:
       return {
         ...state,
-        ...actions.payload,
+        ...action.payload,
       };
     case PreferenceActionTypes.UPDATE:
-      checkToSaveThemePreference(state.theme, actions.payload);
+      checkToSaveThemePreference(state.theme, action.payload);
       return {
         ...state,
-        ...actions.payload,
+        ...action.payload,
       };
     default:
       return state;

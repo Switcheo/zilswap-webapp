@@ -10,32 +10,49 @@ import cls from "classnames";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { CurrencyDialogProps } from "../CurrencyDialog/CurrencyDialog";
+import { AppTheme } from "app/theme/types";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
+  form: {
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
+  },
   inputRow: {
-    paddingLeft: 0
+    paddingLeft: 0,
+    backgroundColor: theme.palette.currencyInput,
+    border: 0
   },
   input: {
-    textAlign: "right",
+    textAlign: "left",
+  },
+  label: {
+    position: "absolute",
+    color: theme.palette.primary.contrastText,
+    left: 20,
+    top: 12,
+  },
+  balance: {
+    position: "absolute",
+    color: theme.palette.primary.contrastText,
+    right: 20,
+    top: 12,
   },
   currencyButton: {
+    display: "flex",
+    justifyContent: "space-between",
+    fontFamily: 'Avenir Next',
+    fontWeight: 'bold',
     borderRadius: 0,
     borderTopLeftRadius: 4,
     borderBottomLeftRadius: 4,
-    minHeight: 52,
-    color: theme.palette.text.primary,
-    fontWeight: 600,
-    display: "flex",
-    justifyContent: "space-between"
+    padding: "34px 18px 12px 5px",
+    color: theme.palette.text?.primary,
   },
-  label: {
-    color: theme.palette.text.secondary,
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
+  currencyText: {
+    fontSize: 20,
   },
   currencyLogo: {
     marginRight: theme.spacing(1),
@@ -45,7 +62,7 @@ const useStyles = makeStyles(theme => ({
   },
   expandIcon: {
     marginLeft: theme.spacing(1),
-    color: theme.palette.primary.main
+    color: theme.palette.text?.primary,
   },
 }));
 
@@ -119,18 +136,20 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
 
   return (
     <form className={cls(classes.form, className)} noValidate autoComplete="off">
-      <Box className={classes.label} display="flex" justifyContent="space-between">
-        <InputLabel>{label}</InputLabel>
-        {tokenBalance && !hideBalance && (
-          <Typography variant="body2">
-            {moneyFormat(tokenBalance, {
+      <InputLabel className={classes.label}>{label}</InputLabel>
+
+      {!hideBalance && (
+        <Typography className={classes.balance} variant="body2">
+          Balance: {tokenBalance ?
+            moneyFormat(tokenBalance, {
               symbol: token?.symbol,
               compression: token?.decimals,
-              showCurrency: true,
-            })}
-          </Typography>
-        )}
-      </Box>
+              showCurrency: false,
+            })
+            : '-'
+          }
+        </Typography>
+      )}
 
       <OutlinedInput
         className={classes.inputRow}
@@ -141,13 +160,13 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
         disabled={disabled}
         type="number"
         inputProps={{ className: classes.input }}
-        startAdornment={
-          <InputAdornment position="start">
+        endAdornment={
+          <InputAdornment position="end">
             {fixedToken ? (
               <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
                 <Box display="flex" alignItems="center">
                   <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />
-                  <Typography variant="button">{token?.symbol}</Typography>
+                  <Typography variant="button" className={classes.currencyText}>{token?.symbol}</Typography>
                 </Box>
               </Box>
               ) :
@@ -155,7 +174,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
               <Button className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
                 <Box display="flex" alignItems="center">
                   {token && <CurrencyLogo currency={token.registered && token.symbol} address={token.address} className={classes.currencyLogo} />}
-                  <Typography variant="button">{token?.symbol || "Select Token"}</Typography>
+                  <Typography variant="button" className={classes.currencyText}>{token?.symbol || "Select Token"}</Typography>
                 </Box>
                 <ExpandMoreIcon className={classes.expandIcon} />
               </Button>

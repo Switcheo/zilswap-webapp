@@ -1,23 +1,33 @@
-import { TokenUpdateProps, TokenInitProps, TokenAddProps, UpdatePriceProps, UpdateUSDValuesProps } from "./types";
+import {
+  TokenInitProps, TokenUpdateProps, TokenUpdateAllProps,
+  TokenAddProps, UpdatePriceProps, UpdateUSDValuesProps,
+} from "./types";
 
 export const TokenActionTypes = {
-  TOKEN_UPDATE_STATE: "TOKEN_UPDATE_STATE",
   TOKEN_INIT: "TOKEN_INIT",
-  TOKEN_UPDATE: "TOKEN_UPDATE",
   TOKEN_ADD: "TOKEN_ADD",
+  TOKEN_REFETCH_STATE: "TOKEN_REFETCH_STATE",
+  TOKEN_UPDATE: "TOKEN_UPDATE",
+  TOKEN_UPDATE_ALL: "TOKEN_UPDATE_ALL",
   TOKEN_UPDATE_PRICES: "TOKEN_UPDATE_PRICES",
-  TOKEN_UPDATE_VALUES: "TOKEN_UPDATE_VALUES",
+  TOKEN_UPDATE_USD: "TOKEN_UPDATE_USD",
 };
 
-export function updateState() {
-  return {
-    type: TokenActionTypes.TOKEN_UPDATE_STATE,
-  }
-};
 export function init(payload: TokenInitProps) {
   return {
     type: TokenActionTypes.TOKEN_INIT,
     payload,
+  }
+};
+export function add(payload: TokenAddProps) {
+  return {
+    type: TokenActionTypes.TOKEN_ADD,
+    payload,
+  }
+};
+export function refetchState() {
+  return {
+    type: TokenActionTypes.TOKEN_REFETCH_STATE,
   }
 };
 export function update(payload: TokenUpdateProps) {
@@ -26,9 +36,9 @@ export function update(payload: TokenUpdateProps) {
     payload,
   }
 };
-export function add(payload: TokenAddProps) {
+export function updateAll(payload: TokenUpdateAllProps) {
   return {
-    type: TokenActionTypes.TOKEN_ADD,
+    type: TokenActionTypes.TOKEN_UPDATE_ALL,
     payload,
   }
 };
@@ -40,7 +50,7 @@ export function updatePrices(payload: UpdatePriceProps) {
 };
 export function updateUSDValues(payload: UpdateUSDValuesProps) {
   return {
-    type: TokenActionTypes.TOKEN_UPDATE_VALUES,
+    type: TokenActionTypes.TOKEN_UPDATE_USD,
     payload,
   }
 };

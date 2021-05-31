@@ -56,7 +56,6 @@ function* queryPoolLiquidityDay({ network }: QueryOpts) {
 };
 
 function* watchStats() {
-  logger("run watch stats");
   while (true) {
     const { network } = getBlockchain(yield select())
     const queryOpts = { network };
