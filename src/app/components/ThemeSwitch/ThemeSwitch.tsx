@@ -1,15 +1,13 @@
-import { FormGroup, FormControlLabel, Switch, Typography } from "@material-ui/core";
+import { FormControlLabel, FormGroup, Switch, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
+import { AppTheme } from "app/theme/types";
+import { hexToRGBA } from "app/utils";
 import clsx from "clsx";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import pathDarkSvg from "./dark.svg";
-import pathLightSvg from "./light.svg";
 import { ThemeSwitchProps } from "./types";
-import { hexToRGBA } from "app/utils";
-import { AppTheme } from "app/theme/types";
 
 const THEME_TOGGLE_SELECTED = "dark";
 

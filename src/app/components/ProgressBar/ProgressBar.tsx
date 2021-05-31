@@ -1,5 +1,5 @@
-import { Box, Typography, makeStyles } from '@material-ui/core'
-import { hexToRGBA, extractBoxProps, PartialBoxProps } from "app/utils";
+import { Box, makeStyles, Typography } from '@material-ui/core';
+import { extractBoxProps, PartialBoxProps } from "app/utils";
 import React from "react";
 
 interface Props extends PartialBoxProps {

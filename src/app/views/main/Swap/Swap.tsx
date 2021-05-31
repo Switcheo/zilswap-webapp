@@ -1,30 +1,30 @@
 import { Box, Button, IconButton, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
 import { WarningRounded } from "@material-ui/icons";
 import AddIcon from "@material-ui/icons/Add";
+import AutorenewIcon from '@material-ui/icons/Autorenew';
+import BrightnessLowIcon from '@material-ui/icons/BrightnessLow';
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import RemoveIcon from "@material-ui/icons/Remove";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { validation as ZilValidation } from "@zilliqa-js/util";
-import { CurrencyInput, FancyButton, KeyValueDisplay, Notifications, ProportionSelect, StatefulText, Text } from "app/components";
+import { CurrencyInput, FancyButton, Notifications, ProportionSelect, Text } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { strings, useAsyncTask, useBlacklistAddress, useMoneyFormatter, useNetwork, useSearchParam } from "app/utils";
+import { strings, useAsyncTask, useBlacklistAddress, useNetwork, useSearchParam } from "app/utils";
 import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router";
 import { CONTRACTS } from "zilswap-sdk/lib/constants";
 import { ShowAdvanced } from "./components";
-import { ReactComponent as SwapSVG } from "./swap_logo.svg";
-import { useLocation } from "react-router";
 import SwapDetail from "./components/SwapDetail";
-import BrightnessLowIcon from '@material-ui/icons/BrightnessLow';
-import AutorenewIcon from '@material-ui/icons/Autorenew';
+import { ReactComponent as SwapSVG } from "./swap_logo.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -201,10 +201,10 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [runSwap, loading, error, clearSwapError] = useAsyncTask("swap");
   const [isBlacklisted] = useBlacklistAddress();
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
-  const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
+  // const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
   const [errorRecipientAddress, setErrorRecipientAddress] = useState<string | undefined>();
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [reversedRate, setReversedRate] = useState(false);
+  // const [reversedRate, setReversedRate] = useState(false);
   const queryParams = new URLSearchParams(useLocation().search);
   const [recipientAddrBlacklisted, setRecipientAddrBlacklisted] = useState(false);
 
@@ -261,40 +261,40 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }));
   }
 
-  const getExchangeRateLabel = () => {
-    let exchangeRate = swapFormState.expectedExchangeRate || BIG_ZERO;
+  // const getExchangeRateLabel = () => {
+  //   let exchangeRate = swapFormState.expectedExchangeRate || BIG_ZERO;
 
-    let src = inToken, dst = outToken;
-    if (reversedRate) {
-      dst = inToken;
-      src = outToken;
-    }
+  //   let src = inToken, dst = outToken;
+  //   if (reversedRate) {
+  //     dst = inToken;
+  //     src = outToken;
+  //   }
 
-    if (exchangeRate.eq(0)) {
-      try {
-        const rateResult = ZilswapConnector.getExchangeRate({
-          amount: BIG_ONE.shiftedBy(src!.decimals),
-          exactOf: reversedRate ? "out" : "in",
-          tokenInID: inToken!.address,
-          tokenOutID: outToken!.address,
-        });
-        if (!rateResult.expectedAmount.isNaN() && !rateResult.expectedAmount.isNegative())
-          exchangeRate = rateResult.expectedAmount.shiftedBy(-dst!.decimals).pow(reversedRate ? -1 : 1);
-      } catch (e) {
-        exchangeRate = BIG_ZERO;
-      }
-    }
+  //   if (exchangeRate.eq(0)) {
+  //     try {
+  //       const rateResult = ZilswapConnector.getExchangeRate({
+  //         amount: BIG_ONE.shiftedBy(src!.decimals),
+  //         exactOf: reversedRate ? "out" : "in",
+  //         tokenInID: inToken!.address,
+  //         tokenOutID: outToken!.address,
+  //       });
+  //       if (!rateResult.expectedAmount.isNaN() && !rateResult.expectedAmount.isNegative())
+  //         exchangeRate = rateResult.expectedAmount.shiftedBy(-dst!.decimals).pow(reversedRate ? -1 : 1);
+  //     } catch (e) {
+  //       exchangeRate = BIG_ZERO;
+  //     }
+  //   }
 
-    const formatterOpts = {
-      compression: 0,
-      maxFractionDigits: dst?.decimals,
-      symbol: dst?.symbol,
-    };
-    const shouldReverseRate = reversedRate && !exchangeRate.isZero();
-    const srcAmount = `1 ${src!.symbol || ""}`;
-    const dstAmount = `${moneyFormat(exchangeRate.pow(shouldReverseRate ? -1 : 1), formatterOpts)}`;
-    return `${srcAmount} = ${dstAmount}`;
-  };
+  //   const formatterOpts = {
+  //     compression: 0,
+  //     maxFractionDigits: dst?.decimals,
+  //     symbol: dst?.symbol,
+  //   };
+  //   const shouldReverseRate = reversedRate && !exchangeRate.isZero();
+  //   const srcAmount = `1 ${src!.symbol || ""}`;
+  //   const dstAmount = `${moneyFormat(exchangeRate.pow(shouldReverseRate ? -1 : 1), formatterOpts)}`;
+  //   return `${srcAmount} = ${dstAmount}`;
+  // };
 
   const onReverse = () => {
     setButtonRotate(!buttonRotate);
@@ -573,7 +573,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
 
   const { outToken, inToken } = swapFormState;
-  const tokenBalance = strings.bnOrZero(inToken?.balances?.[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString());
+  // const tokenBalance = strings.bnOrZero(inToken?.balances?.[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString());
   let showTxApprove = false;
   if (inToken && !inToken?.isZil) {
     const zilswapContractAddress = CONTRACTS[network];
