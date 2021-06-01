@@ -18,7 +18,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     tokenSymbol: 'STREAM',
     tokenName: 'ZilStream',
     description: 'ZilSteam\'s premium membership token',
-    contractAddress: 'zil1vccnvs4chqxtm57fxq35n2ezny85c0glv99wef',
+    contractAddress: 'zil10j9xr36tyxvcajkfn2rnggj2geczlk9p3pw8lw',
     showUntil: dayjs('2021-05-26T10:00:00.000+0800'),
     usdRatio: '0.7'
   }],

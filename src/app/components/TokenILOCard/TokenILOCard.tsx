@@ -16,6 +16,7 @@ import { ILOData } from 'core/zilo/constants';
 import HelpInfo from "../HelpInfo";
 import { Dayjs } from 'dayjs';
 import { ILOState } from 'zilswap-sdk/lib/constants';
+import { ObservedTx } from 'zilswap-sdk';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -84,9 +85,8 @@ const TokenILOCard = (props: Props) => {
   const txState = useSelector<RootState, TransactionState>(state => state.transaction);
   const ziloState = useSelector<RootState, ZiloAppState>(state => state.blockchain.contracts.zilo[contractAddrHex]);
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
-  const [approveTxHash, setApproveTxHash] = useState<string | null>(null) // TODO: do this for all txs
-  const [runCommit, loading, error, clearCommitError] = useAsyncTask("commitILO");
-  const [runApprove, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
+  const [pendingTxHash, setPendingTxHash] = useState<string | null>(null)
+  const [runTx, txIsSending, txError, setTxError] = useAsyncTask("pendingTx");
   const classes = useStyles();
 
   const zwapToken = Object.values(tokenState.tokens).filter(token => token.isZwap)[0]
@@ -101,13 +101,13 @@ const TokenILOCard = (props: Props) => {
   const unitlessInAmount = new BigNumber(formState.zwapAmount).shiftedBy(zwapToken.decimals).integerValue();
   const approved = new BigNumber(zwapToken.allowances![contractAddrHex] || '0')
   const showTxApprove = approved.isZero() || approved.comparedTo(unitlessInAmount) < 0;
-  const disableTxApprove = loadingApproveTx || txState.observingTxs.findIndex(tx => tx.hash.toLowerCase() === approveTxHash) > 0
+  const txIsPending = txIsSending || txState.observingTxs.findIndex(tx => tx.hash.toLowerCase() === pendingTxHash) >= 0
 
   const { state: iloState, contributed, userContribution, contractState: { total_contributions: totalContributions } } = ziloState
-  // const { target_zil_amount: targetZil, target_zwap_amount: targetZwap } = ziloState.contractInit!
+  const { target_zil_amount: targetZil, target_zwap_amount: targetZwap } = ziloState.contractInit!
   const { start_block: startBlock, end_block: endBlock } = ziloState.contractInit!
-  const targetZil = new BigNumber('70000').shiftedBy(12)
-  const targetZwap = new BigNumber('30000').shiftedBy(12)
+  // const targetZil = new BigNumber('70000').shiftedBy(12)
+  // const targetZwap = new BigNumber('30000').shiftedBy(12)
   // console.log(targetZil.toString(), targetZwap.toString())
 
   const totalCommittedUSD = new BigNumber(totalContributions).shiftedBy(-12).dividedBy(data.usdRatio).times(tokenState.prices.ZIL).toFormat(2)
@@ -145,11 +145,9 @@ const TokenILOCard = (props: Props) => {
   };
 
   const onApprove = () => {
-    if (loading) return;
+    if (txIsPending) return;
 
-    clearCommitError();
-
-    runApprove(async () => {
+    runTx(async () => {
       const tokenAmount = new BigNumber(formState.zwapAmount).plus(1);
       const observedTx = await ZilswapConnector.approveTokenTransfer({
         tokenAmount: tokenAmount.shiftedBy(zwapToken.decimals),
@@ -160,32 +158,56 @@ const TokenILOCard = (props: Props) => {
       if (!observedTx)
         throw new Error("Transfer allowance already sufficient for specified amount");
 
-      const walletObservedTx: WalletObservedTx = {
-        ...observedTx!,
-        address: walletState.wallet!.addressInfo.bech32,
-        network,
-      };
-
-      setApproveTxHash(observedTx.hash.toLowerCase());
-      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
+      onSentTx(observedTx);
     });
   };
 
   const onCommit = () => {
-    if (loading) return;
+    if (txIsPending) return;
 
-    clearApproveError();
+    const amount = new BigNumber(formState.zilAmount).shiftedBy(12).integerValue()
+    if (!amount.isPositive()) {
+      setTxError(new Error('Contribution amount must be positive'));
+      return
+    }
 
-    runCommit(async () => {
+    runTx(async () => {
+      const observedTx = await ZilswapConnector.contributeZILO({
+        address: data.contractAddress,
+        amount: new BigNumber(formState.zilAmount).shiftedBy(12).integerValue(),
+      });
+
+      if (!observedTx)
+        throw new Error("Failed to commit tokens");
+
+      onSentTx(observedTx);
     })
   }
 
   const onClaim = () => {
-    if (loading) return;
+    if (txIsPending || !contributed) return;
 
-    runCommit(async () => {
-      // TODO: reusing same effect - is this ok?
+    runTx(async () => {
+      const observedTx = await ZilswapConnector.claimZILO({
+        address: data.contractAddress,
+      });
+
+      if (!observedTx)
+        throw new Error("Failed to commit tokens");
+
+      onSentTx(observedTx);
     })
+  }
+
+  const onSentTx = (tx: ObservedTx) => {
+    const walletObservedTx: WalletObservedTx = {
+      ...tx!,
+      address: walletState.wallet!.addressInfo.bech32,
+      network,
+    };
+
+    setPendingTxHash(tx.hash.toLowerCase());
+    dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
   }
 
   return (
@@ -210,11 +232,10 @@ const TokenILOCard = (props: Props) => {
                 currentTime.isBefore(endTime) && '~'
               }
               {
-                Math.floor(secondsToNextPhase / 3600).toLocaleString('en-US', {minimumIntegerDigits: 2})}:{
-                (Math.floor(secondsToNextPhase / 60) % 60).toLocaleString('en-US', {minimumIntegerDigits: 2})}:{
-                (secondsToNextPhase % 60).toLocaleString('en-US', {minimumIntegerDigits: 2})
-              }
-              <HelpInfo placement="top" title="Approximate time left in HH:MM:SS." />
+                Math.floor(secondsToNextPhase / 3600).toLocaleString('en-US', {minimumIntegerDigits: 2})}h : {
+                (Math.floor(secondsToNextPhase / 60) % 60).toLocaleString('en-US', {minimumIntegerDigits: 2})}m :{
+                (secondsToNextPhase % 60).toLocaleString('en-US', {minimumIntegerDigits: 2})}s
+              <HelpInfo placement="top" title="Approximate time left. Exact start time is based on block height, not wall clock." />
             </Text>
 
             <ProgressBar progress={progress.toNumber()} marginTop={3} />
@@ -226,52 +247,50 @@ const TokenILOCard = (props: Props) => {
               </Box>
               <Box display="flex" marginTop={0.5}>
                 <Text color="textSecondary" flexGrow={1} align="left">ZIL to Raise</Text>
-                <Text color="textSecondary">{targetZil.shiftedBy(-12).toFormat(12)}</Text>
+                <Text color="textSecondary">{targetZil.shiftedBy(-12).toFormat(0)}</Text>
               </Box>
               <Box display="flex" marginTop={0.5}>
                 <Text color="textSecondary" flexGrow={1} align="left">ZWAP to Burn</Text>
-                <Text color="textSecondary">{targetZwap.shiftedBy(-12).toFormat(12)}</Text>
+                <Text color="textSecondary">{targetZwap.shiftedBy(-12).toFormat(0)}</Text>
               </Box>
             </Box>
 
             {
               !iloOver &&
-              [
-                <Text className={classes.title} marginBottom={0.5}>Contribute your tokens in a fixed ratio to participate</Text>,
-                <Text color="textSecondary">30% ZWAP - 70% ZIL</Text>,
+              <Box>
+                <Text className={classes.title} marginBottom={0.5}>Contribute your tokens in a fixed ratio to participate</Text>
+                <Text color="textSecondary">30% ZWAP - 70% ZIL</Text>
                 <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
                   <CurrencyInputILO
                     label="to Burn:"
                     token={zwapToken}
                     amount={formState.zwapAmount}
                     hideBalance={false}
-                    disabled={false}
                     onAmountChange={onZwapChange}
                   />
-
                   <CurrencyInputILO
                     label="for Project:"
                     token={zilToken}
                     amount={formState.zilAmount}
                     hideBalance={false}
-                    disabled={false}
                     onAmountChange={onZilChange}
                   />
-                </Box>,
+                </Box>
                 <FancyButton
                   walletRequired
                   className={classes.actionButton}
                   showTxApprove={showTxApprove}
-                  loadingTxApprove={disableTxApprove}
+                  loadingTxApprove={txIsPending}
                   onClickTxApprove={onApprove}
                   disabled={!showTxApprove && !iloStarted}
                   variant="contained"
                   color="primary"
                   onClick={onCommit}
                 >
-                  {iloStarted ? 'Contribute' : 'Waiting...'}
+                  {iloStarted ? 'Contribute' : 'Waiting to begin'}
                 </FancyButton>
-              ]
+                <Typography className={classes.errorMessage} color="error">{txError?.message}</Typography>
+              </Box>
             }
           </Box>
 
@@ -283,7 +302,7 @@ const TokenILOCard = (props: Props) => {
                 <CurrencyInputILO
                   label="to Burn:"
                   token={zwapToken}
-                  amount={contributed ? userContribution.shiftedBy(12).times(targetZwap).dividedToIntegerBy(targetZil).plus(1).shiftedBy(-12).toString() : '-'}
+                  amount={contributed ? userContribution.times(targetZwap).dividedToIntegerBy(targetZil).plus(1).shiftedBy(-12).toString() : '-'}
                   hideBalance={true}
                   disabled={true}
                   className={classes.input}
@@ -303,20 +322,22 @@ const TokenILOCard = (props: Props) => {
 
           {
             iloOver &&
-            <FancyButton
-              walletRequired
-              className={classes.actionButton}
-              showTxApprove={false}
-              disabled={!contributed}
-              variant="contained"
-              color="primary"
-              onClick={onClaim}
-            >
-              {contributed ? (iloState === ILOState.Completed ? 'Claim' : 'Refund') : 'Completed'}
-            </FancyButton>
+            <Box>
+              <FancyButton
+                walletRequired
+                className={classes.actionButton}
+                showTxApprove={false}
+                disabled={txIsPending || !contributed}
+                variant="contained"
+                color="primary"
+                onClick={onClaim}
+              >
+                {contributed ? (iloState === ILOState.Completed ? 'Claim' : 'Refund') : 'Completed'}
+              </FancyButton>
+              <Typography className={classes.errorMessage} color="error">{txError?.message}</Typography>
+            </Box>
           }
 
-          <Typography className={classes.errorMessage} color="error">{error?.message || errorApproveTx?.message}</Typography>
         </Box>
       }
     </Box>
