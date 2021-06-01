@@ -1,11 +1,8 @@
 import { Box, InputLabel, TextField, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { actions } from "app/store";
-import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React, { ChangeEvent } from "react";
-import { useDispatch, useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -15,10 +12,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: 60,
     marginRight: theme.spacing(1),
     textAlign: "center",
+    backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#D4FFF2",
+    borderRadius: "12px",
+    border: "1px solid #29475A",
   },
   input: {
     fontSize: "12px !important",
     textAlign: "center",
+    padding: `${theme.spacing(.5, 1)} !important`,
   },
   minutes: {
     display: "flex",
@@ -26,15 +27,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const ExpiryField: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
-  const { children, className, ...rest } = props;
-  const dispatch = useDispatch();
-  const expiry = useSelector<RootState, number>(state => state.swap.expiry);
+const ExpiryField: React.FC<React.HTMLAttributes<HTMLDivElement> | any> = (props: any) => {
+  const { children, className, newExpiry, updateNewExpiry, ...rest } = props;
   const classes = useStyles();
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = Number(event.target.value.replace(/[^\d.]+/g, ""));
-    dispatch(actions.Swap.update({ expiry: value }))
+    if (typeof updateNewExpiry === "function") updateNewExpiry(value);
+    // dispatch(actions.Swap.update({ expiry: value }))
   };
 
   return (
@@ -43,7 +43,7 @@ const ExpiryField: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       <Box display="flex">
         <TextField
           variant="outlined"
-          value={expiry}
+          value={newExpiry}
           type="number"
           InputProps={{ className: classes.inputWrapper }}
           inputProps={{ className: classes.input }}

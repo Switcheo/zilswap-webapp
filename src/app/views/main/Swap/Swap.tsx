@@ -3,15 +3,13 @@ import { WarningRounded } from "@material-ui/icons";
 import AddIcon from "@material-ui/icons/Add";
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import BrightnessLowIcon from '@material-ui/icons/BrightnessLow';
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import RemoveIcon from "@material-ui/icons/Remove";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { validation as ZilValidation } from "@zilliqa-js/util";
-import { CurrencyInput, FancyButton, Notifications, ProportionSelect, Text } from "app/components";
+import { CurrencyInput, FancyButton, Notifications, ProportionSelect, ShowAdvanced, Text } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
-import { ExactOfOptions, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
+import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { strings, useAsyncTask, useBlacklistAddress, useNetwork, useSearchParam } from "app/utils";
 import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
@@ -22,7 +20,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router";
 import { CONTRACTS } from "zilswap-sdk/lib/constants";
-import { ShowAdvanced } from "./components";
+// import { ShowAdvanced } from "./components";
 import SwapDetail from "./components/SwapDetail";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
 
@@ -32,7 +30,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   container: {
     padding: theme.spacing(4, 4, 0),
     [theme.breakpoints.down("xs")]: {
-      padding: theme.spacing(4, 2, 0),
+      padding: theme.spacing(2, 2, 0),
     },
   },
   swapButton: {
@@ -165,7 +163,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 12,
     padding: 5,
     marginLeft: 5,
-  }
+  },
 }));
 
 const initialFormState = {
@@ -198,12 +196,12 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
   const walletState = useSelector<RootState, WalletState>(store => store.wallet);
+  const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
   const [runSwap, loading, error, clearSwapError] = useAsyncTask("swap");
   const [isBlacklisted] = useBlacklistAddress();
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   // const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
   const [errorRecipientAddress, setErrorRecipientAddress] = useState<string | undefined>();
-  const [showAdvanced, setShowAdvanced] = useState(false);
   // const [reversedRate, setReversedRate] = useState(false);
   const queryParams = new URLSearchParams(useLocation().search);
   const [recipientAddrBlacklisted, setRecipientAddrBlacklisted] = useState(false);
@@ -582,105 +580,111 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     showTxApprove = strings.bnOrZero(inToken?.allowances?.[byte20ContractAddress]).comparedTo(unitlessInAmount) < 0;
   }
 
+  const toggleAdvanceSetting = () => {
+    dispatch(actions.Layout.showAdvanceSetting(!layoutState.showAdvanceSetting));
+  }
+
+  console.log({ layoutState }, layoutState.showAdvanceSetting)
+
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       <Notifications />
-      <Box display="flex" flexDirection="column" className={classes.container}>
-        <Box display="flex" justifyContent="flex-end" mb={1.5}>
-          <IconButton className={classes.iconButton}>
-            <BrightnessLowIcon />
-          </IconButton>
-          <IconButton className={classes.iconButton}>
-            <AutorenewIcon />
-          </IconButton>
-        </Box>
-        <CurrencyInput
-          label="From"
-          token={inToken || null}
-          amount={formState.inAmount}
-          disabled={!inToken}
-          dialogOpts={{ hideNoPool: true }}
-          onEditorBlur={onDoneEditing}
-          onAmountChange={onInAmountChange}
-          onCurrencyChange={onInCurrencyChange} />
-        <Box display="flex" justifyContent="flex-end">
-          <ProportionSelect size="small" className={classes.proportionSelect} onSelectProp={onPercentage} />
-        </Box>
-        <Box display="flex" justifyContent="center">
-          <IconButton
-            disabled={!inToken || !outToken}
-            onClick={() => onReverse()}
-            className={cls(classes.swapButton, { [classes.rotateSwapButton]: buttonRotate })}>
-            <SwapSVG className={classes.swapIcon}/>
-          </IconButton>
-        </Box>
-        <CurrencyInput
-          label="To"
-          token={outToken || null}
-          amount={formState.outAmount}
-          disabled={!outToken}
-          dialogOpts={{ hideNoPool: true }}
-          onEditorBlur={onDoneEditing}
-          onAmountChange={onOutAmountChange}
-          onCurrencyChange={onOutCurrencyChange} />
-
-        {enableChangeRecipient && (
-          <Box display="flex" flexDirection="column" marginTop={3}>
-            {!formState.showRecipientAddress && (
-              <Button variant="text" className={classes.addAddressButton} onClick={() => setFormState({ ...formState, showRecipientAddress: true })}>
-                <AddIcon className={classes.accordionButton} />
-                <span>Add Receiving Address</span>
-              </Button>
-            )}
-            {formState.showRecipientAddress && (
-              <>
-                <InputLabel className={classes.addressLabel}>
-                  <RemoveIcon className={classes.accordionButton} onClick={() => setFormState({ ...formState, showRecipientAddress: false })} />
-                  <span>Receiving Address</span>
-                  {!!errorRecipientAddress && <Typography className={classes.addressError} component="span" color="error">{errorRecipientAddress}</Typography>}
-                </InputLabel>
-                <OutlinedInput
-                  onBlur={onEnterRecipientAddress}
-                  className={classes.addressInput}
-                  value={swapFormState.recipientAddress || ""}
-                  placeholder={PlaceholderStrings.ZilAddress}
-                  onChange={onRecipientAddressChange} />
-                {recipientAddrBlacklisted && (
-                  <Text className={classes.errorText}>
-                    <WarningRounded color="error" />  Address appears to be a known CEX/DEX address. Please ensure you have entered a correct address!
-                  </Text>
-                )}
-                <Text className={classes.warningText}>
-                  <WarningRounded color="inherit" />  Do not send tokens directly to an exchange address as it may result in failure to receive your fund.
-              </Text>
-              </>
-            )}
+      {!layoutState.showAdvanceSetting && (
+        <Box display="flex" flexDirection="column" className={classes.container}>
+          <Box display="flex" justifyContent="flex-end" mb={1.5}>
+            <IconButton onClick={() => toggleAdvanceSetting()} className={classes.iconButton}>
+              <BrightnessLowIcon />
+            </IconButton>
+            <IconButton className={classes.iconButton}>
+              <AutorenewIcon />
+            </IconButton>
           </Box>
-        )}
 
-        <Typography className={classes.errorMessage} color="error">{error?.message || errorApproveTx?.message}</Typography>
-        {swapFormState.isInsufficientReserves && (
-          <Typography color="error">Pool reserve is too small to fulfill desired output.</Typography>
-        )}
+          <CurrencyInput
+            label="From"
+            token={inToken || null}
+            amount={formState.inAmount}
+            disabled={!inToken}
+            dialogOpts={{ hideNoPool: true }}
+            onEditorBlur={onDoneEditing}
+            onAmountChange={onInAmountChange}
+            onCurrencyChange={onInCurrencyChange} />
+          <Box display="flex" justifyContent="flex-end">
+            <ProportionSelect size="small" className={classes.proportionSelect} onSelectProp={onPercentage} />
+          </Box>
+          <Box display="flex" justifyContent="center">
+            <IconButton
+              disabled={!inToken || !outToken}
+              onClick={() => onReverse()}
+              className={cls(classes.swapButton, { [classes.rotateSwapButton]: buttonRotate })}>
+              <SwapSVG className={classes.swapIcon} />
+            </IconButton>
+          </Box>
+          <CurrencyInput
+            label="To"
+            token={outToken || null}
+            amount={formState.outAmount}
+            disabled={!outToken}
+            dialogOpts={{ hideNoPool: true }}
+            onEditorBlur={onDoneEditing}
+            onAmountChange={onOutAmountChange}
+            onCurrencyChange={onOutCurrencyChange} />
 
-        <FancyButton walletRequired
-          loading={loading}
-          className={classes.actionButton}
-          showTxApprove={showTxApprove}
-          loadingTxApprove={loadingApproveTx}
-          onClickTxApprove={onApproveTx}
-          variant="contained"
-          color="primary"
-          disabled={!inToken || !outToken || recipientAddrBlacklisted}
-          onClick={onSwap}>
-          Swap
-        </FancyButton>
-        <SwapDetail token={ outToken || undefined}/>
-        <Typography variant="body2" className={cls(classes.advanceDetails, showAdvanced ? classes.primaryColor : {})} onClick={() => setShowAdvanced(!showAdvanced)}>
-          Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        </Typography>
-      </Box>
-      <ShowAdvanced showAdvanced={showAdvanced} />
+          {enableChangeRecipient && (
+            <Box display="flex" flexDirection="column" marginTop={3}>
+              {!formState.showRecipientAddress && (
+                <Button variant="text" className={classes.addAddressButton} onClick={() => setFormState({ ...formState, showRecipientAddress: true })}>
+                  <AddIcon className={classes.accordionButton} />
+                  <span>Add Receiving Address</span>
+                </Button>
+              )}
+              {formState.showRecipientAddress && (
+                <>
+                  <InputLabel className={classes.addressLabel}>
+                    <RemoveIcon className={classes.accordionButton} onClick={() => setFormState({ ...formState, showRecipientAddress: false })} />
+                    <span>Receiving Address</span>
+                    {!!errorRecipientAddress && <Typography className={classes.addressError} component="span" color="error">{errorRecipientAddress}</Typography>}
+                  </InputLabel>
+                  <OutlinedInput
+                    onBlur={onEnterRecipientAddress}
+                    className={classes.addressInput}
+                    value={swapFormState.recipientAddress || ""}
+                    placeholder={PlaceholderStrings.ZilAddress}
+                    onChange={onRecipientAddressChange} />
+                  {recipientAddrBlacklisted && (
+                    <Text className={classes.errorText}>
+                      <WarningRounded color="error" />  Address appears to be a known CEX/DEX address. Please ensure you have entered a correct address!
+                    </Text>
+                  )}
+                  <Text className={classes.warningText}>
+                    <WarningRounded color="inherit" />  Do not send tokens directly to an exchange address as it may result in failure to receive your fund.
+                </Text>
+                </>
+              )}
+            </Box>
+          )}
+
+          <Typography className={classes.errorMessage} color="error">{error?.message || errorApproveTx?.message}</Typography>
+          {swapFormState.isInsufficientReserves && (
+            <Typography color="error">Pool reserve is too small to fulfill desired output.</Typography>
+          )}
+
+          <FancyButton walletRequired
+            loading={loading}
+            className={classes.actionButton}
+            showTxApprove={showTxApprove}
+            loadingTxApprove={loadingApproveTx}
+            onClickTxApprove={onApproveTx}
+            variant="contained"
+            color="primary"
+            disabled={!inToken || !outToken || recipientAddrBlacklisted}
+            onClick={onSwap}>
+            Swap
+          </FancyButton>
+          <SwapDetail token={outToken || undefined} />
+        </Box>
+      )}
+      <ShowAdvanced showAdvanced={layoutState.showAdvanceSetting} />
     </MainCard >
   );
 };

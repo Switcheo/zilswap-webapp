@@ -1,6 +1,6 @@
-import { Box, Button } from "@material-ui/core";
+import { Box, Button, IconButton, } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { Notifications } from "app/components";
+import { Notifications, ShowAdvanced } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { LayoutState, OpenCloseState, PoolFormState, RootState } from "app/store/types";
@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolManage, PoolToggleButton, PoolWithdraw } from "./components";
 import AddLiquidityEarnMessage from "./components/AddLiquidityEarnMessage";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
+import BrightnessLowIcon from '@material-ui/icons/BrightnessLow';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -28,6 +29,13 @@ const useStyles = makeStyles(theme => ({
     marginBottom: 40,
     height: 46
   },
+  iconButton: {
+    color: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#003340",
+    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    borderRadius: 12,
+    padding: 5,
+    marginLeft: 5,
+  },
 }));
 const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
@@ -43,6 +51,10 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
     dispatch(actions.Layout.toggleShowCreatePool(override));
   };
 
+  const toggleAdvanceSetting = () => {
+    dispatch(actions.Layout.showAdvanceSetting(!layoutState.showAdvanceSetting));
+  }
+
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       <Notifications />
@@ -50,19 +62,29 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
         <NewPoolMessage token={poolToken || undefined} />
       )}
       <AddLiquidityEarnMessage />
-      <Box display="flex" flexDirection="column">
-        {poolType !== "remove" && (
-          <Box display="flex" justifyContent="space-between" mb="28px" className={classes.container}>
-            <PoolToggleButton />
-            <Button className={classes.createButton} startIcon={<PlusSVG />} onClick={() => onShowCreatePool("open")}>
-              Create Pool
-            </Button>
+
+      {!layoutState.showAdvanceSetting && (
+        <Box display="flex" flexDirection="column">
+          <Box display="flex" justifyContent="flex-end" mb={1.5} className={classes.container}>
+            <IconButton onClick={() => toggleAdvanceSetting()} className={classes.iconButton}>
+              <BrightnessLowIcon />
+            </IconButton>
           </Box>
-        )}
-        {poolType === "add" && (<PoolDeposit />)}
-        {poolType === "manage" && (<PoolManage />)}
-        {poolType === "remove" && (<PoolWithdraw />)}
-      </Box>
+          {poolType !== "remove" && (
+            <Box display="flex" justifyContent="space-between" mb="28px" className={classes.container}>
+              <PoolToggleButton />
+              <Button className={classes.createButton} startIcon={<PlusSVG />} onClick={() => onShowCreatePool("open")}>
+                Create Pool
+            </Button>
+            </Box>
+          )}
+          {poolType === "add" && (<PoolDeposit />)}
+          {poolType === "manage" && (<PoolManage />)}
+          {poolType === "remove" && (<PoolWithdraw />)}
+
+        </Box>
+      )}
+      <ShowAdvanced showAdvanced={layoutState.showAdvanceSetting} />
       <CreatePoolDialog open={showCreatePool} onCloseDialog={() => onShowCreatePool("close")} />
     </MainCard>
   );

@@ -3,6 +3,7 @@ import { OpenCloseState, PoolType, FormNotification } from "./types";
 export const LayoutActionTypes = {
   TOGGLE_SHOW_WALLET: "TOGGLE_SHOW_WALLET",
   SHOW_POOL_TYPE: "SHOW_POOL_TYPE",
+  SHOW_ADVANCE_SETTING: "SHOW_ADVANCE_SETTING",
   TOGGLE_SHOW_CREATE_POOL: "TOGGLE_SHOW_CREATE_POOL",
   HIDE_LIQUIDITY_EARN: "HIDE_LIQUIDITY_EARN",
   UPDATE_NOTIFICATION: "UPDATE_NOTIFICATION",
@@ -27,6 +28,12 @@ export function showPoolType(poolType?: PoolType) {
   return {
     type: LayoutActionTypes.SHOW_POOL_TYPE,
     poolType,
+  }
+};
+export function showAdvanceSetting(show: boolean = true) {
+  return {
+    type: LayoutActionTypes.SHOW_ADVANCE_SETTING,
+    show,
   }
 };
 

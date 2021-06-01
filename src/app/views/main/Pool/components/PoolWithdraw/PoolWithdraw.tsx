@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { ArrowBack } from "@material-ui/icons";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { ContrastBox, CurrencyInput, ExpiryField, FancyButton, KeyValueDisplay, ProportionSelect, SlippageField, Text } from "app/components";
+import { ContrastBox, CurrencyInput, FancyButton, KeyValueDisplay, ProportionSelect, Text } from "app/components";
 import { actions } from "app/store";
 import { PoolFormState, RootState, SwapFormState, TokenInfo, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -80,9 +80,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.primary.main
   },
   showAdvanced: {
-    padding: theme.spacing(2.5, 8, 6.5),
+    padding: theme.spacing(2.5, 8),
     [theme.breakpoints.down("xs")]: {
-      padding: theme.spacing(2.5, 2, 6.5),
+      padding: theme.spacing(2.5, 2),
     },
   },
   text: {
@@ -91,7 +91,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   divider: {
     marginTop: theme.spacing(2),
-    marginBottom: theme.spacing(2),
+    // marginBottom: theme.spacing(2),
     backgroundColor: `rgba${hexToRGBA(theme.palette.primary.main, 0.3)}`
   },
   errorMessage: {
@@ -282,12 +282,12 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
         <Box display="flex" justifyContent="flex-end">
           <ProportionSelect
-          color="primary"
-          size="small"
-          className={classes.proportionSelect}
-          onSelectProp={onPercentage} />
+            color="primary"
+            size="small"
+            className={classes.proportionSelect}
+            onSelectProp={onPercentage} />
         </Box>
-{/* 
+        {/* 
         <KeyValueDisplay className={classes.keyValueLabel} hideIfNoValue kkey="In Pool">
           {!!poolToken && formatMoney(inPoolAmount || 0, formatOpts)}
         </KeyValueDisplay> */}
@@ -328,32 +328,29 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       </Box>
 
       {!!showAdvanced && !!poolToken && (
-        <ContrastBox className={classes.showAdvanced}>
-          <Typography className={classes.text} variant="body2">
-            You are removing{" "}
-            <strong>{formatMoney(poolFormState.removeZilAmount, zilFormatOpts)} + {formatMoney(poolFormState.removeTokenAmount, formatOpts)}</strong>
+        <>
+          <ContrastBox className={classes.showAdvanced}>
+            <Typography className={classes.text} variant="body2">
+              You are removing{" "}
+              <strong>{formatMoney(poolFormState.removeZilAmount, zilFormatOpts)} + {formatMoney(poolFormState.removeTokenAmount, formatOpts)}</strong>
             from the liquidity pool.{" "}
-            <strong>(~{formatMoney(poolFormState.removeTokenAmount, { ...formatOpts, showCurrency: true })} Pool Token)</strong>
-          </Typography>
+              <strong>(~{formatMoney(poolFormState.removeTokenAmount, { ...formatOpts, showCurrency: true })} Pool Token)</strong>
+            </Typography>
 
-          <Divider className={classes.divider} />
+            <Divider className={classes.divider} />
 
-          <KeyValueDisplay mt={"22px"} kkey={"Current Total Supply"}>
-            {formatMoney(poolToken?.pool?.tokenReserve || 0, { ...formatOpts })} Pool Token
+            <KeyValueDisplay mt={"22px"} kkey={"Current Total Supply"}>
+              {formatMoney(poolToken?.pool?.tokenReserve || 0, { ...formatOpts })} Pool Token
           </KeyValueDisplay>
-          <KeyValueDisplay mt={"8px"} kkey={"Each Pool Token Value"}>
-            {formatMoney(new BigNumber(liquidityTokenRate).times(poolToken?.pool?.exchangeRate || 0), { ...zilFormatOpts, compression: 0 })}
-            {" "}+{" "}
-            {formatMoney(new BigNumber(liquidityTokenRate).shiftedBy(poolToken?.decimals || 0), formatOpts)}
-          </KeyValueDisplay>
+            <KeyValueDisplay mt={"8px"} kkey={"Each Pool Token Value"}>
+              {formatMoney(new BigNumber(liquidityTokenRate).times(poolToken?.pool?.exchangeRate || 0), { ...zilFormatOpts, compression: 0 })}
+              {" "}+{" "}
+              {formatMoney(new BigNumber(liquidityTokenRate).shiftedBy(poolToken?.decimals || 0), formatOpts)}
+            </KeyValueDisplay>
 
-          <Divider className={classes.divider} />
-
-          <Box display="flex" justifyContent="space-between">
-            <SlippageField label="Set Limit Transaction Slippage" />
-            <ExpiryField />
-          </Box>
-        </ContrastBox>
+            <Divider className={classes.divider} />
+          </ContrastBox>
+        </>
       )}
     </Box>
   );
