@@ -619,7 +619,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           <Box display="flex" justifyContent="flex-end">
             <ProportionSelect size="small" className={classes.proportionSelect} onSelectProp={onPercentage} />
           </Box>
-          <Box display="flex" justifyContent="center">
+          <Box display="flex" className={classes.swapIconBox}>
             <IconButton
               disabled={!inToken || !outToken}
               onClick={() => onReverse()}
