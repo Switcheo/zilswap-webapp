@@ -41,6 +41,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: -15,
     transform: "rotate(0)",
     transition: "transform .5s ease-in-out",
+    [theme.breakpoints.down("sm")]: {
+      marginTop: -55
+    },
   },
   rotateSwapButton: {
     transform: "rotate(180deg)",
@@ -165,6 +168,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 12,
     padding: 5,
     marginLeft: 5,
+  },
+  swapIconBox: {
+    justifyContent: "center",
+    [theme.breakpoints.down("sm")]: {
+      justifyContent: "flex-start"
+    },
   }
 }));
 
@@ -606,7 +615,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         <Box display="flex" justifyContent="flex-end">
           <ProportionSelect size="small" className={classes.proportionSelect} onSelectProp={onPercentage} />
         </Box>
-        <Box display="flex" justifyContent="center">
+        <Box display="flex" className={classes.swapIconBox}>
           <IconButton
             disabled={!inToken || !outToken}
             onClick={() => onReverse()}

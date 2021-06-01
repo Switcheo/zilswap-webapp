@@ -39,6 +39,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     margin: theme.spacing(0, 1),
     color: theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "100" : "200"],
   },
+  link: {
+    color: theme.palette.type === "dark" ? "#00FFB0" : "#003340",
+  }
 }));
 
 const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -72,7 +75,7 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
         <Typography color="textPrimary" variant="body2" align="center">
           No wallet yet? Download ZilPay
           {" "}
-          <Link rel="noopener noreferrer" target="_blank" href="https://chrome.google.com/webstore/detail/zilpay/klnaejjgbibmhlephnhpmaofohgkpgkd" style={{ color: theme.palette.type === "dark" ? "#00FFB0" : "#003340" }}>here</Link>.
+          <Link rel="noopener noreferrer" target="_blank" href="https://chrome.google.com/webstore/detail/zilpay/klnaejjgbibmhlephnhpmaofohgkpgkd" className={classes.link}>here</Link>.
         </Typography>
       </DialogContent>
     </Box>

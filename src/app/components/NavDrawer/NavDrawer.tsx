@@ -1,19 +1,22 @@
-import { Box, Drawer, DrawerProps, List, IconButton } from "@material-ui/core";
-// import Divider from '@material-ui/core/Divider';
+import { Box, Drawer, DrawerProps, IconButton, List } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { CurrencyLogo, Text } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { useClaimEnabled } from "app/utils";
 import cls from "classnames";
-import React from "react";
+import React, { useMemo } from "react";
+import NetworkToggle from "../NetworkToggle";
 import SocialLinkGroup from "../SocialLinkGroup";
 import ThemeSwitch from "../ThemeSwitch";
 import { ReactComponent as CloseSVG } from "./close.svg";
 import { NavigationContent } from "./components";
-// import { ReactComponent as LogoSVG } from "./logo.svg";
 import navigationConfig from "./navigationConfig";
-import NetworkToggle from "../NetworkToggle";
-import { Text } from "app/components";
-import { CurrencyLogo } from "app/components";
+import { useNetwork, useValueCalculators } from "app/utils";
+import { ZWAPRewards } from "core/zwap";
+import { useSelector } from "react-redux";
+import { BIG_ZERO, BIG_ONE } from "app/utils/constants";
+import { RootState, TokenState } from "app/store/types";
+import BigNumber from "bignumber.js";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -83,6 +86,17 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
   const { children, className, onClose, ...rest } = props;
   const claimEnabled = useClaimEnabled();
   const classes = useStyles();
+  const valueCalculators = useValueCalculators();
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const network = useNetwork();
+
+  const zapTokenValue: BigNumber = useMemo(() => {
+    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[network] ?? "";
+    const zapToken = tokenState.tokens[zapContractAddr];
+    if (!zapToken) return BIG_ZERO;
+
+    return valueCalculators.amount(tokenState.prices, zapToken, BIG_ONE).shiftedBy(zapToken.decimals);
+  }, [network, tokenState.prices, tokenState.tokens, valueCalculators]);
 
   return (
     <Drawer PaperProps={{ className: classes.paper }} onClose={onClose} {...rest} className={cls(classes.root, className)}>
@@ -106,7 +120,7 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
           <Box display="flex" alignItems="center">
             <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} />
               <Text variant="h3" className={classes.price}>
-                &nbsp;$ 363.63
+                &nbsp;${ zapTokenValue.toFormat(2) }
               </Text>
           </Box>
           <SocialLinkGroup />

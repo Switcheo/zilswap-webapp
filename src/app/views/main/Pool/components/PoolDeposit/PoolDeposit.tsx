@@ -17,8 +17,9 @@ import { CONTRACTS } from "zilswap-sdk/lib/constants";
 import PoolAdvancedDetails from "../PoolAdvancedDetails";
 import PoolDetail from "../PoolDetail";
 import PoolIcon from "../PoolIcon";
+import { AppTheme } from "app/theme/types";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   container: {
@@ -63,8 +64,18 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.primary.main
   },
   poolIcon: {
+    margin: 12,
     marginTop: -30,
     marginBottom: 0,
+    [theme.breakpoints.down("sm")]: {
+      marginTop: -33
+    },
+  },
+  poolIconBox: {
+    justifyContent: "center",
+    [theme.breakpoints.down("sm")]: {
+      justifyContent: "flex-start"
+    },
   }
 }));
 
@@ -306,7 +317,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           onSelectProp={onPercentage} />
         </Box>
 
-        <Box display="flex" justifyContent="center">
+        <Box display="flex" className={classes.poolIconBox}>
           <PoolIcon type="plus" className={classes.poolIcon} />
         </Box>
 

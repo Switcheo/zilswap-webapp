@@ -55,12 +55,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   readOnly: {
     textAlign: "left",
     color: theme.palette.text?.primary,
-    padding: theme.spacing(1.5, 3),
+    padding: theme.spacing(1.5, 2.5),
   },
   previewAmount: {
-    fontSize: 20,
+    fontSize: 22,
     lineHeight: "24px",
-    marginBottom: 2
+    marginBottom: 4,
+    fontWeight: "bold",
+    [theme.breakpoints.down("md")]: {
+      fontSize: 20,
+    },
   },
   keyValueLabel: {
     marginTop: theme.spacing(1),
@@ -97,14 +101,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   errorMessage: {
     marginTop: theme.spacing(1),
   },
-  poolIcon: {
-    marginTop: -30,
-    marginBottom: 0
-  },
   label: {
-    // display: "inline-block",
-    // marginBottom: 8,
     color: theme.palette.primary.contrastText,
+  },
+  poolIcon: {
+    margin: 12,
+    marginTop: -30,
+    marginBottom: 0,
+    [theme.breakpoints.down("sm")]: {
+      marginTop: -33
+    },
+  },
+  poolIconBox: {
+    justifyContent: "center",
+    [theme.breakpoints.down("sm")]: {
+      justifyContent: "flex-start"
+    },
   }
 }));
 
@@ -292,7 +304,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           {!!poolToken && formatMoney(inPoolAmount || 0, formatOpts)}
         </KeyValueDisplay> */}
 
-        <Box display="flex" justifyContent="center">
+        <Box display="flex" className={classes.poolIconBox}>
           <PoolIcon type="minus" className={classes.poolIcon} />
         </Box>
 
