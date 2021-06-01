@@ -18,6 +18,9 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
     border: 0,
     margin: '4px 5px',
+    [theme.breakpoints.down("sm")]: {
+      padding: '6px 7px',
+    },
   },
 }));
 

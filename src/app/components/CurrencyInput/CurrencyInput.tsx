@@ -11,6 +11,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { CurrencyDialogProps } from "../CurrencyDialog/CurrencyDialog";
 import { AppTheme } from "app/theme/types";
+import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -45,9 +46,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     justifyContent: "space-between",
     fontFamily: 'Avenir Next',
     fontWeight: 'bold',
-    borderRadius: 0,
-    borderTopLeftRadius: 4,
-    borderBottomLeftRadius: 4,
+    borderRadius: 12,
     padding: "34px 18px 12px 5px",
     color: theme.palette.text?.primary,
   },
@@ -74,6 +73,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   fixedToken?: boolean;
   disabled?: boolean;
   hideBalance?: boolean;
+  showPoolBalance?: boolean;
   showContribution?: boolean;
   dialogOpts?: Partial<CurrencyDialogProps>;
 
@@ -89,7 +89,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     label, fixedToken, amount, disabled,
     showCurrencyDialog: showDialogOverride,
     onCloseDialog: onCloseDialogListener,
-    showContribution, hideBalance, dialogOpts = {},
+    showContribution, hideBalance, showPoolBalance, dialogOpts = {},
     onAmountChange, onCurrencyChange, token,
     onEditorBlur,
   } = props;
@@ -98,6 +98,15 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
   const [tokenBalance, setTokenBalance] = useState<BigNumber | null>(null);
   const [showCurrencyDialog, setShowCurrencyDialog] = useState(false);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+  const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
+  const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
+
+  const userPoolTokenPercent = poolToken?.pool?.contributionPercentage.shiftedBy(-2);
+  const inPoolAmount = poolToken?.pool?.tokenReserve.times(userPoolTokenPercent || 0);
+
+  const formatOpts: MoneyFormatterOptions = {
+    compression: poolToken?.decimals,
+  };
 
   useEffect(() => {
     if (!walletState.wallet || !token)
@@ -148,6 +157,12 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
             })
             : '-'
           }
+        </Typography>
+      )}
+
+      {showPoolBalance && (
+        <Typography className={classes.balance} variant="body2">
+          Balance in Pool: {!!poolToken && formatMoney(inPoolAmount || 0, formatOpts)}
         </Typography>
       )}
 

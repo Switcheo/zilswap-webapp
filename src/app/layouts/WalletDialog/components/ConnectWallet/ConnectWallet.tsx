@@ -41,6 +41,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     margin: theme.spacing(0, 1),
     color: theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "100" : "200"],
   },
+  link: {
+    color: theme.palette.type === "dark" ? "#00FFB0" : "#003340",
+  }
 }));
 
 const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {

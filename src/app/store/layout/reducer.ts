@@ -5,6 +5,7 @@ import { LayoutState } from "./types";
 const initial_state: LayoutState = {
   showWalletDialog: false,
   showCreatePool: false,
+  showAdvancedSetting: false,
   liquidityEarnHidden: false,
   notification: undefined,
   showPoolType: "add",
@@ -24,6 +25,11 @@ const reducer = (state: LayoutState = initial_state, action: any) => {
       return {
         ...state,
         showPoolType: action.poolType,
+      };
+    case LayoutActionTypes.SHOW_ADVANCED_SETTING:
+      return {
+        ...state,
+        showAdvancedSetting: action.show,
       };
     case LayoutActionTypes.TOGGLE_SHOW_CREATE_POOL:
       return {
