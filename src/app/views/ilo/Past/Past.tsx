@@ -1,12 +1,15 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from 'react-redux'
 import { Box, makeStyles } from '@material-ui/core'
+import dayjs, { Dayjs } from "dayjs";
+
 import { Text, Notifications } from "app/components";
 import TokenILOCard from "app/components/TokenILOCard";
 import ILOCard from "app/layouts/ILOCard";
 import { RootState, WalletState } from "app/store/types";
 import { useNetwork } from "app/utils";
 import { ZILO_DATA } from "core/zilo/constants";
+import { ZilswapConnector } from "core/zilswap";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -26,7 +29,18 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const classes = useStyles();
   const network = useNetwork();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const ziloData = ZILO_DATA[network!].filter(x => false)
+  const ziloData = ZILO_DATA[network!].filter(x => false);
+
+  const [currentBlock, setCurrentBlock] = useState<number>(0)
+  const [blockTime, setBlockTime] = useState<Dayjs>(dayjs())
+  const [currentTime, setCurrentTime] = useState<Dayjs>(dayjs())
+
+  // just need to set once on network init
+  useEffect(() => {
+    setCurrentBlock(ZilswapConnector.getCurrentBlock())
+    setBlockTime(dayjs())
+    setCurrentTime(dayjs())
+  }, [network])
 
   useEffect(() => {
     // need to listen to wallet state
@@ -50,6 +64,9 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
               key={data.contractAddress}
               expanded={true}
               data={data}
+              blockTime={blockTime}
+              currentBlock={currentBlock}
+              currentTime={currentTime}
             />
             )
           })

@@ -1,10 +1,11 @@
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from "bignumber.js";
-import { logger } from "core/utilities";
-import { ConnectedWallet,  } from "core/wallet/ConnectedWallet";
 import { ObservedTx, Pool, TokenDetails, Zilswap } from "zilswap-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
+
+import { logger } from "core/utilities";
+import { ConnectedWallet,  } from "core/wallet/ConnectedWallet";
 
 export interface ConnectProps {
   wallet: ConnectedWallet;
@@ -103,6 +104,11 @@ export class ZilswapConnector {
     const { tokens } = zilswap.getAppState();
 
     return Object.values(tokens).find((token) => token.address === tokenID);
+  }
+
+  static getCurrentBlock = () => {
+    if (!zilswap) throw new Error('not initialized');
+    return zilswap.getCurrentBlock()
   }
 
   /**
@@ -274,6 +280,10 @@ export class ZilswapConnector {
     logger(props.amount.toString());
     logger(props.maxAdditionalSlippage);
     logger(props.recipientAddress);
+
+    // TODO: proper token blacklist
+    if (props.tokenOutID === "zil13c62revrh5h3rd6u0mlt9zckyvppsknt55qr3u")
+      throw new Error("Suspected malicious token detected, swap disabled");
     const observedTx = await swapFunction(
       props.tokenInID,
       props.tokenOutID,

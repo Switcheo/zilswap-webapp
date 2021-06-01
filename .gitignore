@@ -28,3 +28,6 @@ static/.media/*
 
 # vs code
 .vscode
+
+# idea
+.idea

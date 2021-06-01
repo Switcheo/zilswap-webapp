@@ -12,9 +12,12 @@ import { ConnectWallet, ConnectWalletPrivateKey, ConnectWalletZilPay } from "./c
 import ConnectedWalletBox from "./components/ConnectedWalletBox";
 import { ReactComponent as PrivateKeyIconDark } from "./components/ConnectWallet/private-key-dark.svg";
 import { ReactComponent as PrivateKeyIcon } from "./components/ConnectWallet/private-key.svg";
+import { ReactComponent as ZeevesIcon } from "./components/ConnectWallet/zeeves.svg";
 import { ReactComponent as ZilPayIcon } from "./components/ConnectWallet/zilpay.svg";
+import ConnectWalletZeeves from "./components/ConnectWalletZeeves";
 
 const DIALOG_HEADERS: { [key in ConnectOptionType]: string } = {
+  zeeves: "Connect With Zeeves",
   zilpay: "Connect With ZilPay",
   privateKey: "Connect With Private Key",
 };
@@ -35,8 +38,15 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const showWalletDialog = useSelector<RootState, boolean>(state => state.layout.showWalletDialog);
 
   const getIcon = () => {
-    if (walletState.wallet?.type === WalletConnectType.ZilPay) return ZilPayIcon;
-    return theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon;
+    switch (walletState.wallet?.type) {
+      case WalletConnectType.ZilPay:
+        return ZilPayIcon;
+      case WalletConnectType.Zeeves:
+        return ZeevesIcon;
+      case WalletConnectType.PrivateKey:
+      default:
+        return theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon;
+    }
   }
 
 
@@ -97,6 +107,9 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
             )}
             {connectWalletType === "zilpay" && (
               <ConnectWalletZilPay onBack={onBack} />
+            )}
+            {connectWalletType === "zeeves" && (
+              <ConnectWalletZeeves onBack={onBack} />
             )}
           </Fragment>
       }

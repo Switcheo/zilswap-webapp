@@ -10,7 +10,7 @@ import { hexToRGBA, truncate, useNetwork, useTaskSubscriber } from "app/utils";
 import { LoadingKeys } from "app/utils/constants";
 import cls from "classnames";
 import { ConnectedWallet, WalletConnectType } from "core/wallet";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 // import { ReactComponent as CheckCompleteIcon } from "./check_complete.svg";
 // import { ReactComponent as CheckEmptyIcon } from "./check_empty.svg";
@@ -20,8 +20,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     overflow: "hidden",
     backgroundColor: theme.palette.background.default,
     borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF", 
-    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF", 
+    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     borderRadius: "0 0 12px 12px"
   },
   walletDetail: {
@@ -124,6 +124,16 @@ const ConnectedWalletBox = (props: any) => {
   //   return transaction.status !== "confirmed";
   // };
 
+  const walletType = useMemo(() => {
+    if (!wallet?.type) return undefined;
+    switch (wallet?.type) {
+      case WalletConnectType.PrivateKey: return "Private Key";
+      case WalletConnectType.Zeeves: return "Zeeves Wallet";
+      case WalletConnectType.ZilPay: return "ZilPay";
+      default: return "Unknown";
+    }
+  }, [wallet?.type]);
+
   const onCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopyMap({ ...copyMap, [text]: true });
@@ -147,7 +157,7 @@ const ConnectedWalletBox = (props: any) => {
         <Typography variant="h6">You are connected to</Typography>
         <Box display="flex" alignItems="center" justifyContent="center" className={classes.zilpayWallet}>
           <Icon className={classes.icon} />
-          <Typography variant="h1">{wallet.type === WalletConnectType.ZilPay ? "ZilPay Wallet" : "Private Key"}</Typography>
+          <Typography variant="h1">{walletType}</Typography>
         </Box>
         <Typography variant="h3">{isMediaXS ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
         <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(humanAddress)} open={!!copyMap[humanAddress]} title="Copied!">
@@ -210,10 +220,10 @@ const ConnectedWalletBox = (props: any) => {
 
       <Box display="flex" flexDirection="column" className={classes.buttonBox}>
         <FancyButton className={classes.button} variant="contained" color="primary">
-            View Past Transactions
+          View Past Transactions
         </FancyButton>
         <FancyButton fullWidth loading={isLoading} onClick={onDisconnect} className={classes.button} variant="contained" color="primary">
-            Disconnect Wallet
+          Disconnect Wallet
         </FancyButton>
       </Box>
     </Box>

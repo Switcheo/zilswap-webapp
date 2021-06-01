@@ -57,6 +57,9 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
         return rhsTVL.comparedTo(lhsTVL);
       })
       .reduce((accum, token) => {
+        // TODO: proper token blacklist
+        if (token.address === "zil13c62revrh5h3rd6u0mlt9zckyvppsknt55qr3u") return accum;
+
         if (queryRegexp) {
           const fullText = `${token.symbol}${token.name || ""}${token.address}`.toLowerCase();
 
