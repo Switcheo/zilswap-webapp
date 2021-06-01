@@ -22,7 +22,8 @@ const useStyles = makeStyles(theme => ({
     padding: "4px 10px",
     border: "1px solid #00FFB0",
     color: '#DEFFFF',
-    marginRight: theme.spacing(2)
+    marginRight: theme.spacing(2),
+    minHeight: 26
   },
   textWhite: {
     color: theme.palette.primary.contrastText,

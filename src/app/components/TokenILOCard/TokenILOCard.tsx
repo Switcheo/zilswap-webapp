@@ -12,6 +12,7 @@ import { useAsyncTask, useNetwork } from "app/utils"
 import { ZIL_TOKEN_NAME } from 'app/utils/constants';
 import { ZilswapConnector } from "core/zilswap";
 import { ILOData } from 'core/zilo/constants';
+import ViewHeadlineIcon from '@material-ui/icons/ViewHeadline';
 
 import HelpInfo from "../HelpInfo";
 import { Dayjs } from 'dayjs';
@@ -56,8 +57,13 @@ const useStyles = makeStyles(theme => ({
   errorMessage: {
     marginTop: theme.spacing(1),
   },
-  input: {
-    marginBottom: theme.spacing(1),
+  viewIcon: {
+    color: theme.palette.primary.dark,
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginLeft: "-12px",
+    marginTop: "12px"
   }
 }));
 
@@ -277,7 +283,7 @@ const TokenILOCard = (props: Props) => {
 
           {
             iloStarted &&
-            <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
+            <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta} position="relative">
               <Text className={classes.title}>Tokens Contributed</Text>
               <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
                 <CurrencyInputILO
@@ -286,16 +292,14 @@ const TokenILOCard = (props: Props) => {
                   amount={contributed ? userContribution.shiftedBy(12).times(targetZwap).dividedToIntegerBy(targetZil).plus(1).shiftedBy(-12).toString() : '-'}
                   hideBalance={true}
                   disabled={true}
-                  className={classes.input}
                 />
-
+                <ViewHeadlineIcon className={classes.viewIcon}/>
                 <CurrencyInputILO
                   label="for Project:"
                   token={zilToken}
                   amount={contributed ?  userContribution.shiftedBy(-12).toString() : '-'}
                   hideBalance={true}
                   disabled={true}
-                  className={classes.input}
                 />
               </Box>
             </Box>

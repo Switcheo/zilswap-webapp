@@ -26,6 +26,7 @@ export { default as ProportionSelect } from "./ProportionSelect";
 export { default as RandomAsciiEmoji } from "./RandomAsciiEmoji";
 export { default as ScrollReset } from "./ScrollReset";
 export { default as SearchInput } from "./SearchInput";
+export { default as ShowAdvanced } from "./ShowAdvanced";
 export { default as SlippageField } from "./SlippageField";
 export { default as StatefulText } from "./StatefulText";
 export { default as StatsCard } from "./StatsCard";
