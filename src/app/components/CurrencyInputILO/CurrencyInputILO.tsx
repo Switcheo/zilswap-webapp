@@ -26,6 +26,7 @@ const useStyles = makeStyles(theme => ({
     textAlign: "left",
   },
   strongInput: {
+    padding: "8px 14px 12px!important",
     textAlign: "left",
     color: theme.palette.primary.dark
   },
