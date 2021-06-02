@@ -26,6 +26,7 @@ const useStyles = makeStyles(theme => ({
     textAlign: "left",
   },
   strongInput: {
+    padding: "8px 14px 12px!important",
     textAlign: "left",
     color: theme.palette.primary.dark
   },
@@ -64,7 +65,7 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     justifyContent: 'space-between',
     padding: "0 16px",
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
   }
 }));
 
@@ -161,10 +162,10 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
             {tokenBalance && !hideBalance && (
               [
                 <InputLabel className={classes.balance}>
-                  <Typography>
-                    Your Balance:
+                  <Typography align="left">
+                    Balance:
                   </Typography>
-                  <Typography>
+                  <Typography align="right">
                   {
                     moneyFormat(tokenBalance, {
                       symbol: token?.symbol,

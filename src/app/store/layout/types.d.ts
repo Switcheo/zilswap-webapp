@@ -15,6 +15,7 @@ export interface FormNotification {
 export interface LayoutState {
   showWalletDialog: boolean;
   showCreatePool: boolean;
+  showAdvancedSetting: boolean;
   liquidityEarnHidden: boolean;
   showPoolType: PoolType;
   notification?: FormNotification;

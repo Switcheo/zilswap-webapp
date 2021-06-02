@@ -1,15 +1,15 @@
 
-import { Box, Button, Divider, InputLabel, Typography } from "@material-ui/core";
+import { Box, Button, Divider, IconButton, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowBack } from "@material-ui/icons";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { ContrastBox, CurrencyInput, ExpiryField, FancyButton, KeyValueDisplay, ProportionSelect, SlippageField, Text } from "app/components";
+import BrightnessLowIcon from '@material-ui/icons/BrightnessLow';
+import ViewHeadlineIcon from '@material-ui/icons/ViewHeadline';
+import { ContrastBox, CurrencyInput, CurrencyLogo, FancyButton, KeyValueDisplay, ProportionSelect, Text } from "app/components";
 import { actions } from "app/store";
-import { PoolFormState, RootState, SwapFormState, TokenInfo, WalletObservedTx, WalletState } from "app/store/types";
+import { LayoutState, PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useMoneyFormatter, useNetwork } from "app/utils";
-import { BIG_ZERO } from "app/utils/constants";
+import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
@@ -17,7 +17,6 @@ import { toBasisPoints, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PoolDetail from "../PoolDetail";
-import PoolIcon from "../PoolIcon";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -55,18 +54,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   readOnly: {
     textAlign: "left",
     color: theme.palette.text?.primary,
-    padding: theme.spacing(1.5, 3),
+    padding: theme.spacing(1.5, 2.5),
   },
   previewAmount: {
-    fontSize: 20,
+    fontSize: 22,
     lineHeight: "24px",
-    marginBottom: 2
+    fontWeight: "bold",
+    [theme.breakpoints.down("md")]: {
+      fontSize: 20,
+    },
+    color: theme.palette.primary.dark,
+    marginBottom: theme.spacing(1)
   },
   keyValueLabel: {
     marginTop: theme.spacing(1),
   },
   poolDetails: {
-    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
   },
   advanceDetails: {
     marginBottom: theme.spacing(2),
@@ -80,9 +84,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.primary.main
   },
   showAdvanced: {
-    padding: theme.spacing(2.5, 8, 6.5),
+    padding: theme.spacing(2.5, 8),
     [theme.breakpoints.down("xs")]: {
-      padding: theme.spacing(2.5, 2, 6.5),
+      padding: theme.spacing(2.5, 2),
     },
   },
   text: {
@@ -91,20 +95,48 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   divider: {
     marginTop: theme.spacing(2),
-    marginBottom: theme.spacing(2),
+    // marginBottom: theme.spacing(2),
     backgroundColor: `rgba${hexToRGBA(theme.palette.primary.main, 0.3)}`
   },
   errorMessage: {
     marginTop: theme.spacing(1),
   },
-  poolIcon: {
-    marginTop: -30,
-    marginBottom: 0
-  },
   label: {
-    // display: "inline-block",
-    // marginBottom: 8,
     color: theme.palette.primary.contrastText,
+  },
+  iconButton: {
+    color: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#003340",
+    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    borderRadius: 12,
+    padding: 5,
+    marginLeft: 5,
+  },
+  viewIcon: {
+    color: theme.palette.primary.dark,
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginLeft: "-12px",
+    marginTop: "-12px"
+  },
+  box: {
+    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    border: "3px solid rgba(0, 255, 176, 0.2)",
+    margin: "2px",
+  },
+  currencyText: {
+    fontSize: 20,
+  },
+  header: {
+    fontSize: 16
+  },
+  token: {
+    fontSize: 22,
+    lineHeight: "24px",
+    [theme.breakpoints.down("md")]: {
+      fontSize: 20,
+    },
+    marginLeft: 4
   }
 }));
 
@@ -120,23 +152,28 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const [currencyDialogOverride, setCurrencyDialogOverride] = useState<boolean>(false);
   const [runRemoveLiquidity, loading, error] = useAsyncTask("poolRemoveLiquidity");
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const network = useNetwork();
   const poolFormState = useSelector<RootState, PoolFormState>(state => state.pool);
   const swapFormState = useSelector<RootState, SwapFormState>(state => state.swap);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
+  const layoutState = useSelector<RootState, LayoutState>(state => state.layout);
   const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
   const userPoolTokenPercent = poolToken?.pool?.contributionPercentage.shiftedBy(-2);
   const inPoolAmount = poolToken?.pool?.tokenReserve.times(userPoolTokenPercent || 0);
 
+  const zwapToken = Object.values(tokenState.tokens).filter(token => token.isZwap)[0];
+  const zilToken = tokenState.tokens[ZIL_TOKEN_NAME]
+
   const zilFormatOpts: MoneyFormatterOptions = {
-    symbol: "ZIL",
+    // symbol: "ZIL",
     compression: 12,
   };
+
   const formatOpts: MoneyFormatterOptions = {
-    symbol: poolToken?.symbol,
+    // symbol: poolToken?.symbol,
     compression: poolToken?.decimals,
   };
 
@@ -254,18 +291,27 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
   const liquidityTokenRate = poolToken?.pool?.totalContribution.isPositive() ? poolToken!.pool!.tokenReserve.div(poolToken!.pool!.totalContribution) : BIG_ZERO;
 
+  const toggleAdvancedSetting = () => {
+    dispatch(actions.Layout.showAdvancedSetting(!layoutState.showAdvancedSetting));
+  }
+
   return (
     <Box display="flex" flexDirection="column"  {...rest} className={clsx(classes.root, className)}>
       <Box className={classes.container}>
-        <Box display="flex" justifyContent="flex-start" alignItems="center" marginY={4}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" marginY={4}>
           <Button variant="text" onClick={onBack} className={classes.backButton}>
             <ArrowBack color="disabled" />
             <Text variant="h4" marginLeft={1}>Remove Liquidity</Text>
           </Button>
+
+          <IconButton onClick={() => toggleAdvancedSetting()} className={classes.iconButton}>
+            <BrightnessLowIcon />
+          </IconButton>
         </Box>
 
         <CurrencyInput
           hideBalance
+          showPoolBalance
           showCurrencyDialog={currencyDialogOverride}
           onCloseDialog={() => setCurrencyDialogOverride(false)}
           label="Withdraw Token"
@@ -282,29 +328,49 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
         <Box display="flex" justifyContent="flex-end">
           <ProportionSelect
-          color="primary"
-          size="small"
-          className={classes.proportionSelect}
-          onSelectProp={onPercentage} />
-        </Box>
-{/* 
-        <KeyValueDisplay className={classes.keyValueLabel} hideIfNoValue kkey="In Pool">
-          {!!poolToken && formatMoney(inPoolAmount || 0, formatOpts)}
-        </KeyValueDisplay> */}
-
-        <Box display="flex" justifyContent="center">
-          <PoolIcon type="minus" className={classes.poolIcon} />
+            color="primary"
+            size="small"
+            className={classes.proportionSelect}
+            onSelectProp={onPercentage} />
         </Box>
 
-        <ContrastBox className={classes.readOnly}>
+        {/* <ContrastBox className={classes.readOnly}>
           <InputLabel className={classes.label}>You Receive (Estimate)</InputLabel>
           <Typography className={classes.previewAmount}>
             <span>{formatMoney(poolFormState.removeZilAmount, zilFormatOpts)}</span>
             <span> + {formatMoney(poolFormState.removeTokenAmount, formatOpts)}</span>
           </Typography>
-        </ContrastBox>
+        </ContrastBox> */}
 
-        <PoolDetail className={classes.poolDetails} token={poolToken || undefined} />
+        {console.log(poolFormState)}
+
+        <Text align="center" marginTop={1} className={classes.header}>You Receive</Text>
+
+        <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12} position="relative">
+          <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" flex={1} borderRadius={12}>
+              <Box py={"4px"} px={"16px"}>
+                <Box display="flex" alignItems="center" mt={1} mb={1}>
+                  <CurrencyLogo currency={zilToken.symbol} address={zilToken.address} />
+                  <Typography className={classes.token}>ZIL</Typography>
+                </Box>
+                <Typography className={classes.previewAmount}>
+                    {formatMoney(poolFormState.removeZilAmount, zilFormatOpts)}
+                </Typography>
+              </Box>
+          </Box>
+          <ViewHeadlineIcon className={classes.viewIcon}/>
+          <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" flex={1} borderRadius={12}>
+            <Box py={"4px"} px={"16px"}>
+              <Box display="flex" alignItems="center" mt={1} mb={1}>
+                <CurrencyLogo currency={zwapToken.symbol} address={zwapToken.address} />
+                <Typography className={classes.token}>{poolFormState?.token?.symbol}</Typography>
+              </Box>
+              <Typography className={classes.previewAmount}>
+                ≈ {formatMoney(poolFormState.removeTokenAmount, formatOpts)}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
 
         <Typography className={classes.errorMessage} color="error">{error?.message}</Typography>
 
@@ -316,44 +382,33 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           onClick={onRemoveLiquidity}>
           Remove Liquidity
         </FancyButton>
-
-        {!!poolToken ? (
-          <Typography
-            variant="body2"
-            className={clsx(classes.advanceDetails, { [classes.primaryColor]: showAdvanced })}
-            onClick={() => setShowAdvanced(!showAdvanced)}>
-            Advanced Details {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          </Typography>
-        ) : <Box component="div" display="block" style={{ height: 16 }}>&nbsp;</Box>}
+        <PoolDetail className={classes.poolDetails} token={poolToken || undefined} />
       </Box>
 
-      {!!showAdvanced && !!poolToken && (
-        <ContrastBox className={classes.showAdvanced}>
-          <Typography className={classes.text} variant="body2">
-            You are removing{" "}
-            <strong>{formatMoney(poolFormState.removeZilAmount, zilFormatOpts)} + {formatMoney(poolFormState.removeTokenAmount, formatOpts)}</strong>
+      {!!layoutState.showAdvancedSetting && !!poolToken && (
+        <>
+          <ContrastBox className={classes.showAdvanced}>
+            <Typography className={classes.text} variant="body2">
+              You are removing{" "}
+              <strong>{formatMoney(poolFormState.removeZilAmount, zilFormatOpts)} + {formatMoney(poolFormState.removeTokenAmount, formatOpts)}</strong>
             from the liquidity pool.{" "}
-            <strong>(~{formatMoney(poolFormState.removeTokenAmount, { ...formatOpts, showCurrency: true })} Pool Token)</strong>
-          </Typography>
+              <strong>(~{formatMoney(poolFormState.removeTokenAmount, { ...formatOpts, showCurrency: true })} Pool Token)</strong>
+            </Typography>
 
-          <Divider className={classes.divider} />
+            <Divider className={classes.divider} />
 
-          <KeyValueDisplay mt={"22px"} kkey={"Current Total Supply"}>
-            {formatMoney(poolToken?.pool?.tokenReserve || 0, { ...formatOpts })} Pool Token
+            <KeyValueDisplay mt={"22px"} kkey={"Current Total Supply"}>
+              {formatMoney(poolToken?.pool?.tokenReserve || 0, { ...formatOpts })} Pool Token
           </KeyValueDisplay>
-          <KeyValueDisplay mt={"8px"} kkey={"Each Pool Token Value"}>
-            {formatMoney(new BigNumber(liquidityTokenRate).times(poolToken?.pool?.exchangeRate || 0), { ...zilFormatOpts, compression: 0 })}
-            {" "}+{" "}
-            {formatMoney(new BigNumber(liquidityTokenRate).shiftedBy(poolToken?.decimals || 0), formatOpts)}
-          </KeyValueDisplay>
+            <KeyValueDisplay mt={"8px"} kkey={"Each Pool Token Value"}>
+              {formatMoney(new BigNumber(liquidityTokenRate).times(poolToken?.pool?.exchangeRate || 0), { ...zilFormatOpts, compression: 0 })}
+              {" "}+{" "}
+              {formatMoney(new BigNumber(liquidityTokenRate).shiftedBy(poolToken?.decimals || 0), formatOpts)}
+            </KeyValueDisplay>
 
-          <Divider className={classes.divider} />
-
-          <Box display="flex" justifyContent="space-between">
-            <SlippageField label="Set Limit Transaction Slippage" />
-            <ExpiryField />
-          </Box>
-        </ContrastBox>
+            <Divider className={classes.divider} />
+          </ContrastBox>
+        </>
       )}
     </Box>
   );

@@ -1,10 +1,11 @@
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from "bignumber.js";
-import { logger } from "core/utilities";
-import { ConnectedWallet,  } from "core/wallet/ConnectedWallet";
 import { ObservedTx, Pool, TokenDetails, Zilswap } from "zilswap-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
+
+import { logger } from "core/utilities";
+import { ConnectedWallet,  } from "core/wallet/ConnectedWallet";
 
 export interface ConnectProps {
   wallet: ConnectedWallet;
@@ -57,6 +58,15 @@ export interface SwapProps {
   recipientAddress?: string;
 };
 
+export interface ContributeZILOProps {
+  address: string;
+  amount: BigNumber;
+};
+
+export interface ClaimZILOProps {
+  address: string;
+};
+
 export interface TokenContractBalancesState {
   [index: string]: string;
 }
@@ -103,6 +113,11 @@ export class ZilswapConnector {
     const { tokens } = zilswap.getAppState();
 
     return Object.values(tokens).find((token) => token.address === tokenID);
+  }
+
+  static getCurrentBlock = () => {
+    if (!zilswap) throw new Error('not initialized');
+    return zilswap.getCurrentBlock()
   }
 
   /**
@@ -285,6 +300,46 @@ export class ZilswapConnector {
       props.maxAdditionalSlippage,
       props.recipientAddress);
     handleObservedTx(observedTx);
+
+    return observedTx;
+  };
+
+  /**
+   * Abstraction for Zilswap SDK functions
+   * `Zilo.contribute`
+   *
+   * @param address string - ZILO contract address to contribute to
+   * @param amount BigNumber - ZIL amount to contribute
+   * @see zilswap-sdk documentation
+   *
+   * @throws "not initialized" if `ZilswapConnector.setSDK` has not been called.
+   */
+   static contributeZILO = async (props: ContributeZILOProps) => {
+    if (!zilswap) throw new Error('not initialized');
+    logger(props.address);
+    logger(props.amount.toString());
+    const observedTx = await zilswap.zilos[fromBech32Address(props.address).toLowerCase()]!.contribute(props.amount.toString());
+    if (observedTx)
+      handleObservedTx(observedTx);
+
+    return observedTx;
+  };
+
+  /**
+   * Abstraction for Zilswap SDK functions
+   * `Zilo.claim`
+   *
+   * @param address string - ZILO contract address to claim from
+   * @see zilswap-sdk documentation
+   *
+   * @throws "not initialized" if `ZilswapConnector.setSDK` has not been called.
+   */
+   static claimZILO = async (props: ClaimZILOProps) => {
+    if (!zilswap) throw new Error('not initialized');
+    logger(props.address);
+    const observedTx = await zilswap.zilos[fromBech32Address(props.address).toLowerCase()]!.claim();
+    if (observedTx)
+      handleObservedTx(observedTx);
 
     return observedTx;
   };

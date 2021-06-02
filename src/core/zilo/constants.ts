@@ -8,6 +8,7 @@ export type ILOData = {
   description: string
   contractAddress: string
   showUntil: Dayjs
+  usdRatio: string // zil / zil+zwap
 }
 
 export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
@@ -17,7 +18,8 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     tokenSymbol: 'STREAM',
     tokenName: 'ZilStream',
     description: 'ZilSteam\'s premium membership token',
-    contractAddress: 'zil1vccnvs4chqxtm57fxq35n2ezny85c0glv99wef',
-    showUntil: dayjs('2021-05-26T10:00:00.000+0800')
+    contractAddress: 'zil192zcxf7ggzmw5ua3ygks7tglecwpttnqnz00jf',
+    showUntil: dayjs('2021-06-06T10:00:00.000+0800'),
+    usdRatio: '0.7'
   }],
 }

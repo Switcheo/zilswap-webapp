@@ -46,8 +46,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   icon: {
     marginRight: "12px",
     "& path": {
-      fill: theme.palette.type === "dark" ? "#00FFB0" : "#003340" 
+      fill: theme.palette.type === "dark" ? "#00FFB0" : "#003340"
     }
+  },
+  expandedList: {
+    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#F6FFFC"
   }
 }))
 
@@ -100,7 +103,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             href={navigation.href}
             target="_blank"
           >
-            <Icon width="20px" className={classes.icon}/>
+            <Icon width="20px" className={classes.icon} />
             {navigation.title}
           </Button>
         </ListItem>
@@ -115,14 +118,14 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             button
             onClick={() => setExpand(navigation.title === expand ? null : navigation.title)}
           >
-            <Icon width="20px" className={classes.icon}/>
+            <Icon width="20px" className={classes.icon} />
             <ListItemText primary={navigation.title} primaryTypographyProps={{ className: classes.mainFont }} />
             {expand === navigation.title ? <ArrowDropUp /> : <ArrowDropDown />}
           </ListItem>
           <Collapse in={expand === navigation.title}>
-            <List className={classes.listItem}>
+            <List className={cls(classes.listItem, classes.expandedList)}>
               {navigation.items && navigation.items.map((item: NavigationPageOptions, index: number) => (
-                <NavigationContent key={index} navigation={item} secondary={true}/>
+                <NavigationContent key={index} navigation={item} secondary={true} />
               ))}
             </List>
           </Collapse>
@@ -137,7 +140,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             }, classes.buttonLeaf)}
             onClick={(ev) => !widgetOpen && initWidget(ev)}
           >
-            <Icon width="20px" className={classes.icon}/>
+            <Icon width="20px" className={classes.icon} />
             {navigation.title}
           </Button>
         </ListItem>
@@ -154,7 +157,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             to={navigation.href}
             exact={false}
           >
-            <Icon width="20px" className={classes.icon}/>
+            <Icon width="20px" className={classes.icon} />
             {navigation.title}
           </Button>
         </ListItem>

@@ -1,11 +1,14 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from 'react-redux'
 import { Box, makeStyles } from '@material-ui/core'
+import dayjs, { Dayjs } from "dayjs";
+
 import { Text, Notifications } from "app/components";
 import TokenILOCard from "app/components/TokenILOCard";
 import ILOCard from "app/layouts/ILOCard";
 import { RootState, WalletState } from "app/store/types";
 import { useNetwork } from "app/utils";
+import { ZilswapConnector } from "core/zilswap";
 import { ZILO_DATA } from "core/zilo/constants";
 
 const useStyles = makeStyles(theme => ({
@@ -27,6 +30,27 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const network = useNetwork();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const ziloData = ZILO_DATA[network!]
+
+  const [currentBlock, setCurrentBlock] = useState<number>(0)
+  const [blockTime, setBlockTime] = useState<Dayjs>(dayjs())
+  const [currentTime, setCurrentTime] = useState<Dayjs>(dayjs())
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      try {
+        const newBlock = ZilswapConnector.getCurrentBlock()
+        if (newBlock !== currentBlock) {
+          setCurrentBlock(newBlock)
+          setBlockTime(dayjs())
+        }
+      } catch (e) {
+        console.warn('Failed to get current block. Will try again in 1s. Error:')
+        console.warn(e)
+      }
+      setCurrentTime(dayjs())
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [network, currentBlock])
 
   useEffect(() => {
     // need to listen to wallet state
@@ -50,6 +74,9 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
               key={data.contractAddress}
               expanded={true}
               data={data}
+              blockTime={blockTime}
+              currentBlock={currentBlock}
+              currentTime={currentTime}
             />
             )
           })

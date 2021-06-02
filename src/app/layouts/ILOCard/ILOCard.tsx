@@ -97,7 +97,7 @@ const ILOCard: React.FC<PaperProps> = (props: any) => {
             className={cls(classes.tab, classes.tabCornerLeft)}
             activeClassName={cls(classes.tabActive)}
             component={CustomRouterLink}
-            to="/ilo/current">Present ZILO</Button>
+            to="/ilo/current">Current</Button>
           <Button
             disableElevation
             color="primary"
@@ -105,7 +105,7 @@ const ILOCard: React.FC<PaperProps> = (props: any) => {
             className={cls(classes.tab, classes.tabCornerRight)}
             activeClassName={cls(classes.tabActive)}
             component={CustomRouterLink}
-            to="/ilo/past">Past ZILOs</Button>
+            to="/ilo/past">Past</Button>
         </Box>
       </Box>
       <Paper {...rest} className={classes.card}>

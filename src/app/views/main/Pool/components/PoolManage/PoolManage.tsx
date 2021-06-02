@@ -19,9 +19,9 @@ interface Props extends BoxProps {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    padding: theme.spacing(0, 4, 0),
+    padding: theme.spacing(2, 4, 0),
     [theme.breakpoints.down("xs")]: {
-      padding: theme.spacing(0, 2, 0),
+      padding: theme.spacing(2, 2, 0),
     },
   },
   viewPoolsButton: {

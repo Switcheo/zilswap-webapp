@@ -17,8 +17,11 @@ export interface PoolDetailProps extends BoxProps {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
-  textColour: {
+  textColoured: {
     color: theme.palette.primary.dark
+  },
+  textBold: {
+    fontWeight: "bold"
   }
 }));
 const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
@@ -42,7 +45,7 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
     const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
     const rate = token.pool.exchangeRate.shiftedBy(token!.decimals - zilToken.decimals).pow(-1);
     return (
-      <span>1 ZIL = <span className={classes.textColour}>{rate.toNumber().toLocaleString("en-US", { maximumFractionDigits: 12 })}</span> {token!.symbol}</span>
+      <span>1 ZIL = <span className={classes.textColoured}>{rate.toNumber().toLocaleString("en-US", { maximumFractionDigits: 12 })}</span> {token!.symbol}</span>
     )
   };
   const getPoolSizeValue = () => {
@@ -57,10 +60,10 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
     const share = contributionPercentage.shiftedBy(-2);
     const tokenContribution = share.times(tokenReserve);
     const zilContribution = share.times(zilReserve);
-    return `${moneyFormat(zilContribution, zilFormatOpts)} + ${moneyFormat(tokenContribution, formatOpts)}`;
+    return ` (${moneyFormat(zilContribution, zilFormatOpts)} + ${moneyFormat(tokenContribution, formatOpts)})`;
   };
   const getUserPoolShare = () => {
-    if (!token?.pool) return "%";
+    if (!token?.pool) return "";
     const { contributionPercentage } = token.pool;
     return `${contributionPercentage.toFixed(1)}%`;
   };
@@ -69,7 +72,10 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
     <Box {...rest} className={cls(classes.root, className)}>
       <KeyValueDisplay kkey={"Price"} mb="8px">{getExchangeRateValue()} <HelpInfo placement="top" title="Your time-weighted pool share estimated based on current liquidity." /></KeyValueDisplay>
       <KeyValueDisplay kkey={"Current Pool Size"} mb="8px">{getPoolSizeValue()} <HelpInfo placement="top" title="Your time-weighted pool share estimated based on current liquidity." /></KeyValueDisplay>
-      <KeyValueDisplay kkey={`Your Current Pool Share (${getUserPoolShare()})`} mb="8px">{getShareValue()} <HelpInfo placement="top" title="Your time-weighted pool share estimated based on current liquidity." /></KeyValueDisplay>
+      <KeyValueDisplay kkey={"Your Current Pool Share"} mb="8px">
+        <span className={cls(classes.textColoured, classes.textBold)}>{getUserPoolShare()}</span> 
+        {getShareValue()} <HelpInfo placement="top" title="Your time-weighted pool share estimated based on current liquidity." />
+      </KeyValueDisplay>
       {layoutState.showPoolType === "add" && (
         <PotentialRewardInfo />
       )}
