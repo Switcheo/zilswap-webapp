@@ -1,4 +1,4 @@
-import { AppBar, Box, IconButton, Toolbar } from "@material-ui/core";
+import { AppBar, Box, Hidden, IconButton, Toolbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Brand } from "app/components/TopBar/components";
 import RewardsInfoButton from "app/layouts/RewardsInfoButton";
@@ -63,12 +63,14 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
             </IconButton>
           </div>
         </Box>
-        <Box justifyContent="center">
+        <Box justifyContent="center" flex={1}>
           <Brand />
         </Box>
-        <Box display="flex" flex={1} justifyContent="flex-end" alignItems="center">
+        <Box display="flex" justifyContent="flex-end" alignItems="center">
           <RewardsInfoButton />
-          <ConnectWalletButton />
+          <Hidden xsDown>
+            <ConnectWalletButton />
+          </Hidden>
         </Box>
       </Toolbar>
     </AppBar >

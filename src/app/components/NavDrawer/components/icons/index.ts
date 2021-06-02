@@ -1,6 +1,8 @@
+export { default as Category } from "./Category";
 export { default as Code } from "./Code";
 export { default as DeveloperBoard } from "./DeveloperBoard"; 
 export { default as FileCopy } from "./FileCopy";
+export { default as Flame } from "./Flame";
 export { default as Forum } from "./Forum";
 export { default as HowToVote } from "./HowToVote";
 export { default as Gavel } from "./Gavel";

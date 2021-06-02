@@ -37,7 +37,8 @@ const useStyles = makeStyles(theme => ({
     fontSize: '16px!important',
     [theme.breakpoints.down("xs")]: {
       fontSize: "12px!important"
-    }
+    },
+    padding: "18.5px 14px!important"
   },
   preview: {
     marginTop: theme.spacing(3),

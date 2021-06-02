@@ -47,7 +47,7 @@ const useStyles = makeStyles(theme => ({
       borderRadius: "12px"
     },
     "&.Mui-selected:hover": {
-      backgroundColor: theme.palette.primary.dark,
+      backgroundColor: theme.palette.primary.main,
       color: theme.palette.primary.contrastText,
       borderRadius: "12px"
     },

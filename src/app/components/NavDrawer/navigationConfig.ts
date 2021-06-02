@@ -14,7 +14,7 @@ const navigationConfig: NavigationOptions[] = [{
   }, {
     title: "ZILO",
     href: "/ilo",
-    icon: "MoreHoriz",
+    icon: "Flame",
     badge: "New",
   }, {
     title: "Guide",
@@ -58,7 +58,7 @@ const navigationConfig: NavigationOptions[] = [{
     }, {
       title: "SDK",
       href: "https://github.com/Switcheo/zilswap-sdk",
-      icon: "MoreHoriz",
+      icon: "Category",
       external: true,
       show: true,
     }, {

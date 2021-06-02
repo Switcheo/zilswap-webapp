@@ -9,7 +9,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ThemeSwitchProps } from "./types";
 
-const THEME_TOGGLE_SELECTED = "dark";
+const THEME_TOGGLE_SELECTED = "light";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: (props: ThemeSwitchProps) => ({

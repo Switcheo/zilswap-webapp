@@ -30,9 +30,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: "100%",
     borderRadius: 0,
     color: theme.palette.text?.primary,
+    alignItems: "flex-end"
   },
   buttonLeafActive: {
-    color: theme.palette.text?.primary,
+    boxShadow: theme.palette.type === "dark" ? "inset 5px 0 0 #00FFB0" : "inset 5px 0 0 #003340"
   },
   highlightTitle: {
     color: theme.palette.type === "dark" ? "#00FFB0" : ""
@@ -51,6 +52,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   expandedList: {
     backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#F6FFFC"
+  },
+  textColoured: {
+    color: theme.palette.type === "dark" ? "#00FFB0" : "#003340"
   }
 }))
 
@@ -158,7 +162,10 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             exact={false}
           >
             <Icon width="20px" className={classes.icon} />
-            {navigation.title}
+            { navigation.title === "Swap + Pool"
+              ? <span>Swap <span className={classes.textColoured}>+</span> Pool</span>
+              : navigation.title
+            }
           </Button>
         </ListItem>
       )}

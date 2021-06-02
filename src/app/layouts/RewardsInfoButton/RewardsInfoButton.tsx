@@ -1,5 +1,5 @@
-import { Backdrop, Badge, Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, Popper, Tooltip } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Backdrop, Badge, Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, IconButton, Popper, Tooltip } from "@material-ui/core";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
@@ -15,6 +15,7 @@ import dayjs from "dayjs";
 import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CurrencyLogo } from "app/components";
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 interface Props extends BoxProps {
 
@@ -82,6 +83,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const [claimCount, setClaimCount] = useState(0);
   const [runClaimRewards, loading, error] = useAsyncTask("claimRewards");
   const buttonRef = useRef();
+  const theme = useTheme();
+  const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
 
   const walletAddress = useMemo(() => walletState.wallet?.addressInfo.bech32, [walletState.wallet]);
 
@@ -209,17 +212,23 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <span>
-        <Badge variant="dot" invisible={unclaimedRewards.isZero()}>
-          <Button
-            size="small"
-            buttonRef={buttonRef}
-            className={classes.topbarButton}
-            variant="outlined"
-            onClick={() => setActive(!active)}>
-            {zapBalanceLabel}
-            <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
-          </Button>
-        </Badge>
+        {
+          isMobileView 
+          ? <IconButton onClick={() => setActive(!active)} buttonRef={buttonRef}>
+              <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} />
+            </IconButton> 
+          : <Badge variant="dot" invisible={unclaimedRewards.isZero()}>
+              <Button
+                size="small"
+                buttonRef={buttonRef}
+                className={classes.topbarButton}
+                variant="outlined"
+                onClick={() => setActive(!active)}>
+                {zapBalanceLabel}
+                <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
+              </Button>
+            </Badge>
+        }
       </span>
       <Popper
         open={active}
@@ -303,7 +312,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
           </ClickAwayListener>
         </Box>
       </Popper>
-      <Backdrop className={classes.backdrop} open={active} onClick={() => setActive(!active)}>
+      <Backdrop className={classes.backdrop} open={active}>
       </Backdrop>
     </Box>
   );

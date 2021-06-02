@@ -14,11 +14,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   showAdvanced: {
-    padding: theme.spacing(4, 4, 6.5),
+    padding: theme.spacing(2, 4, 2),
     flex: 1,
     backgroundColor: "rgba(1, 1, 1, 0.0)",
     [theme.breakpoints.down("xs")]: {
-      padding: theme.spacing(4, 2, 6.5),
+      padding: theme.spacing(2, 2, 2),
     },
   },
   divider: {
@@ -45,9 +45,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 12,
     padding: 5,
     marginLeft: 5,
-  },
-  detailBorder: {
-
   },
   actionButton: {
     marginTop: theme.spacing(1),
@@ -102,7 +99,7 @@ const ShowAdvanced = (props: any) => {
             <Typography>{moneyFormat((slippage || 0) * 100)}%</Typography>
           </Box>
         </AccordionSummary>
-        <AccordionDetails className={classes.detailBorder}>
+        <AccordionDetails>
           <SlippageField updateInputSlippage={setNewSlippage} />
         </AccordionDetails>
       </Accordion>
@@ -115,12 +112,13 @@ const ShowAdvanced = (props: any) => {
             <Typography>{expiry} Blocks</Typography>
           </Box>
         </AccordionSummary>
-        <AccordionDetails className={classes.detailBorder}>
+        <AccordionDetails>
           <ExpiryField newExpiry={newExpiry} updateNewExpiry={setNewExpiry} />
         </AccordionDetails>
       </Accordion>
 
-      <Box flexGrow={1} />
+      <Box flexGrow={1}/>
+
       <FancyButton
         variant="contained"
         color="primary"

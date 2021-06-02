@@ -593,6 +593,14 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     dispatch(actions.Layout.showAdvancedSetting(!layoutState.showAdvancedSetting));
   }
 
+  const clearInputs = () => {
+    setFormState({
+      ...formState,
+      inAmount: "0",
+      outAmount: "0",
+    });
+  }
+
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       <Notifications />
@@ -602,7 +610,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
             <IconButton onClick={() => toggleAdvanceSetting()} className={classes.iconButton}>
               <BrightnessLowIcon />
             </IconButton>
-            <IconButton className={classes.iconButton}>
+            <IconButton onClick={() => clearInputs()} className={classes.iconButton}>
               <AutorenewIcon />
             </IconButton>
           </Box>

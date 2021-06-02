@@ -10,13 +10,11 @@ import { useDispatch, useSelector } from "react-redux";
 import LoadableArea from "../LoadableArea";
 import { LoadingKeys } from "app/utils/constants";
 import { AppTheme } from "app/theme/types";
+import { ReactComponent as DotIcon } from "./dot.svg";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     minWidth: 50,
-    [theme.breakpoints.down("xs")]: {
-      marginRight: theme.spacing(1),
-    },
   },
   button: {
     padding: "4px 10px",
@@ -27,6 +25,24 @@ const useStyles = makeStyles(theme => ({
   },
   textWhite: {
     color: theme.palette.primary.contrastText,
+  },
+  mobileButtonBox: {
+    padding: theme.spacing(2, 2, 0),
+    display: "flex",
+    justifyContent: "center",
+  },
+  mobileButton: {
+    width: "100%",
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
+    borderRadius: "12px 12px 0 0",
+    backgroundColor: theme.palette.type === "dark" ? "#13222C" : "#003340",
+    color: theme.palette.tab.selected,
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    justifyContent: "space-between"
+  },
+  dotIcon: {
+    marginRight: theme.spacing(1)
   }
 }));
 
@@ -48,10 +64,31 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
     <Box {...rest} className={cls(classes.root, className)}>
       <LoadableArea loading={loading}>
         {!wallet && (
-          <Button className={classes.button} onClick={onConnectWallet}>Connect</Button>
+          isXs 
+          ? <Box className={classes.mobileButtonBox}>
+              <Button
+              disableElevation
+              variant="outlined"
+              onClick={onConnectWallet}
+              className={classes.mobileButton}>
+              Connect Wallet
+              </Button>
+            </Box>
+          : <Button className={classes.button} onClick={onConnectWallet}>Connect</Button>
         )}
         {!!wallet && (
-          <Chip
+          isXs 
+          ? <Box className={classes.mobileButtonBox}>
+              <Button
+              disableElevation
+              variant="outlined"
+              onClick={onConnectWallet}
+              className={classes.mobileButton}>
+                  <span>Wallet Connected</span>
+                  <span><DotIcon className={classes.dotIcon}/>{truncate(wallet!.addressInfo.bech32, 5, 4)}</span>
+              </Button>
+            </Box>
+          : <Chip
             onClick={onConnectWallet}
             color="primary"
             size="small"

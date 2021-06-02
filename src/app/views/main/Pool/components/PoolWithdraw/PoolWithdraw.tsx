@@ -334,22 +334,12 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
             onSelectProp={onPercentage} />
         </Box>
 
-        {/* <ContrastBox className={classes.readOnly}>
-          <InputLabel className={classes.label}>You Receive (Estimate)</InputLabel>
-          <Typography className={classes.previewAmount}>
-            <span>{formatMoney(poolFormState.removeZilAmount, zilFormatOpts)}</span>
-            <span> + {formatMoney(poolFormState.removeTokenAmount, formatOpts)}</span>
-          </Typography>
-        </ContrastBox> */}
-
-        {console.log(poolFormState)}
-
         <Text align="center" marginTop={1} className={classes.header}>You Receive</Text>
 
         <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12} position="relative">
           <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" flex={1} borderRadius={12}>
               <Box py={"4px"} px={"16px"}>
-                <Box display="flex" alignItems="center" mt={1} mb={1}>
+                <Box display="flex" alignItems="flex-end" mt={1} mb={1}>
                   <CurrencyLogo currency={zilToken.symbol} address={zilToken.address} />
                   <Typography className={classes.token}>ZIL</Typography>
                 </Box>
@@ -361,7 +351,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           <ViewHeadlineIcon className={classes.viewIcon}/>
           <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" flex={1} borderRadius={12}>
             <Box py={"4px"} px={"16px"}>
-              <Box display="flex" alignItems="center" mt={1} mb={1}>
+              <Box display="flex" alignItems="flex-end" mt={1} mb={1}>
                 <CurrencyLogo currency={zwapToken.symbol} address={zwapToken.address} />
                 <Typography className={classes.token}>{poolFormState?.token?.symbol}</Typography>
               </Box>
