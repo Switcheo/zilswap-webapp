@@ -39,6 +39,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: theme.palette.type === "dark" ? "#13222C" : "#003340",
     color: theme.palette.tab.selected,
     border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+  },
+  mobileButtonConnected: {
+    width: "100%",
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
+    borderRadius: "12px 12px 0 0",
+    backgroundColor: theme.palette.type === "dark" ? "#13222C" : "#003340",
+    color: theme.palette.tab.selected,
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     justifyContent: "space-between"
   },
   dotIcon: {
@@ -83,7 +92,7 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
               disableElevation
               variant="outlined"
               onClick={onConnectWallet}
-              className={classes.mobileButton}>
+              className={classes.mobileButtonConnected}>
                   <span>Wallet Connected</span>
                   <span><DotIcon className={classes.dotIcon}/>{truncate(wallet!.addressInfo.bech32, 5, 4)}</span>
               </Button>
