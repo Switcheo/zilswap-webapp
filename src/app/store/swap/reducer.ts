@@ -6,7 +6,7 @@ import { TokenUpdateProps, TokenUpdateAllProps } from "../token/types";
 
 const initial_state: SwapFormState = {
   slippage: 0.01, // percent
-  expiry: 15, // minutes
+  expiry: 3, // blocks
 
   exactOf: "in",
   inAmount: new BigNumber(0),

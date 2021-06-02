@@ -118,11 +118,11 @@ const TokenILOCard = (props: Props) => {
 
   const totalCommittedUSD = new BigNumber(totalContributions).shiftedBy(-12).dividedBy(data.usdRatio).times(tokenState.prices.ZIL).toFormat(2)
   const progress = new BigNumber(totalContributions).dividedBy(targetZil).times(100).integerValue()
+  const iloStarted = iloState === ILOState.Active
+  const iloOver = iloState === ILOState.Failed || iloState === ILOState.Completed
   const startTime = blockTime.add((startBlock - currentBlock), 'minute')
   const endTime = blockTime.add((endBlock - currentBlock), 'minute')
-  const secondsToNextPhase = currentTime.isAfter(startTime) ? (currentTime.isAfter(endTime) ? 0 : endTime.diff(currentTime, 'second')) : startTime.diff(currentTime, 'second')
-  const iloStarted = blockTime.isAfter(startTime)
-  const iloOver = iloState === ILOState.Failed || iloState === ILOState.Completed
+  const secondsToNextPhase = currentTime.isAfter(startTime) ? (currentTime.isAfter(endTime) || !iloStarted ? 0 : endTime.diff(currentTime, 'second')) : startTime.diff(currentTime, 'second')
 
   const onZwapChange = (amount: string = "0") => {
     const _amount = new BigNumber(amount).shiftedBy(12).integerValue(BigNumber.ROUND_DOWN);
@@ -172,15 +172,15 @@ const TokenILOCard = (props: Props) => {
     if (txIsPending) return;
 
     const amount = new BigNumber(formState.zilAmount).shiftedBy(12).integerValue()
-    if (!amount.isPositive()) {
-      setTxError(new Error('Contribution amount must be positive'));
+    if (amount.lte(0) || amount.isNaN()) {
+      setTxError(new Error('Invalid contribution amount'));
       return
     }
 
     runTx(async () => {
       const observedTx = await ZilswapConnector.contributeZILO({
         address: data.contractAddress,
-        amount: new BigNumber(formState.zilAmount).shiftedBy(12).integerValue(),
+        amount,
       });
 
       if (!observedTx)
@@ -293,7 +293,7 @@ const TokenILOCard = (props: Props) => {
                   color="primary"
                   onClick={onCommit}
                 >
-                  {iloStarted ? 'Contribute' : 'Waiting to begin'}
+                  {iloStarted ? 'Contribute' : (currentTime.isAfter(startTime) ? 'Waiting for start block...' : 'Waiting to begin')}
                 </FancyButton>
                 <Typography className={classes.errorMessage} color="error">{txError?.message}</Typography>
               </Box>
@@ -311,6 +311,7 @@ const TokenILOCard = (props: Props) => {
                   amount={contributed ? userContribution.times(targetZwap).dividedToIntegerBy(targetZil).plus(1).shiftedBy(-12).toString() : '-'}
                   hideBalance={true}
                   disabled={true}
+                  disabledStyle={contributed ? "strong" : "muted"}
                 />
                 <ViewHeadlineIcon className={classes.viewIcon}/>
                 <CurrencyInputILO
@@ -319,6 +320,7 @@ const TokenILOCard = (props: Props) => {
                   amount={contributed ?  userContribution.shiftedBy(-12).toString() : '-'}
                   hideBalance={true}
                   disabled={true}
+                  disabledStyle={contributed ? "strong" : "muted"}
                 />
               </Box>
             </Box>
