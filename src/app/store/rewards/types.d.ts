@@ -1,6 +1,8 @@
+import { SimpleMap } from "app/utils";
 import BigNumber from "bignumber.js";
 import { EpochInfo, SwapVolume, ZWAPDistribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
 import { Moment } from "moment";
+import { ObservedTx } from "zilswap-sdk";
 
 export interface PoolSwapVolume extends SwapVolume {
   totalZilVolume: BigNumber;
@@ -25,8 +27,8 @@ export interface ZAPEpochInfo {
 
 export interface ZAPRewardDist {
   info: ZWAPDistribution;
-  claimed: boolean;
   readyToClaim: boolean;
+  claimed?: boolean;
   claimTx?: any;
 }
 
@@ -38,6 +40,15 @@ export interface GlobalClaimHistory {
   [epoch: number]: EpochClaimHistory;
 }
 
+export interface PendingClaimTx {
+  epoch: number;
+  txHash: string;
+  dispatchedAt: Moment;
+}
+export interface PendingClaimTxCache {
+  [hash: string]: PendingClaimTx;
+}
+
 export interface RewardsState {
   epochInfo: ZAPEpochInfo | null;
   rewardByPools: SimpleMap<PoolZWAPReward>;
@@ -45,4 +56,5 @@ export interface RewardsState {
   potentialPoolRewards: ZWAPPotentialRewards;
   globalClaimHistory: GlobalClaimHistory;
   poolWeights: ZWAPPoolWeights;
+  claimTxs: SimpleMap<PendingClaimTxCache>;
 };

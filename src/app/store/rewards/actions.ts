@@ -1,6 +1,6 @@
 import { SimpleMap } from "app/utils";
 import { EpochInfo, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
-import { GlobalClaimHistory, PoolZWAPReward, ZAPRewardDist } from "./types";
+import { GlobalClaimHistory, PendingClaimTx, PoolZWAPReward, ZAPRewardDist } from "./types";
 
 export const RewardsActionTypes = {
   UPDATE_EPOCH_INFO: "UPDATE_EPOCH_INFO",
@@ -9,6 +9,8 @@ export const RewardsActionTypes = {
   UPDATE_CLAIM_HISTORY: "UPDATE_CLAIM_HISTORY",
   UPDATE_POTENTIAL_REWARDS: "UPDATE_POTENTIAL_REWARDS",
   UPDATE_POOL_WEIGHTS: "UPDATE_POOL_WEIGHTS",
+  ADD_PENDING_CLAIM_TX: "ADD_PENDING_CLAIM_TX",
+  REMOVE_PENDING_CLAIM_TX: "REMOVE_PENDING_CLAIM_TX",
 };
 
 export function updateEpochInfo(info: EpochInfo) {
@@ -50,5 +52,20 @@ export function updatePotentialRewards(potentialPoolRewards: ZWAPPotentialReward
   return {
     type: RewardsActionTypes.UPDATE_POTENTIAL_REWARDS,
     potentialPoolRewards,
+  }
+};
+
+export function addPendingClaimTx(bech32Address: string, pendingTx: PendingClaimTx) {
+  return {
+    type: RewardsActionTypes.ADD_PENDING_CLAIM_TX,
+    bech32Address,
+    pendingTx,
+  }
+};
+
+export function removePendingClaimTx(hash: string) {
+  return {
+    type: RewardsActionTypes.REMOVE_PENDING_CLAIM_TX,
+    hash,
   }
 };

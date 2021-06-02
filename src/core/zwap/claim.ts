@@ -5,6 +5,8 @@ import { ConnectedWallet } from "core/wallet";
 import { ZilswapConnector } from 'core/zilswap';
 import { Network } from "zilswap-sdk/lib/constants";
 import { DIST_CONTRACT } from "./constants";
+import { ObservedTx } from "zilswap-sdk";
+import { logger } from 'core/utilities';
 
 export interface CheckClaimHistory {
 
@@ -48,7 +50,7 @@ const getTxArgs = (epoch: number, proof: string[], address: string, amount: BigN
   }];
 };
 
-export const claim = async (claimOpts: ClaimEpochOpts) => {
+export const claim = async (claimOpts: ClaimEpochOpts): Promise<ObservedTx> => {
   const { wallet, epochNumber, proof, amount } = claimOpts;
   const zilswap = ZilswapConnector.connectorState?.zilswap as any;
   const provider = (zilswap?.walletProvider || zilswap?.zilliqa);
@@ -73,6 +75,18 @@ export const claim = async (claimOpts: ClaimEpochOpts) => {
   };
 
   const claimTx = await zilswap.callContract(distContract, "Claim", args, params, true);
+  logger("claim tx dispatched", claimTx.id);
 
-  return claimTx;
+  if (claimTx.isRejected()) {
+    throw new Error('Submitted transaction was rejected.')
+  }
+
+  const observeTxn: ObservedTx = {
+    hash: claimTx.id!,
+    deadline: Number.MAX_SAFE_INTEGER,
+  };
+
+  await zilswap.observeTx(observeTxn)
+
+  return observeTxn
 };

@@ -78,7 +78,6 @@ function* queryDistribution() {
 
       const rewardDistributions = distributions.map((info: ZWAPDistribution): ZAPRewardDist => ({
         info,
-        claimed: false,
         readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
       }));
 

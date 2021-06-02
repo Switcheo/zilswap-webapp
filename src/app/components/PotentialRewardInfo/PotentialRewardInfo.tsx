@@ -15,11 +15,11 @@ const PotentialRewardInfo: React.FC<Props> = (props: Props) => {
   const rewardsState = useSelector<RootState, RewardsState>(store => store.rewards);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const weeklyRewards = useMemo(() => rewardsState.rewardByPools[poolState?.token?.address]?.weeklyReward ?? BIG_ZERO, [poolState?.token?.address, rewardsState.rewardByPools]);
+  const weeklyRewards = useMemo(() => rewardsState.rewardByPools[poolState?.token?.address ?? ""]?.weeklyReward ?? BIG_ZERO, [poolState?.token?.address, rewardsState.rewardByPools]);
 
   const potentialRewards = useMemo(() => {
     const { token, addZilAmount } = poolState;
-    const poolRewards: PoolZWAPReward | undefined = rewardsState.rewardByPools[token?.address];
+    const poolRewards: PoolZWAPReward | undefined = rewardsState.rewardByPools[token?.address ?? ""];
 
     if (!poolRewards || !rewardsState.epochInfo || !token?.pool || weeklyRewards.isZero()) return BIG_ZERO;
 
