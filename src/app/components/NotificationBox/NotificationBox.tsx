@@ -18,6 +18,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexDirection: "row",
     alignItems: "center",
     borderBottom: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "#D2E5DF"}`,
+    borderRadius: "12px",
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
     "&:first-child": {
