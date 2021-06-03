@@ -1,11 +1,11 @@
-import { Box, Divider, IconButton, makeStyles, Tooltip, Typography } from "@material-ui/core";
-import { DialogModal, FancyButton } from "app/components";
+import { Box, IconButton, makeStyles, Tooltip, Typography } from "@material-ui/core";
+import { FancyButton } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { RootState, Transaction, TransactionState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useNetwork } from "app/utils";
+import { truncate, useNetwork } from "app/utils";
 import cls from "classnames";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -63,13 +63,12 @@ type CopyMap = {
 };
 
 const TransactionBox = (props: any) => {
-    const { children, className, ...rest } = props;
+    const { className } = props;
     const classes = useStyles();
     const dispatch = useDispatch();
     const network = useNetwork();
     const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
-    const showTransactionDialog = useSelector<RootState, boolean>(state => state.layout.showTransactionDialog);
-    const [includeCompleted, setIncludeCompleted] = useState(true);
+    // const [includeCompleted, setIncludeCompleted] = useState(true);
     const [copyMap, setCopyMap] = useState<CopyMap>({});
 
     // const filterTXs = (transaction: Transaction) => {
