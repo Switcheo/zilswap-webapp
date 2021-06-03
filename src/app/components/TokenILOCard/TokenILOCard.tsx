@@ -8,7 +8,7 @@ import { CurrencyInputILO, FancyButton, Text } from 'app/components'
 import ProgressBar from 'app/components/ProgressBar'
 import { actions } from "app/store";
 import { RootState, TokenState, TransactionState, WalletObservedTx, WalletState } from "app/store/types"
-import { useAsyncTask, useNetwork } from "app/utils"
+import { useAsyncTask, useNetwork, useToaster } from "app/utils"
 import { ZIL_TOKEN_NAME } from 'app/utils/constants';
 import { ZilswapConnector } from "core/zilswap";
 import { ILOData } from 'core/zilo/constants';
@@ -105,6 +105,7 @@ const TokenILOCard = (props: Props) => {
   const [pendingTxHash, setPendingTxHash] = useState<string | null>(null)
   const [runTx, txIsSending, txError, setTxError] = useAsyncTask("pendingTx");
   const classes = useStyles();
+  const toaster = useToaster();
 
   const zwapToken = Object.values(tokenState.tokens).filter(token => token.isZwap)[0]
 
@@ -224,6 +225,7 @@ const TokenILOCard = (props: Props) => {
     };
 
     setPendingTxHash(tx.hash.toLowerCase());
+    toaster("Sent", { hash: walletObservedTx.hash });
     dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
   }
 
@@ -249,9 +251,9 @@ const TokenILOCard = (props: Props) => {
                 currentTime.isBefore(endTime) && '~'
               } */}
               {
-                Math.floor(secondsToNextPhase / 3600).toLocaleString('en-US', {minimumIntegerDigits: 2})}h : {
-                (Math.floor(secondsToNextPhase / 60) % 60).toLocaleString('en-US', {minimumIntegerDigits: 2})}m : {
-                (secondsToNextPhase % 60).toLocaleString('en-US', {minimumIntegerDigits: 2})}s
+                Math.floor(secondsToNextPhase / 3600).toLocaleString('en-US', { minimumIntegerDigits: 2 })}h : {
+                (Math.floor(secondsToNextPhase / 60) % 60).toLocaleString('en-US', { minimumIntegerDigits: 2 })}m : {
+                (secondsToNextPhase % 60).toLocaleString('en-US', { minimumIntegerDigits: 2 })}s
               <HelpInfo placement="top" title="Approximate time left. Exact start time is based on block height, not wall clock." />
             </Text>
 
@@ -324,11 +326,11 @@ const TokenILOCard = (props: Props) => {
                   disabled={true}
                   disabledStyle={contributed ? "strong" : "muted"}
                 />
-                <ViewHeadlineIcon className={classes.viewIcon}/>
+                <ViewHeadlineIcon className={classes.viewIcon} />
                 <CurrencyInputILO
                   label="for Project:"
                   token={zilToken}
-                  amount={contributed ?  userContribution.shiftedBy(-12).toString() : '-'}
+                  amount={contributed ? userContribution.shiftedBy(-12).toString() : '-'}
                   hideBalance={true}
                   disabled={true}
                   disabledStyle={contributed ? "strong" : "muted"}

@@ -4,7 +4,7 @@ import { fromBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyInput, FancyButton, ProportionSelect } from "app/components";
 import { actions } from "app/store";
 import { PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
-import { strings, useAsyncTask, useNetwork } from "app/utils";
+import { strings, useAsyncTask, useNetwork, useToaster } from "app/utils";
 import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
@@ -85,6 +85,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   // const formatMoney = useMoneyFormatter({ showCurrency: true, maxFractionDigits: 6 });
+  const toaster = useToaster();
 
   useEffect(() => {
     if (poolToken && currencyDialogOverride) {
@@ -234,6 +235,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         pool: updatedPool,
       }));
       dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
+      toaster("Submitted", { hash: walletObservedTx.hash });
     });
   };
 
@@ -260,6 +262,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       if (!observedTx)
         throw new Error("Allowance already sufficient for specified amount");
       dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
+      toaster("Submitted", { hash: walletObservedTx.hash });
     });
   };
 
@@ -314,7 +317,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           onAmountChange={onZilChange} />
 
         <Typography color="error" className={classes.errorMessage}>{error?.message || errorApproveTx?.message}</Typography>
-        
+
         <FancyButton
           loading={loading}
           walletRequired

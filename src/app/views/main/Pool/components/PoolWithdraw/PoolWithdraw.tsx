@@ -8,7 +8,7 @@ import { ContrastBox, CurrencyInput, CurrencyLogo, FancyButton, KeyValueDisplay,
 import { actions } from "app/store";
 import { LayoutState, PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useAsyncTask, useMoneyFormatter, useNetwork } from "app/utils";
+import { hexToRGBA, useAsyncTask, useMoneyFormatter, useNetwork, useToaster } from "app/utils";
 import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
@@ -167,6 +167,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
   const zwapToken = Object.values(tokenState.tokens).filter(token => token.isZwap)[0];
   const zilToken = tokenState.tokens[ZIL_TOKEN_NAME]
+  const toaster = useToaster();
 
   const zilFormatOpts: MoneyFormatterOptions = {
     // symbol: "ZIL",
@@ -276,6 +277,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
         pool: updatedPool,
       }));
       dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
+      toaster("Submitted", { hash: walletObservedTx.hash });
     });
   };
 
@@ -339,17 +341,18 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
 
         <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12} position="relative">
           <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" flex={1} borderRadius={12}>
-              <Box py={"4px"} px={"16px"}>
-                <Box display="flex" alignItems="flex-end" mt={1} mb={1}>
-                  <CurrencyLogo currency={zilToken.symbol} address={zilToken.address} />
-                  <Typography className={classes.token}>ZIL</Typography>
-                </Box>
-                <Typography className={classes.previewAmount}>
-                    {formatMoney(poolFormState.removeZilAmount, zilFormatOpts)}
-                </Typography>
+            <Box py={"4px"} px={"16px"}>
+              <Box display="flex" alignItems="flex-end" mt={1} mb={1}>
+                <CurrencyLogo currency={zilToken.symbol} address={zilToken.address} />
+                <Typography className={classes.token}>ZIL</Typography>
+
               </Box>
+              <Typography className={classes.previewAmount}>
+                {formatMoney(poolFormState.removeZilAmount, zilFormatOpts)}
+              </Typography>
+            </Box>
           </Box>
-          <ViewHeadlineIcon className={classes.viewIcon}/>
+          <ViewHeadlineIcon className={classes.viewIcon} />
           <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" flex={1} borderRadius={12}>
             <Box py={"4px"} px={"16px"}>
               <Box display="flex" alignItems="flex-end" mt={1} mb={1}>

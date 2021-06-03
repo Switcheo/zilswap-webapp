@@ -11,7 +11,7 @@ import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { strings, useAsyncTask, useBlacklistAddress, useNetwork, useSearchParam } from "app/utils";
+import { strings, useAsyncTask, useBlacklistAddress, useNetwork, useSearchParam, useToaster } from "app/utils";
 import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -213,6 +213,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [errorRecipientAddress, setErrorRecipientAddress] = useState<string | undefined>();
   const queryParams = new URLSearchParams(useLocation().search);
   const [recipientAddrBlacklisted, setRecipientAddrBlacklisted] = useState(false);
+  const toaster = useToaster();
 
   useEffect(() => {
     if (!swapFormState.forNetwork) return
@@ -493,6 +494,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       };
 
       dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
+      toaster("Submitted", { hash: walletObservedTx.hash });
     });
   };
 
@@ -521,6 +523,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         network,
       };
       dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
+      toaster("Submitted", { hash: walletObservedTx.hash });
     });
   };
 
