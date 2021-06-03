@@ -25,6 +25,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       borderRadius: "12px",
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: 0,
+    },
+    "&:not(:first-child)": {
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 0,
     }
   },
   notificationDetail: {
