@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   notificationMessage: {
     fontWeight: 400,
     margin: theme.spacing(1, 0),
-    color: theme.palette.type === "light" ? theme.palette.colors.zilliqa.neutral["100"] : theme.palette.colors.zilliqa.neutral["200"]
+    color: theme.palette.type === "light" ? theme.palette.colors.zilliqa.neutral["200"] : theme.palette.colors.zilliqa.neutral["100"]
   },
   notificationSymbol: {
     margin: theme.spacing(1, 1.5, 0),
@@ -47,8 +47,8 @@ const AddLiquidityEarnMessage: React.FC<AddLiquidityEarnMessageProps> = (props: 
       </Box>
       <Box ml={1}>
         <Typography className={classes.notificationMessage} variant="body1">
-          By adding liquidity, you will earn 0.3% on trades for this pool, 
-          proportional to your share of liquidity. Earned fees are added back 
+          By adding liquidity, you will earn 0.3% on trades for this pool,
+          proportional to your share of liquidity. Earned fees are added back
           to the pool and claimable by removing liquidity.
         </Typography>
       </Box>
