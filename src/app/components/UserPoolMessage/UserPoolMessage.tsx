@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   text: {
-    color: theme.palette.type === "light" ? theme.palette.colors.zilliqa.neutral["100"] : theme.palette.colors.zilliqa.neutral["200"]
+    color: theme.palette.type === "light" ? theme.palette.colors.zilliqa.neutral["200"] : theme.palette.colors.zilliqa.neutral["100"]
   },
   notificationHeader: {
     marginTop: theme.spacing(0.5),
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignItems: "start"
   },
   symbolLink: {
-    color: theme.palette.primary.main
+    color: theme.palette.primary.dark
   },
   linkLogo: {
     width: 10,

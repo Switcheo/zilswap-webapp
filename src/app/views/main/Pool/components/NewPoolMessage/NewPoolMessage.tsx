@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   notificationMessage: {
     fontWeight: 400,
     margin: theme.spacing(1, 0),
-    color: theme.palette.type === "light" ? theme.palette.colors.zilliqa.neutral["100"] : theme.palette.colors.zilliqa.neutral["200"]
+    color: theme.palette.type === "light" ? theme.palette.colors.zilliqa.neutral["200"] : theme.palette.colors.zilliqa.neutral["100"]
   },
   viewDetail: {
     color: theme.palette.primary.main,

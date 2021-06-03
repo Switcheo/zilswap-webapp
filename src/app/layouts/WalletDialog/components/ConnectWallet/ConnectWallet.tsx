@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   notificationMessage: {
     fontWeight: 400,
     margin: theme.spacing(0, 1),
-    color: theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "100" : "200"],
+    color: theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "200" : "100"],
   },
   link: {
     color: theme.palette.type === "dark" ? "#00FFB0" : "#003340",
@@ -99,7 +99,7 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
               <br />
               <br />Or try{" "}
               <Link rel="noopener noreferrer" target="_blank"
-                href="https://t.me/zilliqawalletbot"
+                href="https://t.me/zilliqawalletbot" style={{ color: theme.palette.type === "dark" ? "#00FFB0" : "#003340" }}
               >
                 Zeeves
               </Link>,
