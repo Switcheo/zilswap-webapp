@@ -89,9 +89,7 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
           <br />
           <br />Download ZilPay{" "}
           <Link rel="noopener noreferrer" target="_blank"
-            href="https://chrome.google.com/webstore/detail/zilpay/klnaejjgbibmhlephnhpmaofohgkpgkd"
-            style={{ color: theme.palette.type === "dark" ? "#00FFB0" : "#003340" }}
-          >
+            href="https://chrome.google.com/webstore/detail/zilpay/klnaejjgbibmhlephnhpmaofohgkpgkd">
             here
           </Link>.
           {showZeevesOption && (
@@ -99,8 +97,7 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
               <br />
               <br />Or try{" "}
               <Link rel="noopener noreferrer" target="_blank"
-                href="https://t.me/zilliqawalletbot" style={{ color: theme.palette.type === "dark" ? "#00FFB0" : "#003340" }}
-              >
+                href="https://t.me/zilliqawalletbot">
                 Zeeves
               </Link>,
               {" "}

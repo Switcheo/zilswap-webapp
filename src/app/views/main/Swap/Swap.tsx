@@ -20,7 +20,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router";
 import { CONTRACTS } from "zilswap-sdk/lib/constants";
-// import { ShowAdvanced } from "./components";
 import SwapDetail from "./components/SwapDetail";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
 

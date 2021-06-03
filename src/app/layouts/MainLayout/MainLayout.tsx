@@ -7,6 +7,7 @@ import React, { Suspense, useState } from "react";
 import { renderRoutes } from "react-router-config";
 import WalletDialog from "../WalletDialog";
 import { DevInfoBadge } from "./components";
+import TransactionDialog from "../TransactionDialog";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -50,6 +51,7 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         <ConnectWalletButton/>
       </Hidden>
       <WalletDialog />
+      <TransactionDialog />
       <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />
     </Box>
   );

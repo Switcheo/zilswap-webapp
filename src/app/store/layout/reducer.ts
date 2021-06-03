@@ -6,6 +6,7 @@ const initial_state: LayoutState = {
   showWalletDialog: false,
   showCreatePool: false,
   showAdvancedSetting: false,
+  showTransactionDialog: false,
   liquidityEarnHidden: false,
   notification: undefined,
   showPoolType: "add",
@@ -30,6 +31,11 @@ const reducer = (state: LayoutState = initial_state, action: any) => {
       return {
         ...state,
         showAdvancedSetting: action.show,
+      };
+    case LayoutActionTypes.TOGGLE_SHOW_TRANSACTIONS:
+      return {
+        ...state,
+        showTransactionDialog: !action.override ? !state.showTransactionDialog : action.override === "open",
       };
     case LayoutActionTypes.TOGGLE_SHOW_CREATE_POOL:
       return {

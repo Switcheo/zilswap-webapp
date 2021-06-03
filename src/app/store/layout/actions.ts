@@ -7,6 +7,7 @@ export const LayoutActionTypes = {
   TOGGLE_SHOW_CREATE_POOL: "TOGGLE_SHOW_CREATE_POOL",
   HIDE_LIQUIDITY_EARN: "HIDE_LIQUIDITY_EARN",
   UPDATE_NOTIFICATION: "UPDATE_NOTIFICATION",
+  TOGGLE_SHOW_TRANSACTIONS: "TOGGLE_SHOW_TRANSACTIONS",
 
   ADD_BACKGROUND_LOADING: "ADD_BACKGROUND_LOADING",
   REMOVE_BACKGROUND_LOADING: "REMOVE_BACKGROUND_LOADING",
@@ -24,6 +25,12 @@ export function toggleShowCreatePool(override?: OpenCloseState) {
     override,
   }
 };
+export function toggleShowTransactions(override?: OpenCloseState) {
+  return {
+    type: LayoutActionTypes.TOGGLE_SHOW_TRANSACTIONS,
+    override,
+  }
+};
 export function showPoolType(poolType?: PoolType) {
   return {
     type: LayoutActionTypes.SHOW_POOL_TYPE,
@@ -36,7 +43,6 @@ export function showAdvancedSetting(show: boolean = true) {
     show,
   }
 };
-
 export function hideLiquidityEarn(hide: boolean = true) {
   return {
     type: LayoutActionTypes.HIDE_LIQUIDITY_EARN,
