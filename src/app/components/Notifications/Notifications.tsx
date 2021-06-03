@@ -22,11 +22,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   notificationMessage: {
     fontWeight: 400,
     margin: theme.spacing(0, 1),
-    color: theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "100" : "200"],
+    color: theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "200" : "100"],
   },
   link: {
     marginLeft: 2,
     cursor: "pointer",
+    color: theme.palette.primary.dark,
   },
 }));
 
@@ -117,7 +118,7 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
         <NotificationBox IconComponent={LoadingIcon}>
           <Typography variant="body2" className={classes.notificationMessage}>
             {observingTxs.length} Transaction{observingTxs.length > 1 ? "s" : ""} confirming.{" "}
-            <Typography className={classes.link} component="a" color="primary" onClick={onShowTxDetail}>View detail</Typography>
+            <Typography className={classes.link} component="a" onClick={onShowTxDetail}>View detail</Typography>
           </Typography>
         </NotificationBox>
       )}
@@ -130,7 +131,7 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
           <Typography variant="body2" className={classes.notificationMessage}>
             Transaction 0x{truncate(submittedTx.hash)} {submittedTx.status || "status unknown"}.{" "}
             {submittedTx.status !== "expired" && (
-              <Typography className={classes.link} component="a" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/${submittedTx.hash}?network=${network.toLowerCase()}`}>
+              <Typography className={classes.link} component="a" target="_blank" href={`https://viewblock.io/zilliqa/tx/${submittedTx.hash}?network=${network.toLowerCase()}`}>
                 View on explorer
               </Typography>
             )}

@@ -12,13 +12,24 @@ export interface NotificationBoxProps extends BoxProps {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   notification: {
-    backgroundColor: theme.palette.background.paperOpposite!,
+    backgroundColor: theme.palette.type === "dark" ? "#00161C" : theme.palette.background.default!,
     padding: theme.spacing(1),
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    borderBottom: `1px solid ${theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "170" : "120"]}`,
-    borderRadius: "12px"
+    borderBottom: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "#D2E5DF"}`,
+    borderRadius: "12px",
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    "&:first-child": {
+      borderRadius: "12px",
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
+    },
+    "&:not(:first-child)": {
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 0,
+    }
   },
   notificationDetail: {
     display: 'flex',
@@ -28,7 +39,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   notificationSymbol: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1),
-    color: theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "100" : "200"],
+    color: theme.palette.colors.zilliqa.neutral[theme.palette.type === "light" ? "200" : "100"],
     "& svg": {
       display: "block",
     }
