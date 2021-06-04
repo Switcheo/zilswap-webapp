@@ -25,7 +25,7 @@ const SwapDetail: React.FC<SwapDetailProps> = (props: SwapDetailProps) => {
   const { children, className, token, ...rest } = props;
   const classes = useStyles();
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
-  const { inAmount, outAmount, inToken, outToken, expectedSlippage } = useSelector<RootState, SwapFormState>(store => store.swap);
+  const { outAmount, outToken, expectedSlippage } = useSelector<RootState, SwapFormState>(store => store.swap);
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5, showCurrency: true });
 
   const zilFormatOpts: MoneyFormatterOptions = {
