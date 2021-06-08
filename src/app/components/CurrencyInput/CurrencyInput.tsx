@@ -24,22 +24,24 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   inputRow: {
     paddingLeft: 0,
     backgroundColor: theme.palette.currencyInput,
-    border: 0
+    border: 0,
   },
   input: {
     textAlign: "left",
   },
   label: {
     position: "absolute",
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.text?.primary,
     left: 20,
     top: 12,
+    zIndex: 1
   },
   balance: {
     position: "absolute",
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.text?.primary,
     right: 20,
     top: 12,
+    zIndex: 1
   },
   currencyButton: {
     display: "flex",

@@ -54,8 +54,8 @@ const theme = {
   },
   tab: {
     active: "#003340",
-    disabled: "#003340",
-    disabledBackground: "#F6FFFC",
+    disabled: "rgba(222, 255, 255, 0.5)",
+    disabledBackground: "#7B999E",
     selected: "#DEFFFF"
   },
   mainBoxShadow: "0 8px 16px 0 rgba(20,155,163,0.16)",

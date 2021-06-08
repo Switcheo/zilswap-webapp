@@ -48,7 +48,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: theme.palette.type === "dark" ? "#13222C" : "#003340",
     color: theme.palette.tab.selected,
     border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   dotIcon: {
     marginRight: theme.spacing(1)

@@ -16,7 +16,7 @@ const theme = {
     contrastText: "#DEFFFF",
     dark: "#00FFB0",
     main: "#003340",
-    light: zilliqa.neutral["200"],
+    light: "rgba(222, 255, 255, 0.5)",
   },
   error: {
     contrastText: TEXT_COLORS.secondary,

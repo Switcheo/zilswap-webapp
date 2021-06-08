@@ -41,6 +41,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("sm")]: {
       marginTop: -55
     },
+    zIndex: 1
   },
   rotateSwapButton: {
     transform: "rotate(180deg)",
@@ -208,9 +209,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [runSwap, loading, error, clearSwapError] = useAsyncTask("swap");
   const [isBlacklisted] = useBlacklistAddress();
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
-  // const moneyFormat = useMoneyFormatter({ compression: 0, showCurrency: true });
   const [errorRecipientAddress, setErrorRecipientAddress] = useState<string | undefined>();
-  // const [reversedRate, setReversedRate] = useState(false);
   const queryParams = new URLSearchParams(useLocation().search);
   const [recipientAddrBlacklisted, setRecipientAddrBlacklisted] = useState(false);
 
@@ -266,41 +265,6 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       ...newTokens,
     }));
   }
-
-  // const getExchangeRateLabel = () => {
-  //   let exchangeRate = swapFormState.expectedExchangeRate || BIG_ZERO;
-
-  //   let src = inToken, dst = outToken;
-  //   if (reversedRate) {
-  //     dst = inToken;
-  //     src = outToken;
-  //   }
-
-  //   if (exchangeRate.eq(0)) {
-  //     try {
-  //       const rateResult = ZilswapConnector.getExchangeRate({
-  //         amount: BIG_ONE.shiftedBy(src!.decimals),
-  //         exactOf: reversedRate ? "out" : "in",
-  //         tokenInID: inToken!.address,
-  //         tokenOutID: outToken!.address,
-  //       });
-  //       if (!rateResult.expectedAmount.isNaN() && !rateResult.expectedAmount.isNegative())
-  //         exchangeRate = rateResult.expectedAmount.shiftedBy(-dst!.decimals).pow(reversedRate ? -1 : 1);
-  //     } catch (e) {
-  //       exchangeRate = BIG_ZERO;
-  //     }
-  //   }
-
-  //   const formatterOpts = {
-  //     compression: 0,
-  //     maxFractionDigits: dst?.decimals,
-  //     symbol: dst?.symbol,
-  //   };
-  //   const shouldReverseRate = reversedRate && !exchangeRate.isZero();
-  //   const srcAmount = `1 ${src!.symbol || ""}`;
-  //   const dstAmount = `${moneyFormat(exchangeRate.pow(shouldReverseRate ? -1 : 1), formatterOpts)}`;
-  //   return `${srcAmount} = ${dstAmount}`;
-  // };
 
   const onReverse = () => {
     setButtonRotate(!buttonRotate);
@@ -592,12 +556,9 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     dispatch(actions.Layout.showAdvancedSetting(!layoutState.showAdvancedSetting));
   }
 
-  const clearInputs = () => {
-    setFormState({
-      ...formState,
-      inAmount: "0",
-      outAmount: "0",
-    });
+  // Recalculate Exchange Rate
+  const refreshRate = () => {
+    onInAmountChange(formState.inAmount);
   }
 
   return (
@@ -609,7 +570,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
             <IconButton onClick={() => toggleAdvanceSetting()} className={classes.iconButton}>
               <BrightnessLowIcon />
             </IconButton>
-            <IconButton onClick={() => clearInputs()} className={classes.iconButton}>
+            <IconButton onClick={() => refreshRate()} className={classes.iconButton}>
               <AutorenewIcon />
             </IconButton>
           </Box>

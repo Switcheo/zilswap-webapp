@@ -6,7 +6,7 @@ import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { truncate, useNetwork, useTaskSubscriber } from "app/utils";
+import { truncate, useNetwork, useTaskSubscriber, hexToRGBA } from "app/utils";
 import { LoadingKeys } from "app/utils/constants";
 import cls from "classnames";
 import { ConnectedWallet, WalletConnectType } from "core/wallet";
@@ -77,6 +77,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   iconText: {
     marginLeft: 8
+  },
+  icons: {
+    "& path": {
+      fill: `rgba${hexToRGBA(theme.palette.primary.main, 0.5)}`
+    }
   }
 }));
 
@@ -124,7 +129,7 @@ const ConnectedWalletBox = (props: any) => {
   return (
     <Box display="flex" flexDirection="column" className={cls(classes.root, className)}>
       <Box className={classes.walletDetail}>
-        <Typography variant="h6">You are connected to</Typography>
+        <Typography variant="h4">You are connected to</Typography>
         <Box display="flex" alignItems="center" justifyContent="center" className={classes.zilpayWallet}>
           <Icon className={classes.icon} />
           <Typography variant="h1">{walletType}</Typography>
@@ -132,18 +137,18 @@ const ConnectedWalletBox = (props: any) => {
         <Typography variant="h3">{isMediaXS ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
         <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(humanAddress)} open={!!copyMap[humanAddress]} title="Copied!">
           <IconButton className={classes.copy} size="small">
-            <CopyIcon />
+            <CopyIcon className={classes.icons}/>
             <Typography color="textSecondary" className={classes.iconText}>Copy Address</Typography>
           </IconButton>
         </Tooltip>
         <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network}`} className={classes.newLink} size="small">
-          <NewLinkIcon />
+          <NewLinkIcon className={classes.icons}/>
           <Typography color="textSecondary" className={classes.iconText}>View on Explorer</Typography>
         </IconButton>
       </Box>
 
-      <Box display="flex" flexDirection="column" onClick={() => {dispatch(actions.Layout.toggleShowWallet()); dispatch(actions.Layout.toggleShowTransactions())}} className={classes.buttonBox}>
-        <FancyButton className={classes.button} variant="contained" color="primary">
+      <Box display="flex" flexDirection="column" className={classes.buttonBox}>
+        <FancyButton onClick={() => {dispatch(actions.Layout.toggleShowWallet()); dispatch(actions.Layout.toggleShowTransactions())}} className={classes.button} variant="contained" color="primary">
           View Past Transactions
         </FancyButton>
         <FancyButton fullWidth loading={isLoading} onClick={onDisconnect} className={classes.button} variant="contained" color="primary">
