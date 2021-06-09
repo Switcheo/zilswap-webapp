@@ -1,6 +1,5 @@
-import { Box, BoxProps, Container, Grid, Tooltip } from "@material-ui/core";
+import { Box, BoxProps, Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { ArrowDropUpRounded } from "@material-ui/icons";
 import { StatsCard, Text } from "app/components";
 import { RewardsState, RootState, StatsState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -11,7 +10,8 @@ import cls from "classnames";
 import dayjs from "dayjs";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { ReactComponent as TooltipSVG } from "./tooltip.svg";
+import HelpInfo from "../HelpInfo";
+import CurrencyLogo from "../CurrencyLogo";
 
 interface Props extends BoxProps { }
 
@@ -19,25 +19,43 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   banner: {
-    backgroundColor: theme.palette.toolbar.main,
-    padding: theme.spacing(6, 0),
+    background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    padding: theme.spacing(4, 4),
+    borderRadius: 12,
+    boxShadow: theme.palette.cardBoxShadow,
   },
   statistic: {
     fontSize: theme.spacing(4),
     lineHeight: `${theme.spacing(4)}px`,
     fontWeight: 700,
+    color: theme.palette.primary.dark
   },
   subtitle: {
     minHeight: theme.spacing(3),
-  },
-  subtitleIcon: {
-    height: theme.spacing(3),
-    width: theme.spacing(3),
   },
   helpIcon: {
     verticalAlign: "middle",
     marginLeft: theme.spacing(1),
   },
+  helpInfo: {
+    marginBottom: theme.spacing(0.3)
+  },
+  percentageChange: {
+    color: theme.palette.primary.dark,
+  },
+  currencyLogo: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    height: "30px",
+    width: "30px"
+  },
+  reward: {
+    display: "inline-flex"
+  },
+  currency: {
+    color: theme.palette.text?.primary
+  }
 }));
 
 interface Countdown {
@@ -46,6 +64,8 @@ interface Countdown {
   minutes: string;
   seconds: string;
 }
+
+const ZWAP_TOKEN_ADDRESS = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
 
 const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
@@ -129,35 +149,36 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
             <Grid item xs={12} md={4}>
               <StatsCard heading="Total Value Locked">
                 <Text marginBottom={2} variant="h1" className={classes.statistic}>${totalLiquidity.toFormat(2)}</Text>
-                <Box display="flex" flexDirection="row" alignItems="center">
-                  <ArrowDropUpRounded className={classes.subtitleIcon} color="primary" />
-                  <Text color="primary">{liquidityChangePercent.toFormat(2)}%</Text>
+                <Box display="flex" flexDirection="row" alignItems="center" className={classes.subtitle}>
+                  <Text className={classes.percentageChange}>(+{liquidityChangePercent.toFormat(2)}%)</Text>
                 </Box>
               </StatsCard>
             </Grid>
             <Grid item xs={12} md={4}>
               <StatsCard heading={(
-                <span>
-                  ZWAP next epoch
-                  <Tooltip title="Click to learn more about ZWAP rewards">
-                    <a href="https://blog.switcheo.network/introducing-zwap/" target="_blank" rel="noopener noreferrer">
-                      <TooltipSVG className={classes.helpIcon} />
-                    </a>
-                  </Tooltip>
-                </span>
+                <Box display="flex" justifyContent="space-between">
+                  <span>
+                    Rewards to be Distributed
+                  </span>
+                  <HelpInfo className={classes.helpInfo} placement="top" title="Rewards are distributed weekly, every Wednesday, to liquidity providers of eligible token pools." />
+                </Box>
               )}>
-                <Text marginBottom={2} variant="h1" className={classes.statistic}>
+                <Text marginBottom={2} variant="h1" className={cls(classes.statistic, classes.reward)}>
                   {nextRewards.toFormat(0)}
+                  <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} className={classes.currencyLogo}/>
+                  <span className={classes.currency}>
+                    ZWAP
+                  </span>
                 </Text>
                 <Box alignItems="center" display="flex" className={classes.subtitle}>
                   {!!epochInfo && epochInfo.current < epochInfo.maxEpoch && (
-                    <Text color="textSecondary">
-                      until next epoch
+                    <Text>
+                      Per Week
                     </Text>
                   )}
 
                   {!!epochInfo && epochInfo.current >= epochInfo.maxEpoch && (
-                    <Text color="textSecondary">
+                    <Text>
                       All ZWAP rewards distributed
                     </Text>
                   )}
@@ -165,14 +186,14 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
               </StatsCard>
             </Grid>
             <Grid item xs={12} md={4}>
-              <StatsCard heading="Countdown to next epoch">
+              <StatsCard heading="Countdown to Next Reward Distribution">
                 <Box display="flex">
                   <Box display="flex" flexDirection="column">
                     <Text marginBottom={2} variant="h1" className={classes.statistic}>
                       {countdown?.days ?? "-"}
                     </Text>
                     <Box alignItems="center" display="flex" className={classes.subtitle}>
-                      <Text color="textSecondary">days</Text>
+                      <Text>Days</Text>
                     </Box>
                   </Box>
                   <Text variant="h1" className={classes.statistic} marginX={1}>:</Text>
@@ -181,7 +202,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
                       {countdown?.hours ?? "-"}
                     </Text>
                     <Box alignItems="center" display="flex" className={classes.subtitle}>
-                      <Text color="textSecondary">hours</Text>
+                      <Text>Hours</Text>
                     </Box>
                   </Box>
                   <Text variant="h1" className={classes.statistic} marginX={1}>:</Text>
@@ -190,7 +211,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
                       {countdown?.minutes ?? "-"}
                     </Text>
                     <Box alignItems="center" display="flex" className={classes.subtitle}>
-                      <Text color="textSecondary">minutes</Text>
+                      <Text>Minutes</Text>
                     </Box>
                   </Box>
                   <Text variant="h1" className={classes.statistic} marginX={1}>:</Text>
@@ -199,7 +220,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
                       {countdown?.seconds ?? "-"}
                     </Text>
                     <Box alignItems="center" display="flex" className={classes.subtitle}>
-                      <Text color="textSecondary">seconds</Text>
+                      <Text>Seconds</Text>
                     </Box>
                   </Box>
                 </Box>

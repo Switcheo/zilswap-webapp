@@ -15,7 +15,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 12,
     backgroundColor: theme.palette.background.tooltip,
     border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    color: theme.palette.text?.secondary
+    color: theme.palette.text?.secondary,
+    padding: theme.spacing(1.5),
+    fontSize: 11,
   },
   tooltipSVG: {
     marginLeft: theme.spacing(1),
