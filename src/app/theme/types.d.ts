@@ -30,6 +30,8 @@ export interface AppPalette extends PaletteOptions {
   cardBoxShadow: string;
   currencyInput: string;
   icon: string;
+  label: string;
+  warning: SimplePaletteColorOptions;
 }
 
 export interface AppTheme extends ThemeOptions {

@@ -64,7 +64,11 @@ const theme = {
   switcheoLogo: switcheo.logoLight,
   colors: { zilliqa, switcheo },
   currencyInput: "#D4FFF2",
-  icon: "#003340"
+  icon: "#003340",
+  label: "#003340",
+  warning: {
+    main: "#FF5252"
+  } 
 };
 
 export default theme;

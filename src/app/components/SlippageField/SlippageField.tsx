@@ -1,4 +1,4 @@
-import { Box, BoxProps, Button, InputLabel, TextField, Tooltip, Typography } from "@material-ui/core";
+import { Box, BoxProps, Button, TextField, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -6,7 +6,6 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import React, { ChangeEvent, useState } from "react";
 import { useSelector } from "react-redux";
-import HelpInfo from "../HelpInfo";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -22,7 +21,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   inputWrapper: {
     height: 30,
-    width: 70,
+    width: 80,
     marginRight: theme.spacing(1),
     paddingRight: theme.spacing(.5),
     textAlign: "center",
@@ -34,43 +33,38 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   optionButton: {
     width: "unset",
-    borderRadius: 0,
-    minWidth: 0,
+    borderRadius: 12,
+    minWidth: 44,
     padding: theme.spacing(0, 1),
-    "&:hover": {
-      borderRadius: "12px",
-      backgroundColor: "#00FFB0",
-      color: "#003340",
-    }
   },
   optionText: {
     fontSize: "0.75rem",
     lineHeight: "1.875rem",
   },
   warning: {
-    color: `${theme.palette.colors.zilliqa.warning}`,
+    color: theme.palette.warning.main,
   },
   inputError: {
     border: `1px solid ${theme.palette.error}`,
   },
   inputWarning: {
-    border: `1px solid ${theme.palette.colors.zilliqa.warning}`,
+    border: `1px solid ${theme.palette.warning.main}`,
   },
   presetSlippageBox: {
     backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#D4FFF2",
     borderRadius: "12px",
-    border: "1px solid #29475A",
+    border: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "transparent"}`,
   },
   selectedSlippage: {
     borderRadius: "12px",
-    backgroundColor: "#00FFB0",
-    color: "#003340",
-    border: "1px solid #29475A",
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.type === "dark" ? "#003340" : "#DEFFFF",
+    border: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "transparent"}`,
+    "&:hover": {
+      backgroundColor: theme.palette.primary.dark,
+    }
   }
 }));
-
-
-const DEFAULT_SLIPPAGE_LABEL = "Set Limit Add. Price Slippage";
 
 const PRESET_SLIPPAGE = [0.001, 0.005, 0.01, 0.02];
 const PREFERRED_SLIPPAGE = 0.01;
@@ -112,9 +106,9 @@ const SlippageField: React.FC<Props> = (props: Props) => {
     setError("");
 
     if (slippage.gt(0.05))
-      setWarning("High frontrun risk");
+      setWarning("Warning: High frontrun risk.");
     else if (slippage.lt(0.005))
-      setWarning("Your transaction may fail");
+      setWarning("Warning: Your transaction may fail.");
     else
       setWarning("");
 
@@ -125,12 +119,6 @@ const SlippageField: React.FC<Props> = (props: Props) => {
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <InputLabel>{label || DEFAULT_SLIPPAGE_LABEL}
-        <HelpInfo
-          placeholder="top"
-          title="Lowering this limit decreases your risk of frontruning. However, this makes it more likely that your transaction will fail due to normal price movements." />
-      </InputLabel>
-
       <Box display="flex" mb={1} width="100%">
         <div className={classes.presetSlippageBox}>
           {PRESET_SLIPPAGE.map((preset, index) => (
@@ -141,7 +129,7 @@ const SlippageField: React.FC<Props> = (props: Props) => {
                 open={preset === PREFERRED_SLIPPAGE ? undefined : false}>
                 <Typography
                   className={classes.optionText}
-                  color={preset === inputSlippageValue ? "primary" : "textSecondary"}>
+                  color={preset === inputSlippageValue ? "inherit" : "textPrimary"}>
                   {new BigNumber(preset).shiftedBy(2).toFormat()}%
               </Typography>
               </Tooltip>

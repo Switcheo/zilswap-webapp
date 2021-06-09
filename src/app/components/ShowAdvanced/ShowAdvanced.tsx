@@ -9,6 +9,7 @@ import { ExpiryField, SlippageField, FancyButton } from "app/components";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import CloseIcon from '@material-ui/icons/Close';
 import { actions } from "app/store";
+import HelpInfo from "../HelpInfo";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -51,6 +52,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: theme.spacing(1),
     height: 46
   },
+  helpInfo: {
+    marginBottom: theme.spacing(0.4),
+    "&:hover": {
+      cursor: "default"
+    }
+  }
 }));
 
 
@@ -94,7 +101,7 @@ const ShowAdvanced = (props: any) => {
       <Accordion className={classes.accordion}>
         <AccordionSummary expandIcon={<ArrowDropDownIcon />}>
           <Box display="flex" width="100%">
-            <Typography>Slippage Tolerance</Typography>
+            <Typography>Slippage Tolerance <HelpInfo className={classes.helpInfo} placement="top" title="Lowering this limit decreases your risk of frontruning. However, this makes it more likely that your transaction will fail due to normal price movements." /></Typography>
             <Box flexGrow={1} />
             <Typography>{moneyFormat((slippage || 0) * 100)}%</Typography>
           </Box>
@@ -107,7 +114,7 @@ const ShowAdvanced = (props: any) => {
       <Accordion className={classes.accordion}>
         <AccordionSummary expandIcon={<ArrowDropDownIcon />}>
           <Box display="flex" width="100%">
-            <Typography>Block Expiry</Typography>
+            <Typography>Block Expiry <HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></Typography>
             <Box flexGrow={1} />
             <Typography>{expiry} Blocks</Typography>
           </Box>

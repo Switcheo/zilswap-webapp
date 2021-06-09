@@ -50,6 +50,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   backButton: {
     borderRadius: 12,
     marginLeft: theme.spacing(-2),
+    color: theme.palette.text?.primary
   },
   readOnly: {
     textAlign: "left",
@@ -105,14 +106,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.primary.contrastText,
   },
   iconButton: {
-    color: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#003340",
-    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    color: theme.palette?.label,
+    backgroundColor: theme.palette?.currencyInput,
     borderRadius: 12,
     padding: 5,
     marginLeft: 5,
   },
   viewIcon: {
-    color: theme.palette.primary.dark,
+    color: theme.palette.type === "dark" ? "#00FFB0" : `rgba${hexToRGBA("#003340", 0.5)}`,
     position: "absolute",
     top: "50%",
     left: "50%",
@@ -120,8 +121,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginTop: "-12px"
   },
   box: {
-    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
-    border: "3px solid rgba(0, 255, 176, 0.2)",
+    backgroundColor: theme.palette?.currencyInput,
+    border: `3px solid rgba${hexToRGBA("#00FFB0", 0.2)}`,
     margin: "2px",
   },
   currencyText: {
@@ -300,7 +301,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
       <Box className={classes.container}>
         <Box display="flex" justifyContent="space-between" alignItems="center" marginY={4}>
           <Button variant="text" onClick={onBack} className={classes.backButton}>
-            <ArrowBack color="disabled" />
+            <ArrowBack />
             <Text variant="h4" marginLeft={1}>Remove Liquidity</Text>
           </Button>
 

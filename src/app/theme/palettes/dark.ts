@@ -65,7 +65,11 @@ const theme = {
   switcheoLogo: switcheo.logoDark,
   colors: { zilliqa, switcheo },
   currencyInput: "rgba(222, 255, 255, 0.1)",
-  icon: "#00FFB0"
+  icon: "#00FFB0",
+  label: "rgba(222, 255, 255, 0.5)",
+  warning: {
+    main: "#DCA00E"
+  }
 };
 
 export default theme;

@@ -34,28 +34,29 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       flex: 1,
       backgroundColor: "rgba(1, 1, 1, 0.0)",
     },
-    iconButton: {
-        color: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#003340",
-        backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
-        borderRadius: 12,
-        padding: 5,
-        marginLeft: 5,
-    },
     actionButton: {
         marginTop: theme.spacing(1),
         marginBottom: theme.spacing(1),
         height: 46
     },
-    checkbox: {
-        marginRight: 6
-    },
     copy: {
-        borderRadius: 12
+        "& svg": {
+            "& path": {
+                fill: theme.palette.primary.light
+            }
+        }
     },
     newLinkTransaction: {
         marginLeft: 6,
-        height: 10,
+        "& svg": {
+            "& path": {
+                fill: theme.palette.primary.light
+            }
+        }
     },
+    text: {
+        color: theme.palette?.label
+    }
 }));
 
 type CopyMap = {
@@ -107,7 +108,7 @@ const TransactionBox = (props: any) => {
                     <Box key={index} className={classes.transaction}>
                         <Box display="flex" flexDirection="row" justifyContent="space-between">
                             <Box display="flex" flexDirection="row" alignItems="center">
-                            <Typography variant="body2" color="textSecondary">0x{truncate(transaction.hash, 10, 10)}</Typography>
+                            <Typography variant="body2" className={classes.text}>0x{truncate(transaction.hash, 10, 10)}</Typography>
                             <IconButton target="_blank" href={`https://viewblock.io/zilliqa/tx/${transaction.hash}?network=${network.toLowerCase()}`} className={classes.newLinkTransaction} size="small">
                                 <NewLinkIcon />
                             </IconButton>
@@ -117,12 +118,12 @@ const TransactionBox = (props: any) => {
                                 </IconButton>
                             </Tooltip>
                             </Box>
-                            <Typography variant="body2" color="textSecondary">{formatStatusLabel(transaction.status)}</Typography>
+                            <Typography variant="body2" className={classes.text}>{formatStatusLabel(transaction.status)}</Typography>
                         </Box>
                     </Box>
                 ))}
                 {!transactions.length && (
-                    <Typography align="center" variant="body2" color="textSecondary">No transactions found.</Typography>
+                    <Typography align="center" variant="body2" className={classes.text}>No transactions found.</Typography>
                 )}
             </Box>
 

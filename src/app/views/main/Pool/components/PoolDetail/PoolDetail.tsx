@@ -23,6 +23,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   textBold: {
     fontWeight: "bold"
+  },
+  textWrapper: {
+    color: theme.palette.label
   }
 }));
 const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
@@ -45,29 +48,29 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
   };
 
   const getExchangeRateValue = () => {
-    if (!token?.pool) return "-";
+    if (!token?.pool) return <span className={classes.textWrapper}>-</span>;
     const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
     const rate = token.pool.exchangeRate.shiftedBy(token!.decimals - zilToken.decimals).pow(-1);
     return (
-      <span>1 ZIL = <span className={classes.textColoured}>{rate.toNumber().toLocaleString("en-US", { maximumFractionDigits: 12 })}</span> {token!.symbol}</span>
+      <span className={classes.textWrapper}>1 ZIL = <span className={classes.textColoured}>{rate.toNumber().toLocaleString("en-US", { maximumFractionDigits: 12 })}</span> {token!.symbol}</span>
     )
   };
   const getPoolSizeValue = () => {
-    if (!token?.pool) return "-";
+    if (!token?.pool) return <span className={classes.textWrapper}>-</span>;
     const { zilReserve, tokenReserve } = token.pool;
     return (
-      <span><span className={classes.textColoured}>{moneyFormat(zilReserve, zilFormatOpts)}</span> ZIL + <span className={classes.textColoured}>{moneyFormat(tokenReserve, formatOpts)}</span> {token!.symbol}</span>
+      <span className={classes.textWrapper}><span className={classes.textColoured}>{moneyFormat(zilReserve, zilFormatOpts)}</span> ZIL + <span className={classes.textColoured}>{moneyFormat(tokenReserve, formatOpts)}</span> {token!.symbol}</span>
     )
   };
   const getShareValue = () => {
-    if (!token?.pool) return "-";
+    if (!token?.pool) return <span className={classes.textWrapper}>-</span>;
     const { contributionPercentage, zilReserve, tokenReserve } = token.pool;
 
     const share = contributionPercentage.shiftedBy(-2);
     const tokenContribution = share.times(tokenReserve);
     const zilContribution = share.times(zilReserve);
     return (
-      <span> (<span className={classes.textColoured}>{moneyFormat(zilContribution, zilFormatOpts)}</span> ZIL + <span className={classes.textColoured}>{moneyFormat(tokenContribution, formatOpts)}</span> {token!.symbol})</span>
+      <span className={classes.textWrapper}> (<span className={classes.textColoured}>{moneyFormat(zilContribution, zilFormatOpts)}</span> ZIL + <span className={classes.textColoured}>{moneyFormat(tokenContribution, formatOpts)}</span> {token!.symbol})</span>
     )
   };
   const getUserPoolShare = () => {
@@ -76,9 +79,9 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
     return `${contributionPercentage.toFixed(1)}%`;
   };
   const getPoolTokenValue = () => {
-    if (!token?.pool) return "-";
+    if (!token?.pool) return <span className={classes.textWrapper}>-</span>;
     return (
-      <span>
+      <span className={classes.textWrapper}>
         <span className={classes.textColoured}>{moneyFormat(new BigNumber(liquidityTokenRate).times(poolToken?.pool?.exchangeRate || 0), { ...zilFormatOpts, compression: 0 })}</span>
         {" "}ZIL + {" "}
         <span className={classes.textColoured}>{moneyFormat(new BigNumber(liquidityTokenRate).shiftedBy(poolToken?.decimals || 0), formatOpts)}</span>

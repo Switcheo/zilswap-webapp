@@ -5,15 +5,14 @@ import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
-import { AppTheme } from "app/theme/types";
-import { truncate, useNetwork, useTaskSubscriber, hexToRGBA } from "app/utils";
+import { hexToRGBA, truncate, useNetwork, useTaskSubscriber } from "app/utils";
 import { LoadingKeys } from "app/utils/constants";
 import cls from "classnames";
 import { ConnectedWallet, WalletConnectType } from "core/wallet";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-const useStyles = makeStyles((theme: AppTheme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     overflow: "hidden",
     backgroundColor: theme.palette.background.default,
@@ -80,7 +79,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   icons: {
     "& path": {
-      fill: `rgba${hexToRGBA(theme.palette.primary.main, 0.5)}`
+      fill: `rgba${hexToRGBA(theme.palette.text.primary, 0.5)}`
     }
   }
 }));

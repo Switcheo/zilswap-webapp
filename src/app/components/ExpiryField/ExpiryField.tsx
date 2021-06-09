@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     textAlign: "center",
     backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#D4FFF2",
     borderRadius: "12px",
-    border: "1px solid #29475A",
+    border: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "transparent"}`,
   },
   input: {
     fontSize: "12px !important",

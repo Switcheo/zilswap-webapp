@@ -76,7 +76,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: theme.palette.toolbar.main
   },
   price: {
-    color: theme.palette.primary.dark
+    color: theme.palette.primary.dark,
+    fontSize: 16
+  },
+  currencyLogo: {
+    height: 24,
+    width: 24,
+    marginRight: theme.spacing(.3),
+    marginLeft: theme.spacing(.5)
   }
 }));
 
@@ -118,10 +125,10 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
         <Box display="flex" justifyContent="space-around">
           {/* ZWAP Price */}
           <Box display="flex" alignItems="center">
-            <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} />
-              <Text variant="h3" className={classes.price}>
-                &nbsp;${ zapTokenValue.toFormat(2) }
-              </Text>
+            <CurrencyLogo className={classes.currencyLogo} currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} />
+            <Text variant="h6" className={classes.price}>
+              &nbsp;$ { zapTokenValue.toFormat(2) }
+            </Text>
           </Box>
           <SocialLinkGroup />
         </Box>

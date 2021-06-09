@@ -19,6 +19,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   textColoured: {
     color: theme.palette.primary.dark
+  },
+  textWrapper: {
+    color: theme.palette.label
   }
 }));
 const SwapDetail: React.FC<SwapDetailProps> = (props: SwapDetailProps) => {
@@ -28,7 +31,7 @@ const SwapDetail: React.FC<SwapDetailProps> = (props: SwapDetailProps) => {
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5, showCurrency: true });
 
   const getExchangeRateValue = () => {
-    if (!outToken) return "-";
+    if (!outToken) return <span className={classes.textWrapper}>-</span>;
     let exchangeRate = expectedExchangeRate || BIG_ZERO;
 
     if (exchangeRate.eq(0)) {
@@ -46,29 +49,31 @@ const SwapDetail: React.FC<SwapDetailProps> = (props: SwapDetailProps) => {
       }
     }
     return (
-      <span>1 {inToken?.symbol} = <span className={classes.textColoured}>{moneyFormat(exchangeRate.pow(1))}</span> {outToken?.symbol}</span>
+      <span className={classes.textWrapper}>1 {inToken?.symbol} = <span className={classes.textColoured}>{moneyFormat(exchangeRate.pow(1))}</span> {outToken?.symbol}</span>
     )
   };
   
   const getMinimumValue = () => {
-    if (outAmount.isEqualTo(0)) return "-";
+    if (outAmount.isEqualTo(0)) return <span className={classes.textWrapper}>-</span>;
+
     return (
-      <span><span className={classes.textColoured}>{moneyFormat(outAmount, { maxFractionDigits: outToken?.decimals })}</span> {outToken?.symbol}</span>
+      <span className={classes.textWrapper}><span className={classes.textColoured}>{moneyFormat(outAmount, { maxFractionDigits: outToken?.decimals })}</span> {outToken?.symbol}</span>
     )
   };
 
   const getPriceImpact = () => {
-    if (!expectedSlippage) return "-"
+    if (!expectedSlippage) return <span className={classes.textWrapper}>-</span>;
+
     return (
-      <span className={classes.textColoured}>{moneyFormat((expectedSlippage || 0) * 100)}%</span>
+      <span className={classes.textWrapper}><span className={classes.textColoured}>{moneyFormat((expectedSlippage || 0) * 100)}%</span></span>
     )
   }
 
   const getFeeValue = () => {
-    if (inAmount.isEqualTo(0)) return "-";
+    if (inAmount.isEqualTo(0)) return <span className={classes.textWrapper}>-</span>;
 
     return (
-      <span className={classes.textColoured}>≈ {moneyFormat(inAmount.multipliedBy(0.003))} {inToken?.symbol}</span>
+      <span className={classes.textWrapper}><span className={classes.textColoured}>≈ {moneyFormat(inAmount.multipliedBy(0.003))} {inToken?.symbol}</span></span>
     )
   };
 
