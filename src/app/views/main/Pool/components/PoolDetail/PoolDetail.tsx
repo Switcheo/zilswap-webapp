@@ -92,14 +92,14 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <KeyValueDisplay kkey={"Price"} mb="8px">{getExchangeRateValue()} <HelpInfo placement="top" title="Your time-weighted pool share estimated based on current liquidity." /></KeyValueDisplay>
+      <KeyValueDisplay kkey={"Price"} mb="8px">{getExchangeRateValue()} <HelpInfo placement="top" title="Rate you are withdrawing your tokens at." /></KeyValueDisplay>
       {layoutState.showPoolType === "remove" && (
-        <KeyValueDisplay kkey={"Pool Token Value"} mb="8px">{getPoolTokenValue()} <HelpInfo placement="top" title="Your time-weighted pool share estimated based on current liquidity." /></KeyValueDisplay>
+        <KeyValueDisplay kkey={"Pool Token Value"} mb="8px">{getPoolTokenValue()} <HelpInfo placement="top" title="Quantity of tokens you are withdrawing at." /></KeyValueDisplay>
       )}
-      <KeyValueDisplay kkey={"Current Pool Size"} mb="8px">{getPoolSizeValue()} <HelpInfo placement="top" title="Your time-weighted pool share estimated based on current liquidity." /></KeyValueDisplay>
+      <KeyValueDisplay kkey={"Current Pool Size"} mb="8px">{getPoolSizeValue()} <HelpInfo placement="top" title="Total quantity of tokens in the current pool." /></KeyValueDisplay>
       <KeyValueDisplay kkey={"Current Pool Share"} mb="8px">
         <span className={cls(classes.textColoured, classes.textBold)}>{getUserPoolShare()}</span> 
-        {getShareValue()}<HelpInfo placement="top" title="Your time-weighted pool share estimated based on current liquidity." />
+        {getShareValue()}<HelpInfo placement="top" title="Your %  share in relation to the current pool size." />
       </KeyValueDisplay>
       {layoutState.showPoolType === "add" && (
         <PotentialRewardInfo />

@@ -123,7 +123,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
   };
 
   return (
-    <Box {...rest} className={cls(classes.root, className)} mt={6}>
+    <Box {...rest} className={cls(classes.root, className)} mt={6} mb={2}>
       <Box display="flex" justifyContent="space-between" mb={2} className={classes.header}>
         <Text variant="h2" margin={2}>Registered Pools ({registeredTokens.length})</Text>
         <PoolsSearchInput onSearch={onSearch}/>

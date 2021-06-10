@@ -19,6 +19,7 @@ import { Dayjs } from 'dayjs';
 import { ILOState } from 'zilswap-sdk/lib/constants';
 import { ObservedTx } from 'zilswap-sdk';
 import { AppTheme } from 'app/theme/types';
+import cls from "classnames";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -72,6 +73,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   label: {
     color: theme.palette.label
+  },
+  fontSize: {
+    fontSize: 14
   }
 }));
 
@@ -238,7 +242,7 @@ const TokenILOCard = (props: Props) => {
         <Box display="flex" flexDirection="column" className={classes.container}>
           <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
             <Text variant="h1">{data.tokenName} ({data.tokenSymbol})</Text>
-            <Text marginTop={1}>{data.description}</Text>
+            <Text marginTop={1} className={classes.fontSize}>{data.description}</Text>
 
             <Text variant="h1" marginTop={2} className={classes.timer}>
               {/* {
@@ -271,8 +275,8 @@ const TokenILOCard = (props: Props) => {
             {
               iloOver &&
               <Box>
-                <Text className={classes.title} marginBottom={0.5}>Commit your tokens in a fixed ratio to participate</Text>
-                <Text color="textSecondary">30% ZWAP - 70% ZIL</Text>
+                <Text className={cls(classes.title, classes.fontSize)} marginBottom={0.5}>Commit your tokens in a fixed ratio to participate.</Text>
+                <Text className={classes.fontSize} color="textSecondary">30% ZWAP - 70% ZIL</Text>
                 <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
                   <CurrencyInputILO
                     label="to Burn:"

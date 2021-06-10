@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 12,
     boxShadow: theme.palette.cardBoxShadow,
     position: "relative",
-    backgroundColor: theme.palette.background.default,
+    background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
     border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     marginBottom: theme.spacing(2)
   },

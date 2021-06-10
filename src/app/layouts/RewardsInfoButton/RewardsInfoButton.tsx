@@ -260,7 +260,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                     ≈ {potentialRewardsLabel}
                   </Text>
                   <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
-                  <HelpInfo placement="bottom" title="Estimated based on current liquidity and may fluctuate." className={classes.tooltip}/>
+                  <HelpInfo placement="bottom" title="The estimated amount of ZWAP you will be receiving for providing liquidity this epoch." className={classes.tooltip}/>
                 </Box>
               </KeyValueDisplay>
 
@@ -271,7 +271,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                       ≈ {unclaimedRewardsLabel}
                     </Text>
                     <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
-                    <HelpInfo placement="bottom" title="Estimated based on current liquidity and may fluctuate." className={classes.tooltip}/>
+                    <HelpInfo placement="bottom" title="The estimated amount of ZWAP you have earned but have not claimed." className={classes.tooltip}/>
                   </Box>
                 </Badge>
               </KeyValueDisplay>

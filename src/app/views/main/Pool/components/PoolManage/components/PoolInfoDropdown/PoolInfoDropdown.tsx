@@ -155,6 +155,7 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
 
           <Box display="flex" marginTop={3}>
             <Button
+              className={classes.buttonWrapper}
               onClick={onGotoAdd}
               variant="contained"
               color="primary"
@@ -163,6 +164,7 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
             </Button>
             <Box margin={1} />
             <Button
+              className={classes.buttonWrapper}
               onClick={onGotoRemove}
               component={Link}
               to="/pool"
