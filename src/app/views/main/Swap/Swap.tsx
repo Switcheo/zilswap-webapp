@@ -168,6 +168,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginLeft: 5,
   },
   swapIconBox: {
+    zIndex: 1,
     justifyContent: "center",
     [theme.breakpoints.down("sm")]: {
       justifyContent: "flex-start"
