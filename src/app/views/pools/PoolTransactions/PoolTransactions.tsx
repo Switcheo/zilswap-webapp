@@ -5,7 +5,7 @@ import { PoolsNavigationTabs, PoolsOverviewBanner, Text } from "app/components";
 import Page from "app/layouts/Page";
 import { RootState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask, useNetwork } from "app/utils";
+import { hexToRGBA, useAsyncTask, useNetwork } from "app/utils";
 import cls from "classnames";
 import { PoolTransaction, ZAPStats } from "core/utilities";
 import React, { useEffect, useState } from "react";
@@ -18,26 +18,35 @@ interface Props extends BoxProps {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    "& .MuiPaginationItem-page.Mui-selected": {
+      backgroundColor: theme.palette.tab.active,
+      color: theme.palette.tab.selected
+    }
   },
   tableSurface: {
-    borderRadius: 4,
+    borderRadius: 12,
     boxShadow: theme.palette.cardBoxShadow,
     position: "relative",
+    backgroundColor: theme.palette.background.default,
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    marginBottom: theme.spacing(2)
   },
   text: {
     fontSize: "14px",
   },
   tableHead: {
-    backgroundColor: theme.palette.background.contrastAlternate,
     "& th.MuiTableCell-root": {
       borderBottom: "none",
     },
+    "& .MuiTableCell-head": {
+      fontWeight: "bold"
+    }
   },
   tableBody: {
     "& > tr > td": {
       padding: theme.spacing(2.5),
       fontSize: "14px",
-      borderBottom: `1px solid #9CCAD2`,
+      borderBottom: theme.palette.type === "dark" ? `1px solid rgba${hexToRGBA("#DEFFFF", 0.5)}` : `1px solid rgba${hexToRGBA("#003340", 0.5)}`
     },
   },
   placeholderCell: {
@@ -54,6 +63,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignItems: "center",
     display: "flex",
     backgroundColor: "rgba(0,0,0, .7)",
+    borderRadius: 12
   },
 }));
 
