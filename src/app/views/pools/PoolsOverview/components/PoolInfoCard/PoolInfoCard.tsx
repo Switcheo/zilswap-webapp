@@ -1,7 +1,7 @@
 import { Box, Button, Card, CardContent, CardProps, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Add, ViewHeadline } from "@material-ui/icons";
-import { CurrencyLogo, KeyValueDisplay, Text } from "app/components";
+import { CurrencyLogo, HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { actions } from "app/store";
 import { EMPTY_USD_VALUE } from "app/store/token/reducer";
 import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
@@ -91,6 +91,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   statItem: {
     flex: 1,
     flexDirection: "column",
+    alignItems: "center",
     [theme.breakpoints.down("xs")]: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -136,7 +137,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "24px",
     fontWeight: "bold",
     [theme.breakpoints.down("md")]: {
-      fontSize: 20,
+      fontSize: 18,
     },
     color: theme.palette.primary.dark,
     marginBottom: theme.spacing(1)
@@ -165,6 +166,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   textColoured: {
     color: theme.palette.primary.dark
+  },
+  helpInfo: {
+    // margin: theme.spacing(2)
   }
 }));
 
@@ -267,12 +271,15 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
           <ViewHeadline className={classes.viewIcon}/>
-          <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" flex={1} borderRadius={12}>
+          <Box className={classes.box} display="flex" flexDirection="column" flex={1} borderRadius={12}>
             <Box py={"4px"} px={"16px"}>
-                <Box display="flex" alignItems="flex-end" mt={1} mb={1}>
-                  <CurrencyLogo currency="ZIL" address={token.address} />
-                  <Text className={classes.token}>ZIL</Text>
-                </Box> 
+                <Box mt={1} mb={1} display="flex" justifyContent="space-between">
+                  <Box display="flex" alignItems="flex-end">
+                    <CurrencyLogo currency="ZIL" address={token.address} />
+                    <Text className={classes.token}>ZIL</Text>
+                  </Box> 
+                  <HelpInfo className={classes.helpInfo} placement="top" title={`This shows the current ${token.symbol}-ZIL pool size.`}/>
+                </Box>
                 <Text className={classes.poolSize}>{toHumanNumber(token.pool?.zilReserve.shiftedBy(-decimals))}</Text>
             </Box>
           </Box>

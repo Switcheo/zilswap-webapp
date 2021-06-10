@@ -144,7 +144,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
           Load more
         </Button>
       </Box>
-      <Text variant="h2" margin={2}>Other Pools ({otherTokens.length})</Text>
+      <Text variant="h2" margin={2}>Unregistered Pools ({otherTokens.length})</Text>
       <Grid container spacing={2}>
         {otherTokens.slice(0, limits.others).map((token) => (
           <Grid key={token.address} item xs={12} md={6}>
