@@ -4,8 +4,8 @@ import { PoolsNavigationTabs, PoolsOverviewBanner } from "app/components";
 import Page from "app/layouts/Page";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React, { useState } from "react";
-import { PoolsListing, PoolsSearchInput } from "./components";
+import React from "react";
+import { PoolsListing } from "./components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -15,11 +15,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const PoolsOverview: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
-  const [searchQuery, setSearchQuery] = useState<string | undefined>();
+  // const [searchQuery, setSearchQuery] = useState<string | undefined>();
 
-  const onSearch = (query?: string) => {
-    setSearchQuery(query);
-  };
+  // const onSearch = (query?: string) => {
+  //   setSearchQuery(query);
+  // };
 
   return (
     <Page {...rest} className={cls(classes.root, className)}>
@@ -31,8 +31,8 @@ const PoolsOverview: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
       <Box marginTop={6.5}>
         <Container maxWidth="lg">
           <PoolsNavigationTabs />
-          <PoolsSearchInput onSearch={onSearch} marginY={4} />
-          <PoolsListing query={searchQuery} />
+          {/* <PoolsSearchInput onSearch={onSearch} marginY={4} /> */}
+          <PoolsListing />
         </Container>
       </Box>
       {children}

@@ -24,6 +24,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: theme.spacing(4, 4),
     borderRadius: 12,
     boxShadow: theme.palette.cardBoxShadow,
+    [theme.breakpoints.down("xs")]: {
+      padding: theme.spacing(4, 0),
+    },
   },
   statistic: {
     fontSize: theme.spacing(4),
@@ -144,7 +147,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
     <Box {...rest} className={cls(classes.root, className)}>
       <Box className={classes.banner}>
         <Container maxWidth="lg">
-          <Text marginBottom={4} variant="h1">Overview</Text>
+          <Text marginBottom={4} variant="h2">Overview</Text>
           <Grid container spacing={2}>
             <Grid item xs={12} md={4}>
               <StatsCard heading="Total Value Locked">

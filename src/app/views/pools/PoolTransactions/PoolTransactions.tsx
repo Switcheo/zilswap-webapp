@@ -115,7 +115,11 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
 
   return (
     <Page {...rest} className={cls(classes.root, className)}>
-      <PoolsOverviewBanner />
+      <Box mt={8}>
+        <Container maxWidth="lg">
+          <PoolsOverviewBanner />
+        </Container>
+      </Box>
       <Box marginTop={6.5}>
         <Container maxWidth="lg">
           <PoolsNavigationTabs />
