@@ -13,6 +13,7 @@ import routes from "./routes";
 import { startSagas } from "./saga";
 import { RootState } from "./store/types";
 import { darkTheme, lightTheme } from "./theme";
+import { SnackbarUtilsConfigurator } from "app/utils/useToaster";
 
 import "zeeves-auth-sdk-js";
 
@@ -38,17 +39,18 @@ const AppContainer: React.FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <AppButler />
-      <CssBaseline />
-      <MuiPickersUtilsProvider utils={DayJsUtils}>
-        <Router history={history}>
-          <ScrollReset />
-          <GoogleAnalytics />
-          <NotificationBar>
+      <NotificationBar>
+        <SnackbarUtilsConfigurator />
+        <AppButler />
+        <CssBaseline />
+        <MuiPickersUtilsProvider utils={DayJsUtils}>
+          <Router history={history}>
+            <ScrollReset />
+            <GoogleAnalytics />
             {renderRoutes(routes)}
-          </NotificationBar>
-        </Router>
-      </MuiPickersUtilsProvider>
+          </Router>
+        </MuiPickersUtilsProvider>
+      </NotificationBar>
     </ThemeProvider>
   );
 };

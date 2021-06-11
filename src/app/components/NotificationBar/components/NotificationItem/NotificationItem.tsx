@@ -15,6 +15,7 @@ import PendingIcon from '@material-ui/icons/UpdateOutlined';
 import { TxStatus } from "zilswap-sdk";
 import LaunchIcon from '@material-ui/icons/Launch';
 
+
 interface Props extends BoxProps {
   message: string,
   hash: string,
@@ -53,7 +54,7 @@ const LoadingIcon = () => {
   );
 };
 
-const SnackbarComp = forwardRef<HTMLDivElement, Props>((props, ref) => {
+const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const { children, message, hash, providerRef, snackKey, className, ...rest } = props;
   const classes = useStyles();
   const network = useNetwork();
@@ -69,7 +70,11 @@ const SnackbarComp = forwardRef<HTMLDivElement, Props>((props, ref) => {
 
     transactionState.submittedTxs.forEach(tx => {
       if (hash === tx.hash) {
-        setTxStatus(tx.status)
+        if (tx.status === "confirmed" && message !== "transaction confirmed") {
+          providerRef.current.closeSnackbar(snackKey);
+        } else {
+          setTxStatus(tx.status);
+        }
       }
     })
 
@@ -118,7 +123,7 @@ const SnackbarComp = forwardRef<HTMLDivElement, Props>((props, ref) => {
   return (
     <SnackbarContent {...rest} ref={ref} className={classes.snackbar}>
       {getTxStatusIcon()}
-      <Typography>&nbsp;{getMessage()}&nbsp;</Typography>
+      <Typography>&nbsp;&nbsp;{getMessage()}&nbsp;</Typography>
       {hash && (
         <Typography>
           {"0x"}{truncate(hash)}&nbsp;
@@ -127,9 +132,9 @@ const SnackbarComp = forwardRef<HTMLDivElement, Props>((props, ref) => {
       {hash && (
         <>
           <Typography className={classes.link} component="a" target="_blank" href={`https://viewblock.io/zilliqa/tx/${hash}?network=${network.toLowerCase()}`}>
-            {" "}View on explorer
+            {" "}<LaunchIcon className={cls(classes.icon, classes.linkIcon)} />
           </Typography>
-          <LaunchIcon className={cls(classes.icon, classes.linkIcon)} />
+
         </>
       )}
       <Box flexGrow={1} />
@@ -140,4 +145,4 @@ const SnackbarComp = forwardRef<HTMLDivElement, Props>((props, ref) => {
   );
 });
 
-export default SnackbarComp;
+export default NotificationItem;

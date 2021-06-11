@@ -80,7 +80,7 @@ const ShowAdvanced = (props: any) => {
   const updateSetting = () => {
     if (typeof newSlippage === "number" && slippage !== newSlippage) dispatch(actions.Swap.update({ slippage: newSlippage }));
     if (typeof newExpiry === "number" && expiry !== newExpiry) dispatch(actions.Swap.update({ expiry: newExpiry }));
-    toaster("Setting Saved");
+    toaster("Setting updated");
   }
 
   const resetSetting = () => {
@@ -88,7 +88,7 @@ const ShowAdvanced = (props: any) => {
     dispatch(actions.Swap.update({ expiry: PREFERRED_BLOCK }));
     setNewExpiry(PREFERRED_BLOCK);
     setNewSlippage(PREFERRED_SLIPPAGE);
-    toaster("Setting Reset");
+    toaster("Setting reset");
   }
 
   return (
@@ -127,7 +127,7 @@ const ShowAdvanced = (props: any) => {
         </AccordionDetails>
       </Accordion>
 
-      <Box flexGrow={1}/>
+      <Box flexGrow={1} />
 
       <FancyButton
         variant="contained"

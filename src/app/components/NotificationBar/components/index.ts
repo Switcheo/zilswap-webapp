@@ -1,1 +1,1 @@
-export { default as SnackbarComp } from "./SnackbarComp";
+export { default as NotificationItem } from "./NotificationItem";

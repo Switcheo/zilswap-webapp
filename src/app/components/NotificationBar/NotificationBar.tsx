@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import React, { useRef } from "react";
 import { SnackbarProvider } from "notistack";
-import { SnackbarComp } from "./components";
+import { NotificationItem } from "./components";
 
 interface Props extends BoxProps {
 
@@ -36,7 +36,7 @@ const NotificationBar: React.FC<Props> = (props: Props) => {
         const { hash, content } = msgContent;
 
         return (
-          <SnackbarComp snackKey={key} hash={hash} message={content} providerRef={ref} />
+          <NotificationItem snackKey={key} hash={hash} message={content} providerRef={ref} />
         )
       }}
       {...rest}
