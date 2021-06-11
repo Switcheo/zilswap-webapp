@@ -43,7 +43,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   link: {
     color: theme.palette.type === "dark" ? "#00FFB0" : "#003340",
-  }
+  },
+  rounded: {
+    borderRadius: "12px",
+    borderBottom: "none",
+    backgroundColor: theme.palette.type === "dark" ? "#00161C" : theme.palette.background.readOnly!,
+    "&:not(:first-child)": {
+      borderRadius: "12px 12px 12px 12px"
+    }
+  },
 }));
 
 const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -70,7 +78,7 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
           <ConnectWalletOption label="Private Key" icon={theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon} secureLevel={1} buttonText="Enter Private Key" onSelect={() => onSelectConnectOption("privateKey")} />
         )}
 
-        <NotificationBox IconComponent={WarningOutlinedIcon} marginTop={2}>
+        <NotificationBox className={classes.rounded} IconComponent={WarningOutlinedIcon} marginTop={2}>
           <Box>
             <Typography variant="body1" className={classes.notificationMessage}>
               <strong>For the safety of our users, login via private key has been disabled permanently.</strong>
@@ -78,7 +86,7 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
             <Typography variant="body2" className={classes.notificationMessage}>
               To access your liquidity pools, please connect to ZilSwap via a ZilPay wallet.
               <br />
-              Click <Link href="https://docs.zilswap.io/more/help/use-zilpay-on-zilswap" target="_blank" >here</Link> to learn more.
+              Click <Link style={{ color: theme.palette.type === "dark" ? "#00FFB0" : "#003340" }} href="https://docs.zilswap.io/more/help/use-zilpay-on-zilswap" target="_blank" >here</Link> to learn more.
             </Typography>
           </Box>
         </NotificationBox>

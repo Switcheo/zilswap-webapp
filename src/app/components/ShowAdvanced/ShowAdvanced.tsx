@@ -2,7 +2,7 @@ import { Box, IconButton, makeStyles, Typography, Accordion, AccordionSummary, A
 import { ContrastBox } from "app/components";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useMoneyFormatter } from "app/utils";
+import { hexToRGBA, useMoneyFormatter, useToaster } from "app/utils";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ExpiryField, SlippageField, FancyButton } from "app/components";
@@ -73,12 +73,14 @@ const ShowAdvanced = (props: any) => {
   const dispatch = useDispatch();
   const [newSlippage, setNewSlippage] = useState<number>(slippage);
   const [newExpiry, setNewExpiry] = useState<number>(expiry);
+  const toaster = useToaster(false)
 
   if (!showAdvanced) return null;
 
   const updateSetting = () => {
     if (typeof newSlippage === "number" && slippage !== newSlippage) dispatch(actions.Swap.update({ slippage: newSlippage }));
     if (typeof newExpiry === "number" && expiry !== newExpiry) dispatch(actions.Swap.update({ expiry: newExpiry }));
+    toaster("Setting updated");
   }
 
   const resetSetting = () => {
@@ -86,6 +88,7 @@ const ShowAdvanced = (props: any) => {
     dispatch(actions.Swap.update({ expiry: PREFERRED_BLOCK }));
     setNewExpiry(PREFERRED_BLOCK);
     setNewSlippage(PREFERRED_SLIPPAGE);
+    toaster("Setting reset");
   }
 
   return (
@@ -124,7 +127,7 @@ const ShowAdvanced = (props: any) => {
         </AccordionDetails>
       </Accordion>
 
-      <Box flexGrow={1}/>
+      <Box flexGrow={1} />
 
       <FancyButton
         variant="contained"
