@@ -68,7 +68,8 @@ const theme = {
   label: "#003340",
   warning: {
     main: "#FF5252"
-  } 
+  },
+  link: "#02586D",
 };
 
 export default theme;

@@ -32,6 +32,7 @@ export interface AppPalette extends PaletteOptions {
   icon: string;
   label: string;
   warning: SimplePaletteColorOptions;
+  link: string;
 }
 
 export interface AppTheme extends ThemeOptions {

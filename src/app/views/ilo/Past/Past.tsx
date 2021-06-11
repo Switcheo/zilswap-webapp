@@ -10,8 +10,10 @@ import { RootState, WalletState } from "app/store/types";
 import { useNetwork } from "app/utils";
 import { ZILO_DATA } from "core/zilo/constants";
 import { ZilswapConnector } from "core/zilswap";
+import { AppTheme } from "app/theme/types";
+import { Link } from "react-router-dom";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   container: {
     padding: theme.spacing(4, 4, 0),
     [theme.breakpoints.down("xs")]: {
@@ -21,6 +23,12 @@ const useStyles = makeStyles(theme => ({
   secondaryText: {
     marginTop: theme.spacing(1)
   },
+  link: {
+    color: theme.palette.link,
+    "&:hover": {
+      textDecoration: "underline"
+    }
+  }
 }))
 
 const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -55,7 +63,9 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         ziloData.length === 0 ?
           <Box display="flex" flexDirection="column" className={classes.container} textAlign="center" mb={4}>
             <Text variant="h1">Nothing here yet.</Text>
-            <Text className={classes.secondaryText} color="textSecondary">Click here to view current ILOs.</Text>
+            <Text className={classes.secondaryText} color="textSecondary">
+              Click <Link to="/ilo/current" className={classes.link}>here</Link> to view current ILOs.
+            </Text>
           </Box>
         :
         ziloData.map(data => {

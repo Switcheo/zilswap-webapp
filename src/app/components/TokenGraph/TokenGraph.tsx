@@ -266,7 +266,6 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     })
   }
 
-  {/* todo */}
   const calculateData = (inRates?: ZilStreamRates[], outRates?: ZilStreamRates[]): CandleDataPoint[] => {
     let returnResult = new Array<CandleDataPoint>();
     if (!inRates) {
