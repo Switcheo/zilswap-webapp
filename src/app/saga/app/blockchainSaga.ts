@@ -24,6 +24,7 @@ const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
   switch (wallet.type) {
     case WalletConnectType.PrivateKey:
       return wallet.addressInfo.privateKey
+    case WalletConnectType.Zeeves:
     case WalletConnectType.ZilPay:
       return wallet.provider;
     case WalletConnectType.Moonlet:
