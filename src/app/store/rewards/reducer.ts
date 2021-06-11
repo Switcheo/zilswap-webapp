@@ -22,7 +22,13 @@ const loadClaimTxs = (): SimpleMap<PendingClaimTxCache> => {
     for (const address in savedPendingTxs.data) {
       const pendingTxs = savedPendingTxs.data[address];
       for (const hash in pendingTxs) {
-        pendingTxs[hash].dispatchedAt = dayjs(pendingTxs[hash].dispatchedAt);
+        const dispatchedAt = dayjs(pendingTxs[hash].dispatchedAt);
+
+        // ignore pending txs dispatched > 15 mins ago
+        if (dispatchedAt.isBefore(dayjs().add(15, "minute"))) {
+          continue;
+        }
+        pendingTxs[hash].dispatchedAt = dispatchedAt;
       }
     }
 

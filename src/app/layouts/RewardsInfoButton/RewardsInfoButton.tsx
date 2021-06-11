@@ -1,6 +1,7 @@
 import { Backdrop, Badge, Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, IconButton, Popper, Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { HelpInfo, KeyValueDisplay, Text } from "app/components";
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { CurrencyLogo, HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState } from "app/store/types";
@@ -8,14 +9,12 @@ import { AppTheme } from "app/theme/types";
 import { truncate, useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import { formatZWAPLabel } from "app/utils/strings/strings";
-import { ZWAPRewards } from "core/zwap";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
+import { ZWAPRewards } from "core/zwap";
 import dayjs from "dayjs";
 import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CurrencyLogo } from "app/components";
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { ReactComponent as IconSVG } from './icon.svg';
 
 interface Props extends BoxProps {
@@ -305,7 +304,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
               )}
 
               {!!claimResult && (
-                <Button fullWidth variant="outlined" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/0x${claimResult?.hash}?network=${network.toLowerCase()}`}>
+                <Button fullWidth variant="outlined" color="primary" target="_blank" href={`https://viewblock.io/zilliqa/tx/0x${claimResult?.hash}?network=${network?.toLowerCase()}`}>
                   View Claim TX <NewLinkIcon className={classes.buttonIcon} />
                 </Button>
               )}
