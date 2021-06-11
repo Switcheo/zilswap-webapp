@@ -59,7 +59,7 @@ export const claim = async (claimOpts: ClaimEpochOpts): Promise<ObservedTx> => {
 
   const contractAddr = DIST_CONTRACT[network]
   const chainId = CHAIN_ID[network];
-  const distContract = zilswap.zilliqa.contracts.at(fromBech32Address(contractAddr));
+  const distContract = zilswap.getContract(contractAddr);
 
   const address = wallet.addressInfo.byte20;
 
