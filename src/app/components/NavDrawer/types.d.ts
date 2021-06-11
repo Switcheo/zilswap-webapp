@@ -7,6 +7,7 @@ export type NavigationPageOptions = {
   show?: boolean;
   expand?: boolean;
   purchase?: boolean;
+  disabled?: boolean;
   highlight?: boolean;
   items?: NavigationPageOptions[];
 }
