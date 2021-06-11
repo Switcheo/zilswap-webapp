@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flex: 1,
     display: "flex",
     flexDirection: "column",
-    background: theme.palette.background.default,
+    background: theme.palette.background.gradient,
   },
   content: {
     position: "relative",

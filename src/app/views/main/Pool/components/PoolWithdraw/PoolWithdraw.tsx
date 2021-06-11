@@ -165,7 +165,6 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const userPoolTokenPercent = poolToken?.pool?.contributionPercentage.shiftedBy(-2);
   const inPoolAmount = poolToken?.pool?.tokenReserve.times(userPoolTokenPercent || 0);
 
-  // const zwapToken = Object.values(tokenState.tokens).filter(token => token.isZwap)[0];
   const zilToken = tokenState.tokens[ZIL_TOKEN_NAME]
   const toaster = useToaster();
 

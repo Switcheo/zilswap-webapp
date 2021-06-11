@@ -173,5 +173,5 @@ export default function* zapSaga() {
 function* getDistributorContract(zilswap: any) {
   const { network } = getBlockchain(yield select());
   const zwapDistContractAddress = ZWAPRewards.DIST_CONTRACT[network];
-  return (zilswap.walletProvider || zilswap.zilliqa).contracts.at(zwapDistContractAddress);
+  return zilswap.getContract(zwapDistContractAddress);
 }

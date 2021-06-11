@@ -157,7 +157,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   divider: {
     borderBottom: theme.palette.type === "dark" ? "1px solid transparent" : `1px solid rgba${hexToRGBA("#003340", 0.5)}`,
-    borderImage: theme.palette.type === "dark" 
+    borderImage: theme.palette.type === "dark"
                   ? "linear-gradient(to left, #003340 1%, #00FFB0  50%, #003340 100%) 0 0 100% 0/0 0 1px 0 stretch"
                   : "",
   },
@@ -266,8 +266,8 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
                 <Box display="flex" alignItems="flex-end" mt={1} mb={1}>
                   <CurrencyLogo currency={token.symbol} address={token.address} />
                   <Text className={classes.token}>{token.symbol}</Text>
-                </Box> 
-                <Text className={classes.poolSize}>{toHumanNumber(token.pool?.tokenReserve.shiftedBy(-decimals))}</Text>
+                </Box>
+                <Text className={classes.poolSize}>{toHumanNumber(token.pool?.tokenReserve.shiftedBy(-decimals), 2)}</Text>
             </Box>
           </Box>
           <ViewHeadline className={classes.viewIcon}/>
@@ -277,10 +277,10 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
                   <Box display="flex" alignItems="flex-end">
                     <CurrencyLogo currency="ZIL" address={token.address} />
                     <Text className={classes.token}>ZIL</Text>
-                  </Box> 
+                  </Box>
                   <HelpInfo className={classes.helpInfo} placement="top" title={`This shows the current ${token.symbol}-ZIL pool size.`}/>
                 </Box>
-                <Text className={classes.poolSize}>{ toHumanNumber(token.pool?.zilReserve.shiftedBy(-decimals))}</Text>
+                <Text className={classes.poolSize}>{toHumanNumber(token.pool?.zilReserve.shiftedBy(-12), 2)}</Text>
             </Box>
           </Box>
         </Box>
@@ -326,11 +326,11 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
 
         <Box display="flex" flexDirection="column">
           <KeyValueDisplay marginBottom={2.25} kkey="Total Liquidity" ValueComponent="span">
-            <Text className={classes.label}>${toHumanNumber(usdValues?.poolLiquidity)}</Text>
+            <Text className={classes.label}>${usdValues?.poolLiquidity.dp(0).toFormat()}</Text>
           </KeyValueDisplay>
           <KeyValueDisplay marginBottom={2.25} kkey="24-Hour Volume" ValueComponent="span">
-            <Text align="right" variant="body2" className={classes.label}>
-              <span className={classes.textColoured}>{toHumanNumber(swapVolumes[token.address]?.totalZilVolume.shiftedBy(-decimals))}</span> ZIL (${toHumanNumber(totalZilVolumeUSD)})
+            <Text align="right" className={classes.label}>
+              <span className={classes.textColoured}>{swapVolumes[token.address]?.totalZilVolume.shiftedBy(-12).dp(0).toFormat()} ZIL</span> (${totalZilVolumeUSD?.dp(0).toFormat()})
             </Text>
           </KeyValueDisplay>
         </Box>
