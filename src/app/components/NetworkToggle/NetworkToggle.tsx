@@ -34,6 +34,9 @@ const useStyles = makeStyles(theme => ({
     "& .MuiMenu-list": {
       padding: theme.spacing(.5),
     },
+    "& .MuiPaper-root": {
+      backgroundColor: theme.palette.background.default
+    }
   },
   dropdownItem: {
     minWidth: 116,
@@ -42,12 +45,12 @@ const useStyles = makeStyles(theme => ({
     minHeight: theme.spacing(6),
     ...theme.typography.subtitle1,
     "&.Mui-selected": {
-      backgroundColor: theme.palette.primary.main,
+      backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#003340",
       color: theme.palette.primary.contrastText,
       borderRadius: "12px"
     },
     "&.Mui-selected:hover": {
-      backgroundColor: theme.palette.primary.main,
+      backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#003340",
       color: theme.palette.primary.contrastText,
       borderRadius: "12px"
     },
