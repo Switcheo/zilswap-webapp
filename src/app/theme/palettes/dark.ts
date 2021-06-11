@@ -40,6 +40,7 @@ const theme = {
   },
   background: {
     default: "#0D1B24",
+    gradient: "radial-gradient(50% 50% at 50% 0%, #00FFB0 -800%, rgba(0, 255, 176, 0) 85%), radial-gradient(50% 50% at 50% 100%, #00FFB0 -800%, rgba(0, 255, 176, 0) 85%), #0D1B24",
     contrast: "rgba(222, 255, 255, 0.1)",
     contrastAlternate: "#262626",
     paper: zilliqa.black,

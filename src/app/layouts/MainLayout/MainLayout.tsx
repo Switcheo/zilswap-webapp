@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flex: 1,
     display: "flex",
     flexDirection: "column",
-    background: "radial-gradient(50% 50% at 50% 0%, #00FFB0 -800%, rgba(0, 255, 176, 0) 85%), radial-gradient(50% 50% at 50% 100%, #00FFB0 -800%, rgba(0, 255, 176, 0) 85%), #0D1B24",
+    background: theme.palette.background.gradient,
   },
   content: {
     position: "relative",

@@ -4,6 +4,7 @@ import { PaletteOptions, TypeBackground, TypeAction } from "@material-ui/core/st
 import { Spacing } from "@material-ui/core/styles/createSpacing";
 
 export type AppTypeBackground = {
+  gradient: string;
   contrast: string;
   tooltip: string;
   paperOpposite: string;

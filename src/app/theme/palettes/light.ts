@@ -39,6 +39,7 @@ const theme = {
   },
   background: {
     default: "#F6FFFC",
+    gradient: "#F6FFFC",
     contrast: "#D4FFF2",
     contrastAlternate: "#F6FFFC",
     paper: zilliqa.neutral[100],
