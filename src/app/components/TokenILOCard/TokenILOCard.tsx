@@ -273,7 +273,7 @@ const TokenILOCard = (props: Props) => {
             </Box>
 
             {
-              !iloOver &&
+              iloOver &&
               <Box>
                 <Text className={cls(classes.title, classes.fontSize)} marginBottom={0.5}>Commit your tokens in a fixed ratio to participate.</Text>
                 <Text className={classes.fontSize} color="textSecondary">30% ZWAP - 70% ZIL</Text>

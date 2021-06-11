@@ -22,7 +22,7 @@ if ((window as any).Zeeves) {
 
 const history = createBrowserHistory();
 const themes: any = {
-  default: lightTheme,
+  default: darkTheme,
   dark: darkTheme,
   light: lightTheme,
 };

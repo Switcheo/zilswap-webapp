@@ -159,7 +159,7 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
               type={amount === '-' ? 'string' : 'number'}
               inputProps={{ className: disabled && disabledStyle === 'strong' ? classes.strongInput : classes.input }}
             />
-            {tokenBalance && !hideBalance && (
+            {!hideBalance && (
               [
                 <InputLabel className={classes.balance}>
                   <Typography align="left">
@@ -167,7 +167,7 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
                   </Typography>
                   <Typography align="right">
                   {
-                    moneyFormat(tokenBalance, {
+                    moneyFormat(tokenBalance === null ? 0 : tokenBalance, {
                       symbol: token?.symbol,
                       compression: token?.decimals,
                       showCurrency: true,
