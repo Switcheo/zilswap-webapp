@@ -3,7 +3,7 @@ import { RewardsActionTypes } from "app/store/rewards/actions";
 import { TokenActionTypes } from "app/store/token/actions";
 import { TokenInfo, TokenUSDValues } from "app/store/types";
 import { SimpleMap, valueCalculators } from "app/utils";
-import { BIG_ONE, BIG_ZERO, PollIntervals, ZIL_TOKEN_NAME, ZIL_DECIMALS} from "app/utils/constants";
+import { BIG_ONE, BIG_ZERO, PollIntervals, ZIL_TOKEN_NAME, ZIL_DECIMALS } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
@@ -28,7 +28,7 @@ const computeTokenPrice = (zilPrice: BigNumber, tokens: SimpleMap<TokenInfo>) =>
       // times result by price
       const tokPrice = zilPrice.times(rate.expectedAmount.shiftedBy(-ZIL_DECIMALS));
       accum[token.symbol] = tokPrice;
-      if(token.isZwap) window.document.title = "ZilSwap | $ZWAP - $" + tokPrice.toFixed(2);
+      if (token.isZwap) window.document.title = "ZilSwap | $ZWAP - $" + tokPrice.toFixed(2);
     }
     return accum;
   }, { ZIL: zilPrice } as { [index: string]: BigNumber });
@@ -66,12 +66,6 @@ function* updatePoolUSDValues() {
       }
 
       yield put(actions.Token.updateUSDValues(usdValues));
-      const zilPrice = tokenState.prices["ZIL"];
-      if(zilPrice) {
-        const prices = computeTokenPrice(zilPrice, tokenState.tokens);
-        if(prices !== tokenState.prices)
-          yield put(actions.Token.updatePrices(prices));
-      }
     } catch (e) {
       console.warn('Fetch failed, will automatically retry later. Error:')
       console.warn(e)

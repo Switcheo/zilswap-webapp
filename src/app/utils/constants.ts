@@ -59,6 +59,10 @@ export const PRODUCTION_HOSTS = [
   "www.zilswap.exchange",
 ];
 
+export const isProduction = () => {
+  return PRODUCTION_HOSTS.includes(window.location.hostname)
+}
+
 export const STATS_REFRESH_RATE = 30000; // ms
 
 export const ZIL_TOKEN_NAME = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";

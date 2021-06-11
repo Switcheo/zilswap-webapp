@@ -150,7 +150,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
         </ListItem>
       )}
       {!navigation.external && !navigation.expand && !navigation.purchase && (
-        <ListItem className={classes.listItem} disableGutters button>
+        <ListItem className={classes.listItem} disableGutters button disabled={navigation.disabled}>
           <Button
             className={cls({
               [classes.highlightTitle]: navigation.highlight,
@@ -158,14 +158,19 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
             }, classes.buttonLeaf)}
             activeClassName={classes.buttonLeafActive}
             component={CustomRouterLink}
-            to={navigation.href}
+            to={navigation.disabled ? "/disabled-path" : navigation.href}
             exact={false}
           >
             <Icon width="20px" className={classes.icon} />
-            { navigation.title === "Swap + Pool"
+            {navigation.title === "Swap + Pool"
               ? <span>Swap <span className={classes.textColoured}>+</span> Pool</span>
               : navigation.title
             }
+            {!!navigation.badge && (
+              <span className={classes.textColoured} style={{ fontSize: '.7em', marginLeft: '8px' }}>
+                {navigation.badge}
+              </span>
+            )}
           </Button>
         </ListItem>
       )}

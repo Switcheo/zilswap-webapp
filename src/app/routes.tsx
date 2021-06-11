@@ -1,8 +1,8 @@
 import React, { lazy } from 'react';
+import { RouteConfig } from 'react-router-config';
 import { Redirect } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
-import { RouteConfig } from 'react-router-config';
-
+import { isProduction } from './utils/constants';
 
 const routes: RouteConfig[] = [{
   path: '/pools',
@@ -18,7 +18,8 @@ const routes: RouteConfig[] = [{
   }, {
     component: () => <Redirect to="/pools/overview"></Redirect>
   }]
-}, {
+},
+...!isProduction() ? [{
   path: '/ilo',
   component: MainLayout,
   routes: [{
@@ -32,7 +33,8 @@ const routes: RouteConfig[] = [{
   }, {
     component: () => <Redirect to="/ilo/current"></Redirect>
   }]
-}, {
+}] : []
+  , {
   path: '/',
   component: MainLayout,
   routes: [{

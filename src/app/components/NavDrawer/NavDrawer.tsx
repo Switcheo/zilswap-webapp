@@ -14,7 +14,7 @@ import navigationConfig from "./navigationConfig";
 import { useNetwork, useValueCalculators } from "app/utils";
 import { ZWAPRewards } from "core/zwap";
 import { useSelector } from "react-redux";
-import { BIG_ZERO, BIG_ONE } from "app/utils/constants";
+import { BIG_ZERO, BIG_ONE, ZWAP_TOKEN_NAME } from "app/utils/constants";
 import { RootState, TokenState } from "app/store/types";
 import BigNumber from "bignumber.js";
 
@@ -87,8 +87,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   }
 }));
 
-const ZWAP_TOKEN_ADDRESS = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
-
 const NavDrawer: React.FC<DrawerProps> = (props: any) => {
   const { children, className, onClose, ...rest } = props;
   const claimEnabled = useClaimEnabled();
@@ -125,7 +123,7 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
         <Box display="flex" justifyContent="space-around">
           {/* ZWAP Price */}
           <Box display="flex" alignItems="center">
-            <CurrencyLogo className={classes.currencyLogo} currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} />
+            <CurrencyLogo className={classes.currencyLogo} currency="ZWAP" address={ZWAP_TOKEN_NAME} />
             <Text variant="h6" className={classes.price}>
               &nbsp;$ { zapTokenValue.toFormat(2) }
             </Text>
