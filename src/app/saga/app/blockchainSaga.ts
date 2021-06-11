@@ -17,6 +17,7 @@ import { logger } from "core/utilities";
 import { getConnectedZilPay } from "core/utilities/zilpay";
 import { PoolTransaction, PoolTransactionResult, ZAPStats } from "core/utilities/zap-stats";
 import { getBlockchain, getWallet, getTransactions } from '../selectors'
+import { detachedToast } from "app/utils/useToaster";
 
 const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
   if (!wallet) return null;
@@ -80,9 +81,11 @@ function* txObserved(payload: TxObservedPayload) {
   yield put(actions.Rewards.removePendingClaimTx(tx.hash));
   yield put(actions.Transaction.update({ hash: tx.hash, status: status, txReceipt: receipt }));
 
+  detachedToast(`transaction confirmed`, { hash: tx.hash });
+
   // refetch all token states if updated TX is currently recorded within state
   const { transactions } = getTransactions(yield select());
-  if (transactions.find((transaction: Transaction) => transaction.hash === tx.hash)){
+  if (transactions.find((transaction: Transaction) => transaction.hash === tx.hash)) {
     yield put(actions.Token.refetchState());
   }
 }

@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import { Box, makeStyles } from '@material-ui/core'
 import dayjs, { Dayjs } from "dayjs";
 
-import { Text, Notifications } from "app/components";
+import { Text } from "app/components";
 import TokenILOCard from "app/components/TokenILOCard";
 import ILOCard from "app/layouts/ILOCard";
 import { RootState, WalletState } from "app/store/types";
@@ -58,7 +58,6 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
   return (
     <ILOCard {...rest}>
-      <Notifications />
       {
         ziloData.length === 0 ?
           <Box display="flex" flexDirection="column" className={classes.container} textAlign="center" mb={4}>
@@ -67,17 +66,17 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
               Click <Link to="/ilo/current" className={classes.link}>here</Link> to view current ILOs.
             </Text>
           </Box>
-        :
-        ziloData.map(data => {
-          return (
-            <TokenILOCard
-              key={data.contractAddress}
-              expanded={true}
-              data={data}
-              blockTime={blockTime}
-              currentBlock={currentBlock}
-              currentTime={currentTime}
-            />
+          :
+          ziloData.map(data => {
+            return (
+              <TokenILOCard
+                key={data.contractAddress}
+                expanded={true}
+                data={data}
+                blockTime={blockTime}
+                currentBlock={currentBlock}
+                currentTime={currentTime}
+              />
             )
           })
       }

@@ -15,6 +15,7 @@ export { default as KeyValueDisplay } from "./KeyValueDisplay";
 export { default as LoadableArea } from "./LoadableArea";
 export { default as NavDrawer } from "./NavDrawer";
 export { default as NewLinkIcon } from "./new_link.svg";
+export { default as NotificationBar } from "./NotificationBar";
 export { default as NotificationBox } from "./NotificationBox";
 export { default as Notifications } from "./Notifications";
 export { default as PoolLogo } from "./PoolLogo";

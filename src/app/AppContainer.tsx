@@ -8,11 +8,12 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { renderRoutes } from "react-router-config";
 import { Router } from "react-router-dom";
-import { GoogleAnalytics, ScrollReset } from "./components";
+import { GoogleAnalytics, ScrollReset, NotificationBar } from "./components";
 import routes from "./routes";
 import { startSagas } from "./saga";
 import { RootState } from "./store/types";
 import { darkTheme, lightTheme } from "./theme";
+import { SnackbarUtilsConfigurator } from "app/utils/useToaster";
 
 import "zeeves-auth-sdk-js";
 
@@ -38,15 +39,18 @@ const AppContainer: React.FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <AppButler />
-      <CssBaseline />
-      <MuiPickersUtilsProvider utils={DayJsUtils}>
-        <Router history={history}>
-          <ScrollReset />
-          <GoogleAnalytics />
-          {renderRoutes(routes)}
-        </Router>
-      </MuiPickersUtilsProvider>
+      <NotificationBar>
+        <SnackbarUtilsConfigurator />
+        <AppButler />
+        <CssBaseline />
+        <MuiPickersUtilsProvider utils={DayJsUtils}>
+          <Router history={history}>
+            <ScrollReset />
+            <GoogleAnalytics />
+            {renderRoutes(routes)}
+          </Router>
+        </MuiPickersUtilsProvider>
+      </NotificationBar>
     </ThemeProvider>
   );
 };
