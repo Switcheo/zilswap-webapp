@@ -280,7 +280,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
                   </Box>
                   <HelpInfo className={classes.helpInfo} placement="top" title={`This shows the current ${token.symbol}-ZIL pool size.`}/>
                 </Box>
-                <Text className={classes.poolSize}>{toHumanNumber(token.pool?.zilReserve.shiftedBy(-decimals), 2)}</Text>
+                <Text className={classes.poolSize}>{toHumanNumber(token.pool?.zilReserve.shiftedBy(-12), 2)}</Text>
             </Box>
           </Box>
         </Box>
