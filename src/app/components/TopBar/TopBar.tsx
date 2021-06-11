@@ -56,17 +56,17 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
   return (
     <AppBar {...rest} elevation={0} position="static" className={cls(classes.root, className)}>
       <Toolbar className={classes.toolBar} variant="dense">
-        <Box justifyContent="flex-start">
+        <Box justifyContent="flex-start" flex={1}>
           <div className={classes.drawerHeader}>
             <IconButton onClick={onToggleDrawer}>
               <MenuIcon />
             </IconButton>
           </div>
         </Box>
-        <Box justifyContent="center" flex={1}>
+        <Box justifyContent="center">
           <Brand />
         </Box>
-        <Box display="flex" justifyContent="flex-end" alignItems="center">
+        <Box display="flex" flex={1} justifyContent="flex-end" alignItems="center">
           <RewardsInfoButton />
           <Hidden xsDown>
             <ConnectWalletButton />

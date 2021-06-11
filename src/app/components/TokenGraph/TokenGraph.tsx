@@ -352,14 +352,15 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     <Box {...{ ref: containerRef }} {...rest} className={cls(classes.root, className)}>
       <Box className={classes.stats}>
         <Box className={classes.label}>
-          <Typography variant="h4">{" "}{outToken?.symbol || "ZIL"}<span className={classes.slash}> / </span>{inToken?.symbol || "ZIL"}</Typography>
+          <Typography variant="h4">{" "}{inToken?.symbol || "ZIL"}<span className={classes.slash}> / </span>{outToken?.symbol || "ZIL"}</Typography>
         </Box>
         {(inTokenRates || outTokenRates) && (
           <>
-            <Typography variant="h1">{new BigNumber(currentRate?.close || 0).toFixed(6) || "0.00"} {inToken?.symbol || "ZIL"}</Typography>
+            {/* todo */}
+            <Typography variant="h1">{new BigNumber(currentRate?.close || 0).toFixed(6) || "0.00"} {outToken?.symbol || "ZIL"}</Typography>
             <Box className={classes.buttonGroup}>
               <Typography className={growth.isZero() ? classes.noChange : (growth.isPositive() ? classes.priceUp : classes.priceDown)}>
-                {getRates()}{` (${growth.isGreaterThan(0) ? "+" : ""}${growth.toFixed(growth.isZero() ? 2 : 8)}%)`}
+                {getRates()}{` (${growth.isGreaterThan(0) ? "+" : ""}${growth.toFixed(2)}%)`}
               </Typography>
               {/* todo */}
               <Typography>Past 1 Hour</Typography>

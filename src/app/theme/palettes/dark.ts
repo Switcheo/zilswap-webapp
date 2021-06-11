@@ -16,7 +16,7 @@ const theme = {
     contrastText: "#DEFFFF",
     dark: "#00FFB0",
     main: "#003340",
-    light: zilliqa.neutral["200"],
+    light: "rgba(222, 255, 255, 0.5)",
   },
   error: {
     contrastText: TEXT_COLORS.secondary,
@@ -39,7 +39,7 @@ const theme = {
     primary: "#00FFB0",
   },
   background: {
-    default: "#13222C",
+    default: "#0D1B24",
     contrast: "rgba(222, 255, 255, 0.1)",
     contrastAlternate: "#262626",
     paper: zilliqa.black,
@@ -65,7 +65,11 @@ const theme = {
   switcheoLogo: switcheo.logoDark,
   colors: { zilliqa, switcheo },
   currencyInput: "rgba(222, 255, 255, 0.1)",
-  icon: "#00FFB0"
+  icon: "#00FFB0",
+  label: "rgba(222, 255, 255, 0.5)",
+  warning: {
+    main: "#DCA00E"
+  }
 };
 
 export default theme;

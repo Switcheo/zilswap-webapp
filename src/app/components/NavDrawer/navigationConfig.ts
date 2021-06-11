@@ -64,7 +64,7 @@ const navigationConfig: NavigationOptions[] = [{
     }, {
       title: "ZilStream",
       href: "https://zilstream.com",
-      icon: "ShowChart",
+      icon: "Insights",
       external: true,
       show: true,
     }]

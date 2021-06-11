@@ -2,7 +2,7 @@ import { Box, Button, Chip, Typography, useMediaQuery } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
-import { truncate, useTaskSubscriber } from "app/utils";
+import { hexToRGBA, truncate, useTaskSubscriber } from "app/utils";
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
 import React from "react";
@@ -39,6 +39,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: theme.palette.type === "dark" ? "#13222C" : "#003340",
     color: theme.palette.tab.selected,
     border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    "&:hover": {
+      backgroundColor: theme.palette.type === "dark" ? "" : `rgba${hexToRGBA("#003340", 0.8)}`
+    }
   },
   mobileButtonConnected: {
     width: "100%",
@@ -48,7 +51,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: theme.palette.type === "dark" ? "#13222C" : "#003340",
     color: theme.palette.tab.selected,
     border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    "&:hover": {
+      backgroundColor: theme.palette.type === "dark" ? "" : `rgba${hexToRGBA("#003340", 0.8)}`
+    }
   },
   dotIcon: {
     marginRight: theme.spacing(1)

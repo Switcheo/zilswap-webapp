@@ -11,11 +11,9 @@ interface Props extends CardProps {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    borderRadius: theme.spacing(.5),
+    borderRadius: 12,
     boxShadow: theme.palette.cardBoxShadow,
-    ...theme.palette.type === "dark" && {
-      background: "#474747",
-    },
+    backgroundColor: theme.palette.background.contrast
   },
   content: {
     padding: theme.spacing(3, 4),

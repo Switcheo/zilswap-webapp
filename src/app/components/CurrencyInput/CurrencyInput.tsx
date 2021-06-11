@@ -24,22 +24,24 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   inputRow: {
     paddingLeft: 0,
     backgroundColor: theme.palette.currencyInput,
-    border: 0
+    border: 0,
   },
   input: {
     textAlign: "left",
   },
   label: {
     position: "absolute",
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.text?.primary,
     left: 20,
     top: 12,
+    zIndex: 1
   },
   balance: {
     position: "absolute",
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.text?.primary,
     right: 20,
     top: 12,
+    zIndex: 1
   },
   currencyButton: {
     display: "flex",
@@ -49,6 +51,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 12,
     padding: "34px 18px 12px 5px",
     color: theme.palette.text?.primary,
+    "& .MuiButton-label": {
+      padding: theme.spacing(1)
+    },
+    "&:hover": {
+      backgroundColor: "transparent",
+      "& .MuiButton-label": {
+        backgroundColor: "rgba(222, 255, 255, 0.08)",
+        borderRadius: 12,
+      }
+    }
   },
   currencyText: {
     fontSize: 20,
@@ -186,7 +198,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
               </Box>
               ) :
               (
-              <Button className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
+              <Button disableRipple className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
                 <Box display="flex" alignItems="center">
                   {token && <CurrencyLogo currency={token.registered && token.symbol} address={token.address} className={classes.currencyLogo} />}
                   <Typography variant="button" className={classes.currencyText}>{token?.symbol || "Select Token"}</Typography>

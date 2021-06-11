@@ -18,10 +18,15 @@ import HelpInfo from "../HelpInfo";
 import { Dayjs } from 'dayjs';
 import { ILOState } from 'zilswap-sdk/lib/constants';
 import { ObservedTx } from 'zilswap-sdk';
+import { AppTheme } from 'app/theme/types';
+import cls from "classnames";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     paddingBottom: theme.spacing(2.5),
+    // "& .MuiBox-root": {
+    //   flex: 1
+    // }
   },
   container: {
     padding: theme.spacing(4, 4, 0),
@@ -65,6 +70,12 @@ const useStyles = makeStyles(theme => ({
     left: "50%",
     marginLeft: "-12px",
     marginTop: "12px"
+  },
+  label: {
+    color: theme.palette.label
+  },
+  fontSize: {
+    fontSize: 14
   }
 }));
 
@@ -231,15 +242,15 @@ const TokenILOCard = (props: Props) => {
         <Box display="flex" flexDirection="column" className={classes.container}>
           <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
             <Text variant="h1">{data.tokenName} ({data.tokenSymbol})</Text>
-            <Text marginTop={1}>{data.description}</Text>
+            <Text marginTop={1} className={classes.fontSize}>{data.description}</Text>
 
             <Text variant="h1" marginTop={2} className={classes.timer}>
-              {
+              {/* {
                 currentTime.isBefore(endTime) && '~'
-              }
+              } */}
               {
                 Math.floor(secondsToNextPhase / 3600).toLocaleString('en-US', {minimumIntegerDigits: 2})}h : {
-                (Math.floor(secondsToNextPhase / 60) % 60).toLocaleString('en-US', {minimumIntegerDigits: 2})}m :{
+                (Math.floor(secondsToNextPhase / 60) % 60).toLocaleString('en-US', {minimumIntegerDigits: 2})}m : {
                 (secondsToNextPhase % 60).toLocaleString('en-US', {minimumIntegerDigits: 2})}s
               <HelpInfo placement="top" title="Approximate time left. Exact start time is based on block height, not wall clock." />
             </Text>
@@ -248,24 +259,24 @@ const TokenILOCard = (props: Props) => {
 
             <Box marginTop={1} marginBottom={0.5}>
               <Box display="flex" marginTop={0.5}>
-                <Text color="textSecondary" flexGrow={1} align="left">Total Committed</Text>
-                <Text color="textSecondary">~${totalCommittedUSD} ({progress.toString()}%)</Text>
+                <Text className={classes.label} flexGrow={1} align="left">Total Committed</Text>
+                <Text className={classes.label}>~${totalCommittedUSD} ({progress.toString()}%)</Text>
               </Box>
               <Box display="flex" marginTop={0.5}>
-                <Text color="textSecondary" flexGrow={1} align="left">ZIL to Raise</Text>
-                <Text color="textSecondary">{targetZil.shiftedBy(-12).toFormat(0)}</Text>
+                <Text className={classes.label} flexGrow={1} align="left">ZIL to Raise</Text>
+                <Text className={classes.label}>{targetZil.shiftedBy(-12).toFormat(0)}</Text>
               </Box>
               <Box display="flex" marginTop={0.5}>
-                <Text color="textSecondary" flexGrow={1} align="left">ZWAP to Burn</Text>
-                <Text color="textSecondary">{targetZwap.shiftedBy(-12).toFormat(0)}</Text>
+                <Text className={classes.label} flexGrow={1} align="left">ZWAP to Burn</Text>
+                <Text className={classes.label}>{targetZwap.shiftedBy(-12).toFormat(0)}</Text>
               </Box>
             </Box>
 
             {
-              !iloOver &&
+              iloOver &&
               <Box>
-                <Text className={classes.title} marginBottom={0.5}>Contribute your tokens in a fixed ratio to participate</Text>
-                <Text color="textSecondary">30% ZWAP - 70% ZIL</Text>
+                <Text className={cls(classes.title, classes.fontSize)} marginBottom={0.5}>Commit your tokens in a fixed ratio to participate.</Text>
+                <Text className={classes.fontSize} color="textSecondary">30% ZWAP - 70% ZIL</Text>
                 <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
                   <CurrencyInputILO
                     label="to Burn:"
@@ -293,7 +304,7 @@ const TokenILOCard = (props: Props) => {
                   color="primary"
                   onClick={onCommit}
                 >
-                  {iloStarted ? 'Contribute' : (currentTime.isAfter(startTime) ? 'Waiting for start block...' : 'Waiting to begin')}
+                  {iloStarted ? 'Commit' : (currentTime.isAfter(startTime) ? 'Waiting for start block...' : 'Waiting to begin')}
                 </FancyButton>
                 <Typography className={classes.errorMessage} color="error">{txError?.message}</Typography>
               </Box>
@@ -303,7 +314,7 @@ const TokenILOCard = (props: Props) => {
           {
             iloStarted &&
             <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta} position="relative">
-              <Text className={classes.title}>Tokens Contributed</Text>
+              <Text className={classes.title}>Tokens Committed</Text>
               <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
                 <CurrencyInputILO
                   label="to Burn:"

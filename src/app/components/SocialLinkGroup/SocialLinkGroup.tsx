@@ -1,17 +1,18 @@
 import { Box, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { hexToRGBA } from "app/utils";
 import cls from "classnames";
 import React from "react";
 // import { ReactComponent as MediumIcon } from "./social-icons/medium.svg";
 // import { ReactComponent as MailIcon } from "./social-icons/mail.svg";
 import { ReactComponent as Discord } from "./social-icons/discord.svg";
 import { ReactComponent as TwitterIcon } from "./social-icons/twitter.svg";
-import { AppTheme } from "app/theme/types";
 
-const useStyles = makeStyles((theme: AppTheme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
     flexDirection: "row",
+    paddingLeft: theme.spacing(2),
     "& a": {
       minWidth: 0,
       padding: theme.spacing(.75),
@@ -22,12 +23,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         margin: 1,
         "& path": {
           transition: "fill .2s ease-in-out",
-          fill: theme.palette.colors.zilliqa.neutral[140],
+          fill: `rgba${hexToRGBA(theme.palette.text.primary, 0.5)}`,
         }
       },
-      "&:hover svg path": {
-        fill: "#666666"
-      }
     },
   },
 }));

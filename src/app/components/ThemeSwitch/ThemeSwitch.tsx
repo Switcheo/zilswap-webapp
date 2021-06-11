@@ -16,19 +16,25 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiSwitch-track": {
       position: "relative",
       ...props.forceDark && {
-        backgroundColor: `rgba${hexToRGBA("#003340", 0.5)}`,
+        backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.5)}`,
       },
     },
     "& .Mui-checked+.MuiSwitch-track": {
-      backgroundColor: `rgba${hexToRGBA("#00FFB0", 0.5)}`,
+      backgroundColor: `rgba${hexToRGBA("#003340", 0.5)}`,
     },
     "& .MuiSwitch-thumb": {
-      backgroundColor: theme.palette.action?.selected
+      backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#003340",
+      width: 14,
+      height: 14,
+    },
+    "& .MuiSwitch-switchBase": {
+      padding: "12px"
     },
   }),
   label: {
     marginLeft: theme.spacing(1),
-    marginRight: 0
+    marginRight: 0,
+    color: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.5)}` : "#003340"
   },
 }));
 
@@ -53,7 +59,7 @@ const ThemeSwitch: React.FC<ThemeSwitchProps> = (props: ThemeSwitchProps) => {
           onChange={() => onToggleTheme()}
           {...rest}
           className={clsx(classes.root, className)} />}
-        label={<Typography variant="h6" color="textSecondary">Classic</Typography>}
+        label={<Typography variant="h6">Classic</Typography>}
         labelPlacement="start"
         className={classes.label}
       />

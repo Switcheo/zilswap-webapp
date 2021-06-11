@@ -16,6 +16,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CurrencyLogo } from "app/components";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { ReactComponent as IconSVG } from './icon.svg';
 
 interface Props extends BoxProps {
 
@@ -215,7 +216,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         {
           isMobileView 
           ? <IconButton onClick={() => setActive(!active)} buttonRef={buttonRef}>
-              <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} />
+              <IconSVG />
             </IconButton> 
           : <Badge variant="dot" invisible={unclaimedRewards.isZero()}>
               <Button
@@ -259,7 +260,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                     ≈ {potentialRewardsLabel}
                   </Text>
                   <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
-                  <HelpInfo placement="bottom" title="Estimated based on current liquidity and may fluctuate." className={classes.tooltip}/>
+                  <HelpInfo placement="bottom" title="The estimated amount of ZWAP you will be receiving for providing liquidity this epoch." className={classes.tooltip}/>
                 </Box>
               </KeyValueDisplay>
 
@@ -270,7 +271,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                       ≈ {unclaimedRewardsLabel}
                     </Text>
                     <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
-                    <HelpInfo placement="bottom" title="Estimated based on current liquidity and may fluctuate." className={classes.tooltip}/>
+                    <HelpInfo placement="bottom" title="The estimated amount of ZWAP you have earned but have not claimed." className={classes.tooltip}/>
                   </Box>
                 </Badge>
               </KeyValueDisplay>

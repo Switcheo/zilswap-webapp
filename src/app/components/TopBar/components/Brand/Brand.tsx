@@ -12,8 +12,9 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
+    paddingTop: 2,
     '& svg': {
-      height: 36,
+      height: 24,
       '& .st0': {
         fill: '#169BA3!important',
       }
