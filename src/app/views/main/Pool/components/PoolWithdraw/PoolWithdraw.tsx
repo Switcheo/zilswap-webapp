@@ -355,7 +355,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" flex={1} borderRadius={12}>
             <Box py={"4px"} px={"16px"}>
               <Box display="flex" alignItems="flex-end" mt={1} mb={1}>
-                <CurrencyLogo currency={poolToken?.symbol} address={poolToken?.address} />
+                <CurrencyLogo currency={poolFormState?.token?.symbol} address={poolFormState?.token?.address} />
                 <Typography className={classes.token}>{poolFormState?.token?.symbol}</Typography>
               </Box>
               <Typography className={classes.previewAmount}>
