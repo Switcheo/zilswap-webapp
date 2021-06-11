@@ -11,6 +11,9 @@ interface Props extends BoxProps {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    "& .MuiSvgIcon-colorPrimary": {
+      color: "currentColor"
+    }
   },
 }));
 

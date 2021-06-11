@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&:hover": {
       backgroundColor: "transparent",
       "& .MuiButton-label": {
-        backgroundColor: "rgba(222, 255, 255, 0.08)",
+        backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.08)" : "rgba(0, 51, 64, 0.05)",
         borderRadius: 12,
       }
     }

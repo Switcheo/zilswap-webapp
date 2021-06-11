@@ -11,8 +11,9 @@ import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolManage, PoolToggleBu
 import AddLiquidityEarnMessage from "./components/AddLiquidityEarnMessage";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
 import BrightnessLowIcon from '@material-ui/icons/BrightnessLow';
+import { AppTheme } from "app/theme/types";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   container: {
@@ -31,8 +32,8 @@ const useStyles = makeStyles(theme => ({
     height: 46
   },
   iconButton: {
-    color: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#003340",
-    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    color: theme.palette.label,
+    backgroundColor: theme.palette.currencyInput,
     borderRadius: 12,
     padding: 5,
     marginLeft: 5,
@@ -42,6 +43,11 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(0, 2, 2),
     },
+  },
+  plusIcon: {
+    "& path": {
+      fill: theme.palette.icon
+    }
   }
 }));
 const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -75,7 +81,7 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
           {poolType !== "remove" && (
             <Box display="flex" justifyContent="space-between" mb="28px" className={classes.container}>
               <PoolToggleButton />
-              <Button className={classes.createButton} startIcon={<PlusSVG />} onClick={() => onShowCreatePool("open")}>
+              <Button className={classes.createButton} startIcon={<PlusSVG className={classes.plusIcon}/>} onClick={() => onShowCreatePool("open")}>
                 Create Pool
             </Button>
             </Box>

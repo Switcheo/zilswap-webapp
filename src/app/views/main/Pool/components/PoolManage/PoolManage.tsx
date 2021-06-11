@@ -32,6 +32,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   actionButton: {
     height: 46
   },
+  newLinkIcon: {
+    "& path": {
+      fill: theme.palette.icon
+    }
+  }
 }));
 
 const PoolManage: React.FC<Props> = (props: Props) => {
@@ -104,7 +109,7 @@ const PoolManage: React.FC<Props> = (props: Props) => {
         <Button component={Link} variant="text" to="/pools" size="small" className={classes.viewPoolsButton}>
           <Box display="flex" alignItems="center">
             <Text color="inherit">View All Pools</Text>
-            <NewLinkIcon />
+            <NewLinkIcon className={classes.newLinkIcon}/>
           </Box>
         </Button>
       </Box>

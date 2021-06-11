@@ -266,6 +266,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
     })
   }
 
+  {/* todo */}
   const calculateData = (inRates?: ZilStreamRates[], outRates?: ZilStreamRates[]): CandleDataPoint[] => {
     let returnResult = new Array<CandleDataPoint>();
     if (!inRates) {
@@ -356,14 +357,24 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
         </Box>
         {(inTokenRates || outTokenRates) && (
           <>
-            {/* todo */}
+            {/* todo - now showing wrong rate */}
             <Typography variant="h1">{new BigNumber(currentRate?.close || 0).toFixed(6) || "0.00"} {outToken?.symbol || "ZIL"}</Typography>
             <Box className={classes.buttonGroup}>
               <Typography className={growth.isZero() ? classes.noChange : (growth.isPositive() ? classes.priceUp : classes.priceDown)}>
                 {getRates()}{` (${growth.isGreaterThan(0) ? "+" : ""}${growth.toFixed(2)}%)`}
               </Typography>
-              {/* todo */}
-              <Typography>Past 1 Hour</Typography>
+              <Typography>
+                Past 
+                {" "}
+                { currentInterval === "15m"
+                  ? "15 Mins"
+                  : currentInterval === "1h"
+                    ? "1 Hour"
+                    : currentInterval === "1d"
+                      ? "1 Day"
+                      : "1 Week"
+                }
+              </Typography>
               <Box flexGrow="1" />
               <Box display="flex" justifyContent="flex-end">
                 <ButtonGroup variant="text">
