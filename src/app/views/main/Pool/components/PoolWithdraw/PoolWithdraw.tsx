@@ -165,7 +165,6 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const userPoolTokenPercent = poolToken?.pool?.contributionPercentage.shiftedBy(-2);
   const inPoolAmount = poolToken?.pool?.tokenReserve.times(userPoolTokenPercent || 0);
 
-  const zwapToken = Object.values(tokenState.tokens).filter(token => token.isZwap)[0];
   const zilToken = tokenState.tokens[ZIL_TOKEN_NAME]
   const toaster = useToaster();
 
@@ -356,7 +355,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
           <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" flex={1} borderRadius={12}>
             <Box py={"4px"} px={"16px"}>
               <Box display="flex" alignItems="flex-end" mt={1} mb={1}>
-                <CurrencyLogo currency={zwapToken.symbol} address={zwapToken.address} />
+                <CurrencyLogo currency={poolToken?.symbol} address={poolToken?.address} />
                 <Typography className={classes.token}>{poolFormState?.token?.symbol}</Typography>
               </Box>
               <Typography className={classes.previewAmount}>
