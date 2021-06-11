@@ -252,7 +252,7 @@ const TokenILOCard = (props: Props) => {
                 Math.floor(secondsToNextPhase / 3600).toLocaleString('en-US', {minimumIntegerDigits: 2})}h : {
                 (Math.floor(secondsToNextPhase / 60) % 60).toLocaleString('en-US', {minimumIntegerDigits: 2})}m : {
                 (secondsToNextPhase % 60).toLocaleString('en-US', {minimumIntegerDigits: 2})}s
-              <HelpInfo placement="top" title="Approximate time left. Exact start time is based on block height, not wall clock." />
+              <HelpInfo placement="top" title="Amount of time left to the end of this ZILO." />
             </Text>
 
             <ProgressBar progress={progress.toNumber()} marginTop={3} />
