@@ -54,6 +54,10 @@ const MuiButton = theme => ({
     "&:hover": {
       backgroundColor: theme.palette.tab.active,
       color: theme.palette.tab.selected,
+      // Reset on touch devices, it doesn't add specificity
+      '@media (hover: none)': {
+        backgroundColor: theme.palette.tab.active,
+      },
     },
   },
   outlinedSecondary: {
@@ -62,6 +66,7 @@ const MuiButton = theme => ({
     "&:hover": {
       backgroundColor: theme.palette.tab.active,
       color: theme.palette.tab.selected,
+      border: 0
     }
   },
 });
