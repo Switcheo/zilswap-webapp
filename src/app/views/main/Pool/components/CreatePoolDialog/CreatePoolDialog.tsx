@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => ({
     flexDirection: "column",
     width: 516,
     [theme.breakpoints.down("xs")]: {
-      width: 380,
+      width: "fit-content",
     },
     backgroundColor: theme.palette.background.default,
     borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",

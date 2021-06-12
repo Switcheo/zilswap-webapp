@@ -1,6 +1,6 @@
 import { Backdrop, Dialog, DialogProps, DialogTitle, IconButton, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import CloseIcon from "@material-ui/icons/Close";
+import CloseIcon from "@material-ui/icons/CloseRounded";
 import cls from "classnames";
 import React from "react";
 
