@@ -66,7 +66,6 @@ const MuiButton = theme => ({
     "&:hover": {
       backgroundColor: theme.palette.tab.active,
       color: theme.palette.tab.selected,
-      border: 0
     }
   },
 });
