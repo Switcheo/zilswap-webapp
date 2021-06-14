@@ -2,8 +2,8 @@ import { Box, Button, IconButton, InputLabel, makeStyles, OutlinedInput, Typogra
 import { WarningRounded } from "@material-ui/icons";
 import AddIcon from "@material-ui/icons/Add";
 import AutorenewIcon from '@material-ui/icons/Autorenew';
-import BrightnessLowIcon from '@material-ui/icons/BrightnessLow';
-import RemoveIcon from "@material-ui/icons/Remove";
+import BrightnessLowIcon from '@material-ui/icons/BrightnessLowRounded';
+import RemoveIcon from "@material-ui/icons/RemoveRounded";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { validation as ZilValidation } from "@zilliqa-js/util";
 import { CurrencyInput, FancyButton, Notifications, ProportionSelect, ShowAdvanced, Text } from "app/components";

@@ -356,7 +356,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
         </Box>
         {(inTokenRates || outTokenRates) && (
           <>
-            {/* todo - now showing wrong rate */}
+            {/* todo */}
             <Typography variant="h1">{new BigNumber(currentRate?.close || 0).toFixed(6) || "0.00"} {inToken?.symbol || "ZIL"}</Typography>
             <Box className={classes.buttonGroup}>
               <Typography className={growth.isZero() ? classes.noChange : (growth.isPositive() ? classes.priceUp : classes.priceDown)}>

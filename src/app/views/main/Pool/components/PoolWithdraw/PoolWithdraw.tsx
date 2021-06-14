@@ -2,7 +2,7 @@
 import { Box, Button, Divider, IconButton, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowBack } from "@material-ui/icons";
-import BrightnessLowIcon from '@material-ui/icons/BrightnessLow';
+import BrightnessLowIcon from '@material-ui/icons/BrightnessLowRounded';
 import ViewHeadlineIcon from '@material-ui/icons/ViewHeadline';
 import { ContrastBox, CurrencyInput, CurrencyLogo, FancyButton, KeyValueDisplay, ProportionSelect, Text } from "app/components";
 import { actions } from "app/store";

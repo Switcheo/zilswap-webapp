@@ -142,7 +142,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.primary.dark,
     marginBottom: theme.spacing(1)
   },
-  currencyLogo: {
+  zwapLogo: {
     marginLeft: theme.spacing(.5),
     [theme.breakpoints.down("sm")]: {
       paddingBottom: theme.spacing(1.8),
@@ -292,7 +292,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
               <Text variant="h1" color="textPrimary" className={classes.rewardValue}>
                 {potentialRewards.isZero() ? "0" : potentialRewards.toFormat()}
               </Text>
-              <CurrencyLogo className={classes.currencyLogo} currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} />
+              <CurrencyLogo className={classes.zwapLogo} currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} />
             </Box>
           </Box>
 

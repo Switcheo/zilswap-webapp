@@ -6,8 +6,8 @@ import { hexToRGBA, useMoneyFormatter, useToaster } from "app/utils";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ExpiryField, SlippageField, FancyButton } from "app/components";
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import CloseIcon from '@material-ui/icons/Close';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
+import CloseIcon from '@material-ui/icons/CloseRounded';
 import { actions } from "app/store";
 import HelpInfo from "../HelpInfo";
 
@@ -57,6 +57,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&:hover": {
       cursor: "default"
     }
+  },
+  dropDownIcon: {
+    color: theme.palette.label
   }
 }));
 
@@ -102,7 +105,7 @@ const ShowAdvanced = (props: any) => {
       </Box>
 
       <Accordion className={classes.accordion}>
-        <AccordionSummary expandIcon={<ArrowDropDownIcon />}>
+        <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon}/>}>
           <Box display="flex" width="100%">
             <Typography>Slippage Tolerance <HelpInfo className={classes.helpInfo} placement="top" title="Set a higher slippage tolerance to ensure your transactions go through. The lower it is, the higher likelihood your transaction may fail." /></Typography>
             <Box flexGrow={1} />
@@ -115,7 +118,7 @@ const ShowAdvanced = (props: any) => {
       </Accordion>
 
       <Accordion className={classes.accordion}>
-        <AccordionSummary expandIcon={<ArrowDropDownIcon />}>
+        <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon}/>}>
           <Box display="flex" width="100%">
             <Typography>Block Expiry <HelpInfo className={classes.helpInfo} placement="top" title="Your transaction will automatically be reverted if it is PENDING beyond this number of blocks." /></Typography>
             <Box flexGrow={1} />

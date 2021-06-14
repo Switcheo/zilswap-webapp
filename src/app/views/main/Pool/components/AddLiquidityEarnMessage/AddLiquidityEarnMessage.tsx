@@ -22,6 +22,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   notificationSymbol: {
     margin: theme.spacing(1, 1.5, 0),
+    "& path": {
+      fill: theme.palette.primary.dark
+    }
   },
   warning: {
     width: theme.spacing(8),

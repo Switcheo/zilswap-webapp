@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolManage, PoolToggleButton, PoolWithdraw } from "./components";
 import AddLiquidityEarnMessage from "./components/AddLiquidityEarnMessage";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
-import BrightnessLowIcon from '@material-ui/icons/BrightnessLow';
+import BrightnessLowIcon from '@material-ui/icons/BrightnessLowRounded';
 import { AppTheme } from "app/theme/types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
