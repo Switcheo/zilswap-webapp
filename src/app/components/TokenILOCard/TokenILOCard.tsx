@@ -259,7 +259,7 @@ const TokenILOCard = (props: Props) => {
 
             <ProgressBar progress={progress.toNumber()} marginTop={3} />
 
-            <Box marginTop={1} marginBottom={0.5}>
+            <Box marginTop={1} marginBottom={0.5} px={1.2}>
               <Box display="flex" marginTop={0.5}>
                 <Text className={classes.label} flexGrow={1} align="left">Total Committed</Text>
                 <Text className={classes.label}>~${totalCommittedUSD} ({progress.toString()}%)</Text>

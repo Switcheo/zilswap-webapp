@@ -180,7 +180,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
 
       <OutlinedInput
         className={classes.inputRow}
-        placeholder={"0.00"}
+        placeholder={"0"}
         value={amount.toString()}
         onChange={onChange}
         onBlur={onEditorBlur}
