@@ -75,14 +75,6 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
     compression: token?.decimals,
   };
 
-  // const getExchangeRateValue = () => {
-  //   if (!token?.pool) return <span className={classes.textWrapper}>-</span>;
-  //   const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
-  //   const rate = token.pool.exchangeRate.shiftedBy(token!.decimals - zilToken.decimals).pow(-1);
-  //   return (
-  //     <span className={classes.textWrapper}>1 ZIL = <span className={classes.textColoured}>{rate.toNumber().toLocaleString("en-US", { maximumFractionDigits: 12 })}</span> {token!.symbol}</span>
-  //   )
-  // };
   const getPoolSizeValue = () => {
     if (!token?.pool) return <span className={classes.textWrapper}>-</span>;
     const { zilReserve, tokenReserve } = token.pool;
@@ -117,7 +109,6 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
       </span>
     )
   };
-
   const getExchangeRateValue= () => {
     if (!token?.pool) return <span className={classes.textWrapper}>-</span>;
     const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
