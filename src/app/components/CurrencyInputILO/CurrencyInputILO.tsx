@@ -151,13 +151,13 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
             </Text>
             <OutlinedInput
               className={classes.outlinedInput}
-              placeholder={"0.00"}
+              placeholder={"0"}
               value={amount}
               onChange={onChange}
               onBlur={onEditorBlur}
               disabled={disabled}
               type={amount === '-' ? 'string' : 'number'}
-              inputProps={{ className: disabled && disabledStyle === 'strong' ? classes.strongInput : classes.input }}
+              inputProps={{ min: "0", className: disabled && disabledStyle === 'strong' ? classes.strongInput : classes.input }}
             />
             {!hideBalance && (
               [
