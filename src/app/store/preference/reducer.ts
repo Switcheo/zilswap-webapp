@@ -9,7 +9,7 @@ const savedThemePreference = localStorage.getItem(LOCAL_STORAGE_KEY_THEME);
 const initialTheme = savedThemePreference || (prefersDarkMode ? "dark" : "light");
 
 const initial_state: PreferenceState = {
-  theme: VALID_THEMES.includes(initialTheme) ? initialTheme : "light",
+  theme: VALID_THEMES.includes(initialTheme) ? initialTheme : "dark",
 };
 
 const checkToSaveThemePreference = (currentTheme: string, updatePayload: PreferenceStateUpdateProps) => {
