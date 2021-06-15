@@ -20,6 +20,7 @@ import { ILOState } from 'zilswap-sdk/lib/constants';
 import { ObservedTx } from 'zilswap-sdk';
 import { AppTheme } from 'app/theme/types';
 import cls from "classnames";
+import { toHumanNumber } from 'app/utils/strings/strings';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -121,20 +122,28 @@ const TokenILOCard = (props: Props) => {
   const showTxApprove = approved.isZero() || approved.comparedTo(unitlessInAmount) < 0;
   const txIsPending = txIsSending || txState.observingTxs.findIndex(tx => tx.hash.toLowerCase() === pendingTxHash) >= 0
 
-  const { state: iloState, contributed, userContribution, contractState: { total_contributions: totalContributions } } = ziloState
-  const { target_zil_amount: targetZil, target_zwap_amount: targetZwap } = ziloState.contractInit!
+  const { state: iloState, contributed, userContribution, contractState: { total_contributions: totalContributionStr } } = ziloState
+  const { target_zil_amount: targetZil, target_zwap_amount: targetZwap, token_amount: tokenAmount } = ziloState.contractInit!
   const { start_block: startBlock, end_block: endBlock } = ziloState.contractInit!
+  // const contributed = true
+  // const userContribution = new BigNumber('12345678912300000')
   // const targetZil = new BigNumber('70000').shiftedBy(12)
   // const targetZwap = new BigNumber('30000').shiftedBy(12)
   // console.log(targetZil.toString(), targetZwap.toString())
 
-  const totalCommittedUSD = new BigNumber(totalContributions).shiftedBy(-12).dividedBy(data.usdRatio).times(tokenState.prices.ZIL).toFormat(2)
-  const progress = new BigNumber(totalContributions).dividedBy(targetZil).times(100).integerValue()
+  const totalContributions = new BigNumber(totalContributionStr)
+  const totalCommittedUSD = totalContributions.shiftedBy(-12).dividedBy(data.usdRatio).times(tokenState.prices.ZIL).toFormat(2)
+  const progress = totalContributions.dividedBy(targetZil).times(100).integerValue()
   const iloStarted = iloState === ILOState.Active
   const iloOver = iloState === ILOState.Failed || iloState === ILOState.Completed
   const startTime = blockTime.add((startBlock - currentBlock), 'minute')
   const endTime = blockTime.add((endBlock - currentBlock), 'minute')
   const secondsToNextPhase = currentTime.isAfter(startTime) ? (currentTime.isAfter(endTime) || !iloStarted ? 0 : endTime.diff(currentTime, 'second')) : startTime.diff(currentTime, 'second')
+  const effectiveContribution = totalContributions.gt(targetZil) ? userContribution.times(targetZil).dividedToIntegerBy(totalContributions) : userContribution
+  const effectiveTotalContributions = BigNumber.min(targetZil, totalContributions)
+  const receiveAmount = effectiveContribution.times(tokenAmount).dividedToIntegerBy(effectiveTotalContributions)
+  const refundZil = BigNumber.max(userContribution.minus(effectiveContribution.plus(1)), new BigNumber(0))
+  const refundZwap = BigNumber.max(refundZil.times(targetZwap).dividedToIntegerBy(targetZil).minus(1), new BigNumber(0))
 
   const onZwapChange = (amount: string = "0") => {
     const _amount = new BigNumber(amount).shiftedBy(12).integerValue(BigNumber.ROUND_DOWN);
@@ -247,9 +256,6 @@ const TokenILOCard = (props: Props) => {
             <Text marginTop={1} className={classes.fontSize}>{data.description}</Text>
 
             <Text variant="h1" marginTop={2} className={classes.timer}>
-              {/* {
-                currentTime.isBefore(endTime) && '~'
-              } */}
               {
                 Math.floor(secondsToNextPhase / 3600).toLocaleString('en-US', { minimumIntegerDigits: 2 })}h : {
                 (Math.floor(secondsToNextPhase / 60) % 60).toLocaleString('en-US', { minimumIntegerDigits: 2 })}m : {
@@ -265,17 +271,17 @@ const TokenILOCard = (props: Props) => {
                 <Text className={classes.label}>~${totalCommittedUSD} ({progress.toString()}%)</Text>
               </Box>
               <Box display="flex" marginTop={0.5}>
-                <Text className={classes.label} flexGrow={1} align="left">ZIL to Raise</Text>
+                <Text className={classes.label} flexGrow={1} align="left"><strong>ZIL</strong> to Raise</Text>
                 <Text className={classes.label}>{targetZil.shiftedBy(-12).toFormat(0)}</Text>
               </Box>
               <Box display="flex" marginTop={0.5}>
-                <Text className={classes.label} flexGrow={1} align="left">ZWAP to Burn</Text>
+                <Text className={classes.label} flexGrow={1} align="left"><strong>ZWAP</strong> to Burn</Text>
                 <Text className={classes.label}>{targetZwap.shiftedBy(-12).toFormat(0)}</Text>
               </Box>
             </Box>
 
             {
-              iloOver &&
+              !iloOver &&
               <Box>
                 <Text className={cls(classes.title, classes.fontSize)} marginBottom={0.5}>Commit your tokens in a fixed ratio to participate.</Text>
                 <Text className={classes.fontSize} color="textSecondary">30% ZWAP - 70% ZIL</Text>
@@ -314,14 +320,14 @@ const TokenILOCard = (props: Props) => {
           </Box>
 
           {
-            iloStarted &&
+            (iloStarted || contributed) &&
             <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta} position="relative">
               <Text className={classes.title}>Tokens Committed</Text>
               <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
                 <CurrencyInputILO
                   label="to Burn:"
                   token={zwapToken}
-                  amount={contributed ? userContribution.times(targetZwap).dividedToIntegerBy(targetZil).plus(1).shiftedBy(-12).toString() : '-'}
+                  amount={contributed ? toHumanNumber(userContribution.times(targetZwap).dividedToIntegerBy(targetZil).plus(1).shiftedBy(-12), 6) : '-'}
                   hideBalance={true}
                   disabled={true}
                   disabledStyle={contributed ? "strong" : "muted"}
@@ -330,17 +336,31 @@ const TokenILOCard = (props: Props) => {
                 <CurrencyInputILO
                   label="for Project:"
                   token={zilToken}
-                  amount={contributed ? userContribution.shiftedBy(-12).toString() : '-'}
+                  amount={contributed ? toHumanNumber(userContribution.shiftedBy(-12), 2) : '-'}
                   hideBalance={true}
                   disabled={true}
                   disabledStyle={contributed ? "strong" : "muted"}
                 />
               </Box>
+              <Box marginTop={1} marginBottom={0.5}>
+                <Box display="flex" marginTop={0.5}>
+                  <Text className={classes.label} flexGrow={1} align="left"><strong>ZWAP</strong> to Refund</Text>
+                  <Text className={classes.label}>{refundZwap.shiftedBy(-12).toFormat(4)}</Text>
+                </Box>
+                <Box display="flex" marginTop={0.5}>
+                  <Text className={classes.label} flexGrow={1} align="left"><strong>ZIL</strong> to Refund</Text>
+                  <Text className={classes.label}>{refundZil.shiftedBy(-12).toFormat(4)}</Text>
+                </Box>
+                <Box display="flex" marginTop={0.5}>
+                  <Text className={classes.label} flexGrow={1} align="left"><strong>{data.tokenSymbol}</strong> to Claim</Text>
+                  <Text className={classes.label}>{receiveAmount.shiftedBy(-data.tokenDecimals).toFormat(4)}</Text>
+                </Box>
+              </Box>
             </Box>
           }
 
           {
-            !iloOver &&
+            iloOver &&
             <Box>
               <FancyButton
                 walletRequired
@@ -353,6 +373,7 @@ const TokenILOCard = (props: Props) => {
               >
                 {contributed ? (iloState === ILOState.Completed ? 'Claim' : 'Refund') : 'Completed'}
               </FancyButton>
+              {contributed && iloState === ILOState.Completed && <Text className={classes.label} align="center">You'll be refunded any excess tokens in your claim transaction.</Text>}
               <Typography className={classes.errorMessage} color="error">{txError?.message}</Typography>
             </Box>
           }

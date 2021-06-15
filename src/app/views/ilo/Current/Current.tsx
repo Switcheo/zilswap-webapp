@@ -37,11 +37,12 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const classes = useStyles();
   const network = useNetwork();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const ziloData = ZILO_DATA[network!]
 
   const [currentBlock, setCurrentBlock] = useState<number>(0)
   const [blockTime, setBlockTime] = useState<Dayjs>(dayjs())
   const [currentTime, setCurrentTime] = useState<Dayjs>(dayjs())
+
+  const ziloData = ZILO_DATA[network!].filter(x => currentTime.isBefore(x.showUntil))
 
   useEffect(() => {
     const interval = setInterval(() => {

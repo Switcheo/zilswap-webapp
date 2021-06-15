@@ -1,7 +1,6 @@
 import { Box, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { CurrencyLogo, Text } from "app/components";
-import CurrencyDialog from "app/components/CurrencyDialog";
 import { RootState, TokenInfo, WalletState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
 import BigNumber from "bignumber.js";
@@ -90,16 +89,13 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
   const {
     children, className, disabledStyle = 'muted',
     label, amount, disabled,
-    showCurrencyDialog: showDialogOverride,
-    onCloseDialog: onCloseDialogListener,
-    showContribution, hideBalance, dialogOpts = {},
-    onAmountChange, onCurrencyChange, token,
+    showContribution, hideBalance = {},
+    onAmountChange, token,
     onEditorBlur,
   } = props;
   const classes = useStyles();
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5 });
   const [tokenBalance, setTokenBalance] = useState<BigNumber | null>(null);
-  const [showCurrencyDialog, setShowCurrencyDialog] = useState(false);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
 
   useEffect(() => {
@@ -120,21 +116,9 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
 
   }, [walletState.wallet, token, showContribution]);
 
-  const onCurrencySelect = (token: TokenInfo) => {
-    if (typeof onCurrencyChange === "function")
-      onCurrencyChange(token);
-    setShowCurrencyDialog(false);
-  };
-
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (typeof onAmountChange === "function")
       onAmountChange(event.target.value);
-  };
-
-  const onCloseDialog = () => {
-    setShowCurrencyDialog(false);
-    if (typeof onCloseDialogListener === "function")
-      onCloseDialogListener();
   };
 
   return (
@@ -156,7 +140,7 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
               onChange={onChange}
               onBlur={onEditorBlur}
               disabled={disabled}
-              type={amount === '-' ? 'string' : 'number'}
+              type={new BigNumber(amount).isNaN() ? 'string' : 'number'}
               inputProps={{ className: disabled && disabledStyle === 'strong' ? classes.strongInput : classes.input }}
             />
             {!hideBalance && (
@@ -167,11 +151,11 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
                   </Typography>
                   <Typography align="right">
                   {
-                    moneyFormat(tokenBalance === null ? 0 : tokenBalance, {
-                      symbol: token?.symbol,
-                      compression: token?.decimals,
-                      showCurrency: true,
-                    })
+                      moneyFormat(tokenBalance ?? 0, {
+                        symbol: token?.symbol,
+                        compression: token?.decimals,
+                        showCurrency: true,
+                      })
                   }
                   </Typography>
                 </InputLabel>,
@@ -179,7 +163,6 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
             )}
         </Box>
         {children}
-        <CurrencyDialog {...dialogOpts} open={showCurrencyDialog || showDialogOverride || false} onSelectCurrency={onCurrencySelect} onClose={onCloseDialog} />
     </form>
   );
 };
