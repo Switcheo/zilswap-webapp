@@ -22,9 +22,12 @@ const fetchPoolLiquidity = async (opts: GetLiquidityOpts) => {
 
 function* queryVolumeDay({ network }: QueryOpts) {
   try {
+    const aDayAgo = dayjs().add(-1, "d").unix();
+    // stick query to lastest minute to improve cache
+    const refTime =  aDayAgo - aDayAgo % 60;
     const volumeDay: SwapVolume[] = yield ZAPStats.getSwapVolume({
       network,
-      from: dayjs().add(-1, "d").unix(),
+      from: refTime,
     });
 
     yield put(actions.Stats.setSwapVolumes(volumeDay));
@@ -35,12 +38,16 @@ function* queryVolumeDay({ network }: QueryOpts) {
 
 function* queryPoolLiquidityDay({ network }: QueryOpts) {
   try {
+    const now = dayjs().unix();
+    // stick query to lastest minute to improve cache
+    const refTime =  now - now % 60;
     const liquiditySnapshot24hAgo: PoolLiquidityMap = yield fetchPoolLiquidity({
       network,
-      timestamp: dayjs().add(-1, "d").unix(),
+      timestamp: refTime - 86400,
     });
     const liquiditySnapshotNow: PoolLiquidityMap = yield fetchPoolLiquidity({
       network,
+      timestamp: refTime,
     });
 
     const liquidityChange24h = liquiditySnapshotNow;
