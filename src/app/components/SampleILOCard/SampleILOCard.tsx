@@ -1,5 +1,6 @@
 import { Box, makeStyles } from '@material-ui/core';
 import { CurrencyInputILO, FancyButton, Text } from 'app/components';
+import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import ProgressBar from 'app/components/ProgressBar';
 import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from 'app/theme/types';
@@ -66,6 +67,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   fontSize: {
     fontSize: 14
+  },
+  external: {
+    marginLeft: theme.spacing(1),
+    verticalAlign: 'middle',
   }
 }));
 
@@ -101,6 +106,14 @@ const SampleILOCard = (props: Props) => {
           <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
             <Text variant="h1">{data.tokenName} ({data.tokenSymbol})</Text>
             <Text marginTop={1} className={classes.fontSize}>{data.description}</Text>
+            {!!data.projectURL && (
+              <Text marginTop={1}>
+                Learn more about this project
+                <a href={data.projectURL} className={classes.external}>
+                  <NewLinkIcon />
+                </a>
+              </Text>
+            )}
 
             <Text variant="h1" marginTop={2} className={classes.timer}>
               Coming Soon…
