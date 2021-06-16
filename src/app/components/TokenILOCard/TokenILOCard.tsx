@@ -91,7 +91,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   linkIcon: {
     marginLeft: theme.spacing(0.5),
-    verticalAlign: "top"
+    verticalAlign: "top",
+    "& path": {
+      fill: theme.palette.text?.secondary,
+    }
   },
 }));
 
