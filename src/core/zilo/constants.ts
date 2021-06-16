@@ -19,6 +19,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
     tokenSymbol: 'STREAM',
     tokenName: 'ZilStream',
+    tokenDecimals: 8,
     description: 'ZilSteam\'s premium membership token',
     contractAddress: 'test',
     showUntil: dayjs(),
