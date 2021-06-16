@@ -24,8 +24,8 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     tokenDecimals: 8,
     description: 'ZilSteam\'s premium membership token',
     contractAddress: 'test',
-    showUntil: dayjs(),
-    usdRatio: ''
+    showUntil: dayjs('2021-06-25T10:00:00.000+0800'),
+    usdRatio: '0.7'
   }],
   [Network.TestNet]: [{
     projectURL: 'https://docs.zilswap.io/how-to/zilo/01-zilstream',
@@ -34,7 +34,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     tokenName: 'ZilStream',
     tokenDecimals: 8,
     description: 'ZilSteam\'s premium membership token',
-    contractAddress: 'zil12ups4rxaxepf9h9aplwess8vapk37d2m8v20ax',
+    contractAddress: 'zil1syux3v7vkwm306faseta074whn7et2u4kylss7',
     showUntil: dayjs('2021-06-25T10:00:00.000+0800'),
     usdRatio: '0.7'
   }],

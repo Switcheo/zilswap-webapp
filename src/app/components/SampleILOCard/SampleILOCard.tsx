@@ -5,6 +5,7 @@ import ProgressBar from 'app/components/ProgressBar';
 import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from 'app/theme/types';
 import { ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from 'app/utils/constants';
+import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { ILOData } from 'core/zilo/constants';
 import { Dayjs } from 'dayjs';
@@ -138,7 +139,7 @@ const SampleILOCard = (props: Props) => {
 
             <Box>
               <Text className={cls(classes.title, classes.fontSize)} marginBottom={0.5}>Commit your tokens in a fixed ratio to participate.</Text>
-              <Text className={classes.fontSize} color="textSecondary">30% ZWAP - 70% ZIL</Text>
+              <Text className={classes.fontSize} color="textSecondary">{new BigNumber(data.usdRatio).plus(-1).times(100).toFormat(0)}% ZWAP - {new BigNumber(data.usdRatio).times(100).toFormat(0)}% ZIL</Text>
               <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
                 {zwapToken && (
                   <CurrencyInputILO
