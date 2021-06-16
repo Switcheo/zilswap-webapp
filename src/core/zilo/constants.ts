@@ -12,6 +12,7 @@ export type ILOData = {
   contractAddress: string
   showUntil: Dayjs
   usdRatio: string // zil / zil+zwap
+  usdTarget: string // total USD raise
 }
 
 export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
@@ -25,7 +26,8 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     description: 'ZilSteam\'s premium membership token',
     contractAddress: 'test',
     showUntil: dayjs('2021-06-25T10:00:00.000+0800'),
-    usdRatio: '0.7'
+    usdRatio: '0.7',
+    usdTarget: '$342,867',
   }],
   [Network.TestNet]: [{
     projectURL: 'https://docs.zilswap.io/how-to/zilo/01-zilstream',
@@ -34,8 +36,9 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     tokenName: 'ZilStream',
     tokenDecimals: 8,
     description: 'ZilSteam\'s premium membership token',
-    contractAddress: 'zil1syux3v7vkwm306faseta074whn7et2u4kylss7',
+    contractAddress: 'zil1xlaxx7f7zyycutd6x59wk0e6r4w03kjwe0fdah',
     showUntil: dayjs('2021-06-25T10:00:00.000+0800'),
-    usdRatio: '0.7'
+    usdRatio: '0.7',
+    usdTarget: '$342,867',
   }],
 }

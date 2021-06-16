@@ -68,7 +68,7 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           <Box display="flex" flexDirection="column" className={classes.container} textAlign="center" mb={4}>
             <Text variant="h1">Nothing here yet.</Text>
             <Text className={classes.secondaryText} color="textSecondary">
-              Click <Link to="/ilo/current" className={classes.link}>here</Link> to view current ILOs.
+              Click <Link to="/zilo/current" className={classes.link}>here</Link> to view current ILOs.
             </Text>
           </Box>
           :

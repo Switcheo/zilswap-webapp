@@ -1,4 +1,4 @@
-import { Box, makeStyles } from '@material-ui/core';
+import { Link, Box, makeStyles } from '@material-ui/core';
 import { CurrencyInputILO, FancyButton, Text } from 'app/components';
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import ProgressBar from 'app/components/ProgressBar';
@@ -26,7 +26,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       padding: theme.spacing(2, 2, 0),
     },
   },
+  description: {
+    fontFamily: "'Raleway', sans-serif",
+    fontSize: 14
+  },
+  title: {
+    fontWeight: 700,
+    marginTop: theme.spacing(3),
+  },
   meta: {
+    fontFamily: "'Raleway', sans-serif",
     textAlign: "center",
   },
   svg: {
@@ -48,10 +57,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   timer: {
     color: theme.palette.primary.dark
   },
-  title: {
-    fontWeight: 700,
-    marginTop: theme.spacing(3),
-  },
   errorMessage: {
     marginTop: theme.spacing(1),
   },
@@ -66,13 +71,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   label: {
     color: theme.palette.label
   },
-  fontSize: {
-    fontSize: 14
+  link: {
+    fontWeight: 600,
+    color: theme.palette.text?.secondary,
   },
-  external: {
+  linkIcon: {
     marginLeft: theme.spacing(1),
     verticalAlign: 'middle',
-  }
+  },
 }));
 
 interface Props {
@@ -104,17 +110,19 @@ const SampleILOCard = (props: Props) => {
       </Box>
       {expanded &&
         <Box display="flex" flexDirection="column" className={classes.container}>
-          <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
-            <Text variant="h1">{data.tokenName} ({data.tokenSymbol})</Text>
-            <Text marginTop={1} className={classes.fontSize}>{data.description}</Text>
-            {!!data.projectURL && (
-              <Text marginTop={1}>
-                Learn more about this project
-                <a href={data.projectURL} className={classes.external}>
-                  <NewLinkIcon />
-                </a>
-              </Text>
-            )}
+        <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
+          <Text variant="h1" className={cls(classes.title, classes.meta)}>{data.tokenName} ({data.tokenSymbol})</Text>
+          <Text marginTop={2} marginBottom={0.75} className={classes.description}>{data.description}</Text>
+          {!!data.projectURL && (
+            <Link
+              className={classes.link}
+              underline="none"
+              rel="noopener noreferrer"
+              target="_blank"
+              href={data.projectURL}>
+              Learn more about this token <NewLinkIcon className={classes.linkIcon} />
+            </Link>
+          )}
 
             <Text variant="h1" marginTop={2} className={classes.timer}>
               Coming Soon…
@@ -123,23 +131,27 @@ const SampleILOCard = (props: Props) => {
             <ProgressBar progress={0} marginTop={3} />
 
             <Box marginTop={1} marginBottom={0.5}>
-              <Box display="flex" marginTop={0.5}>
+              <Box display="flex" marginTop={0.75}>
                 <Text className={classes.label} flexGrow={1} align="left">Total Committed</Text>
-                <Text className={classes.label}>~$- (0.00%)</Text>
+                <Text className={classes.label}>$0.00 (0%)</Text>
               </Box>
-              <Box display="flex" marginTop={0.5}>
-                <Text className={classes.label} flexGrow={1} align="left">ZIL to Raise</Text>
-                <Text className={classes.label}>-</Text>
+              <Box display="flex" marginTop={0.75}>
+                <Text className={classes.label} flexGrow={1} align="left"><strong>Total Target</strong></Text>
+                <Text className={classes.label}><strong>{data.usdTarget}</strong></Text>
               </Box>
-              <Box display="flex" marginTop={0.5}>
-                <Text className={classes.label} flexGrow={1} align="left">ZWAP to Burn</Text>
-                <Text className={classes.label}>-</Text>
+              <Box display="flex" marginTop={0.75}>
+                <Text className={classes.label} flexGrow={1} align="left">&nbsp; • &nbsp; ZIL to Raise</Text>
+                <Text className={classes.label}>TBD</Text>
+              </Box>
+              <Box display="flex" marginTop={0.75}>
+                <Text className={classes.label} flexGrow={1} align="left">&nbsp; • &nbsp; ZWAP to Burn</Text>
+                <Text className={classes.label}>TBD</Text>
               </Box>
             </Box>
 
             <Box>
-              <Text className={cls(classes.title, classes.fontSize)} marginBottom={0.5}>Commit your tokens in a fixed ratio to participate.</Text>
-              <Text className={classes.fontSize} color="textSecondary">{new BigNumber(data.usdRatio).plus(-1).times(100).toFormat(0)}% ZWAP - {new BigNumber(data.usdRatio).times(100).toFormat(0)}% ZIL</Text>
+                <Text className={cls(classes.title, classes.description)} marginBottom={0.75}>Commit your tokens in a fixed ratio to participate.</Text>
+                <Text className={classes.description} color="textSecondary">{new BigNumber(1).minus(data.usdRatio).times(100).toFormat(0)}% ZWAP - {new BigNumber(data.usdRatio).times(100).toFormat(0)}% ZIL</Text>
               <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
                 {zwapToken && (
                   <CurrencyInputILO
