@@ -74,10 +74,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   link: {
     fontWeight: 600,
     color: theme.palette.text?.secondary,
+    marginTop: theme.spacing(0.5),
+    "&:hover": {
+      textDecoration: "underline"
+    }
   },
   linkIcon: {
-    marginLeft: theme.spacing(1),
-    verticalAlign: 'middle',
+    marginLeft: theme.spacing(0.5),
+    verticalAlign: "top"
   },
 }));
 
