@@ -73,7 +73,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: 0,
   },
   priceUp: {
-    color: theme.palette.type === "dark" ? "#00FFB0" : "#02586D",
+    color: theme.palette.primary.dark,
     marginRight: theme.spacing(1),
   },
   priceDown: {
