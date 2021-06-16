@@ -166,10 +166,6 @@ const TokenILOCard = (props: Props) => {
   const onZwapChange = (amount: string = "0") => {
     const _amount = new BigNumber(amount).shiftedBy(12).integerValue(BigNumber.ROUND_DOWN);
     const _zilAmount = _amount.minus(1).times(targetZil).dividedBy(targetZwap).integerValue(BigNumber.ROUND_DOWN);
-    if (_zilAmount.gt(targetZil)) {
-      onZilChange(targetZil.shiftedBy(-12).toString())
-      return
-    }
 
     setFormState({
       ...formState,
@@ -179,7 +175,7 @@ const TokenILOCard = (props: Props) => {
   };
 
   const onZilChange = (amount: string = "0") => {
-    const _amount = BigNumber.min(targetZil, new BigNumber(amount).shiftedBy(12).integerValue(BigNumber.ROUND_DOWN));
+    const _amount = new BigNumber(amount).shiftedBy(12).integerValue(BigNumber.ROUND_DOWN);
     const _zwapAmount = _amount.times(targetZwap).dividedToIntegerBy(targetZil).plus(1)
 
     setFormState({
@@ -212,7 +208,12 @@ const TokenILOCard = (props: Props) => {
 
     const amount = new BigNumber(formState.zilAmount).shiftedBy(12).integerValue()
     if (amount.lte(0) || amount.isNaN()) {
-      setTxError(new Error('Invalid contribution amount'));
+      setTxError(new Error('Committed amount must be more than 0'));
+      return
+    }
+
+    if (amount.plus(userContribution).gt(targetZil)) {
+      setTxError(new Error(`Maximum commit amount per wallet address is ${targetZil.shiftedBy(-12).toFormat(0)} ZIL`));
       return
     }
 
@@ -375,20 +376,23 @@ const TokenILOCard = (props: Props) => {
                   disabledStyle={contributed ? "strong" : "muted"}
                 />
               </Box>
-              <Box marginTop={1} marginBottom={0.5}>
-                <Box display="flex" marginTop={0.5}>
-                  <Text className={classes.label} flexGrow={1} align="left"><strong>ZWAP</strong> to Refund</Text>
-                  <Text className={classes.label}>{refundZwap.shiftedBy(-12).toFormat(4)}</Text>
+              {
+                iloOver &&
+                <Box marginTop={1} marginBottom={0.5}>
+                  <Box display="flex" marginTop={0.5}>
+                    <Text className={classes.label} flexGrow={1} align="left"><strong>ZWAP</strong> to Refund</Text>
+                    <Text className={classes.label}>{refundZwap.shiftedBy(-12).toFormat(4)}</Text>
+                  </Box>
+                  <Box display="flex" marginTop={0.5}>
+                    <Text className={classes.label} flexGrow={1} align="left"><strong>ZIL</strong> to Refund</Text>
+                    <Text className={classes.label}>{refundZil.shiftedBy(-12).toFormat(4)}</Text>
+                  </Box>
+                  <Box display="flex" marginTop={0.5}>
+                    <Text className={classes.label} flexGrow={1} align="left"><strong>{data.tokenSymbol}</strong> to Claim</Text>
+                    <Text className={classes.label}>{contributed ? receiveAmount.shiftedBy(-data.tokenDecimals).toFormat(4) : '0.0000'}</Text>
+                  </Box>
                 </Box>
-                <Box display="flex" marginTop={0.5}>
-                  <Text className={classes.label} flexGrow={1} align="left"><strong>ZIL</strong> to Refund</Text>
-                  <Text className={classes.label}>{refundZil.shiftedBy(-12).toFormat(4)}</Text>
-                </Box>
-                <Box display="flex" marginTop={0.5}>
-                  <Text className={classes.label} flexGrow={1} align="left"><strong>{data.tokenSymbol}</strong> to Claim</Text>
-                  <Text className={classes.label}>{contributed ? receiveAmount.shiftedBy(-data.tokenDecimals).toFormat(4) : '0.0000'}</Text>
-                </Box>
-              </Box>
+              }
             </Box>
           }
 
