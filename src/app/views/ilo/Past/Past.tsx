@@ -6,7 +6,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { Text } from "app/components";
 import TokenILOCard from "app/components/TokenILOCard";
 import ILOCard from "app/layouts/ILOCard";
-import { RootState, WalletState } from "app/store/types";
+import { BlockchainState, RootState, WalletState } from "app/store/types";
 import { useNetwork } from "app/utils";
 import { ZILO_DATA } from "core/zilo/constants";
 import { ZilswapConnector } from "core/zilswap";
@@ -37,6 +37,7 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const classes = useStyles();
   const network = useNetwork();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+  const blockchainState = useSelector<RootState, BlockchainState>(state => state.blockchain)
   const ziloData = ZILO_DATA[network!].filter(x => false);
 
   const [currentBlock, setCurrentBlock] = useState<number>(0)
@@ -45,10 +46,14 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
   // just need to set once on network init
   useEffect(() => {
-    setCurrentBlock(ZilswapConnector.getCurrentBlock())
+    try {
+      setCurrentBlock(ZilswapConnector.getCurrentBlock())
+    } catch (err) {
+      console.warn(err)
+    }
     setBlockTime(dayjs())
     setCurrentTime(dayjs())
-  }, [network])
+  }, [network, blockchainState])
 
   useEffect(() => {
     // need to listen to wallet state
