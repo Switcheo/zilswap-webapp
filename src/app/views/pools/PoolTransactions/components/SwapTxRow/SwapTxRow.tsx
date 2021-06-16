@@ -99,6 +99,8 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
     };
   }, [transaction, tokenState, valueCalculators]);
 
+  if (!tokenState.initialized) return null;
+
   return (
     <TableRow {...rest} className={cls(classes.root, className)}>
       <TableCell className={classes.placeholderCell} />

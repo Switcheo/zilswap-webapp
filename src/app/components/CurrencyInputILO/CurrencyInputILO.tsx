@@ -140,7 +140,7 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
               onChange={onChange}
               onBlur={onEditorBlur}
               disabled={disabled}
-              type={new BigNumber(amount).isNaN() ? 'string' : 'number'}
+              type={disabled && new BigNumber(amount).isNaN() ? 'string' : 'number'}
               inputProps={{ min: "0", className: disabled && disabledStyle === 'strong' ? classes.strongInput : classes.input }}
             />
             {!hideBalance && (
