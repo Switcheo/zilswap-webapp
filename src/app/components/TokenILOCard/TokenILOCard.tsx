@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import BigNumber from 'bignumber.js'
 import { ZiloAppState } from 'zilswap-sdk/lib/zilo';
-import { Box, CircularProgress, Typography, makeStyles } from '@material-ui/core'
+import { Box, Link, CircularProgress, Typography, makeStyles } from '@material-ui/core'
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyInputILO, FancyButton, Text } from 'app/components'
 import ProgressBar from 'app/components/ProgressBar'
@@ -12,6 +12,7 @@ import { useAsyncTask, useNetwork, useToaster } from "app/utils"
 import { ZIL_TOKEN_NAME } from 'app/utils/constants';
 import { ZilswapConnector } from "core/zilswap";
 import { ILOData } from 'core/zilo/constants';
+import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import ViewHeadlineIcon from '@material-ui/icons/ViewHeadline';
 
 import HelpInfo from "../HelpInfo";
@@ -35,7 +36,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       padding: theme.spacing(2, 2, 0),
     },
   },
+  description: {
+    fontFamily: "'Raleway', sans-serif",
+    fontSize: 14
+  },
+  title: {
+    fontWeight: 700,
+    marginTop: theme.spacing(3),
+  },
   meta: {
+    fontFamily: "'Raleway', sans-serif",
     textAlign: "center",
   },
   svg: {
@@ -57,10 +67,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   timer: {
     color: theme.palette.primary.dark
   },
-  title: {
-    fontWeight: 700,
-    marginTop: theme.spacing(3),
-  },
   errorMessage: {
     marginTop: theme.spacing(1),
   },
@@ -70,14 +76,26 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     top: "50%",
     left: "50%",
     marginLeft: "-12px",
-    marginTop: "12px"
+    marginTop: "-18px"
   },
   label: {
     color: theme.palette.label
   },
-  fontSize: {
-    fontSize: 14
-  }
+  link: {
+    fontWeight: 600,
+    color: theme.palette.text?.secondary,
+    marginTop: theme.spacing(0.5),
+    "&:hover": {
+      textDecoration: "underline"
+    }
+  },
+  linkIcon: {
+    marginLeft: theme.spacing(0.5),
+    verticalAlign: "top",
+    "& path": {
+      fill: theme.palette.text?.secondary,
+    }
+  },
 }));
 
 interface Props {
@@ -252,39 +270,53 @@ const TokenILOCard = (props: Props) => {
       {expanded &&
         <Box display="flex" flexDirection="column" className={classes.container}>
           <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
-            <Text variant="h1">{data.tokenName} ({data.tokenSymbol})</Text>
-            <Text marginTop={1} className={classes.fontSize}>{data.description}</Text>
+            <Text variant="h1" className={cls(classes.title, classes.meta)}>{data.tokenName} ({data.tokenSymbol})</Text>
+            <Text marginTop={2} marginBottom={0.75} className={classes.description}>{data.description}</Text>
+            {!!data.projectURL && (
+              <Link
+                className={classes.link}
+                underline="none"
+                rel="noopener noreferrer"
+                target="_blank"
+                href={data.projectURL}>
+                Learn more about this token <NewLinkIcon className={classes.linkIcon} />
+              </Link>
+            )}
 
-            <Text variant="h1" marginTop={2} className={classes.timer}>
+            <Text variant="h1" marginTop={2.75} className={classes.timer}>
               {
                 Math.floor(secondsToNextPhase / 3600).toLocaleString('en-US', { minimumIntegerDigits: 2 })}h : {
                 (Math.floor(secondsToNextPhase / 60) % 60).toLocaleString('en-US', { minimumIntegerDigits: 2 })}m : {
                 (secondsToNextPhase % 60).toLocaleString('en-US', { minimumIntegerDigits: 2 })}s
-              <HelpInfo placement="top" title="Amount of time left to the end of this ZILO." />
+              <HelpInfo placement="top" title={`Amount of time left to the ${currentTime.isAfter(startTime) ? 'end' : 'start'} of this ZILO.`} />
             </Text>
 
             <ProgressBar progress={progress.toNumber()} marginTop={3} />
 
-            <Box marginTop={1} marginBottom={0.5} px={1.2}>
-              <Box display="flex" marginTop={0.5}>
+            <Box marginTop={1} marginBottom={0.5}>
+              <Box display="flex" marginTop={0.75}>
                 <Text className={classes.label} flexGrow={1} align="left">Total Committed</Text>
                 <Text className={classes.label}>~${totalCommittedUSD} ({progress.toString()}%)</Text>
               </Box>
-              <Box display="flex" marginTop={0.5}>
-                <Text className={classes.label} flexGrow={1} align="left"><strong>ZIL</strong> to Raise</Text>
+              <Box display="flex" marginTop={0.75}>
+                <Text className={classes.label} flexGrow={1} align="left"><strong>Total Target</strong></Text>
+                <Text className={classes.label}><strong>{data.usdTarget}</strong></Text>
+              </Box>
+              <Box display="flex" marginTop={0.75}>
+                <Text className={classes.label} flexGrow={1} align="left">&nbsp; • &nbsp; ZIL to Raise</Text>
                 <Text className={classes.label}>{targetZil.shiftedBy(-12).toFormat(0)}</Text>
               </Box>
-              <Box display="flex" marginTop={0.5}>
-                <Text className={classes.label} flexGrow={1} align="left"><strong>ZWAP</strong> to Burn</Text>
+              <Box display="flex" marginTop={0.75}>
+                <Text className={classes.label} flexGrow={1} align="left">&nbsp; • &nbsp; ZWAP to Burn</Text>
                 <Text className={classes.label}>{targetZwap.shiftedBy(-12).toFormat(0)}</Text>
               </Box>
             </Box>
 
             {
               !iloOver &&
-              <Box>
-                <Text className={cls(classes.title, classes.fontSize)} marginBottom={0.5}>Commit your tokens in a fixed ratio to participate.</Text>
-                <Text className={classes.fontSize} color="textSecondary">30% ZWAP - 70% ZIL</Text>
+              <Box position="relative">
+                <Text className={cls(classes.title, classes.description)} marginBottom={0.75}>Commit your tokens in a fixed ratio to participate.</Text>
+                <Text className={classes.description} color="textSecondary">{new BigNumber(1).minus(data.usdRatio).times(100).toFormat(0)}% ZWAP - {new BigNumber(data.usdRatio).times(100).toFormat(0)}% ZIL</Text>
                 <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
                   <CurrencyInputILO
                     label="to Burn:"
@@ -293,6 +325,7 @@ const TokenILOCard = (props: Props) => {
                     hideBalance={false}
                     onAmountChange={onZwapChange}
                   />
+                  <ViewHeadlineIcon className={classes.viewIcon} />
                   <CurrencyInputILO
                     label="for Project:"
                     token={zilToken}
@@ -322,7 +355,7 @@ const TokenILOCard = (props: Props) => {
           {
             (iloStarted || contributed) &&
             <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta} position="relative">
-              <Text className={classes.title}>Tokens Committed</Text>
+              <Text className={cls(classes.title, classes.description)}>Tokens Committed</Text>
               <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
                 <CurrencyInputILO
                   label="to Burn:"
@@ -353,14 +386,14 @@ const TokenILOCard = (props: Props) => {
                 </Box>
                 <Box display="flex" marginTop={0.5}>
                   <Text className={classes.label} flexGrow={1} align="left"><strong>{data.tokenSymbol}</strong> to Claim</Text>
-                  <Text className={classes.label}>{receiveAmount.shiftedBy(-data.tokenDecimals).toFormat(4)}</Text>
+                  <Text className={classes.label}>{contributed ? receiveAmount.shiftedBy(-data.tokenDecimals).toFormat(4) : '0.0000'}</Text>
                 </Box>
               </Box>
             </Box>
           }
 
           {
-            !iloOver &&
+            iloOver &&
             <Box>
               <FancyButton
                 walletRequired

@@ -19,18 +19,18 @@ const routes: RouteConfig[] = [{
   }]
 },
 {
-  path: '/ilo',
+  path: '/zilo',
   component: MainLayout,
   routes: [{
-    path: '/ilo/current',
+    path: '/zilo/current',
     exact: true,
     component: lazy(() => import('./views/ilo/Current'))
   }, {
-    path: '/ilo/past',
+    path: '/zilo/past',
     exact: true,
     component: lazy(() => import('./views/ilo/Past'))
   }, {
-    component: () => <Redirect to="/ilo/current"></Redirect>
+    component: () => <Redirect to="/zilo/current"></Redirect>
   }]
 }, {
   path: '/',

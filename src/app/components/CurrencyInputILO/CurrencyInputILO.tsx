@@ -123,7 +123,7 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
 
   return (
     <form className={cls(classes.form, className)} noValidate autoComplete="off">
-        <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" borderRadius={12}>
+        <Box flex={1} className={classes.box} display="flex" flexDirection="column" alignItems="start" borderRadius={12}>
             <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
               <Box display="flex" alignItems="center">
                 <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />

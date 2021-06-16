@@ -12,7 +12,7 @@ const navigationConfig: NavigationOptions[] = [{
     icon: "Layers",
   }, {
     title: "ZILO",
-    href: "/ilo",
+    href: "/zilo",
     icon: "Flame",
     badge: "COMING SOON",
   }, {
