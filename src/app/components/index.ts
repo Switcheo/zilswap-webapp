@@ -25,6 +25,7 @@ export { default as PoolsOverviewBanner } from "./PoolsOverviewBanner";
 export { default as PotentialRewardInfo } from "./PotentialRewardInfo";
 export { default as ProportionSelect } from "./ProportionSelect";
 export { default as RandomAsciiEmoji } from "./RandomAsciiEmoji";
+export { default as SampleILOCard } from "./SampleILOCard";
 export { default as ScrollReset } from "./ScrollReset";
 export { default as SearchInput } from "./SearchInput";
 export { default as ShowAdvanced } from "./ShowAdvanced";
@@ -35,4 +36,3 @@ export { default as Text } from "./Text";
 export { default as TokenGraph } from "./TokenGraph";
 export { default as TopBar } from "./TopBar";
 export { default as UserPoolMessage } from "./UserPoolMessage";
-
