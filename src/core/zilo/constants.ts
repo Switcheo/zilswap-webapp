@@ -3,6 +3,7 @@ import { Network } from "zilswap-sdk/lib/constants";
 
 export type ILOData = {
   comingSoon?: boolean
+  projectURL?: string
   imageURL: string
   tokenSymbol: string
   tokenName: string
@@ -16,6 +17,7 @@ export type ILOData = {
 export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
   [Network.MainNet]: [{
     comingSoon: true,
+    projectURL: 'https://docs.zilswap.io/how-to/zilo/01-zilstream',
     imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
     tokenSymbol: 'STREAM',
     tokenName: 'ZilStream',
@@ -26,6 +28,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     usdRatio: ''
   }],
   [Network.TestNet]: [{
+    projectURL: 'https://docs.zilswap.io/how-to/zilo/01-zilstream',
     imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
     tokenSymbol: 'STREAM',
     tokenName: 'ZilStream',
