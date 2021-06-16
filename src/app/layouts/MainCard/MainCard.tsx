@@ -1,13 +1,14 @@
 import { Box, Button, Paper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { TokenGraph } from "app/components";
+import { actions } from "app/store";
 import { LayoutState, RootState, SwapFormState, TokenInfo, TransactionState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import { PaperProps } from "material-ui";
-import React, { forwardRef, useRef, useEffect, useState, Fragment } from "react";
-import { useSelector } from "react-redux";
+import React, { forwardRef, Fragment, useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { NavLink as RouterLink, useRouteMatch } from "react-router-dom";
-import { TokenGraph } from "app/components";
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1, flexBasis: 1 }} >
@@ -110,6 +111,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
   const boxRef = useRef<HTMLDivElement | null>(null);
   const [boxHeight, setBoxHeight] = useState<number>(0);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if(boxRef.current?.clientHeight) {
@@ -140,7 +142,11 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
       // show confirmed tx message
       transactionState.submittedTxs.length > 0);
 
-  const showGraph = (isSwap && (swapState.inToken || swapState.outToken))
+  const showGraph = (isSwap && (swapState.inToken || swapState.outToken));
+
+  const closeAdvancedSetting = () => {
+    dispatch(actions.Layout.showAdvancedSetting(false));
+  }
 
   return (
     <Fragment>
@@ -149,6 +155,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
           <Box className={classes.tabs}>
             <Button
               disableElevation
+              onClick={closeAdvancedSetting}
               color="primary"
               variant="contained"
               className={cls(classes.tab, classes.tabLeft)}
@@ -157,6 +164,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
               to="/swap">Swap</Button>
             <Button
               disableElevation
+              onClick={closeAdvancedSetting}
               color="primary"
               variant="contained"
               className={cls(classes.tab, classes.tabRight)}

@@ -44,8 +44,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   helpInfo: {
     marginBottom: theme.spacing(0.3)
   },
-  percentageChange: {
+  percentagePositive: {
     color: theme.palette.primary.dark,
+  },
+  percentageNegative: {
+    color: "#FF5252"
   },
   currencyLogo: {
     marginLeft: theme.spacing(1),
@@ -153,7 +156,11 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
               <StatsCard heading="Total Value Locked">
                 <Text marginBottom={2} variant="h1" className={classes.statistic}>${totalLiquidity.toFormat(2)}</Text>
                 <Box display="flex" flexDirection="row" alignItems="center" className={classes.subtitle}>
-                  <Text className={classes.percentageChange}>(+{liquidityChangePercent.toFormat(2)}%)</Text>
+                  {
+                    <Text className={liquidityChangePercent.gte(0) ? classes.percentagePositive : classes.percentageNegative}>
+                      ({`${liquidityChangePercent.gt(0) ? "+" : ""}${liquidityChangePercent.toFormat(2)}%`})
+                    </Text>
+                  }
                 </Box>
               </StatsCard>
             </Grid>
