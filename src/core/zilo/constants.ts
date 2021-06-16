@@ -2,6 +2,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { Network } from "zilswap-sdk/lib/constants";
 
 export type ILOData = {
+  comingSoon?: boolean
   imageURL: string
   tokenSymbol: string
   tokenName: string
@@ -13,9 +14,18 @@ export type ILOData = {
 }
 
 export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
-  [Network.MainNet]: [],
+  [Network.MainNet]: [{
+    comingSoon: true,
+    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
+    tokenSymbol: 'STREAM',
+    tokenName: 'ZilStream',
+    description: 'ZilSteam\'s premium membership token',
+    contractAddress: 'test',
+    showUntil: dayjs(),
+    usdRatio: ''
+  }],
   [Network.TestNet]: [{
-    imageURL: 'https://placehold.co/600x250',
+    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
     tokenSymbol: 'STREAM',
     tokenName: 'ZilStream',
     tokenDecimals: 8,

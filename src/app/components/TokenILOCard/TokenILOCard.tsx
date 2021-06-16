@@ -360,7 +360,7 @@ const TokenILOCard = (props: Props) => {
           }
 
           {
-            iloOver &&
+            !iloOver &&
             <Box>
               <FancyButton
                 walletRequired
