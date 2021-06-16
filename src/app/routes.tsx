@@ -46,6 +46,10 @@ const routes: RouteConfig[] = [{
     exact: true,
     component: lazy(() => import('./views/main/Pool'))
   }, {
+    path: '/bridge',
+    exact: true,
+    component: lazy(() => import('./views/main/Bridge'))
+  }, {
     component: () => <Redirect to="/swap"></Redirect>
   }]
 }];

@@ -79,6 +79,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderBottomLeftRadius: CARD_BORDER_RADIUS,
     border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
   },
+  tabNoBorder: {
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+  },
   tabRight: {
     borderTopRightRadius: CARD_BORDER_RADIUS,
     borderBottomRightRadius: CARD_BORDER_RADIUS,
@@ -159,10 +164,18 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
               disableElevation
               color="primary"
               variant="contained"
-              className={cls(classes.tab, classes.tabRight)}
+              className={cls(classes.tab, classes.tabNoBorder)}
               activeClassName={cls(classes.tabActive, { [classes.tabNoticeOpposite]: hasNotification })}
               component={CustomRouterLink}
               to="/pool">Pool</Button>
+            <Button
+              disableElevation
+              color="primary"
+              variant="contained"
+              className={cls(classes.tab, classes.tabRight)}
+              activeClassName={cls(classes.tabActive, { [classes.tabNoticeOpposite]: hasNotification })}
+              component={CustomRouterLink}
+              to="/bridge">Bridge</Button>
           </Box>
         </Box>
         <Box display="flex" justifyContent="center">
