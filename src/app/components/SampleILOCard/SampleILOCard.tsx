@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     top: "50%",
     left: "50%",
     marginLeft: "-12px",
-    marginTop: "12px"
+    marginTop: "-18px"
   },
   label: {
     color: theme.palette.label
