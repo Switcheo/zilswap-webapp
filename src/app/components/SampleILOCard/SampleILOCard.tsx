@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     top: "50%",
     left: "50%",
     marginLeft: "-12px",
-    marginTop: "12px"
+    marginTop: "-18px"
   },
   label: {
     color: theme.palette.label
@@ -74,10 +74,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   link: {
     fontWeight: 600,
     color: theme.palette.text?.secondary,
+    marginTop: theme.spacing(0.5),
+    "&:hover": {
+      textDecoration: "underline"
+    }
   },
   linkIcon: {
-    marginLeft: theme.spacing(1),
-    verticalAlign: 'middle',
+    marginLeft: theme.spacing(0.5),
+    verticalAlign: "top",
+    "& path": {
+      fill: theme.palette.text?.secondary,
+    }
   },
 }));
 

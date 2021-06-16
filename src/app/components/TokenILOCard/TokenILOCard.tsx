@@ -76,7 +76,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     top: "50%",
     left: "50%",
     marginLeft: "-12px",
-    marginTop: "12px"
+    marginTop: "-18px"
   },
   label: {
     color: theme.palette.label
@@ -84,10 +84,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   link: {
     fontWeight: 600,
     color: theme.palette.text?.secondary,
+    marginTop: theme.spacing(0.5),
+    "&:hover": {
+      textDecoration: "underline"
+    }
   },
   linkIcon: {
-    marginLeft: theme.spacing(1),
-    verticalAlign: 'middle',
+    marginLeft: theme.spacing(0.5),
+    verticalAlign: "top",
+    "& path": {
+      fill: theme.palette.text?.secondary,
+    }
   },
 }));
 
@@ -307,7 +314,7 @@ const TokenILOCard = (props: Props) => {
 
             {
               !iloOver &&
-              <Box>
+              <Box position="relative">
                 <Text className={cls(classes.title, classes.description)} marginBottom={0.75}>Commit your tokens in a fixed ratio to participate.</Text>
                 <Text className={classes.description} color="textSecondary">{new BigNumber(1).minus(data.usdRatio).times(100).toFormat(0)}% ZWAP - {new BigNumber(data.usdRatio).times(100).toFormat(0)}% ZIL</Text>
                 <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
@@ -318,6 +325,7 @@ const TokenILOCard = (props: Props) => {
                     hideBalance={false}
                     onAmountChange={onZwapChange}
                   />
+                  <ViewHeadlineIcon className={classes.viewIcon} />
                   <CurrencyInputILO
                     label="for Project:"
                     token={zilToken}
