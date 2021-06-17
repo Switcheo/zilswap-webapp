@@ -282,13 +282,15 @@ const TokenILOCard = (props: Props) => {
               </Link>
             )}
 
-            <Text variant="h1" marginTop={2.75} className={classes.timer}>
-              {
-                Math.floor(secondsToNextPhase / 3600).toLocaleString('en-US', { minimumIntegerDigits: 2 })}h : {
-                (Math.floor(secondsToNextPhase / 60) % 60).toLocaleString('en-US', { minimumIntegerDigits: 2 })}m : {
-                (secondsToNextPhase % 60).toLocaleString('en-US', { minimumIntegerDigits: 2 })}s
-              <HelpInfo placement="top" title={`${blocksToNextPhase} blocks left to the ${currentTime.isAfter(startTime) ? 'end' : 'start'} of this ZILO. Countdown is an estimate only. This ZILO runs from block ${startBlock} to ${endBlock}.`} />
-            </Text>
+            {currentBlock > 0 && (
+              <Text variant="h1" marginTop={2.75} className={classes.timer}>
+                {
+                  Math.floor(secondsToNextPhase / 3600).toLocaleString('en-US', { minimumIntegerDigits: 2 })}h : {
+                  (Math.floor(secondsToNextPhase / 60) % 60).toLocaleString('en-US', { minimumIntegerDigits: 2 })}m : {
+                  (secondsToNextPhase % 60).toLocaleString('en-US', { minimumIntegerDigits: 2 })}s
+                <HelpInfo placement="top" title={`${blocksToNextPhase} blocks left to the ${currentTime.isAfter(startTime) ? 'end' : 'start'} of this ZILO. Countdown is an estimate only. This ZILO runs from block ${startBlock} to ${endBlock}.`} />
+              </Text>
+            )}
 
             <ProgressBar progress={progress.toNumber()} marginTop={3} />
 
