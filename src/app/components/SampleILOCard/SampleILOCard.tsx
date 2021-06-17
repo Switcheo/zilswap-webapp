@@ -121,7 +121,7 @@ const SampleILOCard = (props: Props) => {
           {!!data.projectURL && (
             <Link
               className={classes.link}
-              underline="hover"
+              underline="none"
               rel="noopener noreferrer"
               target="_blank"
               href={data.projectURL}>
