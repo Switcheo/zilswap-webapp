@@ -10,6 +10,9 @@ interface Props extends Omit<TooltipProps, "children"> {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    '&:hover': {
+      cursor: 'pointer',
+    },
   },
   tooltip: {
     borderRadius: 12,

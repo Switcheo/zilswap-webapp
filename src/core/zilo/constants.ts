@@ -42,3 +42,5 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     usdTarget: '$342,867',
   }],
 }
+
+export const BLOCKS_PER_MINUTE = 1.25

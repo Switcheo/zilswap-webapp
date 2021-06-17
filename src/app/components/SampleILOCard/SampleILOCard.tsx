@@ -75,9 +75,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 600,
     color: theme.palette.text?.secondary,
     marginTop: theme.spacing(0.5),
-    "&:hover": {
-      textDecoration: "underline"
-    }
   },
   linkIcon: {
     marginLeft: theme.spacing(0.5),
