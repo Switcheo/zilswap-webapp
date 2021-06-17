@@ -9,6 +9,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import { FancyButton } from 'app/components';
 
+import { ZILClient, ZILClientOpts } from 'tradehub-api-js';
+import { Blockchain, Network, NetworkConfigProvider, NetworkConfigs, SWTHAddress } from 'tradehub-api-js/build/main/lib/tradehub/utils';
+import { ApproveZRC2Params, ZILLockParams } from 'tradehub-api-js/build/main/lib/tradehub/clients';
+
+import BigNumber from 'bignumber.js';
+import { Zilliqa } from '@zilliqa-js/zilliqa';
+import { Wallet } from '@zilliqa-js/account';
+import { ZILLockToken } from './components/tokens';
+
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {},
     container: {
@@ -59,10 +68,53 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         });
     }
 
-    const onExecute = () => {
+    const onExecute = async () => {
         console.log("bridge execute");
         console.log("source address: %o\n", formState.sourceAddress);
         console.log("dest address: %o\n", formState.destAddress);
+
+        const polynetConfig = NetworkConfigs[Network.DevNet];
+
+        const polynetConfigProvider: NetworkConfigProvider = {
+            getConfig: () => polynetConfig
+        }
+
+        const options: ZILClientOpts = {
+            configProvider: polynetConfigProvider,
+            blockchain: Blockchain.Zilliqa,
+        }
+
+        const tradehubZILClient = ZILClient.instance(options);
+
+        const zilliqa = new Zilliqa(tradehubZILClient.getProviderUrl())
+        const wallet  = new Wallet(zilliqa.network.provider)
+        wallet.addByPrivateKey(formState.zilPrivateKey)
+
+        const approveZRC2Params: ApproveZRC2Params = {
+            token: ZILLockToken,
+            gasPrice: new BigNumber("2000000000"),
+            gasLimit : new BigNumber(25000),
+            zilAddress: formState.sourceAddress,
+            signer: wallet
+        }
+
+        console.log("approve zrc2 token params: %o\n", approveZRC2Params);
+
+        const approve_tx = await tradehubZILClient.approveZRC2(approveZRC2Params);
+        console.log(approve_tx);
+
+        const lockDepositParams: ZILLockParams = {
+            address: SWTHAddress.getAddressBytes("swth1pacamg4ey0nx6mrhr7qyhfj0g3pw359cnjyv6d", Network.DevNet),
+            amount: new BigNumber("1000000000000"),
+            token: ZILLockToken,
+            gasPrice: new BigNumber("2000000000"),
+            zilAddress: formState.sourceAddress,
+            gasLimit: new BigNumber(25000),
+            signer: wallet,
+        }
+
+        const lock_tx = await tradehubZILClient.lockDeposit(lockDepositParams)
+        console.log(lock_tx);
     }
 
     return (
