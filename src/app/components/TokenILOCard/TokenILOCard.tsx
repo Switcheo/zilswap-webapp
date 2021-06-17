@@ -11,7 +11,7 @@ import { RootState, TokenState, TransactionState, WalletObservedTx, WalletState 
 import { useAsyncTask, useNetwork, useToaster } from "app/utils"
 import { ZIL_TOKEN_NAME } from 'app/utils/constants';
 import { ZilswapConnector } from "core/zilswap";
-import { ILOData } from 'core/zilo/constants';
+import { ILOData, BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import ViewHeadlineIcon from '@material-ui/icons/ViewHeadline';
 
@@ -151,9 +151,10 @@ const TokenILOCard = (props: Props) => {
   const progress = totalContributions.dividedBy(targetZil).times(100).integerValue()
   const iloStarted = iloState === ILOState.Active
   const iloOver = iloState === ILOState.Failed || iloState === ILOState.Completed
-  const startTime = blockTime.add((startBlock - currentBlock), 'minute')
-  const endTime = blockTime.add((endBlock - currentBlock), 'minute')
+  const startTime = blockTime.add((startBlock - currentBlock) / BLOCKS_PER_MINUTE, 'minute')
+  const endTime = blockTime.add((endBlock - currentBlock) / BLOCKS_PER_MINUTE, 'minute')
   const secondsToNextPhase = currentTime.isAfter(startTime) ? (currentTime.isAfter(endTime) || !iloStarted ? 0 : endTime.diff(currentTime, 'second')) : startTime.diff(currentTime, 'second')
+  const blocksToNextPhase = currentTime.isAfter(startTime) ? (currentTime.isAfter(endTime) || !iloStarted ? 0 : endBlock - currentBlock) : startBlock - currentBlock
   const effectiveContribution = totalContributions.gt(targetZil) ? userContribution.times(targetZil).dividedToIntegerBy(totalContributions) : userContribution
   const effectiveTotalContributions = BigNumber.min(targetZil, totalContributions)
   const receiveAmount = effectiveContribution.times(tokenAmount).dividedToIntegerBy(effectiveTotalContributions)
@@ -286,7 +287,7 @@ const TokenILOCard = (props: Props) => {
                 Math.floor(secondsToNextPhase / 3600).toLocaleString('en-US', { minimumIntegerDigits: 2 })}h : {
                 (Math.floor(secondsToNextPhase / 60) % 60).toLocaleString('en-US', { minimumIntegerDigits: 2 })}m : {
                 (secondsToNextPhase % 60).toLocaleString('en-US', { minimumIntegerDigits: 2 })}s
-              <HelpInfo placement="top" title={`Amount of time left to the ${currentTime.isAfter(startTime) ? 'end' : 'start'} of this ZILO.`} />
+              <HelpInfo placement="top" title={`${blocksToNextPhase} blocks left to the ${currentTime.isAfter(startTime) ? 'end' : 'start'} of this ZILO. Countdown is an estimate only. This ZILO runs from block ${startBlock} to ${endBlock}.`} />
             </Text>
 
             <ProgressBar progress={progress.toNumber()} marginTop={3} />
