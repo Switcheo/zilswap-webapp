@@ -14,7 +14,6 @@ const navigationConfig: NavigationOptions[] = [{
     title: "ZILO",
     href: "/zilo",
     icon: "Flame",
-    badge: "COMING SOON",
   }, {
     title: "Guide",
     href: "https://zilswap.gitbook.io/zilswap/",
