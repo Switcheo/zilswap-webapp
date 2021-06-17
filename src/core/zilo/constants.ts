@@ -17,14 +17,13 @@ export type ILOData = {
 
 export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
   [Network.MainNet]: [{
-    comingSoon: true,
     projectURL: 'https://docs.zilswap.io/how-to/zilo/01-zilstream',
     imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
     tokenSymbol: 'STREAM',
     tokenName: 'ZilStream',
     tokenDecimals: 8,
     description: 'ZilStream\'s premium membership token',
-    contractAddress: 'test',
+    contractAddress: 'zil1j8ecqf7extmnqkrdwl5jf9hpevj4crh95mdrwp',
     showUntil: dayjs('2021-06-25T10:00:00.000+0800'),
     usdRatio: '0.7',
     usdTarget: '$342,867',
