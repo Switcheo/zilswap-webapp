@@ -11,6 +11,7 @@ import { ILOData } from 'core/zilo/constants';
 import { Dayjs } from 'dayjs';
 import React from 'react';
 import { useSelector } from 'react-redux';
+import ViewHeadlineIcon from '@material-ui/icons/ViewHeadline';
 
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -66,7 +67,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     top: "50%",
     left: "50%",
     marginLeft: "-12px",
-    marginTop: "-18px"
+    marginTop: "-12px"
   },
   label: {
     color: theme.palette.label
@@ -156,7 +157,7 @@ const SampleILOCard = (props: Props) => {
               </Box>
             </Box>
 
-            <Box>
+            <Box position="relative">
                 <Text className={cls(classes.title, classes.description)} marginBottom={0.75}>Commit your tokens in a fixed ratio to participate.</Text>
                 <Text className={classes.description} color="textSecondary">{new BigNumber(1).minus(data.usdRatio).times(100).toFormat(0)}% ZWAP - {new BigNumber(data.usdRatio).times(100).toFormat(0)}% ZIL</Text>
               <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
@@ -169,6 +170,7 @@ const SampleILOCard = (props: Props) => {
                     hideBalance={false}
                   />
                 )}
+                <ViewHeadlineIcon className={classes.viewIcon} />
                 {zilToken && (
                   <CurrencyInputILO
                     label="for Project:"
