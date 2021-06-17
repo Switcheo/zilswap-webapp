@@ -4,7 +4,7 @@ import MainCard from 'app/layouts/MainCard';
 import cls from "classnames";
 
 import { Box, Button, IconButton, } from "@material-ui/core";
-import { AddressInput } from "./components/AddressInput";
+import { TextInput } from "./components/TextInput";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import { FancyButton } from 'app/components';
@@ -26,6 +26,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }))
 
 const initialFormState = {
+    zilPrivateKey: '',
+    swthAddress: '',
     sourceAddress: '',
     destAddress: '',
 }
@@ -35,6 +37,13 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     const classes = useStyles();
 
     const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
+
+    const onPrivateKeyChange = (key: string = "") => {
+        setFormState({
+            ...formState,
+            zilPrivateKey: key,
+        });
+    }
 
     const onSourceAddressChange = (address: string = "") => {
         setFormState({
@@ -59,16 +68,21 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     return (
         <MainCard {...rest} className={cls(classes.root, className)}>
             <Box display="flex" flexDirection="column" className={classes.container}>
-                <AddressInput 
-                    label="Ethereum Address" 
-                    placeholder="e.g. 0x91a23ab..."
-                    address={formState.sourceAddress}
-                    onAddressChange={onSourceAddressChange} />
-                <AddressInput 
-                    label="Zilliqa Address" 
+                <TextInput 
+                    label="Zilliqa Private Key (Wallet)" 
+                    placeholder="e.g. 1ab23..."
+                    text={formState.zilPrivateKey}
+                    onInputChange={onPrivateKeyChange} />
+                <TextInput 
+                    label="Zilliqa Address (Source)" 
                     placeholder="e.g. zil1xxxx..."
-                    address={formState.destAddress}
-                    onAddressChange={onDestAddressChange} />
+                    text={formState.destAddress}
+                    onInputChange={onSourceAddressChange} />
+                <TextInput 
+                    label="Ethereum Address (Destination)" 
+                    placeholder="e.g. 0x91a23ab..."
+                    text={formState.sourceAddress}
+                    onInputChange={onDestAddressChange} />
                 <FancyButton
                     className={classes.actionButton}
                     variant="contained"

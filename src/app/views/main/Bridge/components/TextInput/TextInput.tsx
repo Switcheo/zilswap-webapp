@@ -36,21 +36,21 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export interface AddressInputProps extends React.HTMLAttributes<HTMLFormElement> {
+export interface TextInputProps extends React.HTMLAttributes<HTMLFormElement> {
   label: string;
   placeholder: string;
-  address: string;
+  text: string;
 
-  onAddressChange?: (value: string) => void;
+  onInputChange?: (value: string) => void;
 }
 
-const AddressInput: React.FC<AddressInputProps> = (props: any) => {
-  const { children, className, label, placeholder, address, onAddressChange, ...rest } = props;
+const TextInput: React.FC<TextInputProps> = (props: any) => {
+  const { children, className, label, placeholder, text, onInputChange, ...rest } = props;
   const classes = useStyles();
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (typeof onAddressChange === "function") {
-      onAddressChange(event.target.value);
+    if (typeof onInputChange === "function") {
+      onInputChange(event.target.value);
     }
   };
 
@@ -59,7 +59,7 @@ const AddressInput: React.FC<AddressInputProps> = (props: any) => {
       <InputLabel className={classes.floatLeft}>{label}</InputLabel>
       <OutlinedInput
         placeholder={placeholder}
-        value={address}
+        value={text}
         fullWidth
         className={cls(classes.input)}
         onChange={onChange}
@@ -69,4 +69,4 @@ const AddressInput: React.FC<AddressInputProps> = (props: any) => {
   );
 };
 
-export default AddressInput;
+export default TextInput;
