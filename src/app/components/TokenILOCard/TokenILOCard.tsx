@@ -162,6 +162,7 @@ const TokenILOCard = (props: Props) => {
   const refundZwap = BigNumber.max(refundZil.times(targetZwap).dividedToIntegerBy(targetZil).minus(1), new BigNumber(0))
 
   const onZwapChange = (amount: string = "0") => {
+    console.log(amount)
     const _amount = new BigNumber(amount).shiftedBy(12).integerValue(BigNumber.ROUND_DOWN);
     const _zilAmount = _amount.minus(1).times(targetZil).dividedBy(targetZwap).integerValue(BigNumber.ROUND_DOWN);
 
