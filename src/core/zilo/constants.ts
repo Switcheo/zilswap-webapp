@@ -23,7 +23,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     tokenName: 'ZilStream',
     tokenDecimals: 8,
     description: 'ZilStream\'s premium membership token',
-    contractAddress: 'zil1j8ecqf7extmnqkrdwl5jf9hpevj4crh95mdrwp',
+    contractAddress: 'zil1nexqjqw9mddmm0jc2zk0kkuzf77as09kttze4d',
     showUntil: dayjs('2021-06-25T10:00:00.000+0800'),
     usdRatio: '0.7',
     usdTarget: '$342,867',
