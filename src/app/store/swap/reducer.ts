@@ -3,10 +3,13 @@ import { SwapActionTypes } from "./actions";
 import { SwapFormState } from "./types";
 import { TokenActionTypes } from "../token/actions";
 import { TokenUpdateProps, TokenUpdateAllProps } from "../token/types";
+import { LocalStorageKeys } from "app/utils/constants";
+
+const savedSlippageExpiry = JSON.parse(localStorage.getItem(LocalStorageKeys.SwapSlippageExpiry) || "{}");
 
 const initial_state: SwapFormState = {
-  slippage: 0.01, // percent
-  expiry: 3, // blocks
+  slippage: savedSlippageExpiry.slippage || 0.01, // percent
+  expiry: savedSlippageExpiry.expiry || 3, // blocks
 
   exactOf: "in",
   inAmount: new BigNumber(0),
@@ -14,6 +17,13 @@ const initial_state: SwapFormState = {
 
   isInsufficientReserves: false,
   forNetwork: null,
+}
+
+const checkToSaveSlippageExpiry = (state: SwapFormState, payload: any) => {
+  if (payload.slippage || payload.expiry) {
+    let toSave = { slippage: state.slippage, expiry: state.expiry, ...payload };
+    localStorage.setItem(LocalStorageKeys.SwapSlippageExpiry, JSON.stringify(toSave));
+  }
 }
 
 const reducer = (state: SwapFormState = initial_state, action: any) => {
@@ -32,6 +42,7 @@ const reducer = (state: SwapFormState = initial_state, action: any) => {
       };
 
     case SwapActionTypes.UPDATE:
+      checkToSaveSlippageExpiry(state, payload);
       return { ...state, ...payload };
 
     case TokenActionTypes.TOKEN_UPDATE_ALL:

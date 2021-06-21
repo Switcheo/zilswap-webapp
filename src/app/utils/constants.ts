@@ -22,6 +22,7 @@ export const LocalStorageKeys = {
   Network: "zilswap:network",
   UserTokenList: "zilswap:user-token-list",
   PendingClaimedTxs: "zilswap:pending-claimed-txs",
+  SwapSlippageExpiry: "zilswap:swap-slippage-expiry",
 };
 
 export const PlaceholderStrings = {
