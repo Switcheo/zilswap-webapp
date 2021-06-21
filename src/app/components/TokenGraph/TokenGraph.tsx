@@ -341,11 +341,24 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
   }
 
   const getRates = () => {
+    const rateStr = inTokenRate?.toString().split("");
+    let decPlace = 0;
+    let endCheck = false;
+    // loop through rate, if value is too small, increase the decimal place
+    rateStr?.forEach(str => {
+      if (!endCheck) {
+        if (str === "0") {
+          decPlace++;
+        } else if (str === ".") {
+        } else {
+          endCheck = true;
+        }
+      }
+    })
     if (inTokenRate) {
-      return "$" + inTokenRate.toFixed(2);
+      return "$" + inTokenRate.toFixed(3 + decPlace);
     }
     return "-";
-
   }
 
   return (
@@ -363,9 +376,9 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
                 {getRates()}{` (${growth.isGreaterThan(0) ? "+" : ""}${growth.toFixed(2)}%)`}
               </Typography>
               <Typography>
-                Past 
+                Past
                 {" "}
-                { currentInterval === "15m"
+                {currentInterval === "15m"
                   ? "15 Mins"
                   : currentInterval === "1h"
                     ? "1 Hour"
