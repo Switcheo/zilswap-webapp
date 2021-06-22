@@ -1,30 +1,27 @@
-import React, { useEffect, useState } from 'react';
-
-import MainCard from 'app/layouts/MainCard';
-import cls from "classnames";
-
-import { Box, Button, IconButton, } from "@material-ui/core";
-import { TextInput } from "./components/TextInput";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// temp lint override to allow staging deployment for WIP file
+import { Box, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
-import { ConfirmTransfer, CurrencyInput, FancyButton, Text } from 'app/components';
-
-import { ZILClient, ZILClientOpts } from 'tradehub-api-js';
-import { Blockchain, Network, NetworkConfigProvider, NetworkConfigs, SWTHAddress } from 'tradehub-api-js/build/main/lib/tradehub/utils';
-import { ApproveZRC2Params, ZILLockParams } from 'tradehub-api-js/build/main/lib/tradehub/clients';
-
-import BigNumber from 'bignumber.js';
-import { Zilliqa } from '@zilliqa-js/zilliqa';
 import { Wallet } from '@zilliqa-js/account';
-import { ZILLockToken } from './components/tokens';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, TokenInfo, TokenState, LayoutState } from "app/store/types";
-import { ConnectedWallet } from "core/wallet";
-import { truncate, hexToRGBA, useNetwork } from "app/utils";
-import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { Zilliqa } from '@zilliqa-js/zilliqa';
+import { ConfirmTransfer, CurrencyInput, FancyButton, Text } from 'app/components';
 import { ReactComponent as DotIcon } from "app/components/ConnectWalletButton/dot.svg";
+import MainCard from 'app/layouts/MainCard';
 import { actions } from "app/store";
 import { BridgeFormState } from 'app/store/bridge/types';
+import { LayoutState, RootState, TokenInfo, TokenState } from "app/store/types";
+import { AppTheme } from "app/theme/types";
+import { hexToRGBA, truncate, useNetwork } from "app/utils";
+import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
+import BigNumber from 'bignumber.js';
+import cls from "classnames";
+import { ConnectedWallet } from "core/wallet";
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { ZILClient, ZILClientOpts } from 'tradehub-api-js';
+import { ApproveZRC2Params, ZILLockParams } from 'tradehub-api-js/build/main/lib/tradehub/clients';
+import { Blockchain, Network, NetworkConfigProvider, NetworkConfigs, SWTHAddress } from 'tradehub-api-js/build/main/lib/tradehub/utils';
+import { ZILLockToken } from './components/tokens';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {},

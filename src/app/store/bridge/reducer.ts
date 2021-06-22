@@ -1,8 +1,8 @@
 import BigNumber from "bignumber.js";
+import { TokenActionTypes } from "../token/actions";
+import { TokenUpdateProps } from "../token/types";
 import { BridgeActionTypes } from "./actions";
 import { BridgeFormState } from "./types";
-import { TokenActionTypes } from "../token/actions";
-import { TokenUpdateProps, TokenUpdateAllProps } from "../token/types";
 
 const initial_state: BridgeFormState = {
   transferAmount: new BigNumber(0),
