@@ -17,6 +17,7 @@ export interface LayoutState {
   showCreatePool: boolean;
   showAdvancedSetting: boolean;
   showTransactionDialog: boolean;
+  showTransferConfirmation: boolean;
   liquidityEarnHidden: boolean;
   showPoolType: PoolType;
   notification?: FormNotification;

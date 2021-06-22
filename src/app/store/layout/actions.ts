@@ -8,6 +8,7 @@ export const LayoutActionTypes = {
   HIDE_LIQUIDITY_EARN: "HIDE_LIQUIDITY_EARN",
   UPDATE_NOTIFICATION: "UPDATE_NOTIFICATION",
   TOGGLE_SHOW_TRANSACTIONS: "TOGGLE_SHOW_TRANSACTIONS",
+  SHOW_TRANSFER_CONFIRMATION: "SHOW_TRANSFER_CONFIRMATION",
 
   ADD_BACKGROUND_LOADING: "ADD_BACKGROUND_LOADING",
   REMOVE_BACKGROUND_LOADING: "REMOVE_BACKGROUND_LOADING",
@@ -40,6 +41,12 @@ export function showPoolType(poolType?: PoolType) {
 export function showAdvancedSetting(show: boolean = true) {
   return {
     type: LayoutActionTypes.SHOW_ADVANCED_SETTING,
+    show,
+  }
+};
+export function showTransferConfirmation(show: boolean = true) {
+  return {
+    type: LayoutActionTypes.SHOW_TRANSFER_CONFIRMATION,
     show,
   }
 };
