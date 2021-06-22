@@ -1,16 +1,22 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, makeStyles } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
+import { Zilliqa } from "@zilliqa-js/zilliqa";
+import { Wallet } from '@zilliqa-js/account';
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { actions } from "app/store";
 import { BridgeFormState } from "app/store/bridge/types";
 import { RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate } from "app/utils";
+import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
+import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { SWTHAddress, TradeHubSDK, ZILClient } from "tradehub-api-js";
+import { Blockchain } from "tradehub-api-js/build/main/lib/tradehub/utils";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -98,8 +104,66 @@ const ConfirmTransfer = (props: any) => {
 
   if (!showTransfer) return null;
 
-  const onConfirm = () => {
+  const onConfirm = async () => {
     setPending(true);
+
+    console.log("source address: %o\n", bridgeFormState.sourceAddress);
+    console.log("dest address: %o\n", bridgeFormState.destAddress);
+
+    // TODO: get source denom
+
+    // TODO: check if need to approve zrc2 token
+
+    // TODO: generate temp SWTH address
+
+    // lock transaction from source chain
+    const sdk = new TradeHubSDK({
+      network: TradeHubSDK.Network.DevNet,
+      debugMode: true,
+    });
+
+    await sdk.token.reloadTokens();
+    const asset = sdk.token.tokens["zil"];
+    const swthAddressBytes = SWTHAddress.getAddressBytes(`${BridgeParamConstants.TEMP_SWTH_ADDRESS}`, sdk.network);
+
+    const tradehubZILClient = ZILClient.instance({
+      configProvider: {
+        getConfig: () => sdk.networkConfig
+      },
+      blockchain: Blockchain.Zilliqa
+    });
+
+    console.log(tradehubZILClient);
+    console.log(asset);
+
+    const zilliqa = new Zilliqa(tradehubZILClient.getProviderUrl())
+    const zilWallet  = new Wallet(zilliqa.network.provider)
+    zilWallet.addByPrivateKey(wallet?.addressInfo.privateKey!)
+
+    const lockDepositParams = {
+      address: swthAddressBytes,
+      amount: new BigNumber("1000000000000"),
+      token: asset,
+      gasPrice: new BigNumber("2000000000"),
+      zilAddress: "0xA476FcEdc061797fA2A6f80BD9E020a056904298", // TODO: change this to source address
+      gasLimit: new BigNumber(25000),
+      signer: zilWallet,
+    }
+
+    console.log("sending lock deposit txn")
+    const lock_tx = await tradehubZILClient.lockDeposit(lockDepositParams);
+    await lock_tx.confirm(lock_tx.id!);
+    console.log("transaction confirmed! receipt is: ", lock_tx.getReceipt());
+
+    // TODO: dispatch(lock_tx.id)?
+
+    // TODO: check deposit on tradehub using new bridge saga
+
+    // TODO: withdraw from tradehub
+
+    // TODO: check withdraw on tradehub using new bridge saga
+
+    // TODO: inform UI of success / failure
 
     setTimeout(() => {
       setPending(false);
