@@ -84,6 +84,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderTopRightRadius: 0,
     borderBottomRightRadius: 0,
     border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderWidth: "1px 1px 1px 0"
   },
   tabRight: {
     borderTopRightRadius: CARD_BORDER_RADIUS,
