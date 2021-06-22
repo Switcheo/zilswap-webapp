@@ -83,7 +83,7 @@ const SwapDetail: React.FC<SwapDetailProps> = (props: SwapDetailProps) => {
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <KeyValueDisplay kkey={"Price"} mb="8px">{getExchangeRateValue()} <HelpInfo className={classes.helpInfo} placement="top" title="Rate you are swapping your token at." /></KeyValueDisplay>
-  <KeyValueDisplay kkey={"Min. Received"} mb="8px">{getMinimumValue()} <HelpInfo className={classes.helpInfo} placement="top" title={<span>Minimum amount you will receive for this swap.<br />Note: Your transaction will be reverted if there is large, unfavorable price movements prior to confirmation.</span>} /></KeyValueDisplay>
+      <KeyValueDisplay kkey={"Min. Received"} mb="8px">{getMinimumValue()} <HelpInfo className={classes.helpInfo} placement="top" title={<span>Minimum amount you will receive for this swap.<br />Note: Your transaction will be reverted if there is large, unfavorable price movements prior to confirmation.</span>} /></KeyValueDisplay>
       <KeyValueDisplay kkey={"Price Impact"} mb="8px">{getPriceImpact()} <HelpInfo className={classes.helpInfo} placement="top" title="Difference between the market price and estimated price due to amount swapped." /></KeyValueDisplay>
       <KeyValueDisplay kkey={"Estimated Fee"} mb="8px">{getFeeValue()} <HelpInfo className={classes.helpInfo} placement="top" title="Liquidity providers will receive 0.3% of this trade." /></KeyValueDisplay>
     </Box>

@@ -213,7 +213,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         <MainCard {...rest} className={cls(classes.root, className)}>
             {!layoutState.showTransferConfirmation && (
                 <Box display="flex" flexDirection="column" className={classes.container}>
-                    <Text variant="h2" align="center">
+                    <Text variant="h2" align="center" marginTop={2}>
                         ZilSwap
                         <span className={classes.textColoured}>Bridge</span>
                     </Text>
