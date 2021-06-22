@@ -8,8 +8,9 @@ import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizRounded';
 
 export interface PoolDetailProps extends BoxProps {
   token?: TokenInfo;
@@ -29,7 +30,30 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   helpInfo: {
     marginBottom: theme.spacing(0.4)
-  }
+  },
+  switchIcon: {
+    height: 14,
+    width: 14,
+    backgroundColor: theme.palette.type === "dark" ? "#2B4648" : "#E4F1F2",
+    marginLeft: 8,
+    borderRadius: "50%",
+    cursor: "pointer",
+    transform: "rotate(0)",
+    transition: "transform .5s ease-in-out",
+    verticalAlign: "middle",
+    marginBottom: theme.spacing(0.4),
+    "& path": {
+      fill: theme.palette.label,
+    },
+    "&:hover": {
+      "& path": {
+        fill: theme.palette.primary.dark,
+      }
+    }
+  },
+  activeSwitchIcon: {
+    transform: "rotate(180deg)",
+  },
 }));
 const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
   const { children, className, token, ...rest } = props;
@@ -38,6 +62,7 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
   const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5, showCurrency: true });
+  const [reversedRate, setReversedRate] = useState(false);
 
   const liquidityTokenRate = poolToken?.pool?.totalContribution.isPositive() ? poolToken!.pool!.tokenReserve.div(poolToken!.pool!.totalContribution) : BIG_ZERO;
 
@@ -50,14 +75,6 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
     compression: token?.decimals,
   };
 
-  const getExchangeRateValue = () => {
-    if (!token?.pool) return <span className={classes.textWrapper}>-</span>;
-    const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
-    const rate = token.pool.exchangeRate.shiftedBy(token!.decimals - zilToken.decimals).pow(-1);
-    return (
-      <span className={classes.textWrapper}>1 ZIL = <span className={classes.textColoured}>{rate.toNumber().toLocaleString("en-US", { maximumFractionDigits: 12 })}</span> {token!.symbol}</span>
-    )
-  };
   const getPoolSizeValue = () => {
     if (!token?.pool) return <span className={classes.textWrapper}>-</span>;
     const { zilReserve, tokenReserve } = token.pool;
@@ -92,17 +109,37 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
       </span>
     )
   };
+  const getExchangeRateValue= () => {
+    if (!token?.pool) return <span className={classes.textWrapper}>-</span>;
+    const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
+    const rate = token.pool.exchangeRate.shiftedBy(token!.decimals - zilToken.decimals);
+    
+    const shouldReverseRate = reversedRate;
+
+    return (
+      shouldReverseRate 
+        ? <span className={classes.textWrapper}>1 {token!.symbol} = <span className={classes.textColoured}>{rate.pow(1).toNumber().toLocaleString("en-US", { maximumFractionDigits: 12 })}</span> ZIL</span>
+        : <span className={classes.textWrapper}>1 ZIL = <span className={classes.textColoured}>{rate.pow(-1).toNumber().toLocaleString("en-US", { maximumFractionDigits: 12 })}</span> {token!.symbol}</span>
+    )
+  };
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <KeyValueDisplay kkey={"Price"} mb="8px">{getExchangeRateValue()} <HelpInfo className={classes.helpInfo} placement="top" title="Rate you are withdrawing your tokens at." /></KeyValueDisplay>
+      <KeyValueDisplay kkey={"Price"} mb="8px">
+        {getExchangeRateValue()}
+        { " " }
+        <SwapHorizontalCircleIcon onClick={() => setReversedRate(!reversedRate)}
+          className={cls(classes.switchIcon, {
+            [classes.activeSwitchIcon]: reversedRate,
+          })} />
+      </KeyValueDisplay>   
       {layoutState.showPoolType === "remove" && (
         <KeyValueDisplay kkey={"Pool Token Value"} mb="8px">{getPoolTokenValue()} <HelpInfo className={classes.helpInfo} placement="top" title="Quantity of tokens you are withdrawing at." /></KeyValueDisplay>
       )}
       <KeyValueDisplay kkey={"Current Pool Size"} mb="8px">{getPoolSizeValue()} <HelpInfo className={classes.helpInfo} placement="top" title="Total quantity of tokens in the current pool." /></KeyValueDisplay>
       <KeyValueDisplay kkey={"Current Pool Share"} mb="8px">
         <span className={cls(classes.textColoured, classes.textBold)}>{getUserPoolShare()}</span> 
-        {getShareValue()}<HelpInfo className={classes.helpInfo} placement="top" title="Your %  share in relation to the current pool size." />
+        {getShareValue()} <HelpInfo className={classes.helpInfo} placement="top" title="Your %  share in relation to the current pool size." />
       </KeyValueDisplay>
       {layoutState.showPoolType === "add" && (
         <PotentialRewardInfo />

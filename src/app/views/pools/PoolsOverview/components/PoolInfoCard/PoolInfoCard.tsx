@@ -128,7 +128,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: 22,
     lineHeight: "24px",
     [theme.breakpoints.down("md")]: {
-      fontSize: 20,
+      fontSize: 16,
     },
     marginLeft: theme.spacing(0.5)
   },
@@ -167,8 +167,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   textColoured: {
     color: theme.palette.primary.dark
   },
-  helpInfo: {
-    // margin: theme.spacing(2)
+  liquidityVolumeContainer: {
+    padding: theme.spacing(0, 3),
+    [theme.breakpoints.down("xs")]: {
+      padding: theme.spacing(0, 1),
+    },
+  },
+  logo: {
+    [theme.breakpoints.down("xs")]: {
+      height: "24px",
+      width: "24px"
+    },
   }
 }));
 
@@ -264,7 +273,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
           <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" flex={1} borderRadius={12}>
               <Box py={"4px"} px={"16px"}>
                 <Box display="flex" alignItems="flex-end" mt={1} mb={1}>
-                  <CurrencyLogo currency={token.symbol} address={token.address} />
+                  <CurrencyLogo className={classes.logo} currency={token.symbol} address={token.address} />
                   <Text className={classes.token}>{token.symbol}</Text>
                 </Box>
                 <Text className={classes.poolSize}>{toHumanNumber(token.pool?.tokenReserve.shiftedBy(-decimals), 2)}</Text>
@@ -275,17 +284,17 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
             <Box py={"4px"} px={"16px"}>
                 <Box mt={1} mb={1} display="flex" justifyContent="space-between">
                   <Box display="flex" alignItems="flex-end">
-                    <CurrencyLogo currency="ZIL" address={token.address} />
+                    <CurrencyLogo className={classes.logo} currency="ZIL" address={token.address} />
                     <Text className={classes.token}>ZIL</Text>
                   </Box>
-                  <HelpInfo className={classes.helpInfo} placement="top" title={`This shows the current ${token.symbol}-ZIL pool size.`}/>
+                  <HelpInfo placement="top" title={`This shows the current ${token.symbol}-ZIL pool size.`}/>
                 </Box>
                 <Text className={classes.poolSize}>{toHumanNumber(token.pool?.zilReserve.shiftedBy(-12), 2)}</Text>
             </Box>
           </Box>
         </Box>
 
-        <Box display="flex" className={classes.statContainer}>
+        <Box display="flex" className={classes.statContainer} px={1}>
           <Box display="flex" className={classes.statItem}>
             <Text variant="subtitle2" marginBottom={1.5}>Reward to be Distributed</Text>
             <Box display="flex" className={classes.rewardContainer} alignItems="flex-end" flexWrap="wrap">
@@ -324,7 +333,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
           <Divider className={classes.divider}/>
         </Box>
 
-        <Box display="flex" flexDirection="column">
+        <Box display="flex" flexDirection="column" className={classes.liquidityVolumeContainer}>
           <KeyValueDisplay marginBottom={2.25} kkey="Total Liquidity" ValueComponent="span">
             <Text className={classes.label}>${usdValues?.poolLiquidity.dp(0).toFormat()}</Text>
           </KeyValueDisplay>

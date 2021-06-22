@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { useSelector } from 'react-redux'
-import { Box, makeStyles } from '@material-ui/core'
-import dayjs, { Dayjs } from "dayjs";
-
-import { Text } from "app/components";
+import { Box, makeStyles } from '@material-ui/core';
+import { SampleILOCard, Text } from "app/components";
 import TokenILOCard from "app/components/TokenILOCard";
 import ILOCard from "app/layouts/ILOCard";
 import { RootState, WalletState } from "app/store/types";
-import { useNetwork } from "app/utils";
-import { ZilswapConnector } from "core/zilswap";
-import { ZILO_DATA } from "core/zilo/constants";
-import { Link } from "react-router-dom";
 import { AppTheme } from "app/theme/types";
+import { useNetwork } from "app/utils";
+import { ZILO_DATA } from 'core/zilo/constants';
+import { ZilswapConnector } from "core/zilswap";
+import dayjs, { Dayjs } from "dayjs";
+import React, { useEffect, useState } from "react";
+import { useSelector } from 'react-redux';
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   container: {
@@ -74,12 +73,21 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           <Box display="flex" flexDirection="column" className={classes.container} textAlign="center" mb={4}>
             <Text variant="h1">No active listings.</Text>
             <Text className={classes.secondaryText} color="textSecondary">
-              Click <Link to="/ilo/past" className={classes.link}>here</Link> to view past ILOs.
+              Click <Link to="/zilo/past" className={classes.link}>here</Link> to view past ILOs.
             </Text>
           </Box>
           :
-          ziloData.map(data => {
-            return (
+          ziloData.map(data => (
+            data.comingSoon ? (
+              <SampleILOCard
+                key={data.contractAddress}
+                expanded={true}
+                data={data}
+                blockTime={blockTime}
+                currentBlock={currentBlock}
+                currentTime={currentTime}
+              />
+            ) : (
               <TokenILOCard
                 key={data.contractAddress}
                 expanded={true}
@@ -89,7 +97,7 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                 currentTime={currentTime}
               />
             )
-          })
+          ))
       }
     </ILOCard>
   )

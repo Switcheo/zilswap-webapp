@@ -2,7 +2,6 @@ import React, { lazy } from 'react';
 import { RouteConfig } from 'react-router-config';
 import { Redirect } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
-import { isProduction } from './utils/constants';
 
 const routes: RouteConfig[] = [{
   path: '/pools',
@@ -19,22 +18,21 @@ const routes: RouteConfig[] = [{
     component: () => <Redirect to="/pools/overview"></Redirect>
   }]
 },
-...!isProduction() ? [{
-  path: '/ilo',
+{
+  path: '/zilo',
   component: MainLayout,
   routes: [{
-    path: '/ilo/current',
+    path: '/zilo/current',
     exact: true,
     component: lazy(() => import('./views/ilo/Current'))
   }, {
-    path: '/ilo/past',
+    path: '/zilo/past',
     exact: true,
     component: lazy(() => import('./views/ilo/Past'))
   }, {
-    component: () => <Redirect to="/ilo/current"></Redirect>
+    component: () => <Redirect to="/zilo/current"></Redirect>
   }]
-}] : []
-  , {
+}, {
   path: '/',
   component: MainLayout,
   routes: [{

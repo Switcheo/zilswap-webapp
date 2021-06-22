@@ -1,4 +1,3 @@
-import { isProduction } from "app/utils/constants";
 import { NavigationOptions } from "./types";
 
 const navigationConfig: NavigationOptions[] = [{
@@ -13,10 +12,8 @@ const navigationConfig: NavigationOptions[] = [{
     icon: "Layers",
   }, {
     title: "ZILO",
-    href: "/ilo",
-    disabled: isProduction(),
+    href: "/zilo",
     icon: "Flame",
-    badge: "COMING SOON",
   }, {
     title: "Guide",
     href: "https://zilswap.gitbook.io/zilswap/",

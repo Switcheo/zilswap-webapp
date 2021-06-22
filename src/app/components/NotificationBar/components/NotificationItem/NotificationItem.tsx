@@ -1,4 +1,4 @@
-import { IconButton, BoxProps, Typography, Box, CircularProgress } from "@material-ui/core";
+import { IconButton, BoxProps, Typography, Box, CircularProgress, Link } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
@@ -39,12 +39,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     textAlign: "center"
   },
   link: {
-    marginLeft: 2,
-    cursor: "pointer",
     color: theme.palette.text?.secondary,
   },
   linkIcon: {
-    cursor: "pointer",
+    marginLeft: 4,
+    verticalAlign: "text-bottom",
   },
 }));
 
@@ -124,19 +123,19 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
     <SnackbarContent {...rest} ref={ref} className={classes.snackbar}>
       {getTxStatusIcon()}
       <Typography>&nbsp;&nbsp;{getMessage()}&nbsp;</Typography>
-      {hash && (
+      { hash &&
         <Typography>
-          {"0x"}{truncate(hash)}&nbsp;
-        </Typography>
-      )}
-      {hash && (
-        <>
-          <Typography className={classes.link} component="a" target="_blank" href={`https://viewblock.io/zilliqa/tx/${hash}?network=${network.toLowerCase()}`}>
-            {" "}<LaunchIcon className={cls(classes.icon, classes.linkIcon)} />
-          </Typography>
-
-        </>
-      )}
+          <Link
+          className={classes.link}
+          underline="hover"
+          rel="noopener noreferrer"
+          target="_blank"
+          href={`https://viewblock.io/zilliqa/tx/${hash}?network=${network.toLowerCase()}`}>
+            {"0x"}{truncate(hash)}
+            <LaunchIcon className={cls(classes.icon, classes.linkIcon)} />
+          </Link>
+        </Typography> 
+      }
       <Box flexGrow={1} />
       <IconButton size="small" onClick={onClickDismiss()}>
         <CloseIcon className={classes.icon} />

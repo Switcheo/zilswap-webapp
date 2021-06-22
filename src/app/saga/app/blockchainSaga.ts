@@ -120,6 +120,8 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     yield call([sdk, sdk.initialize], txObserver(txChannel), observingTxs)
     for (let i = 0; i < ZILO_DATA[network].length; ++i) {
       const data = ZILO_DATA[network][i]
+      if (data.comingSoon) continue
+
       yield call([sdk, sdk.registerZilo], data.contractAddress, ziloStateObserver(stateChannel))
       logger('zilo sdk initialized')
     }

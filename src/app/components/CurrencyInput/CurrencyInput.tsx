@@ -180,13 +180,13 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
 
       <OutlinedInput
         className={classes.inputRow}
-        placeholder={"0.00"}
+        placeholder={"0"}
         value={amount.toString()}
         onChange={onChange}
         onBlur={onEditorBlur}
         disabled={disabled}
         type="number"
-        inputProps={{ className: classes.input }}
+        inputProps={{ min: "0", className: classes.input }}
         endAdornment={
           <InputAdornment position="end">
             {fixedToken ? (

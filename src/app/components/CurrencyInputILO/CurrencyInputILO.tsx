@@ -3,9 +3,10 @@ import { makeStyles } from "@material-ui/core/styles";
 import { CurrencyLogo, Text } from "app/components";
 import { RootState, TokenInfo, WalletState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
+import { bnOrZero } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { CurrencyDialogProps } from "../CurrencyDialog/CurrencyDialog";
 
@@ -60,6 +61,7 @@ const useStyles = makeStyles(theme => ({
     color: "#DEFFFF"
   },
   balance: {
+    cursor: 'pointer',
     display: 'flex',
     width: '100%',
     justifyContent: 'space-between',
@@ -121,9 +123,13 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
       onAmountChange(event.target.value);
   };
 
+  const balanceHuman = useMemo(() => {
+    return bnOrZero(tokenBalance).shiftedBy(-(token?.decimals ?? 0))
+  }, [tokenBalance, token])
+
   return (
     <form className={cls(classes.form, className)} noValidate autoComplete="off">
-        <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" borderRadius={12}>
+        <Box flex={1} className={classes.box} display="flex" flexDirection="column" alignItems="start" borderRadius={12}>
             <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
               <Box display="flex" alignItems="center">
                 <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />
@@ -135,28 +141,26 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
             </Text>
             <OutlinedInput
               className={classes.outlinedInput}
-              placeholder={"0.00"}
+              placeholder={"0"}
               value={amount}
               onChange={onChange}
               onBlur={onEditorBlur}
               disabled={disabled}
-              type={new BigNumber(amount).isNaN() ? 'string' : 'number'}
-              inputProps={{ className: disabled && disabledStyle === 'strong' ? classes.strongInput : classes.input }}
+              type={disabled && new BigNumber(amount).isNaN() ? 'string' : 'number'}
+              inputProps={{ min: "0", className: disabled && disabledStyle === 'strong' ? classes.strongInput : classes.input }}
             />
             {!hideBalance && (
               [
-                <InputLabel className={classes.balance}>
+                <InputLabel className={classes.balance} onClick={() => onAmountChange?.(balanceHuman.toString(10))}>
                   <Typography align="left">
                     Balance:
                   </Typography>
                   <Typography align="right">
-                  {
-                      moneyFormat(tokenBalance ?? 0, {
-                        symbol: token?.symbol,
-                        compression: token?.decimals,
-                        showCurrency: true,
-                      })
-                  }
+                    {moneyFormat(tokenBalance ?? 0, {
+                      symbol: token?.symbol,
+                      compression: token?.decimals,
+                      showCurrency: true,
+                    })}
                   </Typography>
                 </InputLabel>,
               ]
