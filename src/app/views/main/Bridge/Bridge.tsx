@@ -14,9 +14,11 @@ import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
+import { ethers } from "ethers";
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ChainTransferType } from './components/constants';
+
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {},
@@ -103,14 +105,17 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
     const onClickConnect = async () => {
         try {
-            const ethereum = (window as any).ethereum;
-            const metamask = await ethereum.request({ method: 'eth_requestAccounts' });
+            let provider;
+            (window as any).ethereum.enable().then(provider = new ethers.providers.Web3Provider((window as any).ethereum));
+            const signer = provider.getSigner();
+            const ethAddress = await signer.getAddress();
+
             setFormState({
                 ...formState,
-                sourceAddress: metamask[0]
+                sourceAddress: ethAddress
             })
             dispatch(actions.Bridge.update({
-                sourceAddress: metamask[0]
+                sourceAddress: ethAddress
             }))
         } catch (error) {
             console.error(error);

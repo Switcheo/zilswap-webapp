@@ -3,7 +3,9 @@ export enum ChainTransferType {
     ETH_TO_ZIL = "eth_to_zil"
 }
 
+// TODO: replace with tradehub temp swth or env variables
 export const BridgeParamConstants = {
-    TEMP_SWTH_ADDRESS: "swth1pacamg4ey0nx6mrhr7qyhfj0g3pw359cnjyv6d", // TODO: replace these with actual tradehub call
-    TEMP_SWTH_MNEMONIC: ""
+    TEMP_SWTH_ADDRESS: "swth1kpqxp52fnydyf5gws0z8fuxgnmunthtnajmwwr",
+    TEMP_SWTH_MNEMONIC: "",
+    SWTH_FEE_ADDRESS: "swth1prv0t8j8tqcdngdmjlt59pwy6dxxmtqgycy2h7"
 }

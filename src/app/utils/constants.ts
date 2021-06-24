@@ -40,7 +40,7 @@ export const ZeevesNetworkMap = {
 
 export const RPCEndpoints: { [key in Network]: string } = {
   [Network.MainNet]: 'https://api.zilliqa.com',
-  [Network.TestNet]: 'https://dev-api.zilliqa.com'
+  [Network.TestNet]: 'https://dev-api.zilliqa.com',
 };
 
 export const BIG_ZERO = new BigNumber(0);
