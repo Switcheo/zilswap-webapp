@@ -399,6 +399,8 @@ const ConfirmTransfer = (props: any) => {
     return false;
   }
 
+  // deposit address depends on the selection
+  // not use at the moment because external wallets are used
   const onConfirm = async (depositAddress: string) => {
     setPending(true);
 
@@ -423,7 +425,6 @@ const ConfirmTransfer = (props: any) => {
 
     // TODO: combine with withdraw flow
     setPending(false);
-    setComplete(true);
   }
 
   const conductAnotherTransfer = () => {
