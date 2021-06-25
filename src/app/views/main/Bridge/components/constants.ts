@@ -6,8 +6,10 @@ export enum ChainTransferType {
 // TODO: replace with tradehub temp swth or env variables
 export const BridgeParamConstants = {
     TEMP_SWTH_ADDRESS: "swth1kpqxp52fnydyf5gws0z8fuxgnmunthtnajmwwr",
-    TEMP_SWTH_MNEMONIC: "",
+    TEMP_SWTH_MNEMONIC: process.env.REACT_APP_BRIDGE_TEMP_SWTH_MNEMONIC,
     SWTH_FEE_ADDRESS: "swth1prv0t8j8tqcdngdmjlt59pwy6dxxmtqgycy2h7",
     ZIL_GAS_PRICE: 2000000000,
     ZIL_GAS_LIMIT: 25000,
+    DEPOSIT_DENOM: "zusdt1",
+    WITHDRAW_DENOM: "zusdt1",
 }

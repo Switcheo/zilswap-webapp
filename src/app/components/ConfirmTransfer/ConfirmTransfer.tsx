@@ -174,7 +174,7 @@ const ConfirmTransfer = (props: any) => {
     const sdk = await initTradehubSDK(`${BridgeParamConstants.TEMP_SWTH_MNEMONIC}`);
 
     await sdk.token.reloadTokens();
-    const asset = sdk.token.tokens["zwap"];
+    const asset = sdk.token.tokens[`${BridgeParamConstants.WITHDRAW_DENOM}`];
     const lockProxy = asset.lock_proxy_hash;
     sdk.zil.configProvider.getConfig().Zil.LockProxyAddr = `0x${lockProxy}`;
     sdk.zil.configProvider.getConfig().Zil.ChainId = 333;
@@ -207,7 +207,7 @@ const ConfirmTransfer = (props: any) => {
     const sdk = await initTradehubSDK(`${BridgeParamConstants.TEMP_SWTH_MNEMONIC}`);
 
     await sdk.token.reloadTokens();
-    const asset = sdk.token.tokens["zil.e"];
+    const asset = sdk.token.tokens[`${BridgeParamConstants.WITHDRAW_DENOM}`];
     const lockProxy = asset.lock_proxy_hash;
     sdk.eth.configProvider.getConfig().Eth.LockProxyAddr = `0x${lockProxy}`
 
@@ -285,7 +285,7 @@ const ConfirmTransfer = (props: any) => {
     }
 
     console.log("lock deposit params: %o\n", lockDepositParams);
-    console.log("sending lock deposit txn (zilliqa)")
+    toaster(`Locking asset (Zilliqa)`);
     const lock_tx = await sdk.zil.lockDeposit(lockDepositParams);
 
     toaster(`Submitted: ${lock_tx.id!} (Zilliqa - Lock Asset)`);
@@ -325,7 +325,7 @@ const ConfirmTransfer = (props: any) => {
 
     const sdk = await initTradehubSDK();
     await sdk.token.reloadTokens();
-    const asset = sdk.token.tokens["zil9.e"];
+    const asset = sdk.token.tokens[`${BridgeParamConstants.DEPOSIT_DENOM}`];
     const lockProxy = asset.lock_proxy_hash;
     sdk.eth.configProvider.getConfig().Eth.LockProxyAddr = `0x${lockProxy}`
 
@@ -383,7 +383,7 @@ const ConfirmTransfer = (props: any) => {
     const sdk = await initTradehubSDK(`${BridgeParamConstants.TEMP_SWTH_MNEMONIC}`);
 
     await sdk.token.reloadTokens();
-    const asset = sdk.token.tokens["zwap"];
+    const asset = sdk.token.tokens[`${BridgeParamConstants.DEPOSIT_DENOM}`];
 
     console.log("locking asset: ", asset);
 
@@ -391,6 +391,8 @@ const ConfirmTransfer = (props: any) => {
     if (isLock) {
       toaster("Success: asset locked! (Zilliqa -> SWTH)");
     }
+
+    // TODO: combine with withdraw flow
 
     setTimeout(() => {
       setPending(false);
