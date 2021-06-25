@@ -18,8 +18,6 @@ import { getConnectedZilPay } from "core/utilities/zilpay";
 import { PoolTransaction, PoolTransactionResult, ZAPStats } from "core/utilities/zap-stats";
 import { getBlockchain, getWallet, getTransactions } from '../selectors'
 import { detachedToast } from "app/utils/useToaster";
-import { Token, TradeHubSDK } from "tradehub-api-js";
-import { SimpleMap } from "app/utils";
 
 const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
   if (!wallet) return null;
@@ -66,23 +64,6 @@ const zilPayObserver = (zilPay: any) => {
       networkObserver.unsubscribe()
     }
   })
-}
-
-async function fetchBridgeAssets() {
-  const tradehubSDK = new TradeHubSDK({
-    network: TradeHubSDK.Network.DevNet,
-    debugMode: false,
-  })
-  await tradehubSDK.token.reloadTokens();
-
-  const assets = tradehubSDK.token.tokens;
-  let newAssetMap : SimpleMap<Token> = {}
-  for (var asset in assets) {
-    if (assets[asset].lock_proxy_hash !== "") {
-      newAssetMap[asset] = assets[asset]
-    }
-  }
-  return newAssetMap;
 }
 
 type TxObservedPayload = { tx: ObservedTx, status: TxStatus, receipt?: TxReceipt }
@@ -145,9 +126,6 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
       logger('zilo sdk initialized')
     }
     ZilswapConnector.setSDK(sdk)
-
-    // load bridge assets
-    const assets: SimpleMap<Token> = yield call(fetchBridgeAssets);
 
     // load tokens
     const appState: AppState = yield call([sdk, sdk.getAppState]);
