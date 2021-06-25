@@ -17,7 +17,6 @@ import { ConnectedWallet } from "core/wallet";
 import { ethers } from "ethers";
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ChainTransferType } from './components/constants';
 
 
 const useStyles = makeStyles((theme: AppTheme) => ({

@@ -1,6 +1,6 @@
-export enum ChainTransferType {
+export enum ChainTransferFlow {
     ZIL_TO_ETH = "zil_to_eth",
-    ETH_TO_ZIL = "eth_to_zil"
+    ETH_TO_ZIL = "eth_to_zil",
 }
 
 // TODO: replace with tradehub temp swth or env variables
@@ -10,6 +10,7 @@ export const BridgeParamConstants = {
     SWTH_FEE_ADDRESS: "swth1prv0t8j8tqcdngdmjlt59pwy6dxxmtqgycy2h7",
     ZIL_GAS_PRICE: 2000000000,
     ZIL_GAS_LIMIT: 25000,
-    DEPOSIT_DENOM: "zusdt1",
-    WITHDRAW_DENOM: "zusdt1",
+    DEPOSIT_DENOM: "zil1",      //zil1 , zil9
+    WITHDRAW_DENOM: "zusdt1",   //zil.e, zil9.e
+    TRANSFER_FLOW: ChainTransferFlow.ZIL_TO_ETH,
 }
