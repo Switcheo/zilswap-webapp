@@ -69,7 +69,6 @@ const initialFormState = {
     sourceAddress: '',
     destAddress: '',
     transferAmount: '0',
-    trasnferDirection: ChainTransferType.ETH_TO_ZIL.toString(),
 }
 
 const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
