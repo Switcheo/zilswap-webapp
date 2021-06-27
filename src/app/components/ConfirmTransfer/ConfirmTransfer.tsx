@@ -12,10 +12,10 @@ import { BridgeParamConstants, ChainTransferFlow } from "app/views/main/Bridge/c
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
-import React, { useState } from "react";
+import { ethers } from "ethers";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SWTHAddress, Token, TradeHubSDK } from "tradehub-api-js";
-import { ethers } from "ethers";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   container: {
     padding: theme.spacing(2, 4, 0),
     [theme.breakpoints.down("xs")]: {
-        padding: theme.spacing(2, 2, 0),
+      padding: theme.spacing(2, 2, 0),
     },
   },
   actionButton: {
@@ -86,34 +86,29 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px",
     boxShadow: "none",
     border: "none",
-    backgroundColor:  "rgba(222, 255, 255, 0.1)"
+    backgroundColor: "rgba(222, 255, 255, 0.1)"
   },
 }));
 
 // initialize a tradehub sdk client
-// @param mnemonic  (optional) if supplied, initialize the sdk with an account
-async function initTradehubSDK(mnemonic?: string) {
+// @param mnemonic initialize the sdk with an account
+async function initTradehubSDK(mnemonic: string) {
   let sdk = new TradeHubSDK({
     network: TradeHubSDK.Network.DevNet,
     debugMode: true,
   });
-
-  if (mnemonic && mnemonic !== "") {
-    // init sdk with a valid swth address
-    sdk = await sdk.connectWithMnemonic(mnemonic);
-  }
-  return sdk;
+  return await sdk.connectWithMnemonic(mnemonic);
 }
 
 // check withdrawal on switcheo side
 // returns true if withdraw is confirm, otherwise returns false
 async function isWithdrawOnSwth(swthTxnHash: string, asset: Token, amount: string) {
   const sdk = new TradeHubSDK({
-      network: TradeHubSDK.Network.DevNet,
-      debugMode: false,
+    network: TradeHubSDK.Network.DevNet,
+    debugMode: false,
   })
 
-  const response = await sdk.api.getTxLog({ hash: swthTxnHash})
+  const response = await sdk.api.getTxLog({ hash: swthTxnHash })
 
   if (response !== null) {
     const result = JSON.parse(response.raw_log);
@@ -129,25 +124,25 @@ async function isWithdrawOnSwth(swthTxnHash: string, asset: Token, amount: strin
 // returns true if deposit is confirm, otherwise returns false
 async function isDepositOnSwth(swthAddress: string, asset: Token, amount: string) {
   const sdk = new TradeHubSDK({
-      network: TradeHubSDK.Network.DevNet,
-      debugMode: false,
+    network: TradeHubSDK.Network.DevNet,
+    debugMode: false,
   })
 
   const result = await sdk.api.getTransfers({
-      account: swthAddress
+    account: swthAddress
   })
 
   console.log(result[0]);
   if (result &&
-      result.length > 0 &&
-      result[0].transfer_type === "deposit" &&
-      result[0].blockchain === asset.blockchain &&
-      result[0].contract_hash === asset.lock_proxy_hash &&
-      result[0].denom === asset.denom &&
-      result[0].status === "success" &&
-      result[0].amount === amount) {
-      console.log("deposit confirmed; can proceed to withdraw")
-      return true
+    result.length > 0 &&
+    result[0].transfer_type === "deposit" &&
+    result[0].blockchain === asset.blockchain &&
+    result[0].contract_hash === asset.lock_proxy_hash &&
+    result[0].denom === asset.denom &&
+    result[0].status === "success" &&
+    result[0].amount === amount) {
+    console.log("deposit confirmed; can proceed to withdraw")
+    return true
   }
   return false
 }
@@ -163,6 +158,8 @@ const ConfirmTransfer = (props: any) => {
   const token = useSelector<RootState, TokenInfo | undefined>(state => state.bridge.formState.token);
   const [pending, setPending] = useState<Boolean>(false);
   const [complete, setComplete] = useState<Boolean>(false);
+
+  const swthAddrMnemonic = useMemo(() => SWTHAddress.newMnemonic(), []);
 
   if (!showTransfer) return null;
 
@@ -180,7 +177,7 @@ const ConfirmTransfer = (props: any) => {
   const onWithdraw = async (recvAddress: string) => {
     setPending(true);
 
-    const sdk = await initTradehubSDK(`${BridgeParamConstants.TEMP_SWTH_MNEMONIC}`);
+    const sdk = await initTradehubSDK(swthAddrMnemonic);
 
     await sdk.token.reloadTokens();
     const asset = sdk.token.tokens[`${BridgeParamConstants.WITHDRAW_DENOM}`];
@@ -211,8 +208,8 @@ const ConfirmTransfer = (props: any) => {
       console.log("checking deposit...");
       const isConfirmed = await isWithdrawOnSwth(`${withdrawTradehub.txhash}`, asset, `${bridgeFormState.transferAmount}`)
       if (isConfirmed) {
-          isWithdrawn = true
-          break;
+        isWithdrawn = true
+        break;
       }
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
@@ -234,10 +231,11 @@ const ConfirmTransfer = (props: any) => {
     * @param asset         details of the asset being locked; retrieved from tradehub
     * @param amount        nuumber of asset to be lock, e.g. set '1' if locking 1 native ETH
     */
-  async function lockAssetOnEth(swthAddress: string, asset: Token, amount: string) {
+  async function lockAssetOnEth(asset: Token, amount: string) {
     const lockProxy = asset.lock_proxy_hash;
-    const sdk = await initTradehubSDK();
+    const sdk = await initTradehubSDK(swthAddrMnemonic);
     sdk.eth.configProvider.getConfig().Eth.LockProxyAddr = `0x${lockProxy}`;
+    const swthAddress = sdk.wallet.bech32Address;
 
     let provider;
     (window as any).ethereum.enable().then(provider = new ethers.providers.Web3Provider((window as any).ethereum));
@@ -261,7 +259,7 @@ const ConfirmTransfer = (props: any) => {
           gasPriceGwei: gasPriceGwei,
           signer: signer,
         });
-  
+
         console.log("approve tx", approve_tx.hash);
         toaster(`Submitted: ${approve_tx.hash!} (Ethereum - ERC20 Approval)`);
         await approve_tx.wait();
@@ -270,7 +268,7 @@ const ConfirmTransfer = (props: any) => {
 
     toaster(`Locking asset (Ethereum)`);
 
-    const swthAddressBytes = SWTHAddress.getAddressBytes(`${BridgeParamConstants.TEMP_SWTH_ADDRESS}`, sdk.network);
+    const swthAddressBytes = SWTHAddress.getAddressBytes(swthAddress, sdk.network);
     const lock_tx = await sdk.eth.lockDeposit({
       token: asset,
       address: swthAddressBytes,
@@ -280,7 +278,7 @@ const ConfirmTransfer = (props: any) => {
       amount: depositAmt,
       signer: signer,
     });
-    
+
     await lock_tx.wait();
 
     toaster(`Submitted: ${lock_tx.hash!} (Ethereum - Lock Asset)`);
@@ -292,8 +290,8 @@ const ConfirmTransfer = (props: any) => {
       console.log("checking deposit...");
       const isConfirmed = await isDepositOnSwth(swthAddress, asset, amount)
       if (isConfirmed) {
-          isDeposited = true
-          break;
+        isDeposited = true
+        break;
       }
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
@@ -308,23 +306,23 @@ const ConfirmTransfer = (props: any) => {
     * Lock the asset on Zilliqa chain
     * returns true if lock txn is success, false otherwise
     * @param wallet        connected zilliqa wallet
-    * @param swthAddress   temp swth address to hold the lock asset
     * @param asset         details of the asset being locked; retrieved from tradehub
     * @param amount        nuumber of asset to be lock, e.g. set '1' if locking 1 native ZIL
     */
-  async function lockAssetOnZil(wallet: ConnectedWallet, swthAddress: string, asset: Token, amount: string) {
-    if (swthAddress === null || asset === null || wallet === null) {
+  async function lockAssetOnZil(wallet: ConnectedWallet, asset: Token, amount: string) {
+    if (asset === null || wallet === null) {
       console.error("Zilliqa wallet not connected");
       return false;
     }
-    
+
     const lockProxy = asset.lock_proxy_hash;
-    const sdk = await initTradehubSDK();
+    const sdk = await initTradehubSDK(swthAddrMnemonic);
     sdk.zil.configProvider.getConfig().Zil.LockProxyAddr = `0x${lockProxy}`;
     sdk.zil.configProvider.getConfig().Zil.ChainId = 333;
     sdk.zil.configProvider.getConfig().Zil.RpcURL = "https://dev-api.zilliqa.com";
 
     const zilAddress = santizedAddress(wallet.addressInfo.byte20);
+    const swthAddress = sdk.wallet.bech32Address;
     const swthAddressBytes = SWTHAddress.getAddressBytes(swthAddress, sdk.network);
     const amountQa = units.toQa(amount, units.Units.Zil); // TODO: might have to determine if is locking asset or native zils
 
@@ -386,8 +384,8 @@ const ConfirmTransfer = (props: any) => {
         console.log("checking deposit...");
         const isConfirmed = await isDepositOnSwth(swthAddress, asset, amount)
         if (isConfirmed) {
-            isDeposited = true
-            break;
+          isDeposited = true
+          break;
         }
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
@@ -405,19 +403,19 @@ const ConfirmTransfer = (props: any) => {
     setPending(true);
 
     const transferFlow = BridgeParamConstants.TRANSFER_FLOW;
-    const sdk = await initTradehubSDK(`${BridgeParamConstants.TEMP_SWTH_MNEMONIC}`);
+    const sdk = await initTradehubSDK(swthAddrMnemonic);
     await sdk.token.reloadTokens();
     const asset = sdk.token.tokens[`${BridgeParamConstants.DEPOSIT_DENOM}`];
 
     if (transferFlow === ChainTransferFlow.ZIL_TO_ETH) {
       // init lock on zil side
-      const isLock = await lockAssetOnZil(wallet!, `${BridgeParamConstants.TEMP_SWTH_ADDRESS}`, asset, bridgeFormState.transferAmount.toString());
+      const isLock = await lockAssetOnZil(wallet!, asset, bridgeFormState.transferAmount.toString());
       if (isLock) {
         toaster("Success: asset locked! (Zilliqa -> SWTH)");
       }
     } else {
       // init lock on eth side
-      const isLock = await lockAssetOnEth(`${BridgeParamConstants.TEMP_SWTH_ADDRESS}`, asset, bridgeFormState.transferAmount.toString());
+      const isLock = await lockAssetOnEth(asset, bridgeFormState.transferAmount.toString());
       if (isLock) {
         toaster("Success: asset locked! (Ethereum -> SWTH)");
       }
@@ -425,6 +423,22 @@ const ConfirmTransfer = (props: any) => {
 
     // TODO: combine with withdraw flow
     setPending(false);
+
+    // TODO: implement load initiated bridge tx into redux
+    // const { destAddress, sourceAddress } = bridgeFormState;
+    // if (!destAddress || !sourceAddress) return;
+
+    // const bridgeTx: BridgeTx = {
+    //     dstAddr: destAddress,
+    //     srcAddr: sourceAddress,
+    //     dstChain: ,
+    //     srcChain: ,
+    //     dstToken: ,
+    //     srcToken: ,
+    //     inputAmount: ,
+    //     interimAddrMnemonics: ,
+    // }
+    // dispatch(actions.Bridge.addBridgeTx(bridgeTx))
   }
 
   const conductAnotherTransfer = () => {
@@ -436,14 +450,14 @@ const ConfirmTransfer = (props: any) => {
     <Box className={cls(classes.root, classes.container)}>
       {!pending && !complete && (
         <IconButton onClick={() => dispatch(actions.Layout.showTransferConfirmation(false))} className={classes.backButton}>
-          <ArrowBack/>
+          <ArrowBack />
         </IconButton>
       )}
 
       {!pending && !complete && (
         <Box display="flex" flexDirection="column" alignItems="center">
           <Text variant="h2">Confirm Transfer</Text>
-                
+
           <Text margin={0.5}>
             Please review your transaction carefully.
           </Text>
@@ -456,8 +470,8 @@ const ConfirmTransfer = (props: any) => {
 
       {(pending || complete) && (
         <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
-          <Text variant="h2">{ pending ? "Transfer in Progress..." : "Transfer Complete" }</Text>
-                
+          <Text variant="h2">{pending ? "Transfer in Progress..." : "Transfer Complete"}</Text>
+
           <Text className={classes.textWarning} margin={0.5}>
             Do not close this page while we transfer your funds.
           </Text>
@@ -495,10 +509,10 @@ const ConfirmTransfer = (props: any) => {
 
       {!pending && !complete && (
         <Box marginTop={3} marginBottom={0.5} px={2}>
-          <KeyValueDisplay kkey={<strong>Estimated Total Fees</strong>} mb="8px">~ <span className={classes.textColoured}>$21.75</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo"/></KeyValueDisplay>
-          <KeyValueDisplay kkey="&nbsp; • &nbsp; Ethereum Txn Fee" mb="8px"><span className={classes.textColoured}>0.01</span> ETH ~<span className={classes.textColoured}>$21.25</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo"/></KeyValueDisplay>
-          <KeyValueDisplay kkey="&nbsp; • &nbsp; Zilliqa Txn Fee" mb="8px"><span className={classes.textColoured}>5</span> ZIL ~<span className={classes.textColoured}>$0.50</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo"/></KeyValueDisplay>
-          <KeyValueDisplay kkey="Estimated Transfer Time" mb="8px"><span className={classes.textColoured}>&lt; 30</span> Minutes<HelpInfo className={classes.helpInfo} placement="top" title="Todo"/></KeyValueDisplay>
+          <KeyValueDisplay kkey={<strong>Estimated Total Fees</strong>} mb="8px">~ <span className={classes.textColoured}>$21.75</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
+          <KeyValueDisplay kkey="&nbsp; • &nbsp; Ethereum Txn Fee" mb="8px"><span className={classes.textColoured}>0.01</span> ETH ~<span className={classes.textColoured}>$21.25</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
+          <KeyValueDisplay kkey="&nbsp; • &nbsp; Zilliqa Txn Fee" mb="8px"><span className={classes.textColoured}>5</span> ZIL ~<span className={classes.textColoured}>$0.50</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
+          <KeyValueDisplay kkey="Estimated Transfer Time" mb="8px"><span className={classes.textColoured}>&lt; 30</span> Minutes<HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
         </Box>
       )}
 
@@ -507,14 +521,14 @@ const ConfirmTransfer = (props: any) => {
           <Text align="center" variant="h6">{pending ? "Transfer Progress" : "Transfer Complete"}</Text>
 
           <KeyValueDisplay kkey="Estimated Time Left" mt="8px" mb="8px" px={2}>
-            {pending ? <span><span className={classes.textColoured}>20</span> Minutes</span> : "-" }
-            <HelpInfo className={classes.helpInfo} placement="top" title="Todo"/>
+            {pending ? <span><span className={classes.textColoured}>20</span> Minutes</span> : "-"}
+            <HelpInfo className={classes.helpInfo} placement="top" title="Todo" />
           </KeyValueDisplay>
 
           <Accordion className={classes.accordion}>
             <Box display="flex" justifyContent="center">
-              <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon}/>}>
-                  <Text>View Transactions</Text>
+              <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon} />}>
+                <Text>View Transactions</Text>
               </AccordionSummary>
             </Box>
             <AccordionDetails>
@@ -539,9 +553,9 @@ const ConfirmTransfer = (props: any) => {
           className={classes.actionButton}>
           {pending
             ? "Transfer in Progress..."
-            : BridgeParamConstants.TRANSFER_FLOW === ChainTransferFlow.ZIL_TO_ETH 
-            ? "Confirm (ZIL -> SWTH)"
-            : "Confirm (ETH -> SWTH)"
+            : BridgeParamConstants.TRANSFER_FLOW === ChainTransferFlow.ZIL_TO_ETH
+              ? "Confirm (ZIL -> SWTH)"
+              : "Confirm (ETH -> SWTH)"
           }
         </FancyButton>
       )}

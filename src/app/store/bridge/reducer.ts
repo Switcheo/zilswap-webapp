@@ -54,15 +54,6 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
         },
       };
 
-    case BridgeActionTypes.UPDATE_FORM:
-      return {
-        ...state,
-        formState: {
-          ...state.formState,
-          ...action.payload,
-        }
-      };
-
     case BridgeActionTypes.SET_TOKENS:
       return {
         ...state,
