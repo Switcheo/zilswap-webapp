@@ -1,7 +1,8 @@
 import { actions } from "app/store";
 import { BridgeTx, RootState } from "app/store/types";
 import { logger } from "core/utilities";
-import { fork, race, select, take } from "redux-saga/effects";
+import { call, fork, race, select, take } from "redux-saga/effects";
+import { TradeHubSDK, ConnectedTradeHubSDK } from "tradehub-api-js";
 
 export enum Status {
   NotStarted,
@@ -35,7 +36,33 @@ function getBridgeTxStatus(tx: BridgeTx): Status {
 function* watchDepositConfirmation() {
   while (true) {
     try {
+      const bridgeTxs = (yield select((state: RootState) => state.bridge.bridgeTxs)) as BridgeTx[];
+      const relevantTxs = bridgeTxs.filter(tx => getBridgeTxStatus(tx) === Status.DepositTxStarted);
 
+      for (const tx of relevantTxs) {
+        try {
+          // // watch and update relevant txs
+
+          // tx.depositTxHash = extTransfer.external_hash
+
+          // // trigger withdraw tx if deposit confirmed
+
+          const sdk = new TradeHubSDK({
+            network: TradeHubSDK.Network.DevNet,
+          });
+          const connectedSDK = (yield call([sdk, sdk.connectWithMnemonic], tx.interimAddrMnemonics)) as ConnectedTradeHubSDK
+
+          // const withdrawTx = connectedSDK.coin.withdraw({
+          //   ...
+          // })
+
+          // tx.withdrawTxHash = withdrawTx.hash // ready for next saga to proceed
+
+        } catch (error) {
+          console.error('process deposit tx error');
+          console.error(error);
+        }
+      }
     } catch (error) {
       console.error("watchDepositConfirmation error")
       console.error(error)
@@ -50,7 +77,20 @@ function* watchWithdrawConfirmation() {
   while (true) {
     try {
       const bridgeTxs = (yield select((state: RootState) => state.bridge.bridgeTxs)) as BridgeTx[];
-      
+      const relevantTxs = bridgeTxs.filter(tx => getBridgeTxStatus(tx) === Status.WithdrawTxStarted);
+
+      for (const tx of relevantTxs) {
+        try {
+          // // watch and update relevant txs
+
+          // tx.destinationTxHash = dstChainTx.hash
+          // tx.destinationTxConfirmedAt = dstChainTx.blocktime
+
+        } catch (error) {
+          console.error('process withdraw tx error');
+          console.error(error);
+        }
+      }
     } catch (error) {
       console.error("watchDepositConfirmation error")
       console.error(error)

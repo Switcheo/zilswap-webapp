@@ -51,6 +51,9 @@ export interface BridgeTx {
   srcToken: string;
   dstToken: string;
 
+  // allocated withdraw fee
+  withdrawFee: BigNumber;
+
   // unitless amount
   inputAmount: BigNumber;
 
