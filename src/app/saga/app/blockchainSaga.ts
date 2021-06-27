@@ -155,21 +155,27 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     yield put(actions.Wallet.update({ wallet }))
     if (network !== prevNetwork) yield put(actions.Blockchain.setNetwork(network))
 
-    if (wallet) {
-      const result: PoolTransactionResult = yield call(ZAPStats.getPoolTransactions, {
-        network: network,
-        address: wallet.addressInfo.bech32,
-        per_page: 50,
-      });
-      const transactions: Transaction[] = result.records.map(
-        (tx: PoolTransaction) => ({
-          hash: tx.transaction_hash,
-          status: "confirmed",
-        })
-      )
+    // preventing teardown due to zap api error
+    try {
+      if (wallet) {
+        const result: PoolTransactionResult = yield call(ZAPStats.getPoolTransactions, {
+          network: network,
+          address: wallet.addressInfo.bech32,
+          per_page: 50,
+        });
+        const transactions: Transaction[] = result.records.map(
+          (tx: PoolTransaction) => ({
+            hash: tx.transaction_hash,
+            status: "confirmed",
+          })
+        )
 
-      yield put(actions.Transaction.init({ transactions }))
-    } else {
+        yield put(actions.Transaction.init({ transactions }))
+      } else {
+        yield put(actions.Transaction.init({ transactions: [] }))
+      }
+    } catch (error) {
+      // set to empty transactions when zap api failed 
       yield put(actions.Transaction.init({ transactions: [] }))
     }
 

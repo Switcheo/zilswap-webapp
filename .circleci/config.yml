@@ -16,7 +16,7 @@ jobs:
             - v1-dependencies-
 
       # install dependencies
-      - run: yarn --ignore-engines
+      - run: yarn --ignore-engines --network-concurrency 1
 
       # save node_modules to cache
       - save_cache:

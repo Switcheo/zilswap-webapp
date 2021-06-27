@@ -1,12 +1,29 @@
+import { DEFAULT_TX_EXPIRY, DEFAULT_TX_SLIPPAGE, LocalStorageKeys } from "app/utils/constants";
 import BigNumber from "bignumber.js";
+import { TokenActionTypes } from "../token/actions";
+import { TokenUpdateAllProps, TokenUpdateProps } from "../token/types";
 import { SwapActionTypes } from "./actions";
 import { SwapFormState } from "./types";
-import { TokenActionTypes } from "../token/actions";
-import { TokenUpdateProps, TokenUpdateAllProps } from "../token/types";
+
+const loadSavedSlippage = () => {
+  try {
+    const savedData = JSON.parse(localStorage.getItem(LocalStorageKeys.SwapSlippageExpiry) || "{}");
+    const slippage = parseFloat(savedData.slippage ?? DEFAULT_TX_SLIPPAGE)
+    const expiry = parseInt(savedData.expiry ?? DEFAULT_TX_EXPIRY)
+    return {
+      slippage: isNaN(slippage) ? DEFAULT_TX_SLIPPAGE : slippage,
+      expiry: isNaN(expiry) ? DEFAULT_TX_EXPIRY : expiry,
+    }
+  } catch (error) {
+    return {};
+  }
+}
+
+const savedSlippageExpiry = loadSavedSlippage();
 
 const initial_state: SwapFormState = {
-  slippage: 0.01, // percent
-  expiry: 3, // blocks
+  slippage: savedSlippageExpiry.slippage ?? DEFAULT_TX_SLIPPAGE, // percent
+  expiry: savedSlippageExpiry.expiry ?? DEFAULT_TX_EXPIRY, // blocks
 
   exactOf: "in",
   inAmount: new BigNumber(0),
@@ -14,6 +31,13 @@ const initial_state: SwapFormState = {
 
   isInsufficientReserves: false,
   forNetwork: null,
+}
+
+const checkToSaveSlippageExpiry = (state: SwapFormState, payload: any) => {
+  if (payload.slippage !== undefined || payload.expiry !== undefined) {
+    let toSave = { slippage: state.slippage, expiry: state.expiry, ...payload };
+    localStorage.setItem(LocalStorageKeys.SwapSlippageExpiry, JSON.stringify(toSave));
+  }
 }
 
 const reducer = (state: SwapFormState = initial_state, action: any) => {
@@ -32,6 +56,7 @@ const reducer = (state: SwapFormState = initial_state, action: any) => {
       };
 
     case SwapActionTypes.UPDATE:
+      checkToSaveSlippageExpiry(state, payload);
       return { ...state, ...payload };
 
     case TokenActionTypes.TOKEN_UPDATE_ALL:

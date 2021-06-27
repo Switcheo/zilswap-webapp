@@ -84,6 +84,7 @@ const ShowAdvanced = (props: any) => {
     if (typeof newSlippage === "number" && slippage !== newSlippage) dispatch(actions.Swap.update({ slippage: newSlippage }));
     if (typeof newExpiry === "number" && expiry !== newExpiry) dispatch(actions.Swap.update({ expiry: newExpiry }));
     toaster("Setting updated");
+    dispatch(actions.Layout.showAdvancedSetting(false))
   }
 
   const resetSetting = () => {
@@ -92,6 +93,7 @@ const ShowAdvanced = (props: any) => {
     setNewExpiry(PREFERRED_BLOCK);
     setNewSlippage(PREFERRED_SLIPPAGE);
     toaster("Setting reset");
+    dispatch(actions.Layout.showAdvancedSetting(false))
   }
 
   return (
@@ -105,7 +107,7 @@ const ShowAdvanced = (props: any) => {
       </Box>
 
       <Accordion className={classes.accordion}>
-        <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon}/>}>
+        <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon} />}>
           <Box display="flex" width="100%">
             <Typography>Slippage Tolerance <HelpInfo className={classes.helpInfo} placement="top" title="Set a higher slippage tolerance to ensure your transactions go through. The lower it is, the higher likelihood your transaction may fail." /></Typography>
             <Box flexGrow={1} />
@@ -118,7 +120,7 @@ const ShowAdvanced = (props: any) => {
       </Accordion>
 
       <Accordion className={classes.accordion}>
-        <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon}/>}>
+        <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon} />}>
           <Box display="flex" width="100%">
             <Typography>Block Expiry <HelpInfo className={classes.helpInfo} placement="top" title="Your transaction will automatically be reverted if it is PENDING beyond this number of blocks." /></Typography>
             <Box flexGrow={1} />

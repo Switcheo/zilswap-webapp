@@ -7,6 +7,7 @@ const initial_state: LayoutState = {
   showCreatePool: false,
   showAdvancedSetting: false,
   showTransactionDialog: false,
+  showTransferConfirmation: false,
   liquidityEarnHidden: false,
   notification: undefined,
   showPoolType: "add",
@@ -31,6 +32,11 @@ const reducer = (state: LayoutState = initial_state, action: any) => {
       return {
         ...state,
         showAdvancedSetting: action.show,
+      };
+    case LayoutActionTypes.SHOW_TRANSFER_CONFIRMATION:
+      return {
+        ...state,
+        showTransferConfirmation: action.show,
       };
     case LayoutActionTypes.TOGGLE_SHOW_TRANSACTIONS:
       return {
