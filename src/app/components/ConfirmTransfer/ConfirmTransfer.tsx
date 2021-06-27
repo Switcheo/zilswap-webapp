@@ -159,8 +159,8 @@ const ConfirmTransfer = (props: any) => {
   const toaster = useToaster();
   const network = useNetwork();
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
-  const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge);
-  const token = useSelector<RootState, TokenInfo | undefined>(state => state.bridge.token);
+  const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
+  const token = useSelector<RootState, TokenInfo | undefined>(state => state.bridge.formState.token);
   const [pending, setPending] = useState<Boolean>(false);
   const [complete, setComplete] = useState<Boolean>(false);
 

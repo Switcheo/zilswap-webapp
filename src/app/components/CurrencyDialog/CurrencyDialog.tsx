@@ -1,18 +1,18 @@
 
-import React, { useState,  useEffect } from "react";
-import { useSelector } from "react-redux";
-import BigNumber from "bignumber.js";
-import clsx from "clsx";
 import { Box, CircularProgress, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput } from "@material-ui/core";
 import { SearchOutlined } from "@material-ui/icons";
+import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { DialogModal } from "app/components";
+import { BridgeState } from "app/store/bridge/types";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useTaskSubscriber } from "app/utils";
 import { BIG_ZERO, LoadingKeys, LocalStorageKeys } from "app/utils/constants";
-import { CurrencyList } from "./components";
+import BigNumber from "bignumber.js";
+import clsx from "clsx";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
-import { BridgeFormState } from "app/store/bridge/types";
-import { toBech32Address } from "@zilliqa-js/zilliqa";
+import { CurrencyList } from "./components";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -85,7 +85,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
 
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const bridgeState = useSelector<RootState, BridgeFormState>(state => state.bridge);
+  const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
 
   useEffect(() => {
     if (!tokenState.tokens) return setTokens([]);
