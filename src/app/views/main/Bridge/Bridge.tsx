@@ -149,25 +149,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         dispatch(actions.Layout.showTransferConfirmation(!layoutState.showTransferConfirmation))
     }
 
-    const onTransfer = () => {
-        const { destAddress, sourceAddress } = bridgeFormState;
-
-        if (!destAddress || !sourceAddress) return;
-
-        // TODO: implement load initiated bridge tx into redux
-        // const bridgeTx: BridgeTx = {
-        //     dstAddr: destAddress,
-        //     srcAddr: sourceAddress,
-        //     dstChain: ,
-        //     srcChain: ,
-        //     dstToken: ,
-        //     srcToken: ,
-        //     inputAmount: ,
-        //     interimAddrMnemonics: ,
-        // }
-        // dispatch(actions.Bridge.addBridgeTx(bridgeTx))
-    }
-
     return (
         <MainCard {...rest} className={cls(classes.root, className)}>
             {!layoutState.showTransferConfirmation && (
