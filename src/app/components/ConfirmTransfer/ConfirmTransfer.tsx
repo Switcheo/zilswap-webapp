@@ -1,16 +1,21 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, makeStyles } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
+import { units } from "@zilliqa-js/zilliqa";
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { actions } from "app/store";
 import { BridgeFormState } from "app/store/bridge/types";
-import { RootState, TokenInfo } from "app/store/types";
+import { RootState, TokenInfo, WalletObservedTx } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate } from "app/utils";
+import { hexToRGBA, truncate, useNetwork, useToaster } from "app/utils";
+import { BridgeParamConstants, ChainTransferFlow } from "app/views/main/Bridge/components/constants";
+import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { SWTHAddress, Token, TradeHubSDK } from "tradehub-api-js";
+import { ethers } from "ethers";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -85,11 +90,74 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
+// initialize a tradehub sdk client
+// @param mnemonic  (optional) if supplied, initialize the sdk with an account
+async function initTradehubSDK(mnemonic?: string) {
+  let sdk = new TradeHubSDK({
+    network: TradeHubSDK.Network.DevNet,
+    debugMode: true,
+  });
+
+  if (mnemonic && mnemonic !== "") {
+    // init sdk with a valid swth address
+    sdk = await sdk.connectWithMnemonic(mnemonic);
+  }
+  return sdk;
+}
+
+// check withdrawal on switcheo side
+// returns true if withdraw is confirm, otherwise returns false
+async function isWithdrawOnSwth(swthTxnHash: string, asset: Token, amount: string) {
+  const sdk = new TradeHubSDK({
+      network: TradeHubSDK.Network.DevNet,
+      debugMode: false,
+  })
+
+  const response = await sdk.api.getTxLog({ hash: swthTxnHash})
+
+  if (response !== null) {
+    const result = JSON.parse(response.raw_log);
+    if (result !== null && result !== "") {
+      return (result[0].log === 'Withdrawal success');
+    }
+  }
+
+  return false
+}
+
+// check deposit on switcheo side
+// returns true if deposit is confirm, otherwise returns false
+async function isDepositOnSwth(swthAddress: string, asset: Token, amount: string) {
+  const sdk = new TradeHubSDK({
+      network: TradeHubSDK.Network.DevNet,
+      debugMode: false,
+  })
+
+  const result = await sdk.api.getTransfers({
+      account: swthAddress
+  })
+
+  console.log(result[0]);
+  if (result &&
+      result.length > 0 &&
+      result[0].transfer_type === "deposit" &&
+      result[0].blockchain === asset.blockchain &&
+      result[0].contract_hash === asset.lock_proxy_hash &&
+      result[0].denom === asset.denom &&
+      result[0].status === "success" &&
+      result[0].amount === amount) {
+      console.log("deposit confirmed; can proceed to withdraw")
+      return true
+  }
+  return false
+}
 
 const ConfirmTransfer = (props: any) => {
   const { showTransfer } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
+  const toaster = useToaster();
+  const network = useNetwork();
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
   const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge);
   const token = useSelector<RootState, TokenInfo | undefined>(state => state.bridge.token);
@@ -98,13 +166,265 @@ const ConfirmTransfer = (props: any) => {
 
   if (!showTransfer) return null;
 
-  const onConfirm = () => {
+  // returns true if asset is native coin, false otherwise
+  const isNativeAsset = (asset: Token) => {
+    const zeroAddress = "0000000000000000000000000000000000000000";
+    return (asset.asset_id === zeroAddress)
+  }
+
+  // remove 0x and lowercase
+  const santizedAddress = (address: string) => {
+    return address.replace("0x", "").toLowerCase();
+  }
+
+  const onWithdraw = async (recvAddress: string) => {
     setPending(true);
 
-    setTimeout(() => {
-      setPending(false);
-      setComplete(true);
-    }, 5000)
+    const sdk = await initTradehubSDK(`${BridgeParamConstants.TEMP_SWTH_MNEMONIC}`);
+
+    await sdk.token.reloadTokens();
+    const asset = sdk.token.tokens[`${BridgeParamConstants.WITHDRAW_DENOM}`];
+    console.log("withdraw asset: ", asset);
+    const lockProxy = asset.lock_proxy_hash;
+    sdk.zil.configProvider.getConfig().Zil.LockProxyAddr = `0x${lockProxy}`;
+    sdk.zil.configProvider.getConfig().Zil.ChainId = 333;
+    sdk.zil.configProvider.getConfig().Zil.RpcURL = "https://dev-api.zilliqa.com";
+
+    const toAddress = santizedAddress(recvAddress);
+
+    const withdrawTradehub = await sdk.coin.withdraw({
+      amount: `${bridgeFormState.transferAmount}`,
+      denom: asset.denom,
+      to_address: toAddress,
+      fee_address: `${BridgeParamConstants.SWTH_FEE_ADDRESS}`,
+      fee_amount: "1",
+      originator: sdk.wallet?.bech32Address
+    });
+
+    console.log("withdraw (tradehub): %o\n", withdrawTradehub);
+    toaster(`Submitted: Initiate withdrawal ${withdrawTradehub.txhash} (SWTH -> DEST_BLOCKCHAIN)`);
+
+    let isWithdrawn = false
+
+    // check deposit on switcheo    
+    for (let attempt = 0; attempt < 50; attempt++) {
+      console.log("checking deposit...");
+      const isConfirmed = await isWithdrawOnSwth(`${withdrawTradehub.txhash}`, asset, `${bridgeFormState.transferAmount}`)
+      if (isConfirmed) {
+          isWithdrawn = true
+          break;
+      }
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
+    setPending(false);
+    setComplete(true);
+
+    if (isWithdrawn) {
+      toaster(`Success: asset withdraw (SWTH -> DEST_BLOCKCHAIN)`);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+    * Lock the asset on Ethereum chain
+    * returns true if lock txn is success, false otherwise
+    * @param swthAddress   temp swth address to hold the lock asset
+    * @param asset         details of the asset being locked; retrieved from tradehub
+    * @param amount        nuumber of asset to be lock, e.g. set '1' if locking 1 native ETH
+    */
+  async function lockAssetOnEth(swthAddress: string, asset: Token, amount: string) {
+    const lockProxy = asset.lock_proxy_hash;
+    const sdk = await initTradehubSDK();
+    sdk.eth.configProvider.getConfig().Eth.LockProxyAddr = `0x${lockProxy}`;
+
+    let provider;
+    (window as any).ethereum.enable().then(provider = new ethers.providers.Web3Provider((window as any).ethereum));
+    const signer = provider.getSigner();
+
+    const ethAddress = await signer.getAddress();
+    const gasPrice = await sdk.eth.getProvider().getGasPrice();
+    const gasPriceGwei = new BigNumber(gasPrice.toString()).shiftedBy(-9);
+    const depositAmt = new BigNumber(amount).shiftedBy(asset.decimals);
+
+    // approve token
+    if (!isNativeAsset(asset)) {
+      toaster(`Approval needed (Ethereum)`);
+
+      const allowance = await sdk.eth.checkAllowanceERC20(asset, ethAddress, `0x${lockProxy}`);
+      if (allowance.lt(depositAmt)) {
+        const approve_tx = await sdk.eth.approveERC20({
+          token: asset,
+          ethAddress: ethAddress,
+          gasLimit: new BigNumber(100000),
+          gasPriceGwei: gasPriceGwei,
+          signer: signer,
+        });
+  
+        console.log("approve tx", approve_tx.hash);
+        toaster(`Submitted: ${approve_tx.hash!} (Ethereum - ERC20 Approval)`);
+        await approve_tx.wait();
+      }
+    }
+
+    toaster(`Locking asset (Ethereum)`);
+
+    const swthAddressBytes = SWTHAddress.getAddressBytes(`${BridgeParamConstants.TEMP_SWTH_ADDRESS}`, sdk.network);
+    const lock_tx = await sdk.eth.lockDeposit({
+      token: asset,
+      address: swthAddressBytes,
+      ethAddress: ethAddress.toLowerCase(),
+      gasLimit: new BigNumber(250000),
+      gasPriceGwei: gasPriceGwei,
+      amount: depositAmt,
+      signer: signer,
+    });
+    
+    await lock_tx.wait();
+
+    toaster(`Submitted: ${lock_tx.hash!} (Ethereum - Lock Asset)`);
+    console.log("lock tx", lock_tx.hash!);
+    let isDeposited = false
+
+    // check deposit on switcheo    
+    for (let attempt = 0; attempt < 50; attempt++) {
+      console.log("checking deposit...");
+      const isConfirmed = await isDepositOnSwth(swthAddress, asset, amount)
+      if (isConfirmed) {
+          isDeposited = true
+          break;
+      }
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
+    if (isDeposited) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+    * Lock the asset on Zilliqa chain
+    * returns true if lock txn is success, false otherwise
+    * @param wallet        connected zilliqa wallet
+    * @param swthAddress   temp swth address to hold the lock asset
+    * @param asset         details of the asset being locked; retrieved from tradehub
+    * @param amount        nuumber of asset to be lock, e.g. set '1' if locking 1 native ZIL
+    */
+  async function lockAssetOnZil(wallet: ConnectedWallet, swthAddress: string, asset: Token, amount: string) {
+    if (swthAddress === null || asset === null || wallet === null) {
+      console.error("Zilliqa wallet not connected");
+      return false;
+    }
+    
+    const lockProxy = asset.lock_proxy_hash;
+    const sdk = await initTradehubSDK();
+    sdk.zil.configProvider.getConfig().Zil.LockProxyAddr = `0x${lockProxy}`;
+    sdk.zil.configProvider.getConfig().Zil.ChainId = 333;
+    sdk.zil.configProvider.getConfig().Zil.RpcURL = "https://dev-api.zilliqa.com";
+
+    const zilAddress = santizedAddress(wallet.addressInfo.byte20);
+    const swthAddressBytes = SWTHAddress.getAddressBytes(swthAddress, sdk.network);
+    const amountQa = units.toQa(amount, units.Units.Zil); // TODO: might have to determine if is locking asset or native zils
+
+    if (!isNativeAsset(asset)) {
+      // not native zils
+      // user is transferring zrc2 tokens
+      // need approval
+      const allowance = await sdk.zil.checkAllowanceZRC2(asset, `0x${zilAddress}`, `0x${lockProxy}`);
+      console.log("zil zrc2 allowance: ", allowance);
+
+      const approveZRC2Params = {
+        token: asset,
+        gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
+        gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
+        zilAddress: zilAddress,
+        signer: wallet.provider?.wallet!,
+      }
+      console.log("approve zrc2 token parameters: ", approveZRC2Params);
+      toaster(`Approval needed (Zilliqa)`);
+
+      const approve_tx = await sdk.zil.approveZRC2(approveZRC2Params);
+      toaster(`Submitted: ${approve_tx.id!} (Zilliqa - ZRC2 Approval)`);
+
+      await approve_tx.confirm(approve_tx.id!)
+      console.log("transaction confirmed! receipt is: ", approve_tx.getReceipt())
+    }
+
+    const lockDepositParams = {
+      address: swthAddressBytes,
+      amount: new BigNumber(amountQa.toString()),
+      token: asset,
+      gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
+      gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
+      zilAddress: zilAddress,
+      signer: wallet.provider?.wallet!,
+    }
+
+    console.log("lock deposit params: %o\n", lockDepositParams);
+    toaster(`Locking asset (Zilliqa)`);
+    const lock_tx = await sdk.zil.lockDeposit(lockDepositParams);
+
+    const walletObservedTx: WalletObservedTx = {
+      hash: lock_tx.id!,
+      deadline: Number.MAX_SAFE_INTEGER,
+      address: wallet.addressInfo.bech32 || "",
+      network,
+    };
+    dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
+    toaster(`Submitted: ${lock_tx.id!} (Zilliqa - Lock Asset)`);
+
+    await lock_tx.confirm(lock_tx.id!);
+    console.log("transaction confirmed! receipt is: ", lock_tx.getReceipt());
+
+    let isDeposited = false
+
+    if (lock_tx !== undefined && lock_tx.getReceipt()?.success === true) {
+      // check deposit on switcheo    
+      for (let attempt = 0; attempt < 50; attempt++) {
+        console.log("checking deposit...");
+        const isConfirmed = await isDepositOnSwth(swthAddress, asset, amount)
+        if (isConfirmed) {
+            isDeposited = true
+            break;
+        }
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+
+    if (isDeposited) {
+      return true;
+    }
+    return false;
+  }
+
+  // deposit address depends on the selection
+  // not use at the moment because external wallets are used
+  const onConfirm = async (depositAddress: string) => {
+    setPending(true);
+
+    const transferFlow = BridgeParamConstants.TRANSFER_FLOW;
+    const sdk = await initTradehubSDK(`${BridgeParamConstants.TEMP_SWTH_MNEMONIC}`);
+    await sdk.token.reloadTokens();
+    const asset = sdk.token.tokens[`${BridgeParamConstants.DEPOSIT_DENOM}`];
+
+    if (transferFlow === ChainTransferFlow.ZIL_TO_ETH) {
+      // init lock on zil side
+      const isLock = await lockAssetOnZil(wallet!, `${BridgeParamConstants.TEMP_SWTH_ADDRESS}`, asset, bridgeFormState.transferAmount.toString());
+      if (isLock) {
+        toaster("Success: asset locked! (Zilliqa -> SWTH)");
+      }
+    } else {
+      // init lock on eth side
+      const isLock = await lockAssetOnEth(`${BridgeParamConstants.TEMP_SWTH_ADDRESS}`, asset, bridgeFormState.transferAmount.toString());
+      if (isLock) {
+        toaster("Success: asset locked! (Ethereum -> SWTH)");
+      }
+    }
+
+    // TODO: combine with withdraw flow
+    setPending(false);
   }
 
   const conductAnotherTransfer = () => {
@@ -206,13 +526,50 @@ const ConfirmTransfer = (props: any) => {
       {!complete && (
         <FancyButton
           disabled={!!pending}
-          onClick={onConfirm}
+          onClick={() => {
+            const transferFlow = BridgeParamConstants.TRANSFER_FLOW;
+            if (transferFlow === ChainTransferFlow.ZIL_TO_ETH) {
+              onConfirm(bridgeFormState.destAddress!)
+            } else {
+              onConfirm(bridgeFormState.sourceAddress!)
+            }
+          }}
           variant="contained"
           color="primary"
           className={classes.actionButton}>
           {pending
             ? "Transfer in Progress..."
-            : "Confirm"
+            : BridgeParamConstants.TRANSFER_FLOW === ChainTransferFlow.ZIL_TO_ETH 
+            ? "Confirm (ZIL -> SWTH)"
+            : "Confirm (ETH -> SWTH)"
+          }
+        </FancyButton>
+      )}
+
+      {!complete && (
+        <FancyButton
+          disabled={!!pending}
+          onClick={() => onWithdraw(`${bridgeFormState.sourceAddress}`)}
+          variant="contained"
+          color="primary"
+          className={classes.actionButton}>
+          {pending
+            ? "Transfer in Progress..."
+            : "Withdraw (SWTH -> ETH)"
+          }
+        </FancyButton>
+      )}
+
+      {!complete && (
+        <FancyButton
+          disabled={!!pending}
+          onClick={() => onWithdraw(`${bridgeFormState.destAddress}`)}
+          variant="contained"
+          color="primary"
+          className={classes.actionButton}>
+          {pending
+            ? "Transfer in Progress..."
+            : "Withdraw (SWTH -> ZIL)"
           }
         </FancyButton>
       )}

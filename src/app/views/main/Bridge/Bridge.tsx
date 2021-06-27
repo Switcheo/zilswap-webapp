@@ -2,8 +2,6 @@
 // temp lint override to allow staging deployment for WIP file
 import { Box, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { Wallet } from '@zilliqa-js/account';
-import { Zilliqa } from '@zilliqa-js/zilliqa';
 import { ConfirmTransfer, CurrencyInput, FancyButton, Text } from 'app/components';
 import { ReactComponent as DotIcon } from "app/components/ConnectWalletButton/dot.svg";
 import MainCard from 'app/layouts/MainCard';
@@ -16,12 +14,10 @@ import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
-import React, { useState } from 'react';
+import { ethers } from "ethers";
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ZILClient, ZILClientOpts } from 'tradehub-api-js';
-import { ApproveZRC2Params, ZILLockParams } from 'tradehub-api-js/build/main/lib/tradehub/clients';
-import { Blockchain, Network, NetworkConfigProvider, NetworkConfigs, SWTHAddress } from 'tradehub-api-js/build/main/lib/tradehub/utils';
-import { ZILLockToken } from './components/tokens';
+
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {},
@@ -71,7 +67,7 @@ const initialFormState = {
     swthAddress: '',
     sourceAddress: '',
     destAddress: '',
-    transferAmount: '0'
+    transferAmount: '0',
 }
 
 const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -82,95 +78,42 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     const network = useNetwork();
 
     const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
-    const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
+    const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
     const tokenState = useSelector<RootState, TokenState>(store => store.token);
     const bridgeFormState: BridgeFormState = useSelector<RootState, BridgeFormState>(store => store.bridge);
     const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
-
-    const onPrivateKeyChange = (key: string = "") => {
-        setFormState({
-            ...formState,
-            zilPrivateKey: key,
-        });
-    }
-
-    const onSourceAddressChange = (address: string = "") => {
-        setFormState({
-            ...formState,
-            sourceAddress: address,
-        });
-    }
-
-    const onDestAddressChange = (address: string = "") => {
-        setFormState({
-            ...formState,
-            destAddress: address,
-        });
-    }
-
-    const onExecute = async () => {
-        console.log("bridge execute");
-        console.log("source address: %o\n", formState.sourceAddress);
-        console.log("dest address: %o\n", formState.destAddress);
-
-        const polynetConfig = NetworkConfigs[Network.DevNet];
-
-        const polynetConfigProvider: NetworkConfigProvider = {
-            getConfig: () => polynetConfig
-        }
-
-        const options: ZILClientOpts = {
-            configProvider: polynetConfigProvider,
-            blockchain: Blockchain.Zilliqa,
-        }
-
-        const tradehubZILClient = ZILClient.instance(options);
-
-        const zilliqa = new Zilliqa(tradehubZILClient.getProviderUrl())
-        const wallet  = new Wallet(zilliqa.network.provider)
-        wallet.addByPrivateKey(formState.zilPrivateKey)
-
-        const approveZRC2Params: ApproveZRC2Params = {
-            token: ZILLockToken,
-            gasPrice: new BigNumber("2000000000"),
-            gasLimit : new BigNumber(25000),
-            zilAddress: formState.sourceAddress,
-            signer: wallet
-        }
-
-        console.log("approve zrc2 token params: %o\n", approveZRC2Params);
-
-        const approve_tx = await tradehubZILClient.approveZRC2(approveZRC2Params);
-        console.log(approve_tx);
-
-        const lockDepositParams: ZILLockParams = {
-            address: SWTHAddress.getAddressBytes("swth1pacamg4ey0nx6mrhr7qyhfj0g3pw359cnjyv6d", Network.DevNet),
-            amount: new BigNumber("1000000000000"),
-            token: ZILLockToken,
-            gasPrice: new BigNumber("2000000000"),
-            zilAddress: formState.sourceAddress,
-            gasLimit: new BigNumber(25000),
-            signer: wallet,
-        }
-
-        const lock_tx = await tradehubZILClient.lockDeposit(lockDepositParams)
-        console.log(lock_tx);
-    }
 
     const onConnectWallet = () => {
         dispatch(actions.Layout.toggleShowWallet());
     };
 
-    const onClickConnect = async () => {
-        try {
-            const ethereum = (window as any).ethereum;
-            const metamask = await ethereum.request({ method: 'eth_requestAccounts' });
+    useEffect(() => {
+        // TODO: need a way to determine if updating source / dest address if the "From" is zil wallet
+        if (wallet !== null) {
             setFormState({
                 ...formState,
-                sourceAddress: metamask[0]
+                destAddress: wallet.addressInfo.byte20
             })
             dispatch(actions.Bridge.update({
-                sourceAddress: metamask[0]
+                destAddress: wallet.addressInfo.byte20
+            }))
+        }
+        // eslint-disable-next-line
+    }, [wallet]);
+
+    const onClickConnect = async () => {
+        try {
+            let provider;
+            (window as any).ethereum.enable().then(provider = new ethers.providers.Web3Provider((window as any).ethereum));
+            const signer = provider.getSigner();
+            const ethAddress = await signer.getAddress();
+
+            setFormState({
+                ...formState,
+                sourceAddress: ethAddress
+            })
+            dispatch(actions.Bridge.update({
+                sourceAddress: ethAddress
             }))
         } catch (error) {
             console.error(error);
@@ -268,29 +211,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                                 : "Head to Confirmation"
                         }
                     </Button>
-
-                    {/* <TextInput 
-                        label="Zilliqa Private Key (Wallet)" 
-                        placeholder="e.g. 1ab23..."
-                        text={formState.zilPrivateKey}
-                        onInputChange={onPrivateKeyChange} />
-                    <TextInput 
-                        label="Zilliqa Address (Source)" 
-                        placeholder="e.g. zil1xxxx..."
-                        text={formState.destAddress}
-                        onInputChange={onSourceAddressChange} />
-                    <TextInput 
-                        label="Ethereum Address (Destination)" 
-                        placeholder="e.g. 0x91a23ab..."
-                        text={formState.sourceAddress}
-                        onInputChange={onDestAddressChange} />
-                    <FancyButton
-                        className={classes.actionButton}
-                        variant="contained"
-                        color="primary"
-                        onClick={onExecute}>
-                        Execute
-                    </FancyButton> */}
                 </Box>
             )}
             <ConfirmTransfer showTransfer={layoutState.showTransferConfirmation} />

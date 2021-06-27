@@ -7289,7 +7289,7 @@ ethereumjs-wallet@^1.0.0:
     utf8 "^3.0.0"
     uuid "^3.3.2"
 
-ethers@^5.0.17, ethers@^5.2.0:
+ethers@^5.0.17, ethers@^5.2.0, ethers@^5.3.1:
   version "5.3.1"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.3.1.tgz#1f018f0aeb651576cd84fd987a45f0b99646d761"
   integrity sha512-xCKmC0gsZ9gks89ZfK3B1y6LlPdvX5fxDtu9SytnpdDJR1M7pmJI+4H0AxQPMgUYr7GtQdmECLR0gWdJQ+lZYw==
@@ -15559,9 +15559,9 @@ tr46@^2.0.2:
   dependencies:
     punycode "^2.1.1"
 
-"tradehub-api-js@git://github.com/Switcheo/tradehub-api-js.git#feat/tradehub-client":
+"tradehub-api-js@git://github.com/Switcheo/tradehub-api-js.git":
   version "1.0.0"
-  resolved "git://github.com/Switcheo/tradehub-api-js.git#542618bd21f52bd92f9bcd0496c8afaa149e7057"
+  resolved "git://github.com/Switcheo/tradehub-api-js.git#42b51ef1464faf862ca61e3b55ccf19746a6966e"
   dependencies:
     "@cityofzion/neon-core" "^4.8.0"
     "@cityofzion/neon-js" "^4.8.0"
