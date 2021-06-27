@@ -6,7 +6,7 @@ import { ConfirmTransfer, CurrencyInput, FancyButton, Text } from 'app/component
 import { ReactComponent as DotIcon } from "app/components/ConnectWalletButton/dot.svg";
 import MainCard from 'app/layouts/MainCard';
 import { actions } from "app/store";
-import { BridgeFormState } from 'app/store/bridge/types';
+import { BridgeFormState, BridgeTx } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate, useNetwork } from "app/utils";
@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     dotIcon: {
         marginRight: theme.spacing(1)
-      }
+    }
 }))
 
 const initialFormState = {
@@ -80,7 +80,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
     const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
     const tokenState = useSelector<RootState, TokenState>(store => store.token);
-    const bridgeFormState: BridgeFormState = useSelector<RootState, BridgeFormState>(store => store.bridge);
+    const bridgeFormState: BridgeFormState = useSelector<RootState, BridgeFormState>(store => store.bridge.formState);
     const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
 
     const onConnectWallet = () => {
@@ -94,7 +94,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 ...formState,
                 destAddress: wallet.addressInfo.byte20
             })
-            dispatch(actions.Bridge.update({
+            dispatch(actions.Bridge.updateForm({
                 destAddress: wallet.addressInfo.byte20
             }))
         }
@@ -112,7 +112,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 ...formState,
                 sourceAddress: ethAddress
             })
-            dispatch(actions.Bridge.update({
+            dispatch(actions.Bridge.updateForm({
                 sourceAddress: ethAddress
             }))
         } catch (error) {
@@ -123,13 +123,13 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     const onTransferAmountChange = (amount: string = "0") => {
         let transferAmount = new BigNumber(amount);
         if (transferAmount.isNaN() || transferAmount.isNegative() || !transferAmount.isFinite()) transferAmount = BIG_ZERO;
-        
+
         setFormState({
             ...formState,
             transferAmount: transferAmount.toString()
         })
 
-        dispatch(actions.Bridge.update({
+        dispatch(actions.Bridge.updateForm({
             forNetwork: network,
             token: tokenState.tokens[ZIL_TOKEN_NAME],
             transferAmount
@@ -138,15 +138,34 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
     const onCurrencyChange = (token: TokenInfo) => {
         if (bridgeFormState.token === token) return;
-    
-        dispatch(actions.Bridge.update({
-          forNetwork: network,
-          token
+
+        dispatch(actions.Bridge.updateForm({
+            forNetwork: network,
+            token
         }));
     };
-    
+
     const showTransfer = () => {
         dispatch(actions.Layout.showTransferConfirmation(!layoutState.showTransferConfirmation))
+    }
+
+    const onTransfer = () => {
+        const { destAddress, sourceAddress } = bridgeFormState;
+
+        if (!destAddress || !sourceAddress) return;
+
+        // TODO: implement load initiated bridge tx into redux
+        // const bridgeTx: BridgeTx = {
+        //     dstAddr: destAddress,
+        //     srcAddr: sourceAddress,
+        //     dstChain: ,
+        //     srcChain: ,
+        //     dstToken: ,
+        //     srcToken: ,
+        //     inputAmount: ,
+        //     interimAddrMnemonics: ,
+        // }
+        // dispatch(actions.Bridge.addBridgeTx(bridgeTx))
     }
 
     return (
@@ -166,11 +185,11 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                                 className={cls(classes.connectWalletButton, formState.sourceAddress ? classes.connectedWalletButton : "")}
                                 variant="contained"
                                 color="primary">
-                                {!formState.sourceAddress 
+                                {!formState.sourceAddress
                                     ? "Connect Wallet"
                                     : <Box display="flex" flexDirection="column">
                                         <Text variant="button">{truncate(formState.sourceAddress, 5, 4)}</Text>
-                                        <Text color="textSecondary"><DotIcon className={classes.dotIcon}/>Connected</Text>
+                                        <Text color="textSecondary"><DotIcon className={classes.dotIcon} />Connected</Text>
                                     </Box>
                                 }
                             </Button>
@@ -185,26 +204,26 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                                 onClick={onConnectWallet}>
                                 <Box display="flex" flexDirection="column">
                                     <Text variant="button">{truncate(wallet?.addressInfo.bech32, 5, 4)}</Text>
-                                    <Text color="textSecondary"><DotIcon className={classes.dotIcon}/>Connected</Text>
+                                    <Text color="textSecondary"><DotIcon className={classes.dotIcon} />Connected</Text>
                                 </Box>
                             </FancyButton>
                         </Box>
                     </Box>
 
-                    <CurrencyInput 
+                    <CurrencyInput
                         label="Transfer Amount"
                         disabled={!wallet || !formState.sourceAddress}
                         token={tokenState.tokens[ZIL_TOKEN_NAME]}
                         amount={formState.transferAmount}
                         onAmountChange={onTransferAmountChange} />
 
-                    <Button 
+                    <Button
                         onClick={showTransfer}
                         disabled={!wallet || !formState.sourceAddress || formState.transferAmount === "0" || formState.transferAmount === ""}
-                        className={classes.actionButton} 
-                        color="primary" 
+                        className={classes.actionButton}
+                        color="primary"
                         variant="contained">
-                        { !wallet && !formState.sourceAddress 
+                        {!wallet && !formState.sourceAddress
                             ? "Connect Wallet"
                             : formState.transferAmount === "0" || formState.transferAmount === ""
                                 ? "Enter Amount"

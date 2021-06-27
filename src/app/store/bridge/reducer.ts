@@ -1,45 +1,49 @@
 import BigNumber from "bignumber.js";
-import { TokenActionTypes } from "../token/actions";
-import { TokenUpdateProps } from "../token/types";
 import { BridgeActionTypes } from "./actions";
-import { BridgeFormState } from "./types";
+import { BridgeState } from "./types";
 
-const initial_state: BridgeFormState = {
-  transferAmount: new BigNumber(0),
+const initial_state: BridgeState = {
+  bridgeTxs: [],
+  formState: {
+    transferAmount: new BigNumber(0),
 
-  isInsufficientReserves: false,
-  forNetwork: null,
+    isInsufficientReserves: false,
+    forNetwork: null,
+  }
 }
 
-const reducer = (state: BridgeFormState = initial_state, action: any) => {
+const reducer = (state: BridgeState = initial_state, action: any) => {
   const { payload } = action;
 
   switch (action.type) {
 
     case BridgeActionTypes.CLEAR_FORM:
       return {
-        sourceAddress: '',
-        transferAmount: new BigNumber(0),
+        ...state,
+        formState: {
+          sourceAddress: '',
+          transferAmount: new BigNumber(0),
 
-        isInsufficientReserves: false,
-        forNetwork: null,
+          isInsufficientReserves: false,
+          forNetwork: null,
+        },
       };
 
-    case BridgeActionTypes.UPDATE:
-      return { ...state, ...payload };
-
-    case TokenActionTypes.TOKEN_UPDATE:
-      const updateProps: TokenUpdateProps = payload;
-      if (updateProps.address !== state.token?.address)
-        return state;
-
+    case BridgeActionTypes.ADD_BRIDGE_TXS:
       return {
         ...state,
-        ...updateProps.address === state.token?.address && {
-          token: {
-            ...state.token,
-            ...updateProps,
-          }
+        bridgeTxs: [
+          ...state.bridgeTxs,
+          ...payload,
+        ]
+      };
+
+    case BridgeActionTypes.UPDATE_FORM:
+      return {
+        ...state,
+        formState: {
+          ...state.formState,
+          ...payload,
         }
       };
 
