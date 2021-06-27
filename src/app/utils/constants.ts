@@ -64,6 +64,9 @@ export const isProduction = () => {
   return PRODUCTION_HOSTS.includes(window.location.hostname)
 }
 
+export const DEFAULT_TX_SLIPPAGE = 0.01;
+export const DEFAULT_TX_EXPIRY = 3;
+
 export const STATS_REFRESH_RATE = 30000; // ms
 
 export const ZIL_TOKEN_NAME = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";

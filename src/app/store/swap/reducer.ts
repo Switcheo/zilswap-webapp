@@ -1,15 +1,29 @@
+import { DEFAULT_TX_EXPIRY, DEFAULT_TX_SLIPPAGE, LocalStorageKeys } from "app/utils/constants";
 import BigNumber from "bignumber.js";
+import { TokenActionTypes } from "../token/actions";
+import { TokenUpdateAllProps, TokenUpdateProps } from "../token/types";
 import { SwapActionTypes } from "./actions";
 import { SwapFormState } from "./types";
-import { TokenActionTypes } from "../token/actions";
-import { TokenUpdateProps, TokenUpdateAllProps } from "../token/types";
-import { LocalStorageKeys } from "app/utils/constants";
 
-const savedSlippageExpiry = JSON.parse(localStorage.getItem(LocalStorageKeys.SwapSlippageExpiry) || "{}");
+const loadSavedSlippage = () => {
+  try {
+    const savedData = JSON.parse(localStorage.getItem(LocalStorageKeys.SwapSlippageExpiry) || "{}");
+    const slippage = parseFloat(savedData.slippage ?? DEFAULT_TX_SLIPPAGE)
+    const expiry = parseInt(savedData.expiry ?? DEFAULT_TX_EXPIRY)
+    return {
+      slippage: isNaN(slippage) ? DEFAULT_TX_SLIPPAGE : slippage,
+      expiry: isNaN(expiry) ? DEFAULT_TX_EXPIRY : expiry,
+    }
+  } catch (error) {
+    return {};
+  }
+}
+
+const savedSlippageExpiry = loadSavedSlippage();
 
 const initial_state: SwapFormState = {
-  slippage: savedSlippageExpiry.slippage || 0.01, // percent
-  expiry: savedSlippageExpiry.expiry || 3, // blocks
+  slippage: savedSlippageExpiry.slippage ?? DEFAULT_TX_SLIPPAGE, // percent
+  expiry: savedSlippageExpiry.expiry ?? DEFAULT_TX_EXPIRY, // blocks
 
   exactOf: "in",
   inAmount: new BigNumber(0),
@@ -20,7 +34,7 @@ const initial_state: SwapFormState = {
 }
 
 const checkToSaveSlippageExpiry = (state: SwapFormState, payload: any) => {
-  if (payload.slippage || payload.expiry) {
+  if (payload.slippage !== undefined || payload.expiry !== undefined) {
     let toSave = { slippage: state.slippage, expiry: state.expiry, ...payload };
     localStorage.setItem(LocalStorageKeys.SwapSlippageExpiry, JSON.stringify(toSave));
   }
