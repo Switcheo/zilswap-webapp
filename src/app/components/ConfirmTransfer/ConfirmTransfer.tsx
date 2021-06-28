@@ -195,7 +195,7 @@ const ConfirmTransfer = (props: any) => {
       denom: asset.denom,
       to_address: toAddress,
       fee_address: `${BridgeParamConstants.SWTH_FEE_ADDRESS}`,
-      fee_amount: "1",
+      fee_amount: "0",
       originator: sdk.wallet?.bech32Address
     });
 
@@ -403,7 +403,7 @@ const ConfirmTransfer = (props: any) => {
   const onConfirm = async (depositAddress: string) => {
     setPending(true);
 
-    const transferFlow = BridgeParamConstants.TRANSFER_FLOW;
+    const transferFlow = bridgeState.formState.transferDirection;
     const sdk = await initTradehubSDK(swthAddrMnemonic);
     await sdk.token.reloadTokens();
     const asset = sdk.token.tokens[`${BridgeParamConstants.DEPOSIT_DENOM}`];
@@ -503,14 +503,14 @@ const ConfirmTransfer = (props: any) => {
         <Box mt={2} display="flex" justifyContent="space-between">
           <Box className={classes.networkBox} flex={1}>
             <Text variant="h4" color="textSecondary">From</Text>
-            <Text variant="h4">Ethereum Network</Text>
-            <Text variant="button">{truncate(bridgeFormState.sourceAddress, 5, 4)}</Text>
+            <Text variant="h4">{ bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Ethereum Network' : 'Zilliqa Network'}</Text>
+            <Text variant="button">{truncate( bridgeState.formState.sourceAddress, 5, 4)}</Text>
           </Box>
           <Box flex={0.2}></Box>
           <Box className={classes.networkBox} flex={1}>
             <Text variant="h4" color="textSecondary">To</Text>
-            <Text variant="h4">Zilliqa Network</Text>
-            <Text variant="button">{truncate(wallet?.addressInfo.bech32, 5, 4)}</Text>
+            <Text variant="h4">{ bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa Network' : 'Ethereum Network'}</Text>
+            <Text variant="button">{truncate(bridgeState.formState.destAddress, 5, 4)}</Text>
           </Box>
         </Box>
       </Box>
@@ -548,36 +548,15 @@ const ConfirmTransfer = (props: any) => {
       {!complete && (
         <FancyButton
           disabled={!!pending}
-          onClick={() => {
-            const transferFlow = BridgeParamConstants.TRANSFER_FLOW;
-            if (transferFlow === ChainTransferFlow.ZIL_TO_ETH) {
-              onConfirm(bridgeFormState.destAddress!)
-            } else {
-              onConfirm(bridgeFormState.sourceAddress!)
-            }
-          }}
+          onClick={() => onConfirm(bridgeFormState.sourceAddress!)}
           variant="contained"
           color="primary"
           className={classes.actionButton}>
           {pending
             ? "Transfer in Progress..."
-            : BridgeParamConstants.TRANSFER_FLOW === ChainTransferFlow.ZIL_TO_ETH
+            : bridgeState.formState.transferDirection === ChainTransferFlow.ZIL_TO_ETH
               ? "Confirm (ZIL -> SWTH)"
               : "Confirm (ETH -> SWTH)"
-          }
-        </FancyButton>
-      )}
-
-      {!complete && (
-        <FancyButton
-          disabled={!!pending}
-          onClick={() => onWithdraw(`${bridgeFormState.sourceAddress}`)}
-          variant="contained"
-          color="primary"
-          className={classes.actionButton}>
-          {pending
-            ? "Transfer in Progress..."
-            : "Withdraw (SWTH -> ETH)"
           }
         </FancyButton>
       )}
@@ -591,7 +570,25 @@ const ConfirmTransfer = (props: any) => {
           className={classes.actionButton}>
           {pending
             ? "Transfer in Progress..."
+            : bridgeState.formState.transferDirection === ChainTransferFlow.ZIL_TO_ETH
+            ? "Withdraw (SWTH -> ETH)"
             : "Withdraw (SWTH -> ZIL)"
+          }
+        </FancyButton>
+      )}
+
+      {!complete && (
+        <FancyButton
+          disabled={!!pending}
+          onClick={() => onWithdraw(`${bridgeFormState.sourceAddress}`)}
+          variant="contained"
+          color="primary"
+          className={classes.actionButton}>
+          {pending
+            ? "Transfer in Progress..."
+            : bridgeState.formState.transferDirection === ChainTransferFlow.ZIL_TO_ETH
+            ? "Withdraw To Source (SWTH -> ZIL) (FOR TESTING)"
+            : "Withdraw To Source (SWTH -> ETH) (FOR TESTING)"
           }
         </FancyButton>
       )}
