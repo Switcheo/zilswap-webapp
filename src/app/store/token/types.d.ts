@@ -2,10 +2,6 @@ import BigNumber from "bignumber.js";
 import { Pool } from "zilswap-sdk";
 import { SimpleMap } from "app/utils";
 
-export type TokenBalanceMap = {
-  [index: string]: BigNumber;
-};
-
 export type TokenUSDValues = {
   balance: BigNumber;
   poolLiquidity: BigNumber;
@@ -18,15 +14,14 @@ export type TokenInfo = {
   isZwap: boolean;
   registered: boolean;
   whitelisted: boolean;
-  listPriority?: number;
   symbol: string;
   name?: string;
   decimals: number;
   address: string;
   balance?: BigNumber;
-  balances?: TokenBalanceMap;
   pool?: Pool;
-  allowances?: { [index: string]: string },
+  allowances?: { [index: string]: string };
+  blockchain: Blockchain;
 };
 
 export interface TokenState {

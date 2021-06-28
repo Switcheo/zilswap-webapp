@@ -7,7 +7,6 @@ import { useMoneyFormatter } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ConnectedWallet } from "core/wallet";
 import React from "react";
 import { useSelector } from "react-redux";
 
@@ -58,13 +57,11 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
 
   const getTokenBalance = (token: TokenInfo): BigNumber => {
     if (!walletState.wallet) return BIG_ZERO;
-
-    const wallet: ConnectedWallet = walletState.wallet!;
     if (showContribution) {
       const contribution = token.pool?.userContribution ?? BIG_ZERO;
       return contribution as BigNumber;
     } else {
-      const amount = token.balances && token.balances[wallet.addressInfo.byte20.toLowerCase()];
+      const amount = token.balance;
       if (!amount) return BIG_ZERO;
 
       return new BigNumber(amount.toString());
@@ -125,11 +122,6 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
                   })}
                 </Typography>
               )}
-              {/* {!token.balance && (
-                <Typography align="right" color="textSecondary" variant="body2" className={classes.subtleText}>
-                  {!!walletState.wallet ? "Select to load" : ""}
-                </Typography>
-              )} */}
               {showContribution && (
                 <Typography align="right" color="textSecondary" variant="body2">
                   {moneyFormat(getContributionPercentage(token), {

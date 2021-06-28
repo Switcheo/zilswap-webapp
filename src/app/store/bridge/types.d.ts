@@ -1,11 +1,27 @@
 import { TokenInfo } from "app/store/types";
 import BigNumber from "bignumber.js";
-import { Blockchain } from 'tradehub-api-js';
 import dayjs from "dayjs";
+import { Blockchain } from "tradehub-api-js";
+
+export type BridgeableToken = {
+  blockchain: Blockchain;
+  tokenAddress: string;
+  denom: string;
+  toBlockchain: Blockchain;
+  toTokenAddress: string;
+  toDenom: string;
+}
+
+export type BridgeableTokenMapping = {
+  [Blockchain.Ethereum]: ReadonlyArray<BridgeableToken>;
+  [Blockchain.Zilliqa]: ReadonlyArray<BridgeableToken>;
+}
 
 export interface BridgeState {
   formState: BridgeFormState;
   bridgeTxs: BridgeTx[];
+
+  tokens: BridgeableTokenMapping;
 }
 
 export interface BridgeFormState {
@@ -31,7 +47,7 @@ export interface BridgeTx {
   srcAddr: string;
   dstAddr: string;
 
-  // token hash
+  // token denom
   srcToken: string;
   dstToken: string;
 
@@ -50,8 +66,8 @@ export interface BridgeTx {
   // .lock tx on the source chain
   sourceTxHash?: string;
 
-  // TradeHub deposit tx
-  depositTxHash?: string;
+  // TradeHub external transfers confirmed
+  depositTxConfirmedAt?: dayjs.Dayjs;
 
   // TradeHub withdraw tx
   withdrawTxHash?: string;

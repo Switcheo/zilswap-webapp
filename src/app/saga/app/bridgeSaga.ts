@@ -1,8 +1,12 @@
 import { actions } from "app/store";
 import { BridgeTx, RootState } from "app/store/types";
+import { SimpleMap } from "app/utils";
+import { bnOrZero } from "app/utils/strings/strings";
+import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import { logger } from "core/utilities";
 import { call, fork, race, select, take } from "redux-saga/effects";
-import { TradeHubSDK, ConnectedTradeHubSDK } from "tradehub-api-js";
+import { TradeHubSDK, ConnectedTradeHubSDK, RestModels, TradeHubTx, SWTHAddress } from "tradehub-api-js";
+import dayjs from "dayjs";
 
 export enum Status {
   NotStarted,
@@ -14,7 +18,7 @@ export enum Status {
 }
 
 function getBridgeTxStatus(tx: BridgeTx): Status {
-  if (tx.destinationTxConfirmedAt) {
+  if (tx.destinationTxHash) {
     return Status.WithdrawTxConfirmed;
   }
 
@@ -22,7 +26,7 @@ function getBridgeTxStatus(tx: BridgeTx): Status {
     return Status.WithdrawTxStarted;
   }
 
-  if (tx.depositTxHash) {
+  if (tx.depositTxConfirmedAt) {
     return Status.DepositTxConfirmed;
   }
 
@@ -36,47 +40,61 @@ function getBridgeTxStatus(tx: BridgeTx): Status {
 function* watchDepositConfirmation() {
   while (true) {
     try {
+      // watch and update relevant txs
       const bridgeTxs = (yield select((state: RootState) => state.bridge.bridgeTxs)) as BridgeTx[];
-      const relevantTxs = bridgeTxs.filter(tx => getBridgeTxStatus(tx) === Status.DepositTxStarted);
-      // those with a source tx hash
+      const relevantTxs = bridgeTxs.filter(tx => [Status.DepositTxStarted, Status.DepositTxConfirmed].includes(getBridgeTxStatus(tx)));
 
+      const updatedTxs: SimpleMap<BridgeTx> = {};
+      const network = TradeHubSDK.Network.DevNet
       for (const tx of relevantTxs) {
         try {
-          // // watch and update relevant txs
-
-          // tx.depositTxHash = extTransfer.external_hash
-
-          // // trigger withdraw tx if deposit confirmed
-
-          const sdk = new TradeHubSDK({
-            network: TradeHubSDK.Network.DevNet,
-          });
-          const connectedSDK = (yield call([sdk, sdk.connectWithMnemonic], tx.interimAddrMnemonics)) as ConnectedTradeHubSDK
-
-          // question: where to get SWTH address? which field in extTransfer represents external_hash? transaction_hash?
 
 
-          const extTransfer = yield call({ context: sdk.api, fn: sdk.api.getTransfers }, { account: connectedSDK.wallet.bech32Address});
-          // tradehub tx hash for depositTxHash
+          const sdk = new TradeHubSDK({ network });
 
-          // status = success, not tx hash
-          if (extTransfer[0].external_hash) {
-            tx.depositTxHash = extTransfer.external_hash;
+          const swthAddress = SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
+
+          // check if deposit is confirmed
+          if (!tx.depositTxConfirmedAt) {
+            const extTransfers = (yield call([sdk.api, sdk.api.getTransfers], { account: swthAddress })) as RestModels.Transfer[];
+
+            const depositTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'deposit' && transfer.blockchain === tx.srcChain);
+
+            if (depositTransfer?.status === 'success') {
+              tx.depositTxConfirmedAt = dayjs();
+              updatedTxs[tx.sourceTxHash!] = tx;
+            }
           }
 
-        
-          // confused about this part
-          // const withdrawTx = connectedSDK.coin.withdraw({
-          //   ...
-          // })
+          // trigger withdraw tx if deposit confirmed
+          if (tx.depositTxConfirmedAt) {
 
-          // tx.withdrawTxHash = withdrawTx.hash // ready for next saga to proceed
+            const connectedSDK = (yield call([sdk, sdk.connectWithMnemonic], tx.interimAddrMnemonics)) as ConnectedTradeHubSDK
+            const balance = (yield call([sdk.api, sdk.api.getWalletBalance], { account: swthAddress })) as RestModels.Balances;
+            const withdrawAmount = bnOrZero(balance?.[tx.dstToken]?.available);
+            if (!withdrawAmount.isZero()) {
+              throw new Error(`tradehub address balance not found`)
+            }
 
+            const withdrawResult = (yield call([connectedSDK.coin, connectedSDK.coin.withdraw], {
+              amount: withdrawAmount.toString(10),
+              denom: tx.dstToken,
+              to_address: tx.dstAddr,
+              fee_address: BridgeParamConstants.SWTH_FEE_ADDRESS,
+              fee_amount: tx.withdrawFee.toString(10),
+              originator: swthAddress,
+            })) as TradeHubTx.TxResponse;
+
+            tx.withdrawTxHash = withdrawResult.txhash;
+            updatedTxs[tx.sourceTxHash!] = tx;
+          }
         } catch (error) {
           console.error('process deposit tx error');
           console.error(error);
         }
       }
+
+      // update redux updatedTxs
     } catch (error) {
       console.error("watchDepositConfirmation error")
       console.error(error)
@@ -90,18 +108,29 @@ function* watchDepositConfirmation() {
 function* watchWithdrawConfirmation() {
   while (true) {
     try {
+      // watch and update relevant txs
       const bridgeTxs = (yield select((state: RootState) => state.bridge.bridgeTxs)) as BridgeTx[];
       const relevantTxs = bridgeTxs.filter(tx => getBridgeTxStatus(tx) === Status.WithdrawTxStarted);
 
+      const updatedTxs: SimpleMap<BridgeTx> = {};
+      const network = TradeHubSDK.Network.DevNet;
       for (const tx of relevantTxs) {
         try {
-          // // watch and update relevant txs
 
-          // question: query wallet address or withdrawTxHash?
+          const sdk = new TradeHubSDK({ network });
+          const swthAddress = SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
+          const extTransfers = (yield call([sdk.api, sdk.api.getTransfers], { account: swthAddress })) as RestModels.Transfer[];
 
-          // tx.destinationTxHash = dstChainTx.hash
+          const withdrawTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'withdrawal' && transfer.blockchain === tx.dstChain);
+
+          // update destination chain tx hash if success
+          if (withdrawTransfer?.status === 'success') {
+            tx.destinationTxHash = withdrawTransfer.transaction_hash;
+            updatedTxs[tx.sourceTxHash!] = tx;
+          }
+
+          // possible extension: validate tx on dest chain 
           // tx.destinationTxConfirmedAt = dstChainTx.blocktime
-
         } catch (error) {
           console.error('process withdraw tx error');
           console.error(error);

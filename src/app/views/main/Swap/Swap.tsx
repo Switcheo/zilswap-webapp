@@ -469,8 +469,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       if (amount.isNaN() || !amount.isFinite())
         throw new Error("Invalid input amount");
 
-      const address = walletState.wallet?.addressInfo.byte20.toLowerCase() || ""
-      const balance: BigNumber = strings.bnOrZero(inToken.balances?.[address])
+      const balance: BigNumber = strings.bnOrZero(inToken.balance)
 
       if (inAmount.shiftedBy(inToken.decimals).gt(balance)) {
         throw new Error(`Insufficient ${inToken.symbol} balance.`)
@@ -547,7 +546,6 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   };
 
   const { outToken, inToken } = swapFormState;
-  // const tokenBalance = strings.bnOrZero(inToken?.balances?.[walletState.wallet?.addressInfo.byte20.toLowerCase() || ""]?.toString());
   let showTxApprove = false;
   if (inToken && !inToken?.isZil) {
     const zilswapContractAddress = CONTRACTS[network];

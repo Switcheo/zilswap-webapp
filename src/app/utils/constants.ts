@@ -1,4 +1,3 @@
-import { TokenInfo } from "app/store/types";
 import BigNumber from "bignumber.js";
 import { Network } from "zilswap-sdk/lib/constants";
 
@@ -23,6 +22,7 @@ export const LocalStorageKeys = {
   UserTokenList: "zilswap:user-token-list",
   PendingClaimedTxs: "zilswap:pending-claimed-txs",
   SwapSlippageExpiry: "zilswap:swap-slippage-expiry",
+  BridgeTxs: 'zilswap:bridge-txs',
 };
 
 export const PlaceholderStrings = {
@@ -46,12 +46,6 @@ export const RPCEndpoints: { [key in Network]: string } = {
 
 export const BIG_ZERO = new BigNumber(0);
 export const BIG_ONE = new BigNumber(1);
-
-export const sortTokens = (lhs: TokenInfo, rhs: TokenInfo) => {
-  const { listPriority: lhsPriority = Number.MAX_SAFE_INTEGER } = lhs;
-  const { listPriority: rhsPriority = Number.MAX_SAFE_INTEGER } = rhs;
-  return lhsPriority - rhsPriority;
-};
 
 export const PRODUCTION_HOSTS = [
   "zilswap.io",

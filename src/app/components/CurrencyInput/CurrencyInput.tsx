@@ -9,7 +9,7 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { CurrencyDialogProps } from "../CurrencyDialog/CurrencyDialog";
+import { CurrencyDialogProps, CurrencyListType } from "../CurrencyDialog/CurrencyDialog";
 import { AppTheme } from "app/theme/types";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 
@@ -81,6 +81,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   label: string;
   token: TokenInfo | null;
   amount: string;
+  tokenList?: CurrencyListType;
   showCurrencyDialog?: boolean;
   fixedToken?: boolean;
   disabled?: boolean;
@@ -104,6 +105,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     showContribution, hideBalance, showPoolBalance, dialogOpts = {},
     onAmountChange, onCurrencyChange, token,
     onEditorBlur,
+    tokenList = "zil",
   } = props;
   const classes = useStyles();
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5 });
@@ -125,8 +127,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
       return setTokenBalance(null);
 
     if (!showContribution) {
-      const wallet = walletState.wallet!;
-      const tokenBalance = token!.balances?.[wallet.addressInfo.byte20.toLowerCase()];
+      const tokenBalance = token!.balance;
       if (!tokenBalance)
         return setTokenBalance(null);
 
@@ -211,7 +212,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
         }
       />
       {children}
-      <CurrencyDialog {...dialogOpts} open={showCurrencyDialog || showDialogOverride || false} onSelectCurrency={onCurrencySelect} onClose={onCloseDialog} />
+      <CurrencyDialog {...dialogOpts} tokenList={tokenList} open={showCurrencyDialog || showDialogOverride || false} onSelectCurrency={onCurrencySelect} onClose={onCloseDialog} />
     </form>
   );
 };
