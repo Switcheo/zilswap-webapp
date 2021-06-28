@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       # image with node, npm and yarn installed
-      - image: circleci/node:13.7.0-buster
+      - image: cimg/node:16.4.0
     steps:
       # checkout workspace to repo code
       - checkout
