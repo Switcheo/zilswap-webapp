@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       # image with node, npm and yarn installed
-      - image: circleci/node:13.7.0-buster
+      - image: cimg/node:16.4.0
     steps:
       # checkout workspace to repo code
       - checkout
@@ -16,7 +16,7 @@ jobs:
             - v1-dependencies-
 
       # install dependencies
-      - run: yarn --ignore-engines --network-concurrency 1
+      - run: yarn --ignore-engines --network-concurrency=1
 
       # save node_modules to cache
       - save_cache:
@@ -30,7 +30,7 @@ jobs:
       - run:
           name: yarn build according to branch
           command: |
-            yarn build
+            yarn build --max-old-space-size=4096
 
       - persist_to_workspace:
           root: .

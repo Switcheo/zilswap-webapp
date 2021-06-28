@@ -144,7 +144,6 @@ const TokenILOCard = (props: Props) => {
   // const userContribution = new BigNumber('12345678912300000')
   // const targetZil = new BigNumber('70000').shiftedBy(12)
   // const targetZwap = new BigNumber('30000').shiftedBy(12)
-  // console.log(targetZil.toString(), targetZwap.toString())
 
   const totalContributions = new BigNumber(totalContributionStr)
   const totalCommittedUSD = totalContributions.shiftedBy(-12).dividedBy(data.usdRatio).times(tokenState.prices.ZIL).toFormat(2)

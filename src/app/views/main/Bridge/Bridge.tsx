@@ -18,8 +18,9 @@ import { ethers } from "ethers";
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Blockchain } from "tradehub-api-js";
+import Web3Modal from 'web3modal';
+import { providerOptions } from "core/ethereum";
 import { ChainTransferFlow } from "./components/constants";
-
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
@@ -170,25 +171,29 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const onClickConnectETH = async () => {
-    try {
-      let provider;
-      (window as any).ethereum.enable().then(provider = new ethers.providers.Web3Provider((window as any).ethereum));
-      const signer = provider.getSigner();
-      const ethAddress = await signer.getAddress();
+    const web3Modal = new Web3Modal({
+        network: "mainnet",
+        cacheProvider: true,
+        disableInjectedProvider: false,
+        providerOptions
+    });
 
-      if (fromBlockchain === Blockchain.Ethereum) {
-        setSourceAddress(ethAddress);
-      }
+    const provider = await web3Modal.connect();
+    const ethersProvider = new ethers.providers.Web3Provider(provider)
+    const signer = ethersProvider.getSigner();
+    const ethAddress = await signer.getAddress();
 
-      if (toBlockchain === Blockchain.Ethereum) {
-        setDestAddress(ethAddress);
-      }
-      setEthConnectedAddress(ethAddress);
-      dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, address: ethAddress}))
-      dispatch(actions.Token.refetchState())
-    } catch (error) {
-      console.error(error);
+    if (fromBlockchain === Blockchain.Ethereum) {
+      setSourceAddress(ethAddress);
     }
+
+    if (toBlockchain === Blockchain.Ethereum) {
+      setDestAddress(ethAddress);
+    }
+    
+    setEthConnectedAddress(ethAddress);
+    dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, address: ethAddress}));
+    dispatch(actions.Token.refetchState());
   };
 
   const onClickConnectZIL = () => {
@@ -214,7 +219,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
     dispatch(actions.Bridge.updateForm({
       forNetwork: network,
-      token: tokenState.tokens[ZIL_ADDRESS],
       transferAmount,
     }));
   }
@@ -282,25 +286,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     </FancyButton>
   }
 
-  const onTransfer = () => {
-    const { destAddress, sourceAddress } = bridgeFormState;
-
-    if (!destAddress || !sourceAddress) return;
-
-    // TODO: implement load initiated bridge tx into redux
-    // const bridgeTx: BridgeTx = {
-    //     dstAddr: destAddress,
-    //     srcAddr: sourceAddress,
-    //     dstChain: ,
-    //     srcChain: ,
-    //     dstToken: ,
-    //     srcToken: ,
-    //     inputAmount: ,
-    //     interimAddrMnemonics: ,
-    // }
-    // dispatch(actions.Bridge.addBridgeTx(bridgeTx))
-  }
-
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       {!layoutState.showTransferConfirmation && (
@@ -314,33 +299,33 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               <Text variant="h4" align="center">From</Text>
               <Box display="flex" justifyContent="center">
                 <FormControl variant="outlined" className={classes.formControl}>
-                    <Select
+                  <Select
                     MenuProps={{ classes: { paper: classes.selectMenu} }}
                     value={fromBlockchain}
                     onChange={onFromBlockchainChange}
                     label=""
-                    >
+                  >
                     <MenuItem value={Blockchain.Zilliqa}>Zilliqa</MenuItem>
                     <MenuItem value={Blockchain.Ethereum}>Ethereum</MenuItem>
-                    </Select>
+                  </Select>
                 </FormControl>
               </Box>
               {fromBlockchain === Blockchain.Ethereum ? getConnectEthWallet() : getConnectZilWallet()}
             </Box>
-            <Box flex={0.2}></Box>
+            <Box flex={0.2} />
             <Box className={classes.box} flex={1} bgcolor="background.contrast">
               <Text variant="h4" align="center">To</Text>
               <Box display="flex" justifyContent="center">
                 <FormControl variant="outlined" className={classes.formControl}>
-                    <Select
+                  <Select
                     MenuProps={{ classes: { paper: classes.selectMenu} }}
                     value={toBlockchain}
                     onChange={onToBlockchainChange}
                     label=""
-                    >
+                  >
                     <MenuItem value={Blockchain.Ethereum}>Ethereum</MenuItem>
                     <MenuItem value={Blockchain.Zilliqa}>Zilliqa</MenuItem>
-                    </Select>
+                  </Select>
                 </FormControl>
               </Box>
               {toBlockchain === Blockchain.Ethereum ? getConnectEthWallet() : getConnectZilWallet()}
@@ -350,7 +335,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           <CurrencyInput
             label="Transfer Amount"
             disabled={!wallet || !formState.sourceAddress}
-            token={tokenState.tokens[ZIL_ADDRESS]}
+            token={bridgeFormState.token ?? tokenState.tokens[ZIL_ADDRESS]}
             amount={formState.transferAmount}
             onAmountChange={onTransferAmountChange}
             onCurrencyChange={onCurrencyChange}
