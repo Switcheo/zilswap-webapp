@@ -19,6 +19,7 @@ import { SWTHAddress, Token, TradeHubSDK, Blockchain } from "tradehub-api-js";
 import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
+import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -121,6 +122,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fill: theme.palette.text?.secondary,
     }
   },
+  warningIcon: {
+    verticalAlign: "middle",
+    marginBottom: theme.spacing(0.5)
+  }
 }));
 
 // initialize a tradehub sdk client
@@ -514,7 +519,7 @@ const ConfirmTransfer = (props: any) => {
           <Text variant="h2">{pending ? "Transfer in Progress..." : "Transfer Complete"}</Text>
 
           <Text className={classes.textWarning} margin={0.5}>
-            Do not close this page while we transfer your funds.
+            <WarningRoundedIcon className={classes.warningIcon} /> Do not close this page while we transfer your funds.
           </Text>
 
           <Text className={classes.textWarning} align="center">
