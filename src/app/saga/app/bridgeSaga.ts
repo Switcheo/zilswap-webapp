@@ -19,7 +19,6 @@ export enum Status {
 }
 
 function getBridgeTxStatus(tx: BridgeTx): Status {
-  console.log("getBridgeTxStatus", tx)
   if (tx.destinationTxHash) {
     return Status.WithdrawTxConfirmed;
   }
@@ -46,7 +45,6 @@ function* watchDepositConfirmation() {
       const bridgeTxs = (yield select((state: RootState) => state.bridge.bridgeTxs)) as BridgeTx[];
       const relevantTxs = bridgeTxs.filter(tx => {
         const status = getBridgeTxStatus(tx)
-        console.log(status);
         return [Status.DepositTxStarted, Status.DepositTxConfirmed].includes(status);
       });
       logger("bridge saga", "watch deposit confirmation", relevantTxs.length);
