@@ -20,7 +20,8 @@ export type TokenInfo = {
   address: string;
   balance?: BigNumber;
   pool?: Pool;
-  allowances?: { [index: string]: string },
+  allowances?: { [index: string]: string };
+  blockchain: Blockchain;
 };
 
 export interface TokenState {

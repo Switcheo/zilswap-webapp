@@ -1,4 +1,3 @@
-import { TokenInfo } from "app/store/types";
 import BigNumber from "bignumber.js";
 import { Network } from "zilswap-sdk/lib/constants";
 

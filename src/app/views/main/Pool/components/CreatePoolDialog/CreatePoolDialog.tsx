@@ -7,6 +7,7 @@ import { BIG_ZERO, PlaceholderStrings } from "app/utils/constants";
 import cls from "classnames";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Blockchain } from "tradehub-api-js";
 import { AddressInput } from "./components";
 import { TokenPreview } from "./components/AddressInput/AddressInput";
 
@@ -68,6 +69,7 @@ const CreatePoolDialog = (props: any) => {
         decimals: tokenPreview.decimals,
         balance: BIG_ZERO,
         allowances: {},
+        blockchain: Blockchain.Zilliqa,
       };
 
       dispatch(actions.Token.add({ token }));

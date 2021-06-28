@@ -36,17 +36,7 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
     const { token } = request;
 
     if (!updates[token.address]) {
-      updates[token.address] = {
-        initialized: token.initialized,
-        isZil: token.isZil,
-        isZwap: token.isZwap,
-        name: token.name,
-        symbol: token.symbol,
-        registered: token.registered,
-        whitelisted: token.whitelisted,
-        address: token.address,
-        decimals: token.decimals
-      }
+      updates[token.address] = { ...token }
     }
 
     switch(request.type) {

@@ -52,6 +52,9 @@ const reducer = (state: BridgeFormState = initial_state, action: any) => {
     case BridgeActionTypes.UPDATE:
       return { ...state, ...payload };
 
+    case BridgeActionTypes.SET_TOKENS:
+      return { ...state, tokens: payload };
+
     case TokenActionTypes.TOKEN_UPDATE:
       const updateProps: TokenUpdateProps = payload;
       if (updateProps.address !== state.token?.address)

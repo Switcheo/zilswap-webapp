@@ -10,6 +10,9 @@ import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useTaskSubscriber } from "app/utils";
 import { BIG_ZERO, LoadingKeys, LocalStorageKeys } from "app/utils/constants";
 import { CurrencyList } from "./components";
+import { Blockchain } from "tradehub-api-js";
+import { BridgeFormState } from "app/store/bridge/types";
+import { toBech32Address } from "@zilliqa-js/zilliqa";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -62,16 +65,18 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+export type CurrencyListType = "zil" | "bridge-zil" | "bridge-eth";
+
 export interface CurrencyDialogProps extends DialogProps {
   onSelectCurrency: (token: TokenInfo) => void;
   hideZil?: boolean;
   hideNoPool?: boolean;
   showContribution?: boolean;
-  tokenList: "zil" | "bridge-zil" | "bridge-eth";
+  tokenList: CurrencyListType;
 };
 
 const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProps) => {
-  const { className, onSelectCurrency, hideZil, hideNoPool, showContribution, open } = props;
+  const { className, onSelectCurrency, hideZil, hideNoPool, showContribution, tokenList, open, onClose } = props;
   const classes = useStyles();
   const [search, setSearch] = useState("");
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
@@ -80,6 +85,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
 
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+  const bridgeState = useSelector<RootState, BridgeFormState>(state => state.bridge);
 
   useEffect(() => {
     if (!tokenState.tokens) return setTokens([]);
@@ -97,8 +103,16 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
       const difference = new BigNumber(rhs.balance?.toString() || 0).comparedTo(lhs.balance?.toString() || 0);
       return difference !== 0 ? difference : lhs.symbol.localeCompare(rhs.symbol);
     };
-    setTokens(Object.values(tokenState.tokens).sort(sortFn));
-  }, [tokenState.tokens, walletState.wallet, showContribution]);
+    let tokens = Object.values(tokenState.tokens);
+    if (tokenList === 'zil') {
+      tokens = tokens.filter(t => t.blockchain === Blockchain.Zilliqa)
+    } else if (tokenList === 'bridge-eth') {
+      tokens = tokens.filter(t => t.blockchain === Blockchain.Ethereum)
+    } else if (tokenList === 'bridge-zil') {
+      tokens = tokens.filter(t => bridgeState.tokens[Blockchain.Zilliqa].findIndex(b => toBech32Address(b.tokenAddress) === t.address) >= 0)
+    }
+    setTokens(tokens.sort(sortFn));
+  }, [tokenState.tokens, walletState.wallet, bridgeState.tokens, showContribution, tokenList]);
 
   const filterSearch = (token: TokenInfo): boolean => {
     const searchTerm = search.toLowerCase().trim();
@@ -130,7 +144,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const filteredTokens = tokens.filter(filterSearch);
 
   return (
-    <DialogModal header="Select a Token" open={open} className={clsx(classes.root, className)}>
+    <DialogModal header="Select a Token" open={open} onClose={onClose} className={clsx(classes.root, className)}>
       <DialogContent className={classes.dialogContent}>
         {!loadingConnectWallet && (
           <OutlinedInput

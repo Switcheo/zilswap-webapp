@@ -8,7 +8,7 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { CurrencyDialogProps } from "../CurrencyDialog/SwapCurrencyDialog";
+import { CurrencyDialogProps } from "../CurrencyDialog/CurrencyDialog";
 
 const useStyles = makeStyles(theme => ({
   root: {

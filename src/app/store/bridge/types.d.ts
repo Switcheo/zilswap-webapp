@@ -11,6 +11,11 @@ export type BridgeableToken = {
   toDenom: string;
 }
 
+export type BridgeableTokenMapping = {
+  [Blockchain.Ethereum]: ReadonlyArray<BridgeableToken>;
+  [Blockchain.Zilliqa]: ReadonlyArray<BridgeableToken>;
+}
+
 export interface BridgeFormState {
   sourceAddress?: string; // can be eth or zil address
   destAddress?: string; // can be eth or zil address
@@ -18,7 +23,7 @@ export interface BridgeFormState {
 
   token?: TokenInfo; // might be a new DenomInfo
 
-  tokens: { [Blockchain]: ReadonlyArray<BridgeableToken> }
+  tokens: BridgeableTokenMapping;
 
   isInsufficientReserves: boolean;
   forNetwork: Network | null,

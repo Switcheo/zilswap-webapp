@@ -12,12 +12,16 @@ import { RPCEndpoints, ZIL_TOKEN_NAME } from "app/utils/constants";
 import { connectWalletZilPay, ConnectedWallet, WalletConnectType } from "core/wallet";
 import { ZILO_DATA } from "core/zilo/constants";
 import { ZWAPRewards } from "core/zwap";
-import { ZilswapConnector } from "core/zilswap";
+import { toBech32Address, ZilswapConnector } from "core/zilswap";
 import { logger } from "core/utilities";
 import { getConnectedZilPay } from "core/utilities/zilpay";
 import { PoolTransaction, PoolTransactionResult, ZAPStats } from "core/utilities/zap-stats";
 import { getBlockchain, getWallet, getTransactions } from '../selectors'
 import { detachedToast } from "app/utils/useToaster";
+import { BridgeableToken } from "app/store/bridge/types";
+import { Network } from "zilswap-sdk/lib/constants";
+import { Blockchain } from "tradehub-api-js";
+import { SimpleMap } from "app/utils";
 
 const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
   if (!wallet) return null;
@@ -103,6 +107,47 @@ function* stateChangeObserved(payload: StateChangeObservedPayload) {
   yield put(actions.Blockchain.setZiloState(payload.state.contractInit!._this_address, payload.state))
 }
 
+type WrapperMappingsResult = { height: string, result: { [key: string]: string }}
+type TradeHubToken = {denom: string, decimals: string, blockchain: Blockchain.Zilliqa | Blockchain.Ethereum, asset_id: string, symbol: string, name: string}
+type TradeHubTokensResult = { height: string, result: ReadonlyArray<TradeHubToken> }
+type BridgeMappingResult =  { [Blockchain.Zilliqa]: BridgeableToken[] , [Blockchain.Ethereum]: BridgeableToken[] }
+
+const fetchJSON = async (url: string) => {
+  const res = await fetch(url)
+  return res.json()
+}
+
+const addMapping = (r: BridgeMappingResult, a: TradeHubToken, b: TradeHubToken) => {
+  r[a.blockchain].push({
+    blockchain: a.blockchain,
+    tokenAddress: a.asset_id.toLowerCase(),
+    denom: a.denom,
+    toBlockchain: b.blockchain,
+    toTokenAddress: b.asset_id.toLowerCase(),
+    toDenom: b.denom,
+  })
+}
+
+const addToken = (r: SimpleMap<TokenInfo>, t: TradeHubToken) => {
+  const address = t.blockchain === Blockchain.Zilliqa ? toBech32Address(t.asset_id) : `0x${t.asset_id.toLowerCase()}`
+  if (r[address]) return
+  r[address] = {
+    initialized: false,
+    registered: true,
+    whitelisted: true,
+    isZil: false, // TODO: maybe true?
+    isZwap: false, // TODO: maybe true?
+    address,
+    decimals: parseInt(t.decimals, 10),
+    symbol: t.symbol,
+    name: `${t.name} (${t.denom})`,
+    balance: undefined,
+    allowances: {},
+    pool: undefined,
+    blockchain: t.blockchain,
+  }
+}
+
 function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPayload>, stateChannel: Channel<StateChangeObservedPayload>) {
   let sdk: Zilswap | null = null;
   try {
@@ -130,7 +175,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     // load tokens
     const appState: AppState = yield call([sdk, sdk.getAppState]);
     const zilswapTokens = appState.tokens
-    const tokens: { [index: string]: TokenInfo } = Object.keys(zilswapTokens).reduce((acc, addr) => {
+    const tokens: SimpleMap<TokenInfo> = Object.keys(zilswapTokens).reduce((acc, addr) => {
       const tkn = zilswapTokens[addr]
       acc[tkn.address] = {
         initialized: false,
@@ -145,14 +190,31 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
         // name: zilswapToken.name,
         balance: undefined,
         allowances: {},
-        pool: sdk!.getPool(tkn.address) || undefined
+        pool: sdk!.getPool(tkn.address) || undefined,
+        blockchain: Blockchain.Zilliqa,
       }
       return acc
-    }, {} as { [index: string]: TokenInfo })
+    }, {} as SimpleMap<TokenInfo>)
 
-    // todo: load eth tokens
+    // load wrapper mappings and eth tokens by fetching bridge list from tradehub
+    const host = network === Network.MainNet ? 'tradescan.switcheo.org' : 'dev-tradescan.switcheo.org'
+    const mappings: WrapperMappingsResult = yield call(fetchJSON, `https://${host}/coin/wrapper_mappings`)
+    const data: TradeHubTokensResult = yield call(fetchJSON, `https://${host}/coin/tokens`)
+    const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [] , [Blockchain.Ethereum]: [] }
+    Object.entries(mappings.result).forEach(([wrappedDenom, sourceDenom]) => {
+      const wrappedToken = data.result.find(d => d.denom === wrappedDenom)!
+      const sourceToken = data.result.find(d => d.denom === sourceDenom)!
+      if ((wrappedToken.blockchain !== Blockchain.Zilliqa && wrappedToken.blockchain !== Blockchain.Ethereum) ||
+        (sourceToken.blockchain !== Blockchain.Zilliqa && sourceToken.blockchain !== Blockchain.Ethereum)) {
+        return
+      }
+      addToken(tokens, sourceToken)
+      addToken(tokens, wrappedToken)
+      addMapping(result, wrappedToken, sourceToken)
+      addMapping(result, sourceToken, wrappedToken)
+    })
 
-
+    yield put(actions.Bridge.setTokens(result))
     yield put(actions.Token.init({ tokens }));
     yield put(actions.Wallet.update({ wallet }))
     if (network !== prevNetwork) yield put(actions.Blockchain.setNetwork(network))
@@ -176,15 +238,16 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
       } else {
         yield put(actions.Transaction.init({ transactions: [] }))
       }
-    } catch (error) {
-      // set to empty transactions when zap api failed 
+    } catch (err) {
+      console.error(err)
+      // set to empty transactions when zap api failed
       yield put(actions.Transaction.init({ transactions: [] }))
     }
 
     yield put(actions.Token.refetchState());
     yield put(actions.Blockchain.initialized());
-  } catch (error) {
-    console.error(error)
+  } catch (err) {
+    console.error(err)
     sdk = yield call(teardown, sdk)
   } finally {
     yield put(actions.Layout.removeBackgroundLoading('INIT_CHAIN'))

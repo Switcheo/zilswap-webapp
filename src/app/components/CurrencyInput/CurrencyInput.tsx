@@ -9,7 +9,7 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { CurrencyDialogProps } from "../CurrencyDialog/CurrencyDialog";
+import { CurrencyDialogProps, CurrencyListType } from "../CurrencyDialog/CurrencyDialog";
 import { AppTheme } from "app/theme/types";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 
@@ -81,7 +81,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   label: string;
   token: TokenInfo | null;
   amount: string;
-  tokenList?: "zil" | "bridge";
+  tokenList?: CurrencyListType;
   showCurrencyDialog?: boolean;
   fixedToken?: boolean;
   disabled?: boolean;
