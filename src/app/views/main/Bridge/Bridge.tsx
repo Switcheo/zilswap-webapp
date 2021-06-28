@@ -64,10 +64,25 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   formControl: {
     margin: theme.spacing(1),
     minWidth: 120,
+    display: "contents",
     "& .MuiSelect-select:focus": {
         borderRadius: 12
-    }
+    },
+    "& .MuiOutlinedInput-root": {
+        border: "none"
+    },
+    "& .MuiInputBase-input": {
+        fontWeight: "bold",
+        fontSize: "16px"
+    },
+    "& .MuiSelect-icon": {
+        top: "calc(50% - 14px)",
+        fill: theme.palette.label
+    },
   },
+  selectMenu: {
+    // TODO
+  }
 }))
 
 const initialFormState = {
@@ -239,31 +254,37 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           <Box mt={2} mb={2} display="flex" justifyContent="space-between">
             <Box className={classes.box} flex={1} bgcolor="background.contrast">
               <Text variant="h4" align="center">From</Text>
-              <FormControl variant="outlined" className={classes.formControl}>
-                <Select
-                  value={fromBlockchain}
-                  onChange={onFromBlockchainChange}
-                  label=""
-                >
-                  <MenuItem value={Blockchain.Zilliqa}>Zilliqa</MenuItem>
-                  <MenuItem value={Blockchain.Ethereum}>Ethereum</MenuItem>
-                </Select>
-              </FormControl>
+              <Box display="flex" justifyContent="center">
+                <FormControl variant="outlined" className={classes.formControl}>
+                    <Select
+                    MenuProps={{ classes: { paper: classes.selectMenu} }}
+                    value={fromBlockchain}
+                    onChange={onFromBlockchainChange}
+                    label=""
+                    >
+                    <MenuItem value={Blockchain.Zilliqa}>Zilliqa</MenuItem>
+                    <MenuItem value={Blockchain.Ethereum}>Ethereum</MenuItem>
+                    </Select>
+                </FormControl>
+              </Box>
               {fromBlockchain === Blockchain.Ethereum ? getConnectEthWallet() : getConnectZilWallet()}
             </Box>
             <Box flex={0.2}></Box>
             <Box className={classes.box} flex={1} bgcolor="background.contrast">
               <Text variant="h4" align="center">To</Text>
-              <FormControl variant="outlined" className={classes.formControl}>
-                <Select
-                  value={toBlockchain}
-                  onChange={onToBlockchainChange}
-                  label=""
-                >
-                  <MenuItem value={Blockchain.Ethereum}>Ethereum</MenuItem>
-                  <MenuItem value={Blockchain.Zilliqa}>Zilliqa</MenuItem>
-                </Select>
-              </FormControl>
+              <Box display="flex" justifyContent="center">
+                <FormControl variant="outlined" className={classes.formControl}>
+                    <Select
+                    MenuProps={{ classes: { paper: classes.selectMenu} }}
+                    value={toBlockchain}
+                    onChange={onToBlockchainChange}
+                    label=""
+                    >
+                    <MenuItem value={Blockchain.Ethereum}>Ethereum</MenuItem>
+                    <MenuItem value={Blockchain.Zilliqa}>Zilliqa</MenuItem>
+                    </Select>
+                </FormControl>
+              </Box>
               {toBlockchain === Blockchain.Ethereum ? getConnectEthWallet() : getConnectZilWallet()}
             </Box>
           </Box>

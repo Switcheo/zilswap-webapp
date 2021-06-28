@@ -145,21 +145,16 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const filteredTokens = tokens.filter(filterSearch);
 
   return (
-    <DialogModal header="Select a Token" open={open} onClose={onClose} className={clsx(classes.root, className)}>
+    <DialogModal header="Select Token" open={open} onClose={onClose} className={clsx(classes.root, className)}>
       <DialogContent className={classes.dialogContent}>
         {!loadingConnectWallet && (
           <OutlinedInput
-            placeholder="Search token name, symbol or address"
+            placeholder="Search name or enter address"
             value={search}
             fullWidth
             classes={{ input: classes.inputText }}
             className={classes.input}
             onChange={(e) => setSearch(e.target.value)}
-            startAdornment={
-              <InputAdornment position="start">
-                <SearchOutlined htmlColor="white" />
-              </InputAdornment>
-            }
           />
         )}
         {(loadingConnectWallet || !tokenState.initialized) && (

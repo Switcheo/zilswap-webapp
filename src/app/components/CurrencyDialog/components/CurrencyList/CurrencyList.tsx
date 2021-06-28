@@ -3,6 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import ContrastBox from "app/components/ContrastBox";
 import CurrencyLogo from "app/components/CurrencyLogo";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
+import { AppTheme} from "app/theme/types";
 import { useMoneyFormatter } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from "bignumber.js";
@@ -20,7 +21,7 @@ type CurrencyListProps = BoxProps & {
   userTokens: string[];
 };
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   buttonBase: {
@@ -33,7 +34,11 @@ const useStyles = makeStyles(theme => ({
     marginTop: "0px !important",
     display: "flex",
     alignItems: "center",
-    width: "100%"
+    width: "100%",
+    backgroundColor: "transparent",
+    "&:hover": {
+      backgroundColor: theme.palette.currencyInput
+    }
   },
   currencyLogo: {
     marginRight: 10
