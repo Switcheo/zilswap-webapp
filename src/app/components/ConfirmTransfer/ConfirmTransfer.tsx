@@ -387,6 +387,11 @@ const ConfirmTransfer = (props: any) => {
 
       await approve_tx.confirm(approve_tx.id!)
       console.log("transaction confirmed! receipt is: ", approve_tx.getReceipt())
+
+      // token approval success
+      // if (approve_tx !== undefined && approve_tx.getReceipt()?.success) {
+      //   setTokenApproval(true);
+      // }
     }
 
     const lockDepositParams = {
