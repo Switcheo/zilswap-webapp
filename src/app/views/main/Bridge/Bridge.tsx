@@ -64,6 +64,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   formControl: {
     margin: theme.spacing(1),
     minWidth: 120,
+    "& .MuiSelect-select:focus": {
+        borderRadius: 12
+    }
   },
 }))
 
