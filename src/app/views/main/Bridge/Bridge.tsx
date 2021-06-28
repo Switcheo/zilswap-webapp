@@ -229,8 +229,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       {!layoutState.showTransferConfirmation && (
         <Box display="flex" flexDirection="column" className={classes.container}>
           <Text variant="h2" align="center" marginTop={2}>
-            ZilSwap
-                        <span className={classes.textColoured}>Bridge</span>
+            ZilSwap<span className={classes.textColoured}>Bridge</span>
           </Text>
           <Text margin={1} align="center" color="textSecondary" className={classes.textSpacing}>Powered by Switcheo TradeHub</Text>
           <Box mt={2} mb={2} display="flex" justifyContent="space-between">

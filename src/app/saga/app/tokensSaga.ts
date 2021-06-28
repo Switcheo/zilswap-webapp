@@ -140,8 +140,6 @@ function* updateTokensState() {
     call(fetchEthTokensState, network, tokens, ethAddress)
   ])
 
-  console.log({resultZil, resultEth})
-
   yield put(actions.Token.updateAll({ ...resultZil, ...resultEth }));
 }
 

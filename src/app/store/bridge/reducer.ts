@@ -105,10 +105,7 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
     case BridgeActionTypes.SET_TOKENS:
       return {
         ...state,
-        formState: {
-          ...state.formState,
-          tokens: payload,
-        },
+        tokens: payload,
       };
 
     case BridgeActionTypes.ADD_BRIDGE_TXS:
