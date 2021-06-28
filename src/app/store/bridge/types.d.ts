@@ -47,7 +47,7 @@ export interface BridgeTx {
   srcAddr: string;
   dstAddr: string;
 
-  // token hash
+  // token denom
   srcToken: string;
   dstToken: string;
 
@@ -66,8 +66,8 @@ export interface BridgeTx {
   // .lock tx on the source chain
   sourceTxHash?: string;
 
-  // TradeHub deposit tx
-  depositTxHash?: string;
+  // TradeHub external transfers confirmed
+  depositTxConfirmedAt?: dayjs.Dayjs;
 
   // TradeHub withdraw tx
   withdrawTxHash?: string;

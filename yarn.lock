@@ -15871,7 +15871,7 @@ tr46@^2.0.2:
 
 "tradehub-api-js@git://github.com/Switcheo/tradehub-api-js.git":
   version "1.0.0"
-  resolved "git://github.com/Switcheo/tradehub-api-js.git#4c01b42bb59463f9954cad159a21840bab47bbe8"
+  resolved "git://github.com/Switcheo/tradehub-api-js.git#a495090d8c4e3c6905bab99d99bb6d237fe6dbe1"
   dependencies:
     "@cityofzion/neon-core" "^4.8.0"
     "@cityofzion/neon-js" "^4.8.0"
