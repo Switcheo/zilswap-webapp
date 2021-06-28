@@ -8,7 +8,7 @@ import { actions } from "app/store";
 import { ChainInitAction } from "app/store/blockchain/actions";
 import { WalletAction, WalletActionTypes } from "app/store/wallet/actions";
 import { Transaction, TokenInfo } from "app/store/types";
-import { RPCEndpoints, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { RPCEndpoints, ZIL_ADDRESS } from "app/utils/constants";
 import { connectWalletZilPay, ConnectedWallet, WalletConnectType } from "core/wallet";
 import { ZILO_DATA } from "core/zilo/constants";
 import { ZWAPRewards } from "core/zwap";
@@ -108,7 +108,7 @@ function* stateChangeObserved(payload: StateChangeObservedPayload) {
 }
 
 type WrapperMappingsResult = { height: string, result: { [key: string]: string }}
-type TradeHubToken = {denom: string, decimals: string, blockchain: Blockchain.Zilliqa | Blockchain.Ethereum, asset_id: string, symbol: string, name: string}
+type TradeHubToken = {denom: string, decimals: string, blockchain: Blockchain.Zilliqa | Blockchain.Ethereum, asset_id: string, symbol: string, name: string, lockproxy_hash: string}
 type TradeHubTokensResult = { height: string, result: ReadonlyArray<TradeHubToken> }
 type BridgeMappingResult =  { [Blockchain.Zilliqa]: BridgeableToken[] , [Blockchain.Ethereum]: BridgeableToken[] }
 
@@ -121,6 +121,7 @@ const addMapping = (r: BridgeMappingResult, a: TradeHubToken, b: TradeHubToken) 
   r[a.blockchain].push({
     blockchain: a.blockchain,
     tokenAddress: a.asset_id.toLowerCase(),
+    lockproxyAddress: a.lockproxy_hash,
     denom: a.denom,
     toBlockchain: b.blockchain,
     toTokenAddress: b.asset_id.toLowerCase(),
@@ -181,7 +182,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
         initialized: false,
         registered: tkn.registered,
         whitelisted: tkn.whitelisted,
-        isZil: tkn.address === ZIL_TOKEN_NAME,
+        isZil: tkn.address === ZIL_ADDRESS,
         isZwap: tkn.address === ZWAPRewards.TOKEN_CONTRACT[network],
         address: tkn.address,
         decimals: tkn.decimals,

@@ -10,7 +10,7 @@ import { BridgeFormState, BridgeTx } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate, useNetwork } from "app/utils";
-import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
@@ -138,9 +138,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         ...formState,
         sourceAddress: ethAddress
       })
-      dispatch(actions.Bridge.updateForm({
-        sourceAddress: ethAddress
-      }))
+      dispatch(actions.Bridge.updateForm({ sourceAddress: ethAddress }))
+      dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, address: ethAddress}))
+      dispatch(actions.Token.refetchState())
     } catch (error) {
       console.error(error);
     }
@@ -161,8 +161,8 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
     dispatch(actions.Bridge.updateForm({
       forNetwork: network,
-      token: tokenState.tokens[ZIL_TOKEN_NAME],
-      transferAmount
+      token: tokenState.tokens[ZIL_ADDRESS],
+      transferAmount,
     }));
   }
 
@@ -271,7 +271,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           <CurrencyInput
             label="Transfer Amount"
             disabled={!wallet || !formState.sourceAddress}
-            token={tokenState.tokens[ZIL_TOKEN_NAME]}
+            token={tokenState.tokens[ZIL_ADDRESS]}
             amount={formState.transferAmount}
             onAmountChange={onTransferAmountChange}
             onCurrencyChange={onCurrencyChange}

@@ -2,7 +2,7 @@
 import BigNumber from "bignumber.js";
 import { Network } from "zilswap-sdk/lib/constants";
 import { Task } from "redux-saga";
-import { call, put, fork, select, race, delay, take, cancel } from "redux-saga/effects";
+import { all, call, put, fork, select, race, delay, take, cancel } from "redux-saga/effects";
 
 import { actions } from "app/store";
 import { TokenInfo } from "app/store/types";
@@ -11,14 +11,58 @@ import { logger } from "core/utilities";
 import { balanceBatchRequest, BatchRequestType, sendBatchRequest,
   tokenAllowancesBatchRequest, tokenBalanceBatchRequest, ZilswapConnector } from "core/zilswap";
 import { getWallet, getTokens, getBlockchain } from "../selectors";
-import { PollIntervals } from "app/utils/constants";
+import { PollIntervals, ETH_ADDRESS } from "app/utils/constants";
+import { Blockchain } from "tradehub-api-js";
+import { ETHBalances } from "core/ethereum";
 
-const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string) => {
-  logger("tokens saga", "retrieving token balances/allowances");
+const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string | null) => {
+  const updates: SimpleMap<TokenInfo> = {};
+
+  if (!address) {
+    return updates
+  }
+
+  logger("tokens saga", "retrieving eth token balances/allowances");
+
+  // get eth balance
+  const balance = await ETHBalances.getETHBalance({ network, walletAddress: address })
+  updates[ETH_ADDRESS] = {
+    ...tokens[ETH_ADDRESS],
+    initialized: true,
+    name: "Ethereum",
+    symbol: "ETH",
+    balance,
+  }
+
+  // get rest
+  const tokenAddresses = Object.values(tokens).filter(t => t.blockchain === Blockchain.Ethereum && t.address !== ETH_ADDRESS).map(t => t.address)
+  const balances = await ETHBalances.getTokenBalances({ network, tokenAddresses, walletAddress: address })
+  Object.entries(balances).forEach(([address, balance]) => {
+    updates[address] = {
+      ...tokens[address],
+      initialized: true,
+      balance,
+    }
+  })
+
+  return updates
+}
+
+const fetchZilTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string | null) => {
+  const updates: SimpleMap<TokenInfo> = {};
+
+  if (!address) {
+    return updates
+  }
+
+  logger("tokens saga", "retrieving zil token balances/allowances");
 
   const batchRequests: any[] = [];
   for (const t in tokens) {
     const token = tokens[t];
+    if (token.blockchain !== Blockchain.Zilliqa) {
+      continue
+    }
 
     if (token.isZil) {
       batchRequests.push(balanceBatchRequest(token, address.replace("0x", "")))
@@ -29,7 +73,6 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
   }
 
   const batchResults = await sendBatchRequest(network, batchRequests)
-  const updates: SimpleMap<TokenInfo> = {};
 
   batchResults.forEach(r => {
     const { request, result } = r;
@@ -47,6 +90,7 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
           ...updates[token.address],
           initialized: true,
           name: "Zilliqa",
+          symbol: "ZIL",
           balance,
         };
 
@@ -60,7 +104,7 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
 
         const tokenInfo: Partial<TokenInfo> = {
           initialized: true,
-          symbol: tokenDetails?.symbol ?? "",
+          symbol: tokenDetails?.symbol ?? token.symbol,
           pool: tokenPool ?? undefined,
           balance: result ? strings.bnOrZero(result.balances[address]) : token.balance,
         };
@@ -84,18 +128,21 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
 
 function* updateTokensState() {
   logger("tokens saga", "called updateTokensState")
-  const { wallet } = getWallet(yield select());
-
-  if (!wallet) return;
-
+  const { wallet, bridgeWallets } = getWallet(yield select());
   const { tokens } = getTokens(yield select());
   const { network } = getBlockchain(yield select());
 
-  const address = wallet!.addressInfo.byte20.toLowerCase();
+  const zilAddress = wallet ? wallet.addressInfo.byte20.toLowerCase() : null;
+  const ethAddress = bridgeWallets.eth;
 
-  const result: SimpleMap<TokenInfo> = yield call(fetchTokensState, network, tokens, address);
+  const [resultZil, resultEth]: [SimpleMap<TokenInfo>, SimpleMap<TokenInfo>] = yield all([
+    call(fetchZilTokensState, network, tokens, zilAddress),
+    call(fetchEthTokensState, network, tokens, ethAddress)
+  ])
 
-  yield put(actions.Token.updateAll(result));
+  console.log({resultZil, resultEth})
+
+  yield put(actions.Token.updateAll({ ...resultZil, ...resultEth }));
 }
 
 function* watchRefetchTokensState() {

@@ -12,7 +12,7 @@ import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { strings, useAsyncTask, useBlacklistAddress, useNetwork, useSearchParam, useToaster } from "app/utils";
-import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from "app/utils/constants";
+import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_ADDRESS, ZWAP_ADDRESS } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
@@ -235,8 +235,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (inToken || outToken) {
       return;
     }
-    const queryInput = queryParams.get("tokenIn") ?? ZIL_TOKEN_NAME;
-    const queryOutput = queryParams.get("tokenOut") ?? ZWAP_TOKEN_NAME;
+    const queryInput = queryParams.get("tokenIn") ?? ZIL_ADDRESS;
+    const queryOutput = queryParams.get("tokenOut") ?? ZWAP_ADDRESS;
     if (queryInput === queryOutput && queryOutput) {
       return;
     }
@@ -411,7 +411,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     let { inToken } = swapFormState;
 
     if (!token.isZil && !inToken) {
-      inToken = tokenState.tokens[ZIL_TOKEN_NAME];
+      inToken = tokenState.tokens[ZIL_ADDRESS];
     }
 
     const result = calculateAmounts({ inToken, outToken: token });
@@ -433,7 +433,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     let { outToken } = swapFormState;
 
     if (!token.isZil && !outToken) {
-      outToken = tokenState.tokens[ZIL_TOKEN_NAME];
+      outToken = tokenState.tokens[ZIL_ADDRESS];
     }
 
     const result = calculateAmounts({ inToken: token, outToken });

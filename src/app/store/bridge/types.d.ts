@@ -6,6 +6,7 @@ import { Blockchain } from "tradehub-api-js";
 export type BridgeableToken = {
   blockchain: Blockchain;
   tokenAddress: string;
+  lockproxyAddress: string;
   denom: string;
   toBlockchain: Blockchain;
   toTokenAddress: string;

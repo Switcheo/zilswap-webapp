@@ -3,7 +3,7 @@ import { RewardsActionTypes } from "app/store/rewards/actions";
 import { TokenActionTypes } from "app/store/token/actions";
 import { TokenInfo, TokenUSDValues } from "app/store/types";
 import { SimpleMap, valueCalculators } from "app/utils";
-import { BIG_ONE, BIG_ZERO, PollIntervals, ZIL_TOKEN_NAME, ZIL_DECIMALS } from "app/utils/constants";
+import { BIG_ONE, BIG_ZERO, PollIntervals, ZIL_ADDRESS, ZIL_DECIMALS } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
@@ -21,7 +21,7 @@ const computeTokenPrice = (zilPrice: BigNumber, tokens: SimpleMap<TokenInfo>) =>
         amount: BIG_ONE.shiftedBy(token.decimals),
         exactOf: "in",
         tokenInID: token.address,
-        tokenOutID: ZIL_TOKEN_NAME,
+        tokenOutID: ZIL_ADDRESS,
         suppressLogs: true,
       });
 
