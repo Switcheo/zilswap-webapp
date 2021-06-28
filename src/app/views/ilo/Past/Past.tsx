@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from 'react-redux'
 import { Box, makeStyles } from '@material-ui/core'
 import dayjs, { Dayjs } from "dayjs";
@@ -38,11 +38,11 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const network = useNetwork();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const blockchainState = useSelector<RootState, BlockchainState>(state => state.blockchain)
-  const ziloData = ZILO_DATA[network!].filter(x => false);
 
   const [currentBlock, setCurrentBlock] = useState<number>(0)
   const [blockTime, setBlockTime] = useState<Dayjs>(dayjs())
   const [currentTime, setCurrentTime] = useState<Dayjs>(dayjs())
+  const ziloData = useMemo(() => ZILO_DATA[network!].filter(x => x.showUntil.isBefore(currentTime)), [network, currentTime])
 
   // just need to set once on network init
   useEffect(() => {
