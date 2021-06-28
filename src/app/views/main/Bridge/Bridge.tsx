@@ -18,8 +18,9 @@ import { ethers } from "ethers";
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Blockchain } from "tradehub-api-js";
+import Web3Modal from 'web3modal';
+import { providerOptions } from "core/ethereum";
 import { ChainTransferFlow } from "./components/constants";
-
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
@@ -170,25 +171,30 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const onClickConnectETH = async () => {
-    try {
-      let provider;
-      (window as any).ethereum.enable().then(provider = new ethers.providers.Web3Provider((window as any).ethereum));
-      const signer = provider.getSigner();
-      const ethAddress = await signer.getAddress();
+    const web3Modal = new Web3Modal({
+        network: "mainnet",
+        cacheProvider: true,
+        disableInjectedProvider: false,
+        providerOptions
+    });
 
-      if (fromBlockchain === Blockchain.Ethereum) {
-        setSourceAddress(ethAddress);
-      }
 
-      if (toBlockchain === Blockchain.Ethereum) {
-        setDestAddress(ethAddress);
-      }
-      setEthConnectedAddress(ethAddress);
-      dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, address: ethAddress}))
-      dispatch(actions.Token.refetchState())
-    } catch (error) {
-      console.error(error);
+    const provider = await web3Modal.connect();
+    const ethersProvider = new ethers.providers.Web3Provider(provider)
+    const signer = ethersProvider.getSigner();
+    const ethAddress = await signer.getAddress();
+
+    if (fromBlockchain === Blockchain.Ethereum) {
+      setSourceAddress(ethAddress);
     }
+
+    if (toBlockchain === Blockchain.Ethereum) {
+      setDestAddress(ethAddress);
+    }
+    
+    setEthConnectedAddress(ethAddress);
+    dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, address: ethAddress}));
+    dispatch(actions.Token.refetchState());
   };
 
   const onClickConnectZIL = () => {
