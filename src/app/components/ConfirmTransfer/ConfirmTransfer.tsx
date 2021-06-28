@@ -110,6 +110,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   checkIcon: {
     fontSize: "1rem",
     verticalAlign: "sub",
+    color: theme.palette.primary.light,
+    // // done
+    // color: theme.palette.primary.dark
   },
   link: {
     color: theme.palette.text?.secondary,
