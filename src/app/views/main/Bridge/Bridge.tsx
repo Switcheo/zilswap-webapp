@@ -81,7 +81,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   selectMenu: {
-    // TODO
+    "& .MuiListItem-root.Mui-selected": {
+        color: "#DEFFFF"
+    }
   }
 }))
 

@@ -167,7 +167,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
           <CurrencyList
             tokens={filteredTokens}
             search={search}
-            emptyStateLabel={`No tokens found for "${search}"`}
+            emptyStateLabel="No tokens found."
             showContribution={showContribution}
             userTokens={userTokens}
             onToggleUserToken={onToggleUserToken}
