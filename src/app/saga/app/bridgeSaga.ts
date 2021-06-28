@@ -4,9 +4,10 @@ import { SimpleMap } from "app/utils";
 import { bnOrZero } from "app/utils/strings/strings";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import { logger } from "core/utilities";
-import { call, fork, race, select, take } from "redux-saga/effects";
+import { call, delay, fork, race, select, take } from "redux-saga/effects";
 import { TradeHubSDK, ConnectedTradeHubSDK, RestModels, TradeHubTx, SWTHAddress } from "tradehub-api-js";
 import dayjs from "dayjs";
+import { PollIntervals } from "app/utils/constants";
 
 export enum Status {
   NotStarted,
@@ -18,6 +19,7 @@ export enum Status {
 }
 
 function getBridgeTxStatus(tx: BridgeTx): Status {
+  console.log("getBridgeTxStatus", tx)
   if (tx.destinationTxHash) {
     return Status.WithdrawTxConfirmed;
   }
@@ -42,7 +44,12 @@ function* watchDepositConfirmation() {
     try {
       // watch and update relevant txs
       const bridgeTxs = (yield select((state: RootState) => state.bridge.bridgeTxs)) as BridgeTx[];
-      const relevantTxs = bridgeTxs.filter(tx => [Status.DepositTxStarted, Status.DepositTxConfirmed].includes(getBridgeTxStatus(tx)));
+      const relevantTxs = bridgeTxs.filter(tx => {
+        const status = getBridgeTxStatus(tx)
+        console.log(status);
+        return [Status.DepositTxStarted, Status.DepositTxConfirmed].includes(status);
+      });
+      logger("bridge saga", "watch deposit confirmation", relevantTxs.length);
 
       const updatedTxs: SimpleMap<BridgeTx> = {};
       const network = TradeHubSDK.Network.DevNet
@@ -63,6 +70,8 @@ function* watchDepositConfirmation() {
             if (depositTransfer?.status === 'success') {
               tx.depositTxConfirmedAt = dayjs();
               updatedTxs[tx.sourceTxHash!] = tx;
+
+              logger("bridge saga", "confirmed tx deposit", tx.sourceTxHash);
             }
           }
 
@@ -87,6 +96,8 @@ function* watchDepositConfirmation() {
 
             tx.withdrawTxHash = withdrawResult.txhash;
             updatedTxs[tx.sourceTxHash!] = tx;
+
+            logger("bridge saga", "initiated tx withdraw", tx.sourceTxHash);
           }
         } catch (error) {
           console.error('process deposit tx error');
@@ -100,7 +111,8 @@ function* watchDepositConfirmation() {
       console.error(error)
     } finally {
       yield race({
-        bridgeTxUpdated: take(actions.Bridge.addBridgeTx),
+        bridgeTxUpdated: take(actions.Bridge.BridgeActionTypes.ADD_BRIDGE_TXS),
+        pollTimeout: delay(PollIntervals.BridgeDepositWatcher),
       });
     }
   }
@@ -111,12 +123,13 @@ function* watchWithdrawConfirmation() {
       // watch and update relevant txs
       const bridgeTxs = (yield select((state: RootState) => state.bridge.bridgeTxs)) as BridgeTx[];
       const relevantTxs = bridgeTxs.filter(tx => getBridgeTxStatus(tx) === Status.WithdrawTxStarted);
+      logger("bridge saga", "watch withdraw confirmation", relevantTxs.length);
 
       const updatedTxs: SimpleMap<BridgeTx> = {};
       const network = TradeHubSDK.Network.DevNet;
       for (const tx of relevantTxs) {
+        logger("bridge saga", "checking tx withdraw", tx.sourceTxHash);
         try {
-
           const sdk = new TradeHubSDK({ network });
           const swthAddress = SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
           const extTransfers = (yield call([sdk.api, sdk.api.getTransfers], { account: swthAddress })) as RestModels.Transfer[];
@@ -127,6 +140,8 @@ function* watchWithdrawConfirmation() {
           if (withdrawTransfer?.status === 'success') {
             tx.destinationTxHash = withdrawTransfer.transaction_hash;
             updatedTxs[tx.sourceTxHash!] = tx;
+
+            logger("bridge saga", "confirmed tx withdraw", tx.sourceTxHash);
           }
 
           // possible extension: validate tx on dest chain 
@@ -141,7 +156,8 @@ function* watchWithdrawConfirmation() {
       console.error(error)
     } finally {
       yield race({
-        bridgeTxUpdated: take(actions.Bridge.addBridgeTx),
+        bridgeTxUpdated: take(actions.Bridge.BridgeActionTypes.ADD_BRIDGE_TXS),
+        pollTimeout: delay(PollIntervals.BridgeWithdrawWatcher),
       });
     }
   }

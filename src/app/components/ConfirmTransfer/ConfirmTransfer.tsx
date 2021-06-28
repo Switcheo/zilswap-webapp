@@ -15,7 +15,7 @@ import { ConnectedWallet } from "core/wallet";
 import { ethers } from "ethers";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { SWTHAddress, Token, TradeHubSDK } from "tradehub-api-js";
+import { SWTHAddress, Token, TradeHubSDK, Blockchain } from "tradehub-api-js";
 import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
