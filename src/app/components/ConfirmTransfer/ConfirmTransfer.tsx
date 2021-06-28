@@ -236,7 +236,7 @@ const ConfirmTransfer = (props: any) => {
       denom: asset.denom,
       to_address: toAddress,
       fee_address: `${BridgeParamConstants.SWTH_FEE_ADDRESS}`,
-      fee_amount: "1",
+      fee_amount: "0",
       originator: sdk.wallet?.bech32Address
     });
 
@@ -268,7 +268,7 @@ const ConfirmTransfer = (props: any) => {
 
   /**
     * Lock the asset on Ethereum chain
-    * returns true if lock txn is success, false otherwise
+    * returns the txn hash if lock txn is successful, otherwise return null
     * @param swthAddress   temp swth address to hold the lock asset
     * @param asset         details of the asset being locked; retrieved from tradehub
     * @param amount        nuumber of asset to be lock, e.g. set '1' if locking 1 native ETH
@@ -339,14 +339,14 @@ const ConfirmTransfer = (props: any) => {
     }
 
     if (isDeposited) {
-      return true;
+      return lock_tx.hash!;
     }
-    return false;
+    return null;
   }
 
   /**
     * Lock the asset on Zilliqa chain
-    * returns true if lock txn is success, false otherwise
+    * returns the txn hash if lock txn is successful, otherwise return null
     * @param wallet        connected zilliqa wallet
     * @param asset         details of the asset being locked; retrieved from tradehub
     * @param amount        nuumber of asset to be lock, e.g. set '1' if locking 1 native ZIL
@@ -354,7 +354,7 @@ const ConfirmTransfer = (props: any) => {
   async function lockAssetOnZil(wallet: ConnectedWallet, asset: Token, amount: string) {
     if (asset === null || wallet === null) {
       console.error("Zilliqa wallet not connected");
-      return false;
+      return null;
     }
 
     const lockProxy = asset.lock_proxy_hash;
@@ -439,9 +439,9 @@ const ConfirmTransfer = (props: any) => {
     }
 
     if (isDeposited) {
-      return true;
+      return lock_tx.id;
     }
-    return false;
+    return null;
   }
 
   // deposit address depends on the selection
@@ -449,23 +449,23 @@ const ConfirmTransfer = (props: any) => {
   const onConfirm = async (depositAddress: string) => {
     setPending(true);
 
-    const transferFlow = BridgeParamConstants.TRANSFER_FLOW;
+    const transferFlow = bridgeState.formState.transferDirection;
     const sdk = await initTradehubSDK(swthAddrMnemonic);
     await sdk.token.reloadTokens();
     const asset = sdk.token.tokens[`${BridgeParamConstants.DEPOSIT_DENOM}`];
 
+    let sourceTxHash;
     if (transferFlow === ChainTransferFlow.ZIL_TO_ETH) {
       // init lock on zil side
-      const isLock = await lockAssetOnZil(wallet!, asset, bridgeFormState.transferAmount.toString());
-      if (isLock) {
-        toaster("Success: asset locked! (Zilliqa -> SWTH)");
-      }
+      sourceTxHash = await lockAssetOnZil(wallet!, asset, bridgeFormState.transferAmount.toString());
     } else {
       // init lock on eth side
-      const isLock = await lockAssetOnEth(asset, bridgeFormState.transferAmount.toString());
-      if (isLock) {
-        toaster("Success: asset locked! (Ethereum -> SWTH)");
-      }
+      sourceTxHash = await lockAssetOnEth(asset, bridgeFormState.transferAmount.toString());
+    }
+
+    if (sourceTxHash === null) {
+      console.error("source txn hash is null!");
+      return null;
     }
 
     setPending(false);
@@ -487,7 +487,7 @@ const ConfirmTransfer = (props: any) => {
         srcChain: srcChain,
         dstToken: bridgeableToken.toDenom,
         srcToken: bridgeableToken.denom,
-        sourceTxHash: "placeholder", // TODO: populate source tx hash
+        sourceTxHash: sourceTxHash, // TODO: populate source tx hash
         inputAmount: bridgeFormState.transferAmount,
         interimAddrMnemonics: swthAddrMnemonic,
         withdrawFee: new BigNumber(1), // TODO: add withdraw fee
@@ -549,14 +549,14 @@ const ConfirmTransfer = (props: any) => {
         <Box mt={2} display="flex" justifyContent="space-between">
           <Box className={classes.networkBox} flex={1}>
             <Text variant="h4" color="textSecondary">From</Text>
-            <Text variant="h4">Ethereum Network</Text>
-            <Text variant="button">{truncate(bridgeFormState.sourceAddress, 5, 4)}</Text>
+            <Text variant="h4">{ bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Ethereum Network' : 'Zilliqa Network'}</Text>
+            <Text variant="button">{truncate( bridgeState.formState.sourceAddress, 5, 4)}</Text>
           </Box>
           <Box flex={0.2}></Box>
           <Box className={classes.networkBox} flex={1}>
             <Text variant="h4" color="textSecondary">To</Text>
-            <Text variant="h4">Zilliqa Network</Text>
-            <Text variant="button">{truncate(wallet?.addressInfo.bech32, 5, 4)}</Text>
+            <Text variant="h4">{ bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa Network' : 'Ethereum Network'}</Text>
+            <Text variant="button">{truncate(bridgeState.formState.destAddress, 5, 4)}</Text>
           </Box>
         </Box>
       </Box>
@@ -655,36 +655,15 @@ const ConfirmTransfer = (props: any) => {
       {!complete && (
         <FancyButton
           disabled={!!pending}
-          onClick={() => {
-            const transferFlow = BridgeParamConstants.TRANSFER_FLOW;
-            if (transferFlow === ChainTransferFlow.ZIL_TO_ETH) {
-              onConfirm(bridgeFormState.destAddress!)
-            } else {
-              onConfirm(bridgeFormState.sourceAddress!)
-            }
-          }}
+          onClick={() => onConfirm(bridgeFormState.sourceAddress!)}
           variant="contained"
           color="primary"
           className={classes.actionButton}>
           {pending
             ? "Transfer in Progress..."
-            : BridgeParamConstants.TRANSFER_FLOW === ChainTransferFlow.ZIL_TO_ETH
+            : bridgeState.formState.transferDirection === ChainTransferFlow.ZIL_TO_ETH
               ? "Confirm (ZIL -> SWTH)"
               : "Confirm (ETH -> SWTH)"
-          }
-        </FancyButton>
-      )}
-
-      {!complete && (
-        <FancyButton
-          disabled={!!pending}
-          onClick={() => onWithdraw(`${bridgeFormState.sourceAddress}`)}
-          variant="contained"
-          color="primary"
-          className={classes.actionButton}>
-          {pending
-            ? "Transfer in Progress..."
-            : "Withdraw (SWTH -> ETH)"
           }
         </FancyButton>
       )}
@@ -698,7 +677,25 @@ const ConfirmTransfer = (props: any) => {
           className={classes.actionButton}>
           {pending
             ? "Transfer in Progress..."
+            : bridgeState.formState.transferDirection === ChainTransferFlow.ZIL_TO_ETH
+            ? "Withdraw (SWTH -> ETH)"
             : "Withdraw (SWTH -> ZIL)"
+          }
+        </FancyButton>
+      )}
+
+      {!complete && (
+        <FancyButton
+          disabled={!!pending}
+          onClick={() => onWithdraw(`${bridgeFormState.sourceAddress}`)}
+          variant="contained"
+          color="primary"
+          className={classes.actionButton}>
+          {pending
+            ? "Transfer in Progress..."
+            : bridgeState.formState.transferDirection === ChainTransferFlow.ZIL_TO_ETH
+            ? "Withdraw To Source (SWTH -> ZIL) (FOR TESTING)"
+            : "Withdraw To Source (SWTH -> ETH) (FOR TESTING)"
           }
         </FancyButton>
       )}

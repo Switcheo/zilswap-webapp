@@ -1,6 +1,5 @@
 
-import { Box, CircularProgress, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput } from "@material-ui/core";
-import { SearchOutlined } from "@material-ui/icons";
+import { Box, CircularProgress, DialogContent, DialogProps, makeStyles, OutlinedInput } from "@material-ui/core";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { DialogModal } from "app/components";
 import { BridgeState } from "app/store/bridge/types";
