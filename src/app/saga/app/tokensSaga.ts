@@ -28,9 +28,12 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
   const balance = await ETHBalances.getETHBalance({ network, walletAddress: address })
   updates[ETH_ADDRESS] = {
     ...tokens[ETH_ADDRESS],
+    address: ETH_ADDRESS,
     initialized: true,
     name: "Ethereum",
     symbol: "ETH",
+    decimals: 18,
+    blockchain: Blockchain.Ethereum,
     balance,
   }
 

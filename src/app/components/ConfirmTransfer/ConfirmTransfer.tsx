@@ -1,25 +1,26 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Link, makeStyles } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
+import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
+import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
+import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
 import { units } from "@zilliqa-js/zilliqa";
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
+import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
-import { BridgeState, BridgeFormState, BridgeTx } from "app/store/bridge/types";
+import { BridgeFormState, BridgeState, BridgeTx } from "app/store/bridge/types";
 import { RootState, TokenInfo, WalletObservedTx } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useNetwork, useToaster } from "app/utils";
+import { hexToRGBA, truncate, useNetwork, useSearchParam, useToaster } from "app/utils";
 import { BridgeParamConstants, ChainTransferFlow } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
+import { logger } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
 import { ethers } from "ethers";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { SWTHAddress, Token, TradeHubSDK, Blockchain } from "tradehub-api-js";
-import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
-import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
-import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
-import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
+import { Blockchain, SWTHAddress, Token, TradeHubSDK } from "tradehub-api-js";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -170,7 +171,7 @@ async function isDepositOnSwth(swthAddress: string, asset: Token, amount: string
     account: swthAddress
   })
 
-  console.log(result[0]);
+  logger(result[0]);
   if (result &&
     result.length > 0 &&
     result[0].transfer_type === "deposit" &&
@@ -179,7 +180,7 @@ async function isDepositOnSwth(swthAddress: string, asset: Token, amount: string
     result[0].denom === asset.denom &&
     result[0].status === "success" &&
     result[0].amount === amount) {
-    console.log("deposit confirmed; can proceed to withdraw")
+    logger("deposit confirmed; can proceed to withdraw")
     return true
   }
   return false
@@ -197,6 +198,7 @@ const ConfirmTransfer = (props: any) => {
   const token = useSelector<RootState, TokenInfo | undefined>(state => state.bridge.formState.token);
   const [pending, setPending] = useState<Boolean>(false);
   const [complete, setComplete] = useState<Boolean>(false);
+  const enableCheatyButtons = useSearchParam("enableCheatyButtons") === "true";
 
   const swthAddrMnemonic = useMemo(() => SWTHAddress.newMnemonic(), []);
 
@@ -220,7 +222,7 @@ const ConfirmTransfer = (props: any) => {
 
     await sdk.token.reloadTokens();
     const asset = sdk.token.tokens[`${BridgeParamConstants.WITHDRAW_DENOM}`];
-    console.log("withdraw asset: ", asset);
+    logger("withdraw asset: ", asset);
     const lockProxy = asset.lock_proxy_hash;
     sdk.zil.configProvider.getConfig().Zil.LockProxyAddr = `0x${lockProxy}`;
     sdk.zil.configProvider.getConfig().Zil.ChainId = 333;
@@ -237,14 +239,14 @@ const ConfirmTransfer = (props: any) => {
       originator: sdk.wallet?.bech32Address
     });
 
-    console.log("withdraw (tradehub): %o\n", withdrawTradehub);
+    logger("withdraw (tradehub): %o\n", withdrawTradehub);
     toaster(`Submitted: Initiate withdrawal ${withdrawTradehub.txhash} (SWTH -> DEST_BLOCKCHAIN)`);
 
     let isWithdrawn = false
 
     // check deposit on switcheo    
     for (let attempt = 0; attempt < 50; attempt++) {
-      console.log("checking deposit...");
+      logger("checking deposit...");
       const isConfirmed = await isWithdrawOnSwth(`${withdrawTradehub.txhash}`, asset, `${bridgeFormState.transferAmount}`)
       if (isConfirmed) {
         isWithdrawn = true
@@ -299,7 +301,7 @@ const ConfirmTransfer = (props: any) => {
           signer: signer,
         });
 
-        console.log("approve tx", approve_tx.hash);
+        logger("approve tx", approve_tx.hash);
         toaster(`Submitted: ${approve_tx.hash!} (Ethereum - ERC20 Approval)`);
         await approve_tx.wait();
       }
@@ -321,12 +323,12 @@ const ConfirmTransfer = (props: any) => {
     await lock_tx.wait();
 
     toaster(`Submitted: ${lock_tx.hash!} (Ethereum - Lock Asset)`);
-    console.log("lock tx", lock_tx.hash!);
+    logger("lock tx", lock_tx.hash!);
     let isDeposited = false
 
     // check deposit on switcheo    
     for (let attempt = 0; attempt < 50; attempt++) {
-      console.log("checking deposit...");
+      logger("checking deposit...");
       const isConfirmed = await isDepositOnSwth(swthAddress, asset, amount)
       if (isConfirmed) {
         isDeposited = true
@@ -370,7 +372,7 @@ const ConfirmTransfer = (props: any) => {
       // user is transferring zrc2 tokens
       // need approval
       const allowance = await sdk.zil.checkAllowanceZRC2(asset, `0x${zilAddress}`, `0x${lockProxy}`);
-      console.log("zil zrc2 allowance: ", allowance);
+      logger("zil zrc2 allowance: ", allowance);
 
       const approveZRC2Params = {
         token: asset,
@@ -379,14 +381,14 @@ const ConfirmTransfer = (props: any) => {
         zilAddress: zilAddress,
         signer: wallet.provider?.wallet!,
       }
-      console.log("approve zrc2 token parameters: ", approveZRC2Params);
+      logger("approve zrc2 token parameters: ", approveZRC2Params);
       toaster(`Approval needed (Zilliqa)`);
 
       const approve_tx = await sdk.zil.approveZRC2(approveZRC2Params);
       toaster(`Submitted: ${approve_tx.id!} (Zilliqa - ZRC2 Approval)`);
 
       await approve_tx.confirm(approve_tx.id!)
-      console.log("transaction confirmed! receipt is: ", approve_tx.getReceipt())
+      logger("transaction confirmed! receipt is: ", approve_tx.getReceipt())
 
       // token approval success
       // if (approve_tx !== undefined && approve_tx.getReceipt()?.success) {
@@ -404,7 +406,7 @@ const ConfirmTransfer = (props: any) => {
       signer: wallet.provider?.wallet!,
     }
 
-    console.log("lock deposit params: %o\n", lockDepositParams);
+    logger("lock deposit params: %o\n", lockDepositParams);
     toaster(`Locking asset (Zilliqa)`);
     const lock_tx = await sdk.zil.lockDeposit(lockDepositParams);
 
@@ -418,14 +420,14 @@ const ConfirmTransfer = (props: any) => {
     toaster(`Submitted: ${lock_tx.id!} (Zilliqa - Lock Asset)`);
 
     await lock_tx.confirm(lock_tx.id!);
-    console.log("transaction confirmed! receipt is: ", lock_tx.getReceipt());
+    logger("transaction confirmed! receipt is: ", lock_tx.getReceipt());
 
     let isDeposited = false
 
     if (lock_tx !== undefined && lock_tx.getReceipt()?.success === true) {
       // check deposit on switcheo    
       for (let attempt = 0; attempt < 50; attempt++) {
-        console.log("checking deposit...");
+        logger("checking deposit...");
         const isConfirmed = await isDepositOnSwth(swthAddress, asset, amount)
         if (isConfirmed) {
           isDeposited = true
@@ -659,16 +661,16 @@ const ConfirmTransfer = (props: any) => {
           {pending
             ? "Transfer in Progress..."
             : bridgeState.formState.transferDirection === ChainTransferFlow.ZIL_TO_ETH
-              ? "Confirm (ZIL -> SWTH)"
-              : "Confirm (ETH -> SWTH)"
+              ? "Confirm (ZIL -> ETH)"
+              : "Confirm (ETH -> ZIL)"
           }
         </FancyButton>
       )}
 
-      {!complete && (
+      {enableCheatyButtons && !complete && (
         <FancyButton
           disabled={!!pending}
-          onClick={() => onWithdraw(`${bridgeFormState.destAddress}`)}
+          onClick={() => onWithdraw(bridgeFormState.destAddress!)}
           variant="contained"
           color="primary"
           className={classes.actionButton}>
@@ -681,10 +683,10 @@ const ConfirmTransfer = (props: any) => {
         </FancyButton>
       )}
 
-      {!complete && (
+      {enableCheatyButtons && !complete && (
         <FancyButton
           disabled={!!pending}
-          onClick={() => onWithdraw(`${bridgeFormState.sourceAddress}`)}
+          onClick={() => onWithdraw(bridgeFormState.sourceAddress!)}
           variant="contained"
           color="primary"
           className={classes.actionButton}>
