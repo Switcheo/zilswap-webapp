@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexDirection: "column",
     alignItems: "center",
     borderRadius: 12,
-    backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.1)}`,
+    backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`,
     padding: theme.spacing(1)
   },
   networkBox: {
@@ -100,7 +100,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px",
     boxShadow: "none",
     border: "none",
-    backgroundColor: "rgba(222, 255, 255, 0.1)"
+    backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` :  `rgba${hexToRGBA("#003340", 0.05)}`
   },
   arrowIcon: {
     verticalAlign: "middle",
@@ -111,8 +111,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "1rem",
     verticalAlign: "sub",
     color: theme.palette.primary.light,
-    // // done
-    // color: theme.palette.primary.dark
+  },
+  checkIconCompleted: {
+    color: theme.palette.primary.dark
   },
   link: {
     color: theme.palette.text?.secondary,
@@ -200,6 +201,7 @@ const ConfirmTransfer = (props: any) => {
   const token = useSelector<RootState, TokenInfo | undefined>(state => state.bridge.formState.token);
   const [pending, setPending] = useState<Boolean>(false);
   const [complete, setComplete] = useState<Boolean>(false);
+  const [tokenApproval, setTokenApproval] = useState<Boolean>(false);
 
   const swthAddrMnemonic = useMemo(() => SWTHAddress.newMnemonic(), []);
 
@@ -392,9 +394,9 @@ const ConfirmTransfer = (props: any) => {
       console.log("transaction confirmed! receipt is: ", approve_tx.getReceipt())
 
       // token approval success
-      // if (approve_tx !== undefined && approve_tx.getReceipt()?.success) {
-      //   setTokenApproval(true);
-      // }
+      if (approve_tx !== undefined && approve_tx.getReceipt()?.success) {
+        setTokenApproval(true);
+      }
     }
 
     const lockDepositParams = {
@@ -590,11 +592,11 @@ const ConfirmTransfer = (props: any) => {
                 {/* Stage 1 */}
                 <Box mb={1}>
                   <Text>
-                    <strong>Stage 1: Ethereum <ArrowRightRoundedIcon className={classes.arrowIcon} /> TradeHub</strong>
+                    <strong>Stage 1: { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Ethereum' : 'Zilliqa' } <ArrowRightRoundedIcon className={classes.arrowIcon} /> TradeHub</strong>
                   </Text>
                   <Box display="flex">
                     <Text className={classes.label} flexGrow={1} align="left" marginBottom={0.5}>
-                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> Token Approval (ERC20/ZRC2)
+                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, tokenApproval ? classes.checkIconCompleted : "")}/> Token Approval (ERC20/ZRC2)
                     </Text>
                     <Text className={classes.label}>
                       <Link
@@ -603,7 +605,7 @@ const ConfirmTransfer = (props: any) => {
                         rel="noopener noreferrer"
                         target="_blank"
                         href="/">
-                        View on Etherscan <NewLinkIcon className={classes.linkIcon} />
+                        View on { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Etherscan' : 'ViewBlock' } <NewLinkIcon className={classes.linkIcon} />
                       </Link>
                     </Text>
                   </Box>
@@ -628,7 +630,7 @@ const ConfirmTransfer = (props: any) => {
                   </Box>
                   <Box display="flex">
                     <Text className={classes.label} flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> Withdrawal to Zilliqa
+                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> Withdrawal to { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa' : 'Ethereum' }
                     </Text>
                     <Text className={classes.label}>-</Text>
                   </Box>
@@ -637,11 +639,11 @@ const ConfirmTransfer = (props: any) => {
                 {/* Stage 3 */}
                 <Box>
                   <Text>
-                    <strong>Stage 3: TradeHub <ArrowRightRoundedIcon className={classes.arrowIcon} /> Zilliqa</strong>
+                    <strong>Stage 3: TradeHub <ArrowRightRoundedIcon className={classes.arrowIcon} /> { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa' : 'Ethereum' }</strong>
                   </Text>
                   <Box display="flex">
                     <Text className={classes.label} flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> Transfer to Zilliqa Wallet
+                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> Transfer to { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa' : 'Ethereum' } Wallet
                     </Text>
                     <Text className={classes.label}>-</Text>
                   </Box>

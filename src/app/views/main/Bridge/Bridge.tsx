@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   connectedWalletButton: {
     backgroundColor: "transparent",
-    border: `1px solid ${theme.palette.currencyInput}`,
+    border: `1px solid ${theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : "#D2E5DF"}`,
     "&:hover": {
       backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.2)}`
     }
