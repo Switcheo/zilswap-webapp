@@ -1,6 +1,7 @@
 import { LocalStorageKeys } from "app/utils/constants";
 import { bnOrZero, DataCoder } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
+import { logger } from "core/utilities";
 import { Blockchain } from "tradehub-api-js";
 import { BridgeActionTypes } from "./actions";
 import { BridgeState, BridgeTx } from "./types";
@@ -55,13 +56,16 @@ try {
   if (loadedBridgeTxsData) {
     const savedTxs: object[] = JSON.parse(loadedBridgeTxsData);
     loadedBridgeTxs = savedTxs.map(BridgeTxEncoder.decode);
+    logger("loadedBridgeTxs", loadedBridgeTxs);
   }
 } catch (error) {
+  console.error(error);
   loadedBridgeTxs = [];
 }
 
 const saveBridgeTxs = (txs: BridgeTx[]) => {
   const encodedTxs = txs.map(BridgeTxEncoder.encode);
+  logger("saveBridgeTxs", encodedTxs);
   localStorage.setItem(LocalStorageKeys.BridgeTxs, JSON.stringify(encodedTxs));
 }
 

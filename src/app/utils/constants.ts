@@ -83,4 +83,7 @@ export class PollIntervals {
   public static PoolWeights = 3600000;
 
   public static RetryAfterError = 5000;
+
+  public static BridgeDepositWatcher = 10000;
+  public static BridgeWithdrawWatcher = 10000;
 }
