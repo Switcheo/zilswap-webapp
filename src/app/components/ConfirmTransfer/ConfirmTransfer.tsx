@@ -4,7 +4,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import { units } from "@zilliqa-js/zilliqa";
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { actions } from "app/store";
-import { BridgeFormState } from "app/store/bridge/types";
+import { BridgeState, BridgeFormState, BridgeTx } from "app/store/bridge/types";
 import { RootState, TokenInfo, WalletObservedTx } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate, useNetwork, useToaster } from "app/utils";
@@ -187,6 +187,7 @@ const ConfirmTransfer = (props: any) => {
   const toaster = useToaster();
   const network = useNetwork();
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
+  const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
   const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
   const token = useSelector<RootState, TokenInfo | undefined>(state => state.bridge.formState.token);
   const [pending, setPending] = useState<Boolean>(false);
@@ -454,24 +455,31 @@ const ConfirmTransfer = (props: any) => {
       }
     }
 
-    // TODO: combine with withdraw flow
     setPending(false);
 
-    // TODO: implement load initiated bridge tx into redux
-    // const { destAddress, sourceAddress } = bridgeFormState;
-    // if (!destAddress || !sourceAddress) return;
+    const { destAddress, sourceAddress } = bridgeFormState;
+    if (!destAddress || !sourceAddress) return;
 
-    // const bridgeTx: BridgeTx = {
-    //     dstAddr: destAddress,
-    //     srcAddr: sourceAddress,
-    //     dstChain: ,
-    //     srcChain: ,
-    //     dstToken: ,
-    //     srcToken: ,
-    //     inputAmount: ,
-    //     interimAddrMnemonics: ,
-    // }
-    // dispatch(actions.Bridge.addBridgeTx(bridgeTx))
+    const isToEth = transferFlow === ChainTransferFlow.ZIL_TO_ETH;
+    const srcChain = isToEth ? Blockchain.Zilliqa : Blockchain.Ethereum
+    const bridgeableToken = bridgeState.tokens[srcChain].find(token => token.denom === asset.denom)
+    if (!bridgeableToken) {
+      throw new Error(`bridgeable token not found for deposited denom: ${asset.denom}`)
+    }
+
+    const bridgeTx: BridgeTx = {
+        dstAddr: destAddress,
+        srcAddr: sourceAddress,
+        dstChain: isToEth ? Blockchain.Ethereum : Blockchain.Zilliqa,
+        srcChain: srcChain,
+        dstToken: bridgeableToken.toDenom,
+        srcToken: bridgeableToken.denom,
+        sourceTxHash: "placeholder", // TODO: populate source tx hash
+        inputAmount: bridgeFormState.transferAmount,
+        interimAddrMnemonics: swthAddrMnemonic,
+        withdrawFee: new BigNumber(1), // TODO: add withdraw fee
+    }
+    dispatch(actions.Bridge.addBridgeTx([bridgeTx]))
   }
 
   const conductAnotherTransfer = () => {
