@@ -16,19 +16,19 @@ export const providerOptions = {
   walletconnect: {
       package: WalletConnectProvider,
       options: {
-          infuraId: ""
+          infuraId: process.env.REACT_APP_INFURA_ID
       }
   },
   fortmatic: {
       package: Fortmatic,
       options: {
-          key: ""
+          key: process.env.REACT_APP_FORTMATIC_KEY
       }
   },
   portis: {
       package: Portis,
       options: {
-          id: ""
+          id: process.env.REACT_APP_PORTIS_ID
       }
   },
   torus: {
