@@ -47,12 +47,6 @@ export const RPCEndpoints: { [key in Network]: string } = {
 export const BIG_ZERO = new BigNumber(0);
 export const BIG_ONE = new BigNumber(1);
 
-export const sortTokens = (lhs: TokenInfo, rhs: TokenInfo) => {
-  const { listPriority: lhsPriority = Number.MAX_SAFE_INTEGER } = lhs;
-  const { listPriority: rhsPriority = Number.MAX_SAFE_INTEGER } = rhs;
-  return lhsPriority - rhsPriority;
-};
-
 export const PRODUCTION_HOSTS = [
   "zilswap.io",
   "www.zilswap.io",

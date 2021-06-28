@@ -22,8 +22,8 @@ const useStyles = makeStyles(theme => ({
     },
     backgroundColor: theme.palette.background.default,
     borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF", 
-    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF", 
+    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     borderRadius: "0 0 12px 12px"
   },
   actionButton: {
@@ -67,7 +67,6 @@ const CreatePoolDialog = (props: any) => {
         name: tokenPreview.name,
         decimals: tokenPreview.decimals,
         balance: BIG_ZERO,
-        balances: tokenPreview.balances,
         allowances: {},
       };
 

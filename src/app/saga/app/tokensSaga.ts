@@ -5,7 +5,7 @@ import { Task } from "redux-saga";
 import { call, put, fork, select, race, delay, take, cancel } from "redux-saga/effects";
 
 import { actions } from "app/store";
-import { TokenInfo, TokenBalanceMap } from "app/store/types";
+import { TokenInfo } from "app/store/types";
 import { SimpleMap, strings } from "app/utils";
 import { logger } from "core/utilities";
 import { balanceBatchRequest, BatchRequestType, sendBatchRequest,
@@ -58,12 +58,6 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
           initialized: true,
           name: "Zilliqa",
           balance,
-          balances: {
-            ...(balance && {
-              // fake the zrc-2 balances map by initializing with own zil balance
-              [address]: balance!,
-            }),
-          },
         };
 
         updates[token.address] = { ...updates[token.address], ...tokenInfo };
@@ -74,23 +68,11 @@ const fetchTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, 
         const tokenDetails = ZilswapConnector.getToken(token.address);
         const tokenPool = ZilswapConnector.getPool(token.address);
 
-        let { balance } = token
-        let balances: TokenBalanceMap =  {};
-
-        if(result) {
-          for (const address in result.balances)
-            balances[address] = strings.bnOrZero(
-              result.balances[address]
-            );
-          balance = strings.bnOrZero(balances[address]);
-        }
-
         const tokenInfo: Partial<TokenInfo> = {
           initialized: true,
           symbol: tokenDetails?.symbol ?? "",
           pool: tokenPool ?? undefined,
-          balance,
-          balances,
+          balance: result ? strings.bnOrZero(result.balances[address]) : token.balance,
         };
 
         updates[token.address] = { ...updates[token.address], ...tokenInfo };

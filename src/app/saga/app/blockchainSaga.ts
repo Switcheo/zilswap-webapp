@@ -144,12 +144,14 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
         name: "",
         // name: zilswapToken.name,
         balance: undefined,
-        balances: {},
         allowances: {},
         pool: sdk!.getPool(tkn.address) || undefined
       }
       return acc
     }, {} as { [index: string]: TokenInfo })
+
+    // todo: load eth tokens
+
 
     yield put(actions.Token.init({ tokens }));
     yield put(actions.Wallet.update({ wallet }))

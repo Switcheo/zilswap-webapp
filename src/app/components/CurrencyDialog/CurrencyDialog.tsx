@@ -1,13 +1,14 @@
+
+import React, { useState,  useEffect } from "react";
+import { useSelector } from "react-redux";
+import BigNumber from "bignumber.js";
+import clsx from "clsx";
 import { Box, CircularProgress, DialogContent, DialogProps, InputAdornment, makeStyles, OutlinedInput } from "@material-ui/core";
 import { SearchOutlined } from "@material-ui/icons";
 import { DialogModal } from "app/components";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { useTaskSubscriber } from "app/utils";
-import { BIG_ZERO, LoadingKeys, LocalStorageKeys, sortTokens } from "app/utils/constants";
-import BigNumber from "bignumber.js";
-import clsx from "clsx";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { BIG_ZERO, LoadingKeys, LocalStorageKeys } from "app/utils/constants";
 import { CurrencyList } from "./components";
 
 const useStyles = makeStyles(theme => ({
@@ -66,43 +67,38 @@ export interface CurrencyDialogProps extends DialogProps {
   hideZil?: boolean;
   hideNoPool?: boolean;
   showContribution?: boolean;
+  tokenList: "zil" | "bridge-zil" | "bridge-eth";
 };
 
 const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProps) => {
-  const { children, className, onSelectCurrency, hideZil, hideNoPool, showContribution, ...rest } = props;
+  const { className, onSelectCurrency, hideZil, hideNoPool, showContribution, open } = props;
   const classes = useStyles();
-  const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const [search, setSearch] = useState("");
+  const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const [userTokens, setUserTokens] = useState<string[]>([]);
+  const [loadingConnectWallet] = useTaskSubscriber(...LoadingKeys.connectWallet);
 
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const [loadingConnectWallet] = useTaskSubscriber(...LoadingKeys.connectWallet);
-
-  useEffect(() => {
-    const savedTokensData = localStorage.getItem(LocalStorageKeys.UserTokenList);
-    if (!savedTokensData) return;
-
-    try {
-      const savedTokensAddresses = JSON.parse(savedTokensData) as string[];
-      const savedTokens = savedTokensAddresses.reduce((result, address) => {
-        if (tokenState.tokens[address])
-          result.push(address);
-
-        return result;
-      }, [] as string[]);
-
-      setUserTokens(savedTokens);
-    } catch (error) {
-      console.error("error loading saved tokens");
-      console.error(error);
-    }
-  }, [tokenState.tokens]);
 
   useEffect(() => {
     if (!tokenState.tokens) return setTokens([]);
-    setTokens(Object.values(tokenState.tokens).sort(sortTokens));
-  }, [tokenState.tokens]);
+    const sortFn = (lhs: TokenInfo, rhs: TokenInfo) => {
+      if (!walletState.wallet) return 0;
+      if (lhs.isZil) return -1;
+      if (rhs.isZil) return 1;
+      if (showContribution) {
+        // sort first by contribution
+        const difference = (rhs.pool?.userContribution || BIG_ZERO)
+          .comparedTo(lhs.pool?.userContribution || BIG_ZERO);
+        // then lexicographically by symbol
+        return difference !== 0 ? difference : lhs.symbol.localeCompare(rhs.symbol);
+      }
+      const difference = new BigNumber(rhs.balance?.toString() || 0).comparedTo(lhs.balance?.toString() || 0);
+      return difference !== 0 ? difference : lhs.symbol.localeCompare(rhs.symbol);
+    };
+    setTokens(Object.values(tokenState.tokens).sort(sortFn));
+  }, [tokenState.tokens, walletState.wallet, showContribution]);
 
   const filterSearch = (token: TokenInfo): boolean => {
     const searchTerm = search.toLowerCase().trim();
@@ -119,10 +115,6 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
       token.symbol.toLowerCase().includes(searchTerm);
   };
 
-  const getTokenFilter = () => {
-    return (token: TokenInfo) => filterSearch(token)
-  };
-
   const onToggleUserToken = (token: TokenInfo) => {
     if (userTokens.indexOf(token.address) >= 0) {
       userTokens.splice(userTokens.indexOf(token.address), 1);
@@ -135,26 +127,10 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     setUserTokens([...userTokens]);
   };
 
-  const sortResult = (lhs: TokenInfo, rhs: TokenInfo) => {
-    if (!walletState.wallet) return 0;
-    if (lhs.isZil) return -1;
-    if (rhs.isZil) return 1;
-    if (showContribution) {
-      // sort first by contribution
-      const difference = (rhs.pool?.userContribution || BIG_ZERO)
-        .comparedTo(lhs.pool?.userContribution || BIG_ZERO);
-      // then lexicographically by symbol
-      return difference !== 0 ? difference : lhs.symbol.localeCompare(rhs.symbol);
-    }
-    const userAddress = walletState.wallet!.addressInfo.byte20.toLowerCase();
-    const difference = new BigNumber(rhs.balances?.[userAddress]?.toString() || 0).comparedTo(lhs.balances?.[userAddress]?.toString() || 0);
-    return difference !== 0 ? difference : lhs.symbol.localeCompare(rhs.symbol);
-  };
-
-  const filteredTokens = tokens.filter(getTokenFilter()).sort(sortResult);
+  const filteredTokens = tokens.filter(filterSearch);
 
   return (
-    <DialogModal header="Select a Token" {...rest} className={clsx(classes.root, className)}>
+    <DialogModal header="Select a Token" open={open} className={clsx(classes.root, className)}>
       <DialogContent className={classes.dialogContent}>
         {!loadingConnectWallet && (
           <OutlinedInput
@@ -166,7 +142,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
             onChange={(e) => setSearch(e.target.value)}
             startAdornment={
               <InputAdornment position="start">
-                <SearchOutlined color="primary" />
+                <SearchOutlined htmlColor="white" />
               </InputAdornment>
             }
           />

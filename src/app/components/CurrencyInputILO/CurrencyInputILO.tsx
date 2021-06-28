@@ -8,7 +8,7 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { CurrencyDialogProps } from "../CurrencyDialog/CurrencyDialog";
+import { CurrencyDialogProps } from "../CurrencyDialog/SwapCurrencyDialog";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -105,8 +105,7 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
       return setTokenBalance(null);
 
     if (!showContribution) {
-      const wallet = walletState.wallet!;
-      const tokenBalance = token!.balances?.[wallet.addressInfo.byte20.toLowerCase()];
+      const tokenBalance = token!.balance;
       if (!tokenBalance)
         return setTokenBalance(null);
 
