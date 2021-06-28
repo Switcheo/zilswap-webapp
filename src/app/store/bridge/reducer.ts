@@ -73,26 +73,8 @@ const initial_state: BridgeState = {
   bridgeTxs: loadedBridgeTxs,
 
   tokens: {
-    [Blockchain.Zilliqa]: [
-      {
-        blockchain: Blockchain.Zilliqa,
-        tokenAddress: '5d3ecead6149b264db1ffbc45625e0131ac06d3c',
-        denom: 'usdt.z',
-        toBlockchain: Blockchain.Ethereum,
-        toTokenAddress: '1f9840a85d5af5bf1d1762f925bdaddc4201f984',
-        toDenom: 'usdt.e',
-      }
-    ],
-    [Blockchain.Ethereum]: [
-      {
-        blockchain: Blockchain.Ethereum,
-        tokenAddress: '1f9840a85d5af5bf1d1762f925bdaddc4201f984',
-        denom: 'usdt.e',
-        toBlockchain: Blockchain.Zilliqa,
-        toTokenAddress: '5d3ecead6149b264db1ffbc45625e0131ac06d3c',
-        toDenom: 'usdt.z',
-      }
-    ],
+    [Blockchain.Zilliqa]: [],
+    [Blockchain.Ethereum]: [],
   },
 
   formState: {

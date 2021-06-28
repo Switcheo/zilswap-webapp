@@ -9,7 +9,7 @@ import { actions } from "app/store";
 import { LayoutState, PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useMoneyFormatter, useNetwork, useToaster } from "app/utils";
-import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
@@ -165,7 +165,7 @@ const PoolWithdraw: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any
   const userPoolTokenPercent = poolToken?.pool?.contributionPercentage.shiftedBy(-2);
   const inPoolAmount = poolToken?.pool?.tokenReserve.times(userPoolTokenPercent || 0);
 
-  const zilToken = tokenState.tokens[ZIL_TOKEN_NAME]
+  const zilToken = tokenState.tokens[ZIL_ADDRESS]
   const toaster = useToaster();
 
   const zilFormatOpts: MoneyFormatterOptions = {

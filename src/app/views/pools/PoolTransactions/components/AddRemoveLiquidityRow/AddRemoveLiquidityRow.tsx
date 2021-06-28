@@ -7,7 +7,7 @@ import TxStatusIndicator from "app/components/TxStatusIndicator";
 import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useNetwork, useValueCalculators } from "app/utils";
-import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
 import { PoolTransaction } from "core/utilities";
@@ -54,7 +54,7 @@ const AddRemoveLiquidityRow: React.FC<Props> = (props: Props) => {
     tokenAmount,
     totalValue,
   } = React.useMemo(() => {
-    const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
+    const zilToken = tokenState.tokens[ZIL_ADDRESS];
     const poolToken = tokenState.tokens[transaction.token_address];
 
     let type = transaction.change_amount?.isPositive() ? "add": "remove";

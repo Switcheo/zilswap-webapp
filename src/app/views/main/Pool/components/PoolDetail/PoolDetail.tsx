@@ -4,7 +4,7 @@ import { HelpInfo, KeyValueDisplay, PotentialRewardInfo } from "app/components";
 import { LayoutState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useMoneyFormatter } from "app/utils";
-import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -111,13 +111,13 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
   };
   const getExchangeRateValue= () => {
     if (!token?.pool) return <span className={classes.textWrapper}>-</span>;
-    const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
+    const zilToken = tokenState.tokens[ZIL_ADDRESS];
     const rate = token.pool.exchangeRate.shiftedBy(token!.decimals - zilToken.decimals);
-    
+
     const shouldReverseRate = reversedRate;
 
     return (
-      shouldReverseRate 
+      shouldReverseRate
         ? <span className={classes.textWrapper}>1 {token!.symbol} = <span className={classes.textColoured}>{rate.pow(1).toNumber().toLocaleString("en-US", { maximumFractionDigits: 12 })}</span> ZIL</span>
         : <span className={classes.textWrapper}>1 ZIL = <span className={classes.textColoured}>{rate.pow(-1).toNumber().toLocaleString("en-US", { maximumFractionDigits: 12 })}</span> {token!.symbol}</span>
     )
@@ -132,13 +132,13 @@ const PoolDetail: React.FC<PoolDetailProps> = (props: PoolDetailProps) => {
           className={cls(classes.switchIcon, {
             [classes.activeSwitchIcon]: reversedRate,
           })} />
-      </KeyValueDisplay>   
+      </KeyValueDisplay>
       {layoutState.showPoolType === "remove" && (
         <KeyValueDisplay kkey={"Pool Token Value"} mb="8px">{getPoolTokenValue()} <HelpInfo className={classes.helpInfo} placement="top" title="Quantity of tokens you are withdrawing at." /></KeyValueDisplay>
       )}
       <KeyValueDisplay kkey={"Current Pool Size"} mb="8px">{getPoolSizeValue()} <HelpInfo className={classes.helpInfo} placement="top" title="Total quantity of tokens in the current pool." /></KeyValueDisplay>
       <KeyValueDisplay kkey={"Current Pool Share"} mb="8px">
-        <span className={cls(classes.textColoured, classes.textBold)}>{getUserPoolShare()}</span> 
+        <span className={cls(classes.textColoured, classes.textBold)}>{getUserPoolShare()}</span>
         {getShareValue()} <HelpInfo className={classes.helpInfo} placement="top" title="Your %  share in relation to the current pool size." />
       </KeyValueDisplay>
       {layoutState.showPoolType === "add" && (

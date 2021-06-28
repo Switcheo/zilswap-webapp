@@ -63,8 +63,9 @@ export const DEFAULT_TX_EXPIRY = 3;
 
 export const STATS_REFRESH_RATE = 30000; // ms
 
-export const ZIL_TOKEN_NAME = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
-export const ZWAP_TOKEN_NAME = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
+export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
+export const ZIL_ADDRESS = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
+export const ZWAP_ADDRESS = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
 export const ZIL_DECIMALS = 12;
 
 export const TRANSAK_API_KEY = {

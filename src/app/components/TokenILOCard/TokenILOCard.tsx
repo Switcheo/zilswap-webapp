@@ -9,7 +9,7 @@ import ProgressBar from 'app/components/ProgressBar'
 import { actions } from "app/store";
 import { RootState, TokenState, TransactionState, WalletObservedTx, WalletState } from "app/store/types"
 import { useAsyncTask, useNetwork, useToaster } from "app/utils"
-import { ZIL_TOKEN_NAME } from 'app/utils/constants';
+import { ZIL_ADDRESS } from 'app/utils/constants';
 import { ZilswapConnector } from "core/zilswap";
 import { ILOData, BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
@@ -131,7 +131,7 @@ const TokenILOCard = (props: Props) => {
     </Box>
   }
 
-  const zilToken = tokenState.tokens[ZIL_TOKEN_NAME]
+  const zilToken = tokenState.tokens[ZIL_ADDRESS]
   const unitlessInAmount = new BigNumber(formState.zwapAmount).shiftedBy(zwapToken.decimals).integerValue();
   const approved = new BigNumber(zwapToken.allowances![contractAddrHex] || '0')
   const showTxApprove = approved.isZero() || approved.comparedTo(unitlessInAmount) < 0;
