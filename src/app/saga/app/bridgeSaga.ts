@@ -38,6 +38,7 @@ function* watchDepositConfirmation() {
     try {
       const bridgeTxs = (yield select((state: RootState) => state.bridge.bridgeTxs)) as BridgeTx[];
       const relevantTxs = bridgeTxs.filter(tx => getBridgeTxStatus(tx) === Status.DepositTxStarted);
+      // those with a source tx hash
 
       for (const tx of relevantTxs) {
         try {
@@ -52,6 +53,19 @@ function* watchDepositConfirmation() {
           });
           const connectedSDK = (yield call([sdk, sdk.connectWithMnemonic], tx.interimAddrMnemonics)) as ConnectedTradeHubSDK
 
+          // question: where to get SWTH address? which field in extTransfer represents external_hash? transaction_hash?
+
+
+          const extTransfer = yield call({ context: sdk.api, fn: sdk.api.getTransfers }, { account: connectedSDK.wallet.bech32Address});
+          // tradehub tx hash for depositTxHash
+
+          // status = success, not tx hash
+          if (extTransfer[0].external_hash) {
+            tx.depositTxHash = extTransfer.external_hash;
+          }
+
+        
+          // confused about this part
           // const withdrawTx = connectedSDK.coin.withdraw({
           //   ...
           // })
@@ -82,6 +96,8 @@ function* watchWithdrawConfirmation() {
       for (const tx of relevantTxs) {
         try {
           // // watch and update relevant txs
+
+          // question: query wallet address or withdrawTxHash?
 
           // tx.destinationTxHash = dstChainTx.hash
           // tx.destinationTxConfirmedAt = dstChainTx.blocktime

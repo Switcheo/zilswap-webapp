@@ -204,7 +204,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                         className={classes.actionButton}
                         color="primary"
                         variant="contained">
-                        {!wallet && !formState.sourceAddress
+                        {!(wallet && formState.sourceAddress)
                             ? "Connect Wallet"
                             : formState.transferAmount === "0" || formState.transferAmount === ""
                                 ? "Enter Amount"

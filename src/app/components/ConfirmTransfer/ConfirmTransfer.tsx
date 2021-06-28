@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, makeStyles } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Link, makeStyles } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import { units } from "@zilliqa-js/zilliqa";
@@ -16,12 +16,25 @@ import { ethers } from "ethers";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SWTHAddress, Token, TradeHubSDK } from "tradehub-api-js";
+import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
+import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
+import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     "& .MuiAccordionSummary-root": {
       display: "inline-flex"
     },
+    "& .MuiAccordionSummary-root.Mui-expanded": {
+      minHeight: 0
+    },
+    "& .MuiAccordionDetails-root": {
+      padding: "0px 16px 16px",
+      display: "inherit"
+    },
+    "& .MuiAccordionSummary-content.Mui-expanded": {
+      margin: 0
+    }
   },
   container: {
     padding: theme.spacing(2, 4, 0),
@@ -87,6 +100,26 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     boxShadow: "none",
     border: "none",
     backgroundColor: "rgba(222, 255, 255, 0.1)"
+  },
+  arrowIcon: {
+    verticalAlign: "middle",
+    marginBottom: "1.2px",
+    color: theme.palette.label
+  },
+  checkIcon: {
+    fontSize: "1rem",
+    verticalAlign: "sub",
+  },
+  link: {
+    color: theme.palette.text?.secondary,
+  },
+  linkIcon: {
+    marginLeft: theme.spacing(0.5),
+    width: "10px",
+    verticalAlign: "top",
+    "& path": {
+      fill: theme.palette.text?.secondary,
+    }
   },
 }));
 
@@ -532,6 +565,67 @@ const ConfirmTransfer = (props: any) => {
               </AccordionSummary>
             </Box>
             <AccordionDetails>
+              <Box>
+                {/* Stage 1 */}
+                <Box mb={1}>
+                  <Text>
+                    <strong>Stage 1: Ethereum <ArrowRightRoundedIcon className={classes.arrowIcon} /> TradeHub</strong>
+                  </Text>
+                  <Box display="flex">
+                    <Text className={classes.label} flexGrow={1} align="left" marginBottom={0.5}>
+                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> Token Approval (ERC20/ZRC2)
+                    </Text>
+                    <Text className={classes.label}>
+                      <Link
+                        className={classes.link}
+                        underline="none"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        href="/">
+                        View on Etherscan <NewLinkIcon className={classes.linkIcon} />
+                      </Link>
+                    </Text>
+                  </Box>
+                  <Box display="flex">
+                    <Text className={classes.label} flexGrow={1} align="left">
+                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> Deposit to TradeHub Contract
+                    </Text>
+                    <Text className={classes.label}>-</Text>
+                  </Box>
+                </Box>
+
+                {/* Stage 2 */}
+                <Box mb={1}>
+                  <Text>
+                      <strong>Stage 2: TradeHub Confirmation</strong>
+                  </Text>
+                  <Box display="flex" mt={0.9}>
+                    <Text className={classes.label} flexGrow={1} align="left" marginBottom={0.5}>
+                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> TradeHub Deposit Confirmation
+                    </Text>
+                    <Text className={classes.label}>-</Text>
+                  </Box>
+                  <Box display="flex">
+                    <Text className={classes.label} flexGrow={1} align="left">
+                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> Withdrawal to Zilliqa
+                    </Text>
+                    <Text className={classes.label}>-</Text>
+                  </Box>
+                </Box>
+
+                {/* Stage 3 */}
+                <Box>
+                  <Text>
+                    <strong>Stage 3: TradeHub <ArrowRightRoundedIcon className={classes.arrowIcon} /> Zilliqa</strong>
+                  </Text>
+                  <Box display="flex">
+                    <Text className={classes.label} flexGrow={1} align="left">
+                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> Transfer to Zilliqa Wallet
+                    </Text>
+                    <Text className={classes.label}>-</Text>
+                  </Box>
+                </Box>
+              </Box>
             </AccordionDetails>
           </Accordion>
         </Box>
