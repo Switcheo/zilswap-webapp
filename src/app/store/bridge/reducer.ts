@@ -1,5 +1,6 @@
 import { LocalStorageKeys } from "app/utils/constants";
 import { bnOrZero, DataCoder } from "app/utils/strings/strings";
+import { ChainTransferFlow } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
 import { Blockchain } from "tradehub-api-js";
@@ -79,6 +80,7 @@ const initial_state: BridgeState = {
 
   formState: {
     transferAmount: new BigNumber(0),
+    transferDirection: ChainTransferFlow.ETH_TO_ZIL,
 
     isInsufficientReserves: false,
     forNetwork: null,

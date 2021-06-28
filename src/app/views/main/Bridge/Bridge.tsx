@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Blockchain } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
 import { providerOptions } from "core/ethereum";
+import { ChainTransferFlow } from "./components/constants";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
@@ -89,8 +90,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }))
 
 const initialFormState = {
-  zilPrivateKey: '',
-  swthAddress: '',
   sourceAddress: '',
   destAddress: '',
   transferAmount: '0',
@@ -101,6 +100,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const classes = useStyles();
   const dispatch = useDispatch();
   const network = useNetwork();
+  const [ethConnectedAddress, setEthConnectedAddress] = useState('');
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const [fromBlockchain, setFromBlockchain] = useState<Blockchain.Zilliqa | Blockchain.Ethereum>(Blockchain.Ethereum);
   const [toBlockchain, setToBlockchain] = useState<Blockchain.Zilliqa | Blockchain.Ethereum>(Blockchain.Zilliqa);
@@ -112,36 +112,61 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const tokenList: 'bridge-zil' | 'bridge-eth' = fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth'
 
   useEffect(() => {
-    // TODO: need a way to determine if updating source / dest address if the "From" is zil wallet
     if (wallet !== null) {
-      setFormState({
-        ...formState,
-        destAddress: wallet.addressInfo.byte20
-      })
-      dispatch(actions.Bridge.updateForm({
-        destAddress: wallet.addressInfo.byte20
-      }))
+      if (fromBlockchain === Blockchain.Zilliqa) {
+        setSourceAddress(wallet.addressInfo.byte20!)   
+      } else {
+        setDestAddress(wallet.addressInfo.byte20!)
+      }
     }
     // eslint-disable-next-line
-  }, [wallet]);
+  }, [wallet])
+
+  const setSourceAddress = (address: string) => {
+    setFormState({
+      ...formState,
+      sourceAddress: address
+    })
+    dispatch(actions.Bridge.updateForm({
+      sourceAddress: address
+    }))
+  }
+
+  const setDestAddress = (address: string) => {
+    setFormState({
+      ...formState,
+      destAddress: address
+    })
+    dispatch(actions.Bridge.updateForm({
+      destAddress: address
+    }))
+  }
 
   const onFromBlockchainChange = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown; }>) => {
     if (e.target.value === Blockchain.Zilliqa) {
+      setSourceAddress(wallet?.addressInfo.byte20!)
       setFromBlockchain(Blockchain.Zilliqa)
       setToBlockchain(Blockchain.Ethereum)
+      setDestAddress(ethConnectedAddress)
     } else {
+      setSourceAddress(ethConnectedAddress)
       setFromBlockchain(Blockchain.Ethereum)
       setToBlockchain(Blockchain.Zilliqa)
+      setDestAddress(wallet?.addressInfo.byte20!)
     }
   }
 
   const onToBlockchainChange = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown; }>) => {
     if (e.target.value === Blockchain.Zilliqa) {
+      setDestAddress(wallet?.addressInfo.byte20!)
       setToBlockchain(Blockchain.Zilliqa)
       setFromBlockchain(Blockchain.Ethereum)
+      setSourceAddress(ethConnectedAddress)
     } else {
+      setDestAddress(ethConnectedAddress)
       setToBlockchain(Blockchain.Ethereum)
       setFromBlockchain(Blockchain.Zilliqa)
+      setSourceAddress(wallet?.addressInfo.byte20!)
     }
   }
 
@@ -153,18 +178,35 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         providerOptions
     });
 
+
     const provider = await web3Modal.connect();
     const ethersProvider = new ethers.providers.Web3Provider(provider)
     const signer = ethersProvider.getSigner();
     const ethAddress = await signer.getAddress();
 
-    dispatch(actions.Bridge.updateForm({ sourceAddress: ethAddress }));
+    if (fromBlockchain === Blockchain.Ethereum) {
+      setSourceAddress(ethAddress);
+    }
+
+    if (toBlockchain === Blockchain.Ethereum) {
+      setDestAddress(ethAddress);
+    }
+    
+    setEthConnectedAddress(ethAddress);
     dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, address: ethAddress}));
     dispatch(actions.Token.refetchState());
   };
 
   const onClickConnectZIL = () => {
     dispatch(actions.Layout.toggleShowWallet());
+
+    if (wallet !== null && fromBlockchain === Blockchain.Zilliqa) {
+      setSourceAddress(wallet.addressInfo.byte20);
+    }
+
+    if (wallet !== null && toBlockchain === Blockchain.Zilliqa) {
+      setDestAddress(wallet.addressInfo.byte20);
+    }
   };
 
   const onTransferAmountChange = (amount: string = "0") => {
@@ -193,23 +235,44 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   };
 
   const showTransfer = () => {
+    if (fromBlockchain === Blockchain.Zilliqa) {
+      dispatch(actions.Bridge.updateForm({ transferDirection: ChainTransferFlow.ZIL_TO_ETH }));
+    } else {
+      dispatch(actions.Bridge.updateForm({ transferDirection: ChainTransferFlow.ETH_TO_ZIL }));
+    }
     dispatch(actions.Layout.showTransferConfirmation(!layoutState.showTransferConfirmation))
   }
 
   const getConnectEthWallet = () => {
-    return <Button
-      onClick={onClickConnectETH}
-      className={cls(classes.connectWalletButton, formState.sourceAddress ? classes.connectedWalletButton : "")}
-      variant="contained"
-      color="primary">
-      {!formState.sourceAddress
-        ? "Connect Wallet"
-        : <Box display="flex" flexDirection="column">
-          <Text variant="button">{truncate(formState.sourceAddress, 5, 4)}</Text>
-          <Text color="textSecondary"><DotIcon className={classes.dotIcon} />Connected</Text>
-        </Box>
-      }
-    </Button>
+    return (
+      fromBlockchain === Blockchain.Ethereum ?
+      <Button
+        onClick={onClickConnectETH}
+        className={cls(classes.connectWalletButton, formState.sourceAddress ? classes.connectedWalletButton : "")}
+        variant="contained"
+        color="primary">
+        {!formState.sourceAddress
+          ? "Connect Wallet"
+          : <Box display="flex" flexDirection="column">
+            <Text variant="button">{truncate(formState.sourceAddress, 5, 4)}</Text>
+            <Text color="textSecondary"><DotIcon className={classes.dotIcon} />Connected</Text>
+          </Box>
+        }
+      </Button> :
+      <Button
+        onClick={onClickConnectETH}
+        className={cls(classes.connectWalletButton, formState.destAddress ? classes.connectedWalletButton : "")}
+        variant="contained"
+        color="primary">
+        {!formState.destAddress
+          ? "Connect Wallet"
+          : <Box display="flex" flexDirection="column">
+            <Text variant="button">{truncate(formState.destAddress, 5, 4)}</Text>
+            <Text color="textSecondary"><DotIcon className={classes.dotIcon} />Connected</Text>
+          </Box>
+        }
+      </Button>
+    )
   }
 
   const getConnectZilWallet = () => {

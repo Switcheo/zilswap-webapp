@@ -1,4 +1,5 @@
 import { TokenInfo } from "app/store/types";
+import { ChainTransferFlow } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { Blockchain } from "tradehub-api-js";
@@ -29,6 +30,7 @@ export interface BridgeFormState {
   sourceAddress?: string; // can be eth or zil address
   destAddress?: string; // can be eth or zil address
   transferAmount: BigNumber;
+  transferDirection: ChainTransferFlow;
 
   token?: TokenInfo; // might be a new DenomInfo
 
