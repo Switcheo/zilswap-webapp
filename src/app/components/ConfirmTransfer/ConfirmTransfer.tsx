@@ -227,7 +227,7 @@ const ConfirmTransfer = (props: any) => {
 
   /**
     * Lock the asset on Ethereum chain
-    * returns true if lock txn is success, false otherwise
+    * returns the txn hash if lock txn is successful, otherwise return null
     * @param swthAddress   temp swth address to hold the lock asset
     * @param asset         details of the asset being locked; retrieved from tradehub
     * @param amount        nuumber of asset to be lock, e.g. set '1' if locking 1 native ETH
@@ -298,14 +298,14 @@ const ConfirmTransfer = (props: any) => {
     }
 
     if (isDeposited) {
-      return true;
+      return lock_tx.hash!;
     }
-    return false;
+    return null;
   }
 
   /**
     * Lock the asset on Zilliqa chain
-    * returns true if lock txn is success, false otherwise
+    * returns the txn hash if lock txn is successful, otherwise return null
     * @param wallet        connected zilliqa wallet
     * @param asset         details of the asset being locked; retrieved from tradehub
     * @param amount        nuumber of asset to be lock, e.g. set '1' if locking 1 native ZIL
@@ -313,7 +313,7 @@ const ConfirmTransfer = (props: any) => {
   async function lockAssetOnZil(wallet: ConnectedWallet, asset: Token, amount: string) {
     if (asset === null || wallet === null) {
       console.error("Zilliqa wallet not connected");
-      return false;
+      return null;
     }
 
     const lockProxy = asset.lock_proxy_hash;
@@ -393,9 +393,9 @@ const ConfirmTransfer = (props: any) => {
     }
 
     if (isDeposited) {
-      return true;
+      return lock_tx.id;
     }
-    return false;
+    return null;
   }
 
   // deposit address depends on the selection
@@ -408,18 +408,18 @@ const ConfirmTransfer = (props: any) => {
     await sdk.token.reloadTokens();
     const asset = sdk.token.tokens[`${BridgeParamConstants.DEPOSIT_DENOM}`];
 
+    let sourceTxHash;
     if (transferFlow === ChainTransferFlow.ZIL_TO_ETH) {
       // init lock on zil side
-      const isLock = await lockAssetOnZil(wallet!, asset, bridgeFormState.transferAmount.toString());
-      if (isLock) {
-        toaster("Success: asset locked! (Zilliqa -> SWTH)");
-      }
+      sourceTxHash = await lockAssetOnZil(wallet!, asset, bridgeFormState.transferAmount.toString());
     } else {
       // init lock on eth side
-      const isLock = await lockAssetOnEth(asset, bridgeFormState.transferAmount.toString());
-      if (isLock) {
-        toaster("Success: asset locked! (Ethereum -> SWTH)");
-      }
+      sourceTxHash = await lockAssetOnEth(asset, bridgeFormState.transferAmount.toString());
+    }
+
+    if (sourceTxHash === null) {
+      console.error("source txn hash is null!");
+      return null;
     }
 
     setPending(false);
@@ -441,7 +441,7 @@ const ConfirmTransfer = (props: any) => {
         srcChain: srcChain,
         dstToken: bridgeableToken.toDenom,
         srcToken: bridgeableToken.denom,
-        sourceTxHash: "placeholder", // TODO: populate source tx hash
+        sourceTxHash: sourceTxHash, // TODO: populate source tx hash
         inputAmount: bridgeFormState.transferAmount,
         interimAddrMnemonics: swthAddrMnemonic,
         withdrawFee: new BigNumber(1), // TODO: add withdraw fee
