@@ -32,7 +32,7 @@ export interface BridgeFormState {
   transferAmount: BigNumber;
   transferDirection: ChainTransferFlow;
 
-  token?: TokenInfo; // might be a new DenomInfo
+  token?: BridgeableToken;
 
   isInsufficientReserves: boolean;
   forNetwork: Network | null,

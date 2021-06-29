@@ -22,6 +22,6 @@ export { default as useRouter } from "./useRouter";
 export { default as useSearchParam } from "./useSearchParam";
 export { default as useTaskSubscriber } from "./useTaskSubscriber";
 export * from "./useToaster";
+export { default as useTokenFinder } from "./useTokenFinder";
 export * from "./useValueCalculators";
 export { default as useValueCalculators } from "./useValueCalculators";
-

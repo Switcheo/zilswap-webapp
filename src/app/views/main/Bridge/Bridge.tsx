@@ -6,16 +6,16 @@ import { ConfirmTransfer, CurrencyInput, FancyButton, Text } from 'app/component
 import { ReactComponent as DotIcon } from "app/components/ConnectWalletButton/dot.svg";
 import MainCard from 'app/layouts/MainCard';
 import { actions } from "app/store";
-import { BridgeFormState, BridgeTx } from 'app/store/bridge/types';
+import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useNetwork } from "app/utils";
+import { hexToRGBA, truncate, useNetwork, useTokenFinder } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
 import { ethers } from "ethers";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Blockchain } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
@@ -24,6 +24,7 @@ import { ChainTransferFlow } from "./components/constants";
 import { ReactComponent as ZilliqaLogo } from "./zilliqa-logo.svg";
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "./wavy-line.svg";
+import { fromBech32Address } from "@zilliqa-js/crypto";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
@@ -119,16 +120,28 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const classes = useStyles();
   const dispatch = useDispatch();
   const network = useNetwork();
+  const tokenFinder = useTokenFinder();
   const [ethConnectedAddress, setEthConnectedAddress] = useState('');
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const [fromBlockchain, setFromBlockchain] = useState<Blockchain.Zilliqa | Blockchain.Ethereum>(Blockchain.Ethereum);
   const [toBlockchain, setToBlockchain] = useState<Blockchain.Zilliqa | Blockchain.Ethereum>(Blockchain.Zilliqa);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
+  const bridgeState = useSelector<RootState, BridgeState>(store => store.bridge);
   const bridgeFormState: BridgeFormState = useSelector<RootState, BridgeFormState>(store => store.bridge.formState);
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
 
   const tokenList: 'bridge-zil' | 'bridge-eth' = fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth'
+
+  const bridgeToken = bridgeFormState.token;
+
+  const { fromToken } = useMemo(() => {
+    if (!bridgeToken) return {};
+    return {
+      fromToken: tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain),
+      toToken: tokenFinder(bridgeToken.toTokenAddress, bridgeToken.toBlockchain),
+    }
+  }, [tokenFinder, bridgeToken])
 
   useEffect(() => {
     if (wallet !== null) {
@@ -243,11 +256,21 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const onCurrencyChange = (token: TokenInfo) => {
-    if (bridgeFormState.token === token) return;
+    let tokenAddress: string | undefined;
+    if (fromBlockchain === Blockchain.Ethereum) {
+      tokenAddress = token.address.toLowerCase();
+    } else {
+      tokenAddress = fromBech32Address(token.address).toLowerCase();
+    }
+    tokenAddress = tokenAddress.replace(/^0x/, '');
+
+    const bridgeToken = bridgeState.tokens[fromBlockchain].find(bridgeToken => bridgeToken.tokenAddress === tokenAddress);
+    
+    if (bridgeFormState.token && bridgeFormState.token === bridgeToken) return;
 
     dispatch(actions.Bridge.updateForm({
       forNetwork: network,
-      token
+      token: bridgeToken
     }));
   };
 
@@ -367,7 +390,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           <CurrencyInput
             label="Transfer Amount"
             disabled={!wallet || !formState.sourceAddress}
-            token={bridgeFormState.token ?? tokenState.tokens[ZIL_ADDRESS]}
+            token={fromToken ?? tokenState.tokens[ZIL_ADDRESS]}
             amount={formState.transferAmount}
             onAmountChange={onTransferAmountChange}
             onCurrencyChange={onCurrencyChange}
