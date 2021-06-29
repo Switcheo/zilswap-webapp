@@ -31,10 +31,10 @@ export const detachedToast = (content: string, { overridePersist = true, hash = 
 export const useToaster = (persist = true) => {
   const { enqueueSnackbar } = useSnackbar();
 
-  return (content: string, { overridePersist = persist, hash = "" } = {}) => {
+  return (content: string, { overridePersist = persist, hash = "", sourceBlockchain = "" } = {}) => {
     if (!content) return;
     const message = JSON.stringify({
-      content, hash
+      content, hash, sourceBlockchain
     })
     enqueueSnackbar(message, { persist: overridePersist });
   }

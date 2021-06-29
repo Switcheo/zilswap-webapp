@@ -331,7 +331,7 @@ const ConfirmTransfer = (props: any) => {
         });
 
         logger("approve tx", approve_tx.hash);
-        toaster(`Submitted: ${approve_tx.hash!} (Ethereum - ERC20 Approval)`);
+        toaster(`Submitted: (Ethereum - ERC20 Approval)`, { hash: approve_tx.hash!, sourceBlockchain: "eth" });
         await approve_tx.wait();
       }
     }
@@ -351,7 +351,7 @@ const ConfirmTransfer = (props: any) => {
 
     await lock_tx.wait();
 
-    toaster(`Submitted: ${lock_tx.hash!} (Ethereum - Lock Asset)`);
+    toaster(`Submitted: (Ethereum - Lock Asset)`, { sourceBlockchain: "eth", hash: lock_tx.hash! });
     logger("lock tx", lock_tx.hash!);
     let isDeposited = false
 
@@ -416,7 +416,7 @@ const ConfirmTransfer = (props: any) => {
       toaster(`Approval needed (Zilliqa)`);
 
       const approve_tx = await sdk.zil.approveZRC2(approveZRC2Params);
-      toaster(`Submitted: ${approve_tx.id!} (Zilliqa - ZRC2 Approval)`);
+      toaster(`Submitted: (Zilliqa - ZRC2 Approval)`, { hash: approve_tx.id! });
 
       await approve_tx.confirm(approve_tx.id!)
       logger("transaction confirmed! receipt is: ", approve_tx.getReceipt())
@@ -448,7 +448,7 @@ const ConfirmTransfer = (props: any) => {
       network,
     };
     dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
-    toaster(`Submitted: ${lock_tx.id!} (Zilliqa - Lock Asset)`);
+    toaster(`Submitted: (Zilliqa - Lock Asset)`, { hash: lock_tx.id! });
 
     await lock_tx.confirm(lock_tx.id!);
     logger("transaction confirmed! receipt is: ", lock_tx.getReceipt());
@@ -646,7 +646,7 @@ const ConfirmTransfer = (props: any) => {
                       {true
                         ? <Text>
                           Approved
-                              <HelpInfo className={classes.helpInfo} placement="top" title="Only one approval is required per token. You have previously approved this token and will not need to approve it for this or future transfers." />
+                          <HelpInfo className={classes.helpInfo} placement="top" title="Only one approval is required per token. You have previously approved this token and will not need to approve it for this or future transfers." />
                         </Text>
                         : <Link
                           className={classes.link}

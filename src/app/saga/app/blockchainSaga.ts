@@ -85,7 +85,7 @@ function* txObserved(payload: TxObservedPayload) {
   yield put(actions.Rewards.removePendingClaimTx(tx.hash));
   yield put(actions.Transaction.update({ hash: tx.hash, status: status, txReceipt: receipt }));
 
-  detachedToast(`transaction confirmed`, { hash: tx.hash });
+  detachedToast(`transaction ${status ? status : "confirmed"}`, { hash: tx.hash });
 
   // refetch all token states if updated TX is currently recorded within state
   const { transactions } = getTransactions(yield select());
@@ -107,10 +107,10 @@ function* stateChangeObserved(payload: StateChangeObservedPayload) {
   yield put(actions.Blockchain.setZiloState(payload.state.contractInit!._this_address, payload.state))
 }
 
-type WrapperMappingsResult = { height: string, result: { [key: string]: string }}
-type TradeHubToken = {denom: string, decimals: string, blockchain: Blockchain.Zilliqa | Blockchain.Ethereum, asset_id: string, symbol: string, name: string, lockproxy_hash: string}
+type WrapperMappingsResult = { height: string, result: { [key: string]: string } }
+type TradeHubToken = { denom: string, decimals: string, blockchain: Blockchain.Zilliqa | Blockchain.Ethereum, asset_id: string, symbol: string, name: string, lockproxy_hash: string }
 type TradeHubTokensResult = { height: string, result: ReadonlyArray<TradeHubToken> }
-type BridgeMappingResult =  { [Blockchain.Zilliqa]: BridgeableToken[] , [Blockchain.Ethereum]: BridgeableToken[] }
+type BridgeMappingResult = { [Blockchain.Zilliqa]: BridgeableToken[], [Blockchain.Ethereum]: BridgeableToken[] }
 
 const fetchJSON = async (url: string) => {
   const res = await fetch(url)
@@ -201,7 +201,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     const host = network === Network.MainNet ? 'tradescan.switcheo.org' : 'dev-tradescan.switcheo.org'
     const mappings: WrapperMappingsResult = yield call(fetchJSON, `https://${host}/coin/wrapper_mappings`)
     const data: TradeHubTokensResult = yield call(fetchJSON, `https://${host}/coin/tokens`)
-    const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [] , [Blockchain.Ethereum]: [] }
+    const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
     Object.entries(mappings.result).forEach(([wrappedDenom, sourceDenom]) => {
       const wrappedToken = data.result.find(d => d.denom === wrappedDenom)!
       const sourceToken = data.result.find(d => d.denom === sourceDenom)!
