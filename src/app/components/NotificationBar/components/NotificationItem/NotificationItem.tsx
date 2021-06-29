@@ -20,7 +20,8 @@ interface Props extends BoxProps {
   message: string,
   hash: string,
   providerRef: React.MutableRefObject<SnackbarProvider>,
-  snackKey: SnackbarKey
+  snackKey: SnackbarKey,
+  sourceBlockchain: string,
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -54,7 +55,7 @@ const LoadingIcon = () => {
 };
 
 const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const { children, message, hash, providerRef, snackKey, className, ...rest } = props;
+  const { children, message, hash, sourceBlockchain, providerRef, snackKey, className, ...rest } = props;
   const classes = useStyles();
   const network = useNetwork();
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
@@ -104,7 +105,7 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
   }
 
   const getMessage = () => {
-    if (!hash) return message;
+    if (!hash || !sourceBlockchain) return message;
     switch (txStatus) {
       case 'confirmed':
         return "Confirmed";
@@ -119,22 +120,30 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
     }
   }
 
+  const getHref = () => {
+    switch (sourceBlockchain) {
+      case "swth":
+      case "eth": return `https://etherscan.io/search?q=${hash}`
+      default: return `https://viewblock.io/zilliqa/tx/${hash}?network=${network.toLowerCase()}`
+    }
+  }
+
   return (
     <SnackbarContent {...rest} ref={ref} className={classes.snackbar}>
       {getTxStatusIcon()}
       <Typography>&nbsp;&nbsp;{getMessage()}&nbsp;</Typography>
-      { hash &&
+      {hash &&
         <Typography>
           <Link
-          className={classes.link}
-          underline="hover"
-          rel="noopener noreferrer"
-          target="_blank"
-          href={`https://viewblock.io/zilliqa/tx/${hash}?network=${network.toLowerCase()}`}>
+            className={classes.link}
+            underline="hover"
+            rel="noopener noreferrer"
+            target="_blank"
+            href={getHref()}>
             {"0x"}{truncate(hash)}
             <LaunchIcon className={cls(classes.icon, classes.linkIcon)} />
           </Link>
-        </Typography> 
+        </Typography>
       }
       <Box flexGrow={1} />
       <IconButton size="small" onClick={onClickDismiss()}>
