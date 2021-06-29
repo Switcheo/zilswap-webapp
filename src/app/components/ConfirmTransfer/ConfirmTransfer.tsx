@@ -159,26 +159,6 @@ async function initTradehubSDK(mnemonic: string) {
   return await sdk.connectWithMnemonic(mnemonic);
 }
 
-// check withdrawal on switcheo side
-// returns true if withdraw is confirm, otherwise returns false
-async function isWithdrawOnSwth(swthTxnHash: string, asset: Token, amount: string) {
-  const sdk = new TradeHubSDK({
-    network: TradeHubSDK.Network.DevNet,
-    debugMode: false,
-  })
-
-  const response = await sdk.api.getTxLog({ hash: swthTxnHash })
-
-  if (response !== null) {
-    const result = JSON.parse(response.raw_log);
-    if (result !== null && result !== "") {
-      return (result[0].log === 'Withdrawal success');
-    }
-  }
-
-  return false
-}
-
 // check deposit on switcheo side
 // returns true if deposit is confirm, otherwise returns false
 async function isDepositOnSwth(swthAddress: string, asset: Token, amount: BigNumber) {
@@ -218,12 +198,12 @@ const ConfirmTransfer = (props: any) => {
   const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
   const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
   const bridgeToken = useSelector<RootState, BridgeableToken | undefined>(state => state.bridge.formState.token);
-  const [pending, setPending] = useState<Boolean>(false);
-  const [complete, setComplete] = useState<Boolean>(false);
   const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK")
   const [tokenApproval, setTokenApproval] = useState<Boolean>(false);
   const enableCheatyButtons = useSearchParam("enableCheatyButtons") === "true";
 
+  const pendingBridgeTx = useMemo(() => bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.destinationTxHash), [bridgeState]);
+  const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
   const swthAddrMnemonic = useMemo(() => SWTHAddress.newMnemonic(), []);
 
   const { fromToken } = useMemo(() => {
@@ -232,7 +212,7 @@ const ConfirmTransfer = (props: any) => {
       fromToken: tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain),
       toToken: tokenFinder(bridgeToken.toTokenAddress, bridgeToken.toBlockchain),
     }
-  }, [bridgeToken, tokenFinder])
+  }, [bridgeToken, tokenFinder]);
 
   useEffect(() => {
     if (!swthAddrMnemonic) return;
@@ -264,52 +244,52 @@ const ConfirmTransfer = (props: any) => {
   }
 
   const onWithdraw = async (recvAddress: string) => {
-    setPending(true);
+    // setPending(true);
 
-    const sdk = await initTradehubSDK(swthAddrMnemonic);
+    // const sdk = await initTradehubSDK(swthAddrMnemonic);
 
-    await sdk.token.reloadTokens();
-    const asset = sdk.token.tokens[`${BridgeParamConstants.WITHDRAW_DENOM}`];
-    logger("withdraw asset: ", asset);
-    const lockProxy = asset.lock_proxy_hash;
-    sdk.zil.configProvider.getConfig().Zil.LockProxyAddr = `0x${lockProxy}`;
-    sdk.zil.configProvider.getConfig().Zil.ChainId = 333;
-    sdk.zil.configProvider.getConfig().Zil.RpcURL = "https://dev-api.zilliqa.com";
+    // await sdk.token.reloadTokens();
+    // const asset = sdk.token.tokens[`${BridgeParamConstants.WITHDRAW_DENOM}`];
+    // logger("withdraw asset: ", asset);
+    // const lockProxy = asset.lock_proxy_hash;
+    // sdk.zil.configProvider.getConfig().Zil.LockProxyAddr = `0x${lockProxy}`;
+    // sdk.zil.configProvider.getConfig().Zil.ChainId = 333;
+    // sdk.zil.configProvider.getConfig().Zil.RpcURL = "https://dev-api.zilliqa.com";
 
-    const toAddress = santizedAddress(recvAddress);
+    // const toAddress = santizedAddress(recvAddress);
 
-    const withdrawTradehub = await sdk.coin.withdraw({
-      amount: `${bridgeFormState.transferAmount}`,
-      denom: asset.denom,
-      to_address: toAddress,
-      fee_address: `${BridgeParamConstants.SWTH_FEE_ADDRESS}`,
-      fee_amount: "0",
-      originator: sdk.wallet?.bech32Address
-    });
+    // const withdrawTradehub = await sdk.coin.withdraw({
+    //   amount: `${bridgeFormState.transferAmount}`,
+    //   denom: asset.denom,
+    //   to_address: toAddress,
+    //   fee_address: `${BridgeParamConstants.SWTH_FEE_ADDRESS}`,
+    //   fee_amount: "0",
+    //   originator: sdk.wallet?.bech32Address
+    // });
 
-    logger("withdraw (tradehub): %o\n", withdrawTradehub);
-    toaster(`Submitted: Initiate withdrawal ${withdrawTradehub.txhash} (SWTH -> DEST_BLOCKCHAIN)`);
+    // logger("withdraw (tradehub): %o\n", withdrawTradehub);
+    // toaster(`Submitted: Initiate withdrawal ${withdrawTradehub.txhash} (SWTH -> DEST_BLOCKCHAIN)`);
 
-    let isWithdrawn = false
+    // let isWithdrawn = false
 
-    // check deposit on switcheo    
-    for (let attempt = 0; attempt < 50; attempt++) {
-      logger("checking deposit...");
-      const isConfirmed = await isWithdrawOnSwth(`${withdrawTradehub.txhash}`, asset, `${bridgeFormState.transferAmount}`)
-      if (isConfirmed) {
-        isWithdrawn = true
-        break;
-      }
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    }
+    // // check deposit on switcheo    
+    // for (let attempt = 0; attempt < 50; attempt++) {
+    //   logger("checking deposit...");
+    //   const isConfirmed = await isWithdrawOnSwth(`${withdrawTradehub.txhash}`, asset, `${bridgeFormState.transferAmount}`)
+    //   if (isConfirmed) {
+    //     isWithdrawn = true
+    //     break;
+    //   }
+    //   await new Promise(resolve => setTimeout(resolve, 2000));
+    // }
 
-    setPending(false);
-    setComplete(true);
+    // setPending(false);
+    // setComplete(true);
 
-    if (isWithdrawn) {
-      toaster(`Success: asset withdraw (SWTH -> DEST_BLOCKCHAIN)`);
-      return true;
-    }
+    // if (isWithdrawn) {
+    //   toaster(`Success: asset withdraw (SWTH -> DEST_BLOCKCHAIN)`);
+    //   return true;
+    // }
     return false;
   }
 
@@ -501,12 +481,9 @@ const ConfirmTransfer = (props: any) => {
       console.error("TradeHubSDK not initialized")
       return null;
     }
-    
-    setPending(true);
 
     const transferFlow = bridgeState.formState.transferDirection;
     const asset = sdk.token.tokens[bridgeToken?.denom ?? ""];
-    console.log(asset, sdk.token, bridgeToken?.denom)
 
     if (!asset) {
       console.error("asset not found for", bridgeToken);
@@ -526,8 +503,6 @@ const ConfirmTransfer = (props: any) => {
       console.error("source txn hash is null!");
       return null;
     }
-
-    setPending(false);
 
     const { destAddress, sourceAddress } = bridgeFormState;
     if (!destAddress || !sourceAddress || !bridgeToken) return;
@@ -557,13 +532,13 @@ const ConfirmTransfer = (props: any) => {
 
   return (
     <Box className={cls(classes.root, classes.container)}>
-      {!pending && !complete && (
+      {!pendingBridgeTx && (
         <IconButton onClick={() => dispatch(actions.Layout.showTransferConfirmation(false))} className={classes.backButton}>
           <ArrowBack />
         </IconButton>
       )}
 
-      {!pending && !complete && (
+      {!pendingBridgeTx && (
         <Box display="flex" flexDirection="column" alignItems="center">
           <Text variant="h2">Confirm Transfer</Text>
 
@@ -577,9 +552,9 @@ const ConfirmTransfer = (props: any) => {
         </Box>
       )}
 
-      {(pending || complete) && (
+      {!!pendingBridgeTx && (
         <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
-          <Text variant="h2">{pending ? "Transfer in Progress..." : "Transfer Complete"}</Text>
+          <Text variant="h2">{!pendingBridgeTx.destinationTxHash ? "Transfer in Progress..." : "Transfer Complete"}</Text>
 
           <Text className={classes.textWarning} margin={0.5}>
             <WarningRoundedIcon className={classes.warningIcon} /> Do not close this page while we transfer your funds.
@@ -595,7 +570,7 @@ const ConfirmTransfer = (props: any) => {
         <Box className={classes.transferBox}>
           <Text>Transferring</Text>
           <Text variant="h2" className={classes.amount}>
-            {bridgeFormState.transferAmount.toString()}
+            {pendingBridgeTx?.inputAmount.toString(10) ?? bridgeFormState.transferAmount.toString(10)}
             <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} />
             {fromToken?.symbol}
           </Text>
@@ -629,7 +604,7 @@ const ConfirmTransfer = (props: any) => {
         </Box>
       </Box>
 
-      {!pending && !complete && (
+      {!pendingBridgeTx && (
         <Box marginTop={3} marginBottom={0.5} px={2}>
           <KeyValueDisplay kkey={<strong>Estimated Total Fees</strong>} mb="8px">~ <span className={classes.textColoured}>$21.75</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
           <KeyValueDisplay kkey="&nbsp; • &nbsp; Ethereum Txn Fee" mb="8px"><span className={classes.textColoured}>0.01</span> ETH ~<span className={classes.textColoured}>$21.25</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
@@ -638,12 +613,12 @@ const ConfirmTransfer = (props: any) => {
         </Box>
       )}
 
-      {(pending || complete) && (
+      {(pendingBridgeTx?.destinationTxHash) && (
         <Box className={classes.box} bgcolor="background.contrast">
-          <Text align="center" variant="h6">{pending ? "Transfer Progress" : "Transfer Complete"}</Text>
+          <Text align="center" variant="h6">{!pendingBridgeTx.destinationTxHash ? "Transfer Progress" : "Transfer Complete"}</Text>
 
           <KeyValueDisplay kkey="Estimated Time Left" mt="8px" mb="8px" px={2}>
-            {pending ? <span><span className={classes.textColoured}>20</span> Minutes</span> : "-"}
+            {!pendingBridgeTx.destinationTxHash ? <span><span className={classes.textColoured}>20</span> Minutes</span> : "-"}
             <HelpInfo className={classes.helpInfo} placement="top" title="Todo" />
           </KeyValueDisplay>
 
@@ -735,12 +710,12 @@ const ConfirmTransfer = (props: any) => {
 
       {!complete && (
         <FancyButton
-          disabled={!!pending}
+          disabled={!!pendingBridgeTx}
           onClick={() => onConfirm(bridgeFormState.sourceAddress!)}
           variant="contained"
           color="primary"
           className={classes.actionButton}>
-          {pending
+          {pendingBridgeTx
             ? "Transfer in Progress..."
             : bridgeState.formState.transferDirection === ChainTransferFlow.ZIL_TO_ETH
               ? "Confirm (ZIL -> ETH)"
@@ -751,12 +726,12 @@ const ConfirmTransfer = (props: any) => {
 
       {enableCheatyButtons && !complete && (
         <FancyButton
-          disabled={!!pending}
+          disabled={!!pendingBridgeTx}
           onClick={() => onWithdraw(bridgeFormState.destAddress!)}
           variant="contained"
           color="primary"
           className={classes.actionButton}>
-          {pending
+          {pendingBridgeTx
             ? "Transfer in Progress..."
             : bridgeState.formState.transferDirection === ChainTransferFlow.ZIL_TO_ETH
               ? "Withdraw (SWTH -> ETH)"
@@ -767,12 +742,12 @@ const ConfirmTransfer = (props: any) => {
 
       {enableCheatyButtons && !complete && (
         <FancyButton
-          disabled={!!pending}
+          disabled={!!pendingBridgeTx}
           onClick={() => onWithdraw(bridgeFormState.sourceAddress!)}
           variant="contained"
           color="primary"
           className={classes.actionButton}>
-          {pending
+          {pendingBridgeTx
             ? "Transfer in Progress..."
             : bridgeState.formState.transferDirection === ChainTransferFlow.ZIL_TO_ETH
               ? "Withdraw To Source (SWTH -> ZIL) (FOR TESTING)"
