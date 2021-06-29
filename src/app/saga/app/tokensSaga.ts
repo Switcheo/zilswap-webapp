@@ -136,7 +136,7 @@ function* updateTokensState() {
   const { network } = getBlockchain(yield select());
 
   const zilAddress = wallet ? wallet.addressInfo.byte20.toLowerCase() : null;
-  const ethAddress = bridgeWallets.eth;
+  const ethAddress = bridgeWallets.eth ? bridgeWallets.eth.address : null;
 
   const [resultZil, resultEth]: [SimpleMap<TokenInfo>, SimpleMap<TokenInfo>] = yield all([
     call(fetchZilTokensState, network, tokens, zilAddress),
