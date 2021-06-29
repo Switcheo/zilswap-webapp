@@ -24,6 +24,7 @@ import { Blockchain, SWTHAddress, Token, TradeHubSDK } from "tradehub-api-js";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
 import { ReactComponent as EthereumLogo } from"../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from"../../views/main/Bridge/wavy-line.svg";
+import { ReactComponent as StraightLine } from"./straight-line.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -145,7 +146,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("xs")]: {
       width: "100px",
       marginLeft: "-50px",
+    },
   },
+  straightLine: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginLeft: "-60px",
+    marginTop: "-20px",
+    display: theme.palette.type === "light" ? "none" : "",
+    [theme.breakpoints.down("xs")]: {
+      width: "90px",
+      marginLeft: "-45px",
+    },
   }
 }));
 
@@ -579,7 +592,10 @@ const ConfirmTransfer = (props: any) => {
             <Text variant="button">{truncate( bridgeState.formState.sourceAddress, 5, 4)}</Text>
           </Box>
           <Box flex={0.2} />
-          <WavyLine className={classes.wavyLine} />
+          {complete
+            ? <StraightLine className={classes.straightLine} />
+            : <WavyLine className={classes.wavyLine} />
+          }
           <Box className={classes.networkBox} flex={1}>
             <Text variant="h4" color="textSecondary">To</Text>
             <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
@@ -634,7 +650,7 @@ const ConfirmTransfer = (props: any) => {
                       {/* TODO: Case where approval not needed */}
                       {/* isNativeAsset(sdk.token.tokens[`${BridgeParamConstants.DEPOSIT_DENOM}`]) */}
                       { true
-                          ? <Text>
+                          ? <Text className={classes.label}>
                               Approved
                               <HelpInfo className={classes.helpInfo} placement="top" title="Only one approval is required per token. You have previously approved this token and will not need to approve it for this or future transfers." />
                             </Text>
