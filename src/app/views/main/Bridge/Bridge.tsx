@@ -6,16 +6,16 @@ import { ConfirmTransfer, CurrencyInput, FancyButton, Text } from 'app/component
 import { ReactComponent as DotIcon } from "app/components/ConnectWalletButton/dot.svg";
 import MainCard from 'app/layouts/MainCard';
 import { actions } from "app/store";
-import { BridgeFormState, BridgeTx } from 'app/store/bridge/types';
+import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useNetwork } from "app/utils";
+import { hexToRGBA, truncate, useNetwork, useTokenFinder } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { ConnectedWallet } from "core/wallet";
 import { ethers } from "ethers";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Blockchain } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
@@ -24,6 +24,7 @@ import { ChainTransferFlow } from "./components/constants";
 import { ReactComponent as ZilliqaLogo } from "./zilliqa-logo.svg";
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "./wavy-line.svg";
+import { fromBech32Address } from "@zilliqa-js/crypto";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
@@ -71,26 +72,26 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minWidth: 120,
     display: "contents",
     "& .MuiSelect-select:focus": {
-        borderRadius: 12
+      borderRadius: 12
     },
     "& .MuiOutlinedInput-root": {
-        border: "none"
+      border: "none"
     },
     "& .MuiInputBase-input": {
-        fontWeight: "bold",
-        fontSize: "16px"
+      fontWeight: "bold",
+      fontSize: "16px"
     },
     "& .MuiSelect-icon": {
-        top: "calc(50% - 14px)",
-        fill: theme.palette.label
+      top: "calc(50% - 14px)",
+      fill: theme.palette.label
     },
     "& .MuiSelect-selectMenu": {
-        minHeight: 0
+      minHeight: 0
     }
   },
   selectMenu: {
     "& .MuiListItem-root.Mui-selected": {
-        color: "#DEFFFF"
+      color: "#DEFFFF"
     },
   },
   wavyLine: {
@@ -102,8 +103,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: "160px",
     display: theme.palette.type === "light" ? "none" : "",
     [theme.breakpoints.down("xs")]: {
-        width: "110px",
-        marginLeft: "-55px",
+      width: "110px",
+      marginLeft: "-55px",
     },
   }
 }))
@@ -119,21 +120,54 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const classes = useStyles();
   const dispatch = useDispatch();
   const network = useNetwork();
+  const tokenFinder = useTokenFinder();
   const [ethConnectedAddress, setEthConnectedAddress] = useState('');
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const [fromBlockchain, setFromBlockchain] = useState<Blockchain.Zilliqa | Blockchain.Ethereum>(Blockchain.Ethereum);
   const [toBlockchain, setToBlockchain] = useState<Blockchain.Zilliqa | Blockchain.Ethereum>(Blockchain.Zilliqa);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
+  const bridgeState = useSelector<RootState, BridgeState>(store => store.bridge);
   const bridgeFormState: BridgeFormState = useSelector<RootState, BridgeFormState>(store => store.bridge.formState);
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
 
   const tokenList: 'bridge-zil' | 'bridge-eth' = fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth'
 
+  const bridgeToken = bridgeFormState.token;
+
+  const { fromToken } = useMemo(() => {
+    if (!bridgeToken) return {};
+    return {
+      fromToken: tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain),
+      toToken: tokenFinder(bridgeToken.toTokenAddress, bridgeToken.toBlockchain),
+    }
+  }, [tokenFinder, bridgeToken])
+
+  useEffect(() => {
+    const bridgeTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.destinationTxHash)
+
+    if (bridgeTx) {
+      if (!layoutState.showTransferConfirmation) {
+        dispatch(actions.Layout.showTransferConfirmation());
+      }
+
+      const bridgeTokens = bridgeState.tokens[bridgeTx.srcChain as Blockchain.Ethereum | Blockchain.Zilliqa];
+      const bridgeToken = bridgeTokens.find(token => token.denom === bridgeTx.srcToken);
+
+      dispatch(actions.Bridge.updateForm({
+        destAddress: bridgeTx.dstAddr,
+        sourceAddress: bridgeTx.srcAddr,
+        transferDirection: bridgeTx.srcChain === Blockchain.Ethereum ? ChainTransferFlow.ETH_TO_ZIL : ChainTransferFlow.ZIL_TO_ETH,
+        forNetwork: network,
+        token: bridgeToken,
+      }))
+    }
+  }, [bridgeState.bridgeTxs, bridgeState.tokens, layoutState, network, dispatch])
+
   useEffect(() => {
     if (wallet !== null) {
       if (fromBlockchain === Blockchain.Zilliqa) {
-        setSourceAddress(wallet.addressInfo.byte20!)   
+        setSourceAddress(wallet.addressInfo.byte20!)
       } else {
         setDestAddress(wallet.addressInfo.byte20!)
       }
@@ -191,10 +225,10 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const onClickConnectETH = async () => {
     const web3Modal = new Web3Modal({
-        network: "mainnet",
-        cacheProvider: true,
-        disableInjectedProvider: false,
-        providerOptions
+      network: "mainnet",
+      cacheProvider: true,
+      disableInjectedProvider: false,
+      providerOptions
     });
 
     const provider = await web3Modal.connect();
@@ -209,9 +243,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     if (toBlockchain === Blockchain.Ethereum) {
       setDestAddress(ethAddress);
     }
-    
+
     setEthConnectedAddress(ethAddress);
-    dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, address: ethAddress}));
+    dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, address: ethAddress }));
     dispatch(actions.Token.refetchState());
   };
 
@@ -243,11 +277,21 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const onCurrencyChange = (token: TokenInfo) => {
-    if (bridgeFormState.token === token) return;
+    let tokenAddress: string | undefined;
+    if (fromBlockchain === Blockchain.Ethereum) {
+      tokenAddress = token.address.toLowerCase();
+    } else {
+      tokenAddress = fromBech32Address(token.address).toLowerCase();
+    }
+    tokenAddress = tokenAddress.replace(/^0x/, '');
+
+    const bridgeToken = bridgeState.tokens[fromBlockchain].find(bridgeToken => bridgeToken.tokenAddress === tokenAddress);
+
+    if (bridgeFormState.token && bridgeFormState.token === bridgeToken) return;
 
     dispatch(actions.Bridge.updateForm({
       forNetwork: network,
-      token
+      token: bridgeToken
     }));
   };
 
@@ -263,32 +307,32 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const getConnectEthWallet = () => {
     return (
       fromBlockchain === Blockchain.Ethereum ?
-      <Button
-        onClick={onClickConnectETH}
-        className={cls(classes.connectWalletButton, formState.sourceAddress ? classes.connectedWalletButton : "")}
-        variant="contained"
-        color="primary">
-        {!formState.sourceAddress
-          ? "Connect Wallet"
-          : <Box display="flex" flexDirection="column">
-            <Text variant="button">{truncate(formState.sourceAddress, 5, 4)}</Text>
-            <Text color="textSecondary"><DotIcon className={classes.dotIcon} />Connected</Text>
-          </Box>
-        }
-      </Button> :
-      <Button
-        onClick={onClickConnectETH}
-        className={cls(classes.connectWalletButton, formState.destAddress ? classes.connectedWalletButton : "")}
-        variant="contained"
-        color="primary">
-        {!formState.destAddress
-          ? "Connect Wallet"
-          : <Box display="flex" flexDirection="column">
-            <Text variant="button">{truncate(formState.destAddress, 5, 4)}</Text>
-            <Text color="textSecondary"><DotIcon className={classes.dotIcon} />Connected</Text>
-          </Box>
-        }
-      </Button>
+        <Button
+          onClick={onClickConnectETH}
+          className={cls(classes.connectWalletButton, formState.sourceAddress ? classes.connectedWalletButton : "")}
+          variant="contained"
+          color="primary">
+          {!formState.sourceAddress
+            ? "Connect Wallet"
+            : <Box display="flex" flexDirection="column">
+              <Text variant="button">{truncate(formState.sourceAddress, 5, 4)}</Text>
+              <Text color="textSecondary"><DotIcon className={classes.dotIcon} />Connected</Text>
+            </Box>
+          }
+        </Button> :
+        <Button
+          onClick={onClickConnectETH}
+          className={cls(classes.connectWalletButton, formState.destAddress ? classes.connectedWalletButton : "")}
+          variant="contained"
+          color="primary">
+          {!formState.destAddress
+            ? "Connect Wallet"
+            : <Box display="flex" flexDirection="column">
+              <Text variant="button">{truncate(formState.destAddress, 5, 4)}</Text>
+              <Text color="textSecondary"><DotIcon className={classes.dotIcon} />Connected</Text>
+            </Box>
+          }
+        </Button>
     )
   }
 
@@ -317,15 +361,15 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             <Box className={classes.box} flex={1} bgcolor="background.contrast">
               <Text variant="h4" align="center">From</Text>
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-                { fromBlockchain === Blockchain.Ethereum
-                    ? <EthereumLogo />
-                    : <ZilliqaLogo />
+                {fromBlockchain === Blockchain.Ethereum
+                  ? <EthereumLogo />
+                  : <ZilliqaLogo />
                 }
               </Box>
               <Box display="flex" justifyContent="center">
                 <FormControl variant="outlined" className={classes.formControl}>
                   <Select
-                    MenuProps={{ classes: { paper: classes.selectMenu} }}
+                    MenuProps={{ classes: { paper: classes.selectMenu } }}
                     value={fromBlockchain}
                     onChange={onFromBlockchainChange}
                     label=""
@@ -342,15 +386,15 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             <Box className={classes.box} flex={1} bgcolor="background.contrast">
               <Text variant="h4" align="center">To</Text>
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-                { toBlockchain === Blockchain.Zilliqa
-                    ? <ZilliqaLogo />
-                    : <EthereumLogo />
+                {toBlockchain === Blockchain.Zilliqa
+                  ? <ZilliqaLogo />
+                  : <EthereumLogo />
                 }
               </Box>
               <Box display="flex" justifyContent="center">
                 <FormControl variant="outlined" className={classes.formControl}>
                   <Select
-                    MenuProps={{ classes: { paper: classes.selectMenu} }}
+                    MenuProps={{ classes: { paper: classes.selectMenu } }}
                     value={toBlockchain}
                     onChange={onToBlockchainChange}
                     label=""
@@ -367,7 +411,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           <CurrencyInput
             label="Transfer Amount"
             disabled={!wallet || !formState.sourceAddress}
-            token={bridgeFormState.token ?? tokenState.tokens[ZIL_ADDRESS]}
+            token={fromToken ?? tokenState.tokens[ZIL_ADDRESS]}
             amount={formState.transferAmount}
             onAmountChange={onTransferAmountChange}
             onCurrencyChange={onCurrencyChange}

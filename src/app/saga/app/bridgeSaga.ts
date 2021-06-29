@@ -5,7 +5,7 @@ import { bnOrZero } from "app/utils/strings/strings";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import { logger } from "core/utilities";
 import { call, delay, fork, race, select, take } from "redux-saga/effects";
-import { TradeHubSDK, ConnectedTradeHubSDK, RestModels, TradeHubTx, SWTHAddress } from "tradehub-api-js";
+import { TradeHubSDK, ConnectedTradeHubSDK, RestModels, TradeHubTx, SWTHAddress, Blockchain } from "tradehub-api-js";
 import dayjs from "dayjs";
 import { PollIntervals } from "app/utils/constants";
 
@@ -79,15 +79,19 @@ function* watchDepositConfirmation() {
 
             const connectedSDK = (yield call([sdk, sdk.connectWithMnemonic], tx.interimAddrMnemonics)) as ConnectedTradeHubSDK
             const balance = (yield call([sdk.api, sdk.api.getWalletBalance], { account: swthAddress })) as RestModels.Balances;
-            const withdrawAmount = bnOrZero(balance?.[tx.dstToken]?.available);
-            if (!withdrawAmount.isZero()) {
+
+            const balanceDenom = tx.srcChain === Blockchain.Zilliqa ? tx.srcToken : tx.dstToken;
+
+            logger("bridge saga", "detected balance to withdraw", balance, balanceDenom)
+            const withdrawAmount = bnOrZero(balance?.[balanceDenom]?.available);
+            if (withdrawAmount.isZero()) {
               throw new Error(`tradehub address balance not found`)
             }
 
             const withdrawResult = (yield call([connectedSDK.coin, connectedSDK.coin.withdraw], {
               amount: withdrawAmount.toString(10),
               denom: tx.dstToken,
-              to_address: tx.dstAddr,
+              to_address: tx.dstAddr.toLowerCase().replace(/^0x/i, ""),
               fee_address: BridgeParamConstants.SWTH_FEE_ADDRESS,
               fee_amount: tx.withdrawFee.toString(10),
               originator: swthAddress,

@@ -33,10 +33,10 @@ const NotificationBar: React.FC<Props> = (props: Props) => {
       content={(key, message) => {
         if (!message) return
         let msgContent = JSON.parse(message!.toString());
-        const { hash, content } = msgContent;
+        const { hash, content, sourceBlockchain } = msgContent;
 
         return (
-          <NotificationItem snackKey={key} hash={hash} message={content} providerRef={ref} />
+          <NotificationItem sourceBlockchain={sourceBlockchain} snackKey={key} hash={hash} message={content} providerRef={ref} />
         )
       }}
       {...rest}
