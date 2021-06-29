@@ -21,6 +21,9 @@ import { Blockchain } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
 import { providerOptions } from "core/ethereum";
 import { ChainTransferFlow } from "./components/constants";
+import { ReactComponent as ZilliqaLogo } from "./zilliqa-logo.svg";
+import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
+import { ReactComponent as WavyLine } from "./wavy-line.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
@@ -81,11 +84,27 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         top: "calc(50% - 14px)",
         fill: theme.palette.label
     },
+    "& .MuiSelect-selectMenu": {
+        minHeight: 0
+    }
   },
   selectMenu: {
     "& .MuiListItem-root.Mui-selected": {
         color: "#DEFFFF"
-    }
+    },
+  },
+  wavyLine: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginLeft: "-80px",
+    marginTop: "-80px",
+    width: "160px",
+    display: theme.palette.type === "light" ? "none" : "",
+    [theme.breakpoints.down("xs")]: {
+        width: "110px",
+        marginLeft: "-55px",
+    },
   }
 }))
 
@@ -294,9 +313,15 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             ZilSwap<span className={classes.textColoured}>Bridge</span>
           </Text>
           <Text margin={1} align="center" color="textSecondary" className={classes.textSpacing}>Powered by Switcheo TradeHub</Text>
-          <Box mt={2} mb={2} display="flex" justifyContent="space-between">
+          <Box mt={2} mb={2} display="flex" justifyContent="space-between" position="relative">
             <Box className={classes.box} flex={1} bgcolor="background.contrast">
               <Text variant="h4" align="center">From</Text>
+              <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
+                { fromBlockchain === Blockchain.Ethereum
+                    ? <EthereumLogo />
+                    : <ZilliqaLogo />
+                }
+              </Box>
               <Box display="flex" justifyContent="center">
                 <FormControl variant="outlined" className={classes.formControl}>
                   <Select
@@ -312,9 +337,16 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               </Box>
               {fromBlockchain === Blockchain.Ethereum ? getConnectEthWallet() : getConnectZilWallet()}
             </Box>
-            <Box flex={0.2} />
+            <Box flex={0.3} />
+            <WavyLine className={classes.wavyLine} />
             <Box className={classes.box} flex={1} bgcolor="background.contrast">
               <Text variant="h4" align="center">To</Text>
+              <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
+                { toBlockchain === Blockchain.Zilliqa
+                    ? <ZilliqaLogo />
+                    : <EthereumLogo />
+                }
+              </Box>
               <Box display="flex" justifyContent="center">
                 <FormControl variant="outlined" className={classes.formControl}>
                   <Select

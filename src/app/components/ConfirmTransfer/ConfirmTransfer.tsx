@@ -21,6 +21,9 @@ import { ethers } from "ethers";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain, SWTHAddress, Token, TradeHubSDK } from "tradehub-api-js";
+import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
+import { ReactComponent as EthereumLogo } from"../../views/main/Bridge/ethereum-logo.svg";
+import { ReactComponent as WavyLine } from"../../views/main/Bridge/wavy-line.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -130,6 +133,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   warningIcon: {
     verticalAlign: "middle",
     marginBottom: theme.spacing(0.5)
+  },
+  wavyLine: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginLeft: "-70px",
+    marginTop: "-40px",
+    display: theme.palette.type === "light" ? "none" : "",
+    width: "140px",
+    [theme.breakpoints.down("xs")]: {
+      width: "100px",
+      marginLeft: "-50px",
+  },
   }
 }));
 
@@ -550,15 +566,28 @@ const ConfirmTransfer = (props: any) => {
           </Text>
         </Box>
 
-        <Box mt={2} display="flex" justifyContent="space-between">
+        <Box mt={2} display="flex" justifyContent="space-between" position="relative">
           <Box className={classes.networkBox} flex={1}>
             <Text variant="h4" color="textSecondary">From</Text>
+            <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
+                { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL
+                    ? <EthereumLogo />
+                    : <ZilliqaLogo />
+                }
+              </Box>
             <Text variant="h4">{ bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Ethereum Network' : 'Zilliqa Network'}</Text>
             <Text variant="button">{truncate( bridgeState.formState.sourceAddress, 5, 4)}</Text>
           </Box>
-          <Box flex={0.2}></Box>
+          <Box flex={0.2} />
+          <WavyLine className={classes.wavyLine} />
           <Box className={classes.networkBox} flex={1}>
             <Text variant="h4" color="textSecondary">To</Text>
+            <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
+                { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL
+                    ? <ZilliqaLogo />
+                    : <EthereumLogo />
+                }
+              </Box>
             <Text variant="h4">{ bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa Network' : 'Ethereum Network'}</Text>
             <Text variant="button">{truncate(bridgeState.formState.destAddress, 5, 4)}</Text>
           </Box>
@@ -598,22 +627,31 @@ const ConfirmTransfer = (props: any) => {
                   </Text>
                   <Box display="flex">
                     <Text className={classes.label} flexGrow={1} align="left" marginBottom={0.5}>
+                      {/* TODO */}
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, tokenApproval ? classes.checkIconCompleted : "")}/> Token Approval (ERC20/ZRC2)
                     </Text>
                     <Text className={classes.label}>
-                      <Link
-                        className={classes.link}
-                        underline="none"
-                        rel="noopener noreferrer"
-                        target="_blank"
-                        href="/">
-                        View on { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Etherscan' : 'ViewBlock' } <NewLinkIcon className={classes.linkIcon} />
-                      </Link>
+                      {/* TODO: Case where approval not needed */}
+                      {/* isNativeAsset(sdk.token.tokens[`${BridgeParamConstants.DEPOSIT_DENOM}`]) */}
+                      { true
+                          ? <Text>
+                              Approved
+                              <HelpInfo className={classes.helpInfo} placement="top" title="Only one approval is required per token. You have previously approved this token and will not need to approve it for this or future transfers." />
+                            </Text>
+                          : <Link
+                              className={classes.link}
+                              underline="none"
+                              rel="noopener noreferrer"
+                              target="_blank"
+                              href="/">
+                              View on { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Etherscan' : 'ViewBlock' } <NewLinkIcon className={classes.linkIcon} />
+                            </Link>
+                      }
                     </Text>
                   </Box>
                   <Box display="flex">
                     <Text className={classes.label} flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> Deposit to TradeHub Contract
+                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, bridgeState.bridgeTxs[0]?.sourceTxHash ? classes.checkIconCompleted : "")}/> Deposit to TradeHub Contract
                     </Text>
                     <Text className={classes.label}>-</Text>
                   </Box>
@@ -626,13 +664,15 @@ const ConfirmTransfer = (props: any) => {
                   </Text>
                   <Box display="flex" mt={0.9}>
                     <Text className={classes.label} flexGrow={1} align="left" marginBottom={0.5}>
-                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> TradeHub Deposit Confirmation
+                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, bridgeState.bridgeTxs[0]?.depositTxConfirmedAt ? classes.checkIconCompleted : "")}/> TradeHub Deposit Confirmation
                     </Text>
                     <Text className={classes.label}>-</Text>
                   </Box>
                   <Box display="flex">
                     <Text className={classes.label} flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> Withdrawal to { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa' : 'Ethereum' }
+                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, bridgeState.bridgeTxs[0]?.withdrawTxHash ? classes.checkIconCompleted : "")}/>
+                      {" "}
+                      Withdrawal to { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa' : 'Ethereum' }
                     </Text>
                     <Text className={classes.label}>-</Text>
                   </Box>
@@ -645,7 +685,9 @@ const ConfirmTransfer = (props: any) => {
                   </Text>
                   <Box display="flex">
                     <Text className={classes.label} flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={classes.checkIcon}/> Transfer to { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa' : 'Ethereum' } Wallet
+                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, bridgeState.bridgeTxs[0]?.destinationTxHash ? classes.checkIconCompleted : "")}/>
+                      {" "}
+                      Transfer to { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa' : 'Ethereum' } Wallet
                     </Text>
                     <Text className={classes.label}>-</Text>
                   </Box>
