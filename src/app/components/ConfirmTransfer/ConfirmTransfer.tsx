@@ -346,6 +346,8 @@ const ConfirmTransfer = (props: any) => {
         logger("approve tx", approve_tx.hash);
         toaster(`Submitted: (Ethereum - ERC20 Approval)`, { hash: approve_tx.hash!, sourceBlockchain: "eth" });
         await approve_tx.wait();
+
+        // TODO: token approval success
       }
     }
 
@@ -653,7 +655,7 @@ const ConfirmTransfer = (props: any) => {
                   </Text>
                   <Box display="flex">
                     <Text className={classes.label} flexGrow={1} align="left" marginBottom={0.5}>
-                      {/* TODO */}
+                      {/* TODO: Case where approval not needed */}
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, tokenApproval ? classes.checkIconCompleted : "")} /> Token Approval (ERC20/ZRC2)
                     </Text>
                     <Text className={classes.label}>
