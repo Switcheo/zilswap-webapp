@@ -613,7 +613,7 @@ const ConfirmTransfer = (props: any) => {
         </Box>
       )}
 
-      {(pendingBridgeTx?.destinationTxHash) && (
+      {pendingBridgeTx && (
         <Box className={classes.box} bgcolor="background.contrast">
           <Text align="center" variant="h6">{!pendingBridgeTx.destinationTxHash ? "Transfer Progress" : "Transfer Complete"}</Text>
 
