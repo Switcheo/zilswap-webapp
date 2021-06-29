@@ -1,4 +1,5 @@
 import BigNumber from "bignumber.js";
+import dayjs from "dayjs";
 import { BIG_ONE, BIG_ZERO } from "../constants";
 
 const BILLION = BIG_ONE.shiftedBy(9);
@@ -46,3 +47,12 @@ export const formatZWAPLabel = (input: BigNumber) => {
   if (!amount.isZero() && amount.lt(0.01)) return "<0.01";
   return amount.toFormat(2);
 };
+
+export interface DataCoder<T = unknown> {
+  encode: (object: T) => object;
+  decode: (data: object) => T;
+}
+export namespace DataCoder {
+  export const decodeDayjs = (input: number | undefined) => typeof input === "undefined" ? undefined : dayjs.unix(input);
+  export const encodeDayjs = (input: dayjs.Dayjs | undefined) => input?.unix();
+}

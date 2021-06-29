@@ -1,4 +1,3 @@
-import { TokenInfo } from "app/store/types";
 import BigNumber from "bignumber.js";
 import { Network } from "zilswap-sdk/lib/constants";
 
@@ -23,6 +22,7 @@ export const LocalStorageKeys = {
   UserTokenList: "zilswap:user-token-list",
   PendingClaimedTxs: "zilswap:pending-claimed-txs",
   SwapSlippageExpiry: "zilswap:swap-slippage-expiry",
+  BridgeTxs: 'zilswap:bridge-txs',
 };
 
 export const PlaceholderStrings = {
@@ -47,12 +47,6 @@ export const RPCEndpoints: { [key in Network]: string } = {
 export const BIG_ZERO = new BigNumber(0);
 export const BIG_ONE = new BigNumber(1);
 
-export const sortTokens = (lhs: TokenInfo, rhs: TokenInfo) => {
-  const { listPriority: lhsPriority = Number.MAX_SAFE_INTEGER } = lhs;
-  const { listPriority: rhsPriority = Number.MAX_SAFE_INTEGER } = rhs;
-  return lhsPriority - rhsPriority;
-};
-
 export const PRODUCTION_HOSTS = [
   "zilswap.io",
   "www.zilswap.io",
@@ -69,8 +63,9 @@ export const DEFAULT_TX_EXPIRY = 3;
 
 export const STATS_REFRESH_RATE = 30000; // ms
 
-export const ZIL_TOKEN_NAME = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
-export const ZWAP_TOKEN_NAME = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
+export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
+export const ZIL_ADDRESS = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
+export const ZWAP_ADDRESS = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
 export const ZIL_DECIMALS = 12;
 
 export const TRANSAK_API_KEY = {
@@ -89,4 +84,7 @@ export class PollIntervals {
   public static PoolWeights = 3600000;
 
   public static RetryAfterError = 5000;
+
+  public static BridgeDepositWatcher = 10000;
+  public static BridgeWithdrawWatcher = 10000;
 }

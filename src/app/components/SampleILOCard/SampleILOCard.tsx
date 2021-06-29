@@ -4,7 +4,7 @@ import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import ProgressBar from 'app/components/ProgressBar';
 import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from 'app/theme/types';
-import { ZIL_TOKEN_NAME, ZWAP_TOKEN_NAME } from 'app/utils/constants';
+import { ZIL_ADDRESS, ZWAP_ADDRESS } from 'app/utils/constants';
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { ILOData } from 'core/zilo/constants';
@@ -99,8 +99,8 @@ const SampleILOCard = (props: Props) => {
   const classes = useStyles();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
-  const zilToken = tokenState.tokens[ZIL_TOKEN_NAME];
-  const zwapToken = tokenState.tokens[ZWAP_TOKEN_NAME];
+  const zilToken = tokenState.tokens[ZIL_ADDRESS];
+  const zwapToken = tokenState.tokens[ZWAP_ADDRESS];
 
   return (
     <Box className={classes.root}>

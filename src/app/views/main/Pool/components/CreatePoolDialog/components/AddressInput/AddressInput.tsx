@@ -1,18 +1,16 @@
 import { Box, BoxProps, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
 import { KeyValueDisplay, LoadableArea } from "app/components";
-import { RootState, TokenBalanceMap, WalletState } from "app/store/types";
+import { RootState, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
 import { PlaceholderStrings } from "app/utils/constants";
-import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { zilParamsToMap } from "core/utilities";
-import { Contract, getBalancesMap, toBech32Address, ZilliqaValidate, ZilswapConnector } from "core/zilswap";
+import { Contract, toBech32Address, ZilliqaValidate, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 export type TokenPreview = {
   contract: Contract;
-  balances: TokenBalanceMap;
   name: string;
   symbol: string;
   address: string;
@@ -80,17 +78,10 @@ const AddressInput: React.FC<AddressInputProps> = (props: AddressInputProps) => 
         const token = await ZilswapConnector.addPoolToken({ address: inputAddress });
         const contract = token.contract
         const contractInitRaw = contract.init ?? await contract.getInit();
-
         const contractInit = zilParamsToMap(contractInitRaw);
 
-        const contractBalanceState = await getBalancesMap(token.contract);
-
-        const balances: TokenBalanceMap = {};
-        for (const address in contractBalanceState)
-          balances[address] = new BigNumber(contractBalanceState[address]);
-
         setTokenPreview({
-          contract, balances,
+          contract,
           name: contractInit.name,
           symbol: contractInit.symbol,
           address: inputAddress,

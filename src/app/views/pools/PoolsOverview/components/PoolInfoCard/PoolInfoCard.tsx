@@ -7,7 +7,7 @@ import { EMPTY_USD_VALUE } from "app/store/token/reducer";
 import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useNetwork, useValueCalculators } from "app/utils";
-import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import { bnOrZero, toHumanNumber } from "app/utils/strings/strings";
 import cls from "classnames";
 import { ZWAPRewards } from "core/zwap";
@@ -206,7 +206,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
 
     const usdValues = tokenState.values[token.address] ?? EMPTY_USD_VALUE;
     const totalZilVolume = swapVolumes[token.address]?.totalZilVolume ?? BIG_ZERO;
-    const totalZilVolumeUSD = valueCalculators.amount(tokenState.prices, tokenState.tokens[ZIL_TOKEN_NAME], totalZilVolume);
+    const totalZilVolumeUSD = valueCalculators.amount(tokenState.prices, tokenState.tokens[ZIL_ADDRESS], totalZilVolume);
 
     return {
       totalZilVolumeUSD,

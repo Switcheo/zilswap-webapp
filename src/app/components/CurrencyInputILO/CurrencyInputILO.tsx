@@ -105,8 +105,7 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
       return setTokenBalance(null);
 
     if (!showContribution) {
-      const wallet = walletState.wallet!;
-      const tokenBalance = token!.balances?.[wallet.addressInfo.byte20.toLowerCase()];
+      const tokenBalance = token!.balance;
       if (!tokenBalance)
         return setTokenBalance(null);
 

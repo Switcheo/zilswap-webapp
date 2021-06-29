@@ -6,7 +6,7 @@ import TxStatusIndicator from "app/components/TxStatusIndicator";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useNetwork, useValueCalculators } from "app/utils";
-import { BIG_ZERO, ZIL_TOKEN_NAME } from "app/utils/constants";
+import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { PoolTransaction } from "core/utilities";
@@ -67,14 +67,14 @@ const SwapTxRow: React.FC<Props> = (props: Props) => {
     let outToken!: TokenInfo;
 
     if (transaction.swap0_is_sending_zil) {
-      inToken = tokenState.tokens[ZIL_TOKEN_NAME];
+      inToken = tokenState.tokens[ZIL_ADDRESS];
       outToken = tokenState.tokens[transaction.token_address];
       swapRoute.push(inToken, outToken);
       inAmount = transaction.zil_amount;
       outAmount = transaction.token_amount;
     } else {
       inToken = tokenState.tokens[transaction.token_address];
-      outToken = tokenState.tokens[ZIL_TOKEN_NAME];
+      outToken = tokenState.tokens[ZIL_ADDRESS];
       swapRoute.push(inToken, outToken);
       inAmount = transaction.token_amount;
       outAmount = transaction.zil_amount;

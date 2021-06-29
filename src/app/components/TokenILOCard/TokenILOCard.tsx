@@ -9,7 +9,7 @@ import ProgressBar from 'app/components/ProgressBar'
 import { actions } from "app/store";
 import { RootState, TokenState, TransactionState, WalletObservedTx, WalletState } from "app/store/types"
 import { useAsyncTask, useNetwork, useToaster } from "app/utils"
-import { ZIL_TOKEN_NAME } from 'app/utils/constants';
+import { ZIL_ADDRESS } from 'app/utils/constants';
 import { ZilswapConnector } from "core/zilswap";
 import { ILOData, BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
@@ -131,7 +131,7 @@ const TokenILOCard = (props: Props) => {
     </Box>
   }
 
-  const zilToken = tokenState.tokens[ZIL_TOKEN_NAME]
+  const zilToken = tokenState.tokens[ZIL_ADDRESS]
   const unitlessInAmount = new BigNumber(formState.zwapAmount).shiftedBy(zwapToken.decimals).integerValue();
   const approved = new BigNumber(zwapToken.allowances![contractAddrHex] || '0')
   const showTxApprove = approved.isZero() || approved.comparedTo(unitlessInAmount) < 0;
@@ -144,7 +144,6 @@ const TokenILOCard = (props: Props) => {
   // const userContribution = new BigNumber('12345678912300000')
   // const targetZil = new BigNumber('70000').shiftedBy(12)
   // const targetZwap = new BigNumber('30000').shiftedBy(12)
-  // console.log(targetZil.toString(), targetZwap.toString())
 
   const totalContributions = new BigNumber(totalContributionStr)
   const totalCommittedUSD = totalContributions.shiftedBy(-12).dividedBy(data.usdRatio).times(tokenState.prices.ZIL).toFormat(2)
@@ -162,7 +161,6 @@ const TokenILOCard = (props: Props) => {
   const refundZwap = BigNumber.max(refundZil.times(targetZwap).dividedToIntegerBy(targetZil).minus(1), new BigNumber(0))
 
   const onZwapChange = (amount: string = "0") => {
-    console.log(amount)
     const _amount = new BigNumber(amount).shiftedBy(12).integerValue(BigNumber.ROUND_DOWN);
     const _zilAmount = _amount.minus(1).times(targetZil).dividedBy(targetZwap).integerValue(BigNumber.ROUND_DOWN);
 

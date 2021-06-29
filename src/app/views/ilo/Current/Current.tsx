@@ -8,7 +8,7 @@ import { useNetwork } from "app/utils";
 import { ZILO_DATA } from 'core/zilo/constants';
 import { ZilswapConnector } from "core/zilswap";
 import dayjs, { Dayjs } from "dayjs";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from 'react-redux';
 import { Link } from "react-router-dom";
 
@@ -41,7 +41,7 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const [blockTime, setBlockTime] = useState<Dayjs>(dayjs())
   const [currentTime, setCurrentTime] = useState<Dayjs>(dayjs())
 
-  const ziloData = ZILO_DATA[network!].filter(x => currentTime.isBefore(x.showUntil))
+  const ziloData = useMemo(() => ZILO_DATA[network!].filter(x => currentTime.isBefore(x.showUntil)), [network, currentTime])
 
   useEffect(() => {
     const interval = setInterval(() => {

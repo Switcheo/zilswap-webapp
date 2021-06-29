@@ -4,7 +4,7 @@ import { PlaceholderStrings } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { zilParamsToMap } from "core/utilities";
-import { Contract, getBalancesMap, toBech32Address, ZilliqaValidate, ZilswapConnector } from "core/zilswap";
+import { Contract, toBech32Address, ZilliqaValidate, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 
 
