@@ -4,7 +4,7 @@ import { SimpleMap } from "app/utils";
 import { bnOrZero } from "app/utils/strings/strings";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import { logger } from "core/utilities";
-import { call, delay, fork, race, select, take } from "redux-saga/effects";
+import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { TradeHubSDK, ConnectedTradeHubSDK, RestModels, TradeHubTx, SWTHAddress, Blockchain } from "tradehub-api-js";
 import dayjs from "dayjs";
 import { PollIntervals } from "app/utils/constants";
@@ -109,6 +109,10 @@ function* watchDepositConfirmation() {
       }
 
       // update redux updatedTxs
+      const updatedTxList = Object.values(updatedTxs);
+      if (updatedTxList.length) {
+        yield put(actions.Bridge.addBridgeTx(updatedTxList));
+      }
     } catch (error) {
       console.error("watchDepositConfirmation error")
       console.error(error)
@@ -159,6 +163,12 @@ function* watchWithdrawConfirmation() {
           console.error('process withdraw tx error');
           console.error(error);
         }
+      }
+
+      // update redux updatedTxs
+      const updatedTxList = Object.values(updatedTxs);
+      if (updatedTxList.length) {
+        yield put(actions.Bridge.addBridgeTx(updatedTxList));
       }
     } catch (error) {
       console.error("watchDepositConfirmation error")

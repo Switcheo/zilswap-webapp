@@ -1,3 +1,4 @@
+import { SimpleMap } from "app/utils";
 import { LocalStorageKeys } from "app/utils/constants";
 import { bnOrZero, DataCoder } from "app/utils/strings/strings";
 import { ChainTransferFlow } from "app/views/main/Bridge/components/constants";
@@ -111,11 +112,12 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
       };
 
     case BridgeActionTypes.ADD_BRIDGE_TXS:
-      const newBridgeTxs = [
-        ...state.bridgeTxs,
-        ...payload,
-      ];
+      const uniqueTxs: SimpleMap<BridgeTx> = {};
+      for (const tx of [...state.bridgeTxs, ...payload]) {
+        uniqueTxs[tx.sourceTxHash] = tx;
+      }
 
+      const newBridgeTxs = Object.values(uniqueTxs);
       saveBridgeTxs(newBridgeTxs);
 
       return {
