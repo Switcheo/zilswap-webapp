@@ -1,8 +1,8 @@
-import WalletConnectProvider from '@walletconnect/web3-provider';
-import Fortmatic from "fortmatic";
+// import WalletConnectProvider from '@walletconnect/web3-provider';
+// import Fortmatic from "fortmatic";
 import Portis from "@portis/web3";
-import Authereum from "authereum";
-import Torus from "@toruslabs/torus-embed";
+// import Authereum from "authereum";
+// import Torus from "@toruslabs/torus-embed";
 
 export const providerOptions = {
   injected: {
@@ -13,28 +13,28 @@ export const providerOptions = {
       },
       package: null
   },
-  walletconnect: {
-      package: WalletConnectProvider,
-      options: {
-          infuraId: process.env.REACT_APP_INFURA_ID
-      }
-  },
-  fortmatic: {
-      package: Fortmatic,
-      options: {
-          key: process.env.REACT_APP_FORTMATIC_KEY
-      }
-  },
+//   walletconnect: {
+//       package: WalletConnectProvider,
+//       options: {
+//           infuraId: process.env.REACT_APP_INFURA_ID
+//       }
+//   },
+//   fortmatic: {
+//       package: Fortmatic,
+//       options: {
+//           key: process.env.REACT_APP_FORTMATIC_KEY
+//       }
+//   },
   portis: {
       package: Portis,
       options: {
           id: process.env.REACT_APP_PORTIS_ID
       }
   },
-  torus: {
-      package: Torus
-  },
-  authereum: {
-      package: Authereum
-  }
+//   torus: {
+//       package: Torus
+//   },
+//   authereum: {
+//       package: Authereum
+//   }
 };
