@@ -686,19 +686,21 @@ const ConfirmTransfer = (props: any) => {
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, tokenApproval || pendingBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Token Approval (ERC20/ZRC2)
                     </Text>
                     <Text className={classes.label}>
-                      {!approvalHash
-                          ? <Text className={classes.label}>
-                              Approved
-                              <HelpInfo className={classes.helpInfo} placement="top" title="Only one approval is required per token. You have previously approved this token and will not need to approve it for this or future transfers." />
-                            </Text>
-                          : <Link
-                              className={classes.link}
-                              underline="none"
-                              rel="noopener noreferrer"
-                              target="_blank"
-                              href={bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? `https://etherscan.io/search?q=${approvalHash}` : `https://viewblock.io/zilliqa/tx/${approvalHash}?network=${network.toLowerCase()}`}>
-                              View on { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Etherscan' : 'ViewBlock' } <NewLinkIcon className={classes.linkIcon} />
-                            </Link>
+                      {approvalHash &&
+                        <Link
+                          className={classes.link}
+                          underline="none"
+                          rel="noopener noreferrer"
+                          target="_blank"
+                          href={bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? `https://etherscan.io/search?q=${approvalHash}` : `https://viewblock.io/zilliqa/tx/${approvalHash}?network=${network.toLowerCase()}`}>
+                          View on { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Etherscan' : 'ViewBlock' } <NewLinkIcon className={classes.linkIcon} />
+                        </Link>
+                      }
+                      {!approvalHash &&
+                        <Text className={classes.label}>
+                          Approved
+                          <HelpInfo className={classes.helpInfo} placement="top" title="Only one approval is required per token. You have previously approved this token and will not need to approve it for this or future transfers." />
+                        </Text>
                       }
                     </Text>
                   </Box>
