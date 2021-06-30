@@ -426,6 +426,9 @@ const ConfirmTransfer = (props: any) => {
         if (approve_tx !== undefined && approve_tx.getReceipt()?.success) {
           setTokenApproval(true);
         }
+      } else {
+        // already approved before
+        setTokenApproval(true);
       }
     }
 
