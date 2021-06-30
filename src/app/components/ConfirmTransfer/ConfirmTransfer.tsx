@@ -26,6 +26,7 @@ import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.sv
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
 import { ReactComponent as StraightLine } from"./straight-line.svg";
 // import { ReactComponent as ProgressBar } from"./progress.svg";
+import { Network } from "zilswap-sdk/lib/constants";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -757,7 +758,7 @@ const ConfirmTransfer = (props: any) => {
                             underline="none"
                             rel="noopener noreferrer"
                             target="_blank"
-                            href="/">
+                            href={`https://tradescan.switcheo.org/transaction/${pendingBridgeTx.withdrawTxHash}?net=${network === Network.MainNet ? "main" : "dev"}`}>
                             View on TradeHub <NewLinkIcon className={classes.linkIcon} />
                           </Link>
                         : "-"
