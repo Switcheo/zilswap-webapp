@@ -216,7 +216,7 @@ const ConfirmTransfer = (props: any) => {
   const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK")
   const enableCheatyButtons = useSearchParam("enableCheatyButtons") === "true";
 
-  const [tokenApproval, setTokenApproval] = useState<Boolean>(false);
+  const [tokenApproval, setTokenApproval] = useState<boolean>(false);
   const [approvalHash, setApprovalHash] = useState<string>("");
 
   const pendingBridgeTx = useMemo(() => bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.destinationTxHash), [bridgeState]);
