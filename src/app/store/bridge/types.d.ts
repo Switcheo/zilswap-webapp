@@ -3,6 +3,7 @@ import { ChainTransferFlow } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { Blockchain } from "tradehub-api-js";
+import { FeesData } from "core/utilities/bridge";
 
 export type BridgeableToken = {
   blockchain: Blockchain;
@@ -36,6 +37,7 @@ export interface BridgeFormState {
   toBlockchain: BridgeableChains;
 
   token?: BridgeableToken;
+  fees?: FeesData;
 
   isInsufficientReserves: boolean;
   forNetwork: Network | null,

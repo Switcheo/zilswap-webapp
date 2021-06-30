@@ -552,15 +552,15 @@ const ConfirmTransfer = (props: any) => {
         // init lock on eth side
         sourceTxHash = await lockAssetOnEth(asset);
       }
-  
+
       if (sourceTxHash === null) {
         console.error("source txn hash is null!");
         return null;
       }
-  
+
       const { destAddress, sourceAddress } = bridgeFormState;
       if (!destAddress || !sourceAddress || !bridgeToken) return;
-  
+
       const bridgeTx: BridgeTx = {
         dstAddr: destAddress,
         srcAddr: sourceAddress,

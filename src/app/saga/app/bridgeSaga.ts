@@ -3,11 +3,15 @@ import { BridgeTx, RootState } from "app/store/types";
 import { SimpleMap } from "app/utils";
 import { bnOrZero } from "app/utils/strings/strings";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
-import { logger } from "core/utilities";
-import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
+import { logger, Bridge } from "core/utilities";
+import { call, delay, fork, put, race, select, take, takeEvery } from "redux-saga/effects";
 import { TradeHubSDK, ConnectedTradeHubSDK, RestModels, TradeHubTx, SWTHAddress, Blockchain } from "tradehub-api-js";
 import dayjs from "dayjs";
 import { PollIntervals } from "app/utils/constants";
+import { BridgeActionTypes } from "app/store/bridge/actions";
+import { FeesData } from "core/utilities/bridge";
+import { getBridge, getTokens } from '../selectors'
+import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
 
 export enum Status {
   NotStarted,
@@ -187,9 +191,46 @@ function* watchWithdrawConfirmation() {
     }
   }
 }
+function* getFee() {
+  try {
+    yield
+    const { formState } = getBridge(yield select());
+    const { token } = formState;
+    if (token) {
+      const { blockchain } = token;
+
+      const feeEst = (yield call(Bridge.getEstimatedFees, { denom: blockchain === Blockchain.Zilliqa ? token.toDenom : token.denom })) as FeesData | undefined;
+      if (feeEst) {
+        yield put(actions.Bridge.updateFee(feeEst));
+      }
+    }
+
+  } catch (e) {
+    console.warn('Fetch failed, will automatically retry later. Error:')
+    console.warn(e)
+  }
+}
+
+function* queryTokenFees() {
+  while (true) {
+    // logger("bridge saga", "query token fees");
+    try {
+      yield fork(getFee);
+
+    } catch (e) {
+      console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn(e)
+    } finally {
+      yield delay(PollIntervals.BridgeTokenFee);
+    }
+  }
+}
+
 
 export default function* bridgeSaga() {
   logger("init bridge saga");
   yield fork(watchDepositConfirmation);
   yield fork(watchWithdrawConfirmation);
+  yield fork(queryTokenFees);
+  yield takeEvery(BridgeActionTypes.UPDATE_FORM, getFee)
 }
