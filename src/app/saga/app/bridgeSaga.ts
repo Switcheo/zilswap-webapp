@@ -100,7 +100,7 @@ function* watchDepositConfirmation() {
             tx.withdrawTxHash = withdrawResult.txhash;
             updatedTxs[tx.sourceTxHash!] = tx;
 
-            logger("bridge saga", "initiated tx withdraw", tx.sourceTxHash);
+            logger("bridge saga", "initiated tx withdraw", tx.withdrawTxHash);
           }
         } catch (error) {
           console.error('process deposit tx error');
@@ -141,7 +141,7 @@ function* watchWithdrawConfirmation() {
       const updatedTxs: SimpleMap<BridgeTx> = {};
       const network = TradeHubSDK.Network.DevNet;
       for (const tx of bridgeTxs) {
-        logger("bridge saga", "checking tx withdraw", tx.sourceTxHash);
+        logger("bridge saga", "checking tx withdraw", tx.withdrawTxHash);
         try {
           const sdk = new TradeHubSDK({ network });
           const swthAddress = SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
@@ -154,7 +154,7 @@ function* watchWithdrawConfirmation() {
             tx.destinationTxHash = withdrawTransfer.transaction_hash;
             updatedTxs[tx.sourceTxHash!] = tx;
 
-            logger("bridge saga", "confirmed tx withdraw", tx.sourceTxHash);
+            logger("bridge saga", "confirmed tx withdraw", tx.withdrawTxHash);
           }
 
           // possible extension: validate tx on dest chain 
