@@ -4,7 +4,7 @@ import { SimpleMap } from "app/utils";
 import { bnOrZero } from "app/utils/strings/strings";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import { logger, Bridge } from "core/utilities";
-import { call, delay, fork, put, race, select, take, takeEvery } from "redux-saga/effects";
+import { call, delay, fork, put, race, select, take, takeLatest } from "redux-saga/effects";
 import { TradeHubSDK, ConnectedTradeHubSDK, RestModels, TradeHubTx, SWTHAddress, Blockchain } from "tradehub-api-js";
 import dayjs from "dayjs";
 import { PollIntervals } from "app/utils/constants";
@@ -12,6 +12,7 @@ import { BridgeActionTypes } from "app/store/bridge/actions";
 import { FeesData } from "core/utilities/bridge";
 import { getBridge, getTokens } from '../selectors'
 import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
+import BigNumber from "bignumber.js";
 
 export enum Status {
   NotStarted,
@@ -193,15 +194,38 @@ function* watchWithdrawConfirmation() {
 }
 function* getFee() {
   try {
-    yield
-    const { formState } = getBridge(yield select());
+    const { formState, tokens: toke } = getBridge(yield select());
+    const { tokens } = getTokens(yield select());
     const { token } = formState;
+    const network = TradeHubSDK.Network.DevNet;
     if (token) {
       const { blockchain } = token;
 
-      const feeEst = (yield call(Bridge.getEstimatedFees, { denom: blockchain === Blockchain.Zilliqa ? token.toDenom : token.denom })) as FeesData | undefined;
-      if (feeEst) {
-        yield put(actions.Bridge.updateFee(feeEst));
+      const denom = blockchain === Blockchain.Zilliqa ? token.toDenom : token.denom;
+
+      let address = blockchain === Blockchain.Zilliqa ? token.toTokenAddress : token.tokenAddress;
+      address = address.toLowerCase();
+      if (blockchain === Blockchain.Zilliqa && !address.startsWith("zil")) {
+        address = toBech32Address(address);
+      } else if (blockchain === Blockchain.Ethereum && address.startsWith("zil")) {
+        address = fromBech32Address(address);
+      }
+
+      if (blockchain === Blockchain.Ethereum && !address.startsWith("0x")) {
+        address = `0x${address}`;
+      }
+
+      const feeToken = tokens[address];
+
+      const swthAddrMnemonic = SWTHAddress.newMnemonic();
+      const sdk = new TradeHubSDK({ network });
+      (yield call([sdk, sdk.connectWithMnemonic], swthAddrMnemonic)) as ConnectedTradeHubSDK
+      const prices = (yield sdk.token.reloadUSDValues([denom])) as SimpleMap<BigNumber>;
+      const feeEst = (yield call(Bridge.getEstimatedFees, { denom })) as FeesData | undefined;
+      if (feeEst && feeToken) {
+        yield put(actions.Bridge.updateFee(new BigNumber(feeEst.withdrawalFee!).div(new BigNumber(10).pow(feeToken!.decimals)).times(prices[feeToken?.blockchain])));
+      } else {
+        yield put(actions.Bridge.updateFee(new BigNumber(0)));
       }
     }
 
@@ -232,5 +256,5 @@ export default function* bridgeSaga() {
   yield fork(watchDepositConfirmation);
   yield fork(watchWithdrawConfirmation);
   yield fork(queryTokenFees);
-  yield takeEvery(BridgeActionTypes.UPDATE_FORM, getFee)
+  yield takeLatest(BridgeActionTypes.UPDATE_FORM, getFee)
 }

@@ -37,7 +37,7 @@ export interface BridgeFormState {
   toBlockchain: BridgeableChains;
 
   token?: BridgeableToken;
-  fees?: FeesData;
+  withdrawFee?: BigNumber;
 
   isInsufficientReserves: boolean;
   forNetwork: Network | null,

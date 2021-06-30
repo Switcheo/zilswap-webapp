@@ -1,5 +1,5 @@
 import { BridgeableTokenMapping, BridgeFormState, BridgeTx } from "./types";
-import { FeesData } from "core/utilities/bridge";
+import BigNumber from "bignumber.js";
 
 export enum BridgeActionTypes {
   CLEAR_FORM = "BRIDGE_CLEAR_FORM",
@@ -36,7 +36,7 @@ export function setTokens(payload: BridgeableTokenMapping) {
   }
 }
 
-export function updateFee(payload: FeesData) {
+export function updateFee(payload: BigNumber) {
   return {
     type: BridgeActionTypes.UPDATE_FEE,
     payload

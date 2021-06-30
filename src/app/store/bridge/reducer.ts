@@ -153,7 +153,7 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
         ...state,
         formState: {
           ...state.formState,
-          fees: payload,
+          withdrawFee: payload,
         }
       };
 
