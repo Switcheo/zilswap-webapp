@@ -90,9 +90,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   selectMenu: {
-    "& .MuiListItem-root.Mui-selected": {
-      color: "#DEFFFF"
+    backgroundColor: theme.palette.background.default,
+    "& .MuiListItem-root": {
+        borderRadius: "12px",
+        padding: theme.spacing(1.5),
+        justifyContent: "center"
     },
+    "& .MuiListItem-root.Mui-selected": {
+      backgroundColor: theme.palette.label,
+      color: theme.palette.primary.contrastText,
+    },
+    "& .MuiList-padding": {
+        padding: "2px"
+    }
   },
   wavyLine: {
     position: "absolute",
