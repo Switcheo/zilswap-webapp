@@ -12,7 +12,7 @@ import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/sto
 import { RootState, WalletObservedTx } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate, useAsyncTask, useNetwork, useSearchParam, useToaster, useTokenFinder } from "app/utils";
-import { BridgeParamConstants, ChainTransferFlow } from "app/views/main/Bridge/components/constants";
+import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { logger } from "core/utilities";
@@ -24,9 +24,7 @@ import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, Token, Trade
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
-import { ReactComponent as StraightLine } from"./straight-line.svg";
-// import { ReactComponent as ProgressBar } from"./progress.svg";
-import { Network } from "zilswap-sdk/lib/constants";
+import { ReactComponent as StraightLine } from "./straight-line.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -201,6 +199,13 @@ async function isDepositOnSwth(swthAddress: string, asset: Token, amount: BigNum
   return false
 }
 
+const CHAIN_NAMES = {
+  [Blockchain.Zilliqa]: "Zilliqa",
+  [Blockchain.Ethereum]: "Ethereum",
+  [Blockchain.Neo]: "Neo",
+  [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
+}
+
 const ConfirmTransfer = (props: any) => {
   const { showTransfer } = props;
   const classes = useStyles();
@@ -216,13 +221,21 @@ const ConfirmTransfer = (props: any) => {
   const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK")
   const enableCheatyButtons = useSearchParam("enableCheatyButtons") === "true";
 
+  const [showTransactions, setShowTransactions] = useState<boolean>(true);
   const [tokenApproval, setTokenApproval] = useState<boolean>(false);
   const [approvalHash, setApprovalHash] = useState<string>("");
+  const [pendingBridgeTx, setPendingBridgeTx] = useState<BridgeTx | undefined>();
 
-  const pendingBridgeTx = useMemo(() => bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.destinationTxHash), [bridgeState]);
   const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
   const swthAddrMnemonic = useMemo(() => SWTHAddress.newMnemonic(), []);
 
+  useEffect(() => {
+    if (pendingBridgeTx) return;
+    const pendingTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.destinationTxHash);
+
+    if (pendingTx)
+      setPendingBridgeTx(pendingTx);
+  }, [bridgeState, pendingBridgeTx]);
 
   const { fromToken } = useMemo(() => {
     if (!bridgeToken) return {};
@@ -231,6 +244,13 @@ const ConfirmTransfer = (props: any) => {
       toToken: tokenFinder(bridgeToken.toTokenAddress, bridgeToken.toBlockchain),
     }
   }, [bridgeToken, tokenFinder]);
+
+  const { fromChainName, toChainName } = useMemo(() => {
+    return {
+      fromChainName: CHAIN_NAMES[bridgeFormState.fromBlockchain],
+      toChainName: CHAIN_NAMES[bridgeFormState.toBlockchain],
+    }
+  }, [bridgeFormState.fromBlockchain, bridgeFormState.toBlockchain]);
 
   useEffect(() => {
     if (!swthAddrMnemonic) return;
@@ -358,7 +378,7 @@ const ConfirmTransfer = (props: any) => {
           setTokenApproval(true);
         }
       }
-    } 
+    }
 
     toaster(`Locking asset (Ethereum)`);
 
@@ -439,14 +459,14 @@ const ConfirmTransfer = (props: any) => {
         }
         logger("approve zrc2 token parameters: ", approveZRC2Params);
         toaster(`Approval needed (Zilliqa)`);
-  
+
         const approve_tx = await sdk.zil.approveZRC2(approveZRC2Params);
         toaster(`Submitted: (Zilliqa - ZRC2 Approval)`, { hash: approve_tx.id! });
         setApprovalHash(approve_tx.id!);
-  
+
         await approve_tx.confirm(approve_tx.id!)
         logger("transaction confirmed! receipt is: ", approve_tx.getReceipt())
-  
+
         // token approval success
         if (approve_tx !== undefined && approve_tx.getReceipt()?.success) {
           setTokenApproval(true);
@@ -512,7 +532,6 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
-    const transferFlow = bridgeState.formState.transferDirection;
     const asset = sdk.token.tokens[bridgeToken?.denom ?? ""];
 
     if (!asset) {
@@ -520,8 +539,9 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
+    const { toBlockchain, fromBlockchain } = bridgeState.formState;
     let sourceTxHash;
-    if (transferFlow === ChainTransferFlow.ZIL_TO_ETH) {
+    if (fromBlockchain === Blockchain.Zilliqa) {
       // init lock on zil side
       sourceTxHash = await lockAssetOnZil(asset);
     } else {
@@ -537,14 +557,11 @@ const ConfirmTransfer = (props: any) => {
     const { destAddress, sourceAddress } = bridgeFormState;
     if (!destAddress || !sourceAddress || !bridgeToken) return;
 
-    const isToEth = transferFlow === ChainTransferFlow.ZIL_TO_ETH;
-    const srcChain = isToEth ? Blockchain.Zilliqa : Blockchain.Ethereum
-
     const bridgeTx: BridgeTx = {
       dstAddr: destAddress,
       srcAddr: sourceAddress,
-      dstChain: isToEth ? Blockchain.Ethereum : Blockchain.Zilliqa,
-      srcChain: srcChain,
+      dstChain: toBlockchain,
+      srcChain: fromBlockchain,
       dstToken: bridgeToken.toDenom,
       srcToken: bridgeToken.denom,
       sourceTxHash: sourceTxHash, // TODO: populate source tx hash
@@ -558,6 +575,18 @@ const ConfirmTransfer = (props: any) => {
   const conductAnotherTransfer = () => {
     dispatch(actions.Bridge.clearForm());
     dispatch(actions.Layout.showTransferConfirmation(false));
+  }
+
+  const getTradeHubExplorerLink = (hash: string) => {
+    return `https://switcheo.org/transaction/${hash}?net=dev`;
+  };
+  const getExplorerLink = (hash: string, blockchain: Blockchain) => {
+    switch (blockchain) {
+      case Blockchain.Ethereum:
+        return `https://ropsten.etherscan.io/search?q=${hash}`;
+      default:
+        return `https://viewblock.io/zilliqa/tx/${hash}?network=testnet`;
+    }
   }
 
   return (
@@ -610,12 +639,12 @@ const ConfirmTransfer = (props: any) => {
           <Box className={classes.networkBox} flex={1}>
             <Text variant="h4" color="textSecondary">From</Text>
             <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-              {bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL
+              {bridgeState.formState.fromBlockchain === Blockchain.Ethereum
                 ? <EthereumLogo />
                 : <ZilliqaLogo />
               }
             </Box>
-            <Text variant="h4">{bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Ethereum Network' : 'Zilliqa Network'}</Text>
+            <Text variant="h4">{fromChainName} Network</Text>
             <Text variant="button">{truncate(bridgeState.formState.sourceAddress, 5, 4)}</Text>
           </Box>
           <Box flex={0.2} />
@@ -626,12 +655,12 @@ const ConfirmTransfer = (props: any) => {
           <Box className={classes.networkBox} flex={1}>
             <Text variant="h4" color="textSecondary">To</Text>
             <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-              {bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL
+              {bridgeState.formState.toBlockchain === Blockchain.Ethereum
                 ? <ZilliqaLogo />
                 : <EthereumLogo />
               }
             </Box>
-            <Text variant="h4">{bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa Network' : 'Ethereum Network'}</Text>
+            <Text variant="h4">{toChainName} Network</Text>
             <Text variant="button">{truncate(bridgeState.formState.destAddress, 5, 4)}</Text>
           </Box>
         </Box>
@@ -667,13 +696,13 @@ const ConfirmTransfer = (props: any) => {
               </Box>
             </Box>
           </Box> */}
-  
+
           <KeyValueDisplay kkey="Estimated Time Left" mt="8px" mb="8px" px={2}>
             {!pendingBridgeTx.destinationTxHash ? <span><span className={classes.textColoured}>20</span> Minutes</span> : "-"}
             <HelpInfo className={classes.helpInfo} placement="top" title="Todo" />
           </KeyValueDisplay>
 
-          <Accordion className={classes.accordion}>
+          <Accordion className={classes.accordion} expanded={showTransactions} onChange={(_, expanded) => setShowTransactions(expanded)}>
             <Box display="flex" justifyContent="center">
               <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon} />}>
                 <Text>View Transactions</Text>
@@ -684,7 +713,7 @@ const ConfirmTransfer = (props: any) => {
                 {/* Stage 1 */}
                 <Box mb={1}>
                   <Text>
-                    <strong>Stage 1: {bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Ethereum' : 'Zilliqa'} <ArrowRightRoundedIcon className={classes.arrowIcon} /> TradeHub</strong>
+                    <strong>Stage 1: {fromChainName} <ArrowRightRoundedIcon className={classes.arrowIcon} /> TradeHub</strong>
                   </Text>
                   <Box display="flex">
                     <Text className={classes.label} flexGrow={1} align="left" marginBottom={0.5}>
@@ -697,8 +726,8 @@ const ConfirmTransfer = (props: any) => {
                           underline="none"
                           rel="noopener noreferrer"
                           target="_blank"
-                          href={bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? `https://etherscan.io/search?q=${approvalHash}` : `https://viewblock.io/zilliqa/tx/${approvalHash}?network=${network.toLowerCase()}`}>
-                          View on { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Etherscan' : 'ViewBlock' } <NewLinkIcon className={classes.linkIcon} />
+                          href={getExplorerLink(approvalHash, bridgeFormState.fromBlockchain)}>
+                          View on {bridgeState.formState.fromBlockchain === Blockchain.Ethereum ? 'Etherscan' : 'ViewBlock'} <NewLinkIcon className={classes.linkIcon} />
                         </Link>
                       }
                       {!approvalHash &&
@@ -714,15 +743,15 @@ const ConfirmTransfer = (props: any) => {
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Deposit to TradeHub Contract
                     </Text>
                     <Text className={classes.label}>
-                      { pendingBridgeTx.sourceTxHash
+                      {pendingBridgeTx.sourceTxHash
                         ? <Link
-                            className={classes.link}
-                            underline="none"
-                            rel="noopener noreferrer"
-                            target="_blank"
-                            href={bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? `https://etherscan.io/search?q=${pendingBridgeTx.sourceTxHash}` : `https://viewblock.io/zilliqa/tx/${pendingBridgeTx.sourceTxHash}?network=${network.toLowerCase()}`}>
-                            View on { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Etherscan' : 'ViewBlock' } <NewLinkIcon className={classes.linkIcon} />
-                          </Link>
+                          className={classes.link}
+                          underline="none"
+                          rel="noopener noreferrer"
+                          target="_blank"
+                          href={getExplorerLink(pendingBridgeTx.sourceTxHash, bridgeFormState.fromBlockchain)}>
+                          View on {bridgeState.formState.fromBlockchain === Blockchain.Ethereum ? 'Etherscan' : 'ViewBlock'} <NewLinkIcon className={classes.linkIcon} />
+                        </Link>
                         : "-"
                       }
                     </Text>
@@ -743,18 +772,18 @@ const ConfirmTransfer = (props: any) => {
                     <Text className={classes.label} flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.withdrawTxHash ? classes.checkIconCompleted : "")} />
                       {" "}
-                      Withdrawal to {bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa' : 'Ethereum'}
+                      Withdrawal to {toChainName}
                     </Text>
                     <Text className={classes.label}>
-                      { pendingBridgeTx.withdrawTxHash
+                      {pendingBridgeTx.withdrawTxHash
                         ? <Link
-                            className={classes.link}
-                            underline="none"
-                            rel="noopener noreferrer"
-                            target="_blank"
-                            href={`https://tradescan.switcheo.org/transaction/${pendingBridgeTx.withdrawTxHash}?net=${network === Network.MainNet ? "main" : "dev"}`}>
-                            View on TradeHub <NewLinkIcon className={classes.linkIcon} />
-                          </Link>
+                          className={classes.link}
+                          underline="none"
+                          rel="noopener noreferrer"
+                          target="_blank"
+                          href={getTradeHubExplorerLink(pendingBridgeTx.withdrawTxHash)}>
+                          View on TradeHub <NewLinkIcon className={classes.linkIcon} />
+                        </Link>
                         : "-"
                       }
                     </Text>
@@ -764,24 +793,24 @@ const ConfirmTransfer = (props: any) => {
                 {/* Stage 3 */}
                 <Box>
                   <Text>
-                    <strong>Stage 3: TradeHub <ArrowRightRoundedIcon className={classes.arrowIcon} /> {bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa' : 'Ethereum'}</strong>
+                    <strong>Stage 3: TradeHub <ArrowRightRoundedIcon className={classes.arrowIcon} /> {toChainName}</strong>
                   </Text>
                   <Box display="flex">
                     <Text className={classes.label} flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.destinationTxHash ? classes.checkIconCompleted : "")} />
                       {" "}
-                      Transfer to {bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa' : 'Ethereum'} Wallet
+                      Transfer to {toChainName} Wallet
                     </Text>
                     <Text className={classes.label}>
-                    { pendingBridgeTx.destinationTxHash
+                      {pendingBridgeTx.destinationTxHash
                         ? <Link
-                            className={classes.link}
-                            underline="none"
-                            rel="noopener noreferrer"
-                            target="_blank"
-                            href={bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? `https://viewblock.io/zilliqa/tx/${pendingBridgeTx.destinationTxHash}?network=${network.toLowerCase()}` : `https://etherscan.io/search?q=${pendingBridgeTx.destinationTxHash}`}>
-                            View on { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'ViewBlock' : 'Etherscan' } <NewLinkIcon className={classes.linkIcon} />
-                          </Link>
+                          className={classes.link}
+                          underline="none"
+                          rel="noopener noreferrer"
+                          target="_blank"
+                          href={getExplorerLink(pendingBridgeTx.destinationTxHash, bridgeFormState.toBlockchain)}>
+                          View on {bridgeState.formState.toBlockchain === Blockchain.Zilliqa ? 'ViewBlock' : 'Etherscan'} <NewLinkIcon className={classes.linkIcon} />
+                        </Link>
                         : "-"
                       }
                     </Text>
@@ -802,7 +831,7 @@ const ConfirmTransfer = (props: any) => {
           className={classes.actionButton}>
           {pendingBridgeTx
             ? "Transfer in Progress..."
-            : bridgeState.formState.transferDirection === ChainTransferFlow.ZIL_TO_ETH
+            : bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
               ? "Confirm (ZIL -> ETH)"
               : "Confirm (ETH -> ZIL)"
           }
@@ -818,7 +847,7 @@ const ConfirmTransfer = (props: any) => {
           className={classes.actionButton}>
           {pendingBridgeTx
             ? "Transfer in Progress..."
-            : bridgeState.formState.transferDirection === ChainTransferFlow.ZIL_TO_ETH
+            : bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
               ? "Withdraw (SWTH -> ETH)"
               : "Withdraw (SWTH -> ZIL)"
           }
@@ -834,7 +863,7 @@ const ConfirmTransfer = (props: any) => {
           className={classes.actionButton}>
           {pendingBridgeTx
             ? "Transfer in Progress..."
-            : bridgeState.formState.transferDirection === ChainTransferFlow.ZIL_TO_ETH
+            : bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
               ? "Withdraw To Source (SWTH -> ZIL) (FOR TESTING)"
               : "Withdraw To Source (SWTH -> ETH) (FOR TESTING)"
           }
