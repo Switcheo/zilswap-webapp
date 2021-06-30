@@ -429,25 +429,30 @@ const ConfirmTransfer = (props: any) => {
       const allowance = await sdk.zil.checkAllowanceZRC2(asset, `0x${zilAddress}`, `0x${lockProxy}`);
       logger("zil zrc2 allowance: ", allowance);
 
-      const approveZRC2Params = {
-        token: asset,
-        gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
-        gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
-        zilAddress: zilAddress,
-        signer: wallet.provider?.wallet!,
-      }
-      logger("approve zrc2 token parameters: ", approveZRC2Params);
-      toaster(`Approval needed (Zilliqa)`);
-
-      const approve_tx = await sdk.zil.approveZRC2(approveZRC2Params);
-      toaster(`Submitted: (Zilliqa - ZRC2 Approval)`, { hash: approve_tx.id! });
-      setApprovalHash(approve_tx.id!);
-
-      await approve_tx.confirm(approve_tx.id!)
-      logger("transaction confirmed! receipt is: ", approve_tx.getReceipt())
-
-      // token approval success
-      if (approve_tx !== undefined && approve_tx.getReceipt()?.success) {
+      if (allowance.lt(new BigNumber(amountQa.toString()))) {
+        const approveZRC2Params = {
+          token: asset,
+          gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
+          gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
+          zilAddress: zilAddress,
+          signer: wallet.provider?.wallet!,
+        }
+        logger("approve zrc2 token parameters: ", approveZRC2Params);
+        toaster(`Approval needed (Zilliqa)`);
+  
+        const approve_tx = await sdk.zil.approveZRC2(approveZRC2Params);
+        toaster(`Submitted: (Zilliqa - ZRC2 Approval)`, { hash: approve_tx.id! });
+        setApprovalHash(approve_tx.id!);
+  
+        await approve_tx.confirm(approve_tx.id!)
+        logger("transaction confirmed! receipt is: ", approve_tx.getReceipt())
+  
+        // token approval success
+        if (approve_tx !== undefined && approve_tx.getReceipt()?.success) {
+          setTokenApproval(true);
+        }
+      } else {
+        // approved before
         setTokenApproval(true);
       }
     }
