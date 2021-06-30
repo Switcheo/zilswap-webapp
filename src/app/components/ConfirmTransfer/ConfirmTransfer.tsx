@@ -747,7 +747,7 @@ const ConfirmTransfer = (props: any) => {
                             underline="none"
                             rel="noopener noreferrer"
                             target="_blank"
-                            href={`https://tradescan.switcheo.org/transaction/${pendingBridgeTx.withdrawTxHash}?net=${network === Network.MainNet ? "main" : "dev"}`}>
+                            href={`https://switcheo.org/transaction/${pendingBridgeTx.withdrawTxHash}?net=${network === Network.MainNet ? "main" : "dev"}`}>
                             View on TradeHub <NewLinkIcon className={classes.linkIcon} />
                           </Link>
                         : "-"
