@@ -733,19 +733,6 @@ const ConfirmTransfer = (props: any) => {
                     <Text className={classes.label} flexGrow={1} align="left" marginBottom={0.5}>
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx?.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> TradeHub Deposit Confirmation
                     </Text>
-                    <Text className={classes.label}>
-                      { pendingBridgeTx?.depositTxConfirmedAt
-                        ? <Link
-                            className={classes.link}
-                            underline="none"
-                            rel="noopener noreferrer"
-                            target="_blank"
-                            href="/">
-                            View on TradeHub <NewLinkIcon className={classes.linkIcon} />
-                          </Link>
-                        : "-"
-                      }
-                    </Text>
                   </Box>
                   <Box display="flex">
                     <Text className={classes.label} flexGrow={1} align="left">
