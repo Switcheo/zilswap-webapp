@@ -19,7 +19,6 @@
     "dayjs": "^1.10.4",
     "decimal.js": "^10.2.0",
     "ethers": "^5.3.1",
-    "fortmatic": "^2.2.1",
     "lightweight-charts": "^3.3.0",
     "node-sass": "^6.0.0",
     "notistack": "^1.0.9",

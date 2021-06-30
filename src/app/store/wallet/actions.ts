@@ -1,5 +1,4 @@
-import { Blockchain } from "tradehub-api-js";
-import { WalletUpdateProps } from "./types";
+import { BridgeWalletUpdateProps, WalletUpdateProps } from "./types";
 
 export const WalletActionTypes = {
   WALLET_UPDATE: "WALLET_UPDATE",
@@ -14,7 +13,7 @@ export function update(payload: WalletUpdateProps) {
   }
 };
 
-export function setBridgeWallet(payload: { blockchain: Blockchain, address: string}) {
+export function setBridgeWallet(payload: BridgeWalletUpdateProps) {
   return {
     type: WalletActionTypes.SET_BRIDGE_WALLET,
     payload
