@@ -655,7 +655,7 @@ const ConfirmTransfer = (props: any) => {
           </Box> */}
   
           <KeyValueDisplay kkey="Estimated Time Left" mt="8px" mb="8px" px={2}>
-            {!pendingBridgeTx?.destinationTxHash ? <span><span className={classes.textColoured}>20</span> Minutes</span> : "-"}
+            {!pendingBridgeTx.destinationTxHash ? <span><span className={classes.textColoured}>20</span> Minutes</span> : "-"}
             <HelpInfo className={classes.helpInfo} placement="top" title="Todo" />
           </KeyValueDisplay>
 
