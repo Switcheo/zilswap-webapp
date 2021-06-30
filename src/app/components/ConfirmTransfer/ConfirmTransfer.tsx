@@ -655,7 +655,7 @@ const ConfirmTransfer = (props: any) => {
           </Box> */}
   
           <KeyValueDisplay kkey="Estimated Time Left" mt="8px" mb="8px" px={2}>
-            {!pendingBridgeTx.destinationTxHash ? <span><span className={classes.textColoured}>20</span> Minutes</span> : "-"}
+            {!pendingBridgeTx?.destinationTxHash ? <span><span className={classes.textColoured}>20</span> Minutes</span> : "-"}
             <HelpInfo className={classes.helpInfo} placement="top" title="Todo" />
           </KeyValueDisplay>
 
@@ -698,7 +698,19 @@ const ConfirmTransfer = (props: any) => {
                     <Text className={classes.label} flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Deposit to TradeHub Contract
                     </Text>
-                    <Text className={classes.label}>-</Text>
+                    <Text className={classes.label}>
+                      { pendingBridgeTx.sourceTxHash
+                        ? <Link
+                            className={classes.link}
+                            underline="none"
+                            rel="noopener noreferrer"
+                            target="_blank"
+                            href="/">
+                            View on { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Etherscan' : 'ViewBlock' } <NewLinkIcon className={classes.linkIcon} />
+                          </Link>
+                        : "-"
+                      }
+                    </Text>
                   </Box>
                 </Box>
 
@@ -709,9 +721,21 @@ const ConfirmTransfer = (props: any) => {
                   </Text>
                   <Box display="flex" mt={0.9}>
                     <Text className={classes.label} flexGrow={1} align="left" marginBottom={0.5}>
-                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> TradeHub Deposit Confirmation
+                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx?.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> TradeHub Deposit Confirmation
                     </Text>
-                    <Text className={classes.label}>-</Text>
+                    <Text className={classes.label}>
+                      { pendingBridgeTx?.depositTxConfirmedAt
+                        ? <Link
+                            className={classes.link}
+                            underline="none"
+                            rel="noopener noreferrer"
+                            target="_blank"
+                            href="/">
+                            View on TradeHub <NewLinkIcon className={classes.linkIcon} />
+                          </Link>
+                        : "-"
+                      }
+                    </Text>
                   </Box>
                   <Box display="flex">
                     <Text className={classes.label} flexGrow={1} align="left">
@@ -719,7 +743,19 @@ const ConfirmTransfer = (props: any) => {
                       {" "}
                       Withdrawal to {bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa' : 'Ethereum'}
                     </Text>
-                    <Text className={classes.label}>-</Text>
+                    <Text className={classes.label}>
+                      { pendingBridgeTx.withdrawTxHash
+                        ? <Link
+                            className={classes.link}
+                            underline="none"
+                            rel="noopener noreferrer"
+                            target="_blank"
+                            href="/">
+                            View on TradeHub <NewLinkIcon className={classes.linkIcon} />
+                          </Link>
+                        : "-"
+                      }
+                    </Text>
                   </Box>
                 </Box>
 
@@ -734,7 +770,19 @@ const ConfirmTransfer = (props: any) => {
                       {" "}
                       Transfer to {bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa' : 'Ethereum'} Wallet
                     </Text>
-                    <Text className={classes.label}>-</Text>
+                    <Text className={classes.label}>
+                    { pendingBridgeTx.destinationTxHash
+                        ? <Link
+                            className={classes.link}
+                            underline="none"
+                            rel="noopener noreferrer"
+                            target="_blank"
+                            href="/">
+                            View on { bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Etherscan' : 'ViewBlock' } <NewLinkIcon className={classes.linkIcon} />
+                          </Link>
+                        : "-"
+                      }
+                    </Text>
                   </Box>
                 </Box>
               </Box>
