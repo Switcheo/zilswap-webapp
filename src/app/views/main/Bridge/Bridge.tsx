@@ -1,16 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// temp lint override to allow staging deployment for WIP file
 import { Box, Button, FormControl, MenuItem, Select } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
-import { ConfirmTransfer, CurrencyInput, FancyButton, Text } from 'app/components';
-import { ReactComponent as DotIcon } from "app/components/ConnectWalletButton/dot.svg";
+import { ConfirmTransfer, CurrencyInput, Text } from 'app/components';
 import MainCard from 'app/layouts/MainCard';
 import { actions } from "app/store";
 import { BridgeFormState, BridgeState } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useNetwork, useTokenFinder } from "app/utils";
+import { hexToRGBA, useNetwork, useTokenFinder } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
