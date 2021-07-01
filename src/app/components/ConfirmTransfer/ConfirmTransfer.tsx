@@ -231,6 +231,8 @@ const ConfirmTransfer = (props: any) => {
 
   const [runConfirmTransfer, loadingConfirm] = useAsyncTask("confirm");
 
+  const { toBlockchain, fromBlockchain, withdrawFee } = bridgeFormState;
+
   useEffect(() => {
     if (pendingBridgeTx) return;
     const pendingTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.destinationTxHash);
@@ -541,9 +543,10 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
-    const { toBlockchain, fromBlockchain } = bridgeState.formState;
-
     runConfirmTransfer(async () => {
+      if (!withdrawFee)
+        throw new Error("withdraw fee not loaded");
+
       let sourceTxHash;
       if (fromBlockchain === Blockchain.Zilliqa) {
         // init lock on zil side
@@ -559,7 +562,7 @@ const ConfirmTransfer = (props: any) => {
       }
 
       const { destAddress, sourceAddress } = bridgeFormState;
-      if (!destAddress || !sourceAddress || !bridgeToken) return;
+      if (!destAddress || !sourceAddress || !bridgeToken || !withdrawFee) return;
 
       const bridgeTx: BridgeTx = {
         dstAddr: destAddress,
@@ -571,7 +574,7 @@ const ConfirmTransfer = (props: any) => {
         sourceTxHash: sourceTxHash, // TODO: populate source tx hash
         inputAmount: bridgeFormState.transferAmount,
         interimAddrMnemonics: swthAddrMnemonic,
-        withdrawFee: new BigNumber(1), // TODO: add withdraw fee
+        withdrawFee: withdrawFee.amount, // TODO: add withdraw fee
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
     })
@@ -673,9 +676,19 @@ const ConfirmTransfer = (props: any) => {
 
       {!pendingBridgeTx && (
         <Box marginTop={3} marginBottom={0.5} px={2}>
-          <KeyValueDisplay kkey={<strong>Estimated Total Fees</strong>} mb="8px">~ <span className={classes.textColoured}>$21.75</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
-          <KeyValueDisplay kkey="&nbsp; • &nbsp; Ethereum Txn Fee" mb="8px"><span className={classes.textColoured}>{bridgeFormState.withdrawFee?.amount.toFixed(2) || ""}</span> {bridgeFormState.withdrawFee?.token?.symbol || ""} ~<span className={classes.textColoured}>${bridgeFormState.withdrawFee?.value.toFixed(2) || 0}</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
-          <KeyValueDisplay kkey="&nbsp; • &nbsp; Zilliqa Txn Fee" mb="8px"><span className={classes.textColoured}>5</span> ZIL ~<span className={classes.textColoured}>$0.50</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
+          <KeyValueDisplay kkey={<strong>Estimated Total Fees</strong>} mb="8px">
+            ~ <span className={classes.textColoured}>${withdrawFee?.value.toFixed(2) || 0}</span>
+            <HelpInfo className={classes.helpInfo} placement="top" title="Todo" />
+            </KeyValueDisplay>
+          <KeyValueDisplay kkey={<span>&nbsp; • &nbsp;{toChainName} Txn Fee</span>} mb="8px">
+            <span className={classes.textColoured}>{withdrawFee?.amount.toFixed(2)}</span>
+            {" "}
+            {fromToken?.symbol}
+            {" "}
+            ~<span className={classes.textColoured}>${withdrawFee?.value.toFixed(2) || 0}</span>
+            <HelpInfo className={classes.helpInfo} placement="top" title="Todo" />
+          </KeyValueDisplay>
+          {/* <KeyValueDisplay kkey="&nbsp; • &nbsp; Zilliqa Txn Fee" mb="8px"><span className={classes.textColoured}>5</span> ZIL ~<span className={classes.textColoured}>$0.50</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay> */}
           <KeyValueDisplay kkey="Estimated Transfer Time" mb="8px"><span className={classes.textColoured}>&lt; 30</span> Minutes<HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
         </Box>
       )}
