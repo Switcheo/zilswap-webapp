@@ -178,7 +178,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         setDestAddress(wallet.addressInfo.byte20!)
       }
     }
-
     // eslint-disable-next-line
   }, [wallet, bridgeFormState.fromBlockchain])
 
@@ -203,6 +202,8 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const onFromBlockchainChange = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown; }>) => {
+    console.log(e.target.value);
+    console.log(e.target);
     if (e.target.value === Blockchain.Zilliqa) {
       setSourceAddress(wallet?.addressInfo.byte20!)
       setDestAddress(ethConnectedAddress)
@@ -386,7 +387,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               
               <ConnectButton
                 chain={fromBlockchain}
-                address={formState.sourceAddress}
+                address={bridgeFormState.sourceAddress || ''}
                 onClick={onConnectSrcWallet}
               />
             </Box>
@@ -416,7 +417,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
               <ConnectButton
                 chain={toBlockchain}
-                address={formState.destAddress}
+                address={bridgeFormState.destAddress || ''}
                 onClick={onConnectDstWallet}
               />
             </Box>
