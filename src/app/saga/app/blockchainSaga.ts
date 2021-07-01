@@ -203,8 +203,14 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     const data: TradeHubTokensResult = yield call(fetchJSON, `https://${host}/coin/tokens`)
     const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
     Object.entries(mappings.result).forEach(([wrappedDenom, sourceDenom]) => {
+      // TODO: update whitelist (this is devnet only)
+      if (!["zil9.e", "zwap.e", "swth-e", "usdt2.z"].includes(wrappedDenom)) {
+        return;
+      }
+
       const wrappedToken = data.result.find(d => d.denom === wrappedDenom)!
       const sourceToken = data.result.find(d => d.denom === sourceDenom)!
+
       if ((wrappedToken.blockchain !== Blockchain.Zilliqa && wrappedToken.blockchain !== Blockchain.Ethereum) ||
         (sourceToken.blockchain !== Blockchain.Zilliqa && sourceToken.blockchain !== Blockchain.Ethereum)) {
         return
