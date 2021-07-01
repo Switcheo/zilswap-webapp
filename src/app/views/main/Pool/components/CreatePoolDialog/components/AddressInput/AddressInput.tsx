@@ -27,6 +27,9 @@ const useStyles = makeStyles(theme => ({
   },
   input: {
     marginBottom: 20,
+    '&.Mui-focused': {
+      borderColor: theme.palette.primary.dark,
+    },
   },
   inputError: {
     border: `1px solid ${theme.palette.error.main}`

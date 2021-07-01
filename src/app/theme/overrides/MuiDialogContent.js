@@ -1,6 +1,7 @@
 const MuiDialogContent = theme => ({
   root: {
     padding: theme.spacing(4.5, 8),
+    overflowY: "hidden",
     "&+$root": {
       paddingTop: theme.spacing(1),
     },
