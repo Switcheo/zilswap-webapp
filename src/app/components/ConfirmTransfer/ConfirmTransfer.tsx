@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Link, makeStyles } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Link, makeStyles, Step, StepConnector, StepLabel, Stepper, withStyles } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
@@ -162,9 +162,56 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   stepper: {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
+    "& .MuiStepIcon-root": {
+      color: `rgba${hexToRGBA("#DEFFFF", 0.1)}`,
+      border: "5px solid #0D1B24",
+      borderRadius: "50%",
+      zIndex: 1
+    },
+    "& .MuiStepIcon-completed": {
+      color: "#00FFB0"
+    },
+    "& .MuiSvgIcon-root": {
+      fontSize: "3rem",
+    },
+    "& .MuiStepLabel-label": {
+      marginTop: "8px",
+      fontWeight: 600,
+      fontSize: "14px",
+      lineHeight: 1.6,
+      color: theme.palette.text?.primary
+    },
+    "& .MuiStepLabel-completed": {
+      color: theme.palette.primary.dark
+    }
   }
 }));
+
+const ColorlibConnector = withStyles({
+  alternativeLabel: {
+    top: 15,
+    left: "calc(-50% + 20px)",
+    right: "calc(50% + 20px)"
+  },
+  active: {
+    '& $line': {
+      backgroundColor: "#00FFB0",
+    },
+  },
+  completed: {
+    '& $line': {
+      backgroundColor: "#00FFB0",
+    },
+  },
+  line: {
+    height: 18,
+    borderTop: "5px solid #0D1B24",
+    borderBottom: "5px solid #0D1B24",
+    backgroundColor: "#0D1B24",
+    zIndex: 0
+  }
+})(StepConnector);
 
 // initialize a tradehub sdk client
 // @param mnemonic initialize the sdk with an account
@@ -502,21 +549,21 @@ const ConfirmTransfer = (props: any) => {
     setPendingBridgeTx(undefined);
   }
 
-  // const getActiveStep = () => {
-  //   if (pendingBridgeTx?.destinationTxHash) {
-  //     return 3;
-  //   }
+  const getActiveStep = () => {
+    if (pendingBridgeTx?.destinationTxHash) {
+      return 3;
+    }
   
-  //   if (pendingBridgeTx?.withdrawTxHash) {
-  //     return 2;
-  //   }
+    if (pendingBridgeTx?.withdrawTxHash) {
+      return 2;
+    }
   
-  //   if (pendingBridgeTx?.sourceTxHash) {
-  //     return 1;
-  //   }
+    if (pendingBridgeTx?.sourceTxHash) {
+      return 1;
+    }
   
-  //   return 0;
-  // }
+    return 0;
+  }
 
   return (
     <Box className={cls(classes.root, classes.container)}>
@@ -618,15 +665,23 @@ const ConfirmTransfer = (props: any) => {
         <Box className={classes.box} bgcolor="background.contrast">
           <Text align="center" variant="h6">{!pendingBridgeTx.destinationTxHash ? "Transfer Progress" : "Transfer Complete"}</Text>
 
-          {/* <Stepper className={classes.stepper} activeStep={getActiveStep()} alternativeLabel>
-            {STEPS.map((label) => (
+          <Stepper className={classes.stepper} activeStep={getActiveStep()} connector={<ColorlibConnector />} alternativeLabel>
+            {STEPS.map((label, index) => (
               <Step key={label}>
                 <StepLabel>
-                  <Text variant="h6">{label}</Text>
+                  <span>{label}</span>
+                  <Text color="textSecondary">
+                    {index === 0
+                      ? fromChainName
+                      : index === 1
+                        ? "TradeHub"
+                        : toChainName
+                    }
+                  </Text>
                 </StepLabel>
               </Step>
             ))}
-          </Stepper> */}
+          </Stepper>
 
           <KeyValueDisplay kkey="Estimated Time Left" mt="8px" mb="8px" px={2}>
             {!pendingBridgeTx.destinationTxHash ? <span><span className={classes.textColoured}>20</span> Minutes</span> : "-"}

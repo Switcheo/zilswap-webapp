@@ -58,6 +58,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   box: {
     display: "flex",
+    flex: "1 1 0",
     flexDirection: "column",
     border: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "#D2E5DF"}`,
     borderRadius: 12,
@@ -393,7 +394,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           </Text>
           <Text margin={1} align="center" color="textSecondary" className={classes.textSpacing}>Powered by Switcheo TradeHub</Text>
           <Box mt={2} mb={2} display="flex" justifyContent="space-between" position="relative">
-            <Box className={classes.box} flex={1} bgcolor="background.contrast">
+            <Box className={classes.box} bgcolor="background.contrast">
               <Text variant="h4" align="center">From</Text>
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
                 {fromBlockchain === Blockchain.Ethereum
@@ -418,7 +419,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             </Box>
             <Box flex={0.3} />
             <WavyLine className={classes.wavyLine} onClick={swapBridgeChains} />
-            <Box className={classes.box} flex={1} bgcolor="background.contrast">
+            <Box className={classes.box} bgcolor="background.contrast">
               <Text variant="h4" align="center">To</Text>
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
                 {toBlockchain === Blockchain.Zilliqa
