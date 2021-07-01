@@ -160,6 +160,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       width: "90px",
       marginLeft: "-45px",
     },
+  },
+  stepper: {
+    backgroundColor: "transparent"
   }
 }));
 
@@ -179,6 +182,8 @@ const CHAIN_NAMES = {
   [Blockchain.Neo]: "Neo",
   [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
 }
+
+// const STEPS = ['Deposit', 'Confirm', 'Withdraw'];
 
 const ConfirmTransfer = (props: any) => {
   const { showTransfer } = props;
@@ -588,7 +593,7 @@ const ConfirmTransfer = (props: any) => {
         <Box marginTop={3} marginBottom={0.5} px={2}>
           <KeyValueDisplay kkey={<strong>Estimated Total Fees</strong>} mb="8px">
             ~ <span className={classes.textColoured}>${withdrawFee?.value.toFixed(2) || 0}</span>
-            <HelpInfo className={classes.helpInfo} placement="top" title="Todo" />
+            <HelpInfo className={classes.helpInfo} placement="top" title="Estimated total fees to be incurred for this transfer (in USD). Please note that the fees will be deducted from the amount that is being transferred out of the network and you will receive less tokens as a result." />
             </KeyValueDisplay>
           <KeyValueDisplay kkey={<span>&nbsp; • &nbsp;{toChainName} Txn Fee</span>} mb="8px">
             <span className={classes.textColoured}>{withdrawFee?.amount.toFixed(2)}</span>
@@ -596,10 +601,10 @@ const ConfirmTransfer = (props: any) => {
             {fromToken?.symbol}
             {" "}
             ~<span className={classes.textColoured}>${withdrawFee?.value.toFixed(2) || 0}</span>
-            <HelpInfo className={classes.helpInfo} placement="top" title="Todo" />
+            <HelpInfo className={classes.helpInfo} placement="top" title="Estimated network fees incurred to pay the relayer." />
           </KeyValueDisplay>
           {/* <KeyValueDisplay kkey="&nbsp; • &nbsp; Zilliqa Txn Fee" mb="8px"><span className={classes.textColoured}>5</span> ZIL ~<span className={classes.textColoured}>$0.50</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay> */}
-          <KeyValueDisplay kkey="Estimated Transfer Time" mb="8px"><span className={classes.textColoured}>&lt; 30</span> Minutes<HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
+          <KeyValueDisplay kkey="Estimated Transfer Time" mb="8px"><span className={classes.textColoured}>&lt; 30</span> Minutes<HelpInfo className={classes.helpInfo} placement="top" title="Estimated time for the completion of this transfer." /></KeyValueDisplay>
         </Box>
       )}
 
@@ -607,27 +612,19 @@ const ConfirmTransfer = (props: any) => {
         <Box className={classes.box} bgcolor="background.contrast">
           <Text align="center" variant="h6">{!pendingBridgeTx.destinationTxHash ? "Transfer Progress" : "Transfer Complete"}</Text>
 
-          {/* <Box display="flex" flexDirection="column" alignItems="center" mt={2} mb={1}>
-            <ProgressBar />
-            <Box width={1} display="flex" justifyContent="space-evenly">
-              <Box display="flex" flexDirection="column" alignItems="center">
-                <Text variant="h6">Deposit</Text>
-                <Text className={classes.label}>{bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Ethereum' : 'Zilliqa'}</Text>
-              </Box>
-              <Box display="flex" flexDirection="column" alignItems="center">
-                <Text variant="h6">Confirm</Text>
-                <Text className={classes.label}>Tradehub</Text>
-              </Box>
-              <Box display="flex" flexDirection="column" alignItems="center">
-                <Text variant="h6">Withdraw</Text>
-                <Text className={classes.label}>{bridgeState.formState.transferDirection === ChainTransferFlow.ETH_TO_ZIL ? 'Zilliqa' : 'Ethereum'}</Text>
-              </Box>
-            </Box>
-          </Box> */}
+          {/* <Stepper className={classes.stepper} activeStep={getActiveStep()} alternativeLabel>
+            {STEPS.map((label) => (
+              <Step key={label}>
+                <StepLabel>
+                  <Text variant="h6">{label}</Text>
+                </StepLabel>
+              </Step>
+            ))}
+          </Stepper> */}
 
           <KeyValueDisplay kkey="Estimated Time Left" mt="8px" mb="8px" px={2}>
             {!pendingBridgeTx.destinationTxHash ? <span><span className={classes.textColoured}>20</span> Minutes</span> : "-"}
-            <HelpInfo className={classes.helpInfo} placement="top" title="Todo" />
+            <HelpInfo className={classes.helpInfo} placement="top" title="Estimated time left to the completion of this transfer." />
           </KeyValueDisplay>
 
           <Accordion className={classes.accordion} expanded={showTransactions} onChange={(_, expanded) => setShowTransactions(expanded)}>
@@ -661,7 +658,7 @@ const ConfirmTransfer = (props: any) => {
                       {!approvalHash &&
                         <Text className={classes.link}>
                           Approved
-                          <HelpInfo className={classes.helpInfo} placement="top" title="Only one approval is required per token. You have previously approved this token and will not need to approve it for this or future transfers." />
+                          <HelpInfo className={classes.helpInfo} placement="top" title="This token has previously been approved by you, and hence will not require approval during this transaction." />
                         </Text>
                       }
                     </Text>

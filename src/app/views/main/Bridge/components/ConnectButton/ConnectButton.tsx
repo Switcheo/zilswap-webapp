@@ -45,6 +45,8 @@ const ConnectButton: React.FC<Props> = (props: Props) => {
           return truncate(address, 5, 4);
       }
     } catch (e) {
+      console.error(address)
+      console.error(e)
       return "";
     }
   }

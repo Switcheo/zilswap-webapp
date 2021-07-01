@@ -413,6 +413,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                   </Select>
                 </FormControl>
               </Box>
+
               <ConnectButton
                 chain={toBlockchain}
                 address={formState.destAddress}

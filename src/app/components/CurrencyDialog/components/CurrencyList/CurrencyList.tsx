@@ -91,7 +91,7 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
     <Box {...rest} className={cls(classes.root, className)}>
       {!!tokenState.initialized && search.length > 0 && !tokens.length && (
         <Typography color="error">
-          {emptyStateLabel || `No tokens found for "${search}"`}
+          {emptyStateLabel || `No token found for "${search}"`}
         </Typography>
       )}
       {tokens.map((token, index) => (
