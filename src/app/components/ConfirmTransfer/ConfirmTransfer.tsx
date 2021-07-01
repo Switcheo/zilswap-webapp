@@ -785,15 +785,6 @@ const ConfirmTransfer = (props: any) => {
                     <Text className={classes.label}>
                       {pendingBridgeTx.withdrawTxHash
                         ? <Link
-<<<<<<< HEAD
-                            className={classes.link}
-                            underline="none"
-                            rel="noopener noreferrer"
-                            target="_blank"
-                            href={`https://switcheo.org/transaction/${pendingBridgeTx.withdrawTxHash}?net=${network === Network.MainNet ? "main" : "dev"}`}>
-                            View on TradeHub <NewLinkIcon className={classes.linkIcon} />
-                          </Link>
-=======
                           className={classes.link}
                           underline="none"
                           rel="noopener noreferrer"
@@ -801,7 +792,6 @@ const ConfirmTransfer = (props: any) => {
                           href={getTradeHubExplorerLink(pendingBridgeTx.withdrawTxHash)}>
                           View on TradeHub <NewLinkIcon className={classes.linkIcon} />
                         </Link>
->>>>>>> 9c515873a81b22077924a7405b1615b6d3694b2e
                         : "-"
                       }
                     </Text>
