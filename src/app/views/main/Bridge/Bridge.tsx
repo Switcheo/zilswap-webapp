@@ -175,9 +175,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   useEffect(() => {
     if (wallet !== null) {
       if (bridgeFormState.fromBlockchain === Blockchain.Zilliqa) {
-        setSourceAddress(wallet.addressInfo.byte20!)
+        setSourceAddress(wallet.addressInfo.bech32!)
       } else {
-        setDestAddress(wallet.addressInfo.byte20!)
+        setDestAddress(wallet.addressInfo.bech32!)
       }
     }
 
@@ -206,7 +206,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const onFromBlockchainChange = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown; }>) => {
     if (e.target.value === Blockchain.Zilliqa) {
-      setSourceAddress(wallet?.addressInfo.byte20!)
+      setSourceAddress(wallet?.addressInfo.bech32!)
       setDestAddress(ethConnectedAddress)
 
       dispatch(actions.Bridge.updateForm({
@@ -215,7 +215,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       }))
     } else {
       setSourceAddress(ethConnectedAddress)
-      setDestAddress(wallet?.addressInfo.byte20!)
+      setDestAddress(wallet?.addressInfo.bech32!)
 
       dispatch(actions.Bridge.updateForm({
         fromBlockchain: Blockchain.Ethereum,
@@ -226,7 +226,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const onToBlockchainChange = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown; }>) => {
     if (e.target.value === Blockchain.Zilliqa) {
-      setDestAddress(wallet?.addressInfo.byte20!)
+      setDestAddress(wallet?.addressInfo.bech32!)
       setSourceAddress(ethConnectedAddress)
 
       dispatch(actions.Bridge.updateForm({
@@ -235,7 +235,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       }))
     } else {
       setDestAddress(ethConnectedAddress)
-      setSourceAddress(wallet?.addressInfo.byte20!)
+      setSourceAddress(wallet?.addressInfo.bech32!)
 
       dispatch(actions.Bridge.updateForm({
         fromBlockchain: Blockchain.Zilliqa,
@@ -274,11 +274,11 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     dispatch(actions.Layout.toggleShowWallet());
 
     if (wallet !== null && bridgeFormState.fromBlockchain === Blockchain.Zilliqa) {
-      setSourceAddress(wallet.addressInfo.byte20);
+      setSourceAddress(wallet.addressInfo.bech32);
     }
 
     if (wallet !== null && bridgeFormState.toBlockchain === Blockchain.Zilliqa) {
-      setDestAddress(wallet.addressInfo.byte20);
+      setDestAddress(wallet.addressInfo.bech32);
     }
   };
 
