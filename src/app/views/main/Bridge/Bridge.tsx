@@ -104,6 +104,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   wavyLine: {
+    cursor: "pointer",
     position: "absolute",
     top: "50%",
     left: "50%",
@@ -315,6 +316,15 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }));
   };
 
+  const swapBridgeChains = () => {
+    const isZilToEth = fromBlockchain === Blockchain.Zilliqa;
+    dispatch(actions.Bridge.updateForm({
+      fromBlockchain: isZilToEth ? Blockchain.Ethereum : Blockchain.Zilliqa,
+      toBlockchain: isZilToEth ? Blockchain.Zilliqa : Blockchain.Ethereum,
+      token: undefined,
+    }))
+  };
+
   const showTransfer = () => {
     dispatch(actions.Layout.showTransferConfirmation(!layoutState.showTransferConfirmation))
   }
@@ -397,7 +407,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               {fromBlockchain === Blockchain.Ethereum ? getConnectEthWallet() : getConnectZilWallet()}
             </Box>
             <Box flex={0.3} />
-            <WavyLine className={classes.wavyLine} />
+            <WavyLine className={classes.wavyLine} onClick={swapBridgeChains} />
             <Box className={classes.box} flex={1} bgcolor="background.contrast">
               <Text variant="h4" align="center">To</Text>
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
