@@ -11,7 +11,7 @@ import { actions } from "app/store";
 import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/store/bridge/types";
 import { RootState, WalletObservedTx } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useAsyncTask, useNetwork, useSearchParam, useToaster, useTokenFinder } from "app/utils";
+import { hexToRGBA, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -20,7 +20,8 @@ import { ConnectedWallet } from "core/wallet";
 import { ethers } from "ethers";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, Token, TradeHubSDK } from "tradehub-api-js";
+import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
+import { BN_ZERO } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
@@ -172,33 +173,6 @@ async function initTradehubSDK(mnemonic: string) {
   return await sdk.connectWithMnemonic(mnemonic);
 }
 
-// check deposit on switcheo side
-// returns true if deposit is confirm, otherwise returns false
-async function isDepositOnSwth(swthAddress: string, asset: Token, amount: BigNumber) {
-  const sdk = new TradeHubSDK({
-    network: TradeHubSDK.Network.DevNet,
-    debugMode: false,
-  })
-
-  const result = await sdk.api.getTransfers({
-    account: swthAddress
-  })
-
-  logger(result[0]);
-  if (result &&
-    result.length > 0 &&
-    result[0].transfer_type === "deposit" &&
-    result[0].blockchain === asset.blockchain &&
-    result[0].contract_hash === asset.lock_proxy_hash &&
-    result[0].denom === asset.denom &&
-    result[0].status === "success" &&
-    result[0].amount === amount.toString(10)) {
-    logger("deposit confirmed; can proceed to withdraw")
-    return true
-  }
-  return false
-}
-
 const CHAIN_NAMES = {
   [Blockchain.Zilliqa]: "Zilliqa",
   [Blockchain.Ethereum]: "Ethereum",
@@ -219,7 +193,6 @@ const ConfirmTransfer = (props: any) => {
   const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
   const bridgeToken = useSelector<RootState, BridgeableToken | undefined>(state => state.bridge.formState.token);
   const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK")
-  const enableCheatyButtons = useSearchParam("enableCheatyButtons") === "true";
 
   const [showTransactions, setShowTransactions] = useState<boolean>(true);
   const [tokenApproval, setTokenApproval] = useState<boolean>(false);
@@ -229,11 +202,15 @@ const ConfirmTransfer = (props: any) => {
   const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
   const swthAddrMnemonic = useMemo(() => SWTHAddress.newMnemonic(), []);
 
-  const [runConfirmTransfer, loadingConfirm] = useAsyncTask("confirm");
+  const [runConfirmTransfer, loadingConfirm] = useAsyncTask("confirmTransfer", (error) => toaster(error.message));
+
+  const { toBlockchain, fromBlockchain, withdrawFee } = bridgeFormState;
+
+  const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx])
 
   useEffect(() => {
     if (pendingBridgeTx) return;
-    const pendingTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.destinationTxHash);
+    const pendingTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.withdrawTxHash);
 
     if (pendingTx)
       setPendingBridgeTx(pendingTx);
@@ -283,56 +260,6 @@ const ConfirmTransfer = (props: any) => {
     return !isNativeAsset(asset)
   }
 
-  const onWithdraw = async (recvAddress: string) => {
-    // setPending(true);
-
-    // const sdk = await initTradehubSDK(swthAddrMnemonic);
-
-    // await sdk.token.reloadTokens();
-    // const asset = sdk.token.tokens[`${BridgeParamConstants.WITHDRAW_DENOM}`];
-    // logger("withdraw asset: ", asset);
-    // const lockProxy = asset.lock_proxy_hash;
-    // sdk.zil.configProvider.getConfig().Zil.LockProxyAddr = `0x${lockProxy}`;
-    // sdk.zil.configProvider.getConfig().Zil.ChainId = 333;
-    // sdk.zil.configProvider.getConfig().Zil.RpcURL = "https://dev-api.zilliqa.com";
-
-    // const toAddress = santizedAddress(recvAddress);
-
-    // const withdrawTradehub = await sdk.coin.withdraw({
-    //   amount: `${bridgeFormState.transferAmount}`,
-    //   denom: asset.denom,
-    //   to_address: toAddress,
-    //   fee_address: `${BridgeParamConstants.SWTH_FEE_ADDRESS}`,
-    //   fee_amount: "0",
-    //   originator: sdk.wallet?.bech32Address
-    // });
-
-    // logger("withdraw (tradehub): %o\n", withdrawTradehub);
-    // toaster(`Submitted: Initiate withdrawal ${withdrawTradehub.txhash} (SWTH -> DEST_BLOCKCHAIN)`);
-
-    // let isWithdrawn = false
-
-    // // check deposit on switcheo    
-    // for (let attempt = 0; attempt < 50; attempt++) {
-    //   logger("checking deposit...");
-    //   const isConfirmed = await isWithdrawOnSwth(`${withdrawTradehub.txhash}`, asset, `${bridgeFormState.transferAmount}`)
-    //   if (isConfirmed) {
-    //     isWithdrawn = true
-    //     break;
-    //   }
-    //   await new Promise(resolve => setTimeout(resolve, 2000));
-    // }
-
-    // setPending(false);
-    // setComplete(true);
-
-    // if (isWithdrawn) {
-    //   toaster(`Success: asset withdraw (SWTH -> DEST_BLOCKCHAIN)`);
-    //   return true;
-    // }
-    return false;
-  }
-
   /**
     * Lock the asset on Ethereum chain
     * returns the txn hash if lock txn is successful, otherwise return null
@@ -358,10 +285,10 @@ const ConfirmTransfer = (props: any) => {
     // approve token
     const approvalRequired = await isApprovalRequired(asset, depositAmt);
     if (approvalRequired) {
-      toaster(`Approval needed (Ethereum)`);
 
       const allowance = await sdk.eth.checkAllowanceERC20(asset, ethAddress, `0x${lockProxy}`);
       if (allowance.lt(depositAmt)) {
+        toaster(`Approval needed (Ethereum)`);
         const approve_tx = await sdk.eth.approveERC20({
           token: asset,
           ethAddress: ethAddress,
@@ -399,23 +326,8 @@ const ConfirmTransfer = (props: any) => {
 
     toaster(`Submitted: (Ethereum - Lock Asset)`, { sourceBlockchain: "eth", hash: lock_tx.hash! });
     logger("lock tx", lock_tx.hash!);
-    let isDeposited = false
 
-    // check deposit on switcheo    
-    for (let attempt = 0; attempt < 50; attempt++) {
-      logger("checking deposit...");
-      const isConfirmed = await isDepositOnSwth(swthAddress, asset, amount)
-      if (isConfirmed) {
-        isDeposited = true
-        break;
-      }
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    }
-
-    if (isDeposited) {
-      return lock_tx.hash!;
-    }
-    return null;
+    return lock_tx.hash!;
   }
 
   /**
@@ -501,29 +413,9 @@ const ConfirmTransfer = (props: any) => {
     };
     dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     toaster(`Submitted: (Zilliqa - Lock Asset)`, { hash: lock_tx.id! });
+    logger("lock tx", lock_tx.id!);
 
-    await lock_tx.confirm(lock_tx.id!);
-    logger("transaction confirmed! receipt is: ", lock_tx.getReceipt());
-
-    let isDeposited = false
-
-    if (lock_tx !== undefined && lock_tx.getReceipt()?.success === true) {
-      // check deposit on switcheo    
-      for (let attempt = 0; attempt < 50; attempt++) {
-        logger("checking deposit...");
-        const isConfirmed = await isDepositOnSwth(swthAddress, asset, amount)
-        if (isConfirmed) {
-          isDeposited = true
-          break;
-        }
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-    }
-
-    if (isDeposited) {
-      return lock_tx.id;
-    }
-    return null;
+    return lock_tx.id;
   }
 
   // deposit address depends on the selection
@@ -541,9 +433,15 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
-    const { toBlockchain, fromBlockchain } = bridgeState.formState;
-
     runConfirmTransfer(async () => {
+      // TODO: uncomment when fees fixed.
+      // if (!withdrawFee)
+      //   throw new Error("withdraw fee not loaded");
+
+      if (withdrawFee?.amount.gte(bridgeFormState.transferAmount)) {
+        throw new Error("Transfer amount too low");
+      }
+
       let sourceTxHash;
       if (fromBlockchain === Blockchain.Zilliqa) {
         // init lock on zil side
@@ -568,10 +466,10 @@ const ConfirmTransfer = (props: any) => {
         srcChain: fromBlockchain,
         dstToken: bridgeToken.toDenom,
         srcToken: bridgeToken.denom,
-        sourceTxHash: sourceTxHash, // TODO: populate source tx hash
+        sourceTxHash: sourceTxHash,
         inputAmount: bridgeFormState.transferAmount,
         interimAddrMnemonics: swthAddrMnemonic,
-        withdrawFee: new BigNumber(1), // TODO: add withdraw fee
+        withdrawFee: withdrawFee?.amount ?? BN_ZERO,
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
     })
@@ -594,10 +492,15 @@ const ConfirmTransfer = (props: any) => {
     }
   }
 
+  const navigateBack = () => {
+    dispatch(actions.Layout.showTransferConfirmation(false));
+    setPendingBridgeTx(undefined);
+  }
+
   return (
     <Box className={cls(classes.root, classes.container)}>
-      {!pendingBridgeTx && (
-        <IconButton onClick={() => dispatch(actions.Layout.showTransferConfirmation(false))} className={classes.backButton}>
+      {canNavigateBack && (
+        <IconButton onClick={() => navigateBack()} className={classes.backButton}>
           <ArrowBack />
         </IconButton>
       )}
@@ -673,9 +576,19 @@ const ConfirmTransfer = (props: any) => {
 
       {!pendingBridgeTx && (
         <Box marginTop={3} marginBottom={0.5} px={2}>
-          <KeyValueDisplay kkey={<strong>Estimated Total Fees</strong>} mb="8px">~ <span className={classes.textColoured}>$21.75</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
-          <KeyValueDisplay kkey="&nbsp; • &nbsp; Ethereum Txn Fee" mb="8px"><span className={classes.textColoured}>{bridgeFormState.withdrawFee?.amount.toFixed(2) || ""}</span> {bridgeFormState.withdrawFee?.token?.symbol || ""} ~<span className={classes.textColoured}>${bridgeFormState.withdrawFee?.value.toFixed(2) || 0}</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
-          <KeyValueDisplay kkey="&nbsp; • &nbsp; Zilliqa Txn Fee" mb="8px"><span className={classes.textColoured}>5</span> ZIL ~<span className={classes.textColoured}>$0.50</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
+          <KeyValueDisplay kkey={<strong>Estimated Total Fees</strong>} mb="8px">
+            ~ <span className={classes.textColoured}>${withdrawFee?.value.toFixed(2) || 0}</span>
+            <HelpInfo className={classes.helpInfo} placement="top" title="Todo" />
+            </KeyValueDisplay>
+          <KeyValueDisplay kkey={<span>&nbsp; • &nbsp;{toChainName} Txn Fee</span>} mb="8px">
+            <span className={classes.textColoured}>{withdrawFee?.amount.toFixed(2)}</span>
+            {" "}
+            {fromToken?.symbol}
+            {" "}
+            ~<span className={classes.textColoured}>${withdrawFee?.value.toFixed(2) || 0}</span>
+            <HelpInfo className={classes.helpInfo} placement="top" title="Todo" />
+          </KeyValueDisplay>
+          {/* <KeyValueDisplay kkey="&nbsp; • &nbsp; Zilliqa Txn Fee" mb="8px"><span className={classes.textColoured}>5</span> ZIL ~<span className={classes.textColoured}>$0.50</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay> */}
           <KeyValueDisplay kkey="Estimated Transfer Time" mb="8px"><span className={classes.textColoured}>&lt; 30</span> Minutes<HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
         </Box>
       )}
@@ -839,38 +752,6 @@ const ConfirmTransfer = (props: any) => {
             : bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
               ? "Confirm (ZIL -> ETH)"
               : "Confirm (ETH -> ZIL)"
-          }
-        </FancyButton>
-      )}
-
-      {enableCheatyButtons && !complete && (
-        <FancyButton
-          disabled={!!pendingBridgeTx}
-          onClick={() => onWithdraw(bridgeFormState.destAddress!)}
-          variant="contained"
-          color="primary"
-          className={classes.actionButton}>
-          {pendingBridgeTx
-            ? "Transfer in Progress..."
-            : bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
-              ? "Withdraw (SWTH -> ETH)"
-              : "Withdraw (SWTH -> ZIL)"
-          }
-        </FancyButton>
-      )}
-
-      {enableCheatyButtons && !complete && (
-        <FancyButton
-          disabled={!!pendingBridgeTx}
-          onClick={() => onWithdraw(bridgeFormState.sourceAddress!)}
-          variant="contained"
-          color="primary"
-          className={classes.actionButton}>
-          {pendingBridgeTx
-            ? "Transfer in Progress..."
-            : bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
-              ? "Withdraw To Source (SWTH -> ZIL) (FOR TESTING)"
-              : "Withdraw To Source (SWTH -> ETH) (FOR TESTING)"
           }
         </FancyButton>
       )}

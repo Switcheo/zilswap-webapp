@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       # image with node, npm and yarn installed
-      - image: cimg/node:16.4.0
+      - image: cimg/node:14.17.1
     steps:
       # checkout workspace to repo code
       - checkout
