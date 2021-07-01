@@ -655,7 +655,7 @@ const ConfirmTransfer = (props: any) => {
           <Box className={classes.networkBox} flex={1}>
             <Text variant="h4" color="textSecondary">To</Text>
             <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-              {bridgeState.formState.toBlockchain === Blockchain.Ethereum
+              {bridgeState.formState.toBlockchain === Blockchain.Zilliqa
                 ? <ZilliqaLogo />
                 : <EthereumLogo />
               }
