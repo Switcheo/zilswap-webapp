@@ -3,6 +3,7 @@ import { ChainTransferFlow } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { Blockchain } from "tradehub-api-js";
+import { FeesData } from "core/utilities/bridge";
 
 export type BridgeableToken = {
   blockchain: Blockchain;
@@ -27,6 +28,11 @@ export interface BridgeState {
 }
 
 export type BridgeableChains = Blockchain.Ethereum | Blockchain.Zilliqa;
+export interface WithdrawFee {
+  amount: BigNumber;
+  value: BigNumber;
+  token?: TokenInfo;
+}
 
 export interface BridgeFormState {
   sourceAddress?: string; // can be eth or zil address
@@ -36,6 +42,7 @@ export interface BridgeFormState {
   toBlockchain: BridgeableChains;
 
   token?: BridgeableToken;
+  withdrawFee?: WithdrawFee;
 
   isInsufficientReserves: boolean;
   forNetwork: Network | null,

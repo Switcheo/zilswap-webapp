@@ -229,6 +229,8 @@ const ConfirmTransfer = (props: any) => {
   const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
   const swthAddrMnemonic = useMemo(() => SWTHAddress.newMnemonic(), []);
 
+  const [runConfirmTransfer, loadingConfirm] = useAsyncTask("confirm");
+
   useEffect(() => {
     if (pendingBridgeTx) return;
     const pendingTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.destinationTxHash);
@@ -540,36 +542,39 @@ const ConfirmTransfer = (props: any) => {
     }
 
     const { toBlockchain, fromBlockchain } = bridgeState.formState;
-    let sourceTxHash;
-    if (fromBlockchain === Blockchain.Zilliqa) {
-      // init lock on zil side
-      sourceTxHash = await lockAssetOnZil(asset);
-    } else {
-      // init lock on eth side
-      sourceTxHash = await lockAssetOnEth(asset);
-    }
 
-    if (sourceTxHash === null) {
-      console.error("source txn hash is null!");
-      return null;
-    }
+    runConfirmTransfer(async () => {
+      let sourceTxHash;
+      if (fromBlockchain === Blockchain.Zilliqa) {
+        // init lock on zil side
+        sourceTxHash = await lockAssetOnZil(asset);
+      } else {
+        // init lock on eth side
+        sourceTxHash = await lockAssetOnEth(asset);
+      }
 
-    const { destAddress, sourceAddress } = bridgeFormState;
-    if (!destAddress || !sourceAddress || !bridgeToken) return;
+      if (sourceTxHash === null) {
+        console.error("source txn hash is null!");
+        return null;
+      }
 
-    const bridgeTx: BridgeTx = {
-      dstAddr: destAddress,
-      srcAddr: sourceAddress,
-      dstChain: toBlockchain,
-      srcChain: fromBlockchain,
-      dstToken: bridgeToken.toDenom,
-      srcToken: bridgeToken.denom,
-      sourceTxHash: sourceTxHash, // TODO: populate source tx hash
-      inputAmount: bridgeFormState.transferAmount,
-      interimAddrMnemonics: swthAddrMnemonic,
-      withdrawFee: new BigNumber(1), // TODO: add withdraw fee
-    }
-    dispatch(actions.Bridge.addBridgeTx([bridgeTx]))
+      const { destAddress, sourceAddress } = bridgeFormState;
+      if (!destAddress || !sourceAddress || !bridgeToken) return;
+
+      const bridgeTx: BridgeTx = {
+        dstAddr: destAddress,
+        srcAddr: sourceAddress,
+        dstChain: toBlockchain,
+        srcChain: fromBlockchain,
+        dstToken: bridgeToken.toDenom,
+        srcToken: bridgeToken.denom,
+        sourceTxHash: sourceTxHash, // TODO: populate source tx hash
+        inputAmount: bridgeFormState.transferAmount,
+        interimAddrMnemonics: swthAddrMnemonic,
+        withdrawFee: new BigNumber(1), // TODO: add withdraw fee
+      }
+      dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
+    })
   }
 
   const conductAnotherTransfer = () => {
@@ -669,7 +674,7 @@ const ConfirmTransfer = (props: any) => {
       {!pendingBridgeTx && (
         <Box marginTop={3} marginBottom={0.5} px={2}>
           <KeyValueDisplay kkey={<strong>Estimated Total Fees</strong>} mb="8px">~ <span className={classes.textColoured}>$21.75</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
-          <KeyValueDisplay kkey="&nbsp; • &nbsp; Ethereum Txn Fee" mb="8px"><span className={classes.textColoured}>0.01</span> ETH ~<span className={classes.textColoured}>$21.25</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
+          <KeyValueDisplay kkey="&nbsp; • &nbsp; Ethereum Txn Fee" mb="8px"><span className={classes.textColoured}>{bridgeFormState.withdrawFee?.amount.toFixed(2) || ""}</span> {bridgeFormState.withdrawFee?.token?.symbol || ""} ~<span className={classes.textColoured}>${bridgeFormState.withdrawFee?.value.toFixed(2) || 0}</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
           <KeyValueDisplay kkey="&nbsp; • &nbsp; Zilliqa Txn Fee" mb="8px"><span className={classes.textColoured}>5</span> ZIL ~<span className={classes.textColoured}>$0.50</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
           <KeyValueDisplay kkey="Estimated Transfer Time" mb="8px"><span className={classes.textColoured}>&lt; 30</span> Minutes<HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
         </Box>
@@ -716,10 +721,10 @@ const ConfirmTransfer = (props: any) => {
                     <strong>Stage 1: {fromChainName} <ArrowRightRoundedIcon className={classes.arrowIcon} /> TradeHub</strong>
                   </Text>
                   <Box display="flex">
-                    <Text className={classes.label} flexGrow={1} align="left" marginBottom={0.5}>
+                    <Text flexGrow={1} align="left" marginBottom={0.5}>
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, tokenApproval || pendingBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Token Approval (ERC20/ZRC2)
                     </Text>
-                    <Text className={classes.label}>
+                    <Text>
                       {approvalHash &&
                         <Link
                           className={classes.link}
@@ -731,7 +736,7 @@ const ConfirmTransfer = (props: any) => {
                         </Link>
                       }
                       {!approvalHash &&
-                        <Text className={classes.label}>
+                        <Text className={classes.link}>
                           Approved
                           <HelpInfo className={classes.helpInfo} placement="top" title="Only one approval is required per token. You have previously approved this token and will not need to approve it for this or future transfers." />
                         </Text>
@@ -739,10 +744,10 @@ const ConfirmTransfer = (props: any) => {
                     </Text>
                   </Box>
                   <Box display="flex">
-                    <Text className={classes.label} flexGrow={1} align="left">
+                    <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Deposit to TradeHub Contract
                     </Text>
-                    <Text className={classes.label}>
+                    <Text className={classes.link}>
                       {pendingBridgeTx.sourceTxHash
                         ? <Link
                           className={classes.link}
@@ -764,17 +769,17 @@ const ConfirmTransfer = (props: any) => {
                     <strong>Stage 2: TradeHub Confirmation</strong>
                   </Text>
                   <Box display="flex" mt={0.9}>
-                    <Text className={classes.label} flexGrow={1} align="left" marginBottom={0.5}>
+                    <Text flexGrow={1} align="left" marginBottom={0.5}>
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx?.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> TradeHub Deposit Confirmation
                     </Text>
                   </Box>
                   <Box display="flex">
-                    <Text className={classes.label} flexGrow={1} align="left">
+                    <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.withdrawTxHash ? classes.checkIconCompleted : "")} />
                       {" "}
                       Withdrawal to {toChainName}
                     </Text>
-                    <Text className={classes.label}>
+                    <Text className={classes.link}>
                       {pendingBridgeTx.withdrawTxHash
                         ? <Link
                           className={classes.link}
@@ -796,12 +801,12 @@ const ConfirmTransfer = (props: any) => {
                     <strong>Stage 3: TradeHub <ArrowRightRoundedIcon className={classes.arrowIcon} /> {toChainName}</strong>
                   </Text>
                   <Box display="flex">
-                    <Text className={classes.label} flexGrow={1} align="left">
+                    <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.destinationTxHash ? classes.checkIconCompleted : "")} />
                       {" "}
                       Transfer to {toChainName} Wallet
                     </Text>
-                    <Text className={classes.label}>
+                    <Text className={classes.link}>
                       {pendingBridgeTx.destinationTxHash
                         ? <Link
                           className={classes.link}
@@ -824,7 +829,7 @@ const ConfirmTransfer = (props: any) => {
 
       {!complete && (
         <FancyButton
-          disabled={!!pendingBridgeTx}
+          disabled={loadingConfirm || !!pendingBridgeTx}
           onClick={() => onConfirm(bridgeFormState.sourceAddress!)}
           variant="contained"
           color="primary"

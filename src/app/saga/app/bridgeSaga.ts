@@ -3,11 +3,16 @@ import { BridgeTx, RootState } from "app/store/types";
 import { SimpleMap } from "app/utils";
 import { bnOrZero } from "app/utils/strings/strings";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
-import { logger } from "core/utilities";
-import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
+import { logger, Bridge } from "core/utilities";
+import { call, delay, fork, put, race, select, take, takeLatest } from "redux-saga/effects";
 import { TradeHubSDK, ConnectedTradeHubSDK, RestModels, TradeHubTx, SWTHAddress, Blockchain } from "tradehub-api-js";
 import dayjs from "dayjs";
 import { PollIntervals } from "app/utils/constants";
+import { BridgeActionTypes } from "app/store/bridge/actions";
+import { FeesData } from "core/utilities/bridge";
+import { getBridge, getTokens } from '../selectors'
+import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
+import BigNumber from "bignumber.js";
 
 export enum Status {
   NotStarted,
@@ -187,9 +192,79 @@ function* watchWithdrawConfirmation() {
     }
   }
 }
+function* getFee() {
+  try {
+    const { formState } = getBridge(yield select());
+    const { tokens } = getTokens(yield select());
+    const { token } = formState;
+    const network = TradeHubSDK.Network.DevNet;
+    if (token) {
+      const { blockchain } = token;
+
+      const denom = blockchain === Blockchain.Zilliqa ? token.toDenom : token.denom;
+
+      let address = blockchain === Blockchain.Zilliqa ? token.toTokenAddress : token.tokenAddress;
+      address = address.toLowerCase();
+      if (blockchain === Blockchain.Zilliqa && !address.startsWith("zil")) {
+        address = toBech32Address(address);
+      } else if (blockchain === Blockchain.Ethereum && address.startsWith("zil")) {
+        address = fromBech32Address(address);
+      }
+
+      if (blockchain === Blockchain.Ethereum && !address.startsWith("0x")) {
+        address = `0x${address}`;
+      }
+
+      const feeToken = tokens[address];
+
+      const swthAddrMnemonic = SWTHAddress.newMnemonic();
+      const sdk = new TradeHubSDK({ network });
+      (yield call([sdk, sdk.connectWithMnemonic], swthAddrMnemonic)) as ConnectedTradeHubSDK
+      (yield sdk.token.reloadUSDValues([denom]))
+      const feeEst = (yield call(Bridge.getEstimatedFees, { denom })) as FeesData | undefined;
+      const price = (yield sdk.token.getUSDValue(denom)) as BigNumber | undefined;
+
+      if (feeEst && feeToken) {
+        yield put(actions.Bridge.updateFee({
+          amount: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-feeToken!.decimals),
+          value: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-feeToken!.decimals).times(price || 0),
+          token: feeToken
+        }));
+      } else {
+        yield put(actions.Bridge.updateFee({
+          amount: new BigNumber(0),
+          value: new BigNumber(0),
+          token: undefined
+        }));
+      }
+    }
+
+  } catch (e) {
+    console.warn('Fetch failed, will automatically retry later. Error:')
+    console.warn(e)
+  }
+}
+
+function* queryTokenFees() {
+  while (true) {
+    // logger("bridge saga", "query token fees");
+    try {
+      yield fork(getFee);
+
+    } catch (e) {
+      console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn(e)
+    } finally {
+      yield delay(PollIntervals.BridgeTokenFee);
+    }
+  }
+}
+
 
 export default function* bridgeSaga() {
   logger("init bridge saga");
   yield fork(watchDepositConfirmation);
   yield fork(watchWithdrawConfirmation);
+  yield fork(queryTokenFees);
+  yield takeLatest(BridgeActionTypes.UPDATE_FORM, getFee)
 }
