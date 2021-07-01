@@ -223,7 +223,7 @@ const ConfirmTransfer = (props: any) => {
   const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
   const swthAddrMnemonic = useMemo(() => SWTHAddress.newMnemonic(), []);
 
-  const [runConfirmTransfer, pending, error] = useAsyncTask("confirm");
+  const [runConfirmTransfer, loadingConfirm] = useAsyncTask("confirm");
 
 
   const { fromToken } = useMemo(() => {
@@ -701,7 +701,7 @@ const ConfirmTransfer = (props: any) => {
                         </Link>
                       }
                       {!approvalHash &&
-                        <Text className={classes.label}>
+                        <Text className={classes.link}>
                           Approved
                           <HelpInfo className={classes.helpInfo} placement="top" title="Only one approval is required per token. You have previously approved this token and will not need to approve it for this or future transfers." />
                         </Text>
@@ -794,7 +794,7 @@ const ConfirmTransfer = (props: any) => {
 
       {!complete && (
         <FancyButton
-          disabled={pending || !!pendingBridgeTx}
+          disabled={loadingConfirm || !!pendingBridgeTx}
           onClick={() => onConfirm(bridgeFormState.sourceAddress!)}
           variant="contained"
           color="primary"
