@@ -544,8 +544,8 @@ const ConfirmTransfer = (props: any) => {
     }
 
     runConfirmTransfer(async () => {
-      if (!withdrawFee)
-        throw new Error("withdraw fee not loaded");
+      // if (!withdrawFee)
+        // throw new Error("withdraw fee not loaded");
 
       let sourceTxHash;
       if (fromBlockchain === Blockchain.Zilliqa) {

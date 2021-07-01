@@ -318,9 +318,19 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const swapBridgeChains = () => {
     const isZilToEth = fromBlockchain === Blockchain.Zilliqa;
+    setFormState({
+      ...formState,
+      destAddress: formState.sourceAddress,
+      sourceAddress: formState.destAddress,
+    })
+
     dispatch(actions.Bridge.updateForm({
       fromBlockchain: isZilToEth ? Blockchain.Ethereum : Blockchain.Zilliqa,
       toBlockchain: isZilToEth ? Blockchain.Zilliqa : Blockchain.Ethereum,
+
+      sourceAddress: formState.destAddress,
+      destAddress: formState.sourceAddress,
+      
       token: undefined,
     }))
   };
