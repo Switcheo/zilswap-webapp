@@ -151,7 +151,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }, [tokenFinder, bridgeToken])
 
   useEffect(() => {
-    const bridgeTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.destinationTxHash)
+    const bridgeTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.withdrawTxHash)
 
     if (bridgeTx) {
       if (!layoutState.showTransferConfirmation) {

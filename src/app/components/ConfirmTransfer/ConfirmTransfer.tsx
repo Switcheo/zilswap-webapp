@@ -20,7 +20,7 @@ import { ConnectedWallet } from "core/wallet";
 import { ethers } from "ethers";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, Token, TradeHubSDK } from "tradehub-api-js";
+import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
@@ -172,33 +172,6 @@ async function initTradehubSDK(mnemonic: string) {
   return await sdk.connectWithMnemonic(mnemonic);
 }
 
-// check deposit on switcheo side
-// returns true if deposit is confirm, otherwise returns false
-async function isDepositOnSwth(swthAddress: string, asset: Token, amount: BigNumber) {
-  const sdk = new TradeHubSDK({
-    network: TradeHubSDK.Network.DevNet,
-    debugMode: false,
-  })
-
-  const result = await sdk.api.getTransfers({
-    account: swthAddress
-  })
-
-  logger(result[0]);
-  if (result &&
-    result.length > 0 &&
-    result[0].transfer_type === "deposit" &&
-    result[0].blockchain === asset.blockchain &&
-    result[0].contract_hash === asset.lock_proxy_hash &&
-    result[0].denom === asset.denom &&
-    result[0].status === "success" &&
-    result[0].amount === amount.toString(10)) {
-    logger("deposit confirmed; can proceed to withdraw")
-    return true
-  }
-  return false
-}
-
 const CHAIN_NAMES = {
   [Blockchain.Zilliqa]: "Zilliqa",
   [Blockchain.Ethereum]: "Ethereum",
@@ -233,9 +206,11 @@ const ConfirmTransfer = (props: any) => {
 
   const { toBlockchain, fromBlockchain, withdrawFee } = bridgeFormState;
 
+  const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx])
+
   useEffect(() => {
     if (pendingBridgeTx) return;
-    const pendingTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.destinationTxHash);
+    const pendingTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.withdrawTxHash);
 
     if (pendingTx)
       setPendingBridgeTx(pendingTx);
@@ -401,23 +376,8 @@ const ConfirmTransfer = (props: any) => {
 
     toaster(`Submitted: (Ethereum - Lock Asset)`, { sourceBlockchain: "eth", hash: lock_tx.hash! });
     logger("lock tx", lock_tx.hash!);
-    let isDeposited = false
 
-    // check deposit on switcheo    
-    for (let attempt = 0; attempt < 50; attempt++) {
-      logger("checking deposit...");
-      const isConfirmed = await isDepositOnSwth(swthAddress, asset, amount)
-      if (isConfirmed) {
-        isDeposited = true
-        break;
-      }
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    }
-
-    if (isDeposited) {
-      return lock_tx.hash!;
-    }
-    return null;
+    return lock_tx.hash!;
   }
 
   /**
@@ -503,29 +463,9 @@ const ConfirmTransfer = (props: any) => {
     };
     dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     toaster(`Submitted: (Zilliqa - Lock Asset)`, { hash: lock_tx.id! });
+    logger("lock tx", lock_tx.hash!);
 
-    await lock_tx.confirm(lock_tx.id!);
-    logger("transaction confirmed! receipt is: ", lock_tx.getReceipt());
-
-    let isDeposited = false
-
-    if (lock_tx !== undefined && lock_tx.getReceipt()?.success === true) {
-      // check deposit on switcheo    
-      for (let attempt = 0; attempt < 50; attempt++) {
-        logger("checking deposit...");
-        const isConfirmed = await isDepositOnSwth(swthAddress, asset, amount)
-        if (isConfirmed) {
-          isDeposited = true
-          break;
-        }
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-    }
-
-    if (isDeposited) {
-      return lock_tx.id;
-    }
-    return null;
+    return lock_tx.id;
   }
 
   // deposit address depends on the selection
@@ -597,10 +537,15 @@ const ConfirmTransfer = (props: any) => {
     }
   }
 
+  const navigateBack = () => {
+    dispatch(actions.Layout.showTransferConfirmation(false));
+    setPendingBridgeTx(undefined);
+  }
+
   return (
     <Box className={cls(classes.root, classes.container)}>
-      {!pendingBridgeTx && (
-        <IconButton onClick={() => dispatch(actions.Layout.showTransferConfirmation(false))} className={classes.backButton}>
+      {canNavigateBack && (
+        <IconButton onClick={() => navigateBack()} className={classes.backButton}>
           <ArrowBack />
         </IconButton>
       )}
