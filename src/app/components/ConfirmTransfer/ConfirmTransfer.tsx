@@ -721,10 +721,10 @@ const ConfirmTransfer = (props: any) => {
                     <strong>Stage 1: {fromChainName} <ArrowRightRoundedIcon className={classes.arrowIcon} /> TradeHub</strong>
                   </Text>
                   <Box display="flex">
-                    <Text className={classes.label} flexGrow={1} align="left" marginBottom={0.5}>
+                    <Text flexGrow={1} align="left" marginBottom={0.5}>
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, tokenApproval || pendingBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Token Approval (ERC20/ZRC2)
                     </Text>
-                    <Text className={classes.label}>
+                    <Text>
                       {approvalHash &&
                         <Link
                           className={classes.link}
@@ -744,10 +744,10 @@ const ConfirmTransfer = (props: any) => {
                     </Text>
                   </Box>
                   <Box display="flex">
-                    <Text className={classes.label} flexGrow={1} align="left">
+                    <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Deposit to TradeHub Contract
                     </Text>
-                    <Text className={classes.label}>
+                    <Text className={classes.link}>
                       {pendingBridgeTx.sourceTxHash
                         ? <Link
                           className={classes.link}
@@ -769,17 +769,17 @@ const ConfirmTransfer = (props: any) => {
                     <strong>Stage 2: TradeHub Confirmation</strong>
                   </Text>
                   <Box display="flex" mt={0.9}>
-                    <Text className={classes.label} flexGrow={1} align="left" marginBottom={0.5}>
+                    <Text flexGrow={1} align="left" marginBottom={0.5}>
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx?.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> TradeHub Deposit Confirmation
                     </Text>
                   </Box>
                   <Box display="flex">
-                    <Text className={classes.label} flexGrow={1} align="left">
+                    <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.withdrawTxHash ? classes.checkIconCompleted : "")} />
                       {" "}
                       Withdrawal to {toChainName}
                     </Text>
-                    <Text className={classes.label}>
+                    <Text className={classes.link}>
                       {pendingBridgeTx.withdrawTxHash
                         ? <Link
                           className={classes.link}
@@ -801,12 +801,12 @@ const ConfirmTransfer = (props: any) => {
                     <strong>Stage 3: TradeHub <ArrowRightRoundedIcon className={classes.arrowIcon} /> {toChainName}</strong>
                   </Text>
                   <Box display="flex">
-                    <Text className={classes.label} flexGrow={1} align="left">
+                    <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.destinationTxHash ? classes.checkIconCompleted : "")} />
                       {" "}
                       Transfer to {toChainName} Wallet
                     </Text>
-                    <Text className={classes.label}>
+                    <Text className={classes.link}>
                       {pendingBridgeTx.destinationTxHash
                         ? <Link
                           className={classes.link}
