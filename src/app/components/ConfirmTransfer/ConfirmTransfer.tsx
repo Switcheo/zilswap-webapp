@@ -229,10 +229,8 @@ const ConfirmTransfer = (props: any) => {
   const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
   const swthAddrMnemonic = useMemo(() => SWTHAddress.newMnemonic(), []);
 
-<<<<<<< HEAD
   const [runConfirmTransfer, loadingConfirm] = useAsyncTask("confirm");
 
-=======
   useEffect(() => {
     if (pendingBridgeTx) return;
     const pendingTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.destinationTxHash);
@@ -240,7 +238,6 @@ const ConfirmTransfer = (props: any) => {
     if (pendingTx)
       setPendingBridgeTx(pendingTx);
   }, [bridgeState, pendingBridgeTx]);
->>>>>>> 9c515873a81b22077924a7405b1615b6d3694b2e
 
   const { fromToken } = useMemo(() => {
     if (!bridgeToken) return {};
