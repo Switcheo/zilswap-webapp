@@ -1,12 +1,6 @@
-import { Box, BoxProps, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
-import { KeyValueDisplay, LoadableArea } from "app/components";
-import { PlaceholderStrings } from "app/utils/constants";
-import BigNumber from "bignumber.js";
+import { Box, InputLabel, makeStyles, OutlinedInput } from "@material-ui/core";
 import cls from "classnames";
-import { zilParamsToMap } from "core/utilities";
-import { Contract, toBech32Address, ZilliqaValidate, ZilswapConnector } from "core/zilswap";
-import React, { useEffect, useState } from "react";
-
+import React from "react";
 
 const useStyles = makeStyles(theme => ({
   root: {
