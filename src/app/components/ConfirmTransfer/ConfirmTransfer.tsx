@@ -16,8 +16,10 @@ import { BridgeParamConstants } from "app/views/main/Bridge/components/constants
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { logger } from "core/utilities";
+import { providerOptions } from "core/ethereum";
 import { ConnectedWallet } from "core/wallet";
 import { ethers } from "ethers";
+import Web3Modal from 'web3modal';
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
@@ -277,9 +279,16 @@ const ConfirmTransfer = (props: any) => {
     sdk.eth.configProvider.getConfig().Eth.LockProxyAddr = `0x${lockProxy}`;
     const swthAddress = sdk.wallet.bech32Address;
 
-    let provider;
-    (window as any).ethereum.enable().then(provider = new ethers.providers.Web3Provider((window as any).ethereum));
-    const signer = provider.getSigner();
+    const web3Modal = new Web3Modal({
+      network: "mainnet",
+      cacheProvider: true,
+      disableInjectedProvider: false,
+      providerOptions
+    });
+
+    const provider = await web3Modal.connect();
+    const ethersProvider = new ethers.providers.Web3Provider(provider)
+    const signer = ethersProvider.getSigner();
 
     const amount = bridgeFormState.transferAmount;
     const ethAddress = await signer.getAddress();
