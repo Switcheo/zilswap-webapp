@@ -194,7 +194,7 @@ function* watchWithdrawConfirmation() {
 }
 function* getFee() {
   try {
-    const { formState, tokens: toke } = getBridge(yield select());
+    const { formState } = getBridge(yield select());
     const { tokens } = getTokens(yield select());
     const { token } = formState;
     const network = TradeHubSDK.Network.DevNet;
@@ -220,12 +220,22 @@ function* getFee() {
       const swthAddrMnemonic = SWTHAddress.newMnemonic();
       const sdk = new TradeHubSDK({ network });
       (yield call([sdk, sdk.connectWithMnemonic], swthAddrMnemonic)) as ConnectedTradeHubSDK
-      const prices = (yield sdk.token.reloadUSDValues([denom])) as SimpleMap<BigNumber>;
+      (yield sdk.token.reloadUSDValues([denom]))
       const feeEst = (yield call(Bridge.getEstimatedFees, { denom })) as FeesData | undefined;
+      const price = (yield sdk.token.getUSDValue(denom)) as BigNumber | undefined;
+
       if (feeEst && feeToken) {
-        yield put(actions.Bridge.updateFee(new BigNumber(feeEst.withdrawalFee!).div(new BigNumber(10).pow(feeToken!.decimals)).times(prices[feeToken?.blockchain])));
+        yield put(actions.Bridge.updateFee({
+          amount: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-feeToken!.decimals),
+          value: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-feeToken!.decimals).times(price || 0),
+          token: feeToken
+        }));
       } else {
-        yield put(actions.Bridge.updateFee(new BigNumber(0)));
+        yield put(actions.Bridge.updateFee({
+          amount: new BigNumber(0),
+          value: new BigNumber(0),
+          token: undefined
+        }));
       }
     }
 

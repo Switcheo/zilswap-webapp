@@ -28,6 +28,11 @@ export interface BridgeState {
 }
 
 export type BridgeableChains = Blockchain.Ethereum | Blockchain.Zilliqa;
+export interface WithdrawFee {
+  amount: BigNumber;
+  value: BigNumber;
+  token?: TokenInfo;
+}
 
 export interface BridgeFormState {
   sourceAddress?: string; // can be eth or zil address
@@ -37,7 +42,7 @@ export interface BridgeFormState {
   toBlockchain: BridgeableChains;
 
   token?: BridgeableToken;
-  withdrawFee?: BigNumber;
+  withdrawFee?: WithdrawFee;
 
   isInsufficientReserves: boolean;
   forNetwork: Network | null,

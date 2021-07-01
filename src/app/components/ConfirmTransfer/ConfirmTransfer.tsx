@@ -674,7 +674,7 @@ const ConfirmTransfer = (props: any) => {
       {!pendingBridgeTx && (
         <Box marginTop={3} marginBottom={0.5} px={2}>
           <KeyValueDisplay kkey={<strong>Estimated Total Fees</strong>} mb="8px">~ <span className={classes.textColoured}>$21.75</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
-          <KeyValueDisplay kkey="&nbsp; • &nbsp; Ethereum Txn Fee" mb="8px"><span className={classes.textColoured}>0.01</span> ETH ~<span className={classes.textColoured}>${bridgeFormState.withdrawFee?.toFixed(2)}</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
+          <KeyValueDisplay kkey="&nbsp; • &nbsp; Ethereum Txn Fee" mb="8px"><span className={classes.textColoured}>{bridgeFormState.withdrawFee?.amount.toFixed(2) || ""}</span> {bridgeFormState.withdrawFee?.token?.symbol || ""} ~<span className={classes.textColoured}>${bridgeFormState.withdrawFee?.value.toFixed(2) || 0}</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
           <KeyValueDisplay kkey="&nbsp; • &nbsp; Zilliqa Txn Fee" mb="8px"><span className={classes.textColoured}>5</span> ZIL ~<span className={classes.textColoured}>$0.50</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
           <KeyValueDisplay kkey="Estimated Transfer Time" mb="8px"><span className={classes.textColoured}>&lt; 30</span> Minutes<HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay>
         </Box>
