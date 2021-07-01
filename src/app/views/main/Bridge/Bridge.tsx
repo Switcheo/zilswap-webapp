@@ -341,33 +341,19 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const getConnectEthWallet = () => {
     return (
-      fromBlockchain === Blockchain.Ethereum ?
         <Button
           onClick={onClickConnectETH}
-          className={cls(classes.connectWalletButton, formState.sourceAddress ? classes.connectedWalletButton : "")}
+          className={cls(classes.connectWalletButton, ethConnectedAddress ? classes.connectedWalletButton : "")}
           variant="contained"
           color="primary">
-          {!formState.sourceAddress
+          {!ethConnectedAddress
             ? "Connect Wallet"
             : <Box display="flex" flexDirection="column">
-              <Text variant="button">{truncate(formState.sourceAddress, 5, 4)}</Text>
+              <Text variant="button">{truncate(ethConnectedAddress, 5, 4)}</Text>
               <Text color="textSecondary"><DotIcon className={classes.dotIcon} />Connected</Text>
             </Box>
           }
-        </Button> :
-        <Button
-          onClick={onClickConnectETH}
-          className={cls(classes.connectWalletButton, formState.destAddress ? classes.connectedWalletButton : "")}
-          variant="contained"
-          color="primary">
-          {!formState.destAddress
-            ? "Connect Wallet"
-            : <Box display="flex" flexDirection="column">
-              <Text variant="button">{truncate(formState.destAddress, 5, 4)}</Text>
-              <Text color="textSecondary"><DotIcon className={classes.dotIcon} />Connected</Text>
-            </Box>
-          }
-        </Button>
+        </Button> 
     )
   }
 
