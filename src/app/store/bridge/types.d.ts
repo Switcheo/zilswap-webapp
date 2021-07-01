@@ -26,11 +26,14 @@ export interface BridgeState {
   tokens: BridgeableTokenMapping;
 }
 
+export type BridgeableChains = Blockchain.Ethereum | Blockchain.Zilliqa;
+
 export interface BridgeFormState {
   sourceAddress?: string; // can be eth or zil address
   destAddress?: string; // can be eth or zil address
   transferAmount: BigNumber;
-  transferDirection: ChainTransferFlow;
+  fromBlockchain: BridgeableChains;
+  toBlockchain: BridgeableChains;
 
   token?: BridgeableToken;
 
@@ -39,8 +42,8 @@ export interface BridgeFormState {
 };
 
 export interface BridgeTx {
-  srcChain: Blockchain;
-  dstChain: Blockchain;
+  srcChain: BridgeableChains;
+  dstChain: BridgeableChains;
 
   // in respective display formats
   // zil: bech32 (zil1…)

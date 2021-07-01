@@ -1,12 +1,11 @@
 import { SimpleMap } from "app/utils";
 import { LocalStorageKeys } from "app/utils/constants";
 import { bnOrZero, DataCoder } from "app/utils/strings/strings";
-import { ChainTransferFlow } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
 import { Blockchain } from "tradehub-api-js";
 import { BridgeActionTypes } from "./actions";
-import { BridgeState, BridgeTx } from "./types";
+import { BridgeableTokenMapping, BridgeState, BridgeTx } from "./types";
 
 export const BridgeTxEncoder: DataCoder<BridgeTx> = {
   encode: (tx: BridgeTx): object => {
@@ -81,7 +80,8 @@ const initial_state: BridgeState = {
 
   formState: {
     transferAmount: new BigNumber(0),
-    transferDirection: ChainTransferFlow.ETH_TO_ZIL,
+    fromBlockchain: Blockchain.Zilliqa,
+    toBlockchain: Blockchain.Ethereum,
 
     isInsufficientReserves: false,
     forNetwork: null,
@@ -106,6 +106,20 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
       };
 
     case BridgeActionTypes.SET_TOKENS:
+      const tokens: BridgeableTokenMapping = payload;
+      let token = state.formState.token;
+      if (!token) {
+        
+        const fromBlockchain = state.formState.fromBlockchain as Blockchain.Zilliqa | Blockchain.Ethereum;
+        const firstToken = tokens[fromBlockchain]?.[0];
+        token = tokens[fromBlockchain]?.find(bridgeToken => bridgeToken.denom.startsWith("zil")) ?? firstToken;
+
+        state.formState = {
+          ...state.formState,
+          token,
+        };
+      }
+
       return {
         ...state,
         tokens: payload,
