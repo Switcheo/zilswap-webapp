@@ -202,8 +202,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const onFromBlockchainChange = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown; }>) => {
-    console.log(e.target.value);
-    console.log(e.target);
     if (e.target.value === Blockchain.Zilliqa) {
       setSourceAddress(wallet?.addressInfo.byte20!)
       setDestAddress(ethConnectedAddress)
