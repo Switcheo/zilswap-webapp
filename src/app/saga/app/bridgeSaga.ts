@@ -199,6 +199,10 @@ function* queryTokenFees() {
       const { formState } = getBridge(yield select());
       const bridgeToken = formState.token;
       const network = TradeHubSDK.Network.DevNet;
+      if (lastCheckedToken !== bridgeToken) {
+        yield put(actions.Bridge.updateFee());
+      }
+
       if ((!lastCheckedToken || lastCheckedToken !== bridgeToken) && bridgeToken) {
         const sdk = new TradeHubSDK({ network });
         yield call([sdk, sdk.initialize]);

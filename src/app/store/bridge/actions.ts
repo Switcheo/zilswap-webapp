@@ -36,7 +36,7 @@ export function setTokens(payload: BridgeableTokenMapping) {
   }
 }
 
-export function updateFee(payload: WithdrawFee) {
+export function updateFee(payload?: WithdrawFee) {
   return {
     type: BridgeActionTypes.UPDATE_FEE,
     payload
