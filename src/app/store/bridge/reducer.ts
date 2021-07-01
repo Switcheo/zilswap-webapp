@@ -148,6 +148,15 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
         }
       };
 
+    case BridgeActionTypes.UPDATE_FEE:
+      return {
+        ...state,
+        formState: {
+          ...state.formState,
+          withdrawFee: payload,
+        }
+      };
+
     default:
       return state;
   }
