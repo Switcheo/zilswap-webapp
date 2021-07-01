@@ -223,6 +223,8 @@ const ConfirmTransfer = (props: any) => {
   const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
   const swthAddrMnemonic = useMemo(() => SWTHAddress.newMnemonic(), []);
 
+  const [runConfirmTransfer, pending, error] = useAsyncTask("confirm");
+
 
   const { fromToken } = useMemo(() => {
     if (!bridgeToken) return {};
@@ -515,39 +517,41 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
-    let sourceTxHash;
-    if (transferFlow === ChainTransferFlow.ZIL_TO_ETH) {
-      // init lock on zil side
-      sourceTxHash = await lockAssetOnZil(asset);
-    } else {
-      // init lock on eth side
-      sourceTxHash = await lockAssetOnEth(asset);
-    }
-
-    if (sourceTxHash === null) {
-      console.error("source txn hash is null!");
-      return null;
-    }
-
-    const { destAddress, sourceAddress } = bridgeFormState;
-    if (!destAddress || !sourceAddress || !bridgeToken) return;
-
-    const isToEth = transferFlow === ChainTransferFlow.ZIL_TO_ETH;
-    const srcChain = isToEth ? Blockchain.Zilliqa : Blockchain.Ethereum
-
-    const bridgeTx: BridgeTx = {
-      dstAddr: destAddress,
-      srcAddr: sourceAddress,
-      dstChain: isToEth ? Blockchain.Ethereum : Blockchain.Zilliqa,
-      srcChain: srcChain,
-      dstToken: bridgeToken.toDenom,
-      srcToken: bridgeToken.denom,
-      sourceTxHash: sourceTxHash, // TODO: populate source tx hash
-      inputAmount: bridgeFormState.transferAmount,
-      interimAddrMnemonics: swthAddrMnemonic,
-      withdrawFee: new BigNumber(1), // TODO: add withdraw fee
-    }
-    dispatch(actions.Bridge.addBridgeTx([bridgeTx]))
+    runConfirmTransfer(async () => {
+      let sourceTxHash;
+      if (transferFlow === ChainTransferFlow.ZIL_TO_ETH) {
+        // init lock on zil side
+        sourceTxHash = await lockAssetOnZil(asset);
+      } else {
+        // init lock on eth side
+        sourceTxHash = await lockAssetOnEth(asset);
+      }
+  
+      if (sourceTxHash === null) {
+        console.error("source txn hash is null!");
+        return null;
+      }
+  
+      const { destAddress, sourceAddress } = bridgeFormState;
+      if (!destAddress || !sourceAddress || !bridgeToken) return;
+  
+      const isToEth = transferFlow === ChainTransferFlow.ZIL_TO_ETH;
+      const srcChain = isToEth ? Blockchain.Zilliqa : Blockchain.Ethereum
+  
+      const bridgeTx: BridgeTx = {
+        dstAddr: destAddress,
+        srcAddr: sourceAddress,
+        dstChain: isToEth ? Blockchain.Ethereum : Blockchain.Zilliqa,
+        srcChain: srcChain,
+        dstToken: bridgeToken.toDenom,
+        srcToken: bridgeToken.denom,
+        sourceTxHash: sourceTxHash, // TODO: populate source tx hash
+        inputAmount: bridgeFormState.transferAmount,
+        interimAddrMnemonics: swthAddrMnemonic,
+        withdrawFee: new BigNumber(1), // TODO: add withdraw fee
+      }
+      dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
+    })
   }
 
   const conductAnotherTransfer = () => {
@@ -790,7 +794,7 @@ const ConfirmTransfer = (props: any) => {
 
       {!complete && (
         <FancyButton
-          disabled={!!pendingBridgeTx}
+          disabled={pending || !!pendingBridgeTx}
           onClick={() => onConfirm(bridgeFormState.sourceAddress!)}
           variant="contained"
           color="primary"
