@@ -85,7 +85,7 @@ function* watchDepositConfirmation() {
 
             const balanceDenom = tx.srcChain === Blockchain.Zilliqa ? tx.srcToken : tx.dstToken;
 
-            logger("bridge saga", "detected balance to withdraw", balance, balanceDenom)
+            logger("bridge saga", "detected balance to withdraw", swthAddress, balance, balanceDenom)
             const withdrawAmount = bnOrZero(balance?.[balanceDenom]?.available);
             if (withdrawAmount.isZero()) {
               throw new Error(`tradehub address balance not found`)

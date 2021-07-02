@@ -4,7 +4,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
-import { units } from "@zilliqa-js/zilliqa";
+import { toBech32Address, units } from "@zilliqa-js/zilliqa";
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
@@ -566,6 +566,16 @@ const ConfirmTransfer = (props: any) => {
     return 0;
   }
 
+  const formatAddress = (address: string | undefined | null, chain: Blockchain) => {
+    if (!address) return "";
+    switch(chain) {
+      case Blockchain.Zilliqa:
+        return truncate(toBech32Address(address), 5, 4);
+      default:
+        return truncate(address, 5, 4);
+    }
+  }
+
   return (
     <Box className={cls(classes.root, classes.container)}>
       {canNavigateBack && (
@@ -622,7 +632,7 @@ const ConfirmTransfer = (props: any) => {
               }
             </Box>
             <Text variant="h4">{fromChainName} Network</Text>
-            <Text variant="button">{truncate(bridgeState.formState.sourceAddress, 5, 4)}</Text>
+            <Text variant="button">{formatAddress(bridgeState.formState.sourceAddress, fromBlockchain)}</Text>
           </Box>
           <Box flex={0.2} />
           {complete
@@ -638,7 +648,7 @@ const ConfirmTransfer = (props: any) => {
               }
             </Box>
             <Text variant="h4">{toChainName} Network</Text>
-            <Text variant="button">{truncate(bridgeState.formState.destAddress, 5, 4)}</Text>
+            <Text variant="button">{formatAddress(bridgeState.formState.destAddress, toBlockchain)}</Text>
           </Box>
         </Box>
       </Box>
