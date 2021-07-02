@@ -163,6 +163,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   stepper: {
     backgroundColor: "transparent",
+    display: theme.palette.type === "light" ? "none" : "",
     "& .MuiStepIcon-root": {
       color: `rgba${hexToRGBA("#DEFFFF", 0.1)}`,
       border: "5px solid #0D1B24",
@@ -258,7 +259,7 @@ const ConfirmTransfer = (props: any) => {
 
   const { toBlockchain, fromBlockchain, withdrawFee } = bridgeFormState;
 
-  const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx])
+  const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx]);
 
   useEffect(() => {
     if (pendingBridgeTx) return;
