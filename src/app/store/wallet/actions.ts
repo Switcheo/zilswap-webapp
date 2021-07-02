@@ -13,6 +13,7 @@ export function update(payload: WalletUpdateProps) {
   }
 };
 
+export type BridgeWalletAction = ReturnType<typeof setBridgeWallet>
 export function setBridgeWallet(payload: BridgeWalletUpdateProps) {
   return {
     type: WalletActionTypes.SET_BRIDGE_WALLET,
