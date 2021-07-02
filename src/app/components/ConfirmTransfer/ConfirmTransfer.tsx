@@ -4,7 +4,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
-import { toBech32Address, units } from "@zilliqa-js/zilliqa";
+import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
@@ -412,7 +412,7 @@ const ConfirmTransfer = (props: any) => {
     const zilAddress = santizedAddress(wallet.addressInfo.byte20);
     const swthAddress = sdk.wallet.bech32Address;
     const swthAddressBytes = SWTHAddress.getAddressBytes(swthAddress, sdk.network);
-    const amountQa = units.toQa(amount.toString(10), units.Units.Zil); // TODO: might have to determine if is locking asset or native zils
+    const depositAmt = amount.shiftedBy(asset.decimals)
 
     if (!isNativeAsset(asset)) {
       // not native zils
@@ -421,7 +421,7 @@ const ConfirmTransfer = (props: any) => {
       const allowance = await sdk.zil.checkAllowanceZRC2(asset, `0x${zilAddress}`, `0x${lockProxy}`);
       logger("zil zrc2 allowance: ", allowance);
 
-      if (allowance.lt(new BigNumber(amountQa.toString()))) {
+      if (allowance.lt(depositAmt)) {
         const approveZRC2Params = {
           token: asset,
           gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
@@ -451,7 +451,7 @@ const ConfirmTransfer = (props: any) => {
 
     const lockDepositParams = {
       address: swthAddressBytes,
-      amount: new BigNumber(amountQa.toString()),
+      amount: depositAmt,
       token: asset,
       gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
       gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
