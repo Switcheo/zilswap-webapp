@@ -94,10 +94,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.primary.dark
   },
   helpInfo: {
-    verticalAlign: "text-top"
+    verticalAlign: "text-top!important"
   },
   approvedHelpInfo: {
-    verticalAlign: "top",
+    verticalAlign: "top!important",
   },
   textWarning: {
     color: theme.palette.warning.main
@@ -117,8 +117,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   arrowIcon: {
     verticalAlign: "middle",
-    marginBottom: "1.2px",
-    color: theme.palette.label
+    color: theme.palette.label,
+    margin: "0 -4px 1.2px -4px"
   },
   checkIcon: {
     fontSize: "1rem",
