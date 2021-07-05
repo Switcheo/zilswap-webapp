@@ -599,6 +599,22 @@ const ConfirmTransfer = (props: any) => {
     }
   }
 
+  const getEstimatedTime = () => {  
+    if (pendingBridgeTx?.withdrawTxHash) {
+      return 10;
+    }
+
+    if (pendingBridgeTx?.depositTxConfirmedAt) {
+      return 15;
+    }
+  
+    if (pendingBridgeTx?.sourceTxHash) {
+      return 25;
+    }
+  
+    return 30;
+  }
+
   return (
     <Box className={cls(classes.root, classes.container)}>
       {canNavigateBack && (
@@ -722,7 +738,10 @@ const ConfirmTransfer = (props: any) => {
           </Stepper>
 
           <KeyValueDisplay kkey="Estimated Time Left" mt="8px" mb="8px" px={2}>
-            {!pendingBridgeTx.destinationTxHash ? <span><span className={classes.textColoured}>20</span> Minutes</span> : "-"}
+            {!pendingBridgeTx.destinationTxHash 
+              ? <span><span className={classes.textColoured}>{getEstimatedTime()}</span> Minutes</span> 
+              : "-"
+            }
             <HelpInfo className={classes.helpInfo} placement="top" title="Estimated time left to the completion of this transfer." />
           </KeyValueDisplay>
 
