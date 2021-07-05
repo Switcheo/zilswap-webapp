@@ -110,7 +110,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginLeft: "-80px",
     marginTop: "-80px",
     width: "160px",
-    display: theme.palette.type === "light" ? "none" : "",
     [theme.breakpoints.down("xs")]: {
       width: "110px",
       marginLeft: "-55px",
