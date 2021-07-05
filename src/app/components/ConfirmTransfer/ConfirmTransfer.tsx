@@ -103,7 +103,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.warning.main
   },
   dropDownIcon: {
-    color: theme.palette.label
+    color: theme.palette.primary.light
   },
   accordion: {
     borderRadius: "12px",
@@ -117,7 +117,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   arrowIcon: {
     verticalAlign: "middle",
-    color: theme.palette.label,
+    color: theme.palette.primary.light,
     margin: "0 -4px 1.2px -4px"
   },
   checkIcon: {
