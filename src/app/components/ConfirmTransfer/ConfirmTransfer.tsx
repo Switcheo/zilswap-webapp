@@ -256,12 +256,17 @@ const ConfirmTransfer = (props: any) => {
   const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
   const swthAddrMnemonic = useMemo(() => SWTHAddress.newMnemonic(), []);
 
-  const [runConfirmTransfer, loadingConfirm] = useAsyncTask("confirmTransfer", (error) => toaster(error.message));
+  const [runConfirmTransfer, loadingConfirm] = useAsyncTask("confirmTransfer", (error) => toaster(error.message, { overridePersist: false }));
 
   const { toBlockchain, fromBlockchain, withdrawFee } = bridgeFormState;
 
   const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx]);
   const history = useHistory();
+
+  const clearNavigationPrevention = () => {
+    history.block(true);
+    window.onbeforeunload = null;
+  }
 
   useEffect(() => {
     if (canNavigateBack) {
@@ -319,11 +324,6 @@ const ConfirmTransfer = (props: any) => {
 
   if (!showTransfer) return null;
 
-  const clearNavigationPrevention = () => {
-    history.block(true);
-    window.onbeforeunload = null;
-  }
-
   // returns true if asset is native coin, false otherwise
   const isNativeAsset = (asset: RestModels.Token) => {
     const zeroAddress = "0000000000000000000000000000000000000000";
@@ -367,7 +367,7 @@ const ConfirmTransfer = (props: any) => {
 
       const allowance = await sdk.eth.checkAllowanceERC20(asset, ethAddress, `0x${lockProxy}`);
       if (allowance.lt(depositAmt)) {
-        toaster(`Approval needed (Ethereum)`);
+        toaster(`Approval needed (Ethereum)`, { overridePersist: false });
         const approve_tx = await sdk.eth.approveERC20({
           token: asset,
           ethAddress: ethAddress,
@@ -388,7 +388,7 @@ const ConfirmTransfer = (props: any) => {
       }
     }
 
-    toaster(`Locking asset (Ethereum)`);
+    toaster(`Locking asset (Ethereum)`, { overridePersist: false });
 
     const swthAddressBytes = SWTHAddress.getAddressBytes(swthAddress, sdk.network);
     const lock_tx = await sdk.eth.lockDeposit({
@@ -451,7 +451,7 @@ const ConfirmTransfer = (props: any) => {
           signer: wallet.provider?.wallet!,
         }
         logger("approve zrc2 token parameters: ", approveZRC2Params);
-        toaster(`Approval needed (Zilliqa)`);
+        toaster(`Approval needed (Zilliqa)`, { overridePersist: false });
 
         const approve_tx = await sdk.zil.approveZRC2(approveZRC2Params);
         toaster(`Submitted: (Zilliqa - ZRC2 Approval)`, { hash: approve_tx.id! });
@@ -481,7 +481,7 @@ const ConfirmTransfer = (props: any) => {
     }
 
     logger("lock deposit params: %o\n", lockDepositParams);
-    toaster(`Locking asset (Zilliqa)`);
+    toaster(`Locking asset (Zilliqa)`, { overridePersist: false });
     const lock_tx = await sdk.zil.lockDeposit(lockDepositParams);
 
     const walletObservedTx: WalletObservedTx = {
