@@ -146,7 +146,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     left: "50%",
     marginLeft: "-70px",
     marginTop: "-40px",
-    display: theme.palette.type === "light" ? "none" : "",
     width: "140px",
     [theme.breakpoints.down("xs")]: {
       width: "100px",
@@ -159,7 +158,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     left: "50%",
     marginLeft: "-60px",
     marginTop: "-20px",
-    display: theme.palette.type === "light" ? "none" : "",
     [theme.breakpoints.down("xs")]: {
       width: "90px",
       marginLeft: "-45px",
@@ -167,7 +165,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   stepper: {
     backgroundColor: "transparent",
-    display: theme.palette.type === "light" ? "none" : "",
     "& .MuiStepIcon-root": {
       color: `rgba${hexToRGBA("#DEFFFF", 0.1)}`,
       border: "5px solid #0D1B24",
@@ -175,7 +172,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       zIndex: 1
     },
     "& .MuiStepIcon-completed": {
-      color: "#00FFB0"
+      color: "#00FFB0",
+      backgroundColor: theme.palette.type === "light" ? "#29475A" : ""
     },
     "& .MuiSvgIcon-root": {
       fontSize: "3rem",
@@ -189,6 +187,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "& .MuiStepLabel-completed": {
       color: theme.palette.primary.dark
+    },
+    "& .MuiStepIcon-text": {
+      fill: theme.palette.type === "light" ? "#29475A" : ""
     }
   },
 }));
@@ -608,7 +609,11 @@ const ConfirmTransfer = (props: any) => {
       )}
 
       {!!pendingBridgeTx && (
-        <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
+        <Box display="flex" flexDirection="column" alignItems="center">
+          {!canNavigateBack && (
+            <Box mt={4} />
+          )}
+          
           <Text variant="h2">{!pendingBridgeTx.destinationTxHash ? "Transfer in Progress..." : "Transfer Complete"}</Text>
 
           <Text className={classes.textWarning} margin={0.5}>
