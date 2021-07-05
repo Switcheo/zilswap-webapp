@@ -266,9 +266,14 @@ const ConfirmTransfer = (props: any) => {
   const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx]);
 
   useEffect(() => {
-    if (pendingBridgeTx) return;
-    const pendingTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.withdrawTxHash);
+    if (pendingBridgeTx && bridgeState.bridgeTxs.includes(pendingBridgeTx)) return;
+    if (pendingBridgeTx) {
+      const previousPendingTx = bridgeState.bridgeTxs.find(bridgeTx => bridgeTx.sourceTxHash === pendingBridgeTx.sourceTxHash);
+      setPendingBridgeTx(previousPendingTx);
+      return;
+    }
 
+    const pendingTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.withdrawTxHash)
     if (pendingTx)
       setPendingBridgeTx(pendingTx);
   }, [bridgeState, pendingBridgeTx]);

@@ -109,7 +109,7 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
       const tokens: BridgeableTokenMapping = payload;
       let token = state.formState.token;
       if (!token) {
-        
+
         const fromBlockchain = state.formState.fromBlockchain as Blockchain.Zilliqa | Blockchain.Ethereum;
         const firstToken = tokens[fromBlockchain]?.[0];
         token = tokens[fromBlockchain]?.find(bridgeToken => bridgeToken.denom.startsWith("zil")) ?? firstToken;
@@ -127,8 +127,11 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
 
     case BridgeActionTypes.ADD_BRIDGE_TXS:
       const uniqueTxs: SimpleMap<BridgeTx> = {};
-      for (const tx of [...state.bridgeTxs, ...payload]) {
-        uniqueTxs[tx.sourceTxHash] = tx;
+
+      // reconstruct txs to force component re-render.
+      const newTxs: BridgeTx[] = payload.map((tx: BridgeTx) => ({ ...tx }));
+      for (const tx of [...state.bridgeTxs, ...newTxs]) {
+        uniqueTxs[tx.sourceTxHash!] = tx;
       }
 
       const newBridgeTxs = Object.values(uniqueTxs);
