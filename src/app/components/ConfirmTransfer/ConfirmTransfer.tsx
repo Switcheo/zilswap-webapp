@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       display: "inline-flex"
     },
     "& .MuiAccordionSummary-root.Mui-expanded": {
-      minHeight: 0
+      minHeight: "48px"
     },
     "& .MuiAccordionDetails-root": {
       padding: "0px 16px 16px",
@@ -106,7 +106,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px",
     boxShadow: "none",
     border: "none",
-    backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`
+    backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`,
+    "& .MuiIconButton-root": {
+      padding: 0,
+      marginRight: 0
+    }
   },
   arrowIcon: {
     verticalAlign: "middle",
@@ -186,7 +190,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiStepLabel-completed": {
       color: theme.palette.primary.dark
     }
-  }
+  },
 }));
 
 const ColorlibConnector = withStyles({
@@ -681,7 +685,7 @@ const ConfirmTransfer = (props: any) => {
               <Step key={label}>
                 <StepLabel>
                   <span>{label}</span>
-                  <Text color="textSecondary">
+                  <Text className={classes.label}>
                     {index === 0
                       ? fromChainName
                       : index === 1
