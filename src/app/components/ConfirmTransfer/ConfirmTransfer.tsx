@@ -756,7 +756,7 @@ const ConfirmTransfer = (props: any) => {
                 {/* Stage 1 */}
                 <Box mb={1}>
                   <Text>
-                    <strong>Stage 1: {fromChainName} <ArrowRightRoundedIcon className={classes.arrowIcon} /> TradeHub</strong>
+                    <strong>Stage 1: {fromChainName} <ArrowRightRoundedIcon fontSize="small" className={classes.arrowIcon} /> TradeHub</strong>
                   </Text>
                   <Box display="flex" mb={0.5} className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
@@ -836,7 +836,7 @@ const ConfirmTransfer = (props: any) => {
                 {/* Stage 3 */}
                 <Box>
                   <Text>
-                    <strong>Stage 3: TradeHub <ArrowRightRoundedIcon className={classes.arrowIcon} /> {toChainName}</strong>
+                    <strong>Stage 3: TradeHub <ArrowRightRoundedIcon fontSize="small" className={classes.arrowIcon} /> {toChainName}</strong>
                   </Text>
                   <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
