@@ -94,7 +94,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.primary.dark
   },
   helpInfo: {
-    verticalAlign: "text-top!important"
+    verticalAlign: "text-top"
+  },
+  approvedHelpInfo: {
+    verticalAlign: "top",
   },
   textWarning: {
     color: theme.palette.warning.main
@@ -192,6 +195,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fill: theme.palette.type === "light" ? "#29475A" : ""
     }
   },
+  progressBox: {
+    [theme.breakpoints.down("xs")]: {
+      flexDirection: "column"
+    },
+  },
+  progressInfo: {
+    [theme.breakpoints.down("xs")]: {
+      marginLeft: theme.spacing(2.5)
+    },
+  }
 }));
 
 const ColorlibConnector = withStyles({
@@ -616,7 +629,7 @@ const ConfirmTransfer = (props: any) => {
           
           <Text variant="h2">{!pendingBridgeTx.destinationTxHash ? "Transfer in Progress..." : "Transfer Complete"}</Text>
 
-          <Text className={classes.textWarning} margin={0.5}>
+          <Text className={classes.textWarning} margin={0.5} align="center">
             <WarningRoundedIcon className={classes.warningIcon} /> Do not close this page while we transfer your funds.
           </Text>
 
@@ -726,11 +739,11 @@ const ConfirmTransfer = (props: any) => {
                   <Text>
                     <strong>Stage 1: {fromChainName} <ArrowRightRoundedIcon className={classes.arrowIcon} /> TradeHub</strong>
                   </Text>
-                  <Box display="flex">
-                    <Text flexGrow={1} align="left" marginBottom={0.5}>
+                  <Box display="flex" mb={0.5} className={classes.progressBox}>
+                    <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, tokenApproval || pendingBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Token Approval (ERC20/ZRC2)
                     </Text>
-                    <Text>
+                    <Text className={classes.progressInfo}>
                       {approvalHash &&
                         <Link
                           className={classes.link}
@@ -744,16 +757,16 @@ const ConfirmTransfer = (props: any) => {
                       {!approvalHash &&
                         <Text className={classes.link}>
                           Approved
-                          <HelpInfo className={classes.helpInfo} placement="top" title="This token has previously been approved by you, and hence will not require approval during this transaction." />
+                          <HelpInfo className={classes.approvedHelpInfo} placement="top" title="This token has previously been approved by you, and hence will not require approval during this transaction." />
                         </Text>
                       }
                     </Text>
                   </Box>
-                  <Box display="flex">
+                  <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Deposit to TradeHub Contract
                     </Text>
-                    <Text className={classes.link}>
+                    <Text className={cls(classes.link, classes.progressInfo)}>
                       {pendingBridgeTx.sourceTxHash
                         ? <Link
                           className={classes.link}
@@ -774,18 +787,18 @@ const ConfirmTransfer = (props: any) => {
                   <Text>
                     <strong>Stage 2: TradeHub Confirmation</strong>
                   </Text>
-                  <Box display="flex" mt={0.9}>
-                    <Text flexGrow={1} align="left" marginBottom={0.5}>
+                  <Box display="flex" mt={0.9} mb={0.5}>
+                    <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx?.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> TradeHub Deposit Confirmation
                     </Text>
                   </Box>
-                  <Box display="flex">
+                  <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.withdrawTxHash ? classes.checkIconCompleted : "")} />
                       {" "}
                       Withdrawal to {toChainName}
                     </Text>
-                    <Text className={classes.link}>
+                    <Text className={cls(classes.link, classes.progressInfo)}>
                       {pendingBridgeTx.withdrawTxHash
                         ? <Link
                           className={classes.link}
@@ -806,13 +819,13 @@ const ConfirmTransfer = (props: any) => {
                   <Text>
                     <strong>Stage 3: TradeHub <ArrowRightRoundedIcon className={classes.arrowIcon} /> {toChainName}</strong>
                   </Text>
-                  <Box display="flex">
+                  <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.destinationTxHash ? classes.checkIconCompleted : "")} />
                       {" "}
                       Transfer to {toChainName} Wallet
                     </Text>
-                    <Text className={classes.link}>
+                    <Text className={cls(classes.link, classes.progressInfo)}>
                       {pendingBridgeTx.destinationTxHash
                         ? <Link
                           className={classes.link}
