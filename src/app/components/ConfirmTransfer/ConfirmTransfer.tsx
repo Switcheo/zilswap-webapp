@@ -26,6 +26,7 @@ import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
 import { ReactComponent as StraightLine } from "./straight-line.svg";
+import { useHistory } from "react-router";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -260,6 +261,21 @@ const ConfirmTransfer = (props: any) => {
   const { toBlockchain, fromBlockchain, withdrawFee } = bridgeFormState;
 
   const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx]);
+  const history = useHistory();
+
+  useEffect(() => {
+    if (canNavigateBack) {
+      clearNavigationPrevention()
+    }
+    // eslint-disable-next-line
+  }, [canNavigateBack])
+
+  useEffect(() => {
+    return () => {
+      clearNavigationPrevention()
+    }
+    // eslint-disable-next-line
+  }, [])
 
   useEffect(() => {
     if (pendingBridgeTx && bridgeState.bridgeTxs.includes(pendingBridgeTx)) return;
@@ -302,6 +318,11 @@ const ConfirmTransfer = (props: any) => {
   }, [swthAddrMnemonic])
 
   if (!showTransfer) return null;
+
+  const clearNavigationPrevention = () => {
+    history.block(true);
+    window.onbeforeunload = null;
+  }
 
   // returns true if asset is native coin, false otherwise
   const isNativeAsset = (asset: RestModels.Token) => {
@@ -530,6 +551,14 @@ const ConfirmTransfer = (props: any) => {
         withdrawFee: withdrawFee?.amount ?? BN_ZERO,
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
+
+      history.block("Please do not close this window until your transfer is completed to prevent loss of tokens");
+      window.onbeforeunload = (event: BeforeUnloadEvent) => {
+        const e = event || window.event;
+        e.preventDefault();
+        if (e) { e.returnValue = ''; }
+        return ''; // Legacy method for cross browser support
+      };
     })
   }
 
@@ -559,21 +588,21 @@ const ConfirmTransfer = (props: any) => {
     if (pendingBridgeTx?.destinationTxHash) {
       return 3;
     }
-  
+
     if (pendingBridgeTx?.withdrawTxHash) {
       return 2;
     }
-  
+
     if (pendingBridgeTx?.sourceTxHash) {
       return 1;
     }
-  
+
     return 0;
   }
 
   const formatAddress = (address: string | undefined | null, chain: Blockchain) => {
     if (!address) return "";
-    switch(chain) {
+    switch (chain) {
       case Blockchain.Zilliqa:
         return truncate(toBech32Address(address), 5, 4);
       default:
@@ -663,7 +692,7 @@ const ConfirmTransfer = (props: any) => {
           <KeyValueDisplay kkey={<strong>Estimated Total Fees</strong>} mb="8px">
             ~ <span className={classes.textColoured}>${withdrawFee?.value.toFixed(2) || 0}</span>
             <HelpInfo className={classes.helpInfo} placement="top" title="Estimated total fees to be incurred for this transfer (in USD). Please note that the fees will be deducted from the amount that is being transferred out of the network and you will receive less tokens as a result." />
-            </KeyValueDisplay>
+          </KeyValueDisplay>
           <KeyValueDisplay kkey={<span>&nbsp; • &nbsp;{toChainName} Txn Fee</span>} mb="8px">
             <span className={classes.textColoured}>{withdrawFee?.amount.toFixed(2)}</span>
             {" "}
