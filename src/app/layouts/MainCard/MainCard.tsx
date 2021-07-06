@@ -76,6 +76,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       color: theme.palette.tab.selected
     },
     // "&.Mui-disabled": {
+      // TODO: colour of disabled tab
     // }
   },
   tabLeft: {
