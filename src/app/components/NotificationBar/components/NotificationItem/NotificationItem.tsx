@@ -1,20 +1,18 @@
-import { IconButton, BoxProps, Typography, Box, CircularProgress, Link } from "@material-ui/core";
+import { Box, BoxProps, CircularProgress, IconButton, Link, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
-import cls from "classnames";
-import React, { useState, useEffect, forwardRef } from "react";
-import { truncate, useNetwork } from "app/utils";
-import { SnackbarProvider, SnackbarContent, SnackbarKey } from "notistack";
-import CloseIcon from "@material-ui/icons/CloseOutlined";
-import { BridgeState, RootState, TransactionState } from "app/store/types";
-import { useSelector } from "react-redux";
-import CheckmarkIcon from "@material-ui/icons/CheckOutlined";
-import TimeoutIcon from "@material-ui/icons/TimerOutlined";
 import FailIcon from "@material-ui/icons/CancelOutlined";
-import PendingIcon from '@material-ui/icons/UpdateOutlined';
-import { TxStatus } from "zilswap-sdk";
+import CheckmarkIcon from "@material-ui/icons/CheckOutlined";
+import CloseIcon from "@material-ui/icons/CloseOutlined";
 import LaunchIcon from '@material-ui/icons/Launch';
-
+import TimeoutIcon from "@material-ui/icons/TimerOutlined";
+import { BridgeState, RootState, TransactionState } from "app/store/types";
+import { AppTheme } from "app/theme/types";
+import { truncate, useNetwork } from "app/utils";
+import cls from "classnames";
+import { SnackbarContent, SnackbarKey, SnackbarProvider } from "notistack";
+import React, { forwardRef, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { TxStatus } from "zilswap-sdk";
 
 interface Props extends BoxProps {
   message: string,

@@ -13,7 +13,7 @@ import { actions } from "app/store";
 import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
+import { hexToRGBA, truncate, useAsyncTask, useToaster, useTokenFinder } from "app/utils";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -21,8 +21,10 @@ import { providerOptions } from "core/ethereum";
 import { logger } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
 import { ethers } from "ethers";
+import { History } from "history";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import { BN_ZERO } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import Web3Modal from 'web3modal';
@@ -30,7 +32,6 @@ import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
 import { ReactComponent as StraightLine } from "./straight-line.svg";
-import { useHistory } from "react-router";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -247,6 +248,22 @@ async function initTradehubSDK(mnemonic: string) {
   return await sdk.connectWithMnemonic(mnemonic);
 }
 
+const clearNavigationHook = (history: History<unknown>) => {
+  history.block(true);
+  window.onbeforeunload = null;
+}
+
+const addNavigationHook = (history: History<unknown>) => {
+  clearNavigationHook(history);
+  history.block("Do not close this window until your transfer has completed to prevent loss of tokens.");
+  window.onbeforeunload = (event: BeforeUnloadEvent) => {
+    const e = event || window.event;
+    e.preventDefault();
+    if (e) { e.returnValue = ''; }
+    return ''; // Legacy method for cross browser support
+  };
+}
+
 const CHAIN_NAMES = {
   [Blockchain.Zilliqa]: "Zilliqa",
   [Blockchain.Ethereum]: "Ethereum",
@@ -261,8 +278,7 @@ const ConfirmTransfer = (props: any) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const toaster = useToaster();
-  // eslint-disable-next-line
-  const network = useNetwork();
+  const history = useHistory();
   const tokenFinder = useTokenFinder();
   const [sdk, setSdk] = useState<ConnectedTradeHubSDK | null>(null);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
@@ -284,38 +300,38 @@ const ConfirmTransfer = (props: any) => {
   const { toBlockchain, fromBlockchain, withdrawFee } = bridgeFormState;
 
   const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx]);
-  const history = useHistory();
-
-  const clearNavigationPrevention = () => {
-    history.block(true);
-    window.onbeforeunload = null;
-  }
 
   useEffect(() => {
     if (canNavigateBack) {
-      clearNavigationPrevention()
+      clearNavigationHook(history)
     }
     // eslint-disable-next-line
   }, [canNavigateBack])
 
   useEffect(() => {
     return () => {
-      clearNavigationPrevention()
+      clearNavigationHook(history)
     }
     // eslint-disable-next-line
   }, [])
 
   useEffect(() => {
     if (pendingBridgeTx && bridgeState.bridgeTxs.includes(pendingBridgeTx)) return;
+
+    // same bridgeTx updated
     if (pendingBridgeTx) {
       const previousPendingTx = bridgeState.bridgeTxs.find(bridgeTx => bridgeTx.sourceTxHash === pendingBridgeTx.sourceTxHash);
       setPendingBridgeTx(previousPendingTx);
       return;
     }
 
+    // new bridgeTx found
     const pendingTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.withdrawTxHash)
-    if (pendingTx)
+    if (pendingTx) {
       setPendingBridgeTx(pendingTx);
+      addNavigationHook(history);
+    }
+    // eslint-disable-next-line
   }, [bridgeState, pendingBridgeTx]);
 
   const { fromToken } = useMemo(() => {
@@ -509,7 +525,7 @@ const ConfirmTransfer = (props: any) => {
       gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
       gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
       zilAddress: zilAddress,
-      signer: wallet.provider!  as any,
+      signer: wallet.provider! as any,
     }
 
     logger("lock deposit params: %o\n", lockDepositParams);
@@ -575,13 +591,7 @@ const ConfirmTransfer = (props: any) => {
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
 
-      history.block("Please do not close this window until your transfer is completed to prevent loss of tokens");
-      window.onbeforeunload = (event: BeforeUnloadEvent) => {
-        const e = event || window.event;
-        e.preventDefault();
-        if (e) { e.returnValue = ''; }
-        return ''; // Legacy method for cross browser support
-      };
+      addNavigationHook(history);
     })
   }
 
@@ -633,7 +643,7 @@ const ConfirmTransfer = (props: any) => {
     }
   }
 
-  const getEstimatedTime = () => {  
+  const getEstimatedTime = () => {
     if (pendingBridgeTx?.withdrawTxHash) {
       return 10;
     }
@@ -641,11 +651,11 @@ const ConfirmTransfer = (props: any) => {
     if (pendingBridgeTx?.depositTxConfirmedAt) {
       return 15;
     }
-  
+
     if (pendingBridgeTx?.sourceTxHash) {
       return 25;
     }
-  
+
     return 30;
   }
 
@@ -676,7 +686,7 @@ const ConfirmTransfer = (props: any) => {
           {!canNavigateBack && (
             <Box mt={4} />
           )}
-          
+
           <Text variant="h2">{!pendingBridgeTx.destinationTxHash ? "Transfer in Progress..." : "Transfer Complete"}</Text>
 
           <Text className={classes.textWarning} margin={0.5} align="center">
@@ -772,8 +782,8 @@ const ConfirmTransfer = (props: any) => {
           </Stepper>
 
           <KeyValueDisplay kkey="Estimated Time Left" mt="8px" mb="8px" px={2}>
-            {!pendingBridgeTx.destinationTxHash 
-              ? <span><span className={classes.textColoured}>{getEstimatedTime()}</span> Minutes</span> 
+            {!pendingBridgeTx.destinationTxHash
+              ? <span><span className={classes.textColoured}>{getEstimatedTime()}</span> Minutes</span>
               : "-"
             }
             <HelpInfo className={classes.helpInfo} placement="top" title="Estimated time left to the completion of this transfer." />
