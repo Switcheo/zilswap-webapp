@@ -244,7 +244,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const onClickConnectETH = async () => {
     const web3Modal = new Web3Modal({
-      network: "mainnet",
       cacheProvider: true,
       disableInjectedProvider: false,
       providerOptions
@@ -254,6 +253,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     const ethersProvider = new ethers.providers.Web3Provider(provider)
     const signer = ethersProvider.getSigner();
     const ethAddress = await signer.getAddress();
+    const chainId = (await ethersProvider.getNetwork()).chainId;
 
     if (bridgeFormState.fromBlockchain === Blockchain.Ethereum) {
       setSourceAddress(ethAddress);
@@ -264,7 +264,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }
 
     setEthConnectedAddress(ethAddress);
-    dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: { provider: provider, address: ethAddress } }));
+    dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: { provider: provider, address: ethAddress, chainId: chainId } }));
     dispatch(actions.Token.refetchState());
   };
 
