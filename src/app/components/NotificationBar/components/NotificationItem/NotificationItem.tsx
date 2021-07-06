@@ -6,7 +6,7 @@ import React, { useState, useEffect, forwardRef } from "react";
 import { truncate, useNetwork } from "app/utils";
 import { SnackbarProvider, SnackbarContent, SnackbarKey } from "notistack";
 import CloseIcon from "@material-ui/icons/CloseOutlined";
-import { RootState, TransactionState } from "app/store/types";
+import { BridgeState, RootState, TransactionState } from "app/store/types";
 import { useSelector } from "react-redux";
 import CheckmarkIcon from "@material-ui/icons/CheckOutlined";
 import TimeoutIcon from "@material-ui/icons/TimerOutlined";
@@ -59,7 +59,8 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const classes = useStyles();
   const network = useNetwork();
   const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
-  const [txStatus, setTxStatus] = useState<TxStatus | "pending" | "submitted">("submitted");
+  const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
+  const [txStatus, setTxStatus] = useState<TxStatus | "pending" | "submitted" | undefined>();
 
   useEffect(() => {
     transactionState.observingTxs.forEach(tx => {
@@ -78,6 +79,13 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
       }
     })
 
+    bridgeState.bridgeTxs.forEach(tx => {
+      if (hash === tx.sourceTxHash) {
+        if (tx.depositTxConfirmedAt) {
+          setTxStatus("confirmed");
+        }
+      }
+    })
     // eslint-disable-next-line
   }, [{ ...transactionState.submittedTxs }, { ...transactionState.observingTxs }])
 
@@ -89,8 +97,13 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
     };
   };
 
+  const checkMessage = () => {
+    if (message.includes("reject")) return "rejected";
+    if (message.includes("expire")) return "expired";
+  }
+
   const getTxStatusIcon = () => {
-    switch (txStatus) {
+    switch (txStatus || checkMessage()) {
       case 'confirmed':
         return <CheckmarkIcon className={classes.icon} />;
       case 'rejected':
@@ -100,7 +113,7 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
       case 'pending':
         return <LoadingIcon />;
       default:
-        return <PendingIcon className={classes.icon} />;
+        return;
     }
   }
 
