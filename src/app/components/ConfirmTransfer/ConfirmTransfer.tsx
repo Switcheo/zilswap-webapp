@@ -594,6 +594,7 @@ const ConfirmTransfer = (props: any) => {
 
   const conductAnotherTransfer = () => {
     setPendingBridgeTx(undefined);
+    setSwthAddrMnemonic(SWTHAddress.newMnemonic());
     dispatch(actions.Bridge.clearForm());
     dispatch(actions.Layout.showTransferConfirmation(false));
   }
@@ -612,6 +613,7 @@ const ConfirmTransfer = (props: any) => {
 
   const navigateBack = () => {
     dispatch(actions.Layout.showTransferConfirmation(false));
+    setSwthAddrMnemonic(SWTHAddress.newMnemonic());
     setPendingBridgeTx(undefined);
   }
 
