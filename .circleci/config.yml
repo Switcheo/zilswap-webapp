@@ -1,6 +1,7 @@
 version: 2.1
 jobs:
   build:
+    resource_class: large
     docker:
       # image with node, npm and yarn installed
       - image: cimg/node:14.17.1
@@ -30,7 +31,7 @@ jobs:
       - run:
           name: yarn build according to branch
           command: |
-            yarn build --transpile-only --max-old-space-size=4096
+            NODE_OPTIONS="--max_old_space_size=7168" yarn build --transpile-only
 
       - persist_to_workspace:
           root: .
