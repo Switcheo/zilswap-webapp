@@ -17,9 +17,9 @@ import { hexToRGBA, truncate, useAsyncTask, useToaster, useTokenFinder } from "a
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { providerOptions } from "core/ethereum";
 import { isDebug, logger } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ethers } from "ethers";
 import { History } from "history";
 import React, { useEffect, useMemo, useState } from "react";
@@ -27,7 +27,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import { BN_ZERO } from "tradehub-api-js/build/main/lib/tradehub/utils";
-import Web3Modal from 'web3modal';
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
@@ -282,6 +281,7 @@ const ConfirmTransfer = (props: any) => {
   const tokenFinder = useTokenFinder();
   const [sdk, setSdk] = useState<ConnectedTradeHubSDK | null>(null);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
+  const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets.eth); 
   const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
   const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
   const bridgeToken = useSelector<RootState, BridgeableToken | undefined>(state => state.bridge.formState.token);
@@ -390,15 +390,7 @@ const ConfirmTransfer = (props: any) => {
     sdk.eth.configProvider.getConfig().Eth.LockProxyAddr = `0x${lockProxy}`;
     const swthAddress = sdk.wallet.bech32Address;
 
-    const web3Modal = new Web3Modal({
-      network: "mainnet",
-      cacheProvider: true,
-      disableInjectedProvider: false,
-      providerOptions
-    });
-
-    const provider = await web3Modal.connect();
-    const ethersProvider = new ethers.providers.Web3Provider(provider)
+    const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider);
     const signer = ethersProvider.getSigner();
 
     const amount = bridgeFormState.transferAmount;
