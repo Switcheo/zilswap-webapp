@@ -5,6 +5,8 @@ import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
 import { toBech32Address, units } from "@zilliqa-js/zilliqa";
+import { Transaction } from '@zilliqa-js/account'
+import { HTTPProvider } from '@zilliqa-js/core'
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
@@ -437,7 +439,7 @@ const ConfirmTransfer = (props: any) => {
           gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
           gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
           zilAddress: zilAddress,
-          signer: wallet.provider?.wallet!,
+          signer: wallet.provider! as any,
         }
         logger("approve zrc2 token parameters: ", approveZRC2Params);
         toaster(`Approval needed (Zilliqa)`);
@@ -446,11 +448,13 @@ const ConfirmTransfer = (props: any) => {
         toaster(`Submitted: (Zilliqa - ZRC2 Approval)`, { hash: approve_tx.id! });
         setApprovalHash(approve_tx.id!);
 
-        await approve_tx.confirm(approve_tx.id!)
-        logger("transaction confirmed! receipt is: ", approve_tx.getReceipt())
+        const toAddr = toBech32Address(approve_tx.txParams.toAddr)
+        const emptyTx = new Transaction({ ...approve_tx.txParams, toAddr: toAddr }, new HTTPProvider(sdk.zil.getProviderUrl()));
+        const confirmedTxn = await emptyTx.confirm(approve_tx.id!);
+        logger("transaction confirmed! receipt is: ", confirmedTxn.getReceipt())
 
         // token approval success
-        if (approve_tx !== undefined && approve_tx.getReceipt()?.success) {
+        if (confirmedTxn !== undefined && confirmedTxn.getReceipt()?.success) {
           setTokenApproval(true);
         }
       } else {
@@ -466,7 +470,7 @@ const ConfirmTransfer = (props: any) => {
       gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
       gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
       zilAddress: zilAddress,
-      signer: wallet.provider?.wallet!,
+      signer: wallet.provider!  as any,
     }
 
     logger("lock deposit params: %o\n", lockDepositParams);
