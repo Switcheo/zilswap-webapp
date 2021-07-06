@@ -4,9 +4,9 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
-import { toBech32Address, units } from "@zilliqa-js/zilliqa";
-import { Transaction } from '@zilliqa-js/account'
-import { HTTPProvider } from '@zilliqa-js/core'
+import { Transaction } from '@zilliqa-js/account';
+import { HTTPProvider } from '@zilliqa-js/core';
+import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
@@ -17,15 +17,15 @@ import { hexToRGBA, truncate, useAsyncTask, useNetwork, useToaster, useTokenFind
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { logger } from "core/utilities";
 import { providerOptions } from "core/ethereum";
+import { logger } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
 import { ethers } from "ethers";
-import Web3Modal from 'web3modal';
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import { BN_ZERO } from "tradehub-api-js/build/main/lib/tradehub/utils";
+import Web3Modal from 'web3modal';
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
@@ -424,7 +424,7 @@ const ConfirmTransfer = (props: any) => {
     const zilAddress = santizedAddress(wallet.addressInfo.byte20);
     const swthAddress = sdk.wallet.bech32Address;
     const swthAddressBytes = SWTHAddress.getAddressBytes(swthAddress, sdk.network);
-    const amountQa = units.toQa(amount.toString(10), units.Units.Zil); // TODO: might have to determine if is locking asset or native zils
+    const depositAmt = amount.shiftedBy(asset.decimals)
 
     if (!isNativeAsset(asset)) {
       // not native zils
@@ -433,7 +433,7 @@ const ConfirmTransfer = (props: any) => {
       const allowance = await sdk.zil.checkAllowanceZRC2(asset, `0x${zilAddress}`, `0x${lockProxy}`);
       logger("zil zrc2 allowance: ", allowance);
 
-      if (allowance.lt(new BigNumber(amountQa.toString()))) {
+      if (allowance.lt(depositAmt)) {
         const approveZRC2Params = {
           token: asset,
           gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
@@ -465,7 +465,7 @@ const ConfirmTransfer = (props: any) => {
 
     const lockDepositParams = {
       address: swthAddressBytes,
-      amount: new BigNumber(amountQa.toString()),
+      amount: depositAmt,
       token: asset,
       gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
       gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
