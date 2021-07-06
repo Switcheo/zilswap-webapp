@@ -179,7 +179,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         setDestAddress(wallet.addressInfo.byte20!)
       }
     }
-
     // eslint-disable-next-line
   }, [wallet, bridgeFormState.fromBlockchain])
 
@@ -387,7 +386,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               
               <ConnectButton
                 chain={fromBlockchain}
-                address={formState.sourceAddress}
+                address={bridgeFormState.sourceAddress || ''}
                 onClick={onConnectSrcWallet}
               />
             </Box>
@@ -417,7 +416,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
               <ConnectButton
                 chain={toBlockchain}
-                address={formState.destAddress}
+                address={bridgeFormState.destAddress || ''}
                 onClick={onConnectDstWallet}
               />
             </Box>

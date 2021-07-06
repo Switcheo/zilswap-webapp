@@ -9,15 +9,17 @@ import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/store/bridge/types";
-import { RootState, WalletObservedTx } from "app/store/types";
+import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { logger } from "core/utilities";
+import { providerOptions } from "core/ethereum";
 import { ConnectedWallet } from "core/wallet";
 import { ethers } from "ethers";
+import Web3Modal from 'web3modal';
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
@@ -238,6 +240,7 @@ const ConfirmTransfer = (props: any) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const toaster = useToaster();
+  // eslint-disable-next-line
   const network = useNetwork();
   const tokenFinder = useTokenFinder();
   const [sdk, setSdk] = useState<ConnectedTradeHubSDK | null>(null);
@@ -330,9 +333,16 @@ const ConfirmTransfer = (props: any) => {
     sdk.eth.configProvider.getConfig().Eth.LockProxyAddr = `0x${lockProxy}`;
     const swthAddress = sdk.wallet.bech32Address;
 
-    let provider;
-    (window as any).ethereum.enable().then(provider = new ethers.providers.Web3Provider((window as any).ethereum));
-    const signer = provider.getSigner();
+    const web3Modal = new Web3Modal({
+      network: "mainnet",
+      cacheProvider: true,
+      disableInjectedProvider: false,
+      providerOptions
+    });
+
+    const provider = await web3Modal.connect();
+    const ethersProvider = new ethers.providers.Web3Provider(provider)
+    const signer = ethersProvider.getSigner();
 
     const amount = bridgeFormState.transferAmount;
     const ethAddress = await signer.getAddress();
@@ -463,22 +473,13 @@ const ConfirmTransfer = (props: any) => {
     toaster(`Locking asset (Zilliqa)`);
     const lock_tx = await sdk.zil.lockDeposit(lockDepositParams);
 
-    const walletObservedTx: WalletObservedTx = {
-      hash: lock_tx.id!,
-      deadline: Number.MAX_SAFE_INTEGER,
-      address: wallet.addressInfo.bech32 || "",
-      network,
-    };
-    dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
     toaster(`Submitted: (Zilliqa - Lock Asset)`, { hash: lock_tx.id! });
     logger("lock tx", lock_tx.id!);
 
     return lock_tx.id;
   }
 
-  // deposit address depends on the selection
-  // not use at the moment because external wallets are used
-  const onConfirm = async (depositAddress: string) => {
+  const onConfirm = async () => {
     if (!sdk) {
       console.error("TradeHubSDK not initialized")
       return null;
@@ -827,7 +828,7 @@ const ConfirmTransfer = (props: any) => {
       {!complete && (
         <FancyButton
           disabled={loadingConfirm || !!pendingBridgeTx}
-          onClick={() => onConfirm(bridgeFormState.sourceAddress!)}
+          onClick={onConfirm}
           variant="contained"
           color="primary"
           className={classes.actionButton}>
