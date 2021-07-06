@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       display: "inline-flex"
     },
     "& .MuiAccordionSummary-root.Mui-expanded": {
-      minHeight: 0
+      minHeight: "48px"
     },
     "& .MuiAccordionDetails-root": {
       padding: "0px 16px 16px",
@@ -100,22 +100,29 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   helpInfo: {
     verticalAlign: "text-top!important"
   },
+  approvedHelpInfo: {
+    verticalAlign: "top!important",
+  },
   textWarning: {
     color: theme.palette.warning.main
   },
   dropDownIcon: {
-    color: theme.palette.label
+    color: theme.palette.primary.light
   },
   accordion: {
     borderRadius: "12px",
     boxShadow: "none",
     border: "none",
-    backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`
+    backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`,
+    "& .MuiIconButton-root": {
+      padding: 0,
+      marginRight: 0
+    }
   },
   arrowIcon: {
     verticalAlign: "middle",
-    marginBottom: "1.2px",
-    color: theme.palette.label
+    color: theme.palette.primary.light,
+    margin: "0 -4px 1.2px -4px"
   },
   checkIcon: {
     fontSize: "1rem",
@@ -146,7 +153,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     left: "50%",
     marginLeft: "-70px",
     marginTop: "-40px",
-    display: theme.palette.type === "light" ? "none" : "",
     width: "140px",
     [theme.breakpoints.down("xs")]: {
       width: "100px",
@@ -159,7 +165,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     left: "50%",
     marginLeft: "-60px",
     marginTop: "-20px",
-    display: theme.palette.type === "light" ? "none" : "",
     [theme.breakpoints.down("xs")]: {
       width: "90px",
       marginLeft: "-45px",
@@ -167,7 +172,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   stepper: {
     backgroundColor: "transparent",
-    display: theme.palette.type === "light" ? "none" : "",
     "& .MuiStepIcon-root": {
       color: `rgba${hexToRGBA("#DEFFFF", 0.1)}`,
       border: "5px solid #0D1B24",
@@ -175,7 +179,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       zIndex: 1
     },
     "& .MuiStepIcon-completed": {
-      color: "#00FFB0"
+      color: "#00FFB0",
+      backgroundColor: theme.palette.type === "light" ? "#29475A" : ""
     },
     "& .MuiSvgIcon-root": {
       fontSize: "3rem",
@@ -189,7 +194,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "& .MuiStepLabel-completed": {
       color: theme.palette.primary.dark
+    },
+    "& .MuiStepIcon-text": {
+      fill: theme.palette.type === "light" ? "#29475A" : ""
     }
+  },
+  progressBox: {
+    [theme.breakpoints.down("xs")]: {
+      flexDirection: "column"
+    },
+  },
+  progressInfo: {
+    [theme.breakpoints.down("xs")]: {
+      marginLeft: theme.spacing(2.5)
+    },
   }
 }));
 
@@ -586,6 +604,22 @@ const ConfirmTransfer = (props: any) => {
     }
   }
 
+  const getEstimatedTime = () => {  
+    if (pendingBridgeTx?.withdrawTxHash) {
+      return 10;
+    }
+
+    if (pendingBridgeTx?.depositTxConfirmedAt) {
+      return 15;
+    }
+  
+    if (pendingBridgeTx?.sourceTxHash) {
+      return 25;
+    }
+  
+    return 30;
+  }
+
   return (
     <Box className={cls(classes.root, classes.container)}>
       {canNavigateBack && (
@@ -609,10 +643,14 @@ const ConfirmTransfer = (props: any) => {
       )}
 
       {!!pendingBridgeTx && (
-        <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
+        <Box display="flex" flexDirection="column" alignItems="center">
+          {!canNavigateBack && (
+            <Box mt={4} />
+          )}
+          
           <Text variant="h2">{!pendingBridgeTx.destinationTxHash ? "Transfer in Progress..." : "Transfer Complete"}</Text>
 
-          <Text className={classes.textWarning} margin={0.5}>
+          <Text className={classes.textWarning} margin={0.5} align="center">
             <WarningRoundedIcon className={classes.warningIcon} /> Do not close this page while we transfer your funds.
           </Text>
 
@@ -691,7 +729,7 @@ const ConfirmTransfer = (props: any) => {
               <Step key={label}>
                 <StepLabel>
                   <span>{label}</span>
-                  <Text color="textSecondary">
+                  <Text className={classes.label}>
                     {index === 0
                       ? fromChainName
                       : index === 1
@@ -705,7 +743,10 @@ const ConfirmTransfer = (props: any) => {
           </Stepper>
 
           <KeyValueDisplay kkey="Estimated Time Left" mt="8px" mb="8px" px={2}>
-            {!pendingBridgeTx.destinationTxHash ? <span><span className={classes.textColoured}>20</span> Minutes</span> : "-"}
+            {!pendingBridgeTx.destinationTxHash 
+              ? <span><span className={classes.textColoured}>{getEstimatedTime()}</span> Minutes</span> 
+              : "-"
+            }
             <HelpInfo className={classes.helpInfo} placement="top" title="Estimated time left to the completion of this transfer." />
           </KeyValueDisplay>
 
@@ -720,13 +761,13 @@ const ConfirmTransfer = (props: any) => {
                 {/* Stage 1 */}
                 <Box mb={1}>
                   <Text>
-                    <strong>Stage 1: {fromChainName} <ArrowRightRoundedIcon className={classes.arrowIcon} /> TradeHub</strong>
+                    <strong>Stage 1: {fromChainName} <ArrowRightRoundedIcon fontSize="small" className={classes.arrowIcon} /> TradeHub</strong>
                   </Text>
-                  <Box display="flex">
-                    <Text flexGrow={1} align="left" marginBottom={0.5}>
+                  <Box display="flex" mb={0.5} className={classes.progressBox}>
+                    <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, tokenApproval || pendingBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Token Approval (ERC20/ZRC2)
                     </Text>
-                    <Text>
+                    <Text className={classes.progressInfo}>
                       {approvalHash &&
                         <Link
                           className={classes.link}
@@ -740,16 +781,16 @@ const ConfirmTransfer = (props: any) => {
                       {!approvalHash &&
                         <Text className={classes.link}>
                           Approved
-                          <HelpInfo className={classes.helpInfo} placement="top" title="This token has previously been approved by you, and hence will not require approval during this transaction." />
+                          <HelpInfo className={classes.approvedHelpInfo} placement="top" title="This token has previously been approved by you, and hence will not require approval during this transaction." />
                         </Text>
                       }
                     </Text>
                   </Box>
-                  <Box display="flex">
+                  <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Deposit to TradeHub Contract
                     </Text>
-                    <Text className={classes.link}>
+                    <Text className={cls(classes.link, classes.progressInfo)}>
                       {pendingBridgeTx.sourceTxHash
                         ? <Link
                           className={classes.link}
@@ -770,18 +811,18 @@ const ConfirmTransfer = (props: any) => {
                   <Text>
                     <strong>Stage 2: TradeHub Confirmation</strong>
                   </Text>
-                  <Box display="flex" mt={0.9}>
-                    <Text flexGrow={1} align="left" marginBottom={0.5}>
+                  <Box display="flex" mt={0.9} mb={0.5}>
+                    <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx?.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> TradeHub Deposit Confirmation
                     </Text>
                   </Box>
-                  <Box display="flex">
+                  <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.withdrawTxHash ? classes.checkIconCompleted : "")} />
                       {" "}
                       Withdrawal to {toChainName}
                     </Text>
-                    <Text className={classes.link}>
+                    <Text className={cls(classes.link, classes.progressInfo)}>
                       {pendingBridgeTx.withdrawTxHash
                         ? <Link
                           className={classes.link}
@@ -800,15 +841,15 @@ const ConfirmTransfer = (props: any) => {
                 {/* Stage 3 */}
                 <Box>
                   <Text>
-                    <strong>Stage 3: TradeHub <ArrowRightRoundedIcon className={classes.arrowIcon} /> {toChainName}</strong>
+                    <strong>Stage 3: TradeHub <ArrowRightRoundedIcon fontSize="small" className={classes.arrowIcon} /> {toChainName}</strong>
                   </Text>
-                  <Box display="flex">
+                  <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.destinationTxHash ? classes.checkIconCompleted : "")} />
                       {" "}
                       Transfer to {toChainName} Wallet
                     </Text>
-                    <Text className={classes.link}>
+                    <Text className={cls(classes.link, classes.progressInfo)}>
                       {pendingBridgeTx.destinationTxHash
                         ? <Link
                           className={classes.link}
