@@ -203,7 +203,9 @@ function* queryTokenFees() {
         yield put(actions.Bridge.updateFee());
       }
 
+      logger("bridge saga", lastCheckedToken?.toDenom, bridgeToken?.toDenom)
       if ((!lastCheckedToken || lastCheckedToken !== bridgeToken) && bridgeToken) {
+        logger("bridge saga", "query", bridgeToken?.toDenom)
         const sdk = new TradeHubSDK({ network });
         yield call([sdk, sdk.initialize]);
         const tradehubToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken.toDenom);
