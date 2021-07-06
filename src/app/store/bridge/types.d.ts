@@ -13,6 +13,7 @@ export type BridgeableToken = {
   toBlockchain: Blockchain;
   toTokenAddress: string;
   toDenom: string;
+  balDenom: string;
 }
 
 export type BridgeableTokenMapping = {
