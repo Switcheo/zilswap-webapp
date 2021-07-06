@@ -49,7 +49,7 @@
     "validate.js": "^0.13.1",
     "web3modal": "^1.9.3",
     "zeeves-auth-sdk-js": "^2.0.12",
-    "zilswap-sdk": "^1.3.6"
+    "zilswap-sdk": "^1.3.7"
   },
   "scripts": {
     "start": "react-scripts start",
