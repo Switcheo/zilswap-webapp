@@ -2,6 +2,7 @@ import React, { lazy } from 'react';
 import { RouteConfig } from 'react-router-config';
 import { Redirect } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
+import { isProduction } from './utils/constants';
 
 const routes: RouteConfig[] = [{
   path: '/pools',
@@ -43,11 +44,17 @@ const routes: RouteConfig[] = [{
     path: '/pool',
     exact: true,
     component: lazy(() => import('./views/main/Pool'))
-  }, {
-    path: '/bridge',
-    exact: true,
-    component: lazy(() => import('./views/main/Bridge'))
-  }, {
+  }, 
+  !isProduction() 
+    ? {
+        path: '/bridge',
+        exact: true,
+        component: lazy(() => import('./views/main/Bridge'))
+      }
+    : {
+      component: () => <Redirect to="/swap"></Redirect>
+    }
+  , {
     component: () => <Redirect to="/swap"></Redirect>
   }]
 }];
