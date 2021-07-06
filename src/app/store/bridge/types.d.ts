@@ -13,6 +13,7 @@ export type BridgeableToken = {
   toBlockchain: Blockchain;
   toTokenAddress: string;
   toDenom: string;
+  balDenom: string;
 }
 
 export type BridgeableTokenMapping = {
@@ -23,6 +24,7 @@ export type BridgeableTokenMapping = {
 export interface BridgeState {
   formState: BridgeFormState;
   bridgeTxs: BridgeTx[];
+  activeBridgeTx?: BridgeTx;
 
   tokens: BridgeableTokenMapping;
 }
@@ -90,4 +92,7 @@ export interface BridgeTx {
 
   // populated when bridge tx is deemed complete
   destinationTxConfirmedAt?: dayjs.Dayjs;
+
+  // dismissed by user, hide from UI
+  dismissedAt?: dayjs.Dayjs;
 }

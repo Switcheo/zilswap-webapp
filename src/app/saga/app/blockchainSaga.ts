@@ -147,7 +147,7 @@ const fetchJSON = async (url: string) => {
   return res.json()
 }
 
-const addMapping = (r: BridgeMappingResult, a: TradeHubToken, b: TradeHubToken) => {
+const addMapping = (r: BridgeMappingResult, a: TradeHubToken, b: TradeHubToken, sourceChain: Blockchain) => {
   r[a.blockchain].push({
     blockchain: a.blockchain,
     tokenAddress: a.asset_id.toLowerCase(),
@@ -156,6 +156,7 @@ const addMapping = (r: BridgeMappingResult, a: TradeHubToken, b: TradeHubToken) 
     toBlockchain: b.blockchain,
     toTokenAddress: b.asset_id.toLowerCase(),
     toDenom: b.denom,
+    balDenom: sourceChain === a.blockchain ? a.denom : b.denom,
   })
 }
 
@@ -234,7 +235,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
     Object.entries(mappings.result).forEach(([wrappedDenom, sourceDenom]) => {
       // TODO: update whitelist (this is devnet only)
-      if (!["zil.e", "zwap.e", "swth-e", "usdt2.z"].includes(wrappedDenom)) {
+      if (!["zil.e", "zwap1.e", "eth1.z", "dai.z"].includes(wrappedDenom)) {
         return;
       }
 
@@ -247,8 +248,8 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
       }
       addToken(tokens, sourceToken)
       addToken(tokens, wrappedToken)
-      addMapping(result, wrappedToken, sourceToken)
-      addMapping(result, sourceToken, wrappedToken)
+      addMapping(result, wrappedToken, sourceToken, sourceToken.blockchain)
+      addMapping(result, sourceToken, wrappedToken, sourceToken.blockchain)
     })
 
     yield put(actions.Bridge.setTokens(result))

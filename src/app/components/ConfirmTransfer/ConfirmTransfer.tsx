@@ -17,9 +17,9 @@ import { hexToRGBA, truncate, useAsyncTask, useToaster, useTokenFinder } from "a
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { providerOptions } from "core/ethereum";
 import { isDebug, logger } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ethers } from "ethers";
 import { History } from "history";
 import React, { useEffect, useMemo, useState } from "react";
@@ -27,7 +27,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import { BN_ZERO } from "tradehub-api-js/build/main/lib/tradehub/utils";
-import Web3Modal from 'web3modal';
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
@@ -241,11 +240,24 @@ const ColorlibConnector = withStyles({
 // initialize a tradehub sdk client
 // @param mnemonic initialize the sdk with an account
 async function initTradehubSDK(mnemonic: string) {
-  let sdk = new TradeHubSDK({
-    network: TradeHubSDK.Network.DevNet,
-    debugMode: isDebug(),
-  });
-  return await sdk.connectWithMnemonic(mnemonic);
+  let attempts = 0;
+  while (attempts++ < 10) {
+    try {
+      const sdk = new TradeHubSDK({
+        network: TradeHubSDK.Network.DevNet,
+        debugMode: isDebug(),
+      });
+      return await sdk.connectWithMnemonic(mnemonic);
+    } catch (error) {
+      console.error("init tradehub sdk error");
+      console.error(error);
+
+      // delay <2 ^ attempts> seconds if error occurs
+      let delay = Math.pow(2, attempts) * 1000;
+      await new Promise(res => setTimeout(res, delay));
+    }
+  }
+  throw new Error("failed to initialize TradeHubSDK")
 }
 
 const clearNavigationHook = (history: History<unknown>) => {
@@ -282,6 +294,7 @@ const ConfirmTransfer = (props: any) => {
   const tokenFinder = useTokenFinder();
   const [sdk, setSdk] = useState<ConnectedTradeHubSDK | null>(null);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
+  const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets.eth);
   const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
   const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
   const bridgeToken = useSelector<RootState, BridgeableToken | undefined>(state => state.bridge.formState.token);
@@ -290,16 +303,22 @@ const ConfirmTransfer = (props: any) => {
   const [showTransactions, setShowTransactions] = useState<boolean>(true);
   const [tokenApproval, setTokenApproval] = useState<boolean>(false);
   const [approvalHash, setApprovalHash] = useState<string>("");
-  const [pendingBridgeTx, setPendingBridgeTx] = useState<BridgeTx | undefined>();
+  const [swthAddrMnemonic, setSwthAddrMnemonic] = useState<string | undefined>();
+  
+  const pendingBridgeTx = bridgeState.activeBridgeTx;
 
   const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
-  const swthAddrMnemonic = useMemo(() => SWTHAddress.newMnemonic(), []);
 
   const [runConfirmTransfer, loadingConfirm] = useAsyncTask("confirmTransfer", (error) => toaster(error.message, { overridePersist: false }));
 
   const { toBlockchain, fromBlockchain, withdrawFee } = bridgeFormState;
 
   const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx]);
+
+  useEffect(() => {
+    if (!swthAddrMnemonic)
+      setSwthAddrMnemonic(SWTHAddress.newMnemonic());
+  }, [swthAddrMnemonic])
 
   useEffect(() => {
     if (canNavigateBack) {
@@ -314,25 +333,6 @@ const ConfirmTransfer = (props: any) => {
     }
     // eslint-disable-next-line
   }, [])
-
-  useEffect(() => {
-    if (pendingBridgeTx && bridgeState.bridgeTxs.includes(pendingBridgeTx)) return;
-
-    // same bridgeTx updated
-    if (pendingBridgeTx) {
-      const previousPendingTx = bridgeState.bridgeTxs.find(bridgeTx => bridgeTx.sourceTxHash === pendingBridgeTx.sourceTxHash);
-      setPendingBridgeTx(previousPendingTx);
-      return;
-    }
-
-    // new bridgeTx found
-    const pendingTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.withdrawTxHash)
-    if (pendingTx) {
-      setPendingBridgeTx(pendingTx);
-      addNavigationHook(history);
-    }
-    // eslint-disable-next-line
-  }, [bridgeState, pendingBridgeTx]);
 
   const { fromToken } = useMemo(() => {
     if (!bridgeToken) return {};
@@ -390,15 +390,7 @@ const ConfirmTransfer = (props: any) => {
     sdk.eth.configProvider.getConfig().Eth.LockProxyAddr = `0x${lockProxy}`;
     const swthAddress = sdk.wallet.bech32Address;
 
-    const web3Modal = new Web3Modal({
-      network: "mainnet",
-      cacheProvider: true,
-      disableInjectedProvider: false,
-      providerOptions
-    });
-
-    const provider = await web3Modal.connect();
-    const ethersProvider = new ethers.providers.Web3Provider(provider)
+    const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider);
     const signer = ethersProvider.getSigner();
 
     const amount = bridgeFormState.transferAmount;
@@ -586,7 +578,7 @@ const ConfirmTransfer = (props: any) => {
         srcToken: bridgeToken.denom,
         sourceTxHash: sourceTxHash,
         inputAmount: bridgeFormState.transferAmount,
-        interimAddrMnemonics: swthAddrMnemonic,
+        interimAddrMnemonics: swthAddrMnemonic!,
         withdrawFee: withdrawFee?.amount ?? BN_ZERO,
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
@@ -596,7 +588,9 @@ const ConfirmTransfer = (props: any) => {
   }
 
   const conductAnotherTransfer = () => {
-    dispatch(actions.Bridge.clearForm());
+    if (pendingBridgeTx)
+      dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
+    setSwthAddrMnemonic(SWTHAddress.newMnemonic());
     dispatch(actions.Layout.showTransferConfirmation(false));
   }
 
@@ -613,8 +607,10 @@ const ConfirmTransfer = (props: any) => {
   }
 
   const navigateBack = () => {
+    if (pendingBridgeTx)
+      dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
     dispatch(actions.Layout.showTransferConfirmation(false));
-    setPendingBridgeTx(undefined);
+    setSwthAddrMnemonic(SWTHAddress.newMnemonic());
   }
 
   const getActiveStep = () => {

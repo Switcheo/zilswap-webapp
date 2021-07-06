@@ -1,5 +1,5 @@
 import { actions } from "app/store";
-import { BridgeableToken, BridgeTx, RootState } from "app/store/types";
+import { BridgeableToken, BridgeableTokenMapping, BridgeTx, RootState } from "app/store/types";
 import { SimpleMap } from "app/utils";
 import { PollIntervals } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
@@ -53,6 +53,7 @@ function* watchDepositConfirmation() {
     try {
       // watch and update relevant txs
       const bridgeTxs = (yield select(getFilteredTx)) as BridgeTx[];
+      const bridgeableTokensMap = (yield select((state: RootState) => state.bridge.tokens)) as BridgeableTokenMapping;
       logger("bridge saga", "watch deposit confirmation", bridgeTxs.length);
 
       const updatedTxs: SimpleMap<BridgeTx> = {};
@@ -83,10 +84,12 @@ function* watchDepositConfirmation() {
             const connectedSDK = (yield call([sdk, sdk.connectWithMnemonic], tx.interimAddrMnemonics)) as ConnectedTradeHubSDK
             const balance = (yield call([sdk.api, sdk.api.getWalletBalance], { account: swthAddress })) as RestModels.Balances;
 
-            const balanceDenom = tx.srcChain === Blockchain.Zilliqa ? tx.srcToken : tx.dstToken;
+            const bridgeTokens = tx.srcChain === Blockchain.Zilliqa ? bridgeableTokensMap.zil : bridgeableTokensMap.eth;
+            const bridgeToken = bridgeTokens.find(t => t.denom === tx.srcToken);
+            const balanceDenom = bridgeToken?.balDenom;
 
             logger("bridge saga", "detected balance to withdraw", swthAddress, balance, balanceDenom)
-            const withdrawAmount = bnOrZero(balance?.[balanceDenom]?.available);
+            const withdrawAmount = bnOrZero(balance?.[balanceDenom ?? ""]?.available);
             if (withdrawAmount.isZero()) {
               throw new Error(`tradehub address balance not found`)
             }

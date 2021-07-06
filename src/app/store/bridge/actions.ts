@@ -2,7 +2,7 @@ import { BridgeableTokenMapping, BridgeFormState, BridgeTx } from "./types";
 import { WithdrawFee } from "./types";
 
 export enum BridgeActionTypes {
-  CLEAR_FORM = "BRIDGE_CLEAR_FORM",
+  DISMISS_TX = "BRIDGE_DISMISS_TX",
   UPDATE_FORM = "BRIDGE_UPDATE_FORM",
   SET_TOKENS = "BRIDGE_SET_TOKENS",
   ADD_BRIDGE_TXS = "BRIDGE_ADD_BRIDGE_TXS",
@@ -23,9 +23,10 @@ export function addBridgeTx(payload: BridgeTx[]) {
   }
 }
 
-export function clearForm() {
+export function dismissBridgeTx(payload: BridgeTx) {
   return {
-    type: BridgeActionTypes.CLEAR_FORM,
+    type: BridgeActionTypes.DISMISS_TX,
+    payload
   }
 }
 
