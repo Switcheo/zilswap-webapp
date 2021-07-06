@@ -97,11 +97,8 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
       return {
         ...state,
         formState: {
-          sourceAddress: '',
-          transferAmount: new BigNumber(0),
-
+          ...state.formState,
           isInsufficientReserves: false,
-          forNetwork: null,
         },
       };
 

@@ -290,16 +290,21 @@ const ConfirmTransfer = (props: any) => {
   const [showTransactions, setShowTransactions] = useState<boolean>(true);
   const [tokenApproval, setTokenApproval] = useState<boolean>(false);
   const [approvalHash, setApprovalHash] = useState<string>("");
+  const [swthAddrMnemonic, setSwthAddrMnemonic] = useState<string | undefined>();
   const [pendingBridgeTx, setPendingBridgeTx] = useState<BridgeTx | undefined>();
 
   const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
-  const swthAddrMnemonic = useMemo(() => SWTHAddress.newMnemonic(), []);
 
   const [runConfirmTransfer, loadingConfirm] = useAsyncTask("confirmTransfer", (error) => toaster(error.message, { overridePersist: false }));
 
   const { toBlockchain, fromBlockchain, withdrawFee } = bridgeFormState;
 
   const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx]);
+
+  useEffect(() => {
+    if (!swthAddrMnemonic) 
+      setSwthAddrMnemonic(SWTHAddress.newMnemonic());
+  }, [swthAddrMnemonic])
 
   useEffect(() => {
     if (canNavigateBack) {
@@ -578,7 +583,7 @@ const ConfirmTransfer = (props: any) => {
         srcToken: bridgeToken.denom,
         sourceTxHash: sourceTxHash,
         inputAmount: bridgeFormState.transferAmount,
-        interimAddrMnemonics: swthAddrMnemonic,
+        interimAddrMnemonics: swthAddrMnemonic!,
         withdrawFee: withdrawFee?.amount ?? BN_ZERO,
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
@@ -588,6 +593,7 @@ const ConfirmTransfer = (props: any) => {
   }
 
   const conductAnotherTransfer = () => {
+    setPendingBridgeTx(undefined);
     dispatch(actions.Bridge.clearForm());
     dispatch(actions.Layout.showTransferConfirmation(false));
   }
