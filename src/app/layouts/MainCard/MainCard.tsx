@@ -75,9 +75,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       backgroundColor: theme.palette.tab.active,
       color: theme.palette.tab.selected
     },
-    // "&.Mui-disabled": {
-      // TODO: colour of disabled tab
-    // }
+    "&.Mui-disabled": {
+      backgroundColor: theme.palette.tab.disabledBackground,
+    }
   },
   tabLeft: {
     borderTopLeftRadius: CARD_BORDER_RADIUS,
