@@ -18,7 +18,7 @@ import { BridgeParamConstants } from "app/views/main/Bridge/components/constants
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { providerOptions } from "core/ethereum";
-import { logger } from "core/utilities";
+import { isDebug, logger } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
 import { ethers } from "ethers";
 import { History } from "history";
@@ -243,7 +243,7 @@ const ColorlibConnector = withStyles({
 async function initTradehubSDK(mnemonic: string) {
   let sdk = new TradeHubSDK({
     network: TradeHubSDK.Network.DevNet,
-    debugMode: true,
+    debugMode: isDebug(),
   });
   return await sdk.connectWithMnemonic(mnemonic);
 }
@@ -783,7 +783,7 @@ const ConfirmTransfer = (props: any) => {
 
           <KeyValueDisplay kkey="Estimated Time Left" mt="8px" mb="8px" px={2}>
             {!pendingBridgeTx.destinationTxHash
-              ? <span><span className={classes.textColoured}>{getEstimatedTime()}</span> Minutes</span>
+              ? <span><span className={classes.textColoured}>~{getEstimatedTime()}</span> Minutes</span>
               : "-"
             }
             <HelpInfo className={classes.helpInfo} placement="top" title="Estimated time left to the completion of this transfer." />
