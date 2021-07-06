@@ -240,11 +240,24 @@ const ColorlibConnector = withStyles({
 // initialize a tradehub sdk client
 // @param mnemonic initialize the sdk with an account
 async function initTradehubSDK(mnemonic: string) {
-  let sdk = new TradeHubSDK({
-    network: TradeHubSDK.Network.DevNet,
-    debugMode: isDebug(),
-  });
-  return await sdk.connectWithMnemonic(mnemonic);
+  let attempts = 0;
+  while (attempts++ < 10) {
+    try {
+      const sdk = new TradeHubSDK({
+        network: TradeHubSDK.Network.DevNet,
+        debugMode: isDebug(),
+      });
+      return await sdk.connectWithMnemonic(mnemonic);
+    } catch (error) {
+      console.error("init tradehub sdk error");
+      console.error(error);
+
+      // delay <2 ^ attempts> seconds if error occurs
+      let delay = Math.pow(2, attempts) * 1000;
+      await new Promise(res => setTimeout(res, delay));
+    }
+  }
+  throw new Error("failed to initialize TradeHubSDK")
 }
 
 const clearNavigationHook = (history: History<unknown>) => {
