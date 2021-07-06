@@ -3,6 +3,7 @@ import { LocalStorageKeys } from "app/utils/constants";
 import { bnOrZero, DataCoder } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
+import dayjs from "dayjs";
 import { Blockchain } from "tradehub-api-js";
 import { BridgeActionTypes } from "./actions";
 import { BridgeableTokenMapping, BridgeState, BridgeTx } from "./types";
@@ -25,6 +26,7 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
       withdrawTxHash: tx.withdrawTxHash,
       destinationTxHash: tx.destinationTxHash,
       destinationTxConfirmedAt: DataCoder.encodeDayjs(tx.destinationTxConfirmedAt),
+      dismissedAt: DataCoder.encodeDayjs(tx.dismissedAt),
     };
   },
 
@@ -46,10 +48,14 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
       withdrawTxHash: object.withdrawTxHash,
       destinationTxHash: object.destinationTxHash,
       destinationTxConfirmedAt: DataCoder.decodeDayjs(object.destinationTxConfirmedAt),
+      dismissedAt: DataCoder.decodeDayjs(object.dismissedAt),
     }
   }
 }
 
+const findActiveBridgeTx = (bridgeTxs: BridgeTx[]) => {
+  return bridgeTxs.find(bridgeTx => !bridgeTx.dismissedAt)
+}
 
 const loadedBridgeTxsData = localStorage.getItem(LocalStorageKeys.BridgeTxs);
 let loadedBridgeTxs: BridgeTx[] = [];
@@ -72,6 +78,7 @@ const saveBridgeTxs = (txs: BridgeTx[]) => {
 
 const initial_state: BridgeState = {
   bridgeTxs: loadedBridgeTxs,
+  activeBridgeTx: findActiveBridgeTx(loadedBridgeTxs),
 
   tokens: {
     [Blockchain.Zilliqa]: [],
@@ -93,14 +100,25 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
 
   switch (action.type) {
 
-    case BridgeActionTypes.CLEAR_FORM:
+    case BridgeActionTypes.DISMISS_TX: {
+
+      const txIndex = state.bridgeTxs.findIndex(tx => action.payload.sourceTxHash === tx.sourceTxHash);
+      if (txIndex < 0)
+        return state;
+
+      state.bridgeTxs.splice(txIndex, 1, {
+        ...action.payload,
+        dismissedAt: dayjs(),
+      });
+      saveBridgeTxs(state.bridgeTxs);
+      const activeBridgeTx = findActiveBridgeTx(state.bridgeTxs);
+
       return {
         ...state,
-        formState: {
-          ...state.formState,
-          isInsufficientReserves: false,
-        },
+        activeBridgeTx,
+        bridgeTxs: [...state.bridgeTxs],
       };
+    };
 
     case BridgeActionTypes.SET_TOKENS:
       const tokens: BridgeableTokenMapping = payload;
@@ -134,8 +152,10 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
       const newBridgeTxs = Object.values(uniqueTxs);
       saveBridgeTxs(newBridgeTxs);
 
+      const activeBridgeTx = findActiveBridgeTx(newBridgeTxs);
       return {
         ...state,
+        activeBridgeTx,
         bridgeTxs: newBridgeTxs,
       };
 

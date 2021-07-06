@@ -294,7 +294,7 @@ const ConfirmTransfer = (props: any) => {
   const tokenFinder = useTokenFinder();
   const [sdk, setSdk] = useState<ConnectedTradeHubSDK | null>(null);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
-  const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets.eth); 
+  const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets.eth);
   const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
   const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
   const bridgeToken = useSelector<RootState, BridgeableToken | undefined>(state => state.bridge.formState.token);
@@ -304,7 +304,8 @@ const ConfirmTransfer = (props: any) => {
   const [tokenApproval, setTokenApproval] = useState<boolean>(false);
   const [approvalHash, setApprovalHash] = useState<string>("");
   const [swthAddrMnemonic, setSwthAddrMnemonic] = useState<string | undefined>();
-  const [pendingBridgeTx, setPendingBridgeTx] = useState<BridgeTx | undefined>();
+  
+  const pendingBridgeTx = bridgeState.activeBridgeTx;
 
   const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
 
@@ -315,7 +316,7 @@ const ConfirmTransfer = (props: any) => {
   const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx]);
 
   useEffect(() => {
-    if (!swthAddrMnemonic) 
+    if (!swthAddrMnemonic)
       setSwthAddrMnemonic(SWTHAddress.newMnemonic());
   }, [swthAddrMnemonic])
 
@@ -332,25 +333,6 @@ const ConfirmTransfer = (props: any) => {
     }
     // eslint-disable-next-line
   }, [])
-
-  useEffect(() => {
-    if (pendingBridgeTx && bridgeState.bridgeTxs.includes(pendingBridgeTx)) return;
-
-    // same bridgeTx updated
-    if (pendingBridgeTx) {
-      const previousPendingTx = bridgeState.bridgeTxs.find(bridgeTx => bridgeTx.sourceTxHash === pendingBridgeTx.sourceTxHash);
-      setPendingBridgeTx(previousPendingTx);
-      return;
-    }
-
-    // new bridgeTx found
-    const pendingTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.withdrawTxHash)
-    if (pendingTx) {
-      setPendingBridgeTx(pendingTx);
-      addNavigationHook(history);
-    }
-    // eslint-disable-next-line
-  }, [bridgeState, pendingBridgeTx]);
 
   const { fromToken } = useMemo(() => {
     if (!bridgeToken) return {};
@@ -606,9 +588,9 @@ const ConfirmTransfer = (props: any) => {
   }
 
   const conductAnotherTransfer = () => {
-    setPendingBridgeTx(undefined);
+    if (pendingBridgeTx)
+      dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
     setSwthAddrMnemonic(SWTHAddress.newMnemonic());
-    dispatch(actions.Bridge.clearForm());
     dispatch(actions.Layout.showTransferConfirmation(false));
   }
 
@@ -625,9 +607,10 @@ const ConfirmTransfer = (props: any) => {
   }
 
   const navigateBack = () => {
+    if (pendingBridgeTx)
+      dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
     dispatch(actions.Layout.showTransferConfirmation(false));
     setSwthAddrMnemonic(SWTHAddress.newMnemonic());
-    setPendingBridgeTx(undefined);
   }
 
   const getActiveStep = () => {

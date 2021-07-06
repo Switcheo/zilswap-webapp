@@ -149,7 +149,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }, [tokenFinder, bridgeToken])
 
   useEffect(() => {
-    const bridgeTx = bridgeState.bridgeTxs.find(bridgeTx => !bridgeTx.withdrawTxHash)
+    const bridgeTx = bridgeState.activeBridgeTx;
 
     if (bridgeTx) {
       if (!layoutState.showTransferConfirmation) {
@@ -168,7 +168,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         token: bridgeToken,
       }))
     }
-  }, [bridgeState.bridgeTxs, bridgeState.tokens, layoutState, network, dispatch])
+  }, [bridgeState.activeBridgeTx, bridgeState.tokens, layoutState, network, dispatch])
 
   useEffect(() => {
     if (wallet !== null) {
