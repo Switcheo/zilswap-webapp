@@ -69,7 +69,7 @@ const ConnectButton: React.FC<Props> = (props: Props) => {
   const { chain, children, className, address, ...rest } = props;
   const classes = useStyles();
   const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]);
-  const isTestNet = useMemo(() => Number(bridgeWallet?.chainId) !== 1 && bridgeWallet, [bridgeWallet]);
+  const isTestNet = useMemo(() => bridgeWallet && Number(bridgeWallet.chainId) !== 1, [bridgeWallet]);
 
   const getFormattedAddress = () => {
     try {
