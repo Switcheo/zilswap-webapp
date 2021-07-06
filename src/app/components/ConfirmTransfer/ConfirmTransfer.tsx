@@ -766,7 +766,7 @@ const ConfirmTransfer = (props: any) => {
                       {approvalHash &&
                         <Link
                           className={classes.link}
-                          underline="none"
+                          underline="hover"
                           rel="noopener noreferrer"
                           target="_blank"
                           href={getExplorerLink(approvalHash, bridgeFormState.fromBlockchain)}>
@@ -789,7 +789,7 @@ const ConfirmTransfer = (props: any) => {
                       {pendingBridgeTx.sourceTxHash
                         ? <Link
                           className={classes.link}
-                          underline="none"
+                          underline="hover"
                           rel="noopener noreferrer"
                           target="_blank"
                           href={getExplorerLink(pendingBridgeTx.sourceTxHash, bridgeFormState.fromBlockchain)}>
@@ -821,7 +821,7 @@ const ConfirmTransfer = (props: any) => {
                       {pendingBridgeTx.withdrawTxHash
                         ? <Link
                           className={classes.link}
-                          underline="none"
+                          underline="hover"
                           rel="noopener noreferrer"
                           target="_blank"
                           href={getTradeHubExplorerLink(pendingBridgeTx.withdrawTxHash)}>
@@ -848,7 +848,7 @@ const ConfirmTransfer = (props: any) => {
                       {pendingBridgeTx.destinationTxHash
                         ? <Link
                           className={classes.link}
-                          underline="none"
+                          underline="hover"
                           rel="noopener noreferrer"
                           target="_blank"
                           href={getExplorerLink(pendingBridgeTx.destinationTxHash, bridgeFormState.toBlockchain)}>
