@@ -1,3 +1,4 @@
+export { default as Bridge } from "./Bridge";
 export { default as Category } from "./Category";
 export { default as Code } from "./Code";
 export { default as DeveloperBoard } from "./DeveloperBoard"; 

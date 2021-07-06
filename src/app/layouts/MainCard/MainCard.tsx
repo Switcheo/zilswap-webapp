@@ -4,6 +4,7 @@ import { TokenGraph } from "app/components";
 import { actions } from "app/store";
 import { LayoutState, RootState, SwapFormState, TokenInfo, TransactionState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
+import { isProduction } from "app/utils/constants";
 import cls from "classnames";
 import { PaperProps } from "material-ui";
 import React, { forwardRef, Fragment, useEffect, useRef, useState } from "react";
@@ -73,7 +74,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&:hover": {
       backgroundColor: theme.palette.tab.active,
       color: theme.palette.tab.selected
-    }
+    },
+    // "&.Mui-disabled": {
+    // }
   },
   tabLeft: {
     borderTopLeftRadius: CARD_BORDER_RADIUS,
@@ -179,6 +182,7 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
               to="/pool">Pool</Button>
             <Button
               disableElevation
+              disabled={isProduction()}
               color="primary"
               variant="contained"
               className={cls(classes.tab, classes.tabRight)}
