@@ -1,6 +1,7 @@
 import { HTTP } from "./http";
 import dayjs from "dayjs";
 import BigNumber from "bignumber.js";
+import { bnOrZero } from "app/utils/strings/strings";
 
 export const FEE_PREFIX = "https://dev-fees.switcheo.org";
 const FEE_PATHS = {
@@ -35,9 +36,9 @@ export class Bridge {
     const { prev_update_time, details } = await response.json();
     return {
       prevUpdateTime: dayjs.unix(prev_update_time),
-      createWalletFee: new BigNumber(details.createWallet.fee),
-      depositFee: new BigNumber(details.deposit.fee),
-      withdrawalFee: new BigNumber(details.withdrawal.fee),
+      createWalletFee: bnOrZero(details.createWallet?.fee),
+      depositFee: bnOrZero(details.deposit?.fee),
+      withdrawalFee: bnOrZero(details.withdrawal?.fee),
     }
   }
 }
