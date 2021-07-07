@@ -13,6 +13,7 @@ import { SnackbarContent, SnackbarKey, SnackbarProvider } from "notistack";
 import React, { forwardRef, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { TxStatus } from "zilswap-sdk";
+import { Network } from "zilswap-sdk/lib/constants";
 
 interface Props extends BoxProps {
   message: string,
@@ -134,7 +135,7 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const getHref = () => {
     switch (sourceBlockchain) {
       case "swth":
-      case "eth": return `https://etherscan.io/search?q=${hash}`
+      case "eth": return network === Network.MainNet ? `https://etherscan.io/search?q=${hash}` : `https://ropsten.etherscan.io/search?q=${hash}`;
       default: return `https://viewblock.io/zilliqa/tx/${hash}?network=${network.toLowerCase()}`
     }
   }
