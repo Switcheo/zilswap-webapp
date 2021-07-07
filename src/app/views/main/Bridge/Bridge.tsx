@@ -135,11 +135,10 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const bridgeState = useSelector<RootState, BridgeState>(store => store.bridge);
   const bridgeFormState: BridgeFormState = useSelector<RootState, BridgeFormState>(store => store.bridge.formState);
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
-  const isRopsten = useMemo(() => Number(bridgeWallet?.chainId) === 3, [bridgeWallet]);
 
   const isCorrectChain = useMemo(() => {
-    return network === Network.TestNet && isRopsten;
-  }, [isRopsten, network]);
+    return network === Network.TestNet && Number(bridgeWallet?.chainId) === 3;
+  }, [bridgeWallet, network]);
 
   const tokenList: 'bridge-zil' | 'bridge-eth' = bridgeFormState.fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth';
 
