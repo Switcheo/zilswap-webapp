@@ -31,23 +31,28 @@ const CurrencyLogo = (props: any) => {
   const theme = useTheme();
   const network = useNetwork();
 
+  const urlSuffix = theme.palette.type === "dark" ? '?t=dark' : '';
   const tokenKey = currency === 'ZIL' ? '' : `.${address}`
   var tokenIconUrl: string
 
-  if(network === Network.TestNet) {
+  if (network === Network.TestNet) {
     tokenIconUrl = `https://dr297zt0qngbx.cloudfront.net/tokens/testnet/${address}`
   } else {
-    tokenIconUrl = `https://meta.viewblock.io/ZIL${tokenKey}/logo${theme.palette.type === "dark" ? '?t=dark' : ''}`
+    tokenIconUrl = `https://meta.viewblock.io/ZIL${tokenKey}/logo${urlSuffix}`
   }
 
   return (
     <div className={cls(classes.root, className)}>
-      <img 
-        className={classes.svg} 
-        src={tokenIconUrl}
-        alt={`${currency} Token Logo`}
-        loading="lazy"
-      />
+      <object
+        className={classes.svg}
+        data={`https://meta.viewblock.io/ZIL.notfound/logo${urlSuffix}`} type="image/png"
+      >
+        <img
+          alt={`${currency} Token Logo`}
+          loading="lazy"
+          src={tokenIconUrl}
+        />
+      </object>
     </div>
   )
 };
