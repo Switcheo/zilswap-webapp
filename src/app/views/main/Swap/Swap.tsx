@@ -12,14 +12,14 @@ import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { strings, useAsyncTask, useBlacklistAddress, useNetwork, useSearchParam, useToaster } from "app/utils";
-import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_ADDRESS, ZWAP_ADDRESS } from "app/utils/constants";
+import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_ADDRESS, ZWAP_ADDRESS_MAINNET, ZWAP_ADDRESS_TESTNET } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router";
-import { CONTRACTS } from "zilswap-sdk/lib/constants";
+import { CONTRACTS, Network } from "zilswap-sdk/lib/constants";
 import SwapDetail from "./components/SwapDetail";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
 
@@ -235,8 +235,10 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (inToken || outToken) {
       return;
     }
+
+    const zwapAddress = network === Network.MainNet ? ZWAP_ADDRESS_MAINNET : ZWAP_ADDRESS_TESTNET;
     const queryInput = queryParams.get("tokenIn") ?? ZIL_ADDRESS;
-    const queryOutput = queryParams.get("tokenOut") ?? ZWAP_ADDRESS;
+    const queryOutput = queryParams.get("tokenOut") ?? zwapAddress;
     if (queryInput === queryOutput && queryOutput) {
       return;
     }
@@ -254,7 +256,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     });
 
     // eslint-disable-next-line
-  }, [tokenState.tokens]);
+  }, [tokenState.tokens, network]);
 
   useEffect(() => {
     const blacklisted = !!swapFormState.recipientAddress ? isBlacklisted(swapFormState.recipientAddress) : false;

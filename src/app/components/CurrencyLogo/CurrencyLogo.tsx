@@ -1,7 +1,9 @@
 import { makeStyles, useTheme } from "@material-ui/core";
 import cls from "classnames";
-import React from "react";
+import React, { useState } from "react";
 import { AppTheme } from "app/theme/types";
+import { useNetwork } from "app/utils";
+import { Network } from "zilswap-sdk/lib/constants";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -27,16 +29,28 @@ const CurrencyLogo = (props: any) => {
   } = props;
   const classes = useStyles();
   const theme = useTheme();
+  const [error, setError] = useState<boolean>(false);
+  const network = useNetwork();
 
+  const urlSuffix = theme.palette.type === "dark" ? '?t=dark' : '';
   const tokenKey = currency === 'ZIL' ? '' : `.${address}`
+  var tokenIconUrl: string
+
+  if (network === Network.TestNet) {
+    tokenIconUrl = `https://dr297zt0qngbx.cloudfront.net/tokens/testnet/${address}`
+  } else {
+    tokenIconUrl = `https://meta.viewblock.io/ZIL${tokenKey}/logo${urlSuffix}`
+  }
+  const fallbackImg = `https://meta.viewblock.io/ZIL.notfound/logo${urlSuffix}`;
 
   return (
     <div className={cls(classes.root, className)}>
       <img 
         className={classes.svg} 
-        src={`https://meta.viewblock.io/ZIL${tokenKey}/logo${theme.palette.type === "dark" ? '?t=dark' : ''}`}
+        src={error ? fallbackImg : tokenIconUrl}
         alt={`${currency} Token Logo`}
         loading="lazy"
+        onError={(() => setError(true))}
       />
     </div>
   )

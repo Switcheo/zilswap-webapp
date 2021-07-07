@@ -1,17 +1,19 @@
-import { Link, Box, makeStyles } from '@material-ui/core';
+import { Box, Link, makeStyles } from '@material-ui/core';
+import ViewHeadlineIcon from '@material-ui/icons/ViewHeadline';
 import { CurrencyInputILO, FancyButton, Text } from 'app/components';
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import ProgressBar from 'app/components/ProgressBar';
 import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from 'app/theme/types';
-import { ZIL_ADDRESS, ZWAP_ADDRESS } from 'app/utils/constants';
+import { useNetwork } from 'app/utils';
+import { ZIL_ADDRESS, ZWAP_ADDRESS_MAINNET, ZWAP_ADDRESS_TESTNET } from 'app/utils/constants';
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { ILOData } from 'core/zilo/constants';
 import { Dayjs } from 'dayjs';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import ViewHeadlineIcon from '@material-ui/icons/ViewHeadline';
+import { Network } from 'zilswap-sdk/lib/constants';
 
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -97,10 +99,12 @@ interface Props {
 const SampleILOCard = (props: Props) => {
   const { data, expanded = true } = props;
   const classes = useStyles();
+  const network = useNetwork();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
+  const zwapAddress = network === Network.MainNet ? ZWAP_ADDRESS_MAINNET : ZWAP_ADDRESS_TESTNET;
   const zilToken = tokenState.tokens[ZIL_ADDRESS];
-  const zwapToken = tokenState.tokens[ZWAP_ADDRESS];
+  const zwapToken = tokenState.tokens[zwapAddress];
 
   return (
     <Box className={classes.root}>
