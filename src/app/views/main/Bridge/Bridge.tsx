@@ -13,6 +13,7 @@ import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { providerOptions } from "core/ethereum";
 import { ConnectedWallet } from "core/wallet";
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ethers } from "ethers";
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -132,11 +133,12 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const [ethConnectedAddress, setEthConnectedAddress] = useState('');
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
+  const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]); // eth wallet
   const bridgeState = useSelector<RootState, BridgeState>(store => store.bridge);
   const bridgeFormState: BridgeFormState = useSelector<RootState, BridgeFormState>(store => store.bridge.formState);
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
 
-  const tokenList: 'bridge-zil' | 'bridge-eth' = bridgeFormState.fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth'
+  const tokenList: 'bridge-zil' | 'bridge-eth' = bridgeFormState.fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth';
 
   const { token: bridgeToken, fromBlockchain, toBlockchain } = bridgeFormState;
 
@@ -182,20 +184,20 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }, [wallet, bridgeFormState.fromBlockchain])
 
   const setSourceAddress = (address: string) => {
-    setFormState({
-      ...formState,
+    setFormState(prevState => ({
+      ...prevState,
       sourceAddress: address
-    })
+    }))
     dispatch(actions.Bridge.updateForm({
       sourceAddress: address
     }))
   }
 
   const setDestAddress = (address: string) => {
-    setFormState({
-      ...formState,
+    setFormState(prevState => ({
+      ...prevState,
       destAddress: address
-    })
+    }))
     dispatch(actions.Bridge.updateForm({
       destAddress: address
     }))
@@ -423,7 +425,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
           <CurrencyInput
             label="Transfer Amount"
-            disabled={!wallet || !formState.sourceAddress}
+            disabled={!formState.sourceAddress || !formState.destAddress}
             token={fromToken ?? null}
             amount={formState.transferAmount}
             onAmountChange={onTransferAmountChange}
@@ -432,11 +434,11 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           />
           <Button
             onClick={showTransfer}
-            disabled={!wallet || !formState.sourceAddress || formState.transferAmount === "0" || formState.transferAmount === ""}
+            disabled={!formState.sourceAddress || !formState.destAddress || formState.transferAmount === "0" || formState.transferAmount === ""}
             className={classes.actionButton}
             color="primary"
             variant="contained">
-            {!wallet && !formState.sourceAddress
+            {!(formState.sourceAddress && formState.destAddress)
               ? "Connect Wallet"
               : formState.transferAmount === "0" || formState.transferAmount === ""
                 ? "Enter Amount"
