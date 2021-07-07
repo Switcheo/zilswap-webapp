@@ -13,7 +13,7 @@ import { actions } from "app/store";
 import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useAsyncTask, useToaster, useTokenFinder } from "app/utils";
+import { hexToRGBA, truncate, useAsyncTask, useToaster, useTokenFinder, useNetwork } from "app/utils";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -27,6 +27,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import { BN_ZERO } from "tradehub-api-js/build/main/lib/tradehub/utils";
+import { Network } from "zilswap-sdk/lib/constants";
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
@@ -292,6 +293,8 @@ const ConfirmTransfer = (props: any) => {
   const toaster = useToaster();
   const history = useHistory();
   const tokenFinder = useTokenFinder();
+  const network = useNetwork();
+
   const [sdk, setSdk] = useState<ConnectedTradeHubSDK | null>(null);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
   const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets.eth);
@@ -304,7 +307,7 @@ const ConfirmTransfer = (props: any) => {
   const [tokenApproval, setTokenApproval] = useState<boolean>(false);
   const [approvalHash, setApprovalHash] = useState<string>("");
   const [swthAddrMnemonic, setSwthAddrMnemonic] = useState<string | undefined>();
-  
+
   const pendingBridgeTx = bridgeState.activeBridgeTx;
 
   const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
@@ -595,14 +598,27 @@ const ConfirmTransfer = (props: any) => {
   }
 
   const getTradeHubExplorerLink = (hash: string) => {
-    return `https://switcheo.org/transaction/${hash}?net=dev`;
+    if (network === Network.MainNet) {
+      return `https://switcheo.org/transaction/${hash}`;
+    } else {
+      return `https://switcheo.org/transaction/${hash}?net=dev`;
+    }
   };
   const getExplorerLink = (hash: string, blockchain: Blockchain) => {
-    switch (blockchain) {
-      case Blockchain.Ethereum:
-        return `https://ropsten.etherscan.io/search?q=${hash}`;
-      default:
-        return `https://viewblock.io/zilliqa/tx/${hash}?network=testnet`;
+    if (network === Network.MainNet) {
+      switch (blockchain) {
+        case Blockchain.Ethereum:
+          return `https://etherscan.io/search?q=${hash}`;
+        default:
+          return `https://viewblock.io/zilliqa/tx/${hash}`;
+      }
+    } else {
+      switch (blockchain) {
+        case Blockchain.Ethereum:
+          return `https://ropsten.etherscan.io/search?q=${hash}`;
+        default:
+          return `https://viewblock.io/zilliqa/tx/${hash}?network=testnet`;
+      }
     }
   }
 
