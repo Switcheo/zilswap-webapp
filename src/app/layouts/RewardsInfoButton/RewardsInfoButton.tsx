@@ -7,7 +7,7 @@ import { actions } from "app/store";
 import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { truncate, useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
-import { BIG_ZERO } from "app/utils/constants";
+import { BIG_ZERO, ZWAP_ADDRESS_MAINNET, ZWAP_ADDRESS_TESTNET } from "app/utils/constants";
 import { formatZWAPLabel } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -15,6 +15,7 @@ import { ZWAPRewards } from "core/zwap";
 import dayjs from "dayjs";
 import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Network } from "zilswap-sdk/lib/constants";
 import { ReactComponent as IconSVG } from './icon.svg';
 
 interface Props extends BoxProps {
@@ -66,8 +67,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: "16px",
   },
 }));
-
-const ZWAP_TOKEN_ADDRESS = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
 
 const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
@@ -193,6 +192,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   };
 
 
+  const zwapAddress = network === Network.MainNet ? ZWAP_ADDRESS_MAINNET : ZWAP_ADDRESS_TESTNET;
   if (!walletState.wallet) return null;
 
   const popperModifiers = {
@@ -225,7 +225,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                 variant="outlined"
                 onClick={() => setActive(!active)}>
                 {zapBalanceLabel}
-                <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
+                <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
               </Button>
             </Badge>
         }
@@ -246,7 +246,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   <Text variant="h2" className={classes.text}>
                     {zapBalanceLabel}
                   </Text>
-                  <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} className={classes.currencyLogo}/>
+                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={classes.currencyLogo}/>
                 </Box>
                 <Text variant="h6" marginTop={0} className={classes.text}>
                   ≈ {zapTokenValue.toFormat(2)} USD
@@ -258,7 +258,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   <Text variant="body2" color="textPrimary">
                     ≈ {potentialRewardsLabel}
                   </Text>
-                  <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
+                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
                   <HelpInfo placement="bottom" title="The estimated amount of ZWAP you will be receiving for providing liquidity this epoch." className={classes.tooltip}/>
                 </Box>
               </KeyValueDisplay>
@@ -269,7 +269,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                     <Text variant="body2" color="textPrimary">
                       ≈ {unclaimedRewardsLabel}
                     </Text>
-                    <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
+                    <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
                     <HelpInfo placement="bottom" title="The estimated amount of ZWAP you have earned but have not claimed." className={classes.tooltip}/>
                   </Box>
                 </Badge>

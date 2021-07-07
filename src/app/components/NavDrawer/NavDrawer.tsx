@@ -1,22 +1,22 @@
 import { Box, Drawer, DrawerProps, IconButton, List } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { CurrencyLogo, Text } from "app/components";
+import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useClaimEnabled } from "app/utils";
+import { useClaimEnabled, useNetwork, useValueCalculators } from "app/utils";
+import { BIG_ONE, BIG_ZERO, ZWAP_ADDRESS_MAINNET, ZWAP_ADDRESS_TESTNET } from "app/utils/constants";
+import BigNumber from "bignumber.js";
 import cls from "classnames";
+import { ZWAPRewards } from "core/zwap";
 import React, { useMemo } from "react";
+import { useSelector } from "react-redux";
+import { Network } from "zilswap-sdk/lib/constants";
 import NetworkToggle from "../NetworkToggle";
 import SocialLinkGroup from "../SocialLinkGroup";
 import ThemeSwitch from "../ThemeSwitch";
 import { ReactComponent as CloseSVG } from "./close.svg";
 import { NavigationContent } from "./components";
 import navigationConfig from "./navigationConfig";
-import { useNetwork, useValueCalculators } from "app/utils";
-import { ZWAPRewards } from "core/zwap";
-import { useSelector } from "react-redux";
-import { BIG_ZERO, BIG_ONE, ZWAP_ADDRESS } from "app/utils/constants";
-import { RootState, TokenState } from "app/store/types";
-import BigNumber from "bignumber.js";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -103,6 +103,7 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
     return valueCalculators.amount(tokenState.prices, zapToken, BIG_ONE).shiftedBy(zapToken.decimals);
   }, [network, tokenState.prices, tokenState.tokens, valueCalculators]);
 
+  const zwapAddress = network === Network.MainNet ? ZWAP_ADDRESS_MAINNET : ZWAP_ADDRESS_TESTNET;
   return (
     <Drawer PaperProps={{ className: classes.paper }} onClose={onClose} {...rest} className={cls(classes.root, className)}>
       <div className={classes.drawerHeader}>
@@ -114,7 +115,7 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
         {navigationConfig.map((navigation, listIndex) => (
           <List key={listIndex}>
             {navigation.pages.filter(navigation => navigation.show || claimEnabled).map((page, index) => (
-              <NavigationContent onClose={onClose} key={index} navigation={page}/>
+              <NavigationContent onClose={onClose} key={index} navigation={page} />
             ))}
           </List>
         ))}
@@ -123,9 +124,9 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
         <Box display="flex" justifyContent="space-around">
           {/* ZWAP Price */}
           <Box display="flex" alignItems="center">
-            <CurrencyLogo className={classes.currencyLogo} currency="ZWAP" address={ZWAP_ADDRESS} />
+            <CurrencyLogo className={classes.currencyLogo} currency="ZWAP" address={zwapAddress} />
             <Text variant="h6" className={classes.price}>
-              &nbsp;$ { zapTokenValue.toFormat(2) }
+              &nbsp;$ {zapTokenValue.toFormat(2)}
             </Text>
           </Box>
           <SocialLinkGroup />

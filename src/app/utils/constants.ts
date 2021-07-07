@@ -65,7 +65,8 @@ export const STATS_REFRESH_RATE = 30000; // ms
 
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const ZIL_ADDRESS = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
-export const ZWAP_ADDRESS = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
+export const ZWAP_ADDRESS_MAINNET = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
+export const ZWAP_ADDRESS_TESTNET = "zil1k2c3ncjfduj9jrhlgx03t2smd6p25ur56cfzgz";
 export const ZIL_DECIMALS = 12;
 
 export const TRANSAK_API_KEY = {
