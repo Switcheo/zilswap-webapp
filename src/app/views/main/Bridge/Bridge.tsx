@@ -19,6 +19,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Blockchain } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
+import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectButton } from "./components";
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "./wavy-line.svg";
@@ -62,9 +63,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     border: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "#D2E5DF"}`,
     borderRadius: 12,
     padding: theme.spacing(1)
-  },
-  dotIcon: {
-    marginRight: theme.spacing(1)
   },
   formControl: {
     margin: theme.spacing(1),
@@ -137,6 +135,11 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const bridgeState = useSelector<RootState, BridgeState>(store => store.bridge);
   const bridgeFormState: BridgeFormState = useSelector<RootState, BridgeFormState>(store => store.bridge.formState);
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
+  const isRopsten = useMemo(() => Number(bridgeWallet?.chainId) === 3, [bridgeWallet]);
+
+  const isCorrectChain = useMemo(() => {
+    return network === Network.TestNet && isRopsten;
+  }, [isRopsten, network]);
 
   const tokenList: 'bridge-zil' | 'bridge-eth' = bridgeFormState.fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth';
 
@@ -420,6 +423,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 address={bridgeFormState.destAddress || ''}
                 onClick={onConnectDstWallet}
               />
+              {
+
+              }
             </Box>
           </Box>
 
@@ -434,7 +440,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           />
           <Button
             onClick={showTransfer}
-            disabled={!formState.sourceAddress || !formState.destAddress || formState.transferAmount === "0" || formState.transferAmount === ""}
+            disabled={!isCorrectChain || !formState.sourceAddress || !formState.destAddress || formState.transferAmount === "0" || formState.transferAmount === ""}
             className={classes.actionButton}
             color="primary"
             variant="contained">

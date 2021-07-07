@@ -6,6 +6,7 @@ const initial_state: LayoutState = {
   showWalletDialog: false,
   showCreatePool: false,
   showAdvancedSetting: false,
+  showNetworkSwitchDialog: false,
   showTransactionDialog: false,
   showTransferConfirmation: false,
   liquidityEarnHidden: false,
@@ -37,6 +38,11 @@ const reducer = (state: LayoutState = initial_state, action: any) => {
       return {
         ...state,
         showTransferConfirmation: action.show,
+      };
+    case LayoutActionTypes.TOGGLE_SHOW_NETWORK_SWITCH:
+      return {
+        ...state,
+        showNetworkSwitchDialog: !action.override ? !state.showTransactionDialog : action.override === "open",
       };
     case LayoutActionTypes.TOGGLE_SHOW_TRANSACTIONS:
       return {

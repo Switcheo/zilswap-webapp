@@ -69,7 +69,7 @@ const theme = {
   icon: "#00FFB0",
   label: "rgba(222, 255, 255, 0.5)",
   warning: {
-    main: "#DCA00E"
+    main: "#FFDF6B"
   },
   link: "#00FFB0",
 };
