@@ -59,13 +59,26 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const NetworkSwitchBox = (props: any) => {
-    const { className } = props;
+    const { className, chainName } = props;
     const classes = useStyles();
     const dispatch = useDispatch();
-
+    
     const onCloseDialog = () => {
         dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
     };
+
+    const switchChain = async () => {
+        try {
+            const ethereum = window.ethereum;
+            await ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: '0x3' }],
+            });
+            dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
+          } catch (switchError) {
+            console.log(switchError);
+        }
+    }
 
     return (
         <Box overflow="hidden"  display="flex" flexDirection="column" className={cls(classes.root, className)}>
@@ -80,14 +93,14 @@ const NetworkSwitchBox = (props: any) => {
 
                 <Button variant="contained" className={classes.connectedButton}>
                     <Text variant="button">
-                        <DotIcon className={classes.dotIcon} />Binance Smart Chain
+                        <DotIcon className={classes.dotIcon} />{chainName}
                     </Text>
                 </Button>
             </Box>
             
 
             <Text marginBottom={2.5} align="center">
-                Switch to the <span style={{ fontWeight: "bold" }}>Ropsten Test Network</span> to start using ZilBridge.
+                Switch to the <span style={{ fontWeight: "bold" }}>Ropsten Test Network</span> on <span style={{ fontWeight: "bold" }}>Metamask</span> to start using ZilBridge.
             </Text>
 
 
@@ -95,7 +108,7 @@ const NetworkSwitchBox = (props: any) => {
                 variant="contained"
                 color="primary"
                 className={classes.actionButton}
-                onClick={onCloseDialog}
+                onClick={switchChain}
                 >
                 Switch to Ropsten Test Network
             </Button>
