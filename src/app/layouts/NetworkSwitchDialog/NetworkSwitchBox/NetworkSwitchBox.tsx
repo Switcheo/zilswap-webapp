@@ -80,7 +80,7 @@ const NetworkSwitchBox = (props: any) => {
                 console.log(switchError);
             }
         } else {
-
+            dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
         }
     }
 
