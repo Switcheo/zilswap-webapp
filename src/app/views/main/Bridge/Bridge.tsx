@@ -249,6 +249,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     const web3Modal = new Web3Modal({
       cacheProvider: true,
       disableInjectedProvider: false,
+      network: "ropsten",
       providerOptions
     });
 
