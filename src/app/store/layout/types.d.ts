@@ -16,6 +16,7 @@ export interface LayoutState {
   showWalletDialog: boolean;
   showCreatePool: boolean;
   showAdvancedSetting: boolean;
+  showNetworkSwitchDialog: boolean;
   showTransactionDialog: boolean;
   showTransferConfirmation: boolean;
   liquidityEarnHidden: boolean;

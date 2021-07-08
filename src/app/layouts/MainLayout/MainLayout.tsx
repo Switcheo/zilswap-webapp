@@ -5,9 +5,10 @@ import ConnectWalletButton from "app/components/ConnectWalletButton";
 import { AppTheme } from "app/theme/types";
 import React, { Suspense, useState } from "react";
 import { renderRoutes } from "react-router-config";
+import NetworkSwitchDialog from "../NetworkSwitchDialog";
+import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
 import { DevInfoBadge } from "./components";
-import TransactionDialog from "../TransactionDialog";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -50,6 +51,7 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       <Hidden smUp>
         <ConnectWalletButton/>
       </Hidden>
+      <NetworkSwitchDialog />
       <WalletDialog />
       <TransactionDialog />
       <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />

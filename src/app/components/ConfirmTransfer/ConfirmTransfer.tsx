@@ -165,11 +165,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     position: "absolute",
     top: "50%",
     left: "50%",
-    marginLeft: "-60px",
+    marginLeft: "-59px",
     marginTop: "-20px",
     [theme.breakpoints.down("xs")]: {
       width: "90px",
-      marginLeft: "-45px",
+      marginLeft: "-44px",
     },
   },
   stepper: {
@@ -210,7 +210,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("xs")]: {
       marginLeft: theme.spacing(2.5)
     },
-  }
+  },
+  chainName: {
+    [theme.breakpoints.down("xs")]: {
+      fontSize: "12px"
+    },
+  },
+  walletAddress: {
+    [theme.breakpoints.down("xs")]: {
+      fontSize: "12px"
+    },
+  },
 }));
 
 const ColorlibConnector = withStyles({
@@ -683,11 +693,11 @@ const ConfirmTransfer = (props: any) => {
         <Box display="flex" flexDirection="column" alignItems="center">
           <Text variant="h2">Confirm Transfer</Text>
 
-          <Text margin={0.5}>
+          <Text margin={0.5} align="center">
             Please review your transaction carefully.
           </Text>
 
-          <Text color="textSecondary">
+          <Text color="textSecondary" align="center">
             Transactions are non-reversible once they are processed.
           </Text>
         </Box>
@@ -730,8 +740,8 @@ const ConfirmTransfer = (props: any) => {
                 : <ZilliqaLogo />
               }
             </Box>
-            <Text variant="h4">{fromChainName} Network</Text>
-            <Text variant="button">{formatAddress(bridgeState.formState.sourceAddress, fromBlockchain)}</Text>
+            <Text variant="h4" className={classes.chainName}>{fromChainName} Network</Text>
+            <Text variant="button" className={classes.walletAddress}>{formatAddress(bridgeState.formState.sourceAddress, fromBlockchain)}</Text>
           </Box>
           <Box flex={0.2} />
           {complete
@@ -746,8 +756,8 @@ const ConfirmTransfer = (props: any) => {
                 : <EthereumLogo />
               }
             </Box>
-            <Text variant="h4">{toChainName} Network</Text>
-            <Text variant="button">{formatAddress(bridgeState.formState.destAddress, toBlockchain)}</Text>
+            <Text variant="h4" className={classes.chainName}>{toChainName} Network</Text>
+            <Text variant="button" className={classes.walletAddress}>{formatAddress(bridgeState.formState.destAddress, toBlockchain)}</Text>
           </Box>
         </Box>
       </Box>
