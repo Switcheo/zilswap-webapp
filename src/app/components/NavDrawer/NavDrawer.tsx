@@ -4,13 +4,13 @@ import { CurrencyLogo, Text } from "app/components";
 import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useClaimEnabled, useNetwork, useValueCalculators } from "app/utils";
-import { BIG_ONE, BIG_ZERO, ZWAP_ADDRESS_MAINNET, ZWAP_ADDRESS_TESTNET } from "app/utils/constants";
+import { BIG_ONE, BIG_ZERO } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ZWAPRewards } from "core/zwap";
+import { TOKEN_CONTRACT } from "core/zwap/constants";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { Network } from "zilswap-sdk/lib/constants";
 import NetworkToggle from "../NetworkToggle";
 import SocialLinkGroup from "../SocialLinkGroup";
 import ThemeSwitch from "../ThemeSwitch";
@@ -103,7 +103,7 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
     return valueCalculators.amount(tokenState.prices, zapToken, BIG_ONE).shiftedBy(zapToken.decimals);
   }, [network, tokenState.prices, tokenState.tokens, valueCalculators]);
 
-  const zwapAddress = network === Network.MainNet ? ZWAP_ADDRESS_MAINNET : ZWAP_ADDRESS_TESTNET;
+  const zwapAddress = TOKEN_CONTRACT[network];
   return (
     <Drawer PaperProps={{ className: classes.paper }} onClose={onClose} {...rest} className={cls(classes.root, className)}>
       <div className={classes.drawerHeader}>

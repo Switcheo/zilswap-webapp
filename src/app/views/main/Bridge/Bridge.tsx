@@ -284,13 +284,13 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }
   };
 
-  const onTransferAmountChange = (amount: string = "0") => {
-    let transferAmount = new BigNumber(amount);
+  const onTransferAmountChange = (rawAmount: string = "0") => {
+    let transferAmount = new BigNumber(rawAmount);
     if (transferAmount.isNaN() || transferAmount.isNegative() || !transferAmount.isFinite()) transferAmount = BIG_ZERO;
 
     setFormState({
       ...formState,
-      transferAmount: transferAmount.toString()
+      transferAmount: rawAmount,
     })
 
     dispatch(actions.Bridge.updateForm({
@@ -298,6 +298,13 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       transferAmount,
     }));
   }
+
+  const onEndEditTransferAmount = () => {
+    setFormState({
+      ...formState,
+      transferAmount: bridgeFormState.transferAmount.toString(10),
+    })
+  };
 
   const onCurrencyChange = (token: TokenInfo) => {
     let tokenAddress: string | undefined;
@@ -357,6 +364,15 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }
   };
 
+  const isSubmitEnabled = useMemo(() => {
+    if (!isCorrectChain || !formState.sourceAddress || !formState.destAddress)
+      return false;
+    if (bridgeFormState.transferAmount.isZero())
+      return false;
+
+    return true
+  }, [isCorrectChain, formState, bridgeFormState.transferAmount])
+
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       {!layoutState.showTransferConfirmation && (
@@ -387,7 +403,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                   </Select>
                 </FormControl>
               </Box>
-              
+
               <ConnectButton
                 chain={fromBlockchain}
                 address={bridgeFormState.sourceAddress || ''}
@@ -434,19 +450,20 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             disabled={!formState.sourceAddress || !formState.destAddress}
             token={fromToken ?? null}
             amount={formState.transferAmount}
+            onEditorBlur={onEndEditTransferAmount}
             onAmountChange={onTransferAmountChange}
             onCurrencyChange={onCurrencyChange}
             tokenList={tokenList}
           />
           <Button
             onClick={showTransfer}
-            disabled={!isCorrectChain || !formState.sourceAddress || !formState.destAddress || formState.transferAmount === "0" || formState.transferAmount === ""}
+            disabled={!isSubmitEnabled}
             className={classes.actionButton}
             color="primary"
             variant="contained">
             {!(formState.sourceAddress && formState.destAddress)
               ? "Connect Wallet"
-              : formState.transferAmount === "0" || formState.transferAmount === ""
+              : bridgeFormState.transferAmount.isZero()
                 ? "Enter Amount"
                 : "Head to Confirmation"
             }

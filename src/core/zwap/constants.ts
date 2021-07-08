@@ -7,7 +7,7 @@ export const DIST_CONTRACT = {
 }
 export const TOKEN_CONTRACT = {
   [Network.MainNet]: "zil1p5suryq6q647usxczale29cu3336hhp376c627",
-  [Network.TestNet]: "zil1ktmx2udqc77eqq0mdjn8kqdvwjf9q5zvy6x7vu",
+  [Network.TestNet]: "zil1k2c3ncjfduj9jrhlgx03t2smd6p25ur56cfzgz",
 }
 
 export const RETROACTIVE_AIRDROP_FACTOR = 0.05;
