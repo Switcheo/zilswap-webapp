@@ -1,5 +1,4 @@
 import { NavigationOptions } from "./types";
-import { isProduction } from "app/utils/constants";
 
 const navigationConfig: NavigationOptions[] = [{
   pages: [{
@@ -16,7 +15,6 @@ const navigationConfig: NavigationOptions[] = [{
     href: "/bridge",
     icon: "Bridge",
     badge: "COMING SOON",
-    disabled: isProduction(),
   }, {
     title: "ZILO",
     href: "/zilo",
