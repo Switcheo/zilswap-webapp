@@ -726,7 +726,7 @@ const ConfirmTransfer = (props: any) => {
           <Text>Transferring</Text>
           <Text variant="h2" className={classes.amount}>
             {pendingBridgeTx?.inputAmount.toString(10) ?? bridgeFormState.transferAmount.toString(10)}
-            <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} />
+            <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} blockchain={fromToken?.blockchain} />
             {fromToken?.symbol}
           </Text>
         </Box>
