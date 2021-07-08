@@ -1,8 +1,12 @@
 import { makeStyles, useTheme } from "@material-ui/core";
-import cls from "classnames";
-import React, { useState } from "react";
+import { toBech32Address } from "@zilliqa-js/crypto";
+import { BridgeableTokenMapping, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useNetwork } from "app/utils";
+import cls from "classnames";
+import React, { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { Blockchain } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { Network } from "zilswap-sdk/lib/constants";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -22,12 +26,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const CurrencyLogo = (props: any) => {
-  const { currency, address, className }: {
+  const { currency, address, className, blockchain }: {
     currency: string | false;
     address: string;
     className: string;
+    blockchain?: Blockchain;
   } = props;
   const classes = useStyles();
+  const bridgeTokens = useSelector<RootState, BridgeableTokenMapping>((state) => state.bridge.tokens);
   const theme = useTheme();
   const [error, setError] = useState<boolean>(false);
   const network = useNetwork();
@@ -36,8 +42,21 @@ const CurrencyLogo = (props: any) => {
   const tokenKey = currency === 'ZIL' ? '' : `.${address}`
   var tokenIconUrl: string
 
+  const logoAddress = useMemo(() => {
+    if (typeof blockchain !== "undefined" && blockchain === Blockchain.Ethereum) {
+      const tokenHash = address.replace(/^0x/i, "");
+      const bridgeToken = bridgeTokens.eth.find((bridgeToken) => bridgeToken.tokenAddress === tokenHash)
+      
+      if (bridgeToken) {
+        return toBech32Address(bridgeToken.toTokenAddress);
+      }
+    }
+
+    return address;
+  }, [blockchain, address, bridgeTokens.eth])
+
   if (network === Network.TestNet) {
-    tokenIconUrl = `https://dr297zt0qngbx.cloudfront.net/tokens/testnet/${address}`
+    tokenIconUrl = `https://dr297zt0qngbx.cloudfront.net/tokens/testnet/${logoAddress}`
   } else {
     tokenIconUrl = `https://meta.viewblock.io/ZIL${tokenKey}/logo${urlSuffix}`
   }
