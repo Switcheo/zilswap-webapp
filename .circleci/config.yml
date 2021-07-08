@@ -31,7 +31,11 @@ jobs:
       - run:
           name: yarn build according to branch
           command: |
-            NODE_OPTIONS="--max_old_space_size=7168" yarn build --transpile-only
+            if [ "${CIRCLE_BRANCH}" = "master" ]; then
+              NODE_OPTIONS="--max_old_space_size=7168" REACT_APP_GA_MEASUREMENT_ID="G-XRDECDZHLR" yarn build --transpile-only
+            else
+              NODE_OPTIONS="--max_old_space_size=7168" yarn build --transpile-only
+            fi
 
       - persist_to_workspace:
           root: .
