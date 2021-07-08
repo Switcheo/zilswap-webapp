@@ -7,15 +7,15 @@ import { actions } from "app/store";
 import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { truncate, useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
-import { BIG_ZERO, ZWAP_ADDRESS_MAINNET, ZWAP_ADDRESS_TESTNET } from "app/utils/constants";
+import { BIG_ZERO } from "app/utils/constants";
 import { formatZWAPLabel } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ZWAPRewards } from "core/zwap";
+import { TOKEN_CONTRACT } from "core/zwap/constants";
 import dayjs from "dayjs";
 import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Network } from "zilswap-sdk/lib/constants";
 import { ReactComponent as IconSVG } from './icon.svg';
 
 interface Props extends BoxProps {
@@ -192,7 +192,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   };
 
 
-  const zwapAddress = network === Network.MainNet ? ZWAP_ADDRESS_MAINNET : ZWAP_ADDRESS_TESTNET;
+  const zwapAddress = TOKEN_CONTRACT[network];
   if (!walletState.wallet) return null;
 
   const popperModifiers = {

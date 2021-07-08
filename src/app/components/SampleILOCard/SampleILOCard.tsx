@@ -6,14 +6,14 @@ import ProgressBar from 'app/components/ProgressBar';
 import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from 'app/theme/types';
 import { useNetwork } from 'app/utils';
-import { ZIL_ADDRESS, ZWAP_ADDRESS_MAINNET, ZWAP_ADDRESS_TESTNET } from 'app/utils/constants';
+import { ZIL_ADDRESS } from 'app/utils/constants';
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { ILOData } from 'core/zilo/constants';
+import { TOKEN_CONTRACT } from 'core/zwap/constants';
 import { Dayjs } from 'dayjs';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Network } from 'zilswap-sdk/lib/constants';
 
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -102,7 +102,7 @@ const SampleILOCard = (props: Props) => {
   const network = useNetwork();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
-  const zwapAddress = network === Network.MainNet ? ZWAP_ADDRESS_MAINNET : ZWAP_ADDRESS_TESTNET;
+  const zwapAddress = TOKEN_CONTRACT[network];
   const zilToken = tokenState.tokens[ZIL_ADDRESS];
   const zwapToken = tokenState.tokens[zwapAddress];
 
