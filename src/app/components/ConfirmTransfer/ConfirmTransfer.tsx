@@ -22,7 +22,7 @@ import { ConnectedWallet } from "core/wallet";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ethers } from "ethers";
 import { History } from "history";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
@@ -711,13 +711,17 @@ const ConfirmTransfer = (props: any) => {
 
           <Text variant="h2">{!pendingBridgeTx.destinationTxHash ? "Transfer in Progress..." : "Transfer Complete"}</Text>
 
-          <Text className={classes.textWarning} margin={0.5} align="center">
-            <WarningRoundedIcon className={classes.warningIcon} /> Do not close this page while we transfer your funds.
-          </Text>
+          {!pendingBridgeTx.destinationTxHash &&
+            <Fragment>
+              <Text className={classes.textWarning} margin={0.5} align="center">
+                <WarningRoundedIcon className={classes.warningIcon} /> Do not close this page while we transfer your funds.
+              </Text>
 
-          <Text className={classes.textWarning} align="center">
-            Failure to keep this page open during the duration of the transfer may lead to a loss of funds. ZilSwap will not be held accountable and cannot help you retrieve those funds.
-          </Text>
+              <Text className={classes.textWarning} align="center">
+                Failure to keep this page open during the duration of the transfer may lead to a loss of funds. ZilSwap will not be held accountable and cannot help you retrieve those funds.
+              </Text>
+            </Fragment>
+          }
         </Box>
       )}
 
