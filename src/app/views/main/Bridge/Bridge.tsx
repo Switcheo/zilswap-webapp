@@ -181,7 +181,14 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       } else {
         setDestAddress(wallet.addressInfo.byte20!)
       }
+    } else {
+      if (bridgeFormState.fromBlockchain === Blockchain.Zilliqa) {
+        setSourceAddress('')
+      } else {
+        setDestAddress('')
+      }
     }
+    
     // eslint-disable-next-line
   }, [wallet, bridgeFormState.fromBlockchain])
 

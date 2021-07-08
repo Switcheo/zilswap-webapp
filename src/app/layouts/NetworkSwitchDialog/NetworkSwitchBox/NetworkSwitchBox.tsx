@@ -6,7 +6,7 @@ import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA } from "app/utils";
 import cls from "classnames";
-import React from "react";
+import React, { Fragment } from "react";
 import { useDispatch } from "react-redux";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     actionButton: {
         marginTop: theme.spacing(1),
         marginBottom: theme.spacing(1),
-        height: 46
+        height: 46,
     },
     cancel: {
         color: theme.palette?.label,
@@ -107,19 +107,33 @@ const NetworkSwitchBox = (props: any) => {
                 Switch to the <span style={{ fontWeight: "bold" }}>{chainName ? 'Ropsten Test Network' : 'Zilliqa TestNet'}</span> on <span style={{ fontWeight: "bold" }}>{chainName ? 'MetaMask' : 'ZilPay'}</span> to start using ZilBridge.
             </Text>
 
+            {chainName 
+                ? <Fragment>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        className={classes.actionButton}
+                        onClick={switchChain}
+                        >
+                        Switch to Ropsten Test Network
+                    </Button>
 
-            <Button
-                variant="contained"
-                color="primary"
-                className={classes.actionButton}
-                onClick={switchChain}
-                >
-                Switch to {chainName ? 'Ropsten Test Network' : 'Zilliqa TestNet'}
-            </Button>
-
-            <Text marginTop={1.5} marginBottom={1.5} className={classes.cancel} align="center" onClick={onCloseDialog}>
-                Cancel
-            </Text>
+                    <Text marginTop={1.5} marginBottom={1.5} className={classes.cancel} align="center" onClick={onCloseDialog}>
+                        Cancel
+                    </Text>
+                </Fragment>
+                : <Box display="flex" mb={1}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        className={classes.actionButton}
+                        onClick={onCloseDialog}
+                        fullWidth
+                        >
+                        Close
+                    </Button>
+                </Box>
+            }
         </Box>
     )
 }
