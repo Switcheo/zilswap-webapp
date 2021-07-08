@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const NetworkSwitchBox = (props: any) => {
-    const { className, chainName } = props;
+    const { className, chainName, network } = props;
     const classes = useStyles();
     const dispatch = useDispatch();
     
@@ -68,15 +68,19 @@ const NetworkSwitchBox = (props: any) => {
     };
 
     const switchChain = async () => {
-        try {
-            const ethereum = window.ethereum;
-            await ethereum.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: '0x3' }],
-            });
-            dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
-          } catch (switchError) {
-            console.log(switchError);
+        if (chainName) {
+            try {
+                const ethereum = window.ethereum;
+                await ethereum.request({
+                  method: 'wallet_switchEthereumChain',
+                  params: [{ chainId: '0x3' }],
+                });
+                dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
+              } catch (switchError) {
+                console.log(switchError);
+            }
+        } else {
+
         }
     }
 
@@ -93,14 +97,14 @@ const NetworkSwitchBox = (props: any) => {
 
                 <Button variant="contained" className={classes.connectedButton}>
                     <Text variant="button">
-                        <DotIcon className={classes.dotIcon} />{chainName}
+                        <DotIcon className={classes.dotIcon} />{chainName ? chainName : `Zilliqa ${network}`}
                     </Text>
                 </Button>
             </Box>
             
 
             <Text marginBottom={2.5} align="center">
-                Switch to the <span style={{ fontWeight: "bold" }}>Ropsten Test Network</span> on <span style={{ fontWeight: "bold" }}>Metamask</span> to start using ZilBridge.
+                Switch to the <span style={{ fontWeight: "bold" }}>{chainName ? 'Ropsten Test Network' : 'Zilliqa TestNet'}</span> on <span style={{ fontWeight: "bold" }}>{chainName ? 'MetaMask' : 'ZilPay'}</span> to start using ZilBridge.
             </Text>
 
 
@@ -110,7 +114,7 @@ const NetworkSwitchBox = (props: any) => {
                 className={classes.actionButton}
                 onClick={switchChain}
                 >
-                Switch to Ropsten Test Network
+                Switch to {chainName ? 'Ropsten Test Network' : 'Zilliqa TestNet'}
             </Button>
 
             <Text marginTop={1.5} marginBottom={1.5} className={classes.cancel} align="center" onClick={onCloseDialog}>
