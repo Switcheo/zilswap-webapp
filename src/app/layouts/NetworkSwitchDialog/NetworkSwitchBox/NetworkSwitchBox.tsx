@@ -68,19 +68,15 @@ const NetworkSwitchBox = (props: any) => {
     };
 
     const switchChain = async () => {
-        if (chainName) {
-            try {
-                const ethereum = window.ethereum;
-                await ethereum.request({
-                  method: 'wallet_switchEthereumChain',
-                  params: [{ chainId: '0x3' }],
-                });
-                dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
-              } catch (switchError) {
-                console.log(switchError);
-            }
-        } else {
+        try {
+            const ethereum = window.ethereum;
+            await ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: '0x3' }],
+            });
             dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
+            } catch (switchError) {
+            console.log(switchError);
         }
     }
 
