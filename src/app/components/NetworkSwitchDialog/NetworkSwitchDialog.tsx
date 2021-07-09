@@ -46,7 +46,7 @@ const NetworkSwitchDialog = (props: any) => {
 
     // Need a better way for this
     useEffect(() => {
-        if (wallet && network !== Network.TestNet && window.location.pathname === '/bridge') {
+        if (wallet && network !== Network.TestNet) {
             setChainName('');
             dispatch(actions.Layout.toggleShowNetworkSwitch("open"));
         }

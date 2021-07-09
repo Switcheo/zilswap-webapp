@@ -2,12 +2,13 @@ import { Box, Button, FormControl, MenuItem, Select } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { ConfirmTransfer, CurrencyInput, Text } from 'app/components';
+import NetworkSwitchDialog from "app/components/NetworkSwitchDialog";
 import MainCard from 'app/layouts/MainCard';
 import { actions } from "app/store";
 import { BridgeFormState, BridgeState } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useNetwork, useTokenFinder } from "app/utils";
+import { hexToRGBA, strings, useNetwork, useTokenFinder } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
@@ -188,7 +189,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         setDestAddress('')
       }
     }
-    
+
     // eslint-disable-next-line
   }, [wallet, bridgeFormState.fromBlockchain])
 
@@ -380,6 +381,13 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     return true
   }, [isCorrectChain, formState, bridgeFormState.transferAmount])
 
+  const onSelectMax = () => {
+    if (!fromToken) return;
+
+    const balance = strings.bnOrZero(fromToken.balance);
+
+  }
+
   return (
     <MainCard {...rest} className={cls(classes.root, className)}>
       {!layoutState.showTransferConfirmation && (
@@ -462,6 +470,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             onCurrencyChange={onCurrencyChange}
             tokenList={tokenList}
           />
+          <Box mt={1} display="flex" justifyContent="flex-end">
+              <Button color="primary" variant="contained" onClick={onSelectMax}>Max</Button>
+          </Box>
           <Button
             onClick={showTransfer}
             disabled={!isSubmitEnabled}
@@ -477,6 +488,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           </Button>
         </Box>
       )}
+      <NetworkSwitchDialog />
       <ConfirmTransfer showTransfer={layoutState.showTransferConfirmation} />
     </MainCard>
   )
