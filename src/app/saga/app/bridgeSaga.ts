@@ -46,7 +46,7 @@ function getBridgeTxStatus(tx: BridgeTx): Status {
 
 const makeTxFilter = (statuses: Status[]) => {
   return (state: RootState) => {
-    return state.bridge.bridgeTxs.filter((tx) => statuses.includes(getBridgeTxStatus(tx)));
+    return state.bridge.bridgeTxs.filter((tx) => !tx.dismissedAt && statuses.includes(getBridgeTxStatus(tx)));
   }
 }
 
@@ -70,24 +70,6 @@ function* watchDepositConfirmation() {
 
           // check if deposit is confirmed
           if (!tx.depositTxConfirmedAt) {
-            try {
-              const rpcEndpoint = APIS[zilNetwork] ?? APIS.TestNet;
-              const zilliqa = new Zilliqa(rpcEndpoint);
-              const transaction = (yield call([zilliqa.blockchain, zilliqa.blockchain.getTransaction], tx.sourceTxHash!)) as Transaction | undefined;
-
-              logger("bridge saga", tx.sourceTxHash, transaction?.status);
-              if (transaction?.isPending()) continue;
-              if (transaction?.isRejected()) {
-                tx.depositFailedAt = dayjs();
-                updatedTxs[tx.sourceTxHash!] = tx;
-              }
-            } catch (error) {
-              if (error?.message !== "Txn Hash not Present") {
-                console.error("check tx status failed, will try again later");
-                console.error(error);
-              }
-            }
-
             const extTransfers = (yield call([sdk.api, sdk.api.getTransfers], { account: swthAddress })) as RestModels.Transfer[];
 
             const depositTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'deposit' && transfer.blockchain === tx.srcChain);
@@ -97,6 +79,30 @@ function* watchDepositConfirmation() {
               updatedTxs[tx.sourceTxHash!] = tx;
 
               logger("bridge saga", "confirmed tx deposit", tx.sourceTxHash);
+            }
+          }
+
+          if (!tx.depositTxConfirmedAt) {
+            if (tx.srcChain === Blockchain.Zilliqa) {
+              try {
+                const rpcEndpoint = APIS[zilNetwork] ?? APIS.TestNet;
+                const zilliqa = new Zilliqa(rpcEndpoint);
+                const transaction = (yield call([zilliqa.blockchain, zilliqa.blockchain.getTransaction], tx.sourceTxHash!)) as Transaction | undefined;
+  
+                logger("bridge saga", tx.sourceTxHash, transaction?.status);
+                if (transaction?.isPending()) continue;
+                if (transaction?.isRejected()) {
+                  tx.depositFailedAt = dayjs();
+                  updatedTxs[tx.sourceTxHash!] = tx;
+                }
+              } catch (error) {
+                if (error?.message !== "Txn Hash not Present") {
+                  console.error("check tx status failed, will try again later");
+                  console.error(error);
+                }
+              }
+            } else {
+              // TODO: implement tx failed check for eth deposits
             }
           }
 
