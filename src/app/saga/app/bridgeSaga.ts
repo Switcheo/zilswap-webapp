@@ -1,3 +1,5 @@
+import { Transaction } from "@zilliqa-js/account";
+import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { actions } from "app/store";
 import { BridgeableToken, BridgeableTokenMapping, BridgeTx, RootState } from "app/store/types";
 import { SimpleMap } from "app/utils";
@@ -10,6 +12,7 @@ import { FeesData } from "core/utilities/bridge";
 import dayjs from "dayjs";
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK, TradeHubTx } from "tradehub-api-js";
+import { APIS, Network } from "zilswap-sdk/lib/constants";
 import { getBridge } from '../selectors';
 
 export enum Status {
@@ -43,7 +46,7 @@ function getBridgeTxStatus(tx: BridgeTx): Status {
 
 const makeTxFilter = (statuses: Status[]) => {
   return (state: RootState) => {
-    return state.bridge.bridgeTxs.filter((tx) => statuses.includes(getBridgeTxStatus(tx)));
+    return state.bridge.bridgeTxs.filter((tx) => !tx.dismissedAt && statuses.includes(getBridgeTxStatus(tx)));
   }
 }
 
@@ -53,6 +56,7 @@ function* watchDepositConfirmation() {
     try {
       // watch and update relevant txs
       const bridgeTxs = (yield select(getFilteredTx)) as BridgeTx[];
+      const zilNetwork = (yield select((state: RootState) => state.wallet.wallet?.network)) as Network;
       const bridgeableTokensMap = (yield select((state: RootState) => state.bridge.tokens)) as BridgeableTokenMapping;
       logger("bridge saga", "watch deposit confirmation", bridgeTxs.length);
 
@@ -75,6 +79,30 @@ function* watchDepositConfirmation() {
               updatedTxs[tx.sourceTxHash!] = tx;
 
               logger("bridge saga", "confirmed tx deposit", tx.sourceTxHash);
+            }
+          }
+
+          if (!tx.depositTxConfirmedAt) {
+            if (tx.srcChain === Blockchain.Zilliqa) {
+              try {
+                const rpcEndpoint = APIS[zilNetwork] ?? APIS.TestNet;
+                const zilliqa = new Zilliqa(rpcEndpoint);
+                const transaction = (yield call([zilliqa.blockchain, zilliqa.blockchain.getTransaction], tx.sourceTxHash!)) as Transaction | undefined;
+  
+                logger("bridge saga", tx.sourceTxHash, transaction?.status);
+                if (transaction?.isPending()) continue;
+                if (transaction?.isRejected()) {
+                  tx.depositFailedAt = dayjs();
+                  updatedTxs[tx.sourceTxHash!] = tx;
+                }
+              } catch (error) {
+                if (error?.message !== "Txn Hash not Present") {
+                  console.error("check tx status failed, will try again later");
+                  console.error(error);
+                }
+              }
+            } else {
+              // TODO: implement tx failed check for eth deposits
             }
           }
 
@@ -136,6 +164,7 @@ function* watchDepositConfirmation() {
     }
   }
 }
+
 function* watchWithdrawConfirmation() {
   const getFilteredTx = makeTxFilter([Status.WithdrawTxStarted]);
   while (true) {
@@ -249,7 +278,6 @@ function* queryTokenFees() {
     }
   }
 }
-
 
 export default function* bridgeSaga() {
   logger("init bridge saga");
