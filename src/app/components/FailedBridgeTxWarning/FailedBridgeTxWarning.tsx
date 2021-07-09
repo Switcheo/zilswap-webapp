@@ -113,6 +113,11 @@ const FailedBridgeTxWarning = (props: any) => {
           <Text marginBottom={1} variant="h6" align="center">
             The bridge transaction has been rejected, your funds are not deducted, you may try again.
           </Text>
+          <Text marginBottom={1} variant="h6" align="center">
+            There is a known issue with bridging ZIL-ETH, we are working on resolving this as soon as
+            possible. Bridging ETH-ZIL should still be working as intended. You can check ZilSwap
+            twitter for updates <a href="https://twitter.com/ZilSwap" target="_blank" rel="noreferrer">here</a>.
+          </Text>
 
           <Text marginBottom={1} variant="h6" align="center">
             TX: {failedDepositTx?.sourceTxHash}
