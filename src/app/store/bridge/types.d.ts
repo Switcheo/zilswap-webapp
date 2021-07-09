@@ -2,7 +2,8 @@ import { TokenInfo } from "app/store/types";
 import { ChainTransferFlow } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain, RestModels } from "tradehub-api-js";
+import { FeesData } from "core/utilities/bridge";
 
 export type BridgeableToken = {
   blockchain: Blockchain;
@@ -12,6 +13,7 @@ export type BridgeableToken = {
   toBlockchain: Blockchain;
   toTokenAddress: string;
   toDenom: string;
+  balDenom: string;
 }
 
 export type BridgeableTokenMapping = {
@@ -22,25 +24,35 @@ export type BridgeableTokenMapping = {
 export interface BridgeState {
   formState: BridgeFormState;
   bridgeTxs: BridgeTx[];
+  activeBridgeTx?: BridgeTx;
 
   tokens: BridgeableTokenMapping;
+}
+
+export type BridgeableChains = Blockchain.Ethereum | Blockchain.Zilliqa;
+export interface WithdrawFee {
+  amount: BigNumber;
+  value: BigNumber;
+  token?: RestModels.Token;
 }
 
 export interface BridgeFormState {
   sourceAddress?: string; // can be eth or zil address
   destAddress?: string; // can be eth or zil address
   transferAmount: BigNumber;
-  transferDirection: ChainTransferFlow;
+  fromBlockchain: BridgeableChains;
+  toBlockchain: BridgeableChains;
 
   token?: BridgeableToken;
+  withdrawFee?: WithdrawFee;
 
   isInsufficientReserves: boolean;
   forNetwork: Network | null,
 };
 
 export interface BridgeTx {
-  srcChain: Blockchain;
-  dstChain: Blockchain;
+  srcChain: BridgeableChains;
+  dstChain: BridgeableChains;
 
   // in respective display formats
   // zil: bech32 (zil1…)
@@ -80,4 +92,10 @@ export interface BridgeTx {
 
   // populated when bridge tx is deemed complete
   destinationTxConfirmedAt?: dayjs.Dayjs;
+
+  // dismissed by user, hide from UI
+  dismissedAt?: dayjs.Dayjs;
+
+  // deposit tx failure detected at
+  depositFailedAt?: dayjs.Dayjs;
 }

@@ -43,7 +43,7 @@ const reducer = (state: WalletState = initial_state, action: any) => {
       const { payload } = action;
       switch (payload.blockchain) {
         case Blockchain.Ethereum:
-          return { ...state, bridgeWallets: { ...state.bridgeWallets, [payload.blockchain]: payload.address }}
+          return { ...state, bridgeWallets: { ...state.bridgeWallets, [payload.blockchain]: payload.wallet }}
         default:
           throw new Error(`Invalid blockchain in SET_BRIDGE_WALLET: ${payload.blockchain}`)
       }

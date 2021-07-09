@@ -73,6 +73,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&:hover": {
       backgroundColor: theme.palette.tab.active,
       color: theme.palette.tab.selected
+    },
+    "&.Mui-disabled": {
+      backgroundColor: theme.palette.tab.disabledBackground,
     }
   },
   tabLeft: {

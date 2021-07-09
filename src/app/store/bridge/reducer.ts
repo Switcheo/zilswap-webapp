@@ -1,12 +1,12 @@
 import { SimpleMap } from "app/utils";
 import { LocalStorageKeys } from "app/utils/constants";
 import { bnOrZero, DataCoder } from "app/utils/strings/strings";
-import { ChainTransferFlow } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
+import dayjs from "dayjs";
 import { Blockchain } from "tradehub-api-js";
 import { BridgeActionTypes } from "./actions";
-import { BridgeState, BridgeTx } from "./types";
+import { BridgeableTokenMapping, BridgeState, BridgeTx } from "./types";
 
 export const BridgeTxEncoder: DataCoder<BridgeTx> = {
   encode: (tx: BridgeTx): object => {
@@ -18,7 +18,7 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
       srcToken: tx.srcToken,
       dstToken: tx.dstToken,
       withdrawFee: tx.withdrawFee.toString(10),
-      inputAmount: tx.withdrawFee.toString(10),
+      inputAmount: tx.inputAmount.toString(10),
       interimAddrMnemonics: tx.interimAddrMnemonics,
       approveTxHash: tx.approveTxHash,
       sourceTxHash: tx.sourceTxHash,
@@ -26,6 +26,8 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
       withdrawTxHash: tx.withdrawTxHash,
       destinationTxHash: tx.destinationTxHash,
       destinationTxConfirmedAt: DataCoder.encodeDayjs(tx.destinationTxConfirmedAt),
+      dismissedAt: DataCoder.encodeDayjs(tx.dismissedAt),
+      depositFailedAt: DataCoder.encodeDayjs(tx.depositFailedAt),
     };
   },
 
@@ -39,7 +41,7 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
       srcToken: object.srcToken,
       dstToken: object.dstToken,
       withdrawFee: bnOrZero(object.withdrawFee),
-      inputAmount: bnOrZero(object.withdrawFee),
+      inputAmount: bnOrZero(object.inputAmount),
       interimAddrMnemonics: object.interimAddrMnemonics,
       approveTxHash: object.approveTxHash,
       sourceTxHash: object.sourceTxHash,
@@ -47,10 +49,15 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
       withdrawTxHash: object.withdrawTxHash,
       destinationTxHash: object.destinationTxHash,
       destinationTxConfirmedAt: DataCoder.decodeDayjs(object.destinationTxConfirmedAt),
+      dismissedAt: DataCoder.decodeDayjs(object.dismissedAt),
+      depositFailedAt: DataCoder.decodeDayjs(object.depositFailedAt),
     }
   }
 }
 
+const findActiveBridgeTx = (bridgeTxs: BridgeTx[]) => {
+  return bridgeTxs.find(bridgeTx => !bridgeTx.dismissedAt)
+}
 
 const loadedBridgeTxsData = localStorage.getItem(LocalStorageKeys.BridgeTxs);
 let loadedBridgeTxs: BridgeTx[] = [];
@@ -73,6 +80,7 @@ const saveBridgeTxs = (txs: BridgeTx[]) => {
 
 const initial_state: BridgeState = {
   bridgeTxs: loadedBridgeTxs,
+  activeBridgeTx: findActiveBridgeTx(loadedBridgeTxs),
 
   tokens: {
     [Blockchain.Zilliqa]: [],
@@ -81,7 +89,8 @@ const initial_state: BridgeState = {
 
   formState: {
     transferAmount: new BigNumber(0),
-    transferDirection: ChainTransferFlow.ETH_TO_ZIL,
+    fromBlockchain: Blockchain.Zilliqa,
+    toBlockchain: Blockchain.Ethereum,
 
     isInsufficientReserves: false,
     forNetwork: null,
@@ -93,19 +102,41 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
 
   switch (action.type) {
 
-    case BridgeActionTypes.CLEAR_FORM:
+    case BridgeActionTypes.DISMISS_TX: {
+
+      const txIndex = state.bridgeTxs.findIndex(tx => action.payload.sourceTxHash === tx.sourceTxHash);
+      if (txIndex < 0)
+        return state;
+
+      state.bridgeTxs.splice(txIndex, 1, {
+        ...action.payload,
+        dismissedAt: dayjs(),
+      });
+      saveBridgeTxs(state.bridgeTxs);
+      const activeBridgeTx = findActiveBridgeTx(state.bridgeTxs);
+
       return {
         ...state,
-        formState: {
-          sourceAddress: '',
-          transferAmount: new BigNumber(0),
-
-          isInsufficientReserves: false,
-          forNetwork: null,
-        },
+        activeBridgeTx,
+        bridgeTxs: [...state.bridgeTxs],
       };
+    };
 
     case BridgeActionTypes.SET_TOKENS:
+      const tokens: BridgeableTokenMapping = payload;
+      let token = state.formState.token;
+      if (!token) {
+
+        const fromBlockchain = state.formState.fromBlockchain as Blockchain.Zilliqa | Blockchain.Ethereum;
+        const firstToken = tokens[fromBlockchain]?.[0];
+        token = tokens[fromBlockchain]?.find(bridgeToken => bridgeToken.denom.startsWith("zil")) ?? firstToken;
+
+        state.formState = {
+          ...state.formState,
+          token,
+        };
+      }
+
       return {
         ...state,
         tokens: payload,
@@ -113,15 +144,20 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
 
     case BridgeActionTypes.ADD_BRIDGE_TXS:
       const uniqueTxs: SimpleMap<BridgeTx> = {};
-      for (const tx of [...state.bridgeTxs, ...payload]) {
-        uniqueTxs[tx.sourceTxHash] = tx;
+
+      // reconstruct txs to force component re-render.
+      const newTxs: BridgeTx[] = payload.map((tx: BridgeTx) => ({ ...tx }));
+      for (const tx of [...state.bridgeTxs, ...newTxs]) {
+        uniqueTxs[tx.sourceTxHash!] = tx;
       }
 
       const newBridgeTxs = Object.values(uniqueTxs);
       saveBridgeTxs(newBridgeTxs);
 
+      const activeBridgeTx = findActiveBridgeTx(newBridgeTxs);
       return {
         ...state,
+        activeBridgeTx,
         bridgeTxs: newBridgeTxs,
       };
 
@@ -131,6 +167,15 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
         formState: {
           ...state.formState,
           ...payload,
+        }
+      };
+
+    case BridgeActionTypes.UPDATE_FEE:
+      return {
+        ...state,
+        formState: {
+          ...state.formState,
+          withdrawFee: payload,
         }
       };
 

@@ -7,9 +7,14 @@ const navigationConfig: NavigationOptions[] = [{
     icon: "SwapHoriz",
     show: true,
   }, {
-    title: "Pools Overview",
+    title: "Pools",
     href: "/pools",
     icon: "Layers",
+  }, {
+    title: "ZilBridge",
+    href: "/bridge",
+    icon: "Bridge",
+    badge: "COMING SOON",
   }, {
     title: "ZILO",
     href: "/zilo",

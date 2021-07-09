@@ -1,13 +1,19 @@
+import { Transaction } from "@zilliqa-js/account";
+import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { actions } from "app/store";
-import { BridgeTx, RootState } from "app/store/types";
+import { BridgeableToken, BridgeableTokenMapping, BridgeTx, RootState } from "app/store/types";
 import { SimpleMap } from "app/utils";
+import { PollIntervals } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
-import { logger } from "core/utilities";
-import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
-import { TradeHubSDK, ConnectedTradeHubSDK, RestModels, TradeHubTx, SWTHAddress, Blockchain } from "tradehub-api-js";
+import BigNumber from "bignumber.js";
+import { Bridge, logger } from "core/utilities";
+import { FeesData } from "core/utilities/bridge";
 import dayjs from "dayjs";
-import { PollIntervals } from "app/utils/constants";
+import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
+import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK, TradeHubTx } from "tradehub-api-js";
+import { APIS, Network } from "zilswap-sdk/lib/constants";
+import { getBridge } from '../selectors';
 
 export enum Status {
   NotStarted,
@@ -40,7 +46,7 @@ function getBridgeTxStatus(tx: BridgeTx): Status {
 
 const makeTxFilter = (statuses: Status[]) => {
   return (state: RootState) => {
-    return state.bridge.bridgeTxs.filter((tx) => statuses.includes(getBridgeTxStatus(tx)));
+    return state.bridge.bridgeTxs.filter((tx) => !tx.dismissedAt && statuses.includes(getBridgeTxStatus(tx)));
   }
 }
 
@@ -50,6 +56,8 @@ function* watchDepositConfirmation() {
     try {
       // watch and update relevant txs
       const bridgeTxs = (yield select(getFilteredTx)) as BridgeTx[];
+      const zilNetwork = (yield select((state: RootState) => state.wallet.wallet?.network)) as Network;
+      const bridgeableTokensMap = (yield select((state: RootState) => state.bridge.tokens)) as BridgeableTokenMapping;
       logger("bridge saga", "watch deposit confirmation", bridgeTxs.length);
 
       const updatedTxs: SimpleMap<BridgeTx> = {};
@@ -74,16 +82,42 @@ function* watchDepositConfirmation() {
             }
           }
 
+          if (!tx.depositTxConfirmedAt) {
+            if (tx.srcChain === Blockchain.Zilliqa) {
+              try {
+                const rpcEndpoint = APIS[zilNetwork] ?? APIS.TestNet;
+                const zilliqa = new Zilliqa(rpcEndpoint);
+                const transaction = (yield call([zilliqa.blockchain, zilliqa.blockchain.getTransaction], tx.sourceTxHash!)) as Transaction | undefined;
+  
+                logger("bridge saga", tx.sourceTxHash, transaction?.status);
+                if (transaction?.isPending()) continue;
+                if (transaction?.isRejected()) {
+                  tx.depositFailedAt = dayjs();
+                  updatedTxs[tx.sourceTxHash!] = tx;
+                }
+              } catch (error) {
+                if (error?.message !== "Txn Hash not Present") {
+                  console.error("check tx status failed, will try again later");
+                  console.error(error);
+                }
+              }
+            } else {
+              // TODO: implement tx failed check for eth deposits
+            }
+          }
+
           // trigger withdraw tx if deposit confirmed
           if (tx.depositTxConfirmedAt) {
 
             const connectedSDK = (yield call([sdk, sdk.connectWithMnemonic], tx.interimAddrMnemonics)) as ConnectedTradeHubSDK
             const balance = (yield call([sdk.api, sdk.api.getWalletBalance], { account: swthAddress })) as RestModels.Balances;
 
-            const balanceDenom = tx.srcChain === Blockchain.Zilliqa ? tx.srcToken : tx.dstToken;
+            const bridgeTokens = tx.srcChain === Blockchain.Zilliqa ? bridgeableTokensMap.zil : bridgeableTokensMap.eth;
+            const bridgeToken = bridgeTokens.find(t => t.denom === tx.srcToken);
+            const balanceDenom = bridgeToken?.balDenom;
 
-            logger("bridge saga", "detected balance to withdraw", balance, balanceDenom)
-            const withdrawAmount = bnOrZero(balance?.[balanceDenom]?.available);
+            logger("bridge saga", "detected balance to withdraw", swthAddress, balance, balanceDenom)
+            const withdrawAmount = bnOrZero(balance?.[balanceDenom ?? ""]?.available);
             if (withdrawAmount.isZero()) {
               throw new Error(`tradehub address balance not found`)
             }
@@ -100,7 +134,7 @@ function* watchDepositConfirmation() {
             tx.withdrawTxHash = withdrawResult.txhash;
             updatedTxs[tx.sourceTxHash!] = tx;
 
-            logger("bridge saga", "initiated tx withdraw", tx.sourceTxHash);
+            logger("bridge saga", "initiated tx withdraw", tx.withdrawTxHash);
           }
         } catch (error) {
           console.error('process deposit tx error');
@@ -130,6 +164,7 @@ function* watchDepositConfirmation() {
     }
   }
 }
+
 function* watchWithdrawConfirmation() {
   const getFilteredTx = makeTxFilter([Status.WithdrawTxStarted]);
   while (true) {
@@ -141,7 +176,7 @@ function* watchWithdrawConfirmation() {
       const updatedTxs: SimpleMap<BridgeTx> = {};
       const network = TradeHubSDK.Network.DevNet;
       for (const tx of bridgeTxs) {
-        logger("bridge saga", "checking tx withdraw", tx.sourceTxHash);
+        logger("bridge saga", "checking tx withdraw", tx.withdrawTxHash);
         try {
           const sdk = new TradeHubSDK({ network });
           const swthAddress = SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
@@ -154,7 +189,7 @@ function* watchWithdrawConfirmation() {
             tx.destinationTxHash = withdrawTransfer.transaction_hash;
             updatedTxs[tx.sourceTxHash!] = tx;
 
-            logger("bridge saga", "confirmed tx withdraw", tx.sourceTxHash);
+            logger("bridge saga", "confirmed tx withdraw", tx.withdrawTxHash);
           }
 
           // possible extension: validate tx on dest chain 
@@ -188,8 +223,65 @@ function* watchWithdrawConfirmation() {
   }
 }
 
+function* queryTokenFees() {
+  let lastCheckedToken: BridgeableToken | undefined = undefined;
+  while (true) {
+    logger("bridge saga", "query withdraw fees");
+    try {
+      const { formState } = getBridge(yield select());
+      const bridgeToken = formState.token;
+      const network = TradeHubSDK.Network.DevNet;
+      if (lastCheckedToken !== bridgeToken) {
+        yield put(actions.Bridge.updateFee());
+      }
+
+      logger("bridge saga", lastCheckedToken?.toDenom, bridgeToken?.toDenom)
+      if ((!lastCheckedToken || lastCheckedToken !== bridgeToken) && bridgeToken) {
+        logger("bridge saga", "query", bridgeToken?.toDenom)
+        const sdk = new TradeHubSDK({ network });
+        yield call([sdk, sdk.initialize]);
+        const tradehubToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken.toDenom);
+
+        if (!tradehubToken) {
+          throw new Error(`token not found ${bridgeToken.toDenom}`);
+        }
+  
+        const feeEst = (yield call(Bridge.getEstimatedFees, { denom: tradehubToken.denom })) as FeesData | undefined;
+        const price = bnOrZero(yield sdk.token.getUSDValue(tradehubToken.denom))
+  
+        logger("bridge saga", "withdraw fees", tradehubToken.denom, feeEst?.withdrawalFee?.toString(10), price.toString(10))
+        if (feeEst && tradehubToken) {
+          yield put(actions.Bridge.updateFee({
+            amount: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-tradehubToken!.decimals),
+            value: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-tradehubToken!.decimals).times(price),
+            token: tradehubToken
+          }));
+        } else {
+          yield put(actions.Bridge.updateFee({
+            amount: new BigNumber(0),
+            value: new BigNumber(0),
+            token: undefined
+          }));
+        }
+
+        lastCheckedToken = bridgeToken;
+      }
+
+    } catch (e) {
+      console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn(e)
+    } finally {
+      yield race({
+        delay: delay(PollIntervals.BridgeTokenFee),
+        tokenUpdated: take(actions.Bridge.BridgeActionTypes.UPDATE_FORM),
+      })
+    }
+  }
+}
+
 export default function* bridgeSaga() {
   logger("init bridge saga");
   yield fork(watchDepositConfirmation);
   yield fork(watchWithdrawConfirmation);
+  yield fork(queryTokenFees);
 }

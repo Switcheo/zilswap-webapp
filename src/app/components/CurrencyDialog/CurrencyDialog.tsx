@@ -4,7 +4,7 @@ import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { DialogModal } from "app/components";
 import { BridgeState } from "app/store/bridge/types";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
-import { useTaskSubscriber } from "app/utils";
+import { hexToRGBA, useTaskSubscriber } from "app/utils";
 import { BIG_ZERO, LoadingKeys, LocalStorageKeys } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
@@ -29,6 +29,9 @@ const useStyles = makeStyles(theme => ({
   },
   input: {
     marginBottom: 20,
+    '&.Mui-focused': {
+      borderColor: theme.palette.primary.dark,
+    },
   },
   inputText: {
     fontSize: '16px!important',
@@ -42,6 +45,13 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     flexDirection: "column",
     overflowY: "auto",
+    '&::-webkit-scrollbar': {
+      width: '0.4rem'
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: `rgba${hexToRGBA(theme.palette.text.primary, 0.1)}`,
+      borderRadius: 12
+    }
   },
   currenciesHeader: {
     justifyContent: "left",
@@ -165,7 +175,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
           <CurrencyList
             tokens={filteredTokens}
             search={search}
-            emptyStateLabel="No tokens found."
+            emptyStateLabel="No token found."
             showContribution={showContribution}
             userTokens={userTokens}
             onToggleUserToken={onToggleUserToken}

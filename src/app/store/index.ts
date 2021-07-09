@@ -1,4 +1,5 @@
 import sagaMiddleware from "app/saga";
+import dayjs from "dayjs";
 import { applyMiddleware, createStore, Middleware } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
 import { createLogger } from "redux-logger";
@@ -16,6 +17,9 @@ if ((!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && !proces
 const AppStore = createStore(combinedReducers, composeWithDevTools(
   applyMiddleware(...middlewares)
 ));
+
+(window as any).store = AppStore;
+(window as any).dayjs = dayjs;
 
 export { default as actions } from "./actions";
 

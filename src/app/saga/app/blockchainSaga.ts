@@ -6,7 +6,7 @@ import { ZiloAppState } from "zilswap-sdk/lib/zilo"
 
 import { actions } from "app/store";
 import { ChainInitAction } from "app/store/blockchain/actions";
-import { WalletAction, WalletActionTypes } from "app/store/wallet/actions";
+import { BridgeWalletAction, WalletAction, WalletActionTypes } from "app/store/wallet/actions";
 import { Transaction, TokenInfo } from "app/store/types";
 import { RPCEndpoints, ZIL_ADDRESS } from "app/utils/constants";
 import { connectWalletZilPay, ConnectedWallet, WalletConnectType } from "core/wallet";
@@ -22,6 +22,7 @@ import { BridgeableToken } from "app/store/bridge/types";
 import { Network } from "zilswap-sdk/lib/constants";
 import { Blockchain } from "tradehub-api-js";
 import { SimpleMap } from "app/utils";
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 
 const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
   if (!wallet) return null;
@@ -66,6 +67,35 @@ const zilPayObserver = (zilPay: any) => {
       logger('deregistered zilpay observer')
       accountObserver.unsubscribe()
       networkObserver.unsubscribe()
+    }
+  })
+}
+
+const web3Observer = (wallet: ConnectedBridgeWallet) => {
+  return eventChannel<ConnectedBridgeWallet>(emitter => {
+    const provider = wallet.provider
+    provider.on("accountsChanged", (accounts: string[]) => {
+      if(accounts.length > 0) {
+        emitter({
+          provider: provider,
+          address: accounts[0],
+          chainId: wallet.chainId
+        })
+      }
+    })
+
+    provider.on("chainChanged", (chainId: number) => {
+      emitter({
+        provider: provider,
+        address: wallet.address,
+        chainId: chainId
+      })
+    })
+
+    logger('registered web3 observer')
+
+    return () => {
+      logger('deregistered web3 observer')
     }
   })
 }
@@ -117,7 +147,7 @@ const fetchJSON = async (url: string) => {
   return res.json()
 }
 
-const addMapping = (r: BridgeMappingResult, a: TradeHubToken, b: TradeHubToken) => {
+const addMapping = (r: BridgeMappingResult, a: TradeHubToken, b: TradeHubToken, sourceChain: Blockchain) => {
   r[a.blockchain].push({
     blockchain: a.blockchain,
     tokenAddress: a.asset_id.toLowerCase(),
@@ -126,6 +156,7 @@ const addMapping = (r: BridgeMappingResult, a: TradeHubToken, b: TradeHubToken) 
     toBlockchain: b.blockchain,
     toTokenAddress: b.asset_id.toLowerCase(),
     toDenom: b.denom,
+    balDenom: sourceChain === a.blockchain ? a.denom : b.denom,
   })
 }
 
@@ -203,16 +234,22 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     const data: TradeHubTokensResult = yield call(fetchJSON, `https://${host}/coin/tokens`)
     const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
     Object.entries(mappings.result).forEach(([wrappedDenom, sourceDenom]) => {
+      // TODO: update whitelist (this is devnet only)
+      if (!["zil.e", "zwap1.e", "eth.zilliqa", "dai.z"].includes(wrappedDenom)) {
+        return;
+      }
+
       const wrappedToken = data.result.find(d => d.denom === wrappedDenom)!
       const sourceToken = data.result.find(d => d.denom === sourceDenom)!
+
       if ((wrappedToken.blockchain !== Blockchain.Zilliqa && wrappedToken.blockchain !== Blockchain.Ethereum) ||
         (sourceToken.blockchain !== Blockchain.Zilliqa && sourceToken.blockchain !== Blockchain.Ethereum)) {
         return
       }
       addToken(tokens, sourceToken)
       addToken(tokens, wrappedToken)
-      addMapping(result, wrappedToken, sourceToken)
-      addMapping(result, sourceToken, wrappedToken)
+      addMapping(result, wrappedToken, sourceToken, sourceToken.blockchain)
+      addMapping(result, sourceToken, wrappedToken, sourceToken.blockchain)
     })
 
     yield put(actions.Bridge.setTokens(result))
@@ -314,9 +351,37 @@ function* watchZilPay() {
   }
 }
 
+function* watchWeb3() {
+  let chan
+  while (true) {
+    try {
+      const action: BridgeWalletAction = yield take(WalletActionTypes.SET_BRIDGE_WALLET)
+      if (action.payload.wallet) {
+        logger('starting to watch web3')
+        chan = (yield call(web3Observer, action.payload.wallet)) as EventChannel<ConnectedBridgeWallet>;
+        break
+      }
+    } catch(e) {
+      console.warn('Watch web3 failed, will automatically retry to reconnect. Error:')
+      console.warn(e)
+    }
+  }
+  try {
+    while(true) {
+      const newWallet = (yield take(chan)) as ConnectedBridgeWallet
+      yield put(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: newWallet }))
+    }
+  } finally {
+    if (yield cancelled()) {
+      chan.close()
+    }
+  }
+}
+
 export default function* blockchainSaga() {
   logger("init blockchain saga");
   yield fork(watchInitialize);
   yield fork(watchZilPay);
+  yield fork(watchWeb3)
   yield put(actions.Blockchain.ready())
 }
