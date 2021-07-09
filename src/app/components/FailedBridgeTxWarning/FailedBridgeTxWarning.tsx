@@ -114,9 +114,9 @@ const FailedBridgeTxWarning = (props: any) => {
             The bridge transaction has been rejected, your funds are not deducted, you may try again.
           </Text>
           <Text marginBottom={1} variant="h6" align="center">
-            There is a known issue with bridging ZIL-ETH, we are working on resolving this as soon as
-            possible. Bridging ETH-ZIL should still be working as intended. You can check ZilSwap
-            twitter for updates <a href="https://twitter.com/ZilSwap" target="_blank" rel="noreferrer">here</a>.
+            There is a known issue with bridging from Zilliqa to Ethereum, we are working on resolving this as soon as possible.
+            <br />Bridging Ethereum to Zilliqa is unaffected. Please check <a href="https://twitter.com/ZilSwap" target="_blank"
+            rel="noreferrer">ZilSwap Twitter</a> for updates.
           </Text>
 
           <Text marginBottom={1} variant="h6" align="center">
