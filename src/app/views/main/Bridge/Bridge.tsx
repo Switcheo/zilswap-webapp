@@ -2,6 +2,7 @@ import { Box, Button, FormControl, MenuItem, Select } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { ConfirmTransfer, CurrencyInput, Text } from 'app/components';
+import FailedBridgeTxWarning from "app/components/FailedBridgeTxWarning";
 import MainCard from 'app/layouts/MainCard';
 import { actions } from "app/store";
 import { BridgeFormState, BridgeState } from 'app/store/bridge/types';
@@ -446,9 +447,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 address={bridgeFormState.destAddress || ''}
                 onClick={onConnectDstWallet}
               />
-              {
-
-              }
             </Box>
           </Box>
 
@@ -477,6 +475,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           </Button>
         </Box>
       )}
+      <FailedBridgeTxWarning />
       <ConfirmTransfer showTransfer={layoutState.showTransferConfirmation} />
     </MainCard>
   )

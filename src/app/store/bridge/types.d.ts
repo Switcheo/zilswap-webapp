@@ -95,4 +95,7 @@ export interface BridgeTx {
 
   // dismissed by user, hide from UI
   dismissedAt?: dayjs.Dayjs;
+
+  // deposit tx failure detected at
+  depositFailedAt?: dayjs.Dayjs;
 }
