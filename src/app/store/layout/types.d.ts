@@ -18,6 +18,7 @@ export interface LayoutState {
   showAdvancedSetting: boolean;
   showNetworkSwitchDialog: boolean;
   showTransactionDialog: boolean;
+  showBridgeTransactionDialog: boolean;
   showTransferConfirmation: boolean;
   liquidityEarnHidden: boolean;
   showPoolType: PoolType;

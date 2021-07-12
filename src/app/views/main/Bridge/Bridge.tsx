@@ -26,6 +26,7 @@ import { ConnectButton } from "./components";
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "./wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "./zilliqa-logo.svg";
+import BridgeTransactionDialog from "app/components/BridgeTransactionDialog";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
@@ -382,11 +383,27 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     return true
   }, [isCorrectChain, formState, bridgeFormState.transferAmount])
 
+  // Button should be disabled if currency input is disabled
   const onSelectMax = () => {
     if (!fromToken) return;
 
     const balance = strings.bnOrZero(fromToken.balance);
 
+    // do the gas stuff here
+
+    setFormState({
+      ...formState,
+      transferAmount: balance.shiftedBy(-fromToken.decimals).toString(),
+    })
+
+    dispatch(actions.Bridge.updateForm({
+      forNetwork: network,
+      transferAmount: balance.shiftedBy(-fromToken.decimals),
+    }))
+  }
+
+  const viewTransferHistory = () => {
+    dispatch(actions.Layout.toggleShowBridgeTransactions("open"));
   }
 
   return (
@@ -468,8 +485,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             onCurrencyChange={onCurrencyChange}
             tokenList={tokenList}
           />
-          <Box mt={1} display="flex" justifyContent="flex-end">
-              <Button color="primary" variant="contained" onClick={onSelectMax}>Max</Button>
+          <Box mt={1} display="flex" justifyContent="space-between">
+              <Button color="primary" variant="contained" onClick={viewTransferHistory}>View Transfers</Button>
+              <Button color="primary" variant="contained" disabled={!formState.sourceAddress || !formState.destAddress} onClick={onSelectMax}>Max</Button>
           </Box>
           <Button
             onClick={showTransfer}
@@ -486,6 +504,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           </Button>
         </Box>
       )}
+      <BridgeTransactionDialog />
       <NetworkSwitchDialog />
       <FailedBridgeTxWarning />
       <ConfirmTransfer showTransfer={layoutState.showTransferConfirmation} />

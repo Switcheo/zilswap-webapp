@@ -3,6 +3,7 @@ import { OpenCloseState, PoolType, FormNotification } from "./types";
 export const LayoutActionTypes = {
   TOGGLE_SHOW_WALLET: "TOGGLE_SHOW_WALLET",
   TOGGLE_SHOW_NETWORK_SWITCH: "TOGGLE_SHOW_NETWORK_SWITCH",
+  TOGGLE_SHOW_BRIDGE_TRANSACTIONS: "TOGGLE_SHOW_BRIDGE_TRANSACTIONS",
   SHOW_POOL_TYPE: "SHOW_POOL_TYPE",
   SHOW_ADVANCED_SETTING: "SHOW_ADVANCED_SETTING",
   TOGGLE_SHOW_CREATE_POOL: "TOGGLE_SHOW_CREATE_POOL",
@@ -30,6 +31,12 @@ export function toggleShowCreatePool(override?: OpenCloseState) {
 export function toggleShowTransactions(override?: OpenCloseState) {
   return {
     type: LayoutActionTypes.TOGGLE_SHOW_TRANSACTIONS,
+    override,
+  }
+};
+export function toggleShowBridgeTransactions(override?: OpenCloseState) {
+  return {
+    type: LayoutActionTypes.TOGGLE_SHOW_BRIDGE_TRANSACTIONS,
     override,
   }
 };

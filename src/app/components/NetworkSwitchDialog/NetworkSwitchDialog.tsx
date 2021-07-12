@@ -44,7 +44,6 @@ const NetworkSwitchDialog = (props: any) => {
         // eslint-disable-next-line
     }, [bridgeWallet]);
 
-    // Need a better way for this
     useEffect(() => {
         if (wallet && network !== Network.TestNet) {
             setChainName('');
