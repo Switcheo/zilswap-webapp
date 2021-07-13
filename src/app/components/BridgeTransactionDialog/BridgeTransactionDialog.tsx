@@ -6,6 +6,7 @@ import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
+import BridgeTransactionBox from "./BridgeTransactionBox";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -29,6 +30,7 @@ const BridgeTransactionDialog = (props: any) => {
             {...rest}
             className={cls(classes.root, className)}
             >
+            <BridgeTransactionBox />
         </DialogModal>
     )
 }

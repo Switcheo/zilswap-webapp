@@ -1,4 +1,5 @@
 export { default as AmountLabel } from "./AmountLabel";
+export { default as BridgeTransactionDialog } from "./BridgeTransactionDialog";
 export { default as ConfirmTransfer } from "./ConfirmTransfer";
 export { default as ContrastBox } from "./ContrastBox";
 export { default as CopyIcon } from "./copy.svg";
@@ -26,6 +27,7 @@ export { default as PoolsOverviewBanner } from "./PoolsOverviewBanner";
 export { default as PotentialRewardInfo } from "./PotentialRewardInfo";
 export { default as ProportionSelect } from "./ProportionSelect";
 export { default as RandomAsciiEmoji } from "./RandomAsciiEmoji";
+export { default as Reveal } from "./Reveal";
 export { default as SampleILOCard } from "./SampleILOCard";
 export { default as ScrollReset } from "./ScrollReset";
 export { default as SearchInput } from "./SearchInput";
