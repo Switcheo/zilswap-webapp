@@ -12,6 +12,7 @@ import { FeesData } from "core/utilities/bridge";
 import dayjs from "dayjs";
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK, TradeHubTx } from "tradehub-api-js";
+import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
 import { getBridge } from '../selectors';
 
@@ -88,7 +89,7 @@ function* watchDepositConfirmation() {
                 const rpcEndpoint = APIS[zilNetwork] ?? APIS.TestNet;
                 const zilliqa = new Zilliqa(rpcEndpoint);
                 const transaction = (yield call([zilliqa.blockchain, zilliqa.blockchain.getTransaction], tx.sourceTxHash!)) as Transaction | undefined;
-  
+
                 logger("bridge saga", tx.sourceTxHash, transaction?.status);
                 if (transaction?.isPending()) continue;
                 if (transaction?.isRejected()) {
@@ -245,24 +246,18 @@ function* queryTokenFees() {
         if (!tradehubToken) {
           throw new Error(`token not found ${bridgeToken.toDenom}`);
         }
-  
-        const feeEst = (yield call(Bridge.getEstimatedFees, { denom: tradehubToken.denom })) as FeesData | undefined;
-        const price = bnOrZero(yield sdk.token.getUSDValue(tradehubToken.denom))
-  
+
+        const retrievedFees = (yield call(Bridge.getEstimatedFees, { denom: tradehubToken.denom })) as FeesData | undefined;
+        const feeEst = retrievedFees ?? { withdrawalFee: BN_ONE.shiftedBy(3 - tradehubToken.decimals) }; // 1000 sat to bypass min fee check
+        const price = bnOrZero(yield sdk.token.getUSDValue(tradehubToken.denom));
+
         logger("bridge saga", "withdraw fees", tradehubToken.denom, feeEst?.withdrawalFee?.toString(10), price.toString(10))
-        if (feeEst && tradehubToken) {
-          yield put(actions.Bridge.updateFee({
-            amount: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-tradehubToken!.decimals),
-            value: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-tradehubToken!.decimals).times(price),
-            token: tradehubToken
-          }));
-        } else {
-          yield put(actions.Bridge.updateFee({
-            amount: new BigNumber(0),
-            value: new BigNumber(0),
-            token: undefined
-          }));
-        }
+        
+        yield put(actions.Bridge.updateFee({
+          amount: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-tradehubToken!.decimals),
+          value: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-tradehubToken!.decimals).times(price),
+          token: tradehubToken
+        }));
 
         lastCheckedToken = bridgeToken;
       }
