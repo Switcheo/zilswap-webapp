@@ -235,7 +235,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
     Object.entries(mappings.result).forEach(([wrappedDenom, sourceDenom]) => {
       // TODO: update whitelist (this is devnet only)
-      if (!["zil3.e", "zwap3.e", "eth4.z", "dai4.z"].includes(wrappedDenom)) {
+      if (!["zil5.e", "zwap5.e", "eth5.z", "dai5.z"].includes(wrappedDenom)) {
         return;
       }
 

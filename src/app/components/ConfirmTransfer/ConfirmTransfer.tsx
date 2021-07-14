@@ -13,7 +13,7 @@ import { actions } from "app/store";
 import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useAsyncTask, useToaster, useTokenFinder, useNetwork } from "app/utils";
+import { hexToRGBA, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -26,7 +26,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
-import { BN_ZERO } from "tradehub-api-js/build/main/lib/tradehub/utils";
+import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { Network } from "zilswap-sdk/lib/constants";
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
@@ -580,7 +580,7 @@ const ConfirmTransfer = (props: any) => {
       }
 
       const { destAddress, sourceAddress } = bridgeFormState;
-      if (!destAddress || !sourceAddress || !bridgeToken) return;
+      if (!destAddress || !sourceAddress || !bridgeToken || !fromToken) return;
 
       const bridgeTx: BridgeTx = {
         dstAddr: destAddress,
@@ -592,7 +592,7 @@ const ConfirmTransfer = (props: any) => {
         sourceTxHash: sourceTxHash,
         inputAmount: bridgeFormState.transferAmount,
         interimAddrMnemonics: swthAddrMnemonic!,
-        withdrawFee: withdrawFee?.amount ?? BN_ZERO,
+        withdrawFee: withdrawFee?.amount ?? BN_ONE.shiftedBy(3 - fromToken.decimals), // 1000 sat bypass withdraw fee check
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
 
