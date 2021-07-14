@@ -25,6 +25,7 @@ const BridgeTransactionDialog = (props: any) => {
 
     return (
         <DialogModal
+            maxWidth={"lg"}
             open={showBridgeTransactionDialog}
             onClose={onCloseDialog}
             {...rest}

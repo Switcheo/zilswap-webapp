@@ -4,11 +4,13 @@ import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import { CurrencyLogo, HelpInfo, Reveal, Text } from 'app/components';
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
+import { BridgeState, BridgeTx, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA } from "app/utils";
+import { hexToRGBA, useNetwork } from "app/utils";
+import { toHumanNumber } from "app/utils/strings/strings";
 import cls from "classnames";
 import React, { Fragment } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -54,6 +56,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     tableRow: {
         "& .MuiTableCell-root": {
+            whiteSpace: "nowrap",
             borderBottom: `5px solid ${theme.palette.background.default}`,
             borderRadius: 12,
             "&:first-child": {
@@ -114,6 +117,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     transferAmount: {
         display: "inline-flex",
         alignItems: "center"
+    },
+    noTransaction: {
+        color: theme.palette?.label
     }
 }));
 
@@ -122,29 +128,58 @@ const ZWAP_TOKEN_ADDRESS = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
 const BridgeTransactionBox = (props: any) => {
     const { className} = props;
     const classes = useStyles();
+    // const network = useNetwork();
     const dispatch = useDispatch();
-
-    const rows = [
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 6, 24, 4.0, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 9.0, 37, 4.3, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 16.0, 24, 6.0, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 3.7, 67, 4.3, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 16.0, 49, 3.9, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 6.0, 24, 4.0, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 9.0, 37, 4.3, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 16.0, 24, 6.0, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 3.7, 67, 4.3, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 16.0, 49, 3.9, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 6.0, 24, 4.0, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 9.0, 37, 4.3, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 16.0, 24, 6.0, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 3.7, 67, 4.3, 1, 1],
-        ['22 Jul 2021', 'Ethereum - Zilliqa', 16.0, 49, 3.9, 1, 1],
-    ];
+    
+    const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
+    const bridgeTxs = bridgeState.bridgeTxs;
 
     const handleNewTransfer = () => {
         dispatch(actions.Layout.toggleShowBridgeTransactions("close"));
         dispatch(actions.Layout.showTransferConfirmation(false));
+    }
+    
+    const getTransferStatus = (tx: BridgeTx) => {
+        console.log("bridge tx:", tx);
+        // Failed tx
+        if (tx.depositFailedAt) {
+            return (
+                <Chip
+                    className={classes.failedChip}
+                    label={
+                        <Fragment>
+                            <Typography align="center"><strong>Failed</strong></Typography>
+                            <Typography align="center">Stage 2.1</Typography>
+                        </Fragment>
+                    }
+                />
+            )
+        }
+
+        // Completed tx
+        if (tx.destinationTxConfirmedAt) {
+            return (
+                <Chip 
+                    className={classes.completeChip}
+                    label={
+                        <Typography align="center"><strong>Complete</strong></Typography>
+                    }
+                />
+            )
+        }
+
+        // Ongoing tx
+        return (
+            <Chip
+                className={classes.ongoingChip}
+                label={
+                    <Fragment>
+                        <Typography align="center"><strong>Ongoing</strong></Typography>
+                        <Typography align="center">Stage 1.2</Typography>
+                    </Fragment>
+                }
+            />
+        )
     }
 
     return (
@@ -217,56 +252,38 @@ const BridgeTransactionBox = (props: any) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                    {rows.map((row) => (
-                        <TableRow key={row[0]} className={classes.tableRow}>
+                    {bridgeTxs.map((tx: BridgeTx, index: number) => (
+                        <TableRow key={index} className={classes.tableRow}>
                             <TableCell component="th" scope="row">
-                                {row[0]}
+                                22 Jul 2021
                             </TableCell>
                             <TableCell>
                                 <Text className={classes.transferAmount}>
                                     <CurrencyLogo className={classes.currencyLogo} currency="ZWAP" address={ZWAP_TOKEN_ADDRESS}/>
                                     Ethereum
+
+                                    &mdash;
+
                                     <CurrencyLogo className={classes.currencyLogo} currency="ZWAP" address={ZWAP_TOKEN_ADDRESS}/>
                                     Zilliqa
                                 </Text>
                             </TableCell>
                             <TableCell align="center">
                                 <Text className={classes.transferAmount}>
-                                    {row[2]}
-                                    <CurrencyLogo className={classes.currencyLogo} currency="ZWAP" address={ZWAP_TOKEN_ADDRESS}/>
+                                    {toHumanNumber(tx.inputAmount, 2)}
+                                    <CurrencyLogo className={classes.currencyLogo} currency={"ZWAP"} address={ZWAP_TOKEN_ADDRESS}/>
                                 </Text>
                             </TableCell>
                             <TableCell>
-                                <Chip
-                                    className={classes.ongoingChip}
-                                    label={
-                                        <Fragment>
-                                            <Typography align="center"><strong>Ongoing</strong></Typography>
-                                            <Typography align="center">Stage 1.2</Typography>
-                                        </Fragment>
-                                    }
-                                />
-                                {/* <Chip
-                                    className={classes.failedChip}
-                                    label={
-                                        <Fragment>
-                                            <Typography align="center"><strong>Failed</strong></Typography>
-                                            <Typography align="center">Stage 2.1</Typography>
-                                        </Fragment>
-                                    }
-                                /> */}
-                                {/* <Chip 
-                                    className={classes.completeChip}
-                                    label={
-                                        <Typography align="center"><strong>Complete</strong></Typography>
-                                    }
-                                /> */}
+                                {getTransferStatus(tx)}
                             </TableCell>
-                            <TableCell >
+                            <TableCell align="center">
                                 <Reveal secret="12345" />
                             </TableCell>
                             <TableCell>
                                 <Button
+                                    href="https://app.dem.exchange/reset_password"
+                                    target="_blank"
                                     className={classes.button}
                                     endIcon={<NewLinkIcon className={classes.newLinkIcon} />}
                                     >
@@ -285,6 +302,9 @@ const BridgeTransactionBox = (props: any) => {
                     ))}
                     </TableBody>
                 </Table>
+                {!bridgeTxs.length && (
+                    <Typography align="center" variant="body2" className={classes.noTransaction}>No transactions found.</Typography>
+                )}
             </TableContainer>
         </Box>
     )
