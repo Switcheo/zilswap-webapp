@@ -15,6 +15,8 @@ import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK,
 import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
 import { getBridge } from '../selectors';
+import { ethers } from "ethers";
+import { TransactionResponse } from "@ethersproject/abstract-provider";
 
 export enum Status {
   NotStarted,
@@ -224,6 +226,27 @@ function* watchWithdrawConfirmation() {
   }
 }
 
+function* watchActiveTxConfirmations() {
+  while (true) {
+    logger("bridge saga", "query block confirmations");
+    try {
+      const { activeBridgeTx } = getBridge(yield select());
+
+      if (activeBridgeTx?.destinationTxHash) {
+        const defaultProvider = ethers.getDefaultProvider("ropsten");
+        const ethResp = (yield defaultProvider.getTransaction(activeBridgeTx.destinationTxHash)) as TransactionResponse;
+        activeBridgeTx.depositConfirmations = ethResp.confirmations;
+        yield put(actions.Bridge.addBridgeTx([activeBridgeTx]));
+      }
+    } catch (error) {
+      console.error("watchActiveTxConfirmations error")
+      console.error(error)
+    } finally {
+      yield delay(PollIntervals.BridgeDepositWatcher);
+    }
+  }
+}
+
 function* queryTokenFees() {
   let lastCheckedToken: BridgeableToken | undefined = undefined;
   while (true) {
@@ -252,7 +275,7 @@ function* queryTokenFees() {
         const price = bnOrZero(yield sdk.token.getUSDValue(tradehubToken.denom));
 
         logger("bridge saga", "withdraw fees", tradehubToken.denom, feeEst?.withdrawalFee?.toString(10), price.toString(10))
-        
+
         yield put(actions.Bridge.updateFee({
           amount: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-tradehubToken!.decimals),
           value: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-tradehubToken!.decimals).times(price),
@@ -279,4 +302,5 @@ export default function* bridgeSaga() {
   yield fork(watchDepositConfirmation);
   yield fork(watchWithdrawConfirmation);
   yield fork(queryTokenFees);
+  yield fork(watchActiveTxConfirmations);
 }

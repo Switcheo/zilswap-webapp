@@ -101,4 +101,7 @@ export interface BridgeTx {
 
   // populated when bridge tx is added
   depositDispatchedAt?: dayjs.Dayjs;
+
+  // confirmation blocks
+  depositConfirmations?: number;
 }
