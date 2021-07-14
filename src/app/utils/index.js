@@ -11,6 +11,7 @@ export { default as truncate } from "./truncate";
 export * from "./types";
 export { default as useAsyncTask } from "./useAsyncTask";
 export { default as useBlacklistAddress } from "./useBlacklistAddress";
+export { default as useBridgeableTokenFinder } from "./useBridgeableTokenFinder";
 export { default as useClaimEnabled } from "./useClaimEnabled";
 export { default as useErrorCatcher } from "./useErrorCatcher";
 export { default as useFilter } from "./useFilter";

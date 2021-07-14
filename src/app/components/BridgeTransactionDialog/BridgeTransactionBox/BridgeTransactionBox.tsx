@@ -6,11 +6,14 @@ import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { BridgeState, BridgeTx, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useNetwork } from "app/utils";
+import { hexToRGBA, useBridgeableTokenFinder } from "app/utils";
 import { toHumanNumber } from "app/utils/strings/strings";
 import cls from "classnames";
 import React, { Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Blockchain } from "tradehub-api-js";
+import { ReactComponent as EthereumLogo } from "../../../views/main/Bridge/ethereum-logo.svg";
+import { ReactComponent as ZilliqaLogo } from "../../../views/main/Bridge/zilliqa-logo.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -98,6 +101,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
             borderRadius: 12,
         },
+        padding: theme.spacing(0, 0.5)
     },
     failedChip: {
         backgroundColor: "#FF5252"
@@ -120,16 +124,25 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     noTransaction: {
         color: theme.palette?.label
+    },
+    chainLogo: {
+        height: "18px",
+        width: "18px",
     }
 }));
 
-const ZWAP_TOKEN_ADDRESS = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
+const CHAIN_NAMES = {
+    [Blockchain.Zilliqa]: "Zilliqa",
+    [Blockchain.Ethereum]: "Ethereum",
+    [Blockchain.Neo]: "Neo",
+    [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
+}
 
 const BridgeTransactionBox = (props: any) => {
     const { className} = props;
     const classes = useStyles();
-    // const network = useNetwork();
     const dispatch = useDispatch();
+    const bridgeableTokenFinder = useBridgeableTokenFinder();
     
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
     const bridgeTxs = bridgeState.bridgeTxs;
@@ -138,18 +151,33 @@ const BridgeTransactionBox = (props: any) => {
         dispatch(actions.Layout.toggleShowBridgeTransactions("close"));
         dispatch(actions.Layout.showTransferConfirmation(false));
     }
+
+    const getTransferStage = (tx: BridgeTx) => {
+        if (tx?.withdrawTxHash) {
+            return "Stage 3.1"
+        }
+
+        if (tx?.depositTxConfirmedAt) {
+            return "Stage 2.2"
+        }
+
+        if (tx?.sourceTxHash) {
+            return "Stage 2.1"
+        }
+
+        return "Stage 1.2"
+    }
     
     const getTransferStatus = (tx: BridgeTx) => {
-        console.log("bridge tx:", tx);
         // Failed tx
-        if (tx.depositFailedAt) {
+        if (tx?.depositFailedAt) {
             return (
                 <Chip
                     className={classes.failedChip}
                     label={
                         <Fragment>
                             <Typography align="center"><strong>Failed</strong></Typography>
-                            <Typography align="center">Stage 2.1</Typography>
+                            <Typography align="center">{getTransferStage(tx)}</Typography>
                         </Fragment>
                     }
                 />
@@ -157,7 +185,7 @@ const BridgeTransactionBox = (props: any) => {
         }
 
         // Completed tx
-        if (tx.destinationTxConfirmedAt) {
+        if (tx.destinationTxHash) {
             return (
                 <Chip 
                     className={classes.completeChip}
@@ -175,7 +203,7 @@ const BridgeTransactionBox = (props: any) => {
                 label={
                     <Fragment>
                         <Typography align="center"><strong>Ongoing</strong></Typography>
-                        <Typography align="center">Stage 1.2</Typography>
+                        <Typography align="center">{getTransferStage(tx)}</Typography>
                     </Fragment>
                 }
             />
@@ -255,23 +283,30 @@ const BridgeTransactionBox = (props: any) => {
                     {bridgeTxs.map((tx: BridgeTx, index: number) => (
                         <TableRow key={index} className={classes.tableRow}>
                             <TableCell component="th" scope="row">
-                                22 Jul 2021
+                                22 July 2021
                             </TableCell>
                             <TableCell>
                                 <Text className={classes.transferAmount}>
-                                    <CurrencyLogo className={classes.currencyLogo} currency="ZWAP" address={ZWAP_TOKEN_ADDRESS}/>
-                                    Ethereum
-
+                                    {tx.srcChain === Blockchain.Zilliqa
+                                        ? <ZilliqaLogo className={classes.chainLogo}/>
+                                        : <EthereumLogo className={classes.chainLogo}/>
+                                    }
+                                    {CHAIN_NAMES[tx.srcChain]}
+                                    {" "}
                                     &mdash;
 
-                                    <CurrencyLogo className={classes.currencyLogo} currency="ZWAP" address={ZWAP_TOKEN_ADDRESS}/>
-                                    Zilliqa
+                                    {tx.dstChain === Blockchain.Ethereum
+                                        ? <EthereumLogo className={classes.chainLogo}/>
+                                        : <ZilliqaLogo className={classes.chainLogo}/>
+                                    }
+                                    {CHAIN_NAMES[tx.dstChain]}
                                 </Text>
                             </TableCell>
                             <TableCell align="center">
                                 <Text className={classes.transferAmount}>
                                     {toHumanNumber(tx.inputAmount, 2)}
-                                    <CurrencyLogo className={classes.currencyLogo} currency={"ZWAP"} address={ZWAP_TOKEN_ADDRESS}/>
+                                    {/* <CurrencyLogo className={classes.currencyLogo} currency={"ZWAP"} address={ZWAP_TOKEN_ADDRESS}/> */}
+                                    <CurrencyLogo className={classes.currencyLogo} address={bridgeableTokenFinder(tx.srcToken, tx.srcChain)?.tokenAddress} />
                                 </Text>
                             </TableCell>
                             <TableCell>
