@@ -1,7 +1,7 @@
 import { Box, Button, Chip, makeStyles, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import AddIcon from '@material-ui/icons/AddRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
-import { CurrencyLogo, HelpInfo, Reveal, Text } from 'app/components';
+import { CurrencyLogo, HelpInfo, RevealMnemonic, Text } from 'app/components';
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { BridgeState, BridgeTx, RootState } from "app/store/types";
@@ -262,13 +262,13 @@ const BridgeTransactionBox = (props: any) => {
                             <TableCell align="center">
                                 <Box display="flex" flexDirection="column">
                                     <Text variant="h6">Mnemonic</Text>
-                                    <Text>Phrase <HelpInfo className={classes.helpInfo} placement="top" title="Todo." /></Text>
+                                    <Text>Phrase <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Mnemonic Phrase to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
                                 </Box>
                             </TableCell>
                             <TableCell align="center">
                                 <Box display="flex" flexDirection="column">
                                     <Text variant="h6">Recover</Text>
-                                    <Text>Transfer <HelpInfo className={classes.helpInfo} placement="top" title="Todo." /></Text>
+                                    <Text>Transfer <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Mnemonic Phrase to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
                                 </Box>
                             </TableCell>
                             <TableCell align="center">
@@ -283,7 +283,11 @@ const BridgeTransactionBox = (props: any) => {
                     {bridgeTxs.map((tx: BridgeTx, index: number) => (
                         <TableRow key={index} className={classes.tableRow}>
                             <TableCell component="th" scope="row">
-                                22 July 2021
+                                {/* Incomplete */}
+                                {tx?.depositFailedAt
+                                    ? tx.depositFailedAt.format('DD MMM YYYY')
+                                    : tx?.depositTxConfirmedAt?.format('DD MMM YYYY')
+                                }
                             </TableCell>
                             <TableCell>
                                 <Text className={classes.transferAmount}>
@@ -313,7 +317,7 @@ const BridgeTransactionBox = (props: any) => {
                                 {getTransferStatus(tx)}
                             </TableCell>
                             <TableCell align="center">
-                                <Reveal secret="12345" />
+                                <RevealMnemonic mnemonic={tx.interimAddrMnemonics} />
                             </TableCell>
                             <TableCell>
                                 <Button

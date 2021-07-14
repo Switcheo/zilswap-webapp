@@ -27,7 +27,7 @@ export { default as PoolsOverviewBanner } from "./PoolsOverviewBanner";
 export { default as PotentialRewardInfo } from "./PotentialRewardInfo";
 export { default as ProportionSelect } from "./ProportionSelect";
 export { default as RandomAsciiEmoji } from "./RandomAsciiEmoji";
-export { default as Reveal } from "./Reveal";
+export { default as RevealMnemonic } from "./RevealMnemonic";
 export { default as SampleILOCard } from "./SampleILOCard";
 export { default as ScrollReset } from "./ScrollReset";
 export { default as SearchInput } from "./SearchInput";
