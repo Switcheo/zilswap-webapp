@@ -88,13 +88,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         borderRadius: 12,
     },
     tableContainer: {
-        padding: theme.spacing(0, 0.5),
         '&::-webkit-scrollbar': {
             width: '0.4rem'
         },
         '&::-webkit-scrollbar-thumb': {
             backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
-            borderRadius: 12
+            borderRadius: 12,
         },
     },
     failedChip: {
