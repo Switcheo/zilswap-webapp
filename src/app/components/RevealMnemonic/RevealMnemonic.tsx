@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     copyIcon: {
         marginLeft: theme.spacing(0.5),
         "& path": {
-            // fill: `rgba${hexToRGBA(theme.palette.text.primary, 0.5)}`
+            fill: theme.palette.primary.light
         }
     },
     copy: {
