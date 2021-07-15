@@ -13,7 +13,7 @@ import { actions } from "app/store";
 import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
+import { hexToRGBA, truncate, useAsyncTask, useToaster, useTokenFinder, useNetwork } from "app/utils";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -26,7 +26,7 @@ import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
-import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
+import { BN_ZERO } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { Network } from "zilswap-sdk/lib/constants";
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
@@ -580,7 +580,7 @@ const ConfirmTransfer = (props: any) => {
       }
 
       const { destAddress, sourceAddress } = bridgeFormState;
-      if (!destAddress || !sourceAddress || !bridgeToken || !fromToken) return;
+      if (!destAddress || !sourceAddress || !bridgeToken) return;
 
       const bridgeTx: BridgeTx = {
         dstAddr: destAddress,
@@ -592,7 +592,7 @@ const ConfirmTransfer = (props: any) => {
         sourceTxHash: sourceTxHash,
         inputAmount: bridgeFormState.transferAmount,
         interimAddrMnemonics: swthAddrMnemonic!,
-        withdrawFee: withdrawFee?.amount ?? BN_ONE.shiftedBy(3 - fromToken.decimals), // 1000 sat bypass withdraw fee check
+        withdrawFee: withdrawFee?.amount ?? BN_ZERO,
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
 
@@ -709,18 +709,29 @@ const ConfirmTransfer = (props: any) => {
             <Box mt={4} />
           )}
 
-          <Text variant="h2">{!pendingBridgeTx.destinationTxHash ? "Transfer in Progress..." : "Transfer Complete"}</Text>
+          {!pendingBridgeTx.destinationTxHash 
+            ? <Fragment>
+                <Text variant="h2">Transfer in Progress...</Text>
 
-          {!pendingBridgeTx.destinationTxHash &&
-            <Fragment>
-              <Text className={classes.textWarning} margin={0.5} align="center">
-                <WarningRoundedIcon className={classes.warningIcon} /> Do not close this page while we transfer your funds.
-              </Text>
+                <Text className={classes.textWarning} margin={0.5} align="center">
+                  <WarningRoundedIcon className={classes.warningIcon} /> Do not close this page while we transfer your funds.
+                </Text>
 
-              <Text className={classes.textWarning} align="center">
-                Failure to keep this page open during the duration of the transfer may lead to a loss of funds. ZilSwap will not be held accountable and cannot help you retrieve those funds.
-              </Text>
-            </Fragment>
+                <Text className={classes.textWarning} align="center">
+                  Failure to keep this page open during the duration of the transfer may lead to a loss of funds. ZilSwap will not be held accountable and cannot help you retrieve those funds.
+                </Text>
+              </Fragment>
+            : <Fragment>
+                <Text variant="h2">Transfer Complete</Text>
+
+                <Text margin={0.5} align="center">
+                  Your funds have been successfully transferred.
+                </Text>
+
+                <Text color="textSecondary" align="center">
+                  Please check your wallet to view your transferred funds.
+                </Text>
+              </Fragment>
           }
         </Box>
       )}

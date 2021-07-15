@@ -93,8 +93,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         backgroundColor: theme.palette.background?.contrast,
     },
     helpInfo: {
-        verticalAlign: "top",
-        marginLeft: theme.spacing(0.1)
+        verticalAlign: "top!important",
+        marginLeft: "2px!important"
     },
     newLinkIcon: {
         "& path": {
@@ -136,7 +136,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         alignItems: "center"
     },
     noTransaction: {
-        color: theme.palette?.label
+        color: theme.palette?.label,
+        marginBottom: theme.spacing(4)
     },
     chainLogo: {
         height: "18px",
