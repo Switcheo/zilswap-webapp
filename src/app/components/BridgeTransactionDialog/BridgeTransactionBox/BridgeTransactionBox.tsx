@@ -33,6 +33,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         "& .MuiChip-root": {
             borderRadius: 12,
             color: theme.palette.primary.main
+        },
+        "& .MuiChip-label>p:first-child": {
+            fontSize: "11px"
+        },
+        "& .MuiChip-label>p:not(:first-child)": {
+            fontSize: "10px"
         }
     },
     textColoured: {
@@ -51,6 +57,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     textWhite: {
         color: theme.palette.primary.contrastText
+    },
+    tableContainer: {
+        '&::-webkit-scrollbar': {
+            width: '0.4rem'
+        },
+        '&::-webkit-scrollbar-thumb': {
+            backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
+            borderRadius: 12,
+        },
+        padding: theme.spacing(0, 0.5)
     },
     tableHead: {
         "& th.MuiTableCell-root": {
@@ -92,16 +108,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     button: {
         borderRadius: 12,
+        height: "32px",
+        "& .MuiButton-text": {
+            padding: "6px 16px"
+        }
     },
-    tableContainer: {
-        '&::-webkit-scrollbar': {
-            width: '0.4rem'
-        },
-        '&::-webkit-scrollbar-thumb': {
-            backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
-            borderRadius: 12,
-        },
-        padding: theme.spacing(0, 0.5)
+    chip: {
+        width: "75px"
     },
     failedChip: {
         backgroundColor: "#FF5252"
@@ -128,6 +141,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     chainLogo: {
         height: "18px",
         width: "18px",
+    },
+    zilLogo: {
+        marginRight: "2px"
     }
 }));
 
@@ -146,8 +162,6 @@ const BridgeTransactionBox = (props: any) => {
     
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
     const bridgeTxs = bridgeState.bridgeTxs;
-
-    // const bridgeTxsReversed = useMemo(() => bridgeTxs.reverse(), [bridgeTxs]);
 
     const handleNewTransfer = () => {
         dispatch(actions.Layout.toggleShowBridgeTransactions("close"));
@@ -175,11 +189,11 @@ const BridgeTransactionBox = (props: any) => {
         if (tx?.depositFailedAt) {
             return (
                 <Chip
-                    className={classes.failedChip}
+                    className={cls(classes.chip, classes.failedChip)}
                     label={
                         <Fragment>
                             <Typography align="center"><strong>Failed</strong></Typography>
-                            <Typography align="center">{getTransferStage(tx)}</Typography>
+                            <Typography align="center" variant="body1">{getTransferStage(tx)}</Typography>
                         </Fragment>
                     }
                 />
@@ -187,10 +201,10 @@ const BridgeTransactionBox = (props: any) => {
         }
 
         // Completed tx
-        if (tx.destinationTxHash) {
+        if (tx?.destinationTxHash) {
             return (
                 <Chip 
-                    className={classes.completeChip}
+                    className={cls(classes.chip, classes.completeChip)}
                     label={
                         <Typography align="center"><strong>Complete</strong></Typography>
                     }
@@ -201,11 +215,11 @@ const BridgeTransactionBox = (props: any) => {
         // Ongoing tx
         return (
             <Chip
-                className={classes.ongoingChip}
+                className={cls(classes.chip, classes.ongoingChip)}
                 label={
                     <Fragment>
                         <Typography align="center"><strong>Ongoing</strong></Typography>
-                        <Typography align="center">{getTransferStage(tx)}</Typography>
+                        <Typography align="center" variant="body1">{getTransferStage(tx)}</Typography>
                     </Fragment>
                 }
             />
@@ -214,7 +228,7 @@ const BridgeTransactionBox = (props: any) => {
 
     return (
         <Box overflow="hidden" display="flex" flexDirection="column" className={cls(classes.root, className)}>
-            <Box display="flex" justifyContent="space-between" mt={1}>
+            <Box display="flex" justifyContent="space-between" mt={1} pl={2.5} pr={2.5}>
                 <Box display="flex" flexDirection="column">
                     <Text variant="h2">
                         Zil<span className={classes.textColoured}>Bridge</span>
@@ -294,7 +308,7 @@ const BridgeTransactionBox = (props: any) => {
                             <TableCell>
                                 <Text className={classes.transferAmount}>
                                     {tx.srcChain === Blockchain.Zilliqa
-                                        ? <ZilliqaLogo className={classes.chainLogo}/>
+                                        ? <ZilliqaLogo className={cls(classes.chainLogo, classes.zilLogo)}/>
                                         : <EthereumLogo className={classes.chainLogo}/>
                                     }
                                     {CHAIN_NAMES[tx.srcChain]}
@@ -303,7 +317,7 @@ const BridgeTransactionBox = (props: any) => {
 
                                     {tx.dstChain === Blockchain.Ethereum
                                         ? <EthereumLogo className={classes.chainLogo}/>
-                                        : <ZilliqaLogo className={classes.chainLogo}/>
+                                        : <ZilliqaLogo className={cls(classes.chainLogo, classes.zilLogo)}/>
                                     }
                                     {CHAIN_NAMES[tx.dstChain]}
                                 </Text>

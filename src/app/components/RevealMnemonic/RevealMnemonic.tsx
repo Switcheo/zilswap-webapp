@@ -11,7 +11,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
     },
     button: {
-        borderRadius: 12
+        borderRadius: 12,
+        height: "32px",
+        "& .MuiButton-text": {
+            padding: "6px 16px"
+        }
     },
     visibilityIcon: {
         color: theme.palette.label
@@ -36,7 +40,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     actionButton: {
         marginTop: theme.spacing(1),
-        marginBottom: theme.spacing(1),
+        marginBottom: theme.spacing(1.5),
         height: 46,
     },
     warningIcon: {
