@@ -2,9 +2,10 @@ import { Box, Button, FormControl, MenuItem, Select } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { ConfirmTransfer, CurrencyInput, Text } from 'app/components';
-import NetworkSwitchDialog from "app/components/NetworkSwitchDialog";
+import BridgeTransactionDialog from "app/components/BridgeTransactionDialog";
 import FailedBridgeTxWarning from "app/components/FailedBridgeTxWarning";
-import MainCard from 'app/layouts/MainCard';
+import NetworkSwitchDialog from "app/components/NetworkSwitchDialog";
+import BridgeCard from "app/layouts/BridgeCard";
 import { actions } from "app/store";
 import { BridgeFormState, BridgeState } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo } from "app/store/types";
@@ -26,7 +27,6 @@ import { ConnectButton } from "./components";
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "./wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "./zilliqa-logo.svg";
-import BridgeTransactionDialog from "app/components/BridgeTransactionDialog";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
@@ -407,7 +407,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   return (
-    <MainCard {...rest} className={cls(classes.root, className)}>
+    <BridgeCard {...rest} className={cls(classes.root, className)}>
       {!layoutState.showTransferConfirmation && (
         <Box display="flex" flexDirection="column" className={classes.container}>
           <Text variant="h2" align="center" marginTop={2}>
@@ -508,7 +508,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       <NetworkSwitchDialog />
       <FailedBridgeTxWarning />
       <ConfirmTransfer showTransfer={layoutState.showTransferConfirmation} />
-    </MainCard>
+    </BridgeCard>
   )
 }
 

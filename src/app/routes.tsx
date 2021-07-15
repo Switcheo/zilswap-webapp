@@ -32,7 +32,8 @@ const routes: RouteConfig[] = [{
   }, {
     component: () => <Redirect to="/zilo/current"></Redirect>
   }]
-}, {
+},
+{
   path: '/',
   component: MainLayout,
   routes: [{
@@ -47,6 +48,11 @@ const routes: RouteConfig[] = [{
     path: '/bridge',
     exact: true,
     component: lazy(() => import('./views/main/Bridge'))
+  }, {
+    path: '/history',
+    exact: true,
+    compoent: lazy(() => import('./views/main/Bridge'))
+
   }, {
     component: () => <Redirect to="/swap"></Redirect>
   }]

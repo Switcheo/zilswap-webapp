@@ -297,7 +297,7 @@ const BridgeTransactionBox = (props: any) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                    {bridgeTxs.map((tx: BridgeTx, index: number) => (
+                    {bridgeTxs.slice().reverse().map((tx: BridgeTx, index: number) => (
                         <TableRow key={index} className={classes.tableRow}>
                             <TableCell component="th" scope="row">
                                 {/* Incomplete */}
