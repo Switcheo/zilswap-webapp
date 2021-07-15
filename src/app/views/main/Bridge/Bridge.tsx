@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(2, 2, 0),
     },
-    marginBottom: 12
+    marginBottom: 12,
   },
   actionButton: {
     marginTop: theme.spacing(4),

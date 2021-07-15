@@ -13,8 +13,8 @@ import cls from "classnames";
 import React, { Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
-import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
-import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
+import { ReactComponent as EthereumLogo } from "../../main/Bridge/ethereum-logo.svg";
+import { ReactComponent as ZilliqaLogo } from "../../main/Bridge/zilliqa-logo.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -156,7 +156,7 @@ const CHAIN_NAMES = {
     [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
 }
 
-const BridgeTransaction = (props: any) => {
+const TransferHistory = (props: any) => {
     const { className, ...rest } = props;
     const classes = useStyles();
     const dispatch = useDispatch();
@@ -369,4 +369,4 @@ const BridgeTransaction = (props: any) => {
     )
 }
 
-export default BridgeTransaction;
+export default TransferHistory;

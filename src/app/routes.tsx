@@ -51,7 +51,7 @@ const routes: RouteConfig[] = [{
   }, {
     path: '/history',
     exact: true,
-    compoent: lazy(() => import('./views/main/Bridge'))
+    component: lazy(() => import('./views/bridge/TransferHistory'))
 
   }, {
     component: () => <Redirect to="/swap"></Redirect>
