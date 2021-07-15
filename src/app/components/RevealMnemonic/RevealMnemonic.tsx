@@ -59,12 +59,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
 }));
 
+type CopyMap = {
+    [key: string]: boolean
+};
+
 const RevealMnemonic = (props: any) => {
     const { mnemonic } = props;
     const classes = useStyles();
     const [showMnemonic, setShowMnemonic] = useState<boolean>(false);
-
-
+    const [copyMap, setCopyMap] = useState<CopyMap>({});
 
     const onShowMnemonic= () => {
         setShowMnemonic(true);
@@ -76,6 +79,15 @@ const RevealMnemonic = (props: any) => {
 
     const onBeginRecovery = () => {
         setShowMnemonic(false);
+        
+    }
+
+    const onCopy = (text: string) => {
+        navigator.clipboard.writeText(text);
+        setCopyMap({ ...copyMap, [text]: true });
+        setTimeout(() => {
+          setCopyMap({ ...copyMap, [text]: false });
+        }, 500)
     }
 
     return (
@@ -117,7 +129,7 @@ const RevealMnemonic = (props: any) => {
                     </Grid>
 
                     <Box mt={1.5} mb={0.5} display="flex" justifyContent="center">
-                        <Tooltip placement="top" title="Copied!">
+                        <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(mnemonic)} open={!!copyMap[mnemonic]} title="Copied!">
                             <IconButton className={classes.copy} size="small">
                                 <Text>Copy Phrase</Text>
                                 <CopyIcon className={classes.copyIcon}/>

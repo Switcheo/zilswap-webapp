@@ -147,6 +147,8 @@ const BridgeTransactionBox = (props: any) => {
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
     const bridgeTxs = bridgeState.bridgeTxs;
 
+    // const bridgeTxsReversed = useMemo(() => bridgeTxs.reverse(), [bridgeTxs]);
+
     const handleNewTransfer = () => {
         dispatch(actions.Layout.toggleShowBridgeTransactions("close"));
         dispatch(actions.Layout.showTransferConfirmation(false));
