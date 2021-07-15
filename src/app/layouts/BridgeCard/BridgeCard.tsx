@@ -1,9 +1,9 @@
-import { Box, Button, makeStyles, Paper } from '@material-ui/core'
-import { AppTheme } from 'app/theme/types'
-import { PaperProps } from 'material-ui';
-import React, { forwardRef } from 'react'
-import { NavLink as RouterLink } from "react-router-dom";
+import { Box, Button, makeStyles } from '@material-ui/core';
+import { AppTheme } from 'app/theme/types';
 import cls from "classnames";
+import { PaperProps } from 'material-ui';
+import React, { forwardRef } from 'react';
+import { NavLink as RouterLink } from "react-router-dom";
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1, flexBasis: 1 }} >
@@ -22,17 +22,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(6, 2, 2),
-    },
-  },
-  card: {
-    maxWidth: 488,
-    margin: "0 auto",
-    boxShadow: theme.palette.mainBoxShadow,
-    borderRadius: CARD_BORDER_RADIUS,
-    background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    [theme.breakpoints.down("sm")]: {
-      maxWidth: 450,
     },
   },
   tabs: {
@@ -107,9 +96,9 @@ const BridgeCard: React.FC<PaperProps> = (props: any) => {
             to="/history">Transfer History</Button>
         </Box>
       </Box>
-      <Paper {...rest} className={classes.card}>
-        <Box>{children}</Box>
-      </Paper>
+      <Box {...rest}>
+        {children}
+      </Box>
     </Box>
   )
 }

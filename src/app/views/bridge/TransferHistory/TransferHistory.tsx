@@ -18,13 +18,16 @@ import { ReactComponent as ZilliqaLogo } from "../../main/Bridge/zilliqa-logo.sv
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
+    },
+    container: {
+        margin: "0 auto",
+        boxShadow: theme.palette.mainBoxShadow,
+        borderRadius: 12,
+        background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
+        border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
         backgroundColor: theme.palette.background.default,
-        borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-        borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-        borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-        borderRadius: "0 0 12px 12px",
         padding: theme.spacing(2, 8, 2),
-        minWidth: 510,
+        maxWidth: 1200,
         [theme.breakpoints.down("sm")]: {
             padding: theme.spacing(2, 3, 2),
         },
@@ -35,11 +38,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             borderRadius: 12,
             color: theme.palette.primary.main
         },
-        "& .MuiChip-label>p:first-child": {
+        // "& .MuiChip-label>p:first-child": {
+        //     fontSize: "12px"
+        // },
+        "& .MuiChip-label>p:not(:first-child)": {
             fontSize: "11px"
         },
-        "& .MuiChip-label>p:not(:first-child)": {
-            fontSize: "10px"
+        "& .MuiTableCell-stickyHeader": {
+            backgroundColor: "transparent"
         }
     },
     textColoured: {
@@ -67,7 +73,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
             borderRadius: 12,
         },
-        padding: theme.spacing(0, 0.5)
+        padding: theme.spacing(0, 0.5),
+    },
+    table: {
+        borderCollapse: "separate",
+        borderSpacing: theme.spacing(0, 1)
     },
     tableHead: {
         "& th.MuiTableCell-root": {
@@ -77,7 +87,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     tableRow: {
         "& .MuiTableCell-root": {
             whiteSpace: "nowrap",
-            borderBottom: `5px solid ${theme.palette.background.default}`,
+            border: "1px transparent",
             borderRadius: 12,
             "&:first-child": {
                 borderTopRightRadius: 0,
@@ -166,7 +176,6 @@ const TransferHistory = (props: any) => {
     const bridgeTxs = bridgeState.bridgeTxs;
 
     const handleNewTransfer = () => {
-        dispatch(actions.Layout.toggleShowBridgeTransactions("close"));
         dispatch(actions.Layout.showTransferConfirmation(false));
     }
 
@@ -230,14 +239,14 @@ const TransferHistory = (props: any) => {
 
     return (
         <BridgeCard {...rest} className={cls(classes.root, className)}>
-            <Box overflow="hidden" display="flex" flexDirection="column" className={cls(classes.root, className)}>
-                <Box display="flex" justifyContent="space-between" mt={1} pl={2.5} pr={2.5}>
+            <Box overflow="hidden" display="flex" flexDirection="column" className={classes.container}>
+                <Box display="flex" justifyContent="space-between" mt={2} pl={4} pr={4}>
                     <Box display="flex" flexDirection="column">
                         <Text variant="h2">
                             Zil<span className={classes.textColoured}>Bridge</span>
                         </Text>
                         
-                        <Text variant="h6">
+                        <Text variant="h3">
                             Your Transfer History
                         </Text>
                     </Box>
@@ -251,7 +260,7 @@ const TransferHistory = (props: any) => {
                 </Box>
 
                 <TableContainer className={classes.tableContainer}>
-                    <Table stickyHeader>
+                    <Table stickyHeader className={classes.table}>
                         <TableHead className={classes.tableHead}>
                             <TableRow>
                                 <TableCell>
@@ -332,13 +341,13 @@ const TransferHistory = (props: any) => {
                                         <CurrencyLogo className={classes.currencyLogo} address={bridgeableTokenFinder(tx.srcToken, tx.srcChain)?.tokenAddress} />
                                     </Text>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell align="center">
                                     {getTransferStatus(tx)}
                                 </TableCell>
                                 <TableCell align="center">
                                     <RevealMnemonic mnemonic={tx.interimAddrMnemonics} />
                                 </TableCell>
-                                <TableCell>
+                                <TableCell align="center">
                                     <Button
                                         href="https://app.dem.exchange/reset_password"
                                         target="_blank"
@@ -348,7 +357,7 @@ const TransferHistory = (props: any) => {
                                         <Text>Recover</Text>
                                     </Button>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell align="center">
                                     <Button
                                         className={classes.button}
                                         endIcon={<ArrowRightRoundedIcon className={classes.arrowRightIcon} />}

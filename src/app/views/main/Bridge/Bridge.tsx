@@ -29,13 +29,21 @@ import { ReactComponent as WavyLine } from "./wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "./zilliqa-logo.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
-  root: {},
+  root: {
+  },
   container: {
-    padding: theme.spacing(4, 4, 0),
-    [theme.breakpoints.down("xs")]: {
+    maxWidth: 488,
+    margin: "0 auto",
+    boxShadow: theme.palette.mainBoxShadow,
+    borderRadius: 12,
+    background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    [theme.breakpoints.down("sm")]: {
+      maxWidth: 450,
       padding: theme.spacing(2, 2, 0),
     },
-    marginBottom: 12,
+    padding: theme.spacing(4, 4, 0),
+    marginBottom: 12
   },
   actionButton: {
     marginTop: theme.spacing(4),
