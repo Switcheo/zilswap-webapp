@@ -5,13 +5,14 @@ import { DialogModal } from "app/components";
 import { BridgeState } from "app/store/bridge/types";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { hexToRGBA, useTaskSubscriber } from "app/utils";
-import { BIG_ZERO, LoadingKeys, LocalStorageKeys } from "app/utils/constants";
+import { BIG_ZERO, LoadingKeys } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
 import { CurrencyList } from "./components";
+import { actions } from "app/store";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -89,8 +90,8 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const classes = useStyles();
   const [search, setSearch] = useState("");
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
-  const [userTokens, setUserTokens] = useState<string[]>([]);
   const [loadingConnectWallet] = useTaskSubscriber(...LoadingKeys.connectWallet);
+  const dispatch = useDispatch();
 
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
@@ -127,9 +128,9 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     const searchTerm = search.toLowerCase().trim();
     if (token.isZil && hideZil) return false;
     if (!token.isZil && !token.pool && hideNoPool) return false;
-    if (searchTerm === "" && !token.registered && !userTokens.includes(token.address)) return false;
+    if (searchTerm === "" && !token.registered && !tokenState.userSavedTokens.includes(token.address)) return false;
 
-    if (!token.registered && !userTokens.includes(token.address)) {
+    if (!token.registered && !tokenState.userSavedTokens.includes(token.address)) {
       return token.address.toLowerCase() === searchTerm;
     }
 
@@ -139,15 +140,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   };
 
   const onToggleUserToken = (token: TokenInfo) => {
-    if (userTokens.indexOf(token.address) >= 0) {
-      userTokens.splice(userTokens.indexOf(token.address), 1);
-    } else {
-      userTokens.push(token.address);
-    }
-
-    const savedTokensData = JSON.stringify(userTokens);
-    localStorage.setItem(LocalStorageKeys.UserTokenList, savedTokensData);
-    setUserTokens([...userTokens]);
+    dispatch(actions.Token.updateUserSavedTokens(token.address))
   };
 
   const filteredTokens = tokens.filter(filterSearch);
@@ -177,7 +170,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
             search={search}
             emptyStateLabel="No token found."
             showContribution={showContribution}
-            userTokens={userTokens}
+            userTokens={tokenState.userSavedTokens}
             onToggleUserToken={onToggleUserToken}
             onSelectCurrency={onSelectCurrency}
             className={clsx(classes.currencies)} />
