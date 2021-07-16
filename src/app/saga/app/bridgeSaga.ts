@@ -231,12 +231,33 @@ function* watchActiveTxConfirmations() {
     logger("bridge saga", "query block confirmations");
     try {
       const { activeBridgeTx } = getBridge(yield select());
+      if (activeBridgeTx) {
+        if (activeBridgeTx?.withdrawTxHash) {
+          try {
+            const network = TradeHubSDK.Network.DevNet;
+            const sdk = new TradeHubSDK({ network });
+            yield call([sdk, sdk.initialize]);
+            const tradehubtx = (yield sdk.api.getTx({ hash: activeBridgeTx.withdrawTxHash })) as TradeHubSDK.RestModels.TxnHistory;
+            const blocks = (yield sdk.api.getLatestBlock()) as TradeHubSDK.RestModels.CosmosBlock;
+            activeBridgeTx.depositConfirmations = Number(blocks?.block.header.height) - Number(tradehubtx.height);
+            yield put(actions.Bridge.addBridgeTx([activeBridgeTx]));
+          } catch (error) {
+            console.error("error retrieving tradehub confirmation info");
+            console.error(error);
+          }
+        }
 
-      if (activeBridgeTx?.destinationTxHash) {
-        const defaultProvider = ethers.getDefaultProvider("ropsten");
-        const ethResp = (yield defaultProvider.getTransaction(activeBridgeTx.destinationTxHash)) as TransactionResponse;
-        activeBridgeTx.depositConfirmations = ethResp.confirmations;
-        yield put(actions.Bridge.addBridgeTx([activeBridgeTx]));
+        if (activeBridgeTx?.destinationTxHash) {
+          try {
+            const defaultProvider = ethers.getDefaultProvider("ropsten");
+            const ethResp = (yield defaultProvider.getTransaction(activeBridgeTx.destinationTxHash)) as TransactionResponse;
+            activeBridgeTx.ethConfirmations = ethResp.confirmations;
+            yield put(actions.Bridge.addBridgeTx([activeBridgeTx]));
+          } catch (error) {
+            console.error("error retrieving ethereum confirmation info");
+            console.error(error);
+          }
+        }
       }
     } catch (error) {
       console.error("watchActiveTxConfirmations error")

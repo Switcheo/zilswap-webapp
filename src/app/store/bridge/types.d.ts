@@ -104,4 +104,7 @@ export interface BridgeTx {
 
   // confirmation blocks
   depositConfirmations?: number;
+
+  // external tx confirmations
+  ethConfirmations?: number;
 }
