@@ -126,7 +126,7 @@ const RevealMnemonic = (props: any) => {
                         {mnemonic.split(" ").map((word: any) => (
                             <Grid item xs={4}>
                                 <Box className={classes.word} display="flex" justifyContent="center">
-                                    <Text>{word}</Text>
+                                    <Text variant="button">{word}</Text>
                                 </Box>
                             </Grid>
                         ))}

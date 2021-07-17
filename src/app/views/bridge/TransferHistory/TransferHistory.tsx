@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
 import { ReactComponent as EthereumLogo } from "../../main/Bridge/ethereum-logo.svg";
 import { ReactComponent as ZilliqaLogo } from "../../main/Bridge/zilliqa-logo.svg";
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -38,14 +39,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             borderRadius: 12,
             color: theme.palette.primary.main
         },
-        // "& .MuiChip-label>p:first-child": {
-        //     fontSize: "12px"
-        // },
+        "& .MuiChip-label>p:first-child": {
+            fontSize: "12px"
+        },
         "& .MuiChip-label>p:not(:first-child)": {
             fontSize: "11px"
         },
         "& .MuiTableCell-stickyHeader": {
             backgroundColor: "transparent"
+        },
+        "& .MuiTypography-body1": {
+            fontSize: "14px"
         }
     },
     textColoured: {
@@ -110,7 +114,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     newLinkIcon: {
         "& path": {
           fill: theme.palette.label
-        }
+        },
+        marginBottom: "2px"
     },
     arrowRightIcon: {
         color: theme.palette.label,
@@ -140,10 +145,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         height: "20px",
         width: "20px",
         marginLeft: theme.spacing(0.5),
-        marginRight: theme.spacing(0.5)
+        marginRight: theme.spacing(0.5),
     },
     transferAmount: {
-        display: "inline-flex",
+        display: "flex",
         alignItems: "center"
     },
     noTransaction: {
@@ -252,7 +257,7 @@ const TransferHistory = (props: any) => {
                     </Box>
 
                     <Box display="flex" pt={0.5} pb={0.5}>
-                        <Button color="primary" variant="contained" className={classes.newTransferButton} onClick={handleNewTransfer}>
+                        <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.newTransferButton} onClick={handleNewTransfer}>
                             <AddIcon fontSize="small" className={classes.addIcon} />
                             <Text variant="button" className={classes.textWhite}>New Transfer</Text>
                         </Button>
@@ -312,10 +317,12 @@ const TransferHistory = (props: any) => {
                             <TableRow key={index} className={classes.tableRow}>
                                 <TableCell component="th" scope="row">
                                     {/* Incomplete */}
-                                    {tx?.depositFailedAt
-                                        ? tx.depositFailedAt.format('DD MMM YYYY')
-                                        : tx?.depositTxConfirmedAt?.format('DD MMM YYYY')
-                                    }
+                                    <Text>
+                                        {tx?.depositFailedAt
+                                            ? tx.depositFailedAt.format('DD MMM YYYY')
+                                            : tx?.depositTxConfirmedAt?.format('DD MMM YYYY')
+                                        }
+                                    </Text>
                                 </TableCell>
                                 <TableCell>
                                     <Text className={classes.transferAmount}>
