@@ -8,7 +8,6 @@ const initial_state: LayoutState = {
   showAdvancedSetting: false,
   showNetworkSwitchDialog: false,
   showTransactionDialog: false,
-  showBridgeTransactionDialog: false,
   showTransferConfirmation: false,
   showMnemonicInstruction: false,
   liquidityEarnHidden: false,
@@ -45,11 +44,6 @@ const reducer = (state: LayoutState = initial_state, action: any) => {
       return {
         ...state,
         showNetworkSwitchDialog: !action.override ? !state.showTransactionDialog : action.override === "open",
-      };
-    case LayoutActionTypes.TOGGLE_SHOW_BRIDGE_TRANSACTIONS:
-      return {
-        ...state,
-        showBridgeTransactionDialog: !action.override ? !state.showBridgeTransactionDialog : action.override === "open",
       };
     case LayoutActionTypes.TOGGLE_SHOW_TRANSACTIONS:
       return {

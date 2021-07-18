@@ -2,7 +2,6 @@ import { Box, Button, FormControl, MenuItem, Select } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { ConfirmTransfer, CurrencyInput, Text } from 'app/components';
-import BridgeTransactionDialog from "app/components/BridgeTransactionDialog";
 import FailedBridgeTxWarning from "app/components/FailedBridgeTxWarning";
 import NetworkSwitchDialog from "app/components/NetworkSwitchDialog";
 import BridgeCard from "app/layouts/BridgeCard";
@@ -10,7 +9,7 @@ import { actions } from "app/store";
 import { BridgeFormState, BridgeState } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, strings, useNetwork, useTokenFinder } from "app/utils";
+import { hexToRGBA, useNetwork, useTokenFinder } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
@@ -392,27 +391,23 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }, [isCorrectChain, formState, bridgeFormState.transferAmount])
 
   // Button should be disabled if currency input is disabled
-  const onSelectMax = () => {
-    if (!fromToken) return;
+  // const onSelectMax = () => {
+  //   if (!fromToken) return;
 
-    const balance = strings.bnOrZero(fromToken.balance);
+  //   const balance = strings.bnOrZero(fromToken.balance);
 
-    // do the gas stuff here
+  //   // do the gas stuff here
 
-    setFormState({
-      ...formState,
-      transferAmount: balance.shiftedBy(-fromToken.decimals).toString(),
-    })
+  //   setFormState({
+  //     ...formState,
+  //     transferAmount: balance.shiftedBy(-fromToken.decimals).toString(),
+  //   })
 
-    dispatch(actions.Bridge.updateForm({
-      forNetwork: network,
-      transferAmount: balance.shiftedBy(-fromToken.decimals),
-    }))
-  }
-
-  const viewTransferHistory = () => {
-    dispatch(actions.Layout.toggleShowBridgeTransactions("open"));
-  }
+  //   dispatch(actions.Bridge.updateForm({
+  //     forNetwork: network,
+  //     transferAmount: balance.shiftedBy(-fromToken.decimals),
+  //   }))
+  // }
 
   return (
     <BridgeCard {...rest} className={cls(classes.root, className)}>
@@ -493,10 +488,11 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             onCurrencyChange={onCurrencyChange}
             tokenList={tokenList}
           />
-          <Box mt={1} display="flex" justifyContent="space-between">
-              <Button color="primary" variant="contained" onClick={viewTransferHistory}>View Transfers</Button>
+
+          {/* <Box mt={1} display="flex">
               <Button color="primary" variant="contained" disabled={!formState.sourceAddress || !formState.destAddress} onClick={onSelectMax}>Max</Button>
-          </Box>
+          </Box> */}
+
           <Button
             onClick={showTransfer}
             disabled={!isSubmitEnabled}
@@ -512,9 +508,8 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           </Button>
         </Box>
       )}
-      <BridgeTransactionDialog />
       <NetworkSwitchDialog />
-      {/* <FailedBridgeTxWarning /> */}
+      <FailedBridgeTxWarning />
       <ConfirmTransfer showTransfer={layoutState.showTransferConfirmation} />
     </BridgeCard>
   )

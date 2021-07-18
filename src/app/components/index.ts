@@ -1,5 +1,4 @@
 export { default as AmountLabel } from "./AmountLabel";
-export { default as BridgeTransactionDialog } from "./BridgeTransactionDialog";
 export { default as ConfirmTransfer } from "./ConfirmTransfer";
 export { default as ContrastBox } from "./ContrastBox";
 export { default as CopyIcon } from "./copy.svg";
