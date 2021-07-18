@@ -514,7 +514,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       )}
       <BridgeTransactionDialog />
       <NetworkSwitchDialog />
-      <FailedBridgeTxWarning />
+      {/* <FailedBridgeTxWarning /> */}
       <ConfirmTransfer showTransfer={layoutState.showTransferConfirmation} />
     </BridgeCard>
   )

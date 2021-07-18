@@ -1,13 +1,14 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Link, makeStyles, Step, StepConnector, StepLabel, Stepper, withStyles } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, IconButton, Link, makeStyles, Step, StepConnector, StepLabel, Stepper, withStyles } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
+import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
 import { Transaction } from '@zilliqa-js/account';
 import { HTTPProvider } from '@zilliqa-js/core';
 import { toBech32Address } from "@zilliqa-js/zilliqa";
-import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
+import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, MnemonicInstruction, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/store/bridge/types";
@@ -114,6 +115,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   textWarning: {
     color: theme.palette.warning.main
+  },
+  textSuccess: {
+    color: theme.palette.primary.dark
+  },
+  successIcon: {
+    verticalAlign: "middle",
+    marginBottom: theme.spacing(0.7)
   },
   dropDownIcon: {
     color: theme.palette.primary.light
@@ -228,6 +236,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fontSize: "12px"
     },
   },
+  instructionsButton: {
+    backgroundColor: theme.palette.warning.main,
+    padding: "6px 16px",
+    marginTop: theme.spacing(2),
+    "&:hover": {
+      backgroundColor: `rgba${hexToRGBA(theme.palette.warning.main, 0.8)}`
+    }
+  }
 }));
 
 const ColorlibConnector = withStyles({
@@ -688,6 +704,10 @@ const ConfirmTransfer = (props: any) => {
     return 30;
   }
 
+  const handleShowMnemonicInstruction = () => {
+    dispatch(actions.Layout.toggleShowMnemonicInstruction("open"));
+  }
+
   return (
     <Box className={cls(classes.root, classes.container)}>
       {canNavigateBack && (
@@ -700,7 +720,7 @@ const ConfirmTransfer = (props: any) => {
         <Box display="flex" flexDirection="column" alignItems="center">
           <Text variant="h2">Confirm Transfer</Text>
 
-          <Text margin={0.5} align="center">
+          <Text variant="h4" margin={0.5} align="center">
             Please review your transaction carefully.
           </Text>
 
@@ -716,26 +736,28 @@ const ConfirmTransfer = (props: any) => {
             <Box mt={4} />
           )}
 
-          {!pendingBridgeTx.destinationTxHash 
+          {!pendingBridgeTx.destinationTxHash
             ? <Fragment>
                 <Text variant="h2">Transfer in Progress...</Text>
 
-                <Text className={classes.textWarning} margin={0.5} align="center">
-                  <WarningRoundedIcon className={classes.warningIcon} /> Do not close this page while we transfer your funds.
+                <Text variant="h4" className={classes.textWarning} margin={0.5} align="center">
+                  <WarningRoundedIcon className={classes.warningIcon}/> Warning: Please read these instructions carefully before closing this window to avoid losing your funds.
                 </Text>
 
-                <Text className={classes.textWarning} align="center">
-                  Failure to keep this page open during the duration of the transfer may lead to a loss of funds. ZilSwap will not be held accountable and cannot help you retrieve those funds.
-                </Text>
+                <Button onClick={handleShowMnemonicInstruction} className={classes.instructionsButton} size="small" variant="contained">
+                  Read Instructions
+                </Button>
               </Fragment>
             : <Fragment>
-                <Text variant="h2">Transfer Complete</Text>
+                <Text variant="h2" className={classes.textSuccess}>
+                  <CheckCircleRoundedIcon fontSize="inherit" className={classes.successIcon}/> Transfer Complete
+                </Text>
 
-                <Text margin={0.5} align="center">
+                <Text variant="h4" margin={0.5} align="center">
                   Your funds have been successfully transferred.
                 </Text>
 
-                <Text color="textSecondary" align="center">
+                <Text color="textSecondary" marginTop={0.5} align="center">
                   Please check your wallet to view your transferred funds.
                 </Text>
               </Fragment>
@@ -978,6 +1000,8 @@ const ConfirmTransfer = (props: any) => {
           Conduct Another Transfer
         </FancyButton>
       )}
+
+      <MnemonicInstruction mnemonic={pendingBridgeTx?.interimAddrMnemonics}/>
     </Box>
   )
 }

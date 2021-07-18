@@ -58,7 +58,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         }
     },
     copy: {
-        padding: theme.spacing(1.25, 2),
+        height: 38,
+        width: 120,
         borderRadius: 12
     },
 }));
@@ -114,11 +115,11 @@ const RevealMnemonic = (props: any) => {
 
                     <Box mt={2} mb={2} display="flex" flexDirection="column" alignItems="center">
                         <Text marginBottom={1} variant="h6" align="center">
-                            Never disclose your mnemonic phrase to anyone.
+                            Never disclose your transfer key to anyone.
                         </Text>
 
                         <Text marginBottom={1} align="center">
-                            You may only use the following mnemonic phrase to recover <br/> your transfer if it failed in Stage 2.
+                            You may only use the following key phrase to recover <br/> your transfer if it failed in Stage 2.
                         </Text>
                     </Box>
 
