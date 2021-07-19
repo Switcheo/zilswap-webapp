@@ -179,9 +179,18 @@ const TransferHistory = (props: any) => {
     
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
     const bridgeTxs = bridgeState.bridgeTxs;
+    const pendingBridgeTx = bridgeState.activeBridgeTx;
 
+    // Need to check this part
     const handleNewTransfer = () => {
+        if (pendingBridgeTx) {
+            dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
+        }
         dispatch(actions.Layout.showTransferConfirmation(false));
+    }
+
+    const handleShowDetails = () => {
+        dispatch(actions.Layout.showTransferConfirmation(true));
     }
 
     const getTransferStage = (tx: BridgeTx) => {
@@ -366,6 +375,9 @@ const TransferHistory = (props: any) => {
                                 </TableCell>
                                 <TableCell align="center">
                                     <Button
+                                        component={Link} 
+                                        to={`/history/${tx.sourceTxHash}`}
+                                        onClick={handleShowDetails}
                                         className={classes.button}
                                         endIcon={<ArrowRightRoundedIcon className={classes.arrowRightIcon} />}
                                         >

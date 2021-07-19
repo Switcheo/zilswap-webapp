@@ -25,7 +25,7 @@ import { ethers } from "ethers";
 import { History } from "history";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router";
+import { useHistory, useParams } from "react-router";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import { BN_ZERO } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { Network } from "zilswap-sdk/lib/constants";
@@ -334,14 +334,21 @@ const ConfirmTransfer = (props: any) => {
   const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
   const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
   const bridgeToken = useSelector<RootState, BridgeableToken | undefined>(state => state.bridge.formState.token);
+  const bridgeTxs = bridgeState.bridgeTxs;
   const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK")
 
   const [showTransactions, setShowTransactions] = useState<boolean>(true);
   const [tokenApproval, setTokenApproval] = useState<boolean>(false);
   const [approvalHash, setApprovalHash] = useState<string>("");
   const [swthAddrMnemonic, setSwthAddrMnemonic] = useState<string | undefined>();
+  
+  let pendingBridgeTx = bridgeState.activeBridgeTx;
 
-  const pendingBridgeTx = bridgeState.activeBridgeTx;
+  const { hash } = useParams();
+
+  if (hash) {
+    pendingBridgeTx = bridgeTxs.filter(bridgeTx => bridgeTx.sourceTxHash === hash)[0];
+  }
 
   const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
 
