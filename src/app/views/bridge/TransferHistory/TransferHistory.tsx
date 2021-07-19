@@ -39,6 +39,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             borderRadius: 12,
             color: theme.palette.primary.main
         },
+        "& .MuiChip-label": {
+            paddingLeft: 0,
+            paddingRight: 0
+        },
         "& .MuiChip-label>p:first-child": {
             fontSize: "12px"
         },
@@ -274,7 +278,7 @@ const TransferHistory = (props: any) => {
                 </Box>
 
                 <TableContainer className={classes.tableContainer}>
-                    <Table stickyHeader className={classes.table}>
+                    <Table className={classes.table}>
                         <TableHead className={classes.tableHead}>
                             <TableRow>
                                 <TableCell>
@@ -353,7 +357,6 @@ const TransferHistory = (props: any) => {
                                 <TableCell align="center">
                                     <Text className={classes.transferAmount}>
                                         {toHumanNumber(tx.inputAmount, 2)}
-                                        {/* <CurrencyLogo className={classes.currencyLogo} currency={"ZWAP"} address={ZWAP_TOKEN_ADDRESS}/> */}
                                         <CurrencyLogo className={classes.currencyLogo} address={bridgeableTokenFinder(tx.srcToken, tx.srcChain)?.tokenAddress} />
                                     </Text>
                                 </TableCell>

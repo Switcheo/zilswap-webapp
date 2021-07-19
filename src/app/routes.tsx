@@ -51,7 +51,7 @@ const routes: RouteConfig[] = [{
   },  {
     path: '/history/:hash',
     exact: true,
-    component: lazy(() => import('./views/main/Bridge'))
+    component: lazy(() => import('./views/bridge/ShowDetails'))
 
   }, {
     path: '/history',
