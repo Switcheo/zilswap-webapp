@@ -193,9 +193,9 @@ const TransferHistory = (props: any) => {
         dispatch(actions.Layout.showTransferConfirmation(false));
     }
 
-    const handleShowDetails = () => {
-        dispatch(actions.Layout.showTransferConfirmation(true));
-    }
+    // const handleShowDetails = () => {
+    //     dispatch(actions.Layout.showTransferConfirmation(true));
+    // }
 
     const getTransferStage = (tx: BridgeTx) => {
         if (tx?.withdrawTxHash) {
@@ -380,7 +380,6 @@ const TransferHistory = (props: any) => {
                                     <Button
                                         component={Link} 
                                         to={`/history/${tx.sourceTxHash}`}
-                                        onClick={handleShowDetails}
                                         className={classes.button}
                                         endIcon={<ArrowRightRoundedIcon className={classes.arrowRightIcon} />}
                                         >
