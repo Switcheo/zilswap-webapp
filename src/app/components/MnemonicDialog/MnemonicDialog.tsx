@@ -77,16 +77,16 @@ type CopyMap = {
     [key: string]: boolean
 };
 
-const MnemonicInstruction = (props: any) => {
+const MnemonicDialog = (props: any) => {
     const { mnemonic } = props;
     const classes = useStyles();
     const dispatch = useDispatch();
-    const showMnemonicInstruction = useSelector<RootState, boolean>(state => state.layout.showMnemonicInstruction);
+    const showMnemonicDialog = useSelector<RootState, boolean>(state => state.layout.showMnemonicDialog);
     const [showPhrase, setShowPhrase] = useState<boolean>(false);
     const [copyMap, setCopyMap] = useState<CopyMap>({});
 
     const onCloseDialog = () => {
-        dispatch(actions.Layout.toggleShowMnemonicInstruction("close"));
+        dispatch(actions.Layout.toggleShowMnemonic("close"));
     }
 
     const onCopy = (text: string) => {
@@ -103,7 +103,7 @@ const MnemonicInstruction = (props: any) => {
 
     return (
         <DialogModal
-            open={showMnemonicInstruction}
+            open={showMnemonicDialog}
             onClose={onCloseDialog}
             >
             <Box overflow="hidden" display="flex" flexDirection="column" className={classes.dialogBox}>
@@ -159,4 +159,4 @@ const MnemonicInstruction = (props: any) => {
     )
 }
 
-export default MnemonicInstruction;
+export default MnemonicDialog;

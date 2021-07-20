@@ -1,5 +1,5 @@
 import { Box, Button, Grid, IconButton, makeStyles, Tooltip } from "@material-ui/core";
-import { VisibilityRounded as Visibility } from "@material-ui/icons";
+import { VisibilityOff, VisibilityRounded as Visibility } from "@material-ui/icons";
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
 import { DialogModal, Text } from 'app/components';
 import { AppTheme } from "app/theme/types";
@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         height: "32px",
         "& .MuiButton-text": {
             padding: "6px 16px"
-        }
+        },
     },
     visibilityIcon: {
         color: theme.palette.label
@@ -62,6 +62,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         width: 120,
         borderRadius: 12
     },
+    revealButton: {
+        borderRadius: 12,
+        height: 38,
+        width: 122,
+        "& .MuiButton-text": {
+            padding: "6px 16px"
+        },
+        border: `2px solid ${theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : "#D2E5DF"}`
+    }
 }));
 
 type CopyMap = {
@@ -71,19 +80,20 @@ type CopyMap = {
 const RevealMnemonic = (props: any) => {
     const { mnemonic } = props;
     const classes = useStyles();
-    const [showMnemonic, setShowMnemonic] = useState<boolean>(false);
+    const [showMnemonicDialog, setShowMnemonicDialog] = useState<boolean>(false);
+    const [showPhrase, setShowPhrase] = useState<boolean>(false);
     const [copyMap, setCopyMap] = useState<CopyMap>({});
 
-    const onShowMnemonic= () => {
-        setShowMnemonic(true);
+    const onShowMnemonicDialog = () => {
+        setShowMnemonicDialog(true);
     }
 
     const onCloseDialog = () => {
-        setShowMnemonic(false);
+        setShowMnemonicDialog(false);
     }
 
     const onBeginRecovery = () => {
-        setShowMnemonic(false);
+        setShowMnemonicDialog(false);
         
     }
 
@@ -95,17 +105,21 @@ const RevealMnemonic = (props: any) => {
         }, 500)
     }
 
+    const handleShowPhrase = () => {
+        setShowPhrase(!showPhrase);
+    }
+
     return (
         <Fragment>
             <Button
-                onClick={onShowMnemonic}
+                onClick={onShowMnemonicDialog}
                 className={classes.button}
                 endIcon={<Visibility className={classes.visibilityIcon}/>}
                 >
                 <Text>Reveal</Text>
             </Button>
             <DialogModal
-                open={showMnemonic}
+                open={showMnemonicDialog}
                 onClose={onCloseDialog}
                 >
                 <Box overflow="hidden" display="flex" flexDirection="column" className={classes.dialogBox}>
@@ -118,16 +132,27 @@ const RevealMnemonic = (props: any) => {
                             Never disclose your transfer key to anyone.
                         </Text>
 
-                        <Text marginBottom={1} align="center">
+                        <Text align="center">
                             You may only use the following key phrase to recover <br/> your transfer if it failed in Stage 2.
                         </Text>
+                    </Box>
+
+                    <Box display="flex" justifyContent="center" mb={2.5}>
+                        <Button
+                            onClick={handleShowPhrase}
+                            className={classes.revealButton}
+                            variant="outlined"
+                            endIcon={showPhrase ? <VisibilityOff className={classes.visibilityIcon}/> : <Visibility className={classes.visibilityIcon}/>}
+                            >
+                            <Text>{showPhrase ? "Hide" : "Reveal"}</Text>
+                        </Button>
                     </Box>
 
                     <Grid container spacing={1}>
                         {mnemonic.split(" ").map((word: any) => (
                             <Grid item xs={4}>
                                 <Box className={classes.word} display="flex" justifyContent="center">
-                                    <Text variant="button">{word}</Text>
+                                    <Text variant="button">{showPhrase ? word : "***"}</Text>
                                 </Box>
                             </Grid>
                         ))}

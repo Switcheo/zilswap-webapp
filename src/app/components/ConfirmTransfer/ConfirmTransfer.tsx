@@ -8,7 +8,7 @@ import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
 import { Transaction } from '@zilliqa-js/account';
 import { HTTPProvider } from '@zilliqa-js/core';
 import { toBech32Address } from "@zilliqa-js/zilliqa";
-import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, MnemonicInstruction, Text } from "app/components";
+import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, MnemonicDialog, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/store/bridge/types";
@@ -704,8 +704,8 @@ const ConfirmTransfer = (props: any) => {
     return 30;
   }
 
-  const handleShowMnemonicInstruction = () => {
-    dispatch(actions.Layout.toggleShowMnemonicInstruction("open"));
+  const handleShowMnemonicDialog = () => {
+    dispatch(actions.Layout.toggleShowMnemonic("open"));
   }
 
   return (
@@ -744,7 +744,7 @@ const ConfirmTransfer = (props: any) => {
                   <WarningRoundedIcon className={classes.warningIcon}/> Warning: Please read these instructions carefully before closing this window to avoid losing your funds.
                 </Text>
 
-                <Button onClick={handleShowMnemonicInstruction} className={classes.instructionsButton} size="small" variant="contained">
+                <Button onClick={handleShowMnemonicDialog} className={classes.instructionsButton} size="small" variant="contained">
                   Read Instructions
                 </Button>
               </Fragment>
@@ -1001,7 +1001,7 @@ const ConfirmTransfer = (props: any) => {
         </FancyButton>
       )}
 
-      <MnemonicInstruction mnemonic={pendingBridgeTx?.interimAddrMnemonics}/>
+      <MnemonicDialog mnemonic={pendingBridgeTx?.interimAddrMnemonics}/>
     </Box>
   )
 }

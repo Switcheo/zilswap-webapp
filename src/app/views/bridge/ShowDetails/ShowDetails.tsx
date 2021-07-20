@@ -5,7 +5,7 @@ import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutline
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
 import { toBech32Address } from "@zilliqa-js/zilliqa";
-import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, MnemonicInstruction, Text } from "app/components";
+import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, MnemonicDialog, Text } from "app/components";
 import { ReactComponent as StraightLine } from "app/components/ConfirmTransfer/straight-line.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import BridgeCard from "app/layouts/BridgeCard";
@@ -384,8 +384,8 @@ const ShowDetails = (props: any) => {
     return 30;
   }
 
-  const handleShowMnemonicInstruction = () => {
-    dispatch(actions.Layout.toggleShowMnemonicInstruction("open"));
+  const handleShowMnemonicDialog = () => {
+    dispatch(actions.Layout.toggleShowMnemonic("open"));
   }
 
   return (
@@ -419,7 +419,7 @@ const ShowDetails = (props: any) => {
                         <WarningRoundedIcon className={classes.warningIcon}/> Warning: Please read these instructions carefully before closing this window to avoid losing your funds.
                         </Text>
 
-                        <Button onClick={handleShowMnemonicInstruction} className={classes.instructionsButton} size="small" variant="contained">
+                        <Button onClick={handleShowMnemonicDialog} className={classes.instructionsButton} size="small" variant="contained">
                         Read Instructions
                         </Button>
                     </Fragment>
@@ -674,7 +674,7 @@ const ShowDetails = (props: any) => {
                 </FancyButton>
             )}
 
-            <MnemonicInstruction mnemonic={pendingBridgeTx?.interimAddrMnemonics}/>
+            <MnemonicDialog mnemonic={pendingBridgeTx?.interimAddrMnemonics}/>
         </Box>
     </BridgeCard>
   )
