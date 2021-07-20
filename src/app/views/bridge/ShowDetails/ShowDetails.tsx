@@ -407,9 +407,8 @@ const ShowDetails = (props: any) => {
 
             {!!pendingBridgeTx && (
                 <Box display="flex" flexDirection="column" alignItems="center">
-                {!canNavigateBack && (
-                    <Box mt={4} />
-                )}
+                
+                <Box mt={4} />
 
                 {!pendingBridgeTx.destinationTxHash
                     ? <Fragment>
