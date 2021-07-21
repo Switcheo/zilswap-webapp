@@ -11,7 +11,9 @@ const useBridgeableTokenFinder = () => {
   const bridgeableTokenFinder = useMemo(() => {
     return (denom: string, blockchain: Blockchain.Zilliqa | Blockchain.Ethereum): any => {
       const bridgeableToken = bridgeableTokens[blockchain].filter(token => token.denom === denom)[0];
-      return tokenFinder(bridgeableToken?.tokenAddress, blockchain);
+      return bridgeableToken
+        ? tokenFinder(bridgeableToken?.tokenAddress, blockchain)
+        : {}
     }
     
     // eslint-disable-next-line
