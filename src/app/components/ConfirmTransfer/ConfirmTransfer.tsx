@@ -1,29 +1,25 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, IconButton, Link, makeStyles, Step, StepConnector, StepLabel, Stepper, withStyles } from "@material-ui/core";
+import { Box, IconButton, makeStyles } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
-import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
-import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
-import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
-import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
 import { Transaction } from '@zilliqa-js/account';
 import { HTTPProvider } from '@zilliqa-js/core';
 import { toBech32Address } from "@zilliqa-js/zilliqa";
-import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, MnemonicDialog, Text } from "app/components";
-import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
+import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { actions } from "app/store";
 import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
+import { hexToRGBA, truncate, useAsyncTask, useToaster, useTokenFinder } from "app/utils";
+import TransactionDetail from "app/views/bridge/TransactionDetail";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { isDebug, logger } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
+import dayjs from "dayjs";
 import { ethers } from "ethers";
 import { History } from "history";
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
@@ -32,8 +28,6 @@ import { Network } from "zilswap-sdk/lib/constants";
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
-import { ReactComponent as StraightLine } from "./straight-line.svg";
-import dayjs from "dayjs";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -137,33 +131,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       marginRight: 0
     }
   },
-  arrowIcon: {
-    verticalAlign: "middle",
-    color: theme.palette.primary.light,
-    margin: "0 -4px 1.2px -4px"
-  },
   checkIcon: {
     fontSize: "1rem",
     verticalAlign: "sub",
     color: theme.palette.primary.light,
-  },
-  checkIconCompleted: {
-    color: theme.palette.primary.dark
-  },
-  link: {
-    color: theme.palette.text?.secondary,
-  },
-  linkIcon: {
-    marginLeft: theme.spacing(0.5),
-    width: "10px",
-    verticalAlign: "top",
-    "& path": {
-      fill: theme.palette.text?.secondary,
-    }
-  },
-  warningIcon: {
-    verticalAlign: "middle",
-    marginBottom: theme.spacing(0.5)
   },
   wavyLine: {
     position: "absolute",
@@ -177,56 +148,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       marginLeft: "-50px",
     },
   },
-  straightLine: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginLeft: "-59px",
-    marginTop: "-20px",
-    [theme.breakpoints.down("xs")]: {
-      width: "90px",
-      marginLeft: "-44px",
-    },
-  },
-  stepper: {
-    backgroundColor: "transparent",
-    "& .MuiStepIcon-root": {
-      color: `rgba${hexToRGBA("#DEFFFF", 0.1)}`,
-      border: "5px solid #0D1B24",
-      borderRadius: "50%",
-      zIndex: 1
-    },
-    "& .MuiStepIcon-completed": {
-      color: "#00FFB0",
-      backgroundColor: theme.palette.type === "light" ? "#29475A" : ""
-    },
-    "& .MuiSvgIcon-root": {
-      fontSize: "3rem",
-    },
-    "& .MuiStepLabel-label": {
-      marginTop: "8px",
-      fontWeight: 600,
-      fontSize: "14px",
-      lineHeight: 1.6,
-      color: theme.palette.text?.primary
-    },
-    "& .MuiStepLabel-completed": {
-      color: theme.palette.primary.dark
-    },
-    "& .MuiStepIcon-text": {
-      fill: theme.palette.type === "light" ? "#29475A" : ""
-    }
-  },
-  progressBox: {
-    [theme.breakpoints.down("xs")]: {
-      flexDirection: "column"
-    },
-  },
-  progressInfo: {
-    [theme.breakpoints.down("xs")]: {
-      marginLeft: theme.spacing(2.5)
-    },
-  },
   chainName: {
     [theme.breakpoints.down("xs")]: {
       fontSize: "12px"
@@ -237,40 +158,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fontSize: "12px"
     },
   },
-  instructionsButton: {
-    backgroundColor: theme.palette.warning.main,
-    padding: "6px 16px",
-    marginTop: theme.spacing(2),
-    "&:hover": {
-      backgroundColor: `rgba${hexToRGBA(theme.palette.warning.main, 0.8)}`
-    }
-  }
 }));
-
-const ColorlibConnector = withStyles({
-  alternativeLabel: {
-    top: 15,
-    left: "calc(-50% + 20px)",
-    right: "calc(50% + 20px)"
-  },
-  active: {
-    '& $line': {
-      backgroundColor: "#00FFB0",
-    },
-  },
-  completed: {
-    '& $line': {
-      backgroundColor: "#00FFB0",
-    },
-  },
-  line: {
-    height: 18,
-    borderTop: "5px solid #0D1B24",
-    borderBottom: "5px solid #0D1B24",
-    backgroundColor: "#0D1B24",
-    zIndex: 0
-  }
-})(StepConnector);
 
 // initialize a tradehub sdk client
 // @param mnemonic initialize the sdk with an account
@@ -318,8 +206,6 @@ const CHAIN_NAMES = {
   [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
 }
 
-const STEPS = ['Deposit', 'Confirm', 'Withdraw'];
-
 const ConfirmTransfer = (props: any) => {
   const { showTransfer } = props;
   const classes = useStyles();
@@ -327,7 +213,6 @@ const ConfirmTransfer = (props: any) => {
   const toaster = useToaster();
   const history = useHistory();
   const tokenFinder = useTokenFinder();
-  const network = useNetwork();
 
   const [sdk, setSdk] = useState<ConnectedTradeHubSDK | null>(null);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
@@ -337,14 +222,11 @@ const ConfirmTransfer = (props: any) => {
   const bridgeToken = useSelector<RootState, BridgeableToken | undefined>(state => state.bridge.formState.token);
   const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK")
 
-  const [showTransactions, setShowTransactions] = useState<boolean>(true);
   const [tokenApproval, setTokenApproval] = useState<boolean>(false);
   const [approvalHash, setApprovalHash] = useState<string>("");
   const [swthAddrMnemonic, setSwthAddrMnemonic] = useState<string | undefined>();
-  
-  const pendingBridgeTx = bridgeState.activeBridgeTx;
 
-  const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
+  const pendingBridgeTx = bridgeState.activeBridgeTx;
 
   const [runConfirmTransfer, loadingConfirm] = useAsyncTask("confirmTransfer", (error) => toaster(error.message, { overridePersist: false }));
 
@@ -632,52 +514,11 @@ const ConfirmTransfer = (props: any) => {
     dispatch(actions.Layout.showTransferConfirmation(false));
   }
 
-  const getTradeHubExplorerLink = (hash: string) => {
-    if (network === Network.MainNet) {
-      return `https://switcheo.org/transaction/${hash}`;
-    } else {
-      return `https://switcheo.org/transaction/${hash}?net=dev`;
-    }
-  };
-  const getExplorerLink = (hash: string, blockchain: Blockchain) => {
-    if (network === Network.MainNet) {
-      switch (blockchain) {
-        case Blockchain.Ethereum:
-          return `https://etherscan.io/search?q=${hash}`;
-        default:
-          return `https://viewblock.io/zilliqa/tx/${hash}`;
-      }
-    } else {
-      switch (blockchain) {
-        case Blockchain.Ethereum:
-          return `https://ropsten.etherscan.io/search?q=${hash}`;
-        default:
-          return `https://viewblock.io/zilliqa/tx/${hash}?network=testnet`;
-      }
-    }
-  }
-
   const navigateBack = () => {
     if (pendingBridgeTx)
       dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
     dispatch(actions.Layout.showTransferConfirmation(false));
     setSwthAddrMnemonic(SWTHAddress.newMnemonic());
-  }
-
-  const getActiveStep = () => {
-    if (pendingBridgeTx?.destinationTxHash) {
-      return 3;
-    }
-
-    if (pendingBridgeTx?.withdrawTxHash) {
-      return 2;
-    }
-
-    if (pendingBridgeTx?.sourceTxHash) {
-      return 1;
-    }
-
-    return 0;
   }
 
   const formatAddress = (address: string | undefined | null, chain: Blockchain) => {
@@ -690,125 +531,52 @@ const ConfirmTransfer = (props: any) => {
     }
   }
 
-  const getEstimatedTime = () => {
-    if (pendingBridgeTx?.withdrawTxHash) {
-      return 10;
-    }
-
-    if (pendingBridgeTx?.depositTxConfirmedAt) {
-      return 15;
-    }
-
-    if (pendingBridgeTx?.sourceTxHash) {
-      return 25;
-    }
-
-    return 30;
-  }
-
-  const handleShowMnemonicDialog = () => {
-    dispatch(actions.Layout.toggleShowMnemonic("open"));
-  }
-
-  return (
-    <Box className={cls(classes.root, classes.container)}>
-      {canNavigateBack && (
-        <IconButton onClick={() => navigateBack()} className={classes.backButton}>
-          <ArrowBack />
-        </IconButton>
-      )}
-
-      {!pendingBridgeTx && (
-        <Box display="flex" flexDirection="column" alignItems="center">
-          <Text variant="h2">Confirm Transfer</Text>
-
-          <Text variant="h4" margin={0.5} align="center">
-            Please review your transaction carefully.
-          </Text>
-
-          <Text color="textSecondary" align="center">
-            Transactions are non-reversible once they are processed.
-          </Text>
-        </Box>
-      )}
-
-      {!!pendingBridgeTx && (
-        <Box display="flex" flexDirection="column" alignItems="center">
-          {!canNavigateBack && (
-            <Box mt={4} />
-          )}
-
-          {!pendingBridgeTx.destinationTxHash
-            ? <Fragment>
-                <Text variant="h2">Transfer in Progress...</Text>
-
-                <Text variant="h4" className={classes.textWarning} margin={0.5} align="center">
-                  <WarningRoundedIcon className={classes.warningIcon}/> Warning: Please read these instructions carefully before closing this window to avoid losing your funds.
-                </Text>
-
-                <Button onClick={handleShowMnemonicDialog} className={classes.instructionsButton} size="small" variant="contained">
-                  Read Instructions
-                </Button>
-              </Fragment>
-            : <Fragment>
-                <Text variant="h2" className={classes.textSuccess}>
-                  <CheckCircleRoundedIcon fontSize="inherit" className={classes.successIcon}/> Transfer Complete
-                </Text>
-
-                <Text variant="h4" margin={0.5} align="center">
-                  Your funds have been successfully transferred.
-                </Text>
-
-                <Text color="textSecondary" marginTop={0.5} align="center">
-                  Please check your wallet to view your transferred funds.
-                </Text>
-              </Fragment>
-          }
-        </Box>
-      )}
-
-      <Box className={classes.box} bgcolor="background.contrast">
-        <Box className={classes.transferBox}>
-          <Text>{!pendingBridgeTx?.destinationTxHash ? "Transferring" : "Transferred"}</Text>
-          <Text variant="h2" className={classes.amount}>
-            {pendingBridgeTx?.inputAmount.toString(10) ?? bridgeFormState.transferAmount.toString(10)}
-            <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} blockchain={fromToken?.blockchain} />
-            {fromToken?.symbol}
-          </Text>
-        </Box>
-
-        <Box mt={2} display="flex" justifyContent="space-between" position="relative">
-          <Box className={classes.networkBox} flex={1}>
-            <Text variant="h4" color="textSecondary">From</Text>
-            <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-              {bridgeState.formState.fromBlockchain === Blockchain.Ethereum
-                ? <EthereumLogo />
-                : <ZilliqaLogo />
-              }
-            </Box>
-            <Text variant="h4" className={classes.chainName}>{fromChainName} Network</Text>
-            <Text variant="button" className={classes.walletAddress}>{formatAddress(bridgeState.formState.sourceAddress, fromBlockchain)}</Text>
+  if (!pendingBridgeTx) {
+    return (
+      <Box className={cls(classes.root, classes.container)}>
+        {canNavigateBack && (
+          <IconButton onClick={() => navigateBack()} className={classes.backButton}>
+            <ArrowBack />
+          </IconButton>
+        )}
+        <Box className={classes.box} bgcolor="background.contrast">
+          <Box className={classes.transferBox}>
+            <Text>Transferring</Text>
+            <Text variant="h2" className={classes.amount}>
+              {bridgeFormState.transferAmount.toString(10)}
+              <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} blockchain={fromToken?.blockchain} />
+              {fromToken?.symbol}
+            </Text>
           </Box>
-          <Box flex={0.2} />
-          {complete
-            ? <StraightLine className={classes.straightLine} />
-            : <WavyLine className={classes.wavyLine} />
-          }
-          <Box className={classes.networkBox} flex={1}>
-            <Text variant="h4" color="textSecondary">To</Text>
-            <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-              {bridgeState.formState.toBlockchain === Blockchain.Zilliqa
-                ? <ZilliqaLogo />
-                : <EthereumLogo />
-              }
+
+          <Box mt={2} display="flex" justifyContent="space-between" position="relative">
+            <Box className={classes.networkBox} flex={1}>
+              <Text variant="h4" color="textSecondary">From</Text>
+              <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
+                {bridgeState.formState.fromBlockchain === Blockchain.Ethereum
+                  ? <EthereumLogo />
+                  : <ZilliqaLogo />
+                }
+              </Box>
+              <Text variant="h4" className={classes.chainName}>{fromChainName} Network</Text>
+              <Text variant="button" className={classes.walletAddress}>{formatAddress(bridgeState.formState.sourceAddress, fromBlockchain)}</Text>
             </Box>
-            <Text variant="h4" className={classes.chainName}>{toChainName} Network</Text>
-            <Text variant="button" className={classes.walletAddress}>{formatAddress(bridgeState.formState.destAddress, toBlockchain)}</Text>
+            <Box flex={0.2} />
+            <WavyLine className={classes.wavyLine} />
+            <Box className={classes.networkBox} flex={1}>
+              <Text variant="h4" color="textSecondary">To</Text>
+              <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
+                {bridgeState.formState.toBlockchain === Blockchain.Zilliqa
+                  ? <ZilliqaLogo />
+                  : <EthereumLogo />
+                }
+              </Box>
+              <Text variant="h4" className={classes.chainName}>{toChainName} Network</Text>
+              <Text variant="button" className={classes.walletAddress}>{formatAddress(bridgeState.formState.destAddress, toBlockchain)}</Text>
+            </Box>
           </Box>
         </Box>
-      </Box>
 
-      {!pendingBridgeTx && (
         <Box marginTop={3} marginBottom={0.5} px={2}>
           <KeyValueDisplay kkey={<strong>Estimated Total Fees</strong>} mb="8px">
             ~ <span className={classes.textColoured}>${withdrawFee?.value.toFixed(2) || 0}</span>
@@ -822,190 +590,27 @@ const ConfirmTransfer = (props: any) => {
             ~<span className={classes.textColoured}>${withdrawFee?.value.toFixed(2) || 0}</span>
             <HelpInfo className={classes.helpInfo} placement="top" title="Estimated network fees incurred to pay the relayer." />
           </KeyValueDisplay>
-          {/* <KeyValueDisplay kkey="&nbsp; • &nbsp; Zilliqa Txn Fee" mb="8px"><span className={classes.textColoured}>5</span> ZIL ~<span className={classes.textColoured}>$0.50</span><HelpInfo className={classes.helpInfo} placement="top" title="Todo" /></KeyValueDisplay> */}
           <KeyValueDisplay kkey="Estimated Transfer Time" mb="8px"><span className={classes.textColoured}>&lt; 30</span> Minutes<HelpInfo className={classes.helpInfo} placement="top" title="Estimated time for the completion of this transfer." /></KeyValueDisplay>
         </Box>
-      )}
 
-      {pendingBridgeTx && (
-        <Box className={classes.box} bgcolor="background.contrast">
-          <Text align="center" variant="h6">{!pendingBridgeTx.destinationTxHash ? "Transfer Progress" : "Transfer Complete"}</Text>
-
-          <Stepper className={classes.stepper} activeStep={getActiveStep()} connector={<ColorlibConnector />} alternativeLabel>
-            {STEPS.map((label, index) => (
-              <Step key={label}>
-                <StepLabel>
-                  <span>{label}</span>
-                  <Text className={classes.label}>
-                    {index === 0
-                      ? fromChainName
-                      : index === 1
-                        ? "TradeHub"
-                        : toChainName
-                    }
-                  </Text>
-                </StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-
-          <KeyValueDisplay kkey="Estimated Time Left" mt="8px" mb="8px" px={2}>
-            {!pendingBridgeTx.destinationTxHash
-              ? <span><span className={classes.textColoured}>~{getEstimatedTime()}</span> Minutes</span>
-              : "-"
-            }
-            <HelpInfo className={classes.helpInfo} placement="top" title="Estimated time left to the completion of this transfer." />
-          </KeyValueDisplay>
-
-          <Accordion className={classes.accordion} expanded={showTransactions} onChange={(_, expanded) => setShowTransactions(expanded)}>
-            <Box display="flex" justifyContent="center">
-              <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon} />}>
-                <Text>View Transactions</Text>
-              </AccordionSummary>
-            </Box>
-            <AccordionDetails>
-              <Box>
-                {/* Stage 1 */}
-                <Box mb={1}>
-                  <Text>
-                    <strong>Stage 1: {fromChainName} <ArrowRightRoundedIcon fontSize="small" className={classes.arrowIcon} /> TradeHub</strong>
-                  </Text>
-                  <Box display="flex" mb={0.5} className={classes.progressBox}>
-                    <Text flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, tokenApproval || pendingBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Token Approval (ERC20/ZRC2)
-                    </Text>
-                    <Text className={classes.progressInfo}>
-                      {approvalHash &&
-                        <Link
-                          className={classes.link}
-                          underline="hover"
-                          rel="noopener noreferrer"
-                          target="_blank"
-                          href={getExplorerLink(approvalHash, bridgeFormState.fromBlockchain)}>
-                          View on {bridgeState.formState.fromBlockchain === Blockchain.Ethereum ? 'Etherscan' : 'ViewBlock'} <NewLinkIcon className={classes.linkIcon} />
-                        </Link>
-                      }
-                      {!approvalHash &&
-                        <Text className={classes.link}>
-                          Approved
-                          <HelpInfo className={classes.approvedHelpInfo} placement="top" title="This token has previously been approved by you, and hence will not require approval during this transaction." />
-                        </Text>
-                      }
-                    </Text>
-                  </Box>
-                  <Box display="flex" className={classes.progressBox}>
-                    <Text flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Deposit to TradeHub Contract
-                    </Text>
-                    <Text className={cls(classes.link, classes.progressInfo)}>
-                      {pendingBridgeTx.sourceTxHash
-                        ? <Link
-                          className={classes.link}
-                          underline="hover"
-                          rel="noopener noreferrer"
-                          target="_blank"
-                          href={getExplorerLink(pendingBridgeTx.sourceTxHash, bridgeFormState.fromBlockchain)}>
-                          View on {bridgeState.formState.fromBlockchain === Blockchain.Ethereum ? 'Etherscan' : 'ViewBlock'} <NewLinkIcon className={classes.linkIcon} />
-                        </Link>
-                        : "-"
-                      }
-                    </Text>
-                  </Box>
-                </Box>
-
-                {/* Stage 2 */}
-                <Box mb={1}>
-                  <Text>
-                    <strong>Stage 2: TradeHub Confirmation</strong>
-                  </Text>
-                  <Box display="flex" mt={0.9} mb={0.5}>
-                    <Text flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx?.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> TradeHub Deposit Confirmation
-                    </Text>
-                  </Box>
-                  <Box display="flex" className={classes.progressBox}>
-                    <Text flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.withdrawTxHash ? classes.checkIconCompleted : "")} />
-                      {" "}
-                      Withdrawal to {toChainName}
-                    </Text>
-                    <Text className={cls(classes.link, classes.progressInfo)}>
-                      {pendingBridgeTx.withdrawTxHash
-                        ? <Link
-                          className={classes.link}
-                          underline="hover"
-                          rel="noopener noreferrer"
-                          target="_blank"
-                          href={getTradeHubExplorerLink(pendingBridgeTx.withdrawTxHash)}>
-                          View on TradeHub <NewLinkIcon className={classes.linkIcon} />
-                        </Link>
-                        : "-"
-                      }
-                    </Text>
-                  </Box>
-                </Box>
-
-                {/* Stage 3 */}
-                <Box>
-                  <Text>
-                    <strong>Stage 3: TradeHub <ArrowRightRoundedIcon fontSize="small" className={classes.arrowIcon} /> {toChainName}</strong>
-                  </Text>
-                  <Box display="flex" className={classes.progressBox}>
-                    <Text flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, pendingBridgeTx.destinationTxHash ? classes.checkIconCompleted : "")} />
-                      {" "}
-                      Transfer to {toChainName} Wallet
-                    </Text>
-                    <Text className={cls(classes.link, classes.progressInfo)}>
-                      {pendingBridgeTx.destinationTxHash
-                        ? <Link
-                          className={classes.link}
-                          underline="hover"
-                          rel="noopener noreferrer"
-                          target="_blank"
-                          href={getExplorerLink(pendingBridgeTx.destinationTxHash, bridgeFormState.toBlockchain)}>
-                          View on {bridgeState.formState.toBlockchain === Blockchain.Zilliqa ? 'ViewBlock' : 'Etherscan'} <NewLinkIcon className={classes.linkIcon} />
-                        </Link>
-                        : "-"
-                      }
-                    </Text>
-                  </Box>
-                </Box>
-              </Box>
-            </AccordionDetails>
-          </Accordion>
-        </Box>
-      )}
-
-      {!complete && (
         <FancyButton
           disabled={loadingConfirm || !!pendingBridgeTx}
           onClick={onConfirm}
           variant="contained"
           color="primary"
           className={classes.actionButton}>
-          {pendingBridgeTx
-            ? "Transfer in Progress..."
-            : bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
-              ? "Confirm (ZIL -> ETH)"
-              : "Confirm (ETH -> ZIL)"
+          {bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
+            ? "Confirm (ZIL -> ETH)"
+            : "Confirm (ETH -> ZIL)"
           }
         </FancyButton>
-      )}
-
-      {complete && (
-        <FancyButton
-          onClick={conductAnotherTransfer}
-          variant="contained"
-          color="primary"
-          className={classes.actionButton}>
-          Conduct Another Transfer
-        </FancyButton>
-      )}
-
-      <MnemonicDialog mnemonic={pendingBridgeTx?.interimAddrMnemonics}/>
-    </Box>
-  )
+      </Box>
+    )
+  } else {
+    return (
+      <TransactionDetail onBack={canNavigateBack ? navigateBack : undefined} onNewTransfer={conductAnotherTransfer} currentTx={pendingBridgeTx} approvalHash={approvalHash} tokenApproval={tokenApproval} />
+    )
+  }
 }
 
 export default ConfirmTransfer;

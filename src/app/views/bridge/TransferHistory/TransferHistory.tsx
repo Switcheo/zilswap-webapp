@@ -10,12 +10,13 @@ import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useBridgeableTokenFinder } from "app/utils";
 import { toHumanNumber } from "app/utils/strings/strings";
 import cls from "classnames";
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
 import { ReactComponent as EthereumLogo } from "../../main/Bridge/ethereum-logo.svg";
 import { ReactComponent as ZilliqaLogo } from "../../main/Bridge/zilliqa-logo.svg";
 import { Link } from "react-router-dom";
+import TransactionDetail from "app/views/bridge/TransactionDetail";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -67,7 +68,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         color: theme.palette.action?.disabled,
         backgroundColor: theme.palette.action?.disabledBackground,
         "&:hover": {
-            backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ?  "#003340" : "rgba(0, 51, 64, 0.5)", 0.8)}`,
+            backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#003340" : "rgba(0, 51, 64, 0.5)", 0.8)}`,
         },
     },
     textWhite: {
@@ -117,7 +118,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     newLinkIcon: {
         "& path": {
-          fill: theme.palette.label
+            fill: theme.palette.label
         },
         marginBottom: "2px"
     },
@@ -182,10 +183,11 @@ const TransferHistory = (props: any) => {
     const classes = useStyles();
     const dispatch = useDispatch();
     const bridgeableTokenFinder = useBridgeableTokenFinder();
-    
+
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
     const bridgeTxs = bridgeState.bridgeTxs;
     const pendingBridgeTx = bridgeState.activeBridgeTx;
+    const [previewTx, setPreviewTx] = useState<BridgeTx | null>(null);
 
     // Need to check this part
     const handleNewTransfer = () => {
@@ -214,7 +216,7 @@ const TransferHistory = (props: any) => {
 
         return "Stage 1.2"
     }
-    
+
     const getTransferStatus = (tx: BridgeTx) => {
         // Failed tx
         if (tx?.depositFailedAt) {
@@ -234,7 +236,7 @@ const TransferHistory = (props: any) => {
         // Completed tx
         if (tx?.destinationTxHash) {
             return (
-                <Chip 
+                <Chip
                     className={cls(classes.chip, classes.completeChip)}
                     label={
                         <Typography align="center"><strong>Complete</strong></Typography>
@@ -257,142 +259,153 @@ const TransferHistory = (props: any) => {
         )
     }
 
+    const setDisplayTx = (tx: BridgeTx) => {
+        setPreviewTx(tx);
+    }
+
+    const clearPreview = () => {
+        setPreviewTx(null);
+    }
+
     return (
         <BridgeCard {...rest} className={cls(classes.root, className)}>
-            <Box overflow="hidden" display="flex" flexDirection="column" className={classes.container}>
-                <Box display="flex" justifyContent="space-between" mt={2} pl={2.5} pr={2.5}>
-                    <Box display="flex" flexDirection="column">
-                        <Text variant="h2">
-                            Zil<span className={classes.textColoured}>Bridge</span>
-                        </Text>
-                        
-                        <Text variant="h3">
-                            Your Transfer History
-                        </Text>
+            {!previewTx && (
+                <Box overflow="hidden" display="flex" flexDirection="column" className={classes.container}>
+                    <Box display="flex" justifyContent="space-between" mt={2} pl={2.5} pr={2.5}>
+                        <Box display="flex" flexDirection="column">
+                            <Text variant="h2">
+                                Zil<span className={classes.textColoured}>Bridge</span>
+                            </Text>
+
+                            <Text variant="h3">
+                                Your Transfer History
+                            </Text>
+                        </Box>
+
+                        <Box display="flex" pt={0.5} pb={0.5}>
+                            <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.newTransferButton} onClick={handleNewTransfer}>
+                                <AddIcon fontSize="small" className={classes.addIcon} />
+                                <Text variant="button" className={classes.textWhite}>New Transfer</Text>
+                            </Button>
+                        </Box>
                     </Box>
 
-                    <Box display="flex" pt={0.5} pb={0.5}>
-                        <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.newTransferButton} onClick={handleNewTransfer}>
-                            <AddIcon fontSize="small" className={classes.addIcon} />
-                            <Text variant="button" className={classes.textWhite}>New Transfer</Text>
-                        </Button>
-                    </Box>
+                    <TableContainer className={classes.tableContainer}>
+                        <Table className={classes.table}>
+                            <TableHead className={classes.tableHead}>
+                                <TableRow>
+                                    <TableCell>
+                                        <Box display="flex" flexDirection="column">
+                                            <Text variant="h6">Transfer</Text>
+                                            <Text>Date</Text>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        <Box display="flex" flexDirection="column">
+                                            <Text variant="h6">Network</Text>
+                                            <Text>From - To</Text>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Box display="flex" flexDirection="column">
+                                            <Text variant="h6">Transfer</Text>
+                                            <Text>Amount</Text>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Box display="flex" flexDirection="column">
+                                            <Text variant="h6">Transfer</Text>
+                                            <Text>Status</Text>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Box display="flex" flexDirection="column">
+                                            <Text variant="h6">Mnemonic</Text>
+                                            <Text>Phrase <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Mnemonic Phrase to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Box display="flex" flexDirection="column">
+                                            <Text variant="h6">Recover</Text>
+                                            <Text>Transfer <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Mnemonic Phrase to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Box display="flex" flexDirection="column">
+                                            <Text variant="h6">Transfer</Text>
+                                            <Text>Status</Text>
+                                        </Box>
+                                    </TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {bridgeTxs.slice().reverse().map((tx: BridgeTx, index: number) => (
+                                    <TableRow key={index} className={classes.tableRow}>
+                                        <TableCell component="th" scope="row">
+                                            <Text>
+                                                {tx.depositDispatchedAt?.format('DD MMM YYYY')}
+                                            </Text>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Text className={classes.transferAmount}>
+                                                {tx.srcChain === Blockchain.Zilliqa
+                                                    ? <ZilliqaLogo className={cls(classes.chainLogo, classes.zilLogo)} />
+                                                    : <EthereumLogo className={classes.chainLogo} />
+                                                }
+                                                {CHAIN_NAMES[tx.srcChain]}
+                                                {" "}
+                                                &mdash;
+
+                                                {tx.dstChain === Blockchain.Ethereum
+                                                    ? <EthereumLogo className={classes.chainLogo} />
+                                                    : <ZilliqaLogo className={cls(classes.chainLogo, classes.zilLogo)} />
+                                                }
+                                                {CHAIN_NAMES[tx.dstChain]}
+                                            </Text>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Text className={classes.transferAmount}>
+                                                {toHumanNumber(tx.inputAmount, 2)}
+                                                <CurrencyLogo className={classes.currencyLogo} address={bridgeableTokenFinder(tx.srcToken, tx.srcChain)?.tokenAddress} />
+                                            </Text>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            {getTransferStatus(tx)}
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <RevealMnemonic mnemonic={tx.interimAddrMnemonics} />
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Button
+                                                href="https://app.dem.exchange/reset_password"
+                                                target="_blank"
+                                                className={classes.button}
+                                                endIcon={<NewLinkIcon className={classes.newLinkIcon} />}
+                                            >
+                                                <Text>Recover</Text>
+                                            </Button>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Button
+                                                onClick={() => setDisplayTx(tx)}
+                                                endIcon={<ArrowRightRoundedIcon className={classes.arrowRightIcon} />}
+                                            >
+                                                <Text>Show Details</Text>
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                        {!bridgeTxs.length && (
+                            <Typography align="center" variant="body2" className={classes.noTransaction}>No transactions found.</Typography>
+                        )}
+                    </TableContainer>
                 </Box>
-
-                <TableContainer className={classes.tableContainer}>
-                    <Table className={classes.table}>
-                        <TableHead className={classes.tableHead}>
-                            <TableRow>
-                                <TableCell>
-                                    <Box display="flex" flexDirection="column">
-                                        <Text variant="h6">Transfer</Text>
-                                        <Text>Date</Text>
-                                    </Box>
-                                </TableCell>
-                                <TableCell align="left">
-                                    <Box display="flex" flexDirection="column">
-                                        <Text variant="h6">Network</Text>
-                                        <Text>From - To</Text>
-                                    </Box>
-                                </TableCell>
-                                <TableCell align="center">
-                                    <Box display="flex" flexDirection="column">
-                                        <Text variant="h6">Transfer</Text>
-                                        <Text>Amount</Text>
-                                    </Box>
-                                </TableCell>
-                                <TableCell align="center">
-                                    <Box display="flex" flexDirection="column">
-                                        <Text variant="h6">Transfer</Text>
-                                        <Text>Status</Text>
-                                    </Box>
-                                </TableCell>
-                                <TableCell align="center">
-                                    <Box display="flex" flexDirection="column">
-                                        <Text variant="h6">Mnemonic</Text>
-                                        <Text>Phrase <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Mnemonic Phrase to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
-                                    </Box>
-                                </TableCell>
-                                <TableCell align="center">
-                                    <Box display="flex" flexDirection="column">
-                                        <Text variant="h6">Recover</Text>
-                                        <Text>Transfer <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Mnemonic Phrase to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
-                                    </Box>
-                                </TableCell>
-                                <TableCell align="center">
-                                    <Box display="flex" flexDirection="column">
-                                        <Text variant="h6">Transfer</Text>
-                                        <Text>Status</Text>
-                                    </Box>
-                                </TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                        {bridgeTxs.slice().reverse().map((tx: BridgeTx, index: number) => (
-                            <TableRow key={index} className={classes.tableRow}>
-                                <TableCell component="th" scope="row">
-                                    <Text>
-                                        {tx.depositDispatchedAt?.format('DD MMM YYYY')}
-                                    </Text>
-                                </TableCell>
-                                <TableCell>
-                                    <Text className={classes.transferAmount}>
-                                        {tx.srcChain === Blockchain.Zilliqa
-                                            ? <ZilliqaLogo className={cls(classes.chainLogo, classes.zilLogo)}/>
-                                            : <EthereumLogo className={classes.chainLogo}/>
-                                        }
-                                        {CHAIN_NAMES[tx.srcChain]}
-                                        {" "}
-                                        &mdash;
-
-                                        {tx.dstChain === Blockchain.Ethereum
-                                            ? <EthereumLogo className={classes.chainLogo}/>
-                                            : <ZilliqaLogo className={cls(classes.chainLogo, classes.zilLogo)}/>
-                                        }
-                                        {CHAIN_NAMES[tx.dstChain]}
-                                    </Text>
-                                </TableCell>
-                                <TableCell align="center">
-                                    <Text className={classes.transferAmount}>
-                                        {toHumanNumber(tx.inputAmount, 2)}
-                                        <CurrencyLogo className={classes.currencyLogo} address={bridgeableTokenFinder(tx.srcToken, tx.srcChain)?.tokenAddress} />
-                                    </Text>
-                                </TableCell>
-                                <TableCell align="center">
-                                    {getTransferStatus(tx)}
-                                </TableCell>
-                                <TableCell align="center">
-                                    <RevealMnemonic mnemonic={tx.interimAddrMnemonics} />
-                                </TableCell>
-                                <TableCell align="center">
-                                    <Button
-                                        href="https://app.dem.exchange/reset_password"
-                                        target="_blank"
-                                        className={classes.button}
-                                        endIcon={<NewLinkIcon className={classes.newLinkIcon} />}
-                                        >
-                                        <Text>Recover</Text>
-                                    </Button>
-                                </TableCell>
-                                <TableCell align="center">
-                                    <Button
-                                        component={Link} 
-                                        to={`/history/${tx.sourceTxHash}`}
-                                        className={classes.button}
-                                        endIcon={<ArrowRightRoundedIcon className={classes.arrowRightIcon} />}
-                                        >
-                                    <Text>Show Details</Text>
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                        </TableBody>
-                    </Table>
-                    {!bridgeTxs.length && (
-                        <Typography align="center" variant="body2" className={classes.noTransaction}>No transactions found.</Typography>
-                    )}
-                </TableContainer>
-            </Box>
+            )}
+            {previewTx && (
+                <TransactionDetail onBack={clearPreview} currentTx={previewTx} approvalHash="" isHistory={true} />
+            )}
         </BridgeCard>
     )
 }
