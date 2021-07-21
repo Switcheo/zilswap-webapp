@@ -440,7 +440,7 @@ const ShowDetails = (props: any) => {
 
             <Box className={classes.box} bgcolor="background.contrast">
                 <Box className={classes.transferBox}>
-                <Text>Transferring</Text>
+                <Text>{!pendingBridgeTx?.destinationTxHash ? "Transferring" : "Transferred"}</Text>
                 <Text variant="h2" className={classes.amount}>
                     {pendingBridgeTx?.inputAmount.toString(10) ?? bridgeFormState.transferAmount.toString(10)}
                     <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} blockchain={fromToken?.blockchain} />
