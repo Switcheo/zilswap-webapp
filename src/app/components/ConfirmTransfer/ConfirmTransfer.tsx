@@ -33,6 +33,7 @@ import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
 import { ReactComponent as StraightLine } from "./straight-line.svg";
+import dayjs from "dayjs";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -616,6 +617,7 @@ const ConfirmTransfer = (props: any) => {
         inputAmount: bridgeFormState.transferAmount,
         interimAddrMnemonics: swthAddrMnemonic!,
         withdrawFee: withdrawFee?.amount ?? BN_ZERO,
+        depositDispatchedAt: dayjs(),
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
 

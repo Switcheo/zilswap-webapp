@@ -13,7 +13,7 @@ import { actions } from "app/store";
 import { BridgeableToken, BridgeFormState, BridgeState } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
+import { hexToRGBA, truncate, useNetwork, useTokenFinder } from "app/utils";
 import { ReactComponent as EthereumLogo } from "app/views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "app/views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "app/views/main/Bridge/zilliqa-logo.svg";
@@ -21,6 +21,7 @@ import cls from "classnames";
 import React, { Fragment, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
+import { Link as RouterLink } from "react-router-dom";
 import { Blockchain } from "tradehub-api-js";
 import { Network } from "zilswap-sdk/lib/constants";
 
@@ -233,7 +234,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&:hover": {
       backgroundColor: `rgba${hexToRGBA(theme.palette.warning.main, 0.8)}`
     }
-  }
+  },
+  routerLink: {
+      textDecoration: "inherit",
+      color: "inherit"
+  },
 }));
 
 const ColorlibConnector = withStyles({
@@ -273,7 +278,6 @@ const STEPS = ['Deposit', 'Confirm', 'Withdraw'];
 const ShowDetails = (props: any) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const toaster = useToaster();
   const tokenFinder = useTokenFinder();
   const network = useNetwork();
   
@@ -295,11 +299,7 @@ const ShowDetails = (props: any) => {
 
   const complete = useMemo(() => !!pendingBridgeTx?.destinationTxHash, [pendingBridgeTx]);
 
-  const [, loadingConfirm] = useAsyncTask("confirmTransfer", (error) => toaster(error.message, { overridePersist: false }));
-
   const { toBlockchain, fromBlockchain, withdrawFee } = bridgeFormState;
-
-  const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx]);
 
   const { fromToken } = useMemo(() => {
     if (!bridgeToken) return {};
@@ -311,11 +311,10 @@ const ShowDetails = (props: any) => {
 
   const { fromChainName, toChainName } = useMemo(() => {
     return {
-      fromChainName: CHAIN_NAMES[bridgeFormState.fromBlockchain],
-      toChainName: CHAIN_NAMES[bridgeFormState.toBlockchain],
+      fromChainName: CHAIN_NAMES[pendingBridgeTx!.srcChain],
+      toChainName: CHAIN_NAMES[pendingBridgeTx!.dstChain],
     }
-  }, [bridgeFormState.fromBlockchain, bridgeFormState.toBlockchain]);
-
+  }, [pendingBridgeTx]);
 
   const getTradeHubExplorerLink = (hash: string) => {
     if (network === Network.MainNet) {
@@ -453,13 +452,13 @@ const ShowDetails = (props: any) => {
                 <Box className={classes.networkBox} flex={1}>
                     <Text variant="h4" color="textSecondary">From</Text>
                     <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-                    {bridgeState.formState.fromBlockchain === Blockchain.Ethereum
+                    {pendingBridgeTx?.srcChain === Blockchain.Ethereum
                         ? <EthereumLogo />
                         : <ZilliqaLogo />
                     }
                     </Box>
                     <Text variant="h4" className={classes.chainName}>{fromChainName} Network</Text>
-                    <Text variant="button" className={classes.walletAddress}>{formatAddress(bridgeState.formState.sourceAddress, fromBlockchain)}</Text>
+                    <Text variant="button" className={classes.walletAddress}>{formatAddress(pendingBridgeTx?.srcAddr, fromBlockchain)}</Text>
                 </Box>
                 <Box flex={0.2} />
                 {complete
@@ -469,13 +468,13 @@ const ShowDetails = (props: any) => {
                 <Box className={classes.networkBox} flex={1}>
                     <Text variant="h4" color="textSecondary">To</Text>
                     <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-                    {bridgeState.formState.toBlockchain === Blockchain.Zilliqa
+                    {pendingBridgeTx?.dstChain === Blockchain.Zilliqa
                         ? <ZilliqaLogo />
                         : <EthereumLogo />
                     }
                     </Box>
                     <Text variant="h4" className={classes.chainName}>{toChainName} Network</Text>
-                    <Text variant="button" className={classes.walletAddress}>{formatAddress(bridgeState.formState.destAddress, toBlockchain)}</Text>
+                    <Text variant="button" className={classes.walletAddress}>{formatAddress(pendingBridgeTx?.dstAddr, toBlockchain)}</Text>
                 </Box>
                 </Box>
             </Box>
@@ -553,8 +552,8 @@ const ShowDetails = (props: any) => {
                                 underline="hover"
                                 rel="noopener noreferrer"
                                 target="_blank"
-                                href={getExplorerLink(approvalHash, bridgeFormState.fromBlockchain)}>
-                                View on {bridgeState.formState.fromBlockchain === Blockchain.Ethereum ? 'Etherscan' : 'ViewBlock'} <NewLinkIcon className={classes.linkIcon} />
+                                href={getExplorerLink(approvalHash, pendingBridgeTx?.srcChain)}>
+                                View on {pendingBridgeTx?.srcChain === Blockchain.Ethereum ? 'Etherscan' : 'ViewBlock'} <NewLinkIcon className={classes.linkIcon} />
                                 </Link>
                             }
                             {!approvalHash &&
@@ -576,8 +575,8 @@ const ShowDetails = (props: any) => {
                                 underline="hover"
                                 rel="noopener noreferrer"
                                 target="_blank"
-                                href={getExplorerLink(pendingBridgeTx.sourceTxHash, bridgeFormState.fromBlockchain)}>
-                                View on {bridgeState.formState.fromBlockchain === Blockchain.Ethereum ? 'Etherscan' : 'ViewBlock'} <NewLinkIcon className={classes.linkIcon} />
+                                href={getExplorerLink(pendingBridgeTx.sourceTxHash, pendingBridgeTx?.srcChain)}>
+                                View on {pendingBridgeTx?.srcChain === Blockchain.Ethereum ? 'Etherscan' : 'ViewBlock'} <NewLinkIcon className={classes.linkIcon} />
                                 </Link>
                                 : "-"
                             }
@@ -635,8 +634,8 @@ const ShowDetails = (props: any) => {
                                 underline="hover"
                                 rel="noopener noreferrer"
                                 target="_blank"
-                                href={getExplorerLink(pendingBridgeTx.destinationTxHash, bridgeFormState.toBlockchain)}>
-                                View on {bridgeState.formState.toBlockchain === Blockchain.Zilliqa ? 'ViewBlock' : 'Etherscan'} <NewLinkIcon className={classes.linkIcon} />
+                                href={getExplorerLink(pendingBridgeTx.destinationTxHash, pendingBridgeTx?.dstChain)}>
+                                View on {pendingBridgeTx?.dstChain === Blockchain.Zilliqa ? 'ViewBlock' : 'Etherscan'} <NewLinkIcon className={classes.linkIcon} />
                                 </Link>
                                 : "-"
                             }
@@ -649,29 +648,14 @@ const ShowDetails = (props: any) => {
                 </Box>
             )}
 
-            {!complete && (
-                <FancyButton
-                disabled={loadingConfirm || !!pendingBridgeTx}
+            <FancyButton
                 variant="contained"
                 color="primary"
                 className={classes.actionButton}>
-                {pendingBridgeTx
-                    ? "Transfer in Progress..."
-                    : bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
-                    ? "Confirm (ZIL -> ETH)"
-                    : "Confirm (ETH -> ZIL)"
-                }
-                </FancyButton>
-            )}
-
-            {complete && (
-                <FancyButton
-                variant="contained"
-                color="primary"
-                className={classes.actionButton}>
-                Conduct Another Transfer
-                </FancyButton>
-            )}
+                <RouterLink to="/history" className={classes.routerLink}>
+                    Back to Transfer History
+                </RouterLink>
+            </FancyButton>
 
             <MnemonicDialog mnemonic={pendingBridgeTx?.interimAddrMnemonics}/>
         </Box>

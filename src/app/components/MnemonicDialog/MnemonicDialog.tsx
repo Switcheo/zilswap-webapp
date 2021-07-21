@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
         borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
         borderRadius: "0 0 12px 12px",
-        padding: theme.spacing(1, 8, 2),
+        padding: theme.spacing(1, 7, 2),
         maxWidth: 510,
         [theme.breakpoints.down("sm")]: {
             padding: theme.spacing(2, 3, 2),

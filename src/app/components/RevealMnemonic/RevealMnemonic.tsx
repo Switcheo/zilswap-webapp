@@ -132,7 +132,7 @@ const RevealMnemonic = (props: any) => {
                             Never disclose your transfer key to anyone.
                         </Text>
 
-                        <Text align="center">
+                        <Text className={classes.warning} align="center">
                             You may only use the following key phrase to recover <br/> your transfer if it failed in Stage 2.
                         </Text>
                     </Box>

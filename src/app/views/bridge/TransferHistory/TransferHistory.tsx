@@ -150,6 +150,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         width: "20px",
         marginLeft: theme.spacing(0.5),
         marginRight: theme.spacing(0.5),
+        marginBottom: theme.spacing(0.2)
     },
     transferAmount: {
         display: "flex",
@@ -162,6 +163,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     chainLogo: {
         height: "18px",
         width: "18px",
+        marginBottom: theme.spacing(0.2)
     },
     zilLogo: {
         marginRight: "2px"
@@ -258,7 +260,7 @@ const TransferHistory = (props: any) => {
     return (
         <BridgeCard {...rest} className={cls(classes.root, className)}>
             <Box overflow="hidden" display="flex" flexDirection="column" className={classes.container}>
-                <Box display="flex" justifyContent="space-between" mt={2} pl={4} pr={4}>
+                <Box display="flex" justifyContent="space-between" mt={2} pl={2.5} pr={2.5}>
                     <Box display="flex" flexDirection="column">
                         <Text variant="h2">
                             Zil<span className={classes.textColoured}>Bridge</span>
@@ -329,12 +331,8 @@ const TransferHistory = (props: any) => {
                         {bridgeTxs.slice().reverse().map((tx: BridgeTx, index: number) => (
                             <TableRow key={index} className={classes.tableRow}>
                                 <TableCell component="th" scope="row">
-                                    {/* Incomplete */}
                                     <Text>
-                                        {tx?.depositFailedAt
-                                            ? tx.depositFailedAt.format('DD MMM YYYY')
-                                            : tx?.depositTxConfirmedAt?.format('DD MMM YYYY')
-                                        }
+                                        {tx.depositDispatchedAt?.format('DD MMM YYYY')}
                                     </Text>
                                 </TableCell>
                                 <TableCell>
