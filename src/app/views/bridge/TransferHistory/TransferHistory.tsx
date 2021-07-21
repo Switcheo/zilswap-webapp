@@ -155,6 +155,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     transferAmount: {
         display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    transferNetwork: {
+        display: "flex",
         alignItems: "center"
     },
     noTransaction: {
@@ -347,7 +352,7 @@ const TransferHistory = (props: any) => {
                                             </Text>
                                         </TableCell>
                                         <TableCell>
-                                            <Text className={classes.transferAmount}>
+                                            <Text className={classes.transferNetwork}>
                                                 {tx.srcChain === Blockchain.Zilliqa
                                                     ? <ZilliqaLogo className={cls(classes.chainLogo, classes.zilLogo)} />
                                                     : <EthereumLogo className={classes.chainLogo} />
@@ -366,7 +371,7 @@ const TransferHistory = (props: any) => {
                                         <TableCell align="center">
                                             <Text className={classes.transferAmount}>
                                                 {toHumanNumber(tx.inputAmount, 2)}
-                                                <CurrencyLogo className={classes.currencyLogo} address={bridgeableTokenFinder(tx.srcToken, tx.srcChain)?.tokenAddress} />
+                                                <CurrencyLogo className={classes.currencyLogo} address={bridgeableTokenFinder(tx.srcToken, tx.srcChain)?.address} />
                                             </Text>
                                         </TableCell>
                                         <TableCell align="center">

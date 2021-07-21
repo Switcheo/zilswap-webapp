@@ -13,7 +13,7 @@ import { actions } from "app/store";
 import { BridgeFormState, BridgeTx } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useNetwork, useTokenFinder } from "app/utils";
+import { hexToRGBA, truncate, useNetwork, useBridgeableTokenFinder } from "app/utils";
 import { ReactComponent as EthereumLogo } from "app/views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "app/views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "app/views/main/Bridge/zilliqa-logo.svg";
@@ -285,15 +285,16 @@ interface TransactionDetailProps {
 const TransactionDetail = (props: TransactionDetailProps) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const tokenFinder = useTokenFinder();
   const network = useNetwork();
+  const bridgeableTokenFinder = useBridgeableTokenFinder();
   const { currentTx, onBack, tokenApproval, approvalHash, isHistory, onNewTransfer } = props;
 
   const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
 
   const [showTransactions, setShowTransactions] = useState<boolean>(true);
 
-  const fromToken = tokenFinder(currentTx.srcAddr, currentTx.srcChain);
+  const fromToken = bridgeableTokenFinder(currentTx.srcToken, currentTx.srcChain);
+  console.log("from token", fromToken); 
 
   let currentBridgeTx = currentTx;
 
@@ -389,8 +390,9 @@ const TransactionDetail = (props: TransactionDetailProps) => {
 
       {!!currentBridgeTx && (
         <Box display="flex" flexDirection="column" alignItems="center">
-
-          <Box mt={4} />
+          {!onBack && (
+            <Box mt={4} />
+          )}
 
           {!currentBridgeTx.destinationTxHash
             ? <Fragment>
@@ -630,7 +632,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
               variant="contained"
               color="primary"
               className={classes.actionButton}>
-              "Transfer in Progress..."
+              Transfer in Progress...
             </FancyButton>
           )}
 

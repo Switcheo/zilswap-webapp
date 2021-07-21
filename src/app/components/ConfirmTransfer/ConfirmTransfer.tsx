@@ -24,7 +24,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
-import { Network } from "zilswap-sdk/lib/constants";
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
@@ -539,6 +538,19 @@ const ConfirmTransfer = (props: any) => {
             <ArrowBack />
           </IconButton>
         )}
+
+        <Box display="flex" flexDirection="column" alignItems="center">
+          <Text variant="h2">Confirm Transfer</Text>
+
+          <Text margin={0.5} align="center">
+            Please review your transaction carefully.
+          </Text>
+
+          <Text color="textSecondary" align="center">
+            Transactions are non-reversible once they are processed.
+          </Text>
+        </Box>
+
         <Box className={classes.box} bgcolor="background.contrast">
           <Box className={classes.transferBox}>
             <Text>Transferring</Text>
