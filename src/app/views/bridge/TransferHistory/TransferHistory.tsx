@@ -392,6 +392,7 @@ const TransferHistory = (props: any) => {
                                         </TableCell>
                                         <TableCell align="center">
                                             <Button
+                                                className={classes.button}
                                                 onClick={() => setDisplayTx(tx)}
                                                 endIcon={<ArrowRightRoundedIcon className={classes.arrowRightIcon} />}
                                             >
@@ -402,6 +403,7 @@ const TransferHistory = (props: any) => {
                                 ))}
                             </TableBody>
                         </Table>
+                        
                         {!bridgeTxs.length && (
                             <Typography align="center" variant="body2" className={classes.noTransaction}>No transactions found.</Typography>
                         )}
