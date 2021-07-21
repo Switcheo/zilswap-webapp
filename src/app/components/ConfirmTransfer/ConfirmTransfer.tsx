@@ -27,7 +27,7 @@ import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
-import { BN_ZERO } from "tradehub-api-js/build/main/lib/tradehub/utils";
+import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { Network } from "zilswap-sdk/lib/constants";
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
@@ -604,7 +604,7 @@ const ConfirmTransfer = (props: any) => {
       }
 
       const { destAddress, sourceAddress } = bridgeFormState;
-      if (!destAddress || !sourceAddress || !bridgeToken) return;
+      if (!destAddress || !sourceAddress || !bridgeToken || !fromToken) return;
 
       const bridgeTx: BridgeTx = {
         dstAddr: destAddress,
@@ -616,7 +616,7 @@ const ConfirmTransfer = (props: any) => {
         sourceTxHash: sourceTxHash,
         inputAmount: bridgeFormState.transferAmount,
         interimAddrMnemonics: swthAddrMnemonic!,
-        withdrawFee: withdrawFee?.amount ?? BN_ZERO,
+        withdrawFee: withdrawFee?.amount ?? BN_ONE.shiftedBy(3 - fromToken.decimals), // 1000 sat bypass withdraw fee check,
         depositDispatchedAt: dayjs(),
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
