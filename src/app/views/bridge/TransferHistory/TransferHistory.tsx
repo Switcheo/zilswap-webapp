@@ -167,8 +167,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         marginBottom: theme.spacing(4)
     },
     chainLogo: {
-        height: "18px",
-        width: "18px",
+        height: "16px",
+        width: "16px",
         marginBottom: theme.spacing(0.2)
     },
     zilLogo: {
