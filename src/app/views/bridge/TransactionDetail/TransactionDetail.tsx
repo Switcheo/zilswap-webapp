@@ -615,13 +615,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
       )}
 
       {isHistory && (
-        <FancyButton
-          variant="contained"
-          color="primary"
-          onClick={onBack}
-          className={classes.actionButton}>
-          Back to Transfer History
-        </FancyButton>
+        <Box mb={4} />
       )}
 
       {!isHistory && (
