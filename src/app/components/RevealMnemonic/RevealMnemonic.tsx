@@ -33,10 +33,6 @@ const RevealMnemonic = (props: any) => {
         setShowMnemonicDialog(false);
     }
 
-    const onBeginRecovery = () => {
-        setShowMnemonicDialog(false);
-    }
-
     return (
         <Fragment>
             <Button
@@ -50,7 +46,7 @@ const RevealMnemonic = (props: any) => {
                 open={showMnemonicDialog}
                 onClose={onCloseDialog}
                 >
-                <MnemonicBox mnemonic={mnemonic} onBeginRecovery={onBeginRecovery} isHistory={true} />
+                <MnemonicBox mnemonic={mnemonic} isHistory={true} />
             </DialogModal>
         </Fragment>
     )

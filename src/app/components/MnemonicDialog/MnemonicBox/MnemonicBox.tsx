@@ -74,7 +74,7 @@ type CopyMap = {
 };
 
 const MnemonicBox = (props: any) => {
-    const { mnemonic, isHistory, onBeginRecovery, className } = props;
+    const { mnemonic, isHistory, className } = props;
     const classes = useStyles();
     const [showPhrase, setShowPhrase] = useState<boolean>(false);
     const [copyMap, setCopyMap] = useState<CopyMap>({});
@@ -160,7 +160,6 @@ const MnemonicBox = (props: any) => {
                         variant="contained"
                         color="primary"
                         className={classes.actionButton}
-                        onClick={onBeginRecovery}
                     >
                         Begin Recovery
                     </Button>
