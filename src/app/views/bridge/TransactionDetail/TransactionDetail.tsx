@@ -642,7 +642,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
         </>
       )}
 
-      <MnemonicDialog mnemonic={currentBridgeTx?.interimAddrMnemonics} />
+      <MnemonicDialog mnemonic={currentBridgeTx?.interimAddrMnemonics} isHistory={isHistory} />
     </Box>
   )
 }
