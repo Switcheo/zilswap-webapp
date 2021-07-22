@@ -1,4 +1,4 @@
-import { Box, IconButton, makeStyles } from "@material-ui/core";
+import { Box, CircularProgress, IconButton, makeStyles } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import { Transaction } from '@zilliqa-js/account';
 import { HTTPProvider } from '@zilliqa-js/core';
@@ -156,6 +156,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("xs")]: {
       fontSize: "12px"
     },
+  },
+  progress: {
+    color: "rgba(255,255,255,.5)",
+    marginRight: theme.spacing(1)
   },
 }));
 
@@ -542,7 +546,7 @@ const ConfirmTransfer = (props: any) => {
         <Box display="flex" flexDirection="column" alignItems="center">
           <Text variant="h2">Confirm Transfer</Text>
 
-          <Text margin={0.5} align="center">
+          <Text variant="h4" margin={0.5} align="center">
             Please review your transaction carefully.
           </Text>
 
@@ -611,6 +615,9 @@ const ConfirmTransfer = (props: any) => {
           variant="contained"
           color="primary"
           className={classes.actionButton}>
+          {loadingConfirm &&
+            <CircularProgress size={24} className={classes.progress} />
+          }
           {bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
             ? "Confirm (ZIL -> ETH)"
             : "Confirm (ETH -> ZIL)"
