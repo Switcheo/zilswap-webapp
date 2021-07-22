@@ -69,7 +69,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     top: "50%",
     left: "50%",
     marginLeft: "-12px",
-    marginTop: "-12px"
+    transform: "translateY(-50%)"
   },
   label: {
     color: theme.palette.label
@@ -158,10 +158,10 @@ const SampleILOCard = (props: Props) => {
               </Box>
             </Box>
 
-            <Box position="relative">
+            <Box>
                 <Text className={cls(classes.title, classes.description)} marginBottom={0.75}>Commit your tokens in a fixed ratio to participate.</Text>
                 <Text className={classes.description} color="textSecondary">{new BigNumber(1).minus(data.usdRatio).times(100).toFormat(0)}% ZWAP - {new BigNumber(data.usdRatio).times(100).toFormat(0)}% ZIL</Text>
-              <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
+              <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12} position="relative">
                 {zwapToken && (
                   <CurrencyInputILO
                     label="to Burn:"
