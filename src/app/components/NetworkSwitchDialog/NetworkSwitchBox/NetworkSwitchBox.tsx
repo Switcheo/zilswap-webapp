@@ -81,7 +81,7 @@ const NetworkSwitchBox = (props: any) => {
     }
 
     return (
-        <Box overflow="hidden"  display="flex" flexDirection="column" className={cls(classes.root, className)}>
+        <Box overflow="hidden" display="flex" flexDirection="column" className={cls(classes.root, className)}>
             <Text variant="h2" align="center" className={classes.warning}>
                 <SettingsEthernetIcon fontSize="large" className={classes.settingsEthernetIcon} /> Network Switch Required
             </Text>
