@@ -139,11 +139,15 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const network = useNetwork();
   const tokenFinder = useTokenFinder();
   const [ethConnectedAddress, setEthConnectedAddress] = useState('');
-  const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
   const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]); // eth wallet
   const bridgeState = useSelector<RootState, BridgeState>(store => store.bridge);
   const bridgeFormState: BridgeFormState = useSelector<RootState, BridgeFormState>(store => store.bridge.formState);
+  const [formState, setFormState] = useState<typeof initialFormState>({
+    sourceAddress: bridgeFormState.sourceAddress || "",
+    destAddress: bridgeFormState.destAddress || "",
+    transferAmount: bridgeFormState.transferAmount.toString() || "0"
+  });
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
 
   const isCorrectChain = useMemo(() => {
