@@ -184,6 +184,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       borderRadius: "50%",
       zIndex: 1
     },
+    // "& .MuiStepIcon-active": {
+    //   boxShadow: "0px 0px 0px 1.5px #00FFB0 inset"
+    // },
     "& .MuiStepIcon-completed": {
       color: "#00FFB0",
       backgroundColor: theme.palette.type === "light" ? "#29475A" : ""
