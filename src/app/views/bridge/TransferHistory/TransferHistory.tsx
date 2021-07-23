@@ -323,14 +323,14 @@ const TransferHistory = (props: any) => {
                                     </TableCell>
                                     <TableCell align="center">
                                         <Box display="flex" flexDirection="column">
-                                            <Text variant="h6">Mnemonic</Text>
-                                            <Text>Phrase <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Mnemonic Phrase to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
+                                            <Text variant="h6">Transfer</Text>
+                                            <Text>Key <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Transfer Key to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
                                         </Box>
                                     </TableCell>
                                     <TableCell align="center">
                                         <Box display="flex" flexDirection="column">
                                             <Text variant="h6">Recover</Text>
-                                            <Text>Transfer <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Mnemonic Phrase to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
+                                            <Text>Transfer <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Transfer Key to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
                                         </Box>
                                     </TableCell>
                                     <TableCell align="center">
