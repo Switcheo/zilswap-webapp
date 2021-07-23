@@ -294,7 +294,6 @@ const TransactionDetail = (props: TransactionDetailProps) => {
   const [showTransactions, setShowTransactions] = useState<boolean>(true);
 
   const fromToken = bridgeableTokenFinder(currentTx.srcToken, currentTx.srcChain);
-  console.log("from token", fromToken); 
 
   let currentBridgeTx = currentTx;
 
@@ -402,9 +401,11 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                 <WarningRoundedIcon className={classes.warningIcon} /> Warning: Please read these instructions carefully before closing this window to avoid losing your funds.
               </Text>
 
-              <Button onClick={handleShowMnemonicDialog} className={classes.instructionsButton} size="small" variant="contained">
-                Read Instructions
-              </Button>
+              {!currentBridgeTx.withdrawTxHash && (
+                <Button onClick={handleShowMnemonicDialog} className={classes.instructionsButton} size="small" variant="contained">
+                  Read Instructions
+                </Button>
+              )}
             </Fragment>
             : <Fragment>
               <Text variant="h2" className={classes.textSuccess}>
