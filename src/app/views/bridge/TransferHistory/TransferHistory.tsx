@@ -76,13 +76,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     tableContainer: {
         '&::-webkit-scrollbar': {
-            width: '0.4rem'
+            width: '0.4rem',
+            height: '0.4rem'
         },
         '&::-webkit-scrollbar-thumb': {
             backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
             borderRadius: 12,
         },
-        padding: theme.spacing(0, 0.5),
+        // if vertical scrollbar present
+        // padding: theme.spacing(0, 0.5),
     },
     table: {
         borderCollapse: "separate",
@@ -202,10 +204,6 @@ const TransferHistory = (props: any) => {
         dispatch(actions.Layout.showTransferConfirmation(false));
     }
 
-    // const handleShowDetails = () => {
-    //     dispatch(actions.Layout.showTransferConfirmation(true));
-    // }
-
     const getTransferStage = (tx: BridgeTx) => {
         if (tx?.withdrawTxHash) {
             return "Stage 3.1"
@@ -276,7 +274,7 @@ const TransferHistory = (props: any) => {
         <BridgeCard {...rest} className={cls(classes.root, className)}>
             {!previewTx && (
                 <Box overflow="hidden" display="flex" flexDirection="column" className={classes.container}>
-                    <Box display="flex" justifyContent="space-between" mt={2} pl={2.5} pr={2.5}>
+                    <Box display="flex" justifyContent="space-between" mt={2} pl={2} pr={2}>
                         <Box display="flex" flexDirection="column">
                             <Text variant="h2">
                                 Zil<span className={classes.textColoured}>Bridge</span>
