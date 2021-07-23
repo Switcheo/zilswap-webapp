@@ -19,7 +19,7 @@ import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import dayjs from "dayjs";
 import { ethers } from "ethers";
 import { History } from "history";
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";

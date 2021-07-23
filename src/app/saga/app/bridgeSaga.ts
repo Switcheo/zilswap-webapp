@@ -15,8 +15,6 @@ import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK,
 import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
 import { getBridge } from '../selectors';
-import { ethers } from "ethers";
-import { TransactionResponse } from "@ethersproject/abstract-provider";
 
 export enum Status {
   NotStarted,
