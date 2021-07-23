@@ -22,14 +22,20 @@ const useStyles = makeStyles(theme => ({
       maxWidth: 520,
     },
     [theme.breakpoints.down("xs")]: {
-      maxWidth: 380,
+      maxWidth: '100%',
+      padding: '16px',
     },
     "& .MuiPaper-root": {
       width: "100%",
     },
+    "& .MuiDialogTitle-root": {
+      backgroundColor: theme.palette.type === "dark" ? "#12222C" : "#F6FFFC"
+    },
   },
   input: {
+    backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#D4FFF2",
     marginBottom: 20,
+    borderColor: theme.palette.type === "dark" ? "#29475A" : "#D4FFF2",
     '&.Mui-focused': {
       borderColor: theme.palette.primary.dark,
     },
@@ -37,9 +43,9 @@ const useStyles = makeStyles(theme => ({
   inputText: {
     fontSize: '16px!important',
     [theme.breakpoints.down("xs")]: {
-      fontSize: "12px!important"
+      fontSize: "16px!important"
     },
-    padding: "18.5px 14px!important"
+    padding: "18.5px 14px!important",
   },
   currenciesContainer: {
     maxHeight: 460,
@@ -67,11 +73,15 @@ const useStyles = makeStyles(theme => ({
     overflow: "hidden",
   },
   dialogContent: {
-    backgroundColor: theme.palette.background.default,
+    backgroundColor: theme.palette.type === "dark" ? "#12222C" : "#F6FFFC",
     borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRadius: "0 0 12px 12px"
+    borderRadius: "0 0 12px 12px",
+    paddingTop: '24px',
+    [theme.breakpoints.down("sm")]: {
+      paddingTop: '0px',
+    },
   }
 }));
 
