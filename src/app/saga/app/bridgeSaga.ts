@@ -246,18 +246,6 @@ function* watchActiveTxConfirmations() {
             console.error(error);
           }
         }
-
-        if (activeBridgeTx?.destinationTxHash) {
-          try {
-            const defaultProvider = ethers.getDefaultProvider("ropsten");
-            const ethResp = (yield defaultProvider.getTransaction(activeBridgeTx.destinationTxHash)) as TransactionResponse;
-            activeBridgeTx.ethConfirmations = ethResp.confirmations;
-            yield put(actions.Bridge.addBridgeTx([activeBridgeTx]));
-          } catch (error) {
-            console.error("error retrieving ethereum confirmation info");
-            console.error(error);
-          }
-        }
       }
     } catch (error) {
       console.error("watchActiveTxConfirmations error")
