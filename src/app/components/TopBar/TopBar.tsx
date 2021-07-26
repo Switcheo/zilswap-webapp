@@ -1,9 +1,10 @@
-import { AppBar, Box, Hidden, IconButton, Toolbar } from "@material-ui/core";
+import { AppBar, Box, Button, Hidden, IconButton, Toolbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Brand } from "app/components/TopBar/components";
 import RewardsInfoButton from "app/layouts/RewardsInfoButton";
 import cls from "classnames";
 import React from "react";
+import { Link } from "react-router-dom";
 import ConnectWalletButton from "../ConnectWalletButton";
 import { ReactComponent as MenuIcon } from "./menu.svg";
 import { TopBarProps } from "./types";
@@ -47,6 +48,11 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(0, 2),
     justifyContent: 'flex-start',
   },
+  brandButton: {
+    "&:hover": {
+      backgroundColor: "transparent"
+    }
+  }
 }));
 
 const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -64,7 +70,9 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
           </div>
         </Box>
         <Box justifyContent="center">
-          <Brand />
+          <Button component={Link} to="/" className={classes.brandButton} disableRipple>
+            <Brand />
+          </Button>
         </Box>
         <Box display="flex" flex={1} justifyContent="flex-end" alignItems="center">
           <RewardsInfoButton />
