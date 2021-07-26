@@ -487,6 +487,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             onAmountChange={onTransferAmountChange}
             onCurrencyChange={onCurrencyChange}
             tokenList={tokenList}
+            showMaxButton={true}
           />
 
           {/* <Box mt={1} display="flex">
