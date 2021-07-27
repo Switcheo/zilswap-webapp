@@ -633,7 +633,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
               variant="contained"
               color="primary"
               className={classes.actionButton}>
-              <CircularProgress size={24} className={classes.progress} />
+              <CircularProgress size={20} className={classes.progress} />
               Transfer in Progress...
             </FancyButton>
           )}

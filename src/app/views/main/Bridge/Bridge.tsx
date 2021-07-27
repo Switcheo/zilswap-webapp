@@ -9,7 +9,7 @@ import { actions } from "app/store";
 import { BridgeFormState, BridgeState } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useNetwork, useTokenFinder } from "app/utils";
+import { hexToRGBA, strings, useAsyncTask, useNetwork, useTokenFinder } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
@@ -19,10 +19,11 @@ import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ethers } from "ethers";
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain, RestModels, TradeHubSDK } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
 import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectButton } from "./components";
+import { BridgeParamConstants } from "./components/constants";
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "./wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "./zilliqa-logo.svg";
@@ -132,6 +133,11 @@ const initialFormState = {
   transferAmount: '0',
 }
 
+const CHAIN_NAMES : any = {
+  zil: Blockchain.Zilliqa,
+  eth: Blockchain.Ethereum,
+}
+
 const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
@@ -145,6 +151,18 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const bridgeState = useSelector<RootState, BridgeState>(store => store.bridge);
   const bridgeFormState: BridgeFormState = useSelector<RootState, BridgeFormState>(store => store.bridge.formState);
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
+  const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
+  const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK");
+
+  useEffect(() => {
+    runInitTradeHubSDK(async () => {
+      const sdk = new TradeHubSDK({ network: TradeHubSDK.Network.DevNet });
+      await sdk.token.reloadTokens();
+      setSdk(sdk);
+    })
+
+    // eslint-disable-next-line
+  }, []);
 
   const isCorrectChain = useMemo(() => {
     return network === Network.TestNet && Number(bridgeWallet?.chainId) === 3;
@@ -390,24 +408,50 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     return true
   }, [isCorrectChain, formState, bridgeFormState.transferAmount])
 
-  // Button should be disabled if currency input is disabled
-  // const onSelectMax = () => {
-  //   if (!fromToken) return;
+  // returns true if asset is native coin, false otherwise
+  const isNativeAsset = (asset: RestModels.Token) => {
+    const zeroAddress = "0000000000000000000000000000000000000000";
+    return (asset.asset_id === zeroAddress)
+  }
 
-  //   const balance = strings.bnOrZero(fromToken.balance);
+  const adjustedForGas = async (balance: BigNumber, blockchain: Blockchain) => {
+    if (blockchain === Blockchain.Zilliqa) {
+      const gasPrice = new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`);
+      const gasLimit = new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`);
 
-  //   // do the gas stuff here
+      return balance.minus(gasPrice.multipliedBy(gasLimit));
+    } else {
+      const gasPrice = await sdk?.eth.getProvider().getGasPrice();
+      const gasPriceGwei = new BigNumber(gasPrice!.toString()).shiftedBy(-9);
+      const gasLimit = new BigNumber(250000);
 
-  //   setFormState({
-  //     ...formState,
-  //     transferAmount: balance.shiftedBy(-fromToken.decimals).toString(),
-  //   })
+      return balance.minus(gasPriceGwei.multipliedBy(gasLimit));
+    }
+  }
 
-  //   dispatch(actions.Bridge.updateForm({
-  //     forNetwork: network,
-  //     transferAmount: balance.shiftedBy(-fromToken.decimals),
-  //   }))
-  // }
+  const onSelectMax = async () => {
+    if (!fromToken || !sdk) return;
+
+    let balance = strings.bnOrZero(fromToken.balance);
+    const asset = sdk.token.tokens[bridgeToken?.denom ?? ""];
+
+    if (!asset) return;
+
+    // Check if gas fees need to be deducted
+    if (isNativeAsset(asset) && CHAIN_NAMES[fromToken.blockchain] === fromBlockchain) {
+      balance = await adjustedForGas(balance, fromToken.blockchain);
+    } 
+
+    setFormState({
+      ...formState,
+      transferAmount: balance.shiftedBy(-fromToken.decimals).toString(),
+    })
+
+    dispatch(actions.Bridge.updateForm({
+      forNetwork: network,
+      transferAmount: balance.shiftedBy(-fromToken.decimals),
+    }))
+  }
 
   return (
     <BridgeCard {...rest} className={cls(classes.root, className)}>
@@ -487,6 +531,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             onAmountChange={onTransferAmountChange}
             onCurrencyChange={onCurrencyChange}
             tokenList={tokenList}
+            onSelectMax={onSelectMax}
             showMaxButton={true}
           />
 

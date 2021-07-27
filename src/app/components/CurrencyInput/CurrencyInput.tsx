@@ -89,10 +89,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       },
       "&:hover": {
         backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#00FFB0" : "#003340", 0.5)}`,
-      }
+      },
     },
     "&:hover": {
       backgroundColor: "transparent",
+    },
+    "&.Mui-disabled": {
+      color: theme.palette.type === "dark" ? "#003340" : "#DEFFFF",
+      "& .MuiButton-label": {
+        backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#00FFB0" : "#003340", 0.4)}`,
+      }
     }
   }
 }));
@@ -115,6 +121,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   onAmountChange?: (value: string) => void;
   onEditorBlur?: () => void;
   onCloseDialog?: () => void;
+  onSelectMax?: () => void;
 };
 
 const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
@@ -123,9 +130,10 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     label, fixedToken, amount, disabled,
     showCurrencyDialog: showDialogOverride,
     onCloseDialog: onCloseDialogListener,
-    showContribution, hideBalance, showMaxButton, showPoolBalance, dialogOpts = {},
+    showContribution, hideBalance, showPoolBalance, dialogOpts = {},
     onAmountChange, onCurrencyChange, token,
-    onEditorBlur,
+    onEditorBlur, 
+    onSelectMax, showMaxButton,
     tokenList = "zil",
   } = props;
   const classes = useStyles();
@@ -222,7 +230,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
               (
               <Box display="flex" >
                 {showMaxButton &&
-                  <Button className={classes.maxButton} disableRipple>
+                  <Button className={classes.maxButton} disabled={disabled} onClick={onSelectMax} disableRipple>
                     <Typography>MAX</Typography>
                   </Button>
                 }

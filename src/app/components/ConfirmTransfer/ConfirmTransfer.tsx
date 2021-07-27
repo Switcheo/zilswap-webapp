@@ -616,7 +616,7 @@ const ConfirmTransfer = (props: any) => {
           color="primary"
           className={classes.actionButton}>
           {loadingConfirm &&
-            <CircularProgress size={24} className={classes.progress} />
+            <CircularProgress size={20} className={classes.progress} />
           }
           {bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
             ? "Confirm (ZIL -> ETH)"
