@@ -490,10 +490,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             showMaxButton={true}
           />
 
-          {/* <Box mt={1} display="flex">
-              <Button color="primary" variant="contained" disabled={!formState.sourceAddress || !formState.destAddress} onClick={onSelectMax}>Max</Button>
-          </Box> */}
-
           <Button
             onClick={showTransfer}
             disabled={!isSubmitEnabled}

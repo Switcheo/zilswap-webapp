@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, IconButton, Link, makeStyles, Step, StepConnector, StepLabel, Stepper, withStyles } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, CircularProgress, IconButton, Link, makeStyles, Step, StepConnector, StepLabel, Stepper, withStyles } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
@@ -239,6 +239,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   routerLink: {
     textDecoration: "inherit",
     color: "inherit"
+  },
+  progress: {
+    color: "rgba(255,255,255,.5)",
+    marginRight: theme.spacing(1)
   },
 }));
 
@@ -629,6 +633,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
               variant="contained"
               color="primary"
               className={classes.actionButton}>
+              <CircularProgress size={24} className={classes.progress} />
               Transfer in Progress...
             </FancyButton>
           )}

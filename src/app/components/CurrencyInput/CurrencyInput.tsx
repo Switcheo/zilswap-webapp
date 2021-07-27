@@ -221,7 +221,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
               ) :
               (
               <Box display="flex" >
-                {showMaxButton && !disabled && 
+                {showMaxButton &&
                   <Button className={classes.maxButton} disableRipple>
                     <Typography>MAX</Typography>
                   </Button>
