@@ -184,6 +184,11 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     if (typeof onCloseDialogListener === "function")
       onCloseDialogListener();
   };
+  
+  const clearPlaceholder = () => {
+    if (amount === "0" && typeof onAmountChange === "function")
+      onAmountChange("");
+  }
 
   return (
     <form className={cls(classes.form, className)} noValidate autoComplete="off">
@@ -213,6 +218,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
         placeholder={"0"}
         value={amount.toString()}
         onChange={onChange}
+        onFocus={clearPlaceholder}
         onBlur={onEditorBlur}
         disabled={disabled}
         type="number"

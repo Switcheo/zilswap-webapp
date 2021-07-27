@@ -87,7 +87,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignItems: "center",
     borderRadius: 12,
     backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`,
-    padding: theme.spacing(1)
+    padding: theme.spacing(1),
+    overflow: "auto",
   },
   networkBox: {
     display: "flex",
