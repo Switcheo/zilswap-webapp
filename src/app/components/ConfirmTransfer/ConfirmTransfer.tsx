@@ -599,7 +599,7 @@ const ConfirmTransfer = (props: any) => {
             ~ <span className={classes.textColoured}>${withdrawFee?.value.toFixed(2) || 0}</span>
             <HelpInfo className={classes.helpInfo} placement="top" title="Estimated total fees to be incurred for this transfer (in USD). Please note that the fees will be deducted from the amount that is being transferred out of the network and you will receive less tokens as a result." />
           </KeyValueDisplay>
-          <KeyValueDisplay kkey={<span>&nbsp; • &nbsp;{toChainName} Txn Fee</span>} mb="8px">
+          <KeyValueDisplay kkey={<span>&nbsp; • &nbsp;{fromChainName} Txn Fee</span>} mb="8px">
             <span className={classes.textColoured}>{withdrawFee?.amount.toFixed(2)}</span>
             {" "}
             {fromToken?.symbol}

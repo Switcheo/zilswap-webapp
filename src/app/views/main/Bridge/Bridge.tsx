@@ -404,9 +404,11 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       return false;
     if (bridgeFormState.transferAmount.isZero())
       return false;
+    if (fromToken && bridgeFormState.transferAmount.isGreaterThan(strings.bnOrZero(fromToken.balance).shiftedBy(-fromToken.decimals)))
+      return false;
 
     return true
-  }, [isCorrectChain, formState, bridgeFormState.transferAmount])
+  }, [isCorrectChain, formState, bridgeFormState.transferAmount, fromToken])
 
   // returns true if asset is native coin, false otherwise
   const isNativeAsset = (asset: RestModels.Token) => {
