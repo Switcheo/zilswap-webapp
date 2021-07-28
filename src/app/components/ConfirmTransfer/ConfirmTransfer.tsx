@@ -319,7 +319,7 @@ const ConfirmTransfer = (props: any) => {
     const amount = bridgeFormState.transferAmount;
     const ethAddress = await signer.getAddress();
     const gasPrice = await sdk.eth.getProvider().getGasPrice();
-    const gasPriceGwei = new BigNumber(gasPrice.toString()).shiftedBy(-9);
+    const gasPriceGwei = new BigNumber(ethers.utils.formatUnits(gasPrice, "gwei"));
     const depositAmt = amount.shiftedBy(asset.decimals);
 
     // approve token
@@ -356,7 +356,7 @@ const ConfirmTransfer = (props: any) => {
       token: asset,
       address: swthAddressBytes,
       ethAddress: ethAddress.toLowerCase(),
-      gasLimit: new BigNumber(250000),
+      gasLimit: new BigNumber(`${BridgeParamConstants.ETH_GAS_LIMIT}`),
       gasPriceGwei: gasPriceGwei,
       amount: depositAmt,
       signer: signer,

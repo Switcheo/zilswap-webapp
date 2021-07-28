@@ -414,16 +414,16 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     return (asset.asset_id === zeroAddress)
   }
 
-  const adjustedForGas = async (balance: BigNumber, blockchain: Blockchain) => {
+  const adjustedForGas = async (balance: BigNumber, blockchain: Blockchain, sdk: TradeHubSDK) => {
     if (blockchain === Blockchain.Zilliqa) {
       const gasPrice = new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`);
       const gasLimit = new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`);
 
       return balance.minus(gasPrice.multipliedBy(gasLimit));
     } else {
-      const gasPrice = await sdk?.eth.getProvider().getGasPrice();
-      const gasPriceGwei = new BigNumber(gasPrice!.toString()).shiftedBy(-9);
-      const gasLimit = new BigNumber(250000);
+      const gasPrice = await sdk.eth.getProvider().getGasPrice();
+      const gasPriceGwei = new BigNumber(ethers.utils.formatUnits(gasPrice, "gwei"));
+      const gasLimit = new BigNumber(`${BridgeParamConstants.ETH_GAS_LIMIT}`);
 
       return balance.minus(gasPriceGwei.multipliedBy(gasLimit));
     }
@@ -439,7 +439,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
     // Check if gas fees need to be deducted
     if (isNativeAsset(asset) && CHAIN_NAMES[fromToken.blockchain] === fromBlockchain) {
-      balance = await adjustedForGas(balance, fromToken.blockchain);
+      balance = await adjustedForGas(balance, fromToken.blockchain, sdk);
     } 
 
     setFormState({
