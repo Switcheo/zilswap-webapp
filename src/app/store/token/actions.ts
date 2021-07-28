@@ -11,6 +11,7 @@ export const TokenActionTypes = {
   TOKEN_UPDATE_ALL: "TOKEN_UPDATE_ALL",
   TOKEN_UPDATE_PRICES: "TOKEN_UPDATE_PRICES",
   TOKEN_UPDATE_USD: "TOKEN_UPDATE_USD",
+  TOKEN_UPDATE_USER_SAVED: "TOKEN_UPDATE_USER_SAVED",
 };
 
 export function init(payload: TokenInitProps) {
@@ -51,6 +52,12 @@ export function updatePrices(payload: UpdatePriceProps) {
 export function updateUSDValues(payload: UpdateUSDValuesProps) {
   return {
     type: TokenActionTypes.TOKEN_UPDATE_USD,
+    payload,
+  }
+};
+export function updateUserSavedTokens(payload: string) {
+  return {
+    type: TokenActionTypes.TOKEN_UPDATE_USER_SAVED,
     payload,
   }
 };

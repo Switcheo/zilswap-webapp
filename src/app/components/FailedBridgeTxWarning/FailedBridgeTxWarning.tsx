@@ -8,8 +8,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { Network } from "zilswap-sdk/lib/constants";
+import cls from "classnames";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
+  root: {
+    [theme.breakpoints.down("xs")]: {
+      width: "100%!important"
+    },
+  },
   container: {
     backgroundColor: theme.palette.background.default,
     borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
@@ -53,6 +59,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.2)}`
     }
   },
+  breakLine: {
+    wordBreak: "break-word"
+  },
+  link: {
+    color: theme.palette.link,
+    "&:hover": {
+      textDecoration: "underline"
+    }
+  }
 }));
 
 const FailedBridgeTxWarning = (props: any) => {
@@ -102,7 +117,7 @@ const FailedBridgeTxWarning = (props: any) => {
       open={!!failedDepositTx}
       onClose={onTryAgain}
       {...rest}
-      className={className}
+      className={cls(classes.root, className)}
     >
       <Box overflow="hidden" display="flex" flexDirection="column" className={classes.container}>
         <Text variant="h2" align="center" className={classes.warning}>
@@ -115,11 +130,11 @@ const FailedBridgeTxWarning = (props: any) => {
           </Text>
           <Text marginBottom={1} variant="h6" align="center">
             There is a known issue with bridging from Zilliqa to Ethereum, we are working on resolving this as soon as possible.
-            <br />Bridging Ethereum to Zilliqa is unaffected. Please check <a href="https://twitter.com/ZilSwap" target="_blank"
-            rel="noreferrer">ZilSwap Twitter</a> for updates.
+            <br />Bridging Ethereum to Zilliqa is unaffected. Please check <a className={classes.link} href="https://twitter.com/ZilSwap" target="_blank"
+              rel="noreferrer">ZilSwap Twitter</a> for updates.
           </Text>
 
-          <Text marginBottom={1} variant="h6" align="center">
+          <Text marginBottom={1} variant="h6" align="center" className={classes.breakLine}>
             TX: {failedDepositTx?.sourceTxHash}
           </Text>
 

@@ -11,8 +11,8 @@ import { Network } from "zilswap-sdk/lib/constants";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    width: 28,
-    height: 28,
+    width: 30,
+    height: 30,
     display: "flex",
     borderRadius: 14,
     padding: 2,

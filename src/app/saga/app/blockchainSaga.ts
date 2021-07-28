@@ -162,7 +162,11 @@ const addMapping = (r: BridgeMappingResult, a: TradeHubToken, b: TradeHubToken, 
 
 const addToken = (r: SimpleMap<TokenInfo>, t: TradeHubToken) => {
   const address = t.blockchain === Blockchain.Zilliqa ? toBech32Address(t.asset_id) : `0x${t.asset_id.toLowerCase()}`
-  if (r[address]) return
+  if (r[address]) {
+    if (!r[address].registered)
+      r[address].registered = true;
+    return
+  }
   r[address] = {
     initialized: false,
     registered: true,
@@ -218,8 +222,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
         address: tkn.address,
         decimals: tkn.decimals,
         symbol: tkn.symbol,
-        name: "",
-        // name: zilswapToken.name,
+        name: tkn.name,
         balance: undefined,
         allowances: {},
         pool: sdk!.getPool(tkn.address) || undefined,
@@ -235,7 +238,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
     Object.entries(mappings.result).forEach(([wrappedDenom, sourceDenom]) => {
       // TODO: update whitelist (this is devnet only)
-      if (!["zil.e", "zwap1.e", "eth.zilliqa", "dai.z"].includes(wrappedDenom)) {
+      if (!["zil5.e", "zwap5.e", "eth5.z", "dai5.z"].includes(wrappedDenom)) {
         return;
       }
 

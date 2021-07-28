@@ -98,4 +98,7 @@ export interface BridgeTx {
 
   // deposit tx failure detected at
   depositFailedAt?: dayjs.Dayjs;
+
+  // populated when bridge tx is added
+  depositDispatchedAt?: dayjs.Dayjs;
 }

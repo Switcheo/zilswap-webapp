@@ -6,12 +6,18 @@ import {
   UpdatePriceProps, UpdateUSDValuesProps,
   TokenUSDValues, TokenInfo,
 } from "./types";
+import { LocalStorageKeys } from "app/utils/constants";
+
+const savedTokenStrs = localStorage.getItem(LocalStorageKeys.UserTokenList) || "[]";
+const savedTokens = JSON.parse(savedTokenStrs);
+
 
 const initial_state: TokenState = {
   initialized: false,
   prices: {},
   tokens: {},
   values: {},
+  userSavedTokens: savedTokens,
 };
 
 export const EMPTY_USD_VALUE: TokenUSDValues = {
@@ -93,6 +99,22 @@ const reducer = (state: TokenState = initial_state, action: any) => {
         ...state,
         prices: updatePricesProps,
       };
+
+    case TokenActionTypes.TOKEN_UPDATE_USER_SAVED:
+      let newTokens = state.userSavedTokens;
+      if (newTokens.indexOf(payload) >= 0) {
+        newTokens.splice(newTokens.indexOf(payload), 1);
+      } else {
+        newTokens.push(payload);
+      }
+
+      const savedTokensData = JSON.stringify(newTokens);
+      localStorage.setItem(LocalStorageKeys.UserTokenList, savedTokensData);
+      return {
+        ...state,
+        userSavedTokens: newTokens,
+      };
+
 
     default:
       return state;

@@ -5,13 +5,14 @@ import { DialogModal } from "app/components";
 import { BridgeState } from "app/store/bridge/types";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { hexToRGBA, useTaskSubscriber } from "app/utils";
-import { BIG_ZERO, LoadingKeys, LocalStorageKeys } from "app/utils/constants";
+import { BIG_ZERO, LoadingKeys } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
 import { CurrencyList } from "./components";
+import { actions } from "app/store";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -21,14 +22,20 @@ const useStyles = makeStyles(theme => ({
       maxWidth: 520,
     },
     [theme.breakpoints.down("xs")]: {
-      maxWidth: 380,
+      maxWidth: '100%',
+      padding: '16px',
     },
     "& .MuiPaper-root": {
       width: "100%",
     },
+    "& .MuiDialogTitle-root": {
+      backgroundColor: theme.palette.type === "dark" ? "#12222C" : "#F6FFFC"
+    },
   },
   input: {
+    backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#D4FFF2",
     marginBottom: 20,
+    borderColor: theme.palette.type === "dark" ? "#29475A" : "#D4FFF2",
     '&.Mui-focused': {
       borderColor: theme.palette.primary.dark,
     },
@@ -36,9 +43,9 @@ const useStyles = makeStyles(theme => ({
   inputText: {
     fontSize: '16px!important',
     [theme.breakpoints.down("xs")]: {
-      fontSize: "12px!important"
+      fontSize: "16px!important"
     },
-    padding: "18.5px 14px!important"
+    padding: "18.5px 14px!important",
   },
   currenciesContainer: {
     maxHeight: 460,
@@ -66,11 +73,15 @@ const useStyles = makeStyles(theme => ({
     overflow: "hidden",
   },
   dialogContent: {
-    backgroundColor: theme.palette.background.default,
+    backgroundColor: theme.palette.type === "dark" ? "#12222C" : "#F6FFFC",
     borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRadius: "0 0 12px 12px"
+    borderRadius: "0 0 12px 12px",
+    paddingTop: '24px',
+    [theme.breakpoints.down("sm")]: {
+      paddingTop: '0px',
+    },
   }
 }));
 
@@ -89,8 +100,8 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const classes = useStyles();
   const [search, setSearch] = useState("");
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
-  const [userTokens, setUserTokens] = useState<string[]>([]);
   const [loadingConnectWallet] = useTaskSubscriber(...LoadingKeys.connectWallet);
+  const dispatch = useDispatch();
 
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
@@ -127,9 +138,9 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     const searchTerm = search.toLowerCase().trim();
     if (token.isZil && hideZil) return false;
     if (!token.isZil && !token.pool && hideNoPool) return false;
-    if (searchTerm === "" && !token.registered && !userTokens.includes(token.address)) return false;
+    if (searchTerm === "" && !token.registered && !tokenState.userSavedTokens.includes(token.address)) return false;
 
-    if (!token.registered && !userTokens.includes(token.address)) {
+    if (!token.registered && !tokenState.userSavedTokens.includes(token.address)) {
       return token.address.toLowerCase() === searchTerm;
     }
 
@@ -139,15 +150,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   };
 
   const onToggleUserToken = (token: TokenInfo) => {
-    if (userTokens.indexOf(token.address) >= 0) {
-      userTokens.splice(userTokens.indexOf(token.address), 1);
-    } else {
-      userTokens.push(token.address);
-    }
-
-    const savedTokensData = JSON.stringify(userTokens);
-    localStorage.setItem(LocalStorageKeys.UserTokenList, savedTokensData);
-    setUserTokens([...userTokens]);
+    dispatch(actions.Token.updateUserSavedTokens(token.address))
   };
 
   const filteredTokens = tokens.filter(filterSearch);
@@ -177,7 +180,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
             search={search}
             emptyStateLabel="No token found."
             showContribution={showContribution}
-            userTokens={userTokens}
+            userTokens={tokenState.userSavedTokens}
             onToggleUserToken={onToggleUserToken}
             onSelectCurrency={onSelectCurrency}
             className={clsx(classes.currencies)} />

@@ -28,6 +28,7 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
       destinationTxConfirmedAt: DataCoder.encodeDayjs(tx.destinationTxConfirmedAt),
       dismissedAt: DataCoder.encodeDayjs(tx.dismissedAt),
       depositFailedAt: DataCoder.encodeDayjs(tx.depositFailedAt),
+      depositDispatchedAt: DataCoder.encodeDayjs(tx.depositDispatchedAt),
     };
   },
 
@@ -51,6 +52,7 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
       destinationTxConfirmedAt: DataCoder.decodeDayjs(object.destinationTxConfirmedAt),
       dismissedAt: DataCoder.decodeDayjs(object.dismissedAt),
       depositFailedAt: DataCoder.decodeDayjs(object.depositFailedAt),
+      depositDispatchedAt: DataCoder.decodeDayjs(object.depositDispatchedAt),
     }
   }
 }

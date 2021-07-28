@@ -10,6 +10,7 @@ export const LayoutActionTypes = {
   UPDATE_NOTIFICATION: "UPDATE_NOTIFICATION",
   TOGGLE_SHOW_TRANSACTIONS: "TOGGLE_SHOW_TRANSACTIONS",
   SHOW_TRANSFER_CONFIRMATION: "SHOW_TRANSFER_CONFIRMATION",
+  TOGGLE_SHOW_MNEMONIC: "TOGGLE_SHOW_MNEMONIC",
 
   ADD_BACKGROUND_LOADING: "ADD_BACKGROUND_LOADING",
   REMOVE_BACKGROUND_LOADING: "REMOVE_BACKGROUND_LOADING",
@@ -36,6 +37,12 @@ export function toggleShowTransactions(override?: OpenCloseState) {
 export function toggleShowNetworkSwitch(override?: OpenCloseState) {
   return {
     type: LayoutActionTypes.TOGGLE_SHOW_NETWORK_SWITCH,
+    override,
+  }
+};
+export function toggleShowMnemonic(override?: OpenCloseState) {
+  return {
+    type: LayoutActionTypes.TOGGLE_SHOW_MNEMONIC,
     override,
   }
 };
