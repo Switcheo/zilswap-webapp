@@ -1,8 +1,10 @@
-import { Accordion, AccordionDetails, AccordionSummary, Backdrop, Badge, Box, BoxProps, Button, Card, CircularProgress, ClickAwayListener, IconButton, Link, Popper, Tooltip } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, Backdrop, Badge, Box, BoxProps, Button, Card, Checkbox, CircularProgress, ClickAwayListener, Divider, IconButton, Link, Popper, Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
+import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBoxRounded";
+import CheckBoxIcon from "@material-ui/icons/CheckBoxRounded";
 import { CurrencyLogo, HelpInfo, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
@@ -32,19 +34,29 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "& .MuiAccordion-root.Mui-expanded": {
       backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#13222C", 0.5)}` : `rgba${hexToRGBA("#003340", 0.05)}`,
-      margin: 0
+      margin: 0,
     },
     "& .MuiAccordionSummary-root": {
       display: "inline-flex",
       minHeight: "28px",
-      maxHeight: "28px"
+      maxHeight: "28px",
+      marginLeft: "4px"
     },
     "& .MuiAccordionDetails-root": {
       display: "inherit",
     },
     "& .MuiAccordionSummary-content.Mui-expanded": {
       margin: 0
-    }
+    },
+    "& .MuiSvgIcon-fontSizeSmall": {
+      fontSize: "1rem"
+    },
+    "& .MuiCheckbox-colorSecondary.Mui-checked": {
+      color: "#00FFB0",
+      "&:hover": {
+        backgroundColor: "transparent"
+      }
+    },
   },
   backdrop: {
     zIndex: 1101,
@@ -76,6 +88,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   currencyLogoSmall: {
     height: "22px",
     width: "22px"
+  },
+  currencyLogoSmallest: {
+    height: "18px",
+    width: "18px"
   },
   tooltip: {
     marginLeft: "5px",
@@ -131,6 +147,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fill: theme.palette.text?.secondary,
     }
   },
+  header: {
+    fontSize: "16px"
+  },
   body: {
     fontSize: "14px",
     fontWeight: "normal"
@@ -143,6 +162,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   amount: {
     fontFamily: "Avenir Next"
+  },
+  checkbox: {
+    "& .MuiSvgIcon-root": {
+      fontSize: "1rem",
+    },
+    "&:hover": {
+      backgroundColor: "transparent"
+    },
+  },
+  date: {
+    fontWeight: "normal"
   }
 }));
 
@@ -163,15 +193,16 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const buttonRef = useRef();
   const theme = useTheme();
   const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
+  const [checked, setChecked] = useState<boolean>(true);
 
   const walletAddress = useMemo(() => walletState.wallet?.addressInfo.bech32, [walletState.wallet]);
 
-  const potentialRewards = useMemo(() => {
-    return Object.keys(rewardsState.potentialPoolRewards).reduce((accum, poolAddress) => {
-      const reward = rewardsState.potentialPoolRewards[poolAddress];
-      return accum.plus(reward);
-    }, BIG_ZERO);
-  }, [rewardsState.potentialPoolRewards]);
+  // const potentialRewards = useMemo(() => {
+  //   return Object.keys(rewardsState.potentialPoolRewards).reduce((accum, poolAddress) => {
+  //     const reward = rewardsState.potentialPoolRewards[poolAddress];
+  //     return accum.plus(reward);
+  //   }, BIG_ZERO);
+  // }, [rewardsState.potentialPoolRewards]);
 
   const {
     unclaimedRewards,
@@ -224,7 +255,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   const zapBalanceLabel = useMemo(() => formatZWAPLabel(zapTokenBalance), [zapTokenBalance]);
   const unclaimedRewardsLabel = useMemo(() => formatZWAPLabel(unclaimedRewards), [unclaimedRewards]);
-  const potentialRewardsLabel = useMemo(() => formatZWAPLabel(potentialRewards), [potentialRewards]);
+  // const potentialRewardsLabel = useMemo(() => formatZWAPLabel(potentialRewards), [potentialRewards]);
 
   const onClaimRewards = () => {
     runClaimRewards(async () => {
@@ -320,14 +351,14 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
           <ClickAwayListener onClickAway={() => setActive(false)}>
             <Card className={classes.card}>
               <Box display="flex" flexDirection="column" alignItems="center">
-                <Text variant="h6" color="textPrimary">Your Balance</Text>
+                <Text variant="h6" color="textPrimary" className={classes.header}>Your Balance</Text>
                 <Box display="flex" marginTop={1}>
                   <Text variant="h2" className={classes.textColoured}>
                     {zapBalanceLabel}
                   </Text>
                   <CurrencyLogo currency="ZWAP" address={zwapAddress} className={classes.currencyLogo}/>
                 </Box>
-                <Text variant="h6" marginTop={0} className={classes.textColoured}>
+                <Text marginTop={1} className={cls(classes.textColoured, classes.body)}>
                   ≈ {zapTokenValue.toFormat(2)} USD
                 </Text>
               </Box>
@@ -366,8 +397,103 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                       </AccordionSummary>
                     </Box>
                     <AccordionDetails>
-                      <Box>
-                        <h1>hello world</h1>
+                      <Box display="flex" flexDirection="column">
+                        {/* Unselect all */}
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                          <Checkbox
+                            className={classes.checkbox}
+                            icon={<IndeterminateCheckBoxIcon fontSize="small" />}
+                            checkedIcon={<CheckBoxIcon fontSize="small" />}
+                            checked={checked}
+                            onChange={event => setChecked(event?.target.checked)}
+                          />
+                          <Text color="textSecondary">
+                            Unselect all
+                          </Text>
+                        </Box>
+
+                        <Box mb={0.5} />
+
+                        {/* Should be refactored into one component*/}
+                        <Box mt={1}>
+                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+                            <Text className={classes.date}>
+                              15 June
+                            </Text>
+                            <Text variant="body2" color="textSecondary" className={classes.amount}>
+                              ≈ $100.00 USD
+                            </Text>
+                          </Box>
+                          <Divider />
+                          <Box display="flex" justifyContent="space-between" alignItems="center" mt={0.5}>
+                            <Checkbox
+                              className={classes.checkbox}
+                              checked={checked}
+                              onChange={event => setChecked(event?.target.checked)}
+                            />
+                            <Text className={cls(classes.reward, classes.body)}>
+                              10.38
+                              <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
+                              <span className={classes.currency}>
+                                ZWAP
+                              </span>
+                            </Text>
+                          </Box>
+                          <Box display="flex" justifyContent="space-between" alignItems="center">
+                            <Checkbox
+                              className={classes.checkbox}
+                              checked={checked}
+                              onChange={event => setChecked(event?.target.checked)}
+                            />
+                            <Text className={cls(classes.reward, classes.body)}>
+                              10.38
+                              <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
+                              <span className={classes.currency}>
+                                ZWAP
+                              </span>
+                            </Text>
+                          </Box>
+                        </Box>
+
+                        <Box mt={1}>
+                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+                            <Text className={classes.date}>
+                              8 June
+                            </Text>
+                            <Text variant="body2" color="textSecondary" className={classes.amount}>
+                              ≈ $200.00 USD
+                            </Text>
+                          </Box>
+                          <Divider />
+                          <Box display="flex" justifyContent="space-between" alignItems="center" mt={0.5}>
+                            <Checkbox
+                              className={classes.checkbox}
+                              checked={checked}
+                              onChange={event => setChecked(event?.target.checked)}
+                            />
+                            <Text className={cls(classes.reward, classes.body)}>
+                              10.38
+                              <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
+                              <span className={classes.currency}>
+                                ZWAP
+                              </span>
+                            </Text>
+                          </Box>
+                          <Box display="flex" justifyContent="space-between" alignItems="center">
+                            <Checkbox
+                              className={classes.checkbox}
+                              checked={checked}
+                              onChange={event => setChecked(event?.target.checked)}
+                            />
+                            <Text className={cls(classes.reward, classes.body)}>
+                              10.38
+                              <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
+                              <span className={classes.currency}>
+                                ZWAP
+                              </span>
+                            </Text>
+                          </Box>
+                        </Box>                        
                       </Box>
                     </AccordionDetails>
                   </Accordion>
