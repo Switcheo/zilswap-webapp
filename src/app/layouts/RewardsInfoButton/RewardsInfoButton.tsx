@@ -500,6 +500,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                 </Box>
               </Box>
 
+              {/* Previous view */}
               {/* <KeyValueDisplay marginTop={2} alignItems="center" emphasizeValue kkey="Rewards This Epoch">
                 <Box display="flex" alignItems="center">
                   <Text variant="body2" color="textPrimary">
