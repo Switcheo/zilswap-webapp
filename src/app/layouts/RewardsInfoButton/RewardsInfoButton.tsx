@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Backdrop, Badge, Box, BoxProps, Button, Card, Checkbox, CircularProgress, ClickAwayListener, Divider, IconButton, Link, Popper, Tooltip } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, Backdrop, Badge, Box, BoxProps, Button, Card, Checkbox, CircularProgress, ClickAwayListener, Divider, IconButton, Link, Popper, Tooltip, FormControlLabel } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
@@ -52,11 +52,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fontSize: "1rem"
     },
     "& .MuiCheckbox-colorSecondary.Mui-checked": {
-      color: "#00FFB0",
+      color: theme.palette.primary.dark,
       "&:hover": {
         backgroundColor: "transparent"
       }
     },
+    "& .MuiFormControlLabel-root": {
+      marginLeft: 0,
+      marginRight: 0,
+      display: "flex",
+      justifyContent: "space-between"
+    }
   },
   backdrop: {
     zIndex: 1101,
@@ -193,6 +199,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const buttonRef = useRef();
   const theme = useTheme();
   const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
+
+  // Logic for select all not done
   const [checked, setChecked] = useState<boolean>(true);
 
   const walletAddress = useMemo(() => walletState.wallet?.addressInfo.bech32, [walletState.wallet]);
@@ -399,22 +407,28 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                     <AccordionDetails>
                       <Box display="flex" flexDirection="column">
                         {/* Unselect all */}
-                        <Box display="flex" justifyContent="space-between" alignItems="center">
-                          <Checkbox
-                            className={classes.checkbox}
-                            icon={<IndeterminateCheckBoxIcon fontSize="small" />}
-                            checkedIcon={<CheckBoxIcon fontSize="small" />}
-                            checked={checked}
-                            onChange={event => setChecked(event?.target.checked)}
+                        <Box>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                className={classes.checkbox}
+                                icon={<IndeterminateCheckBoxIcon fontSize="small" />}
+                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                checked={checked}
+                                onChange={event => setChecked(event?.target.checked)}
+                              />
+                            }
+                            label={
+                              <Text color="textSecondary">
+                                Unselect all
+                              </Text>
+                            }
                           />
-                          <Text color="textSecondary">
-                            Unselect all
-                          </Text>
                         </Box>
 
                         <Box mb={0.5} />
 
-                        {/* Should be refactored into one component*/}
+                        {/* Weekly rewards should be refactored into one component*/}
                         <Box mt={1}>
                           <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
                             <Text className={classes.date}>
@@ -425,33 +439,45 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                             </Text>
                           </Box>
                           <Divider />
-                          <Box display="flex" justifyContent="space-between" alignItems="center" mt={0.5}>
-                            <Checkbox
-                              className={classes.checkbox}
-                              checked={checked}
-                              onChange={event => setChecked(event?.target.checked)}
+                          <Box mt={0.5}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                className={classes.checkbox}
+                                checked={checked}
+                                onChange={event => setChecked(event?.target.checked)}
+                                />
+                              }
+                              label={
+                                <Text className={cls(classes.reward, classes.body)}>
+                                  10.38
+                                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
+                                  <span className={classes.currency}>
+                                    ZWAP
+                                  </span>
+                                </Text>
+                              }
                             />
-                            <Text className={cls(classes.reward, classes.body)}>
-                              10.38
-                              <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
-                              <span className={classes.currency}>
-                                ZWAP
-                              </span>
-                            </Text>
                           </Box>
-                          <Box display="flex" justifyContent="space-between" alignItems="center">
-                            <Checkbox
-                              className={classes.checkbox}
-                              checked={checked}
-                              onChange={event => setChecked(event?.target.checked)}
+                          <Box>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                className={classes.checkbox}
+                                checked={checked}
+                                onChange={event => setChecked(event?.target.checked)}
+                                />
+                              }
+                              label={
+                                <Text className={cls(classes.reward, classes.body)}>
+                                  10.38
+                                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
+                                  <span className={classes.currency}>
+                                    ZWAP
+                                  </span>
+                                </Text>
+                              }
                             />
-                            <Text className={cls(classes.reward, classes.body)}>
-                              10.38
-                              <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
-                              <span className={classes.currency}>
-                                ZWAP
-                              </span>
-                            </Text>
                           </Box>
                         </Box>
 
@@ -465,33 +491,45 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                             </Text>
                           </Box>
                           <Divider />
-                          <Box display="flex" justifyContent="space-between" alignItems="center" mt={0.5}>
-                            <Checkbox
-                              className={classes.checkbox}
-                              checked={checked}
-                              onChange={event => setChecked(event?.target.checked)}
-                            />
-                            <Text className={cls(classes.reward, classes.body)}>
-                              10.38
-                              <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
-                              <span className={classes.currency}>
-                                ZWAP
-                              </span>
-                            </Text>
+                          <Box mt={0.5}>
+                            <FormControlLabel
+                                control={
+                                  <Checkbox
+                                  className={classes.checkbox}
+                                  checked={checked}
+                                  onChange={event => setChecked(event?.target.checked)}
+                                  />
+                                }
+                                label={
+                                  <Text className={cls(classes.reward, classes.body)}>
+                                    10.38
+                                    <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
+                                    <span className={classes.currency}>
+                                      ZWAP
+                                    </span>
+                                  </Text>
+                                }
+                              />
                           </Box>
-                          <Box display="flex" justifyContent="space-between" alignItems="center">
-                            <Checkbox
-                              className={classes.checkbox}
-                              checked={checked}
-                              onChange={event => setChecked(event?.target.checked)}
+                          <Box>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                className={classes.checkbox}
+                                checked={checked}
+                                onChange={event => setChecked(event?.target.checked)}
+                                />
+                              }
+                              label={
+                                <Text className={cls(classes.reward, classes.body)}>
+                                  10.38
+                                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
+                                  <span className={classes.currency}>
+                                    ZWAP
+                                  </span>
+                                </Text>
+                              }
                             />
-                            <Text className={cls(classes.reward, classes.body)}>
-                              10.38
-                              <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
-                              <span className={classes.currency}>
-                                ZWAP
-                              </span>
-                            </Text>
                           </Box>
                         </Box>                        
                       </Box>
