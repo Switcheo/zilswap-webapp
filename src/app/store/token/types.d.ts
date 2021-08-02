@@ -29,6 +29,7 @@ export interface TokenState {
   prices: SimpleMap<BigNumber>,
   tokens: SimpleMap<TokenInfo>,
   values: SimpleMap<TokenUSDValues>,
+  userSavedTokens: string[],
 };
 
 export interface TokenUpdateProps extends Partial<TokenInfo> {

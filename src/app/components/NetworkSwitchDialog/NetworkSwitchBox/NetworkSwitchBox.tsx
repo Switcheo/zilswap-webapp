@@ -75,7 +75,7 @@ const NetworkSwitchBox = (props: any) => {
                 params: [{ chainId: '0x3' }],
             });
             dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
-            } catch (switchError) {
+        } catch (switchError) {
             console.log(switchError);
         }
     }
