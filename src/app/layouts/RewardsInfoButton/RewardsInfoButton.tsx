@@ -95,6 +95,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     height: "22px",
     width: "22px"
   },
+  currencyLogoButton: {
+    height: "20px",
+    width: "20px"
+  },
   currencyLogoSmallest: {
     height: "18px",
     width: "18px"
@@ -343,7 +347,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                 variant="outlined"
                 onClick={() => setActive(!active)}>
                 {zapBalanceLabel}
-                <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
+                <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoButton)}/>
               </Button>
             </Badge>
         }
