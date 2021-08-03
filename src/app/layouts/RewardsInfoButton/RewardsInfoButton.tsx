@@ -379,7 +379,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
               <Box display="flex" flexDirection="column" alignItems="center" mt={1.5}>
                 <Text className={classes.body}>
                   Rewards Claimable
-                  <HelpInfo placement="bottom" title="The estimated amount of ZWAP you have earned but have not claimed." className={classes.tooltip}/>
+                  <HelpInfo placement="bottom" title="The estimated amount of rewards you have collected and are eligible to claim." className={classes.tooltip}/>
                 </Text>
                 <Box className={classes.rewardBox} bgcolor="background.contrast" width="100%">
                   <Text variant="h4" className={classes.reward}>
