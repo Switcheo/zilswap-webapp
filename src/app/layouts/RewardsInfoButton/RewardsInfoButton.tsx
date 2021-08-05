@@ -1,16 +1,16 @@
-import { Accordion, AccordionDetails, AccordionSummary, Backdrop, Badge, Box, BoxProps, Button, Card, Checkbox, CircularProgress, ClickAwayListener, Divider, IconButton, Link, Popper, Tooltip, FormControlLabel } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, Backdrop, Badge, Box, BoxProps, Button, Card, Checkbox, CircularProgress, ClickAwayListener, Divider, FormControlLabel, IconButton, Link, Popper, Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
+import CheckBoxIcon from "@material-ui/icons/CheckBoxRounded";
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBoxRounded";
-import CheckBoxIcon from "@material-ui/icons/CheckBoxRounded";
 import { CurrencyLogo, HelpInfo, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
+import { hexToRGBA, useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import { formatZWAPLabel } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
@@ -48,6 +48,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiAccordionSummary-content.Mui-expanded": {
       margin: 0
     },
+    // Checkbox size
     "& .MuiSvgIcon-fontSizeSmall": {
       fontSize: "1rem"
     },
@@ -81,6 +82,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: "2px 8px",
     color: theme.palette.primary.contrastText,
     border: "1px solid #00FFB0",
+    alignItems: "flex-end"
   },
   buttonIcon: {
     marginLeft: theme.spacing(1),
@@ -91,17 +93,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   currencyLogo: {
     marginLeft: "2px",
   },
-  currencyLogoSmall: {
-    height: "22px",
-    width: "22px"
-  },
   currencyLogoButton: {
     height: "20px",
     width: "20px"
   },
-  currencyLogoSmallest: {
-    height: "18px",
-    width: "18px"
+  currencyLogoMd: {
+    height: "22px",
+    width: "22px"
+  },
+  currencyLogoSm: {
+    height: "17px",
+    width: "17px"
   },
   tooltip: {
     marginLeft: "5px",
@@ -119,7 +121,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     paddingBottom: theme.spacing(1),
     paddingLeft: theme.spacing(1),
     paddingRight: theme.spacing(1),
-    marginTop: theme.spacing(1)
+    marginTop: theme.spacing(1.5)
   },
   dropDownIcon: {
     color: theme.palette.primary.light
@@ -138,14 +140,43 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#13222C", 0.5)}` : `rgba${hexToRGBA("#003340", 0.05)}`,
     },
   },
-  reward: {
-    display: "inline-flex",
-    alignItems: "flex-end",
-    marginBottom: theme.spacing(0.5)
+  header: {
+    fontSize: "16px"
+  },
+  balanceAmount: {
+    fontSize: "28px"
+  },
+  body: {
+    fontSize: "14px",
+    fontWeight: "normal"
   },
   currency: {
-   fontWeight: 600,
-   marginLeft: "2px"
+    fontWeight: 600,
+    marginLeft: "2px"
+  },
+  checkbox: {
+    "& .MuiSvgIcon-root": {
+      fontSize: "1rem",
+    },
+    "&:hover": {
+      backgroundColor: "transparent"
+    },
+  },
+  totalReward: {
+    display: "inline-flex",
+    alignItems: "inherit",
+    marginBottom: theme.spacing(0.5),
+    fontSize: "20px"
+  },
+  epochReward: {
+    display: "inline-flex",
+    alignItems: "flex-end",
+    marginBottom: theme.spacing(0.5),
+    fontSize: "14px",
+    fontWeight: "normal"
+  },
+  date: {
+    fontWeight: "normal"
   },
   link: {
     color: theme.palette.text?.primary
@@ -157,33 +188,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fill: theme.palette.text?.secondary,
     }
   },
-  header: {
-    fontSize: "16px"
-  },
-  body: {
-    fontSize: "14px",
-    fontWeight: "normal"
-  },
   textSuccess: {
     color: theme.palette.primary.dark
   },
   successIcon: {
     verticalAlign: "top",
   },
-  amount: {
+  usdAmount: {
     fontFamily: "Avenir Next"
   },
-  checkbox: {
-    "& .MuiSvgIcon-root": {
-      fontSize: "1rem",
-    },
-    "&:hover": {
-      backgroundColor: "transparent"
-    },
-  },
-  date: {
-    fontWeight: "normal"
-  }
 }));
 
 const RewardsInfoButton: React.FC<Props> = (props: Props) => {
@@ -197,7 +210,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
   const [active, setActive] = useState(false);
   const [claimResult, setClaimResult] = useState<any>(null);
-  const [claimCount, setClaimCount] = useState(0);
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [runClaimRewards, loading, error] = useAsyncTask("claimRewards");
   const buttonRef = useRef();
@@ -273,7 +285,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     runClaimRewards(async () => {
       if (unclaimedRewards.isZero() || !walletState.wallet) return;
       let claimTx = null;
-      let count = 0;
       for (const distribution of rewardsState.rewardDistributions) {
         if (distribution.claimed) continue;
 
@@ -298,12 +309,9 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
           walletState.wallet.addressInfo.bech32,
           pendingTx,
         ));
-
-        count++;
       }
 
       if (claimTx) {
-        setClaimCount(count);
         setClaimResult(claimTx);
         setTimeout(() => {
           dispatch(actions.Token.refetchState());
@@ -365,40 +373,40 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
               <Box display="flex" flexDirection="column" alignItems="center">
                 <Text variant="h6" color="textPrimary" className={classes.header}>Your Balance</Text>
                 <Box display="flex" marginTop={1}>
-                  <Text variant="h2" className={classes.textColoured}>
+                  <Text variant="h2" className={cls(classes.textColoured, classes.balanceAmount)}>
                     {zapBalanceLabel}
                   </Text>
                   <CurrencyLogo currency="ZWAP" address={zwapAddress} className={classes.currencyLogo}/>
                 </Box>
                 <Text marginTop={1} className={cls(classes.textColoured, classes.body)}>
-                  ≈ {zapTokenValue.toFormat(2)} USD
+                  ≈ ${zapTokenValue.toFormat(2)}
                 </Text>
               </Box>
 
               {/* Rewards claimable */}
-              <Box display="flex" flexDirection="column" alignItems="center" mt={1.5}>
+              <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
                 <Text className={classes.body}>
                   Rewards Claimable
                   <HelpInfo placement="bottom" title="The estimated amount of rewards you have collected and are eligible to claim." className={classes.tooltip}/>
                 </Text>
                 <Box className={classes.rewardBox} bgcolor="background.contrast" width="100%">
-                  <Text variant="h4" className={classes.reward}>
+                  <Text variant="h4" className={classes.totalReward}>
                     {unclaimedRewardsLabel}
-                    <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
+                    <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoMd)}/>
                     <span className={classes.currency}>
                       ZWAP
                     </span>
                   </Text>
 
-                  <Text variant="h4" className={classes.reward}>
+                  <Text variant="h4" className={classes.totalReward}>
                     {unclaimedRewardsLabel}
-                    <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
+                    <CurrencyLogo currency="ZIL" address="zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz" className={cls(classes.currencyLogo, classes.currencyLogoMd)}/>
                     <span className={classes.currency}>
-                      ZWAP
+                      ZIL
                     </span>
                   </Text>
 
-                  <Text marginBottom={1} variant="body2" color="textSecondary" className={classes.amount}>
+                  <Text marginBottom={1} variant="body2" color="textSecondary" className={classes.usdAmount}>
                     ≈ $400.00
                   </Text>
 
@@ -438,8 +446,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                             <Text className={classes.date}>
                               15 June
                             </Text>
-                            <Text variant="body2" color="textSecondary" className={classes.amount}>
-                              ≈ $100.00 USD
+                            <Text variant="body2" color="textSecondary" className={classes.usdAmount}>
+                              ≈ $100.00
                             </Text>
                           </Box>
                           <Divider />
@@ -453,9 +461,9 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                 />
                               }
                               label={
-                                <Text className={cls(classes.reward, classes.body)}>
+                                <Text className={classes.epochReward}>
                                   10.38
-                                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
+                                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
                                   <span className={classes.currency}>
                                     ZWAP
                                   </span>
@@ -473,9 +481,9 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                 />
                               }
                               label={
-                                <Text className={cls(classes.reward, classes.body)}>
+                                <Text className={classes.epochReward}>
                                   10.38
-                                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
+                                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
                                   <span className={classes.currency}>
                                     ZWAP
                                   </span>
@@ -490,8 +498,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                             <Text className={classes.date}>
                               8 June
                             </Text>
-                            <Text variant="body2" color="textSecondary" className={classes.amount}>
-                              ≈ $200.00 USD
+                            <Text variant="body2" color="textSecondary" className={classes.usdAmount}>
+                              ≈ $200.00
                             </Text>
                           </Box>
                           <Divider />
@@ -505,9 +513,9 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                   />
                                 }
                                 label={
-                                  <Text className={cls(classes.reward, classes.body)}>
+                                  <Text className={classes.epochReward}>
                                     10.38
-                                    <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
+                                    <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
                                     <span className={classes.currency}>
                                       ZWAP
                                     </span>
@@ -525,11 +533,11 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                 />
                               }
                               label={
-                                <Text className={cls(classes.reward, classes.body)}>
+                                <Text className={classes.epochReward}>
                                   10.38
-                                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmallest)}/>
+                                  <CurrencyLogo currency="ZWAP" address="zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz" className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
                                   <span className={classes.currency}>
-                                    ZWAP
+                                    ZIL
                                   </span>
                                 </Text>
                               }
@@ -573,14 +581,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   </Text>
                 </Box>
               )}
-
-              {!!claimResult && (
-                <Box marginTop={2}>
-                  <Text variant="body1">Claimed ZWAP from {claimCount} Epochs</Text>
-                  <Text variant="body1">Last Claim TX: 0x{truncate(claimResult?.hash, 8, 8)}</Text>
-                </Box>
-              )}
-
+              
               <Box marginTop={2} />
 
               {!claimResult && (
