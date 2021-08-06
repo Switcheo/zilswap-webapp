@@ -82,7 +82,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 12,
     backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`,
     padding: theme.spacing(1),
-    overflow: "auto", // needs a nicer way to fix overflowing
+    overflow: "auto",
   },
   networkBox: {
     display: "flex",
