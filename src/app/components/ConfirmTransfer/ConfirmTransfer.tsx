@@ -87,7 +87,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignItems: "center",
     borderRadius: 12,
     backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`,
-    padding: theme.spacing(1)
+    padding: theme.spacing(1),
+    overflow: "auto",
   },
   networkBox: {
     display: "flex",
@@ -318,7 +319,7 @@ const ConfirmTransfer = (props: any) => {
     const amount = bridgeFormState.transferAmount;
     const ethAddress = await signer.getAddress();
     const gasPrice = await sdk.eth.getProvider().getGasPrice();
-    const gasPriceGwei = new BigNumber(gasPrice.toString()).shiftedBy(-9);
+    const gasPriceGwei = new BigNumber(ethers.utils.formatUnits(gasPrice, "gwei"));
     const depositAmt = amount.shiftedBy(asset.decimals);
 
     // approve token
@@ -355,7 +356,7 @@ const ConfirmTransfer = (props: any) => {
       token: asset,
       address: swthAddressBytes,
       ethAddress: ethAddress.toLowerCase(),
-      gasLimit: new BigNumber(250000),
+      gasLimit: new BigNumber(`${BridgeParamConstants.ETH_GAS_LIMIT}`),
       gasPriceGwei: gasPriceGwei,
       amount: depositAmt,
       signer: signer,
@@ -559,7 +560,7 @@ const ConfirmTransfer = (props: any) => {
           <Box className={classes.transferBox}>
             <Text>Transferring</Text>
             <Text variant="h2" className={classes.amount}>
-              {bridgeFormState.transferAmount.toString(10)}
+              {`${bridgeFormState.transferAmount.toString(10).slice(0, 11)}...`}
               <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} blockchain={fromToken?.blockchain} />
               {fromToken?.symbol}
             </Text>
@@ -598,7 +599,7 @@ const ConfirmTransfer = (props: any) => {
             ~ <span className={classes.textColoured}>${withdrawFee?.value.toFixed(2) || 0}</span>
             <HelpInfo className={classes.helpInfo} placement="top" title="Estimated total fees to be incurred for this transfer (in USD). Please note that the fees will be deducted from the amount that is being transferred out of the network and you will receive less tokens as a result." />
           </KeyValueDisplay>
-          <KeyValueDisplay kkey={<span>&nbsp; • &nbsp;{toChainName} Txn Fee</span>} mb="8px">
+          <KeyValueDisplay kkey={<span>&nbsp; • &nbsp;{fromChainName} Txn Fee</span>} mb="8px">
             <span className={classes.textColoured}>{withdrawFee?.amount.toFixed(2)}</span>
             {" "}
             {fromToken?.symbol}
@@ -616,7 +617,7 @@ const ConfirmTransfer = (props: any) => {
           color="primary"
           className={classes.actionButton}>
           {loadingConfirm &&
-            <CircularProgress size={24} className={classes.progress} />
+            <CircularProgress size={20} className={classes.progress} />
           }
           {bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
             ? "Confirm (ZIL -> ETH)"

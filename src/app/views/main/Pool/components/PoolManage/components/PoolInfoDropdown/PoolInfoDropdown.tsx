@@ -1,6 +1,6 @@
 import { Box, BoxProps, Button, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { ArrowDropDownOutlined, ArrowDropUpOutlined } from "@material-ui/icons";
+import { ArrowDropDownRounded, ArrowDropUpRounded } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import cls from "classnames";
 import React, { useState } from "react";
@@ -31,6 +31,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   textGreen: {
     color: theme.palette.primary.dark
+  },
+  arrowIcon: {
+    color: theme.palette.label
   }
 }));
 
@@ -113,13 +116,13 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <Button variant="text" fullWidth className={classes.buttonWrapper} onClick={onToggleDropdown}>
+      <Button variant="text" fullWidth className={classes.buttonWrapper} onClick={onToggleDropdown} disableRipple>
         <Box flex={1} display="flex" alignItems="center">
           <PoolLogo pair={poolPair} tokenAddress={token.address} />
           <Text marginLeft={1}>{poolPair.join(" - ")}</Text>
           <Box flex={1} />
-          {active && <ArrowDropUpOutlined color="primary" />}
-          {!active && <ArrowDropDownOutlined color="primary" />}
+          {active && <ArrowDropUpRounded className={classes.arrowIcon} />}
+          {!active && <ArrowDropDownRounded className={classes.arrowIcon} />}
         </Box>
       </Button>
       {active && (

@@ -4,7 +4,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { CurrencyLogo } from "app/components";
 import CurrencyDialog from "app/components/CurrencyDialog";
 import { RootState, TokenInfo, WalletState } from "app/store/types";
-import { useMoneyFormatter } from "app/utils";
+import { hexToRGBA, useMoneyFormatter } from "app/utils";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import React, { useEffect, useState } from "react";
@@ -75,6 +75,32 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginLeft: theme.spacing(1),
     color: theme.palette.text?.primary,
   },
+  maxButton: {
+    display: "flex",
+    padding: "34px 0px 12px 5px",
+    color: theme.palette.type === "dark" ? "#003340" : "#DEFFFF",
+    "& .MuiButton-label": {
+      width: "inherit",
+      padding: "2px 4px",
+      backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#00FFB0" : "#003340", 0.75)}`,
+      borderRadius: 5,
+      "& .MuiTypography-root": {
+        fontWeight: "bold"
+      },
+      "&:hover": {
+        backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#00FFB0" : "#003340", 0.5)}`,
+      },
+    },
+    "&:hover": {
+      backgroundColor: "transparent",
+    },
+    "&.Mui-disabled": {
+      color: theme.palette.type === "dark" ? "#003340" : "#DEFFFF",
+      "& .MuiButton-label": {
+        backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#00FFB0" : "#003340", 0.4)}`,
+      }
+    }
+  }
 }));
 
 export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement> {
@@ -86,6 +112,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   fixedToken?: boolean;
   disabled?: boolean;
   hideBalance?: boolean;
+  showMaxButton?: boolean;
   showPoolBalance?: boolean;
   showContribution?: boolean;
   dialogOpts?: Partial<CurrencyDialogProps>;
@@ -94,6 +121,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   onAmountChange?: (value: string) => void;
   onEditorBlur?: () => void;
   onCloseDialog?: () => void;
+  onSelectMax?: () => void;
 };
 
 const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
@@ -104,7 +132,8 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     onCloseDialog: onCloseDialogListener,
     showContribution, hideBalance, showPoolBalance, dialogOpts = {},
     onAmountChange, onCurrencyChange, token,
-    onEditorBlur,
+    onEditorBlur, 
+    onSelectMax, showMaxButton,
     tokenList = "zil",
   } = props;
   const classes = useStyles();
@@ -155,6 +184,11 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     if (typeof onCloseDialogListener === "function")
       onCloseDialogListener();
   };
+  
+  const clearPlaceholder = () => {
+    if (amount === "0" && typeof onAmountChange === "function")
+      onAmountChange("");
+  }
 
   return (
     <form className={cls(classes.form, className)} noValidate autoComplete="off">
@@ -184,6 +218,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
         placeholder={"0"}
         value={amount.toString()}
         onChange={onChange}
+        onFocus={clearPlaceholder}
         onBlur={onEditorBlur}
         disabled={disabled}
         type="number"
@@ -199,13 +234,20 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
               </Box>
               ) :
               (
-              <Button disableRipple className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
-                <Box display="flex" alignItems="center">
-                  {token && <CurrencyLogo currency={token.registered && token.symbol} blockchain={token?.blockchain} address={token.address} className={classes.currencyLogo} />}
-                  <Typography variant="button" className={classes.currencyText}>{token?.symbol || "Select Token"}</Typography>
-                </Box>
-                <ExpandMoreIcon className={classes.expandIcon} />
-              </Button>
+              <Box display="flex" >
+                {showMaxButton &&
+                  <Button className={classes.maxButton} disabled={disabled} onClick={onSelectMax} disableRipple>
+                    <Typography>MAX</Typography>
+                  </Button>
+                }
+                <Button disableRipple className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
+                  <Box display="flex" alignItems="center">
+                    {token && <CurrencyLogo currency={token.registered && token.symbol} blockchain={token?.blockchain} address={token.address} className={classes.currencyLogo} />}
+                    <Typography variant="button" className={classes.currencyText}>{token?.symbol || "Select Token"}</Typography>
+                  </Box>
+                  <ExpandMoreIcon className={classes.expandIcon} />
+                </Button>
+              </Box>
               )
             }
           </InputAdornment>
