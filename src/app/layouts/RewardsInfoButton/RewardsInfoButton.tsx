@@ -532,7 +532,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                               label={
                                 <Text className={classes.epochReward}>
                                   10.38
-                                  <CurrencyLogo currency="ZWAP" address="zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz" className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
+                                  <CurrencyLogo currency="ZIL" address="zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz" className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
                                   <span className={classes.currency}>
                                     ZIL
                                   </span>
