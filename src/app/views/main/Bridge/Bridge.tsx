@@ -101,7 +101,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiListItem-root": {
       borderRadius: "12px",
       padding: theme.spacing(1.5),
-      justifyContent: "center"
+      justifyContent: "center",
+    },
+    "& .MuiListItem-root.Mui-focusVisible": {
+      backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.08)}` : "rgba(0, 0, 0, 0.04)",
     },
     "& .MuiListItem-root.Mui-selected": {
       backgroundColor: theme.palette.label,
