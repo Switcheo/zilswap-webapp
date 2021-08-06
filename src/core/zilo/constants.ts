@@ -17,7 +17,7 @@ export type ILOData = {
 
 export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
   [Network.MainNet]: [{
-    projectURL: 'https://docs.zilswap.io/how-to/zilo/01-zilstream',
+    projectURL: 'https://docs.zilswap.io/how-to/zilo/launches/01-zilstream',
     imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
     tokenSymbol: 'STREAM',
     tokenName: 'ZilStream',
@@ -27,9 +27,21 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     showUntil: dayjs('2021-06-25T10:00:00.000+0800'),
     usdRatio: '0.7',
     usdTarget: '$342,867',
+  }, {
+    comingSoon: true,
+    projectURL: 'https://docs.zilswap.io/how-to/zilo/launches/02-zilliqaroyale',
+    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/1ZILO-2-BLOX-banner.png',
+    tokenSymbol: 'BLOX',
+    tokenName: 'ZilliqaRoyale',
+    tokenDecimals: 2,
+    description: 'ZilliqaRoyale is a first-of-its-kind blockchain-powered battle royale game running on Minecraft — bringing innovation to the Zilliqa network via the demonstration of seamless game and blockchain technology integration.',
+    contractAddress: '',
+    showUntil: dayjs('2021-08-16T10:00:00.000+0800'),
+    usdRatio: '0.7',
+    usdTarget: '$550,000',
   }],
   [Network.TestNet]: [{
-    projectURL: 'https://docs.zilswap.io/how-to/zilo/01-zilstream',
+    projectURL: 'https://docs.zilswap.io/how-to/zilo/launches/01-zilstream',
     imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
     tokenSymbol: 'STREAM',
     tokenName: 'ZilStream',

@@ -433,7 +433,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
         <Box className={classes.transferBox}>
           <Text>{!currentBridgeTx?.destinationTxHash ? "Transferring" : "Transferred"}</Text>
           <Text variant="h2" className={classes.amount}>
-            {`${currentBridgeTx?.inputAmount.toString(10).slice(0, 11)}...`}
+            {currentBridgeTx?.inputAmount.toString(10)}
             <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} blockchain={fromToken?.blockchain} />
             {fromToken?.symbol}
           </Text>
