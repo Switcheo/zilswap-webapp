@@ -188,9 +188,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fill: theme.palette.text?.secondary,
     }
   },
-  textSuccess: {
-    color: theme.palette.primary.dark
-  },
   successIcon: {
     verticalAlign: "top",
   },
@@ -597,7 +594,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
               {!!claimResult && (
                 <Box display="flex" flexDirection="column" alignItems="center"> 
-                  <Text marginTop={2} variant="h4" className={classes.textSuccess}>
+                  <Text marginTop={2} variant="h4" className={classes.textColoured}>
                     <CheckCircleRoundedIcon fontSize="inherit" className={classes.successIcon} />
                     {" "}
                     Reward claims successful!
