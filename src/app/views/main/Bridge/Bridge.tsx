@@ -107,9 +107,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiListItem-root.Mui-focusVisible": {
       backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.08)}` : "rgba(0, 0, 0, 0.04)",
     },
-    "& .MuiListItem-root.Mui-focusVisible": {
-      backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.08)}` : "rgba(0, 0, 0, 0.04)",
-    },
     "& .MuiListItem-root.Mui-selected": {
       backgroundColor: theme.palette.label,
       color: theme.palette.primary.contrastText,
