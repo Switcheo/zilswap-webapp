@@ -10,16 +10,15 @@ import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, MnemonicDialog, T
 import { ReactComponent as StraightLine } from "app/components/ConfirmTransfer/straight-line.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
-import { BridgeFormState, BridgeTx } from "app/store/bridge/types";
-import { RootState } from "app/store/types";
+import { BridgeTx } from "app/store/bridge/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useNetwork, useBridgeableTokenFinder } from "app/utils";
+import { hexToRGBA, truncate, useBridgeableTokenFinder, useNetwork } from "app/utils";
 import { ReactComponent as EthereumLogo } from "app/views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "app/views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "app/views/main/Bridge/zilliqa-logo.svg";
 import cls from "classnames";
 import React, { Fragment, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
 import { Network } from "zilswap-sdk/lib/constants";
 
@@ -82,7 +81,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignItems: "center",
     borderRadius: 12,
     backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`,
-    padding: theme.spacing(1)
+    padding: theme.spacing(1),
+    overflow: "auto", // needs a nicer way to fix overflowing
   },
   networkBox: {
     display: "flex",
@@ -296,8 +296,6 @@ const TransactionDetail = (props: TransactionDetailProps) => {
   const bridgeableTokenFinder = useBridgeableTokenFinder();
   const { currentTx, onBack, tokenApproval, approvalHash, isHistory, onNewTransfer } = props;
 
-  const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
-
   const [showTransactions, setShowTransactions] = useState<boolean>(true);
 
   const fromToken = bridgeableTokenFinder(currentTx.srcToken, currentTx.srcChain);
@@ -435,7 +433,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
         <Box className={classes.transferBox}>
           <Text>{!currentBridgeTx?.destinationTxHash ? "Transferring" : "Transferred"}</Text>
           <Text variant="h2" className={classes.amount}>
-            {currentBridgeTx?.inputAmount.toString(10) ?? bridgeFormState.transferAmount.toString(10)}
+            {`${currentBridgeTx?.inputAmount.toString(10).slice(0, 11)}...`}
             <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} blockchain={fromToken?.blockchain} />
             {fromToken?.symbol}
           </Text>

@@ -560,7 +560,7 @@ const ConfirmTransfer = (props: any) => {
           <Box className={classes.transferBox}>
             <Text>Transferring</Text>
             <Text variant="h2" className={classes.amount}>
-              {bridgeFormState.transferAmount.toString(10)}
+              {`${bridgeFormState.transferAmount.toString(10).slice(0, 11)}...`}
               <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} blockchain={fromToken?.blockchain} />
               {fromToken?.symbol}
             </Text>
