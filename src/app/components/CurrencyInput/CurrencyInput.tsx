@@ -122,6 +122,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   onEditorBlur?: () => void;
   onCloseDialog?: () => void;
   onSelectMax?: () => void;
+  onEnterKeyPress?: () => void;
 };
 
 const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
@@ -134,6 +135,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     onAmountChange, onCurrencyChange, token,
     onEditorBlur, 
     onSelectMax, showMaxButton,
+    onEnterKeyPress,
     tokenList = "zil",
   } = props;
   const classes = useStyles();
@@ -190,8 +192,15 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
       onAmountChange("");
   }
 
+  const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (onEnterKeyPress) {
+      onEnterKeyPress();
+    }
+  }
+
   return (
-    <form className={cls(classes.form, className)} noValidate autoComplete="off">
+    <form className={cls(classes.form, className)} noValidate autoComplete="off" onSubmit={onSubmitHandler}>
       <InputLabel className={classes.label}>{label}</InputLabel>
 
       {!hideBalance && (

@@ -469,6 +469,12 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }))
   }
 
+  const onEnterKeyPress = () => {
+    if (isSubmitEnabled) {
+      showTransfer();
+    }
+  }
+
   return (
     <BridgeCard {...rest} className={cls(classes.root, className)}>
       {!layoutState.showTransferConfirmation && (
@@ -549,6 +555,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             tokenList={tokenList}
             onSelectMax={onSelectMax}
             showMaxButton={true}
+            onEnterKeyPress={onEnterKeyPress}
           />
 
           <Button
