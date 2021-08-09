@@ -2,21 +2,20 @@ import { Box, Button, Chip, makeStyles, Table, TableBody, TableCell, TableContai
 import AddIcon from '@material-ui/icons/AddRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import { CurrencyLogo, HelpInfo, RevealMnemonic, Text } from 'app/components';
-import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import BridgeCard from "app/layouts/BridgeCard";
 import { actions } from "app/store";
 import { BridgeState, BridgeTx, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useBridgeableTokenFinder } from "app/utils";
 import { toHumanNumber } from "app/utils/strings/strings";
+import TransactionDetail from "app/views/bridge/TransactionDetail";
 import cls from "classnames";
 import React, { Fragment, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { Blockchain } from "tradehub-api-js";
 import { ReactComponent as EthereumLogo } from "../../main/Bridge/ethereum-logo.svg";
 import { ReactComponent as ZilliqaLogo } from "../../main/Bridge/zilliqa-logo.svg";
-import { Link } from "react-router-dom";
-import TransactionDetail from "app/views/bridge/TransactionDetail";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -29,12 +28,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
         backgroundColor: theme.palette.background.default,
         padding: theme.spacing(2, 8, 2),
-        maxWidth: 1200,
+        maxWidth: 1100,
         [theme.breakpoints.down("sm")]: {
             padding: theme.spacing(2, 3, 2),
         },
         [theme.breakpoints.down("xs")]: {
-            minWidth: 320
+            maxWidth: 450,
         },
         "& .MuiChip-root": {
             borderRadius: 12,
@@ -117,12 +116,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     helpInfo: {
         verticalAlign: "top!important",
         marginLeft: "2px!important"
-    },
-    newLinkIcon: {
-        "& path": {
-            fill: theme.palette.label
-        },
-        marginBottom: "2px"
     },
     arrowRightIcon: {
         color: theme.palette.label,
@@ -329,12 +322,6 @@ const TransferHistory = (props: any) => {
                                     </TableCell>
                                     <TableCell align="center">
                                         <Box display="flex" flexDirection="column">
-                                            <Text variant="h6">Recover</Text>
-                                            <Text>Transfer <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Transfer Key to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
-                                        </Box>
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        <Box display="flex" flexDirection="column">
                                             <Text variant="h6">Transfer</Text>
                                             <Text>Status</Text>
                                         </Box>
@@ -377,16 +364,6 @@ const TransferHistory = (props: any) => {
                                         </TableCell>
                                         <TableCell align="center">
                                             <RevealMnemonic mnemonic={tx.interimAddrMnemonics} />
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Button
-                                                href="https://app.dem.exchange/reset_password"
-                                                target="_blank"
-                                                className={classes.button}
-                                                endIcon={<NewLinkIcon className={classes.newLinkIcon} />}
-                                            >
-                                                <Text>Recover</Text>
-                                            </Button>
                                         </TableCell>
                                         <TableCell align="center">
                                             <Button
