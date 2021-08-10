@@ -429,7 +429,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                             }
                             label={
                               <Text color="textSecondary">
-                                Unselect all
+                                {checked ? "Unselect all" : "Select all"}
                               </Text>
                             }
                           />
