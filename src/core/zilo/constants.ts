@@ -57,7 +57,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     tokenName: 'ZilliqaRoyale',
     tokenDecimals: 2,
     description: 'ZilliqaRoyale is a first-of-its-kind blockchain-powered battle royale game running on Minecraft — bringing innovation to the Zilliqa network via the demonstration of seamless game and blockchain technology integration.',
-    contractAddress: 'zil1gcrh6sjrkdrm7lqhvxuaszttcd48e8kvr236y3',
+    contractAddress: 'zil18trvzg0ks6z5qd4j8yr6q2cxvtnyk3dtd633rw',
     showUntil: dayjs('2021-08-16T10:00:00.000+0800'),
     usdRatio: '0.7',
     usdTarget: '$550,000',
