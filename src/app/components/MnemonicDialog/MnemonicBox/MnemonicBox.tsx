@@ -142,37 +142,14 @@ const MnemonicBox = (props: any) => {
                 ))}
             </Grid>
 
-            {isHistory
-                ? <Fragment>
-                    <Box mt={1.5} mb={0.5} display="flex" justifyContent="center">
-                        <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(mnemonic)} open={!!copyMap[mnemonic]} title="Copied!">
-                            <IconButton className={classes.copy} size="small">
-                                <Text>Copy Phrase</Text>
-                                <CopyIcon className={classes.copyIcon}/>
-                            </IconButton>
-                        </Tooltip>
-                    </Box>        
-                        
-
-                    <Button
-                        href="https://app.dem.exchange/reset_password"
-                        target="_blank"
-                        variant="contained"
-                        color="primary"
-                        className={classes.actionButton}
-                    >
-                        Begin Recovery
-                    </Button>
-                </Fragment>
-                : <Box mt={1.5} mb={1} display="flex" justifyContent="center">
-                    <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(mnemonic)} open={!!copyMap[mnemonic]} title="Copied!">
-                        <IconButton className={classes.copy} size="small">
-                            <Text>Copy Phrase</Text>
-                            <CopyIcon className={classes.copyIcon}/>
-                        </IconButton>
-                    </Tooltip>
-                </Box>        
-            }
+            <Box mt={1.5} mb={1} display="flex" justifyContent="center">
+                <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(mnemonic)} open={!!copyMap[mnemonic]} title="Copied!">
+                    <IconButton className={classes.copy} size="small">
+                        <Text>Copy Phrase</Text>
+                        <CopyIcon className={classes.copyIcon}/>
+                    </IconButton>
+                </Tooltip>
+            </Box>
         </Box>
     )
 }

@@ -317,7 +317,7 @@ const TransferHistory = (props: any) => {
                                     <TableCell align="center">
                                         <Box display="flex" flexDirection="column">
                                             <Text variant="h6">Transfer</Text>
-                                            <Text>Key <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Transfer Key to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
+                                            <Text>Key <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Transfer Key to recover failed transfers that failed in Stage 2." /></Text>
                                         </Box>
                                     </TableCell>
                                     <TableCell align="center">
