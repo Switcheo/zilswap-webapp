@@ -32,6 +32,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("sm")]: {
       marginRight: theme.spacing(1),
     },
+    "& .MuiAccordion-root:before": {
+      height: 0
+    },
     "& .MuiAccordion-root.Mui-expanded": {
       backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#13222C", 0.5)}` : `rgba${hexToRGBA("#003340", 0.05)}`,
       margin: 0,
