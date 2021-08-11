@@ -5,8 +5,8 @@ import { Text } from 'app/components';
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA } from "app/utils";
-import React, { Fragment, useState } from "react";
 import cls from "classnames";
+import React, { useState } from "react";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {

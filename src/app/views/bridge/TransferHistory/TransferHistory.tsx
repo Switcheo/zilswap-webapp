@@ -1,5 +1,5 @@
 import { Box, Button, Chip, makeStyles, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
-import AddIcon from '@material-ui/icons/AddRounded';
+import RefreshIcon from '@material-ui/icons/RefreshRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import { CurrencyLogo, HelpInfo, RevealMnemonic, Text } from 'app/components';
 import BridgeCard from "app/layouts/BridgeCard";
@@ -59,19 +59,21 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     textColoured: {
         color: theme.palette.primary.dark
     },
-    addIcon: {
+    refreshIcon: {
         marginRight: theme.spacing(0.5),
         verticalAlign: "middle",
     },
-    newTransferButton: {
+    resumeTransferButton: {
         color: theme.palette.action?.disabled,
         backgroundColor: theme.palette.action?.disabledBackground,
+        textAlign: "center",
         "&:hover": {
             backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#003340" : "rgba(0, 51, 64, 0.5)", 0.8)}`,
         },
     },
-    textWhite: {
-        color: theme.palette.primary.contrastText
+    resumeTransferText: {
+        color: theme.palette.primary.contrastText,
+        paddingRight: theme.spacing(0.5),
     },
     tableContainer: {
         '&::-webkit-scrollbar': {
@@ -190,7 +192,7 @@ const TransferHistory = (props: any) => {
     const [previewTx, setPreviewTx] = useState<BridgeTx | null>(null);
 
     // Need to check this part
-    const handleNewTransfer = () => {
+    const handleResumeTransfer = () => {
         if (pendingBridgeTx) {
             dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
         }
@@ -267,7 +269,7 @@ const TransferHistory = (props: any) => {
         <BridgeCard {...rest} className={cls(classes.root, className)}>
             {!previewTx && (
                 <Box overflow="hidden" display="flex" flexDirection="column" className={classes.container}>
-                    <Box display="flex" justifyContent="space-between" mt={2} pl={2} pr={2}>
+                    <Box display="flex" justifyContent="space-between" mt={2} pl={2}>
                         <Box display="flex" flexDirection="column">
                             <Text variant="h2">
                                 Zil<span className={classes.textColoured}>Bridge</span>
@@ -278,10 +280,10 @@ const TransferHistory = (props: any) => {
                             </Text>
                         </Box>
 
-                        <Box display="flex" pt={0.5} pb={0.5}>
-                            <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.newTransferButton} onClick={handleNewTransfer}>
-                                <AddIcon fontSize="small" className={classes.addIcon} />
-                                <Text variant="button" className={classes.textWhite}>New Transfer</Text>
+                        <Box display="flex" pt={0} pb={0}>
+                            <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.resumeTransferButton} onClick={handleResumeTransfer}>
+                                <RefreshIcon fontSize="small" className={classes.refreshIcon} />
+                                <Text variant="button" className={classes.resumeTransferText}>Resume Transfer</Text>
                             </Button>
                         </Box>
                     </Box>
