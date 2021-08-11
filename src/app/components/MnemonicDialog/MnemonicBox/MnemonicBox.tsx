@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         padding: theme.spacing(1, 7, 2),
         maxWidth: 510,
         [theme.breakpoints.down("sm")]: {
-            padding: theme.spacing(2, 3, 2),
+            padding: theme.spacing(0, 3, 2),
         },
         [theme.breakpoints.down("xs")]: {
             minWidth: 320

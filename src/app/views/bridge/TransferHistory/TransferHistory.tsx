@@ -1,7 +1,7 @@
 import { Box, Button, Chip, makeStyles, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
-import RefreshIcon from '@material-ui/icons/RefreshRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
-import { CurrencyLogo, HelpInfo, RevealMnemonic, Text } from 'app/components';
+import RefreshIcon from '@material-ui/icons/RefreshRounded';
+import { CurrencyLogo, HelpInfo, ResumeTransferDialog, RevealMnemonic, Text } from 'app/components';
 import BridgeCard from "app/layouts/BridgeCard";
 import { actions } from "app/store";
 import { BridgeState, BridgeTx, RootState } from "app/store/types";
@@ -12,7 +12,6 @@ import TransactionDetail from "app/views/bridge/TransactionDetail";
 import cls from "classnames";
 import React, { Fragment, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import { Blockchain } from "tradehub-api-js";
 import { ReactComponent as EthereumLogo } from "../../main/Bridge/ethereum-logo.svg";
 import { ReactComponent as ZilliqaLogo } from "../../main/Bridge/zilliqa-logo.svg";
@@ -188,15 +187,15 @@ const TransferHistory = (props: any) => {
 
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
     const bridgeTxs = bridgeState.bridgeTxs;
-    const pendingBridgeTx = bridgeState.activeBridgeTx;
+    // const pendingBridgeTx = bridgeState.activeBridgeTx;
     const [previewTx, setPreviewTx] = useState<BridgeTx | null>(null);
 
     // Need to check this part
     const handleResumeTransfer = () => {
-        if (pendingBridgeTx) {
-            dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
-        }
-        dispatch(actions.Layout.showTransferConfirmation(false));
+        // if (pendingBridgeTx) {
+        //     dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
+        // }
+        dispatch(actions.Layout.toggleShowResumeTransfer("open"));
     }
 
     const getTransferStage = (tx: BridgeTx) => {
@@ -281,7 +280,7 @@ const TransferHistory = (props: any) => {
                         </Box>
 
                         <Box display="flex" pt={0} pb={0}>
-                            <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.resumeTransferButton} onClick={handleResumeTransfer}>
+                            <Button color="primary" variant="contained" className={classes.resumeTransferButton} onClick={handleResumeTransfer}>
                                 <RefreshIcon fontSize="small" className={classes.refreshIcon} />
                                 <Text variant="button" className={classes.resumeTransferText}>Resume Transfer</Text>
                             </Button>
@@ -390,6 +389,8 @@ const TransferHistory = (props: any) => {
             {previewTx && (
                 <TransactionDetail onBack={clearPreview} currentTx={previewTx} approvalHash="" isHistory={true} />
             )}
+
+            <ResumeTransferDialog />
         </BridgeCard>
     )
 }
