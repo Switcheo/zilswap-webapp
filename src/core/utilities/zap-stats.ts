@@ -13,7 +13,7 @@ const PATHS = {
 	"transactions": "/transactions",
 	"epoch/info": "/epoch/info",
 	"distribution/info": "/distribution/info",
-	"distribution/data": "/distribution/data/:address",
+	"distribution/claimable_data": "/distribution/claimable_data/:address",
 	"distribution/weights": "/distribution/pool_weights",
 	"distribution/current": "/distribution/current/:address",
 };
@@ -91,8 +91,9 @@ export interface Distributor {
 	distributor_address_hex: string;
 }
 
-export interface ZWAPDistribution {
+export interface Distribution {
 	id: string,
+	distributor_address: string,
 	epoch_number: number,
 	address_bech32: string,
 	address_hex: string,
@@ -314,12 +315,12 @@ export class ZAPStats {
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
-	static getZWAPDistributions = async ({ network, address, ...query }: GetZWAPDistribution = {}): Promise<ZWAPDistribution[]> => {
+	static getZWAPDistributions = async ({ network, address, ...query }: GetZWAPDistribution = {}): Promise<Distribution[]> => {
 		const http = ZAPStats.getApi(network);
-		const url = http.path("distribution/data", { address }, query);
+		const url = http.path("distribution/claimable_data", { address }, query);
 		const response = await http.get({ url });
 		const distributions = await response.json();
-		return distributions.map((distribution: any): ZWAPDistribution => ({
+		return distributions.map((distribution: any): Distribution => ({
 			...distribution,
 			amount: bnOrZero(distribution.amount),
 			proof: distribution.proof.split(" "),

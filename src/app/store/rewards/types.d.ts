@@ -1,6 +1,6 @@
 import { SimpleMap } from "app/utils";
 import BigNumber from "bignumber.js";
-import { Distributor, EpochInfo, SwapVolume, ZWAPDistribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
+import { Distributor, EpochInfo, SwapVolume, Distribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
 import { Dayjs } from "dayjs";
 
 export interface PoolSwapVolume extends SwapVolume {
@@ -25,7 +25,7 @@ export interface ZAPEpochInfo {
 };
 
 export interface ZAPRewardDist {
-  info: ZWAPDistribution;
+  info: Distribution;
   readyToClaim: boolean;
   claimed?: boolean;
   claimTx?: any;

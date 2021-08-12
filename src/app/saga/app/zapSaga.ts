@@ -5,7 +5,7 @@ import { GlobalClaimHistory, WalletState, ZAPRewardDist } from "app/store/types"
 import { WalletActionTypes } from "app/store/wallet/actions";
 import { SimpleMap } from "app/utils";
 import { PollIntervals } from "app/utils/constants";
-import { logger, ZAPStats, ZWAPDistribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
+import { logger, ZAPStats, Distribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { ZWAPRewards } from "core/zwap";
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
@@ -98,12 +98,12 @@ function* queryDistribution() {
         continue;
       }
 
-      const distributions: ZWAPDistribution[] = yield ZAPStats.getZWAPDistributions({
+      const distributions: Distribution[] = yield ZAPStats.getZWAPDistributions({
         address: walletState.wallet.addressInfo.bech32,
         network,
       });
 
-      const rewardDistributions = distributions.map((info: ZWAPDistribution): ZAPRewardDist => ({
+      const rewardDistributions = distributions.map((info: Distribution): ZAPRewardDist => ({
         info,
         readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
       }));
