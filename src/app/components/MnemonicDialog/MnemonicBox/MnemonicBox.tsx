@@ -111,10 +111,9 @@ const MnemonicBox = (props: any) => {
                     {isHistory
                         ? <span>You may only use the following key phrase to recover <br/> your transfer if it failed in Stage 2.</span>
                         : <span>
-                            <strong>In the event you are not able to complete Stage 2 of your transfer</strong>, you may retrieve and resume your fund transfer by entering the following 
-                            unique transfer key phrase on <a className={classes.warningLink} href="https://app.dem.exchange/reset_password" target="_blank" rel="noreferrer">Demex</a>. This phrase can also be retrieved later 
-                            from your <strong>Transfer History</strong> page. Do not ever reveal your mnemonic 
-                            phrase to anyone. ZilSwap will not be held accountable and cannot help you 
+                            <strong>In the event you are not able to complete Stage 2 of your transfer</strong>, you may retrieve and resume your transfer by entering the following 
+                            unique transfer key phrase on your Transfer History page. 
+                            Do not ever reveal your key phrase to anyone. ZilSwap will not be held accountable and cannot help you 
                             retrieve those funds once they are lost.
                         </span>
                     }
