@@ -120,19 +120,19 @@ const SampleILOCard = (props: Props) => {
       </Box>
       {expanded &&
         <Box display="flex" flexDirection="column" className={classes.container}>
-        <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
-          <Text variant="h1" className={cls(classes.title, classes.meta)}>{data.tokenName} ({data.tokenSymbol})</Text>
-          <Text marginTop={2} marginBottom={0.75} className={classes.description}>{data.description}</Text>
-          {!!data.projectURL && (
-            <Link
-              className={classes.link}
-              underline="none"
-              rel="noopener noreferrer"
-              target="_blank"
-              href={data.projectURL}>
-              Learn more about this token <NewLinkIcon className={classes.linkIcon} />
-            </Link>
-          )}
+          <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
+            <Text variant="h1" className={cls(classes.title, classes.meta)}>{data.tokenName} ({data.tokenSymbol})</Text>
+            <Text marginTop={2} marginBottom={0.75} className={classes.description}>{data.description}</Text>
+            {!!data.projectURL && (
+              <Link
+                className={classes.link}
+                underline="none"
+                rel="noopener noreferrer"
+                target="_blank"
+                href={data.projectURL}>
+                Learn more about this token <NewLinkIcon className={classes.linkIcon} />
+              </Link>
+            )}
 
             <Text variant="h1" marginTop={2} className={classes.timer}>
               Coming Soon…
@@ -160,28 +160,24 @@ const SampleILOCard = (props: Props) => {
             </Box>
 
             <Box>
-                <Text className={cls(classes.title, classes.description)} marginBottom={0.75}>Commit your tokens in a fixed ratio to participate.</Text>
-                <Text className={classes.description} color="textSecondary">{new BigNumber(1).minus(data.usdRatio).times(100).toFormat(0)}% ZWAP - {new BigNumber(data.usdRatio).times(100).toFormat(0)}% ZIL</Text>
+              <Text className={cls(classes.title, classes.description)} marginBottom={0.75}>Commit your tokens in a fixed ratio to participate.</Text>
+              <Text className={classes.description} color="textSecondary">{new BigNumber(1).minus(data.usdRatio).times(100).toFormat(0)}% ZWAP - {new BigNumber(data.usdRatio).times(100).toFormat(0)}% ZIL</Text>
               <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12} position="relative">
-                {zwapToken && (
-                  <CurrencyInputILO
-                    label="to Burn:"
-                    token={zwapToken}
-                    amount={"0"}
-                    disabled
-                    hideBalance={false}
-                  />
-                )}
+                <CurrencyInputILO
+                  label="to Burn:"
+                  token={zwapToken}
+                  amount={"0"}
+                  disabled
+                  hideBalance={false}
+                />
                 <ViewHeadlineIcon className={classes.viewIcon} />
-                {zilToken && (
-                  <CurrencyInputILO
-                    label="for Project:"
-                    disabled
-                    token={zilToken}
-                    amount={"0"}
-                    hideBalance={false}
-                  />
-                )}
+                <CurrencyInputILO
+                  label="for Project:"
+                  disabled
+                  token={zilToken}
+                  amount={"0"}
+                  hideBalance={false}
+                />
               </Box>
               <FancyButton
                 className={classes.actionButton}
