@@ -31,7 +31,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   description: {
     fontFamily: "'Raleway', sans-serif",
-    fontSize: 14
+    fontSize: 14,
+    lineHeight: 1.2,
   },
   title: {
     fontWeight: 700,
