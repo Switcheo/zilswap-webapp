@@ -1,7 +1,7 @@
 import { LocalStoragePackage, SimpleMap } from "app/utils";
 import { LocalStorageKeys } from "app/utils/constants";
 import BigNumber from "bignumber.js";
-import { EpochInfo, logger, ZWAPPoolWeights } from "core/utilities";
+import { Distributor, EpochInfo, logger, ZWAPPoolWeights } from "core/utilities";
 import dayjs from "dayjs";
 import { RewardsActionTypes } from "./actions";
 import { GlobalClaimHistory, PendingClaimTx, PendingClaimTxCache, PoolZWAPReward, RewardsState, ZAPRewardDist } from "./types";
@@ -50,6 +50,7 @@ const saveClaimTxs = (claimTxs: SimpleMap<PendingClaimTxCache>) => {
 const initial_state: RewardsState = {
   epochInfo: null,
   rewardByPools: {},
+  rewardDistributors: [],
   rewardDistributions: [],
   potentialPoolRewards: {},
   globalClaimHistory: {},
@@ -97,6 +98,13 @@ const reducer = (state: RewardsState = initial_state, action: any) => {
         ...state,
         poolWeights,
       };
+    case RewardsActionTypes.UPDATE_DISTRIBUTORS: {
+      const distributors = action.distributors as Distributor[];
+      return {
+        ...state,
+        distributors
+      };
+    }
     case RewardsActionTypes.UPDATE_DISTRIBUTIONS: {
       const rewardDistributions = action.distributions as ZAPRewardDist[];
       updateDistributionClaims(rewardDistributions, state.globalClaimHistory);

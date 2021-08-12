@@ -57,6 +57,28 @@ function* queryPoolWeights() {
   }
 }
 
+function* queryDistributors() {
+  while (true) {
+    logger("zap saga", "query distributors");
+    const { network } = getBlockchain(yield select());;
+
+    try {
+      const distributors = yield ZAPStats.getDistributors({ network });
+      yield put(actions.Rewards.updateDistributors(distributors));
+    } catch (e) {
+      console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn(e)
+    } finally {
+      const invalidated = yield race({
+        minutePoll: delay(PollIntervals.Distributors),
+        walletUpdated: take(WalletActionTypes.WALLET_UPDATE),
+      });
+
+      logger("zap saga", "distributors invalidated", invalidated);
+    }
+  }
+}
+
 function* queryDistribution() {
   while (true) {
     try {
@@ -165,6 +187,7 @@ export default function* zapSaga() {
   yield take(BlockchainActionTypes.INITIALIZED) // wait for first init
   yield fork(queryEpochInfo);
   yield fork(queryPoolWeights);
+  yield fork(queryDistributors);
   yield fork(queryDistribution);
   yield fork(queryClaimHistory);
   yield fork(queryPotentialRewards);

@@ -12,6 +12,7 @@ const PATHS = {
 	"volume": "/volume",
 	"transactions": "/transactions",
 	"epoch/info": "/epoch/info",
+	"distribution/info": "/distribution/info",
 	"distribution/data": "/distribution/data/:address",
 	"distribution/weights": "/distribution/pool_weights",
 	"distribution/current": "/distribution/current/:address",
@@ -81,6 +82,13 @@ export interface EpochInfo {
 	next_epoch_start: number;
 	tokens_per_epoch: number;
 	total_epoch: number;
+}
+
+export interface Distributor {
+	name: string;
+	reward_token_symbol: string;
+	reward_token_address_hex: string;
+	distributor_address_hex: string;
 }
 
 export interface ZWAPDistribution {
@@ -286,6 +294,18 @@ export class ZAPStats {
 			out_zil_amount: bnOrZero(pool.out_zil_amount),
 			out_token_amount: bnOrZero(pool.out_token_amount),
 		}));
+	}
+
+	/**
+	 * 
+	 * @param network MainNet | TestNet - defaults to `MainNet`
+	 * @returns response in JSON
+	 */
+	static getDistributors = async ({ network }: QueryOptions): Promise<Distributor[]>  => {
+		const http = ZAPStats.getApi(network);
+		const url = http.path("distribution/info");
+		const response = await http.get({ url });
+		return await response.json();
 	}
 
 	/**
