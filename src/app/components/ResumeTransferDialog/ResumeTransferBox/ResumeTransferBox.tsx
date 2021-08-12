@@ -4,7 +4,7 @@ import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
 import { Text } from 'app/components';
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA } from "app/utils";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -85,6 +85,24 @@ const ResumeTransferBox = (props: any) => {
         setMnemonic(mnemonicCopy);
     }
 
+    const handleResumeTransfer = () => {
+        // find tx
+
+        // if tx found, navigate to tx detail page
+
+        // else, some error msg
+    }
+
+    // Ensures no empty string in array
+    const isResumeTransferEnabled = useMemo(() => {
+        for (let word of mnemonic) {
+            if (!word) {
+                return false;
+            }
+        }
+        return true;
+    }, [mnemonic])
+
     return (
         <Box overflow="hidden" display="flex" flexDirection="column" className={classes.root}>
             <Text variant="h2" align="center">
@@ -129,9 +147,11 @@ const ResumeTransferBox = (props: any) => {
 
             <Box mt={1}>
                 <Button
+                    onClick={handleResumeTransfer}
                     variant="contained"
                     color="primary"
                     className={classes.actionButton}
+                    disabled={!isResumeTransferEnabled}
                     fullWidth
                 >
                     Resume Transfer

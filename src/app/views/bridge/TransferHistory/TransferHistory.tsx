@@ -187,14 +187,9 @@ const TransferHistory = (props: any) => {
 
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
     const bridgeTxs = bridgeState.bridgeTxs;
-    // const pendingBridgeTx = bridgeState.activeBridgeTx;
     const [previewTx, setPreviewTx] = useState<BridgeTx | null>(null);
 
-    // Need to check this part
     const handleResumeTransfer = () => {
-        // if (pendingBridgeTx) {
-        //     dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
-        // }
         dispatch(actions.Layout.toggleShowResumeTransfer("open"));
     }
 
