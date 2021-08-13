@@ -4,9 +4,8 @@ import { PreferenceState, PreferenceStateUpdateProps } from "./types";
 const LOCAL_STORAGE_KEY_THEME = "zilswap:theme";
 const VALID_THEMES = ["dark", "light"];
 
-const prefersDarkMode = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
 const savedThemePreference = localStorage.getItem(LOCAL_STORAGE_KEY_THEME);
-const initialTheme = savedThemePreference || (prefersDarkMode ? "dark" : "light");
+const initialTheme = savedThemePreference || "dark";
 
 const initial_state: PreferenceState = {
   theme: VALID_THEMES.includes(initialTheme) ? initialTheme : "dark",
