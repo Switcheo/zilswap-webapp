@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import { useEffect } from "react";
+import { useMemo } from "react";
 
 const useStyles = makeStyles((theme: AppTheme) =>({
   button: {
@@ -75,7 +76,11 @@ const useStyles = makeStyles((theme: AppTheme) =>({
   }
 }))
 
-const TokenFilter = () => {
+interface Props {
+  onFilterChange: ((selectedTokens: string[]) => void);
+};
+
+const TokenFilter = (props: Props) => {
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
@@ -99,10 +104,43 @@ const TokenFilter = () => {
     setAnchorEl(null);
   };
 
+  const { 
+    tokens, 
+    registeredTokens,
+    unregisteredTokens,
+    selectedTokens,
+    selectedRegisteredTokens,
+    selectedUnregisteredTokens
+  } = useMemo(() => {
+    if(!tokenState.initialized) return {
+      tokens: [],
+      registeredTokens: [],
+      unregisteredTokens: [],
+      selectedTokens: [],
+      selectedRegisteredTokens: [],
+      selectedUnregisteredTokens: []
+    };
+
+    const tokens = Object.values(tokenState.tokens).sort((a,b) => a.symbol < b.symbol ? -1 : 1)
+    const registeredTokens = tokens.filter(token => token.registered)
+    const unregisteredTokens = tokens.filter(token => !token.registered)
+    const selectedTokens = tokens.filter(token => selectedState[token.address])
+
+    return {
+      tokens,
+      registeredTokens,
+      unregisteredTokens,
+      selectedTokens,
+      selectedRegisteredTokens: registeredTokens.filter(token => selectedState[token.address]),
+      selectedUnregisteredTokens: unregisteredTokens.filter(token => selectedState[token.address])
+    }
+  }, [tokenState, selectedState])
+
   const handleChange = (token: TokenInfo) => {
     let newState = {...selectedState}
     newState[token.address] = !selectedState[token.address]
     setSelectedState(newState)
+    props.onFilterChange(selectedTokens.map(token => token.address))
   }
   
   const handleGroupChange = (event: React.ChangeEvent<HTMLInputElement>, registered: boolean) => {
@@ -111,14 +149,8 @@ const TokenFilter = () => {
       newState[token.address] = event.target.checked
     })
     setSelectedState(newState)
+    props.onFilterChange(selectedTokens.map(token => token.address))
   }
-
-  const tokens = Object.values(tokenState.tokens).sort((a,b) => a.symbol < b.symbol ? -1 : 1)
-  const registeredTokens = tokens.filter(token => token.registered)
-  const unregisteredTokens = tokens.filter(token => !token.registered)
-  const selectedTokens = tokens.filter(token => selectedState[token.address])
-  const selectedRegisteredTokens = registeredTokens.filter(token => selectedState[token.address])
-  const selectedUnregisteredTokens = unregisteredTokens.filter(token => selectedState[token.address])
 
   const handleChangeAll = () => {
     let newState = {...selectedState}
@@ -126,6 +158,7 @@ const TokenFilter = () => {
       newState[token.address] = selectedTokens.length !== tokens.length
     })
     setSelectedState(newState)
+    props.onFilterChange(selectedTokens.map(token => token.address))
   }
 
   return (
@@ -165,7 +198,7 @@ const TokenFilter = () => {
             <div><span className={classes.bold}>Registered Tokens</span> ({selectedRegisteredTokens.length} of {registeredTokens.length})</div>
           </Box>
           {registeredTokens.map(token => (
-            <Box display="flex" alignItems="center" paddingLeft="46px" paddingRight={2} paddingBottom={1} onClick={() => handleChange(token)}>
+            <Box key={token.address} display="flex" alignItems="center" paddingLeft="46px" paddingRight={2} paddingBottom={1} onClick={() => handleChange(token)}>
               <Checkbox checked={selectedState[token.address]} onChange={() => handleChange(token)} color="primary" size="small" className={classes.checkbox} />
               <div className={classes.bold}>{token.symbol}</div>
             </Box>
@@ -175,7 +208,7 @@ const TokenFilter = () => {
             <div><span className={classes.bold}>Unregistered Tokens</span> ({selectedUnregisteredTokens.length} of {unregisteredTokens.length})</div>
           </Box>
           {unregisteredTokens.map(token => (
-            <Box display="flex" alignItems="center" paddingLeft={5} paddingRight={2} paddingBottom={1}>
+            <Box key={token.address} display="flex" alignItems="center" paddingLeft={5} paddingRight={2} paddingBottom={1}>
               <Checkbox checked={selectedState[token.address]} onChange={() => handleChange(token)} color="primary" size="small" className={classes.checkbox} />
               <div className={classes.bold}>{token.symbol}</div>
             </Box>

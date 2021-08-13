@@ -70,6 +70,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 interface QueryOptions {
   page: number;
+  pool?: string;
   address?: string;
 };
 
@@ -117,6 +118,13 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
     });
   };
 
+  const onFilterChange = (tokens: string[]) => {
+    setQueryOpts({
+      ...queryOpts,
+      pool: tokens.join()
+    });
+  }
+
   const onPage = (event: React.ChangeEvent<any>, newPage: number) => {
     setQueryOpts({
       ...queryOpts,
@@ -156,7 +164,7 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
 
           <Paper className={classes.tableSurface}>
             <Box display="flex" justifyContent="flex-end" alignItems="center" paddingTop={2} paddingBottom={2} paddingRight={4}>
-              <TokenFilter />
+              <TokenFilter onFilterChange={onFilterChange} />
             </Box>
             <TableContainer>
               {queryLoading && (
