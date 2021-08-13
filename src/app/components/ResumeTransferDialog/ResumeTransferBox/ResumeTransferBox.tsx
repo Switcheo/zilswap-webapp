@@ -79,6 +79,7 @@ const ResumeTransferBox = (props: any) => {
         setShowPhrase(!showPhrase);
     }
 
+    // TODO: add validation to ensure string
     const handleWordChange = (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
         const mnemonicCopy = mnemonic.slice();
         mnemonicCopy[index] = e.target.value;
