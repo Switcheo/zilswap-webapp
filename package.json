@@ -13,6 +13,7 @@
     "@portis/web3": "^4.0.5",
     "@toruslabs/torus-embed": "^1.10.20",
     "@transak/transak-sdk": "^1.0.28",
+    "@types/lodash": "^4.14.172",
     "@walletconnect/web3-provider": "^1.4.1",
     "@zilliqa-js/zilliqa": "^2.2.0",
     "authereum": "^0.1.14",

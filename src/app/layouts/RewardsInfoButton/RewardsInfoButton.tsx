@@ -10,7 +10,7 @@ import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useAsyncTask, useNetwork, useValueCalculators } from "app/utils";
+import { hexToRGBA, useAsyncTask, useNetwork, useTokenFinder, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import { formatZWAPLabel } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
@@ -18,6 +18,7 @@ import cls from "classnames";
 import { ZWAPRewards } from "core/zwap";
 import { TOKEN_CONTRACT } from "core/zwap/constants";
 import dayjs from "dayjs";
+import groupBy from "lodash/groupBy";
 import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ReactComponent as IconSVG } from './icon.svg';
@@ -174,7 +175,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   epochReward: {
     display: "inline-flex",
     alignItems: "flex-end",
-    marginBottom: theme.spacing(0.5),
     fontSize: "14px",
     fontWeight: "normal"
   },
@@ -215,18 +215,12 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const buttonRef = useRef();
   const theme = useTheme();
   const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
+  const tokenFinder = useTokenFinder();
 
   // Logic for select all not done
   const [checked, setChecked] = useState<boolean>(true);
 
   const walletAddress = useMemo(() => walletState.wallet?.addressInfo.bech32, [walletState.wallet]);
-
-  // const potentialRewards = useMemo(() => {
-  //   return Object.keys(rewardsState.potentialPoolRewards).reduce((accum, poolAddress) => {
-  //     const reward = rewardsState.potentialPoolRewards[poolAddress];
-  //     return accum.plus(reward);
-  //   }, BIG_ZERO);
-  // }, [rewardsState.potentialPoolRewards]);
 
   const {
     unclaimedRewards,
@@ -262,6 +256,41 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     };
   }, [walletAddress, rewardsState.claimTxs, rewardsState.rewardDistributions]);
 
+
+
+  console.log("rewards", rewardsState);
+
+  // New code for claimable rewards, missing readyToClaim filter
+  const rewardDistributions = rewardsState.rewardDistributions;
+  const rewardDistributors = rewardsState.rewardDistributors;
+
+  // group by epoch
+  const distributionsByEpoch = groupBy(rewardDistributions, (reward) => {
+    return reward.info.epoch_number;
+  })
+
+  console.log("epoch", Object.keys(distributionsByEpoch).map(key => distributionsByEpoch[key]));
+  console.log("distributors", rewardDistributors);
+
+  // group by token (distributor address)
+  const distributionsByToken = groupBy(rewardDistributions, (reward) => {
+    return reward.info.distributor_address;
+  })
+
+  // Need readyToClaim filter?
+  const claimableRewardsByToken = Object.fromEntries(Object.entries(distributionsByToken).map(([distrAddress, distributions]) => {
+    return [distrAddress, distributions.reduce((sum, dist) => {
+        return sum.plus(dist.info.amount);
+      }, BIG_ZERO)
+    ];
+  }))
+
+  // usdValues
+
+  console.log("group by token", distributionsByToken);
+  console.log("rewards by token", claimableRewardsByToken);
+
+  // ZWAP Balance
   const zapTokenBalance: BigNumber = useMemo(() => {
     const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[network] ?? "";
     return tokenState.tokens[zapContractAddr]?.balance ?? BIG_ZERO;
@@ -278,8 +307,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   }, [network, tokenState.prices, tokenState.tokens, zapTokenBalance, valueCalculators]);
 
   const zapBalanceLabel = useMemo(() => formatZWAPLabel(zapTokenBalance), [zapTokenBalance]);
-  const unclaimedRewardsLabel = useMemo(() => formatZWAPLabel(unclaimedRewards), [unclaimedRewards]);
-  // const potentialRewardsLabel = useMemo(() => formatZWAPLabel(potentialRewards), [potentialRewards]);
 
   const onClaimRewards = () => {
     runClaimRewards(async () => {
@@ -390,21 +417,24 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   <HelpInfo placement="bottom" title="The estimated amount of rewards you have collected and are eligible to claim." className={classes.tooltip}/>
                 </Text>
                 <Box className={classes.rewardBox} bgcolor="background.contrast" width="100%">
-                  <Text variant="h4" className={classes.totalReward}>
-                    {unclaimedRewardsLabel}
-                    <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoMd)}/>
-                    <span className={classes.currency}>
-                      ZWAP
-                    </span>
-                  </Text>
+                  {Object.keys(claimableRewardsByToken).map(key => {
+                    const rewardToken = {"name":"ZWAP Rewards","reward_token_symbol":"ZWAP","reward_token_address_hex":"0xb2b119e2496f24590eff419f15aa1b6e82aa7074","distributor_name":"Zilswap","distributor_address_hex":"0x55fc7c40cc9d190aad1499c00102de0828c06d41","developer_address":"zil1ytk3ykwlc2vy8fyp7wqp492zjassj5mxzgscv6","emission_info":{"epoch_period":604800,"tokens_per_epoch":"6250_000_000_000_000","tokens_for_retroactive_distribution":"50000_000_000_000_000","retroactive_distribution_cutoff_time":1628230000,"distribution_start_time":1628240000,"total_number_of_epochs":152,"initial_epoch_number":1,"developer_token_ratio_bps":1500,"trader_token_ratio_bps":2000},"incentived_pools":{"zil10a9z324aunx2qj64984vke93gjdnzlnl5exygv":2,"zil1k2c3ncjfduj9jrhlgx03t2smd6p25ur56cfzgz":5,"zil1fytuayks6njpze00ukasq3m4y4s44k79hvz8q5":3}};
+                    // const rewardToken = rewardDistributors.filter(distributor => distributor.distributor_address_hex === key)[0];
 
-                  <Text variant="h4" className={classes.totalReward}>
-                    {unclaimedRewardsLabel}
-                    <CurrencyLogo currency="ZIL" address="zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz" className={cls(classes.currencyLogo, classes.currencyLogoMd)}/>
-                    <span className={classes.currency}>
-                      ZIL
-                    </span>
-                  </Text>
+                    // to get token decimals
+                    const token = tokenFinder(rewardToken?.reward_token_address_hex);
+
+                    return (
+                      <Text variant="h4" className={classes.totalReward}>
+                        {/* toHumanNumber? */}
+                        {claimableRewardsByToken[key].shiftedBy(-token!.decimals).toFormat(2)}
+                        <CurrencyLogo address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoMd)}/>
+                        <span className={classes.currency}>
+                          {rewardToken?.reward_token_symbol}
+                        </span>
+                      </Text>
+                    )
+                  })}
 
                   <Text marginBottom={1} variant="body2" color="textSecondary" className={classes.usdAmount}>
                     ≈ $400.00
@@ -440,110 +470,53 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
                         <Box mb={0.5} />
 
-                        {/* Weekly rewards should be refactored into one component*/}
-                        <Box mt={1}>
-                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
-                            <Text className={classes.date}>
-                              15 June
-                            </Text>
-                            <Text variant="body2" color="textSecondary" className={classes.usdAmount}>
-                              ≈ $100.00
-                            </Text>
-                          </Box>
-                          <Divider />
-                          <Box mt={0.5}>
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                className={classes.checkbox}
-                                checked={checked}
-                                onChange={event => setChecked(event?.target.checked)}
-                                />
-                              }
-                              label={
-                                <Text className={classes.epochReward}>
-                                  10.38
-                                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
-                                  <span className={classes.currency}>
-                                    ZWAP
-                                  </span>
+                        {/* Rewards by epoch should be refactored into one component*/}
+                        {Object.keys(distributionsByEpoch).map(key => {
+                          return (
+                            <Box mt={1}>
+                              <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+                                <Text className={classes.date}>
+                                  {key}
                                 </Text>
-                              }
-                            />
-                          </Box>
-                          <Box>
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                className={classes.checkbox}
-                                checked={checked}
-                                onChange={event => setChecked(event?.target.checked)}
-                                />
-                              }
-                              label={
-                                <Text className={classes.epochReward}>
-                                  10.38
-                                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
-                                  <span className={classes.currency}>
-                                    ZWAP
-                                  </span>
+                                <Text variant="body2" color="textSecondary" className={classes.usdAmount}>
+                                  ≈ $100.00
                                 </Text>
-                              }
-                            />
-                          </Box>
-                        </Box>
+                              </Box>
+                              <Divider />    
+                              {distributionsByEpoch[key].map(reward => {
+                                const rewardToken = {"name":"ZWAP Rewards","reward_token_symbol":"ZWAP","reward_token_address_hex":"0xb2b119e2496f24590eff419f15aa1b6e82aa7074","distributor_name":"Zilswap","distributor_address_hex":"0x55fc7c40cc9d190aad1499c00102de0828c06d41","developer_address":"zil1ytk3ykwlc2vy8fyp7wqp492zjassj5mxzgscv6","emission_info":{"epoch_period":604800,"tokens_per_epoch":"6250_000_000_000_000","tokens_for_retroactive_distribution":"50000_000_000_000_000","retroactive_distribution_cutoff_time":1628230000,"distribution_start_time":1628240000,"total_number_of_epochs":152,"initial_epoch_number":1,"developer_token_ratio_bps":1500,"trader_token_ratio_bps":2000},"incentived_pools":{"zil10a9z324aunx2qj64984vke93gjdnzlnl5exygv":2,"zil1k2c3ncjfduj9jrhlgx03t2smd6p25ur56cfzgz":5,"zil1fytuayks6njpze00ukasq3m4y4s44k79hvz8q5":3}};
+                                // const rewardToken = rewardDistributors.filter(distributor => distributor.distributor_address_hex === reward.info.distributor_address)[0];
+                                
+                                // to get token decimals
+                                const token = tokenFinder(rewardToken?.reward_token_address_hex);
 
-                        <Box mt={1}>
-                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
-                            <Text className={classes.date}>
-                              8 June
-                            </Text>
-                            <Text variant="body2" color="textSecondary" className={classes.usdAmount}>
-                              ≈ $200.00
-                            </Text>
-                          </Box>
-                          <Divider />
-                          <Box mt={0.5}>
-                            <FormControlLabel
-                                control={
-                                  <Checkbox
-                                  className={classes.checkbox}
-                                  checked={checked}
-                                  onChange={event => setChecked(event?.target.checked)}
-                                  />
-                                }
-                                label={
-                                  <Text className={classes.epochReward}>
-                                    10.38
-                                    <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
-                                    <span className={classes.currency}>
-                                      ZWAP
-                                    </span>
-                                  </Text>
-                                }
-                              />
-                          </Box>
-                          <Box>
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                className={classes.checkbox}
-                                checked={checked}
-                                onChange={event => setChecked(event?.target.checked)}
-                                />
-                              }
-                              label={
-                                <Text className={classes.epochReward}>
-                                  10.38
-                                  <CurrencyLogo currency="ZIL" address="zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz" className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
-                                  <span className={classes.currency}>
-                                    ZIL
-                                  </span>
-                                </Text>
-                              }
-                            />
-                          </Box>
-                        </Box>                        
+                                return (
+                                  <Box mt={0.5}>
+                                    <FormControlLabel
+                                      control={
+                                        <Checkbox
+                                        className={classes.checkbox}
+                                        checked={checked}
+                                        onChange={event => setChecked(event?.target.checked)}
+                                        />
+                                      }
+                                      label={
+                                        <Text className={classes.epochReward}>
+                                          {/* Need toHumanNumber? */}
+                                          {reward.info.amount.shiftedBy(-token!.decimals).toFormat(2)}
+                                          <CurrencyLogo address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
+                                          <span className={classes.currency}>
+                                           {rewardToken?.reward_token_symbol}
+                                          </span>
+                                        </Text>
+                                      }
+                                    />
+                                  </Box>
+                                )
+                              })}
+                            </Box>
+                          )
+                        })}                 
                       </Box>
                     </AccordionDetails>
                   </Accordion>
