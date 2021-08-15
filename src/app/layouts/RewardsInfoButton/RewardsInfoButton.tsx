@@ -8,7 +8,7 @@ import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBoxR
 import { CurrencyLogo, HelpInfo, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
-import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState } from "app/store/types";
+import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState, ZAPRewardDist } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useNetwork, useTokenFinder, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
@@ -208,17 +208,15 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
-  const [active, setActive] = useState(false);
+  const [active, setActive] = useState<boolean>(false);
   const [claimResult, setClaimResult] = useState<any>(null);
   const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [selectedRewards, setSelectedRewards] = useState<ZAPRewardDist[]>([]);
   const [runClaimRewards, loading, error] = useAsyncTask("claimRewards");
   const buttonRef = useRef();
   const theme = useTheme();
   const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
   const tokenFinder = useTokenFinder();
-
-  // Logic for select all not done
-  const [checked, setChecked] = useState<boolean>(true);
 
   const walletAddress = useMemo(() => walletState.wallet?.addressInfo.bech32, [walletState.wallet]);
 
@@ -348,6 +346,40 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     })
   };
 
+  // Logic for checkboxes - check if there's a more efficient way
+  const handleSelect = (distribution: ZAPRewardDist) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedRewardsCopy = selectedRewards.slice();
+
+    // if checked, add to selectedRewards array
+    if (event.target.checked) {
+      selectedRewardsCopy.push(distribution);
+      setSelectedRewards(selectedRewardsCopy);
+    } else {
+      const id = selectedRewardsCopy.indexOf(distribution);
+      if (id !== -1) {
+        selectedRewardsCopy.splice(id, 1);
+        setSelectedRewards(selectedRewardsCopy);
+      }
+    }
+  }
+
+  // useMemo here - selectedRewards.length same as reward distributions that are readyToClaim?
+  const isAllSelected = useMemo(() => {
+    return rewardDistributions.filter(distribution => !distribution.readyToClaim).length === selectedRewards.length;
+  }, [rewardDistributions, selectedRewards])
+
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // selectedRewards should contain all distributions
+    if (event.target.checked) {
+      setSelectedRewards(rewardDistributions);
+    } else {
+      setSelectedRewards([]);
+    }
+  }
+
+  const isDistributionSelected = (distribution: ZAPRewardDist) => {
+    return selectedRewards.includes(distribution);
+  }
 
   const zwapAddress = TOKEN_CONTRACT[network];
   if (!walletState.wallet) return null;
@@ -448,7 +480,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                     </Box>
                     <AccordionDetails>
                       <Box display="flex" flexDirection="column">
-                        {/* Unselect all */}
+                        {/* Select/Unselect all */}
                         <Box>
                           <FormControlLabel
                             control={
@@ -456,13 +488,13 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                 className={classes.checkbox}
                                 icon={<IndeterminateCheckBoxIcon fontSize="small" />}
                                 checkedIcon={<CheckBoxIcon fontSize="small" />}
-                                checked={checked}
-                                onChange={event => setChecked(event?.target.checked)}
+                                checked={isAllSelected}
+                                onChange={handleSelectAll}
                               />
                             }
                             label={
                               <Text color="textSecondary">
-                                {checked ? "Unselect all" : "Select all"}
+                                {isAllSelected ? "Unselect all" : "Select all"}
                               </Text>
                             }
                           />
@@ -496,8 +528,9 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                       control={
                                         <Checkbox
                                         className={classes.checkbox}
-                                        checked={checked}
-                                        onChange={event => setChecked(event?.target.checked)}
+                                        checked={isDistributionSelected(reward)}
+                                        // onChange={event => setChecked(event?.target.checked)}
+                                        onChange={handleSelect(reward)}
                                         />
                                       }
                                       label={
