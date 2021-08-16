@@ -8,6 +8,7 @@ import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBoxR
 import { CurrencyLogo, HelpInfo, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
+import { select } from "app/store/pool/actions";
 import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState, ZAPRewardDist } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useNetwork, useTokenFinder, useValueCalculators } from "app/utils";
@@ -197,6 +198,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   usdAmount: {
     fontFamily: "Avenir Next"
   },
+  progress: {
+    marginRight: theme.spacing(1)
+  }
 }));
 
 const RewardsInfoButton: React.FC<Props> = (props: Props) => {
@@ -211,7 +215,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const [active, setActive] = useState<boolean>(false);
   const [claimResult, setClaimResult] = useState<any>(null);
   const [showDetails, setShowDetails] = useState<boolean>(false);
-  const [selectedRewards, setSelectedRewards] = useState<ZAPRewardDist[]>([]);
+  const [selectedDistributions, setSelectedDistributions] = useState<ZAPRewardDist[]>([]);
   const [runClaimRewards, loading, error] = useAsyncTask("claimRewards");
   const buttonRef = useRef();
   const theme = useTheme();
@@ -220,6 +224,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   const walletAddress = useMemo(() => walletState.wallet?.addressInfo.bech32, [walletState.wallet]);
 
+  // previous code
   const {
     unclaimedRewards,
     claimableRewards,
@@ -254,10 +259,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     };
   }, [walletAddress, rewardsState.claimTxs, rewardsState.rewardDistributions]);
 
-
-
-  console.log("rewards", rewardsState);
-
   // New code for claimable rewards, missing readyToClaim filter
   const rewardDistributions = rewardsState.rewardDistributions;
   const rewardDistributors = rewardsState.rewardDistributors;
@@ -267,7 +268,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     return reward.info.epoch_number;
   })
 
-  console.log("epoch", Object.keys(distributionsByEpoch).map(key => distributionsByEpoch[key]));
   console.log("distributors", rewardDistributors);
 
   // group by token (distributor address)
@@ -275,7 +275,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     return reward.info.distributor_address;
   })
 
-  // Need readyToClaim filter?
   const claimableRewardsByToken = Object.fromEntries(Object.entries(distributionsByToken).map(([distrAddress, distributions]) => {
     return [distrAddress, distributions.reduce((sum, dist) => {
         return sum.plus(dist.info.amount);
@@ -283,10 +282,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     ];
   }))
 
-  // usdValues
-
-  console.log("group by token", distributionsByToken);
-  console.log("rewards by token", claimableRewardsByToken);
+  // TODO: usdValues
 
   // ZWAP Balance
   const zapTokenBalance: BigNumber = useMemo(() => {
@@ -310,75 +306,89 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     runClaimRewards(async () => {
       if (unclaimedRewards.isZero() || !walletState.wallet) return;
       let claimTx = null;
-      for (const distribution of rewardsState.rewardDistributions) {
-        if (distribution.claimed) continue;
 
-        // drop [leaf hash, ..., root hash]
-        const proof = distribution.info.proof.slice(1, distribution.info.proof.length - 1);
+      const claims = selectedDistributions.map(distribution => {
 
-        claimTx = await ZWAPRewards.claim({
-          network,
-          amount: distribution.info.amount,
-          proof,
-          epochNumber: distribution.info.epoch_number,
-          wallet: walletState.wallet,
-        });
+      })
+      // for (const distribution of rewardsState.rewardDistributions) {
+      //   if (distribution.claimed) continue;
 
-        const pendingTx: PendingClaimTx = {
-          dispatchedAt: dayjs(),
-          epoch: distribution.info.epoch_number,
-          txHash: claimTx.hash,
-        };
+      //   // drop [leaf hash, ..., root hash]
+      //   const proof = distribution.info.proof.slice(1, distribution.info.proof.length - 1);
 
-        dispatch(actions.Rewards.addPendingClaimTx(
-          walletState.wallet.addressInfo.bech32,
-          pendingTx,
-        ));
-      }
+      //   claimTx = await ZWAPRewards.claim({
+      //     network,
+      //     amount: distribution.info.amount,
+      //     proof,
+      //     epochNumber: distribution.info.epoch_number,
+      //     wallet: walletState.wallet,
+      //   });
 
-      if (claimTx) {
-        setClaimResult(claimTx);
-        setTimeout(() => {
-          dispatch(actions.Token.refetchState());
-        }, 5000);
-      }
+      //   const pendingTx: PendingClaimTx = {
+      //     dispatchedAt: dayjs(),
+      //     epoch: distribution.info.epoch_number,
+      //     txHash: claimTx.hash,
+      //   };
+
+      //   dispatch(actions.Rewards.addPendingClaimTx(
+      //     walletState.wallet.addressInfo.bech32,
+      //     pendingTx,
+      //   ));
+      // }
+
+      // if (claimTx) {
+      //   setClaimResult(claimTx);
+      //   setTimeout(() => {
+      //     dispatch(actions.Token.refetchState());
+      //   }, 5000);
+      // }
       await new Promise((resolve) => setTimeout(resolve, 1000));
     })
   };
 
-  // Logic for checkboxes - check if there's a more efficient way
+  // Logic for checkboxes - check if there's a more efficient way -> just storing ids?
   const handleSelect = (distribution: ZAPRewardDist) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedRewardsCopy = selectedRewards.slice();
+    const selectedDistributionsCopy = selectedDistributions.slice();
 
-    // if checked, add to selectedRewards array
+    // if checked, add to selectedDistributions array
     if (event.target.checked) {
-      selectedRewardsCopy.push(distribution);
-      setSelectedRewards(selectedRewardsCopy);
+      selectedDistributionsCopy.push(distribution);
+      setSelectedDistributions(selectedDistributionsCopy);
     } else {
-      const id = selectedRewardsCopy.indexOf(distribution);
-      if (id !== -1) {
-        selectedRewardsCopy.splice(id, 1);
-        setSelectedRewards(selectedRewardsCopy);
+      const index = selectedDistributionsCopy.indexOf(distribution);
+      if (index !== -1) {
+        selectedDistributionsCopy.splice(index, 1);
+        setSelectedDistributions(selectedDistributionsCopy);
       }
     }
   }
 
-  // useMemo here - selectedRewards.length same as reward distributions that are readyToClaim?
+  // useMemo here - selectedDistributions.length same as reward distributions that are readyToClaim?
   const isAllSelected = useMemo(() => {
-    return rewardDistributions.filter(distribution => !distribution.readyToClaim).length === selectedRewards.length;
-  }, [rewardDistributions, selectedRewards])
+    return rewardDistributions.filter(distribution => !distribution.readyToClaim).length === selectedDistributions.length;
+  }, [rewardDistributions, selectedDistributions])
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // selectedRewards should contain all distributions
+    // if checked, selectedDistributions should contain all claimable distributions
     if (event.target.checked) {
-      setSelectedRewards(rewardDistributions);
+      setSelectedDistributions(rewardDistributions);
     } else {
-      setSelectedRewards([]);
+      setSelectedDistributions([]);
     }
   }
 
   const isDistributionSelected = (distribution: ZAPRewardDist) => {
-    return selectedRewards.includes(distribution);
+    return selectedDistributions.includes(distribution);
+  }
+
+  const claimButtonText = () => {
+    if (claimableRewards.isZero() || isAllSelected) {
+      return "Claim Rewards (All)";
+    } else if (selectedDistributions.length) {
+      return `Claim Rewards (${selectedDistributions.length})`;
+    } else {
+      return "Select Reward to Claim";
+    }
   }
 
   const zwapAddress = TOKEN_CONTRACT[network];
@@ -449,7 +459,13 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   <HelpInfo placement="bottom" title="The estimated amount of rewards you have collected and are eligible to claim." className={classes.tooltip}/>
                 </Text>
                 <Box className={classes.rewardBox} bgcolor="background.contrast" width="100%">
-                  {Object.keys(claimableRewardsByToken).map(key => {
+                  {claimableRewards.isZero() &&
+                    <Text variant="h4" className={classes.totalReward}>
+                      All rewards claimed.
+                    </Text>
+                  }
+
+                  {!claimableRewards.isZero() && Object.keys(claimableRewardsByToken).map(key => {
                     const rewardToken = {"name":"ZWAP Rewards","reward_token_symbol":"ZWAP","reward_token_address_hex":"0xb2b119e2496f24590eff419f15aa1b6e82aa7074","distributor_name":"Zilswap","distributor_address_hex":"0x55fc7c40cc9d190aad1499c00102de0828c06d41","developer_address":"zil1ytk3ykwlc2vy8fyp7wqp492zjassj5mxzgscv6","emission_info":{"epoch_period":604800,"tokens_per_epoch":"6250_000_000_000_000","tokens_for_retroactive_distribution":"50000_000_000_000_000","retroactive_distribution_cutoff_time":1628230000,"distribution_start_time":1628240000,"total_number_of_epochs":152,"initial_epoch_number":1,"developer_token_ratio_bps":1500,"trader_token_ratio_bps":2000},"incentived_pools":{"zil10a9z324aunx2qj64984vke93gjdnzlnl5exygv":2,"zil1k2c3ncjfduj9jrhlgx03t2smd6p25ur56cfzgz":5,"zil1fytuayks6njpze00ukasq3m4y4s44k79hvz8q5":3}};
                     // const rewardToken = rewardDistributors.filter(distributor => distributor.distributor_address_hex === key)[0];
 
@@ -469,90 +485,91 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   })}
 
                   <Text marginBottom={1} variant="body2" color="textSecondary" className={classes.usdAmount}>
-                    ≈ $400.00
+                    ≈ ${claimableRewards.isZero() ? "0.00" : "400.00"}
                   </Text>
 
-                  <Accordion className={classes.accordion} expanded={showDetails} onChange={(_, expanded) => setShowDetails(expanded)}>
-                    <Box display="flex" justifyContent="center" width="100%">
-                      <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon} />}>
-                        <Text color="textSecondary">View Details</Text>
-                      </AccordionSummary>
-                    </Box>
-                    <AccordionDetails>
-                      <Box display="flex" flexDirection="column">
-                        {/* Select/Unselect all */}
-                        <Box>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                className={classes.checkbox}
-                                icon={<IndeterminateCheckBoxIcon fontSize="small" />}
-                                checkedIcon={<CheckBoxIcon fontSize="small" />}
-                                checked={isAllSelected}
-                                onChange={handleSelectAll}
-                              />
-                            }
-                            label={
-                              <Text color="textSecondary">
-                                {isAllSelected ? "Unselect all" : "Select all"}
-                              </Text>
-                            }
-                          />
-                        </Box>
-
-                        <Box mb={0.5} />
-
-                        {/* Rewards by epoch should be refactored into one component*/}
-                        {Object.keys(distributionsByEpoch).map(key => {
-                          return (
-                            <Box mt={1}>
-                              <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
-                                <Text className={classes.date}>
-                                  {key}
-                                </Text>
-                                <Text variant="body2" color="textSecondary" className={classes.usdAmount}>
-                                  ≈ $100.00
-                                </Text>
-                              </Box>
-                              <Divider />    
-                              {distributionsByEpoch[key].map(reward => {
-                                const rewardToken = {"name":"ZWAP Rewards","reward_token_symbol":"ZWAP","reward_token_address_hex":"0xb2b119e2496f24590eff419f15aa1b6e82aa7074","distributor_name":"Zilswap","distributor_address_hex":"0x55fc7c40cc9d190aad1499c00102de0828c06d41","developer_address":"zil1ytk3ykwlc2vy8fyp7wqp492zjassj5mxzgscv6","emission_info":{"epoch_period":604800,"tokens_per_epoch":"6250_000_000_000_000","tokens_for_retroactive_distribution":"50000_000_000_000_000","retroactive_distribution_cutoff_time":1628230000,"distribution_start_time":1628240000,"total_number_of_epochs":152,"initial_epoch_number":1,"developer_token_ratio_bps":1500,"trader_token_ratio_bps":2000},"incentived_pools":{"zil10a9z324aunx2qj64984vke93gjdnzlnl5exygv":2,"zil1k2c3ncjfduj9jrhlgx03t2smd6p25ur56cfzgz":5,"zil1fytuayks6njpze00ukasq3m4y4s44k79hvz8q5":3}};
-                                // const rewardToken = rewardDistributors.filter(distributor => distributor.distributor_address_hex === reward.info.distributor_address)[0];
-                                
-                                // to get token decimals
-                                const token = tokenFinder(rewardToken?.reward_token_address_hex);
-
-                                return (
-                                  <Box mt={0.5}>
-                                    <FormControlLabel
-                                      control={
-                                        <Checkbox
-                                        className={classes.checkbox}
-                                        checked={isDistributionSelected(reward)}
-                                        // onChange={event => setChecked(event?.target.checked)}
-                                        onChange={handleSelect(reward)}
-                                        />
-                                      }
-                                      label={
-                                        <Text className={classes.epochReward}>
-                                          {/* Need toHumanNumber? */}
-                                          {reward.info.amount.shiftedBy(-token!.decimals).toFormat(2)}
-                                          <CurrencyLogo address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
-                                          <span className={classes.currency}>
-                                           {rewardToken?.reward_token_symbol}
-                                          </span>
-                                        </Text>
-                                      }
-                                    />
-                                  </Box>
-                                )
-                              })}
-                            </Box>
-                          )
-                        })}                 
+                  {!claimableRewards.isZero() && <Accordion className={classes.accordion} expanded={showDetails} onChange={(_, expanded) => setShowDetails(expanded)}>
+                      <Box display="flex" justifyContent="center" width="100%">
+                        <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon} />}>
+                          <Text color="textSecondary">View Details</Text>
+                        </AccordionSummary>
                       </Box>
-                    </AccordionDetails>
-                  </Accordion>
+                      <AccordionDetails>
+                        <Box display="flex" flexDirection="column">
+                          {/* Select/Unselect all */}
+                          <Box>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  className={classes.checkbox}
+                                  icon={<IndeterminateCheckBoxIcon fontSize="small" />}
+                                  checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                  checked={isAllSelected}
+                                  onChange={handleSelectAll}
+                                />
+                              }
+                              label={
+                                <Text color="textSecondary">
+                                  {isAllSelected ? "Unselect all" : "Select all"}
+                                </Text>
+                              }
+                            />
+                          </Box>
+
+                          <Box mb={0.5} />
+
+                          {/* Rewards by epoch should be refactored into one component*/}
+                          {Object.keys(distributionsByEpoch).reverse().map(key => {
+                            return (
+                              <Box mt={1}>
+                                <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+                                  <Text className={classes.date}>
+                                    {key}
+                                  </Text>
+                                  <Text variant="body2" color="textSecondary" className={classes.usdAmount}>
+                                    ≈ $100.00
+                                  </Text>
+                                </Box>
+                                <Divider />    
+                                {distributionsByEpoch[key].map(reward => {
+                                  const rewardToken = {"name":"ZWAP Rewards","reward_token_symbol":"ZWAP","reward_token_address_hex":"0xb2b119e2496f24590eff419f15aa1b6e82aa7074","distributor_name":"Zilswap","distributor_address_hex":"0x55fc7c40cc9d190aad1499c00102de0828c06d41","developer_address":"zil1ytk3ykwlc2vy8fyp7wqp492zjassj5mxzgscv6","emission_info":{"epoch_period":604800,"tokens_per_epoch":"6250_000_000_000_000","tokens_for_retroactive_distribution":"50000_000_000_000_000","retroactive_distribution_cutoff_time":1628230000,"distribution_start_time":1628240000,"total_number_of_epochs":152,"initial_epoch_number":1,"developer_token_ratio_bps":1500,"trader_token_ratio_bps":2000},"incentived_pools":{"zil10a9z324aunx2qj64984vke93gjdnzlnl5exygv":2,"zil1k2c3ncjfduj9jrhlgx03t2smd6p25ur56cfzgz":5,"zil1fytuayks6njpze00ukasq3m4y4s44k79hvz8q5":3}};
+                                  // const rewardToken = rewardDistributors.filter(distributor => distributor.distributor_address_hex === reward.info.distributor_address)[0];
+                                  
+                                  // to get token decimals
+                                  const token = tokenFinder(rewardToken?.reward_token_address_hex);
+
+                                  return (
+                                    <Box mt={0.5}>
+                                      <FormControlLabel
+                                        control={
+                                          <Checkbox
+                                          className={classes.checkbox}
+                                          checked={isDistributionSelected(reward)}
+                                          // onChange={event => setChecked(event?.target.checked)}
+                                          onChange={handleSelect(reward)}
+                                          />
+                                        }
+                                        label={
+                                          <Text className={classes.epochReward}>
+                                            {/* Need toHumanNumber? */}
+                                            {reward.info.amount.shiftedBy(-token!.decimals).toFormat(2)}
+                                            <CurrencyLogo address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
+                                            <span className={classes.currency}>
+                                            {rewardToken?.reward_token_symbol}
+                                            </span>
+                                          </Text>
+                                        }
+                                      />
+                                    </Box>
+                                  )
+                                })}
+                              </Box>
+                            )
+                          })}                 
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
+                  }
                 </Box>
               </Box>
 
@@ -594,8 +611,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                 <Tooltip title={claimTooltip}>
                   <span>
                     <Button fullWidth variant="contained" color="primary" disabled={claimableRewards.isZero()} onClick={onClaimRewards} className={classes.claimRewardsButton}>
-                      {loading && <CircularProgress size="1em" color="inherit" />}
-                      {!loading && "Claim Rewards"}
+                      {loading && <CircularProgress size="1em" color="inherit" className={classes.progress} />}
+                      {claimButtonText()}
                     </Button>
                   </span>
                 </Tooltip>
