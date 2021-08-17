@@ -49,6 +49,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "& .MuiAccordionDetails-root": {
       display: "inherit",
+      maxHeight: "200px",
+      overflowY: "auto",
+      '&::-webkit-scrollbar': {
+        width: "0.4rem",
+      },
+      "&::-webkit-scrollbar-track": {
+        margin: theme.spacing(1),
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.1)}`,
+        // borderRadius: 12,
+        borderRight: "2px solid transparent",
+        backgroundClip: "padding-box"
+      }
     },
     "& .MuiAccordionSummary-content.Mui-expanded": {
       margin: 0
@@ -215,7 +229,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const [active, setActive] = useState<boolean>(false);
   const [claimResult, setClaimResult] = useState<any>(null);
   const [showDetails, setShowDetails] = useState<boolean>(false);
-  const [selectedDistributions, setSelectedDistributions] = useState<ZAPRewardDist[]>([]);
+  const [selectedDistributions, setSelectedDistributions] = useState<ZAPRewardDist[]>([]); // default should be all claimable distributions
   const [runClaimRewards, loading, error] = useAsyncTask("claimRewards");
   const buttonRef = useRef();
   const theme = useTheme();
@@ -240,7 +254,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
     const claimableRewards = rewardsState.rewardDistributions.reduce((sum, dist) => {
       if (pendingClaimEpochs.includes(dist.info.epoch_number)) return sum;
-      return (dist.claimed === false && dist.readyToClaim) ? sum.plus(dist.info.amount) : sum;
+      return (!dist.readyToClaim) ? sum.plus(dist.info.amount) : sum;
     }, BIG_ZERO);
 
     let claimTooltip = "No ZWAP to claim";
@@ -307,14 +321,25 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       if (unclaimedRewards.isZero() || !walletState.wallet) return;
       let claimTx = null;
 
-      const claims = selectedDistributions.map(distribution => {
+      const distributions = selectedDistributions.map(distribution => {
+        // drop [leaf hash, ..., root hash]
+        const proof = distribution.info.proof.slice(1, distribution.info.proof.length - 1);
 
+        return {
+          epochNumber: distribution.info.epoch_number,
+          amount: distribution.info.amount,
+          proof,
+        }
       })
+
+      claimTx = await ZWAPRewards.claimMulti({
+        network,
+        wallet: walletState.wallet,
+        distributions
+      });
+
       // for (const distribution of rewardsState.rewardDistributions) {
       //   if (distribution.claimed) continue;
-
-      //   // drop [leaf hash, ..., root hash]
-      //   const proof = distribution.info.proof.slice(1, distribution.info.proof.length - 1);
 
       //   claimTx = await ZWAPRewards.claim({
       //     network,
