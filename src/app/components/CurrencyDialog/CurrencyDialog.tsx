@@ -1,5 +1,5 @@
 
-import { Box, CircularProgress, DialogContent, DialogProps, makeStyles, OutlinedInput } from "@material-ui/core";
+import { Box, CircularProgress, DialogContent, DialogProps, makeStyles, OutlinedInput, InputAdornment, IconButton } from "@material-ui/core";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { DialogModal } from "app/components";
 import { BridgeState } from "app/store/bridge/types";
@@ -13,6 +13,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
 import { CurrencyList } from "./components";
 import { actions } from "app/store";
+import CloseIcon from "@material-ui/icons/CloseOutlined";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -83,7 +84,10 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.down("sm")]: {
       paddingTop: '0px',
     },
-  }
+  },
+  closeIcon: {
+    color: theme.palette.primary.main,
+  },
 }));
 
 export type CurrencyListType = "zil" | "bridge-zil" | "bridge-eth";
@@ -151,6 +155,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   };
 
   const onToggleUserToken = (token: TokenInfo) => {
+    if (!tokenState.userSavedTokens.includes(token.address)) setSearch("");
     dispatch(actions.Token.updateUserSavedTokens(token.address))
   };
 
@@ -167,6 +172,16 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
             classes={{ input: classes.inputText }}
             className={classes.input}
             onChange={(e) => setSearch(e.target.value)}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="Clear search"
+                  onClick={() => setSearch("")}
+                >
+                  <CloseIcon className={classes.closeIcon} />
+                </IconButton>
+              </InputAdornment>
+            }
           />
         )}
         {(loadingConnectWallet || !tokenState.initialized) && (
