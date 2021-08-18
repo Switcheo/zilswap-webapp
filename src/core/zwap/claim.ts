@@ -17,6 +17,7 @@ export const fetchClaimHistory = async () => {
 }
 
 export interface Distribution {
+  distrAddr: string;
   epochNumber: number;
   amount: BigNumber;
   proof: string[];
@@ -114,13 +115,16 @@ const getMultiTxArgs = (distributions: Distribution[], address: string, contract
       arguments: [
         distributions.map((distribution) => {
           return [
-            distribution.epochNumber.toString(),
-            {
-              constructor: `${contractAddrByStr20}.DistributionLeaf`,
-              argtypes: [],
-              arguments: [address, distribution.amount.toString(10)],
-            },
-            distribution.proof.map(item => `0x${item}`)
+            distribution.distrAddr,
+            [
+              distribution.epochNumber.toString(),
+              {
+                constructor: `${contractAddrByStr20}.DistributionLeaf`,
+                argtypes: [],
+                arguments: [address, distribution.amount.toString(10)],
+              },
+              distribution.proof.map(item => `0x${item}`)
+            ]
           ]
         })
       ],
