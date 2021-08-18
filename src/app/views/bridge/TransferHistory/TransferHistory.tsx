@@ -1,4 +1,5 @@
 import { Box, Button, Chip, makeStyles, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
+import AddIcon from '@material-ui/icons/AddRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import RefreshIcon from '@material-ui/icons/RefreshRounded';
 import { CurrencyLogo, HelpInfo, ResumeTransferDialog, RevealMnemonic, Text } from 'app/components';
@@ -12,6 +13,7 @@ import TransactionDetail from "app/views/bridge/TransactionDetail";
 import cls from "classnames";
 import React, { Fragment, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { Blockchain } from "tradehub-api-js";
 import { ReactComponent as EthereumLogo } from "../../main/Bridge/ethereum-logo.svg";
 import { ReactComponent as ZilliqaLogo } from "../../main/Bridge/zilliqa-logo.svg";
@@ -55,10 +57,30 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             fontSize: "14px"
         }
     },
+    headerBox: {
+        [theme.breakpoints.down("xs")]: {
+            flexDirection: "column",
+        },
+    },
+    titleBox: {
+        [theme.breakpoints.down("xs")]: {
+            alignItems: "center",
+            marginBottom: theme.spacing(2)
+        },
+    },
+    buttonBox: {
+        [theme.breakpoints.down("xs")]: {
+            flexDirection: "column",
+        },
+    },
     textColoured: {
         color: theme.palette.primary.dark
     },
     refreshIcon: {
+        marginRight: theme.spacing(0.5),
+        verticalAlign: "middle",
+    },
+    addIcon: {
         marginRight: theme.spacing(0.5),
         verticalAlign: "middle",
     },
@@ -69,8 +91,29 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         "&:hover": {
             backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#003340" : "rgba(0, 51, 64, 0.5)", 0.8)}`,
         },
+        [theme.breakpoints.down("xs")]: {
+            height: 46
+        },
     },
     resumeTransferText: {
+        color: theme.palette.primary.contrastText,
+        paddingRight: theme.spacing(0.5),
+    },
+    newTransferButton: {
+        color: theme.palette.action?.disabled,
+        backgroundColor: theme.palette.action?.disabledBackground,
+        textAlign: "center",
+        "&:hover": {
+            backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#003340" : "rgba(0, 51, 64, 0.5)", 0.8)}`,
+        },
+        marginRight: theme.spacing(1),
+        [theme.breakpoints.down("xs")]: {
+            marginRight: 0,
+            marginBottom: theme.spacing(1),
+            height: 46
+        },
+    },
+    newTransferText: {
         color: theme.palette.primary.contrastText,
         paddingRight: theme.spacing(0.5),
     },
@@ -187,7 +230,15 @@ const TransferHistory = (props: any) => {
 
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
     const bridgeTxs = bridgeState.bridgeTxs;
+    const pendingBridgeTx = bridgeState.activeBridgeTx;
     const [previewTx, setPreviewTx] = useState<BridgeTx | null>(null);
+
+    const handleNewTransfer = () => {
+        if (pendingBridgeTx) {
+            dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
+        }
+        dispatch(actions.Layout.showTransferConfirmation(false));
+    }
 
     const handleResumeTransfer = () => {
         dispatch(actions.Layout.toggleShowResumeTransfer("open"));
@@ -263,8 +314,8 @@ const TransferHistory = (props: any) => {
         <BridgeCard {...rest} className={cls(classes.root, className)}>
             {!previewTx && (
                 <Box overflow="hidden" display="flex" flexDirection="column" className={classes.container}>
-                    <Box display="flex" justifyContent="space-between" mt={2} pl={2}>
-                        <Box display="flex" flexDirection="column">
+                    <Box display="flex" justifyContent="space-between" mt={2} pl={2} className={classes.headerBox}>
+                        <Box display="flex" flexDirection="column" className={classes.titleBox}>
                             <Text variant="h2">
                                 Zil<span className={classes.textColoured}>Bridge</span>
                             </Text>
@@ -274,7 +325,12 @@ const TransferHistory = (props: any) => {
                             </Text>
                         </Box>
 
-                        <Box display="flex" pt={0} pb={0}>
+                        <Box display="flex" pt={0} pb={0} className={classes.buttonBox}>
+                            <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.newTransferButton} onClick={handleNewTransfer}>
+                                <AddIcon fontSize="small" className={classes.addIcon} />
+                                <Text variant="button" className={classes.newTransferText}>New Transfer</Text>
+                            </Button>
+
                             <Button color="primary" variant="contained" className={classes.resumeTransferButton} onClick={handleResumeTransfer}>
                                 <RefreshIcon fontSize="small" className={classes.refreshIcon} />
                                 <Text variant="button" className={classes.resumeTransferText}>Resume Transfer</Text>
