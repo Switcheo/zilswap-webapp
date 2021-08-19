@@ -5,7 +5,7 @@ import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
-import { NewTxBlockSubscription, toBech32Address } from "@zilliqa-js/zilliqa";
+import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, MnemonicDialog, Text } from "app/components";
 import { ReactComponent as StraightLine } from "app/components/ConfirmTransfer/straight-line.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
@@ -565,11 +565,11 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                     <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, currentBridgeTx?.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> TradeHub Deposit Confirmation
                     </Text>
-                    {!!currentBridgeTx.depositConfirmations && (
-                      <Text flexGrow={1} align="right">
-                        <a className={classes.checkIconCompleted}>{currentBridgeTx.depositConfirmations > 12 ? "12+" : currentBridgeTx.depositConfirmations}</a>&nbsp;of&nbsp;<a className={classes.checkIconCompleted}>12</a>&nbsp;Blocks
-                      </Text>
-                    )}
+                    {/* {!!currentBridgeTx.depositConfirmations && ( */}
+                    <Text flexGrow={1} align="right">
+                      <b className={classes.checkIconCompleted}>{"12+"}</b>&nbsp;of&nbsp;<b className={classes.checkIconCompleted}>12</b>&nbsp;Blocks
+                    </Text>
+                    {/* )} */}
                   </Box>
                   <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">

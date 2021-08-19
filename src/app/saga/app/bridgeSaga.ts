@@ -14,7 +14,7 @@ import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK, TradeHubTx } from "tradehub-api-js";
 import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
-import { getBridge } from '../selectors';
+import { getBlockchain, getBridge } from '../selectors';
 
 export enum Status {
   NotStarted,
@@ -229,11 +229,12 @@ function* watchActiveTxConfirmations() {
     logger("bridge saga", "query block confirmations");
     try {
       const { activeBridgeTx } = getBridge(yield select());
+      const { network } = getBlockchain(yield select());
       if (activeBridgeTx) {
         if (activeBridgeTx?.withdrawTxHash) {
           try {
-            const network = TradeHubSDK.Network.DevNet;
-            const sdk = new TradeHubSDK({ network });
+            const tradehubNetwork = network === Network.MainNet ? TradeHubSDK.Network.MainNet : TradeHubSDK.Network.DevNet;
+            const sdk = new TradeHubSDK({ network: tradehubNetwork });
             yield call([sdk, sdk.initialize]);
             const tradehubtx = (yield sdk.api.getTx({ hash: activeBridgeTx.withdrawTxHash })) as TradeHubSDK.RestModels.TxnHistory;
             const blocks = (yield sdk.api.getLatestBlock()) as TradeHubSDK.RestModels.CosmosBlock;
