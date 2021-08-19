@@ -129,7 +129,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
       if ((outToken && !outToken.isZil) || (outToken?.isZil && !inToken)) {
         outRates = await getZilStreamTokenRates(outToken.symbol, filter);
       }
-      setInTokenRate(outToken ? tokenState.prices[outToken.symbol] : tokenState.prices["ZIL"]);
+      setInTokenRate(outToken ? tokenState.prices[outToken.address] : tokenState.prices["ZIL"]);
       setInTokenRates(inRates);
       setOutTokenRates(outRates);
     })
