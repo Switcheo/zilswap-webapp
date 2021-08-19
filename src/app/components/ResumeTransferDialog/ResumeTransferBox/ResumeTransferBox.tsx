@@ -6,7 +6,7 @@ import { actions } from "app/store";
 import { BridgeableTokenMapping, BridgeTx } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA } from "app/utils";
+import { hexToRGBA, useAsyncTask } from "app/utils";
 import { ConnectButton } from "app/views/main/Bridge/components";
 import BigNumber from 'bignumber.js';
 import { providerOptions } from "core/ethereum";
@@ -14,7 +14,7 @@ import { ConnectedWallet } from "core/wallet";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import dayjs from "dayjs";
 import { ethers } from "ethers";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
@@ -89,16 +89,63 @@ const ResumeTransferBox = (props: any) => {
     const classes = useStyles();
     const dispatch = useDispatch();
     const [showPhrase, setShowPhrase] = useState<boolean>(false);
-    const [mnemonic, setMnemonic] = useState<Array<string>>(Array(9).fill(""));
+    const [mnemonic, setMnemonic] = useState<Array<string>>(Array(12).fill(""));
     const bridgeableTokens = useSelector<RootState, BridgeableTokenMapping>(store => store.bridge.tokens);
     const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
     const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]); // eth wallet
     const network = TradeHubSDK.Network.DevNet;
 
-    const [dstWalletAddr, setDstWalletAddr] = useState<string>("");
-    const [dstChain, setDstChain] = useState<Blockchain.Zilliqa | Blockchain.Ethereum>(Blockchain.Ethereum);
+    const [dstChain, setDstChain] = useState<Blockchain.Zilliqa | Blockchain.Ethereum | null>(null);
+    const [depositTransfer, setDepositTransfer] = useState<RestModels.Transfer>();
+    const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
 
-    // TODO: get dstWalletAddr directly from store
+    const [runGetTransfer, loading, error] = useAsyncTask("getTransfer");
+
+    const isMnemonicFilled = useMemo(() => {
+        return mnemonic.indexOf("") === -1;
+    }, [mnemonic])
+
+    useEffect(() => {
+        const sdk = new TradeHubSDK({ network });
+        setSdk(sdk);
+    }, [])
+
+    useEffect(() => {
+        if (sdk && isMnemonicFilled) {
+            runGetTransfer(async () => {
+                const mnemonicString = mnemonic.join(" ");
+                const swthAddress = SWTHAddress.generateAddress(mnemonicString, undefined, { network });
+        
+                // find deposit confirmation tx
+                const extTransfers = await sdk.api.getTransfers({ account: swthAddress }) as RestModels.Transfer[];
+        
+                const depositTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'deposit');
+
+                if (depositTransfer && depositTransfer.status === 'success') {
+                    setDstChain(depositTransfer.blockchain === Blockchain.Zilliqa ? Blockchain.Ethereum : Blockchain.Zilliqa);
+                    setDepositTransfer(depositTransfer);
+                }
+
+                // else set error message
+            })
+        }
+    
+        // eslint-disable-next-line
+    }, [mnemonic]);
+
+    const dstWalletAddr = useMemo(() => {
+        if (dstChain) {
+            if (dstChain === Blockchain.Zilliqa && wallet) {
+                return wallet.addressInfo.byte20;
+            }
+
+            if (dstChain === Blockchain.Ethereum && bridgeWallet) {
+                return bridgeWallet.address;
+            }
+        }
+
+        return "";
+    }, [dstChain, wallet, bridgeWallet])
 
     const handleShowPhrase = () => {
         setShowPhrase(!showPhrase);
@@ -111,18 +158,9 @@ const ResumeTransferBox = (props: any) => {
         setMnemonic(mnemonicCopy);
     }
 
-    const handleResumeTransfer = async () => {
-        const mnemonicString = mnemonic.join(" ");
-        const sdk = new TradeHubSDK({ network });
-        const swthAddress = SWTHAddress.generateAddress(mnemonicString, undefined, { network });
-
-        // find deposit confirmation tx
-        const extTransfers = await sdk.api.getTransfers({ account: swthAddress }) as RestModels.Transfer[];
-
-        const depositTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'deposit' && transfer.blockchain === dstChain);
-
-        // tx found and status success - build bridgeTx
-        if (depositTransfer?.status === 'success' && dstChain) {
+    const handleResumeTransfer = () => {
+        if (depositTransfer && dstChain) {
+            // tx found and status success - build bridgeTx
             const srcChain = depositTransfer.blockchain as Blockchain.Zilliqa | Blockchain.Ethereum;
             const bridgeToken = bridgeableTokens[srcChain].find(token => token.denom === depositTransfer.denom);
 
@@ -134,15 +172,12 @@ const ResumeTransferBox = (props: any) => {
                 srcToken: depositTransfer.denom,
                 dstToken: bridgeToken?.toDenom!,
                 inputAmount: new BigNumber(depositTransfer.amount),
-                interimAddrMnemonics: mnemonicString,
+                interimAddrMnemonics: mnemonic.join(" "),
                 withdrawFee: new BigNumber(depositTransfer.fee_amount), // need to check
                 depositDispatchedAt: dayjs(),
             }
 
             dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
-        } else {
-            // some error msg
-
         }
     }
 
@@ -159,17 +194,12 @@ const ResumeTransferBox = (props: any) => {
         const ethAddress = await signer.getAddress();
         const chainId = (await ethersProvider.getNetwork()).chainId;
     
-        setDstWalletAddr(ethAddress);
         dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: { provider: provider, address: ethAddress, chainId: chainId } }));
         dispatch(actions.Token.refetchState());
     };
     
     const onClickConnectZIL = () => {
         dispatch(actions.Layout.toggleShowWallet());
-        
-        if (wallet !== null) {
-            setDstWalletAddr(wallet.addressInfo.byte20);
-        }
     };
 
     const handleConnectWallet = () => {
@@ -180,18 +210,16 @@ const ResumeTransferBox = (props: any) => {
         }
     }
 
-    // Ensures no empty string in array, chain selected and wallet connected (address)
-    const isResumeTransferEnabled = useMemo(() => {
-        for (let word of mnemonic) {
-            if (!word) {
-                return false;
-            }
-        }
+    const isConnectWalletEnabled = useMemo(() => {
+        return depositTransfer && dstChain;
+    }, [depositTransfer])
 
+    // Dst wallet connected and deposit tx found
+    const isResumeTransferEnabled = useMemo(() => {
         return dstWalletAddr && dstChain;
 
         // eslint-disable-next-line
-    }, [mnemonic])
+    }, [dstWalletAddr, dstChain])
 
     return (
         <Box overflow="hidden" display="flex" flexDirection="column" className={classes.root}>
@@ -204,15 +232,6 @@ const ResumeTransferBox = (props: any) => {
             <Text marginTop={2} marginBottom={2.5} variant="h6" align="center">
                 Connect your wallet and enter your transfer key to resume your paused transfer.
             </Text>
-
-            <Box mb={2} display="flex" flexDirection="column">
-                <Text align="center">
-                    Destination Wallet Address
-                </Text>
-
-                {/* Connect wallet button - should be disabled until chain is selected */}
-                <ConnectButton address={dstWalletAddr} chain={dstChain} className={classes.connectButton} onClick={handleConnectWallet}/>
-            </Box>
 
             <Text marginBottom={1.5} align="center">
                 Transfer Key
@@ -240,6 +259,15 @@ const ResumeTransferBox = (props: any) => {
                     >
                     <Text>{showPhrase ? "Hide Phrase" : "Show Phrase"}</Text>
                 </Button>
+            </Box>
+
+            <Box mt={1} mb={.5} display="flex" flexDirection="column">
+                <Text align="center">
+                    Destination Wallet Address
+                </Text>
+
+                {/* Connect wallet button - disabled unless */}
+                <ConnectButton address={dstWalletAddr} chain={dstChain} className={classes.connectButton} onClick={handleConnectWallet} disabled={!isConnectWalletEnabled} />
             </Box>
 
             <Box mt={1}>
