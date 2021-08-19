@@ -240,34 +240,25 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   // previous code - needs some fixing
   const {
-    unclaimedRewards,
     claimableRewards,
     claimTooltip,
   } = useMemo(() => {
     const pendingClaimTxs = rewardsState.claimTxs[walletAddress ?? ""] ?? {};
-    const pendingClaimEpochs = Object.values(pendingClaimTxs).map(pendingTx => pendingTx.epoch);
 
-    const unclaimedRewards = rewardsState.rewardDistributions.reduce((sum, dist) => {
-      if (pendingClaimEpochs.includes(dist.info.epoch_number)) return sum;
-      return dist.claimed === false ? sum.plus(dist.info.amount) : sum;
-    }, BIG_ZERO);
+    // needs to change
+    const pendingClaimEpochs = Object.values(pendingClaimTxs).map(pendingTx => pendingTx.epoch);
 
     const claimableRewards = rewardsState.rewardDistributions.reduce((sum, dist) => {
       if (pendingClaimEpochs.includes(dist.info.epoch_number)) return sum;
-      return (dist.claimed === false && dist.readyToClaim) ? sum.plus(dist.info.amount) : sum;
+      return (dist.readyToClaim) ? sum.plus(dist.info.amount) : sum;
     }, BIG_ZERO);
 
-    let claimTooltip = "No ZWAP to claim";
-    if (!unclaimedRewards.isZero()) {
-      if (unclaimedRewards.eq(claimableRewards)) {
-        claimTooltip = "Click to claim your ZWAP!";
-      } else if (unclaimedRewards.gt(claimableRewards)) {
-        claimTooltip = "ZWAP emission is being prepared, please try again in a few seconds.";
-      }
+    let claimTooltip = "No rewards to claim";
+    if (!claimableRewards.isZero()) {
+      claimTooltip = "Click to claim your rewards!";
     }
 
     return {
-      unclaimedRewards,
       claimableRewards,
       claimTooltip,
     };
@@ -336,7 +327,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   const onClaimRewards = () => {
     runClaimRewards(async () => {
-      if (unclaimedRewards.isZero() || !walletState.wallet) return;
+      if (claimableRewards.isZero() || !walletState.wallet) return;
       let claimTx = null;
 
       const distributions = selectedDistributions.map(distribution => {
@@ -416,7 +407,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     }
   }
 
-  // useMemo here - selectedDistributions.length same as reward distributions that are readyToClaim
+  // selectedDistributions.length same as reward distributions that are readyToClaim
   const isAllSelected = useMemo(() => {
     return rewardDistributions.length === selectedDistributions.length;
   }, [rewardDistributions, selectedDistributions])
@@ -469,7 +460,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
           ? <IconButton onClick={() => setActive(!active)} buttonRef={buttonRef}>
               <IconSVG />
             </IconButton> 
-          : <Badge variant="dot" invisible={unclaimedRewards.isZero()}>
+          : <Badge variant="dot" invisible={claimableRewards.isZero()}>
               <Button
                 size="small"
                 buttonRef={buttonRef}
@@ -538,7 +529,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   })}
 
                   <Text marginBottom={1} variant="body2" color="textSecondary" className={classes.usdAmount}>
-                    ≈ ${claimableRewards.isZero() ? "0.00" : totalTokenValue.toFormat(2)}
+                    ≈ ${totalTokenValue.toFormat(2)}
                   </Text>
 
                   {!claimableRewards.isZero() && <Accordion className={classes.accordion} expanded={showDetails} onChange={(_, expanded) => setShowDetails(expanded)}>
@@ -598,7 +589,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                           <Checkbox
                                           className={classes.checkbox}
                                           checked={isDistributionSelected(reward)}
-                                          // onChange={event => setChecked(event?.target.checked)}
                                           onChange={handleSelect(reward)}
                                           />
                                         }
