@@ -429,23 +429,28 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   };
 
   const onDisconnectEthWallet = () => {
-    return () => {
-      let disconnectForm = {};
-      if (toBlockchain === Blockchain.Zilliqa) {
-        disconnectForm = {
-          sourceAddress: undefined,
-          token: undefined,
-        }
-      } else {
-        disconnectForm = {
-          destAddress: undefined,
-          token: undefined,
-        }
+    let disconnectForm = {};
+    if (toBlockchain === Blockchain.Zilliqa) {
+      disconnectForm = {
+        sourceAddress: undefined,
+        token: undefined,
       }
-      setDcMenu(null)
-      dispatch(actions.Bridge.updateForm(disconnectForm));
-      dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: null }));
+    } else {
+      disconnectForm = {
+        destAddress: undefined,
+        token: undefined,
+      }
     }
+    const web3Modal = new Web3Modal({
+      cacheProvider: true,
+      disableInjectedProvider: false,
+      network: "ropsten",
+      providerOptions
+    });
+    web3Modal.clearCachedProvider();
+    setDcMenu(null)
+    dispatch(actions.Bridge.updateForm(disconnectForm));
+    dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: null }));
   }
 
   const isSubmitEnabled = useMemo(() => {
@@ -560,7 +565,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             <WavyLine className={classes.wavyLine} onClick={swapBridgeChains} />
             <Box className={classes.box} bgcolor="background.contrast">
 
-
               <Text variant="h4" align="center">To</Text>
 
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
@@ -632,13 +636,14 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         <ClickAwayListener onClickAway={() => setDcMenu(null)}>
           <FormControl variant="outlined" className={classes.formControl}>
             <Paper className={classes.selectMenu}>
-              <MenuItem onClick={onDisconnectEthWallet()}>Disconnect</MenuItem>
+              <MenuItem onClick={() => { onDisconnectEthWallet(); onClickConnectETH() }}>Change Wallet</MenuItem>
+              <MenuItem onClick={onDisconnectEthWallet}>Disconnect</MenuItem>
             </Paper>
           </FormControl>
         </ClickAwayListener>
 
       </Popper>
-    </BridgeCard>
+    </BridgeCard >
   )
 }
 
