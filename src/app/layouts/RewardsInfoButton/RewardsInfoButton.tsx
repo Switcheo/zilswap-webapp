@@ -349,13 +349,23 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       });
 
       // pendingTx
+      // const pendingTx: PendingClaimTx = {
+      //   dispatchedAt: dayjs(),
+      //   // epoch: distribution.info.epoch_number,
+      //   txHash: claimTx.hash,
+      // };
 
-      if (claimTx) {
-        setClaimResult(claimTx);
-        setTimeout(() => {
-          dispatch(actions.Token.refetchState());
-        }, 5000);
-      }
+      // dispatch(actions.Rewards.addPendingClaimTx(
+      //   walletState.wallet.addressInfo.bech32,
+      //   pendingTx,
+      // ));
+
+      // if (claimTx) {
+      //   setClaimResult(claimTx);
+      //   setTimeout(() => {
+      //     dispatch(actions.Token.refetchState());
+      //   }, 5000);
+      // }
 
       // for (const distribution of rewardsState.rewardDistributions) {
       //   if (distribution.claimed) continue;
