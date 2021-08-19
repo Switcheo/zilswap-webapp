@@ -1,4 +1,4 @@
-import { Box, Button, FormControl, MenuItem, Select, IconButton } from "@material-ui/core";
+import { Box, Button, FormControl, Paper, MenuItem, Select, Popper, ClickAwayListener } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { ConfirmTransfer, CurrencyInput, Text } from 'app/components';
@@ -17,7 +17,7 @@ import { providerOptions } from "core/ethereum";
 import { ConnectedWallet } from "core/wallet";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ethers } from "ethers";
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Blockchain, RestModels, TradeHubSDK } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
@@ -27,7 +27,6 @@ import { BridgeParamConstants } from "./components/constants";
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "./wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "./zilliqa-logo.svg";
-import CloseIcon from "@material-ui/icons/CloseRounded";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -134,6 +133,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     right: 0,
     position: "absolute",
     padding: 5,
+  },
+  priority: {
+    zIndex: 10
   }
 }))
 
@@ -167,6 +169,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
   const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
   const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK");
+  const [dcMenu, setDcMenu] = useState<any>();
+  const dcSourceButtonRef = useRef();
+  const dcDestButtonRef = useRef();
 
   useEffect(() => {
     runInitTradeHubSDK(async () => {
@@ -401,7 +406,12 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     if (fromBlockchain === Blockchain.Zilliqa) {
       return onClickConnectZIL();
     } else {
-      return onClickConnectETH();
+      // if connected, open menu
+      if (bridgeFormState.sourceAddress && bridgeWallet) {
+        setDcMenu(dcSourceButtonRef)
+      } else {
+        return onClickConnectETH();
+      }
     }
   };
 
@@ -409,15 +419,19 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     if (toBlockchain === Blockchain.Zilliqa) {
       return onClickConnectZIL();
     } else {
-      return onClickConnectETH();
+      // if connected, open menu
+      if (bridgeFormState.sourceAddress && bridgeWallet) {
+        setDcMenu(dcDestButtonRef)
+      } else {
+        return onClickConnectETH();
+      }
     }
   };
 
-  const onDisconnectEthWallet = (type: string) => {
+  const onDisconnectEthWallet = () => {
     return () => {
-      dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: null }));
       let disconnectForm = {};
-      if (type === "sourceWallet") {
+      if (toBlockchain === Blockchain.Zilliqa) {
         disconnectForm = {
           sourceAddress: undefined,
           token: undefined,
@@ -428,7 +442,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           token: undefined,
         }
       }
+      setDcMenu(null)
       dispatch(actions.Bridge.updateForm(disconnectForm));
+      dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: null }));
     }
   }
 
@@ -488,6 +504,20 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }))
   }
 
+  const popperModifiers = {
+    flip: {
+      enabled: true,
+    },
+    preventOverflow: {
+      enabled: true,
+      boundariesElement: 'scrollParent',
+    },
+    arrow: {
+      enabled: true,
+      element: dcMenu?.current,
+    },
+  } as const;
+
   return (
     <BridgeCard {...rest} className={cls(classes.root, className)}>
       {!layoutState.showTransferConfirmation && (
@@ -498,14 +528,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           <Text margin={1} align="center" color="textSecondary" className={classes.textSpacing}>Powered by Switcheo TradeHub</Text>
           <Box mt={2} mb={2} display="flex" justifyContent="space-between" position="relative">
             <Box className={classes.box} bgcolor="background.contrast">
-              <Box position="relative" >
-                {(fromBlockchain === Blockchain.Ethereum && bridgeFormState.sourceAddress) &&
-                  <IconButton onClick={onDisconnectEthWallet("sourceWallet")} className={classes.closeIcon}>
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                }
-                <Text marginTop={1} variant="h4" align="center">From</Text>
-              </Box>
+              <Text variant="h4" align="center">From</Text>
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
                 {fromBlockchain === Blockchain.Ethereum
                   ? <EthereumLogo />
@@ -527,6 +550,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               </Box>
 
               <ConnectButton
+                buttonRef={dcSourceButtonRef}
                 chain={fromBlockchain}
                 address={bridgeFormState.sourceAddress || ''}
                 onClick={onConnectSrcWallet}
@@ -536,14 +560,8 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             <WavyLine className={classes.wavyLine} onClick={swapBridgeChains} />
             <Box className={classes.box} bgcolor="background.contrast">
 
-              <Box position="relative" >
-                {(toBlockchain === Blockchain.Ethereum && bridgeFormState.destAddress) &&
-                  <IconButton onClick={onDisconnectEthWallet("destWallet")} className={classes.closeIcon}>
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                }
-                <Text marginTop={1} variant="h4" align="center">To</Text>
-              </Box>
+
+              <Text variant="h4" align="center">To</Text>
 
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
                 {toBlockchain === Blockchain.Zilliqa
@@ -564,8 +582,8 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                   </Select>
                 </FormControl>
               </Box>
-
               <ConnectButton
+                buttonRef={dcDestButtonRef}
                 chain={toBlockchain}
                 address={bridgeFormState.destAddress || ''}
                 onClick={onConnectDstWallet}
@@ -604,6 +622,22 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       <NetworkSwitchDialog />
       <FailedBridgeTxWarning />
       <ConfirmTransfer showTransfer={layoutState.showTransferConfirmation} />
+      <Popper
+        open={!!dcMenu}
+        placement="bottom-end"
+        anchorEl={dcMenu?.current}
+        modifiers={popperModifiers}
+        className={classes.priority}
+      >
+        <ClickAwayListener onClickAway={() => setDcMenu(null)}>
+          <FormControl variant="outlined" className={classes.formControl}>
+            <Paper className={classes.selectMenu}>
+              <MenuItem onClick={onDisconnectEthWallet()}>Disconnect</MenuItem>
+            </Paper>
+          </FormControl>
+        </ClickAwayListener>
+
+      </Popper>
     </BridgeCard>
   )
 }
