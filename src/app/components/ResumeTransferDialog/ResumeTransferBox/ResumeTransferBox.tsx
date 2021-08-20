@@ -3,7 +3,7 @@ import { Visibility, VisibilityOff } from "@material-ui/icons";
 import RefreshIcon from '@material-ui/icons/RefreshRounded';
 import { Text } from 'app/components';
 import { actions } from "app/store";
-import { BridgeableTokenMapping, BridgeTx } from "app/store/bridge/types";
+import { BridgeableTokenMapping, BridgeState, BridgeTx } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask } from "app/utils";
@@ -15,6 +15,7 @@ import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import dayjs from "dayjs";
 import { ethers } from "ethers";
 import React, { useEffect, useMemo, useState } from "react";
+import { useHistory } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
@@ -88,18 +89,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const ResumeTransferBox = (props: any) => {
     const classes = useStyles();
     const dispatch = useDispatch();
+    const history = useHistory();
     const [showPhrase, setShowPhrase] = useState<boolean>(false);
     const [mnemonic, setMnemonic] = useState<Array<string>>(Array(12).fill(""));
     const bridgeableTokens = useSelector<RootState, BridgeableTokenMapping>(store => store.bridge.tokens);
     const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
     const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]); // eth wallet
+    const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
+    const pendingBridgeTx = bridgeState.activeBridgeTx;
+
     const network = TradeHubSDK.Network.DevNet;
 
     const [dstChain, setDstChain] = useState<Blockchain.Zilliqa | Blockchain.Ethereum | null>(null);
     const [depositTransfer, setDepositTransfer] = useState<RestModels.Transfer>();
     const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
 
-    const [runGetTransfer, loading, error] = useAsyncTask("getTransfer");
+    const [runGetTransfer] = useAsyncTask("getTransfer");
 
     const isMnemonicFilled = useMemo(() => {
         return mnemonic.indexOf("") === -1;
@@ -108,7 +113,7 @@ const ResumeTransferBox = (props: any) => {
     useEffect(() => {
         const sdk = new TradeHubSDK({ network });
         setSdk(sdk);
-    }, [])
+    }, [network])
 
     useEffect(() => {
         if (sdk && isMnemonicFilled) {
@@ -159,28 +164,36 @@ const ResumeTransferBox = (props: any) => {
     }
 
     const handleResumeTransfer = () => {
+        // tx found and status success - build bridgeTx
         if (depositTransfer && dstChain) {
-            // tx found and status success - build bridgeTx
             const srcChain = depositTransfer.blockchain as Blockchain.Zilliqa | Blockchain.Ethereum;
             const bridgeToken = bridgeableTokens[srcChain].find(token => token.denom === depositTransfer.denom);
 
-            const bridgeTx: BridgeTx = {
-                srcChain,
-                dstChain,
-                srcAddr: "",
-                dstAddr: wallet?.addressInfo.bech32 ?? "",
-                srcToken: depositTransfer.denom,
-                dstToken: bridgeToken?.toDenom!,
-                inputAmount: new BigNumber(depositTransfer.amount),
-                interimAddrMnemonics: mnemonic.join(" "),
-                withdrawFee: new BigNumber(depositTransfer.fee_amount), // need to check
-                depositDispatchedAt: dayjs(),
+            if (bridgeToken) {
+                const bridgeTx: BridgeTx = {
+                    srcChain,
+                    dstChain,
+                    srcAddr: "",
+                    dstAddr: dstWalletAddr,
+                    srcToken: depositTransfer.denom,
+                    dstToken: bridgeToken.toDenom,
+                    inputAmount: new BigNumber(depositTransfer.amount),
+                    interimAddrMnemonics: mnemonic.join(" "),
+                    withdrawFee: new BigNumber(depositTransfer.fee_amount), // need to check
+                    depositDispatchedAt: dayjs(),
+                }
+    
+                if (pendingBridgeTx) {
+                    dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
+                }
+                dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
+                dispatch(actions.Layout.toggleShowResumeTransfer("close"));
+                history.push('/bridge');
             }
-
-            dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
         }
     }
 
+    // TODO: option to change/disconnect wallet
     const onClickConnectETH = async () => {
         const web3Modal = new Web3Modal({
           cacheProvider: true,
@@ -210,15 +223,14 @@ const ResumeTransferBox = (props: any) => {
         }
     }
 
+    // Deposit Tx found and dst chain obtained
     const isConnectWalletEnabled = useMemo(() => {
         return depositTransfer && dstChain;
-    }, [depositTransfer])
+    }, [depositTransfer, dstChain])
 
     // Dst wallet connected and deposit tx found
     const isResumeTransferEnabled = useMemo(() => {
         return dstWalletAddr && dstChain;
-
-        // eslint-disable-next-line
     }, [dstWalletAddr, dstChain])
 
     return (
