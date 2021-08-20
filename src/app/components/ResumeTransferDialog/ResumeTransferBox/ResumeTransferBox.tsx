@@ -180,6 +180,7 @@ const ResumeTransferBox = (props: any) => {
                     inputAmount: new BigNumber(depositTransfer.amount),
                     interimAddrMnemonics: mnemonic.join(" "),
                     withdrawFee: new BigNumber(depositTransfer.fee_amount), // need to check
+                    sourceTxHash: depositTransfer.transaction_hash,
                     depositDispatchedAt: dayjs(),
                 }
     
