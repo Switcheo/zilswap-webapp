@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         },
         "& .MuiButton-endIcon": {
             marginLeft: "6px"
-        }
+        },
     },
     button: {
         borderRadius: 12,
@@ -92,6 +92,7 @@ const ResumeTransferBox = (props: any) => {
     const history = useHistory();
     const [showPhrase, setShowPhrase] = useState<boolean>(false);
     const [mnemonic, setMnemonic] = useState<Array<string>>(Array(12).fill(""));
+    const [errorMsg, setErrorMsg] = useState<string>("");
     const bridgeableTokens = useSelector<RootState, BridgeableTokenMapping>(store => store.bridge.tokens);
     const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
     const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]); // eth wallet
@@ -101,7 +102,7 @@ const ResumeTransferBox = (props: any) => {
     const network = TradeHubSDK.Network.DevNet;
 
     const [dstChain, setDstChain] = useState<Blockchain.Zilliqa | Blockchain.Ethereum | null>(null);
-    const [depositTransfer, setDepositTransfer] = useState<RestModels.Transfer>();
+    const [depositTransfer, setDepositTransfer] = useState<RestModels.Transfer | null>(null);
     const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
 
     const [runGetTransfer] = useAsyncTask("getTransfer");
@@ -129,14 +130,23 @@ const ResumeTransferBox = (props: any) => {
                 if (depositTransfer && depositTransfer.status === 'success') {
                     setDstChain(depositTransfer.blockchain === Blockchain.Zilliqa ? Blockchain.Ethereum : Blockchain.Zilliqa);
                     setDepositTransfer(depositTransfer);
+                } else {
+                    setDstChain(null);
+                    setDepositTransfer(null);
                 }
-
-                // else set error message
             })
         }
     
         // eslint-disable-next-line
     }, [mnemonic]);
+
+    useEffect(() => {
+        if (isMnemonicFilled && !depositTransfer) {
+            setErrorMsg("Please enter a valid transfer key.");
+        } else {
+            setErrorMsg("");
+        }
+    }, [mnemonic, isMnemonicFilled, depositTransfer])
 
     const dstWalletAddr = useMemo(() => {
         if (dstChain) {
@@ -161,6 +171,15 @@ const ResumeTransferBox = (props: any) => {
         const mnemonicCopy = mnemonic.slice();
         mnemonicCopy[index] = e.target.value;
         setMnemonic(mnemonicCopy);
+    }
+
+    const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        const mnemonic = e.clipboardData.getData("text").split(" ");
+
+        if (mnemonic.length === 12) {
+            setMnemonic(mnemonic);
+        }
     }
 
     const handleResumeTransfer = () => {
@@ -257,18 +276,28 @@ const ResumeTransferBox = (props: any) => {
                             className={classes.inputWord}
                             value={word}
                             onChange={handleWordChange(index)}
+                            onPaste={index === 0 ? handlePaste : () => {}}
                             type={showPhrase ? 'text' : 'password'}
                         />
                     </Grid>
                 ))}
             </Grid>
 
-            <Box display="flex" justifyContent="center" mt={1.5}>
+            {errorMsg &&
+                <Box display="flex" justifyContent="center" mt={1.5}>
+                    <Text color="error">
+                        {errorMsg}
+                    </Text>
+                </Box>
+            }
+
+            <Box display="flex" justifyContent="center" mt={1}>
                 <Button
                     onClick={handleShowPhrase}
                     className={classes.button}
                     variant="outlined"
                     endIcon={showPhrase ? <VisibilityOff className={classes.visibilityIcon}/> : <Visibility className={classes.visibilityIcon}/>}
+                    focusRipple={false}
                     >
                     <Text>{showPhrase ? "Hide Phrase" : "Show Phrase"}</Text>
                 </Button>

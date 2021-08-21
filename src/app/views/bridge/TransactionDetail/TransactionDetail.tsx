@@ -455,7 +455,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
               }
             </Box>
             <Text variant="h4" className={classes.chainName}>{fromChainName} Network</Text>
-            <Text variant="button" className={classes.walletAddress}>{formatAddress(currentBridgeTx?.srcAddr, srcChain)}</Text>
+            <Text variant="button" className={classes.walletAddress}>{currentBridgeTx?.srcAddr ? formatAddress(currentBridgeTx.srcAddr, srcChain) : "-"}</Text>
           </Box>
           <Box flex={0.2} />
           {!!currentBridgeTx?.destinationTxHash
