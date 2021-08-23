@@ -89,6 +89,18 @@ export interface Distributor {
 	reward_token_symbol: string;
 	reward_token_address_hex: string;
 	distributor_address_hex: string;
+	emission_info: EmissionInfo;
+}
+
+export interface EmissionInfo {
+	epoch_period: number;
+	tokens_per_epoch: string;
+	tokens_for_retroactive_distribution: string;
+	retroactive_distribution_cutoff_time: number;
+	distribution_start_time: number;
+	total_number_of_epochs: number;
+	developer_token_ratio_bps: number;
+	trader_token_ratio_bps: number;
 }
 
 export interface Distribution {
