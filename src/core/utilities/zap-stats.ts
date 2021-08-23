@@ -329,7 +329,7 @@ export class ZAPStats {
 	 */
 	static getZWAPDistributions = async ({ network, address, ...query }: GetZWAPDistribution = {}): Promise<Distribution[]> => {
 		const http = ZAPStats.getApi(network);
-		const url = http.path("distribution/claimable_data", { address: "zil15x098aq92zkg6szlx3hf0qyfcgsk99zt030xna" }, query);
+		const url = http.path("distribution/claimable_data", { address }, query);
 		const response = await http.get({ url });
 		const distributions = await response.json();
 		return distributions.map((distribution: any): Distribution => ({
