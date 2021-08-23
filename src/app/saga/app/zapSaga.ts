@@ -99,7 +99,7 @@ function* queryDistribution() {
 
       const rewardDistributions: ZAPRewardDist[] = distributions.map((info: Distribution): ZAPRewardDist => {
         const zilswap = ZilswapConnector.getSDK();
-        const contract = zilswap.getContract(info.distributor_address)
+        const contract = zilswap.getContract(info.distributor_address);
 
         const uploadState = yield call([contract, contract.getSubState], "merkle_roots");
         const merkleRoots = (uploadState?.merkle_roots ?? {}) as SimpleMap<string>;
@@ -108,9 +108,10 @@ function* queryDistribution() {
           info,
           readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
         }
-      }
+      })
 
       yield put(actions.Rewards.updateDistributions(rewardDistributions));
+
     } catch (e) {
       console.warn('Fetch failed, will automatically retry later. Error:')
       console.warn(e)
