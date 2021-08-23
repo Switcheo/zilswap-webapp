@@ -40,7 +40,6 @@ export interface GlobalClaimHistory {
 }
 
 export interface PendingClaimTx {
-  epoch: number;
   txHash: string;
   dispatchedAt: Dayjs;
 }
