@@ -83,12 +83,6 @@ function* queryDistribution() {
   while (true) {
     try {
       logger("zap saga", "query distributions");
-      const zilswap = ZilswapConnector.getSDK();
-
-      const zwapDistContract = yield getDistributorContract(zilswap);
-
-      const uploadState = yield call([zwapDistContract, zwapDistContract.getSubState], "merkle_roots");
-      const merkleRoots = (uploadState?.merkle_roots ?? {}) as SimpleMap<string>;
 
       const { network } = getBlockchain(yield select());;
       const walletState = getWallet(yield select());
@@ -103,10 +97,18 @@ function* queryDistribution() {
         network,
       });
 
-      const rewardDistributions = distributions.map((info: Distribution): ZAPRewardDist => ({
-        info,
-        readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
-      }));
+      const rewardDistributions: ZAPRewardDist[] = distributions.map((info: Distribution): ZAPRewardDist => {
+        const zilswap = ZilswapConnector.getSDK();
+        const contract = zilswap.getContract(info.distributor_address)
+
+        const uploadState = yield call([contract, contract.getSubState], "merkle_roots");
+        const merkleRoots = (uploadState?.merkle_roots ?? {}) as SimpleMap<string>;
+
+        return {
+          info,
+          readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
+        }
+      }
 
       yield put(actions.Rewards.updateDistributions(rewardDistributions));
     } catch (e) {
