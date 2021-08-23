@@ -169,9 +169,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
   const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
   const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK");
-  const [dcMenu, setDcMenu] = useState<any>();
-  const dcSourceButtonRef = useRef();
-  const dcDestButtonRef = useRef();
+  const [disconnectMenu, setDisconnectMenu] = useState<any>();
+  const disconnectSrcButtonRef = useRef();
+  const disconnectDestButtonRef = useRef();
 
   useEffect(() => {
     runInitTradeHubSDK(async () => {
@@ -408,7 +408,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     } else {
       // if connected, open menu
       if (bridgeFormState.sourceAddress && bridgeWallet) {
-        setDcMenu(dcSourceButtonRef)
+        setDisconnectMenu(disconnectSrcButtonRef)
       } else {
         return onClickConnectETH();
       }
@@ -421,7 +421,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     } else {
       // if connected, open menu
       if (bridgeFormState.sourceAddress && bridgeWallet) {
-        setDcMenu(dcDestButtonRef)
+        setDisconnectMenu(disconnectDestButtonRef)
       } else {
         return onClickConnectETH();
       }
@@ -448,7 +448,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       providerOptions
     });
     web3Modal.clearCachedProvider();
-    setDcMenu(null)
+    setDisconnectMenu(null)
     dispatch(actions.Bridge.updateForm(disconnectForm));
     dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: null }));
   }
@@ -519,7 +519,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     },
     arrow: {
       enabled: true,
-      element: dcMenu?.current,
+      element: disconnectMenu?.current,
     },
   } as const;
 
@@ -555,7 +555,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               </Box>
 
               <ConnectButton
-                buttonRef={dcSourceButtonRef}
+                buttonRef={disconnectSrcButtonRef}
                 chain={fromBlockchain}
                 address={bridgeFormState.sourceAddress || ''}
                 onClick={onConnectSrcWallet}
@@ -587,7 +587,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 </FormControl>
               </Box>
               <ConnectButton
-                buttonRef={dcDestButtonRef}
+                buttonRef={disconnectDestButtonRef}
                 chain={toBlockchain}
                 address={bridgeFormState.destAddress || ''}
                 onClick={onConnectDstWallet}
@@ -627,13 +627,13 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       <FailedBridgeTxWarning />
       <ConfirmTransfer showTransfer={layoutState.showTransferConfirmation} />
       <Popper
-        open={!!dcMenu}
+        open={!!disconnectMenu}
         placement="bottom-end"
-        anchorEl={dcMenu?.current}
+        anchorEl={disconnectMenu?.current}
         modifiers={popperModifiers}
         className={classes.priority}
       >
-        <ClickAwayListener onClickAway={() => setDcMenu(null)}>
+        <ClickAwayListener onClickAway={() => setDisconnectMenu(null)}>
           <FormControl variant="outlined" className={classes.formControl}>
             <Paper className={classes.selectMenu}>
               <MenuItem onClick={() => { onDisconnectEthWallet(); onClickConnectETH() }}>Change Wallet</MenuItem>
