@@ -1,6 +1,7 @@
-import { Box, Button, Grid, makeStyles, OutlinedInput } from "@material-ui/core";
+import { Box, Button, CircularProgress, Grid, makeStyles, OutlinedInput } from "@material-ui/core";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
 import RefreshIcon from '@material-ui/icons/RefreshRounded';
+import CheckCircleIcon from "@material-ui/icons/CheckCircleOutlineRounded";
 import { Text } from 'app/components';
 import { actions } from "app/store";
 import { BridgeableTokenMapping, BridgeState, BridgeTx } from "app/store/bridge/types";
@@ -19,6 +20,7 @@ import { useHistory } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
+import cls from "classnames";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -27,7 +29,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
         borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
         borderRadius: "0 0 12px 12px",
-        padding: theme.spacing(1, 7, 2),
+        padding: theme.spacing(0, 7, 2),
         maxWidth: 510,
         [theme.breakpoints.down("sm")]: {
             padding: theme.spacing(0, 3, 2),
@@ -83,6 +85,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     connectButton: {
         marginTop: theme.spacing(1.5)
+    },
+    progress: {
+        color: "rgba(255,255,255,.5)",
+        marginRight: theme.spacing(1)
+    },
+    verified: {
+        backgroundColor: "transparent",
+        border: `1px solid ${theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : "#D2E5DF"}`,
+        "&:hover": {
+        backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.2)}`
+        }
+    },
+    checkIcon: {
+        color: theme.palette.primary.dark,
+        verticalAlign: "text-top",
+        marginRight: theme.spacing(1)
     }
 }));
 
@@ -105,7 +123,7 @@ const ResumeTransferBox = (props: any) => {
     const [depositTransfer, setDepositTransfer] = useState<RestModels.Transfer | null>(null);
     const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
 
-    const [runGetTransfer] = useAsyncTask("getTransfer");
+    const [runGetTransfer, loading, error] = useAsyncTask("getTransfer");
 
     const isMnemonicFilled = useMemo(() => {
         return mnemonic.indexOf("") === -1;
@@ -115,38 +133,6 @@ const ResumeTransferBox = (props: any) => {
         const sdk = new TradeHubSDK({ network });
         setSdk(sdk);
     }, [network])
-
-    useEffect(() => {
-        if (sdk && isMnemonicFilled) {
-            runGetTransfer(async () => {
-                const mnemonicString = mnemonic.join(" ");
-                const swthAddress = SWTHAddress.generateAddress(mnemonicString, undefined, { network });
-        
-                // find deposit confirmation tx
-                const extTransfers = await sdk.api.getTransfers({ account: swthAddress }) as RestModels.Transfer[];
-        
-                const depositTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'deposit');
-
-                if (depositTransfer && depositTransfer.status === 'success') {
-                    setDstChain(depositTransfer.blockchain === Blockchain.Zilliqa ? Blockchain.Ethereum : Blockchain.Zilliqa);
-                    setDepositTransfer(depositTransfer);
-                } else {
-                    setDstChain(null);
-                    setDepositTransfer(null);
-                }
-            })
-        }
-    
-        // eslint-disable-next-line
-    }, [mnemonic]);
-
-    useEffect(() => {
-        if (isMnemonicFilled && !depositTransfer) {
-            setErrorMsg("Please enter a valid transfer key.");
-        } else {
-            setErrorMsg("");
-        }
-    }, [mnemonic, isMnemonicFilled, depositTransfer])
 
     const dstWalletAddr = useMemo(() => {
         if (dstChain) {
@@ -180,6 +166,30 @@ const ResumeTransferBox = (props: any) => {
         if (mnemonic.length === 12) {
             setMnemonic(mnemonic);
         }
+    }
+
+    const handleGetTransfer = () => {
+        runGetTransfer(async () => {
+            if (!sdk) return;
+            
+            const mnemonicString = mnemonic.join(" ");
+            const swthAddress = SWTHAddress.generateAddress(mnemonicString, undefined, { network });
+    
+            // find deposit confirmation tx
+            const extTransfers = await sdk.api.getTransfers({ account: swthAddress }) as RestModels.Transfer[];
+    
+            const depositTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'deposit');
+
+            if (depositTransfer && depositTransfer.status === 'success') {
+                setErrorMsg("");
+                setDstChain(depositTransfer.blockchain === Blockchain.Zilliqa ? Blockchain.Ethereum : Blockchain.Zilliqa);
+                setDepositTransfer(depositTransfer);
+            } else {
+                setErrorMsg("Please enter a valid transfer key.");
+                setDstChain(null);
+                setDepositTransfer(null);
+            }
+        })
     }
 
     const handleResumeTransfer = () => {
@@ -262,11 +272,11 @@ const ResumeTransferBox = (props: any) => {
             </Text>
 
             <Text marginTop={2} marginBottom={2.5} variant="h6" align="center">
-                Connect your wallet and enter your transfer key to resume your paused transfer.
+                Enter your transfer key and connect your wallet <br/> to resume your paused transfer.
             </Text>
 
             <Text marginBottom={1.5} align="center">
-                Transfer Key
+                <strong>Step 1:</strong> Transfer Key
             </Text>
 
             <Grid container spacing={1}>
@@ -283,14 +293,6 @@ const ResumeTransferBox = (props: any) => {
                 ))}
             </Grid>
 
-            {errorMsg &&
-                <Box display="flex" justifyContent="center" mt={1.5}>
-                    <Text color="error">
-                        {errorMsg}
-                    </Text>
-                </Box>
-            }
-
             <Box display="flex" justifyContent="center" mt={1}>
                 <Button
                     onClick={handleShowPhrase}
@@ -303,12 +305,45 @@ const ResumeTransferBox = (props: any) => {
                 </Button>
             </Box>
 
+            <Box>
+                <Button
+                    onClick={handleGetTransfer}
+                    variant="contained"
+                    color="primary"
+                    className={cls(classes.actionButton, { [classes.verified]: !!depositTransfer })}
+                    disabled={!isMnemonicFilled || loading}
+                    fullWidth
+                >
+                    {/* Need to clean this up */}
+                    {(!depositTransfer && loading) && <CircularProgress size={20} className={classes.progress} />}
+                    {!depositTransfer && !loading
+                        ? "Verify Transfer Key"
+                        : !!depositTransfer
+                            ? ""
+                            : "Verifying..."
+                    }
+                    {!!depositTransfer &&
+                        <Text variant="h4">
+                            <CheckCircleIcon className={classes.checkIcon} fontSize="small"/>
+                            Transfer Key Verified
+                        </Text>
+                    }
+                </Button>
+            </Box>
+
+            {!!errorMsg &&
+                <Box display="flex" justifyContent="center" mb={0.5}>
+                    <Text color="error">
+                        <strong>Error:</strong> Please enter a valid transfer key.
+                    </Text>
+                </Box>
+            }
+
             <Box mt={1} mb={.5} display="flex" flexDirection="column">
                 <Text align="center">
-                    Destination Wallet Address
+                    <strong>Step 2:</strong> Destination Wallet Address
                 </Text>
 
-                {/* Connect wallet button - disabled unless */}
                 <ConnectButton address={dstWalletAddr} chain={dstChain} className={classes.connectButton} onClick={handleConnectWallet} disabled={!isConnectWalletEnabled} />
             </Box>
 
