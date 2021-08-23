@@ -8,7 +8,6 @@ import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBoxR
 import { CurrencyLogo, HelpInfo, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
-import { select } from "app/store/pool/actions";
 import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState, ZAPRewardDist } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useNetwork, useTokenFinder, useValueCalculators } from "app/utils";
@@ -238,18 +237,15 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   const walletAddress = useMemo(() => walletState.wallet?.addressInfo.bech32, [walletState.wallet]);
 
-  // previous code - needs some fixing
   const {
     claimableRewards,
     claimTooltip,
   } = useMemo(() => {
-    const pendingClaimTxs = rewardsState.claimTxs[walletAddress ?? ""] ?? {};
+    // const pendingClaimTxs = rewardsState.claimTxs[walletAddress ?? ""] ?? {};
 
-    // needs to change
-    const pendingClaimEpochs = Object.values(pendingClaimTxs).map(pendingTx => pendingTx.epoch);
-
+    // TODO: filter out pending claims
+    // const pendingClaimEpochs = Object.values(pendingClaimTxs).map(pendingTx => pendingTx.epoch);
     const claimableRewards = rewardsState.rewardDistributions.reduce((sum, dist) => {
-      if (pendingClaimEpochs.includes(dist.info.epoch_number)) return sum;
       return (dist.readyToClaim) ? sum.plus(dist.info.amount) : sum;
     }, BIG_ZERO);
 
@@ -262,6 +258,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       claimableRewards,
       claimTooltip,
     };
+
+    // eslint-disable-next-line
   }, [walletAddress, rewardsState.claimTxs, rewardsState.rewardDistributions]);
 
   // New code for claimable rewards
@@ -287,25 +285,38 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   // USD values
   const totalTokenValue = Object.keys(claimableRewardsByToken).reduce((sum, dist) => {
-    const rewardDistributor= {"name":"ZWAP Rewards","reward_token_symbol":"ZWAP","reward_token_address_hex":"0xb2b119e2496f24590eff419f15aa1b6e82aa7074","distributor_name":"Zilswap","distributor_address_hex":"0x55fc7c40cc9d190aad1499c00102de0828c06d41","developer_address":"zil1ytk3ykwlc2vy8fyp7wqp492zjassj5mxzgscv6","emission_info":{"epoch_period":604800,"tokens_per_epoch":"6250_000_000_000_000","tokens_for_retroactive_distribution":"50000_000_000_000_000","retroactive_distribution_cutoff_time":1628230000,"distribution_start_time":1628240000,"total_number_of_epochs":152,"initial_epoch_number":1,"developer_token_ratio_bps":1500,"trader_token_ratio_bps":2000},"incentived_pools":{"zil10a9z324aunx2qj64984vke93gjdnzlnl5exygv":2,"zil1k2c3ncjfduj9jrhlgx03t2smd6p25ur56cfzgz":5,"zil1fytuayks6njpze00ukasq3m4y4s44k79hvz8q5":3}};
-    // const rewardDistributor = rewardDistributors.find(distributor => distributor.distributor_address_hex === dist);
+    const rewardDistributor = rewardDistributors.find(distributor => distributor.distributor_address_hex === dist);
 
-    const token = tokenFinder(rewardDistributor?.reward_token_address_hex!);
+    if (rewardDistributor) {
+      const token = tokenFinder(rewardDistributor.reward_token_address_hex);
 
-    return sum.plus(valueCalculators.amount(tokenState.prices, token!, claimableRewardsByToken[dist]));
+      return token ? sum.plus(valueCalculators.amount(tokenState.prices, token, claimableRewardsByToken[dist])) : sum;
+    }
+
+    return sum;
   }, BIG_ZERO)
 
   const valuesByEpoch = Object.fromEntries(Object.entries(distributionsByEpoch).map(([epochNumber, distributions]) => {
     return [epochNumber, distributions.reduce((sum, dist) => {
-        const rewardDistributor = {"name":"ZWAP Rewards","reward_token_symbol":"ZWAP","reward_token_address_hex":"0xb2b119e2496f24590eff419f15aa1b6e82aa7074","distributor_name":"Zilswap","distributor_address_hex":"0x55fc7c40cc9d190aad1499c00102de0828c06d41","developer_address":"zil1ytk3ykwlc2vy8fyp7wqp492zjassj5mxzgscv6","emission_info":{"epoch_period":604800,"tokens_per_epoch":"6250_000_000_000_000","tokens_for_retroactive_distribution":"50000_000_000_000_000","retroactive_distribution_cutoff_time":1628230000,"distribution_start_time":1628240000,"total_number_of_epochs":152,"initial_epoch_number":1,"developer_token_ratio_bps":1500,"trader_token_ratio_bps":2000},"incentived_pools":{"zil10a9z324aunx2qj64984vke93gjdnzlnl5exygv":2,"zil1k2c3ncjfduj9jrhlgx03t2smd6p25ur56cfzgz":5,"zil1fytuayks6njpze00ukasq3m4y4s44k79hvz8q5":3}};
-        // const rewardDistributor = rewardDistributors.find(distributor => distributor.distributor_address_hex === dist.info.distributor_address);
-
-        const token = tokenFinder(rewardDistributor?.reward_token_address_hex!);
-
-        return sum.plus(valueCalculators.amount(tokenState.prices, token!, dist.info.amount));
+        const rewardDistributor = rewardDistributors.find(distributor => distributor.distributor_address_hex === dist.info.distributor_address);
+       
+        if (rewardDistributor) {
+          const token = tokenFinder(rewardDistributor.reward_token_address_hex);
+    
+          return token ? sum.plus(valueCalculators.amount(tokenState.prices, token, dist.info.amount)) : sum;
+        }
+    
+        return sum;
       }, BIG_ZERO)
     ];
   }))
+
+  const epochNumberToDate = (epochNo: string) => {
+    const epoch_number = parseInt(epochNo);
+    const { distribution_start_time, epoch_period } = rewardDistributors[0].emission_info;
+
+    return dayjs.unix(distribution_start_time + (epoch_period * epoch_number)).format('DD MMM');
+  }
 
   // ZWAP Balance
   const zapTokenBalance: BigNumber = useMemo(() => {
@@ -349,53 +360,23 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       });
 
       // pendingTx
-      // const pendingTx: PendingClaimTx = {
-      //   dispatchedAt: dayjs(),
-      //   // epoch: distribution.info.epoch_number,
-      //   txHash: claimTx.hash,
-      // };
+      const pendingTx: PendingClaimTx = {
+        dispatchedAt: dayjs(),
+        txHash: claimTx.hash,
+      };
 
-      // dispatch(actions.Rewards.addPendingClaimTx(
-      //   walletState.wallet.addressInfo.bech32,
-      //   pendingTx,
-      // ));
+      dispatch(actions.Rewards.addPendingClaimTx(
+        walletState.wallet.addressInfo.bech32,
+        pendingTx,
+      ));
 
-      // if (claimTx) {
-      //   setClaimResult(claimTx);
-      //   setTimeout(() => {
-      //     dispatch(actions.Token.refetchState());
-      //   }, 5000);
-      // }
+      if (claimTx) {
+        setClaimResult(claimTx);
+        setTimeout(() => {
+          dispatch(actions.Token.refetchState());
+        }, 5000);
+      }
 
-      // for (const distribution of rewardsState.rewardDistributions) {
-      //   if (distribution.claimed) continue;
-
-      //   claimTx = await ZWAPRewards.claim({
-      //     network,
-      //     amount: distribution.info.amount,
-      //     proof,
-      //     epochNumber: distribution.info.epoch_number,
-      //     wallet: walletState.wallet,
-      //   });
-
-      //   const pendingTx: PendingClaimTx = {
-      //     dispatchedAt: dayjs(),
-      //     epoch: distribution.info.epoch_number,
-      //     txHash: claimTx.hash,
-      //   };
-
-      //   dispatch(actions.Rewards.addPendingClaimTx(
-      //     walletState.wallet.addressInfo.bech32,
-      //     pendingTx,
-      //   ));
-      // }
-
-      // if (claimTx) {
-      //   setClaimResult(claimTx);
-      //   setTimeout(() => {
-      //     dispatch(actions.Token.refetchState());
-      //   }, 5000);
-      // }
       await new Promise((resolve) => setTimeout(resolve, 1000));
     })
   };
@@ -520,11 +501,11 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   }
 
                   {!claimableRewards.isZero() && Object.keys(claimableRewardsByToken).map(key => {
-                    const rewardDistributor = {"name":"ZWAP Rewards","reward_token_symbol":"ZWAP","reward_token_address_hex":"0xb2b119e2496f24590eff419f15aa1b6e82aa7074","distributor_name":"Zilswap","distributor_address_hex":"0x55fc7c40cc9d190aad1499c00102de0828c06d41","developer_address":"zil1ytk3ykwlc2vy8fyp7wqp492zjassj5mxzgscv6","emission_info":{"epoch_period":604800,"tokens_per_epoch":"6250_000_000_000_000","tokens_for_retroactive_distribution":"50000_000_000_000_000","retroactive_distribution_cutoff_time":1628230000,"distribution_start_time":1628240000,"total_number_of_epochs":152,"initial_epoch_number":1,"developer_token_ratio_bps":1500,"trader_token_ratio_bps":2000},"incentived_pools":{"zil10a9z324aunx2qj64984vke93gjdnzlnl5exygv":2,"zil1k2c3ncjfduj9jrhlgx03t2smd6p25ur56cfzgz":5,"zil1fytuayks6njpze00ukasq3m4y4s44k79hvz8q5":3}};
-                    // const rewardDistributor = rewardDistributors.find(distributor => distributor.distributor_address_hex === key);
+                    // to check if can be more efficient here
+                    const rewardDistributor = rewardDistributors.find(distributor => distributor.distributor_address_hex === key);
 
                     // to get token decimals
-                    const token = tokenFinder(rewardDistributor?.reward_token_address_hex);
+                    const token = tokenFinder(rewardDistributor!.reward_token_address_hex);
 
                     return (
                       <Text variant="h4" className={classes.totalReward}>
@@ -578,7 +559,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                               <Box mt={1}>
                                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
                                   <Text className={classes.date}>
-                                    {key}
+                                    {/* Convert epoch number into date */}
+                                    {epochNumberToDate(key)}
                                   </Text>
                                   <Text variant="body2" color="textSecondary" className={classes.usdAmount}>
                                     ≈ ${valuesByEpoch[key].toFormat(2)}
@@ -586,11 +568,12 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                 </Box>
                                 <Divider />    
                                 {distributionsByEpoch[key].map(reward => {
-                                  const rewardDistributor = {"name":"ZWAP Rewards","reward_token_symbol":"ZWAP","reward_token_address_hex":"0xb2b119e2496f24590eff419f15aa1b6e82aa7074","distributor_name":"Zilswap","distributor_address_hex":"0x55fc7c40cc9d190aad1499c00102de0828c06d41","developer_address":"zil1ytk3ykwlc2vy8fyp7wqp492zjassj5mxzgscv6","emission_info":{"epoch_period":604800,"tokens_per_epoch":"6250_000_000_000_000","tokens_for_retroactive_distribution":"50000_000_000_000_000","retroactive_distribution_cutoff_time":1628230000,"distribution_start_time":1628240000,"total_number_of_epochs":152,"initial_epoch_number":1,"developer_token_ratio_bps":1500,"trader_token_ratio_bps":2000},"incentived_pools":{"zil10a9z324aunx2qj64984vke93gjdnzlnl5exygv":2,"zil1k2c3ncjfduj9jrhlgx03t2smd6p25ur56cfzgz":5,"zil1fytuayks6njpze00ukasq3m4y4s44k79hvz8q5":3}};
-                                  // const rewardDistributor = rewardDistributors.find(distributor => distributor.distributor_address_hex === reward.info.distributor_address);
+                                  // to check if can be more efficient here
+                                  const rewardDistributor = rewardDistributors.find(distributor => distributor.distributor_address_hex === reward.info.distributor_address);
+                                  // const rewardDistributor = {"name":"ZWAP Rewards","reward_token_symbol":"ZWAP","reward_token_address_hex":"0xb2b119e2496f24590eff419f15aa1b6e82aa7074","distributor_name":"Zilswap","distributor_address_hex":"0x55fc7c40cc9d190aad1499c00102de0828c06d41","developer_address":"zil1ytk3ykwlc2vy8fyp7wqp492zjassj5mxzgscv6","emission_info":{"epoch_period":604800,"tokens_per_epoch":"6250_000_000_000_000","tokens_for_retroactive_distribution":"50000_000_000_000_000","retroactive_distribution_cutoff_time":1628230000,"distribution_start_time":1628240000,"total_number_of_epochs":152,"initial_epoch_number":1,"developer_token_ratio_bps":1500,"trader_token_ratio_bps":2000},"incentived_pools":{"zil10a9z324aunx2qj64984vke93gjdnzlnl5exygv":2,"zil1k2c3ncjfduj9jrhlgx03t2smd6p25ur56cfzgz":5,"zil1fytuayks6njpze00ukasq3m4y4s44k79hvz8q5":3}};
                                   
                                   // to get token decimals
-                                  const token = tokenFinder(rewardDistributor?.reward_token_address_hex);
+                                  const token = tokenFinder(rewardDistributor!.reward_token_address_hex);
 
                                   return (
                                     <Box mt={0.5}>
@@ -625,38 +608,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   }
                 </Box>
               </Box>
-
-              {/* Previous view */}
-              {/* <KeyValueDisplay marginTop={2} alignItems="center" emphasizeValue kkey="Rewards This Epoch">
-                <Box display="flex" alignItems="center">
-                  <Text variant="body2" color="textPrimary">
-                    ≈ {potentialRewardsLabel}
-                  </Text>
-                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
-                  <HelpInfo placement="bottom" title="The estimated amount of ZWAP you will be receiving for providing liquidity this epoch." className={classes.tooltip}/>
-                </Box>
-              </KeyValueDisplay>
-
-              <KeyValueDisplay alignItems="center" emphasizeValue kkey={"Rewards Unclaimed"}>
-                <Badge color="primary" variant="dot" invisible={unclaimedRewards.isZero()}>
-                  <Box display="flex" alignItems="center">
-                    <Text variant="body2" color="textPrimary">
-                      ≈ {unclaimedRewardsLabel}
-                    </Text>
-                    <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoSmall)}/>
-                    <HelpInfo placement="bottom" title="The estimated amount of ZWAP you have earned but have not claimed." className={classes.tooltip}/>
-                  </Box>
-                </Badge>
-              </KeyValueDisplay> */}
-
-              {/* Need to change? */}
-              {!!error && (
-                <Box marginTop={1}>
-                  <Text variant="body1" color="error">
-                    {error.message ?? "Unknown error"}
-                  </Text>
-                </Box>
-              )}
               
               <Box marginTop={2} />
 
@@ -689,6 +640,14 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                         <NewLinkIcon className={classes.linkIcon} />
                       </Box>
                   </Link>
+                </Box>
+              )}
+
+              {!!error && (
+                <Box mt={1.5} display="flex" justifyContent="center">
+                  <Text variant="body1" color="error">
+                    {error.message ?? "Unknown error"}
+                  </Text>
                 </Box>
               )}
   
