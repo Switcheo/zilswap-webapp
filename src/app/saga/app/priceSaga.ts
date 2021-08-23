@@ -31,7 +31,7 @@ const computeTokenPrice = (zilPrice: BigNumber, tokens: SimpleMap<TokenInfo>) =>
       if (token.isZwap) window.document.title = "ZilSwap | $ZWAP - $" + tokPrice.toFixed(2);
     }
     return accum;
-  }, { ZIL: zilPrice, [ZIL_ADDRESS]: zilPrice } as { [index: string]: BigNumber });
+  }, { [ZIL_ADDRESS]: zilPrice } as { [index: string]: BigNumber });
   return prices;
 }
 
