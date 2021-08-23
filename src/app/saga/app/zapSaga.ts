@@ -101,7 +101,7 @@ function* queryDistribution() {
         const zilswap = ZilswapConnector.getSDK();
         const contract = zilswap.getContract(info.distributor_address);
 
-        const uploadState = yield call([contract, contract.getSubState], "merkle_roots");
+        const uploadState: any = call([contract, contract.getSubState], "merkle_roots");
         const merkleRoots = (uploadState?.merkle_roots ?? {}) as SimpleMap<string>;
 
         return {
