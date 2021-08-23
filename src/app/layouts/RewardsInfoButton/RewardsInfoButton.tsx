@@ -236,6 +236,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const tokenFinder = useTokenFinder();
 
   const walletAddress = useMemo(() => walletState.wallet?.addressInfo.bech32, [walletState.wallet]);
+  // const claimHistoryLoaded = useMemo(() => Object.keys(rewardsState.globalClaimHistory).length > 0, [rewardsState.globalClaimHistory])
 
   const {
     claimableRewards,
