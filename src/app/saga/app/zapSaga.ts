@@ -105,6 +105,7 @@ function* queryDistribution() {
 function* queryClaimHistory() {
   while (true) {
     logger("zap saga", "query claim history");
+    let retryImmediately = false;
     try {
       const zilswap = ZilswapConnector.getSDK();
 
@@ -115,15 +116,20 @@ function* queryClaimHistory() {
 
       yield put(actions.Rewards.updateClaimHistory(globalClaimHistory));
     } catch (e) {
-      console.warn('Fetch failed, will automatically retry later. Error:')
+      retryImmediately = true;
+      console.warn('Fetch failed, will automatically retry. Error:')
       console.warn(e)
     } finally {
-      const invalidated = yield race({
-        minutePoll: delay(PollIntervals.ZWAPClaimHistory),
-        epochUpdated: take(RewardsActionTypes.UPDATE_EPOCH_INFO),
-      });
+      if (retryImmediately) {
+        yield delay(1000);
+      } else {
+        const invalidated = yield race({
+          tenMinutePoll: delay(PollIntervals.ZWAPClaimHistory),
+          epochUpdated: take(RewardsActionTypes.UPDATE_EPOCH_INFO),
+        });
 
-      logger("zap saga", "claim history invalidated", invalidated);
+        logger("zap saga", "claim history invalidated", invalidated);
+      }
     }
   }
 }

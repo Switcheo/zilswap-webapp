@@ -133,7 +133,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     onCloseDialog: onCloseDialogListener,
     showContribution, hideBalance, showPoolBalance, dialogOpts = {},
     onAmountChange, onCurrencyChange, token,
-    onEditorBlur, 
+    onEditorBlur,
     onSelectMax, showMaxButton,
     onEnterKeyPress,
     tokenList = "zil",
@@ -186,7 +186,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     if (typeof onCloseDialogListener === "function")
       onCloseDialogListener();
   };
-  
+
   const clearPlaceholder = () => {
     if (amount === "0" && typeof onAmountChange === "function")
       onAmountChange("");
@@ -241,22 +241,22 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
                   <Typography variant="button" className={classes.currencyText}>{token?.symbol}</Typography>
                 </Box>
               </Box>
-              ) :
+            ) :
               (
-              <Box display="flex" >
-                {showMaxButton &&
-                  <Button className={classes.maxButton} disabled={disabled} onClick={onSelectMax} disableRipple>
-                    <Typography>MAX</Typography>
+                <Box display="flex" >
+                  {showMaxButton &&
+                    <Button className={classes.maxButton} disabled={disabled} onClick={onSelectMax} disableRipple>
+                      <Typography>MAX</Typography>
+                    </Button>
+                  }
+                  <Button disabled={disabled} disableRipple className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
+                    <Box display="flex" alignItems="center">
+                      {token && <CurrencyLogo currency={token.registered && token.symbol} blockchain={token?.blockchain} address={token.address} className={classes.currencyLogo} />}
+                      <Typography variant="button" className={classes.currencyText}>{token?.symbol || "Select Token"}</Typography>
+                    </Box>
+                    <ExpandMoreIcon className={classes.expandIcon} />
                   </Button>
-                }
-                <Button disableRipple className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
-                  <Box display="flex" alignItems="center">
-                    {token && <CurrencyLogo currency={token.registered && token.symbol} blockchain={token?.blockchain} address={token.address} className={classes.currencyLogo} />}
-                    <Typography variant="button" className={classes.currencyText}>{token?.symbol || "Select Token"}</Typography>
-                  </Box>
-                  <ExpandMoreIcon className={classes.expandIcon} />
-                </Button>
-              </Box>
+                </Box>
               )
             }
           </InputAdornment>
