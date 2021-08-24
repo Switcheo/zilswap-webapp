@@ -12,7 +12,7 @@ import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { BridgeTx } from "app/store/bridge/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useBridgeableTokenFinder, useNetwork } from "app/utils";
+import { hexToRGBA, truncate, useBridgeableTokenFinder, useNetwork, trimValue } from "app/utils";
 import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL } from "app/utils/constants";
 import { ReactComponent as EthereumLogo } from "app/views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "app/views/main/Bridge/wavy-line.svg";
@@ -444,7 +444,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
         <Box className={classes.transferBox}>
           <Text>{!currentBridgeTx?.destinationTxHash ? "Transferring" : "Transferred"}</Text>
           <Text variant="h2" className={classes.amount}>
-            {currentBridgeTx?.inputAmount.toString(10)}
+            {trimValue(currentBridgeTx?.inputAmount.toString(10))}
             <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} blockchain={fromToken?.blockchain} />
             {fromToken?.symbol}
           </Text>
