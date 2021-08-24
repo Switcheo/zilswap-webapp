@@ -1,7 +1,7 @@
 import { Box, makeStyles } from '@material-ui/core';
-import { SampleILOCard, Text } from "app/components";
+import { ILOCard, SampleILOCard, Text } from "app/components";
 import TokenILOCard from "app/components/TokenILOCard";
-import ILOCard from "app/layouts/ILOCard";
+import ILOPage from 'app/layouts/ILOPage';
 import { RootState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useNetwork } from "app/utils";
@@ -67,39 +67,45 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   }, [walletState]);
 
   return (
-    <ILOCard {...rest}>
+    <ILOPage {...rest}>
       {
         ziloData.length === 0 ?
-          <Box display="flex" flexDirection="column" className={classes.container} textAlign="center" mb={4}>
-            <Text variant="h1">No active listings.</Text>
-            <Text className={classes.secondaryText} color="textSecondary">
-              Click <Link to="/zilo/past" className={classes.link}>here</Link> to view past ILOs.
-            </Text>
-          </Box>
+          <ILOCard>
+            <Box display="flex" flexDirection="column" className={classes.container} textAlign="center" mb={4}>
+              <Text variant="h1">No active listings.</Text>
+              <Text className={classes.secondaryText} color="textSecondary">
+                Click <Link to="/zilo/past" className={classes.link}>here</Link> to view past ILOs.
+              </Text>
+            </Box>
+          </ILOCard>
           :
           ziloData.map(data => (
             data.comingSoon ? (
-              <SampleILOCard
-                key={data.contractAddress}
-                expanded={true}
-                data={data}
-                blockTime={blockTime}
-                currentBlock={currentBlock}
-                currentTime={currentTime}
-              />
+              <ILOCard>
+                <SampleILOCard
+                  key={data.contractAddress}
+                  expanded={true}
+                  data={data}
+                  blockTime={blockTime}
+                  currentBlock={currentBlock}
+                  currentTime={currentTime}
+                />
+              </ILOCard>
             ) : (
-              <TokenILOCard
-                key={data.contractAddress}
-                expanded={true}
-                data={data}
-                blockTime={blockTime}
-                currentBlock={currentBlock}
-                currentTime={currentTime}
-              />
+              <ILOCard>
+                <TokenILOCard
+                  key={data.contractAddress}
+                  expanded={true}
+                  data={data}
+                  blockTime={blockTime}
+                  currentBlock={currentBlock}
+                  currentTime={currentTime}
+                />
+              </ILOCard>
             )
           ))
       }
-    </ILOCard>
+    </ILOPage>
   )
 }
 

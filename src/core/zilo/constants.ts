@@ -28,14 +28,13 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     usdRatio: '0.7',
     usdTarget: '$342,867',
   }, {
-    comingSoon: true,
     projectURL: 'https://docs.zilswap.io/how-to/zilo/launches/02-zilliqaroyale',
     imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/1ZILO-2-BLOX-banner.png',
     tokenSymbol: 'BLOX',
     tokenName: 'ZilliqaRoyale',
     tokenDecimals: 2,
     description: 'ZilliqaRoyale is a first-of-its-kind blockchain-powered battle royale game running on Minecraft — bringing innovation to the Zilliqa network via the demonstration of seamless game and blockchain technology integration.',
-    contractAddress: '',
+    contractAddress: 'zil163lpumypene0lhf9v39qka37lraq6amwpn04n3',
     showUntil: dayjs('2021-08-16T10:00:00.000+0800'),
     usdRatio: '0.7',
     usdTarget: '$550,000',
@@ -51,7 +50,18 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     showUntil: dayjs('2021-06-25T10:00:00.000+0800'),
     usdRatio: '0.7',
     usdTarget: '$342,867',
+  }, {
+    projectURL: 'https://docs.zilswap.io/how-to/zilo/launches/02-zilliqaroyale',
+    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/1ZILO-2-BLOX-banner.png',
+    tokenSymbol: 'BLOX',
+    tokenName: 'ZilliqaRoyale',
+    tokenDecimals: 2,
+    description: 'ZilliqaRoyale is a first-of-its-kind blockchain-powered battle royale game running on Minecraft — bringing innovation to the Zilliqa network via the demonstration of seamless game and blockchain technology integration.',
+    contractAddress: 'zil18trvzg0ks6z5qd4j8yr6q2cxvtnyk3dtd633rw',
+    showUntil: dayjs('2021-08-16T10:00:00.000+0800'),
+    usdRatio: '0.7',
+    usdTarget: '$550,000',
   }],
 }
 
-export const BLOCKS_PER_MINUTE = 1.25
+export const BLOCKS_PER_MINUTE = 1.6667 // 100 blocks per hour
