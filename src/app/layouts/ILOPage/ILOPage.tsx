@@ -1,4 +1,4 @@
-import { Box, Button, makeStyles, Paper } from '@material-ui/core'
+import { Box, Button, makeStyles } from '@material-ui/core'
 import { AppTheme } from 'app/theme/types'
 import { PaperProps } from 'material-ui';
 import React, { forwardRef } from 'react'
@@ -11,8 +11,6 @@ const CustomRouterLink = forwardRef((props: any, ref: any) => (
   </div>
 ));
 
-const CARD_BORDER_RADIUS = 12;
-
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     flex: 1,
@@ -22,17 +20,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(6, 2, 2),
-    },
-  },
-  card: {
-    maxWidth: 488,
-    margin: "0 auto",
-    boxShadow: theme.palette.mainBoxShadow,
-    borderRadius: CARD_BORDER_RADIUS,
-    background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    [theme.breakpoints.down("sm")]: {
-      maxWidth: 450,
     },
   },
   tabs: {
@@ -48,7 +35,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(2),
     marginBottom: theme.spacing(3),
-    borderRadius: CARD_BORDER_RADIUS,
+    borderRadius: 12,
     backgroundColor: theme.palette.tab.disabledBackground,
     color: theme.palette.tab.disabled,
     "&:hover": {
@@ -82,8 +69,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }))
 
-const ILOCard: React.FC<PaperProps> = (props: any) => {
-  const { children, className, staticContext, ...rest } = props;
+const ILOPage: React.FC<PaperProps> = (props: PaperProps) => {
+  const { children } = props;
   const classes = useStyles();
 
   return (
@@ -108,11 +95,9 @@ const ILOCard: React.FC<PaperProps> = (props: any) => {
             to="/zilo/past">Past</Button>
         </Box>
       </Box>
-      <Paper {...rest} className={classes.card}>
-        <Box>{children}</Box>
-      </Paper>
+      {children}
     </Box>
   )
 }
 
-export default ILOCard;
+export default ILOPage;

@@ -86,6 +86,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
 
   const walletAddress = useMemo(() => walletState.wallet?.addressInfo.bech32, [walletState.wallet]);
+  const claimHistoryLoaded = useMemo(() => Object.keys(rewardsState.globalClaimHistory).length > 0, [rewardsState.globalClaimHistory])
 
   const potentialRewards = useMemo(() => {
     return Object.keys(rewardsState.potentialPoolRewards).reduce((accum, poolAddress) => {
@@ -296,8 +297,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                 <Tooltip title={claimTooltip}>
                   <span>
                     <Button fullWidth variant="contained" color="primary" disabled={claimableRewards.isZero()} onClick={onClaimRewards} className={classes.claimRewardsButton}>
-                      {loading && <CircularProgress size="1em" color="inherit" />}
-                      {!loading && "Claim Rewards"}
+                      {(loading || !claimHistoryLoaded) && <CircularProgress size="1em" color="inherit" />}
+                      {(!loading && claimHistoryLoaded) && "Claim Rewards"}
                     </Button>
                   </span>
                 </Tooltip>
