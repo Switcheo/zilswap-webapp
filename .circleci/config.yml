@@ -23,7 +23,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-            - ~/.npm 
+            - ~/.npm
             - ~/.cache
           key: v1-dependencies-{{ checksum "yarn.lock" }}
 
@@ -67,17 +67,35 @@ jobs:
               aws cloudfront create-invalidation --distribution-id="ESU80N8RF88HZ" --paths=/*
             fi
 
-workflows: 
+      - run:
+          name: install ipfs-deploy
+          command: |
+            npm i -g ipfs-deploy
+
+      - run:
+          name: deploy to ipfs
+          command: |
+            if [ "${CIRCLE_BRANCH}" = "staging" ]; then
+              IPFS_DEPLOY_CLOUDFLARE__ZONE=staging.zilswap.exchange \
+              IPFS_DEPLOY_CLOUDFLARE__RECORD=_dnslink.staging.zilswap.exchange \
+              ipfs-deploy build/ -d cloudflare -C
+            elif [ "${CIRCLE_BRANCH}" = "master" ]; then
+              IPFS_DEPLOY_CLOUDFLARE__ZONE=zilswap.exchange \
+              IPFS_DEPLOY_CLOUDFLARE__RECORD=_dnslink.zilswap.exchange \
+              ipfs-deploy build/ -d cloudflare -C
+            fi
+
+workflows:
   deploy-staging:
     jobs:
       - build:
           context: org-switcheo
           filters:
             branches:
-              only: 
+              only:
                 - master
                 - staging
-      - deploy: 
+      - deploy:
           context: org-switcheo
           requires:
             - build
