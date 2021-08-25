@@ -44,7 +44,7 @@ jobs:
 
   deploy:
     docker:
-      - image: circleci/node:13.7.0-buster
+      - image: cimg/node:14.17.1
     steps:
       - attach_workspace:
           at: .
