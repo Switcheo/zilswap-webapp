@@ -46,15 +46,27 @@ jobs:
     docker:
       - image: circleci/node:13.7.0-buster
     steps:
-
       - attach_workspace:
           at: .
+
+      - restore_cache:
+          keys:
+            - v1-npm-global
+
+      - run:
+          name: install ipfs-deploy
+          command: NPM_CONFIG_PREFIX=~/.npm-global npm install -g ipfs-deploy
 
       - run:
           name: install AWS CLI
           command: |
             sudo apt-get --allow-releaseinfo-change update
             sudo apt-get install awscli
+
+      - save_cache:
+          paths:
+            - ~/.npm-global
+          key: v1-npm-global
 
       - run:
           name: deploy to aws
@@ -68,25 +80,20 @@ jobs:
             fi
 
       - run:
-          name: install ipfs-deploy
-          command: |
-            npm i -g ipfs-deploy
-
-      - run:
           name: deploy to ipfs
           command: |
             if [ "${CIRCLE_BRANCH}" = "staging" ]; then
               IPFS_DEPLOY_CLOUDFLARE__ZONE=staging.zilswap.exchange \
               IPFS_DEPLOY_CLOUDFLARE__RECORD=_dnslink.staging.zilswap.exchange \
-              ipfs-deploy build/ -d cloudflare -C
+              ~/.npm-global/bin/ipfs-deploy build/ -d cloudflare -C
             elif [ "${CIRCLE_BRANCH}" = "master" ]; then
               IPFS_DEPLOY_CLOUDFLARE__ZONE=zilswap.exchange \
               IPFS_DEPLOY_CLOUDFLARE__RECORD=_dnslink.zilswap.exchange \
-              ipfs-deploy build/ -d cloudflare -C
+              ~/.npm-global/bin/ipfs-deploy build/ -d cloudflare -C
             fi
 
 workflows:
-  deploy-staging:
+  build-and-deploy:
     jobs:
       - build:
           context: org-switcheo
