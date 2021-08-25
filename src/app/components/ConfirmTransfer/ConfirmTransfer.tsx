@@ -1,4 +1,4 @@
-import { Box, CircularProgress, IconButton, makeStyles } from "@material-ui/core";
+import { Box, CircularProgress, IconButton, makeStyles, Tooltip } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import { Transaction } from '@zilliqa-js/account';
 import { HTTPProvider } from '@zilliqa-js/core';
@@ -557,14 +557,16 @@ const ConfirmTransfer = (props: any) => {
         </Box>
 
         <Box className={classes.box} bgcolor="background.contrast">
-          <Box className={classes.transferBox}>
-            <Text>Transferring</Text>
-            <Text variant="h2" className={classes.amount}>
-              {trimValue(bridgeFormState.transferAmount.toString(10))}
-              <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} blockchain={fromToken?.blockchain} />
-              {fromToken?.symbol}
-            </Text>
-          </Box>
+          <Tooltip title={bridgeFormState.transferAmount.toString()}>
+            <Box className={classes.transferBox}>
+              <Text>Transferring</Text>
+              <Text variant="h2" className={classes.amount}>
+                {trimValue(bridgeFormState.transferAmount.toString(10))}
+                <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} blockchain={fromToken?.blockchain} />
+                {fromToken?.symbol}
+              </Text>
+            </Box>
+          </Tooltip>
 
           <Box mt={2} display="flex" justifyContent="space-between" position="relative">
             <Box className={classes.networkBox} flex={1}>
