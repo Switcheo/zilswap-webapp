@@ -5,7 +5,7 @@ import { GlobalClaimHistory, WalletState, ZAPRewardDist } from "app/store/types"
 import { WalletActionTypes } from "app/store/wallet/actions";
 import { SimpleMap } from "app/utils";
 import { PollIntervals } from "app/utils/constants";
-import { logger, ZAPStats, ZWAPDistribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
+import { logger, ZAPStats, Distribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { ZWAPRewards } from "core/zwap";
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
@@ -57,16 +57,32 @@ function* queryPoolWeights() {
   }
 }
 
+function* queryDistributors() {
+  while (true) {
+    logger("zap saga", "query distributors");
+    const { network } = getBlockchain(yield select());;
+
+    try {
+      const distributors = yield ZAPStats.getDistributors({ network });
+      yield put(actions.Rewards.updateDistributors(distributors));
+    } catch (e) {
+      console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn(e)
+    } finally {
+      const invalidated = yield race({
+        minutePoll: delay(PollIntervals.Distributors),
+        walletUpdated: take(WalletActionTypes.WALLET_UPDATE),
+      });
+
+      logger("zap saga", "distributors invalidated", invalidated);
+    }
+  }
+}
+
 function* queryDistribution() {
   while (true) {
     try {
       logger("zap saga", "query distributions");
-      const zilswap = ZilswapConnector.getSDK();
-
-      const zwapDistContract = yield getDistributorContract(zilswap);
-
-      const uploadState = yield call([zwapDistContract, zwapDistContract.getSubState], "merkle_roots");
-      const merkleRoots = (uploadState?.merkle_roots ?? {}) as SimpleMap<string>;
 
       const { network } = getBlockchain(yield select());;
       const walletState = getWallet(yield select());
@@ -76,17 +92,26 @@ function* queryDistribution() {
         continue;
       }
 
-      const distributions: ZWAPDistribution[] = yield ZAPStats.getZWAPDistributions({
+      const distributions: Distribution[] = yield ZAPStats.getZWAPDistributions({
         address: walletState.wallet.addressInfo.bech32,
         network,
       });
 
-      const rewardDistributions = distributions.map((info: ZWAPDistribution): ZAPRewardDist => ({
-        info,
-        readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
-      }));
+      const rewardDistributions: ZAPRewardDist[] = distributions.map((info: Distribution): ZAPRewardDist => {
+        const zilswap = ZilswapConnector.getSDK();
+        const contract = zilswap.getContract(info.distributor_address);
+
+        const uploadState: any = call([contract, contract.getSubState], "merkle_roots");
+        const merkleRoots = (uploadState?.merkle_roots ?? {}) as SimpleMap<string>;
+
+        return {
+          info,
+          readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
+        }
+      })
 
       yield put(actions.Rewards.updateDistributions(rewardDistributions));
+
     } catch (e) {
       console.warn('Fetch failed, will automatically retry later. Error:')
       console.warn(e)
@@ -171,6 +196,7 @@ export default function* zapSaga() {
   yield take(BlockchainActionTypes.INITIALIZED) // wait for first init
   yield fork(queryEpochInfo);
   yield fork(queryPoolWeights);
+  yield fork(queryDistributors);
   yield fork(queryDistribution);
   yield fork(queryClaimHistory);
   yield fork(queryPotentialRewards);

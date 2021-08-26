@@ -80,6 +80,7 @@ export class PollIntervals {
 
   public static ZWAPClaimHistory = 600_000;
   public static EpochInfo = 60000;
+  public static Distributors = 60000;
   public static PoolWeights = 3600000;
 
   public static RetryAfterError = 5000;

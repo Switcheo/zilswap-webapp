@@ -16,6 +16,13 @@ export const fetchClaimHistory = async () => {
 
 }
 
+export interface Distribution {
+  distrAddr: string;
+  epochNumber: number;
+  amount: BigNumber;
+  proof: string[];
+}
+
 export interface ClaimEpochOpts {
   network: Network
   wallet: ConnectedWallet
@@ -23,6 +30,12 @@ export interface ClaimEpochOpts {
   amount: BigNumber;
   proof: string[];
 };
+
+export interface ClaimMultiOpts {
+  network: Network;
+  wallet: ConnectedWallet;
+  distributions: Distribution[];
+}
 
 const CHAIN_ID = {
   [Network.TestNet]: 333, // chainId of the developer testnet
@@ -74,6 +87,74 @@ export const claim = async (claimOpts: ClaimEpochOpts): Promise<ObservedTx> => {
   };
 
   const claimTx = await zilswap.callContract(distContract, "Claim", args, params, true);
+  logger("claim tx dispatched", claimTx.id);
+
+  if (claimTx.isRejected()) {
+    throw new Error('Submitted transaction was rejected.')
+  }
+
+  const observeTxn: ObservedTx = {
+    hash: claimTx.id!,
+    deadline: Number.MAX_SAFE_INTEGER,
+  };
+
+  await zilswap.observeTx(observeTxn)
+
+  return observeTxn
+};
+
+// Needs checking - ClaimMulti accepts List (Pair ByStr20 Claim) -> Address Claim?
+const getMultiTxArgs = (distributions: Distribution[], address: string, contractAddr: string) => {
+  const contractAddrByStr20 = fromBech32Address(contractAddr).toLowerCase();
+  return [{
+    vname: "claimMulti",
+    type: `${contractAddrByStr20}.ClaimMulti`,
+    value: {
+      constructor: `${contractAddrByStr20}.ClaimMulti`,
+      argtypes: [],
+      arguments: [
+        distributions.map((distribution) => {
+          return [
+            distribution.distrAddr,
+            [
+              distribution.epochNumber.toString(),
+              {
+                constructor: `${contractAddrByStr20}.DistributionLeaf`,
+                argtypes: [],
+                arguments: [address, distribution.amount.toString(10)],
+              },
+              distribution.proof.map(item => `0x${item}`)
+            ]
+          ]
+        })
+      ],
+    },
+  }];
+};
+
+export const claimMulti = async (claimOpts: ClaimMultiOpts): Promise<ObservedTx> => {
+  const { network, wallet, distributions } = claimOpts;
+  const zilswap = ZilswapConnector.getSDK()
+
+  if (!zilswap.zilliqa) throw new Error("Wallet not connected");
+
+  const contractAddr = DIST_CONTRACT[network]
+  const chainId = CHAIN_ID[network];
+  const distContract = zilswap.getContract(contractAddr);
+
+  const address = wallet.addressInfo.byte20;
+
+  const args: any = getMultiTxArgs(distributions, address, contractAddr);
+
+  const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
+  const params: any = {
+    amount: new BN(0),
+    gasPrice: new BN(minGasPrice),
+    gasLimit: "5000",
+    version: bytes.pack(chainId, msgVersion),
+  };
+
+  const claimTx = await zilswap.callContract(distContract, "ClaimMulti", args, params, true);
   logger("claim tx dispatched", claimTx.id);
 
   if (claimTx.isRejected()) {

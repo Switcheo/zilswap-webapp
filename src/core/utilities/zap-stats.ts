@@ -12,7 +12,8 @@ const PATHS = {
 	"volume": "/volume",
 	"transactions": "/transactions",
 	"epoch/info": "/epoch/info",
-	"distribution/data": "/distribution/data/:address",
+	"distribution/info": "/distribution/info",
+	"distribution/claimable_data": "/distribution/claimable_data/:address",
 	"distribution/weights": "/distribution/pool_weights",
 	"distribution/current": "/distribution/current/:address",
 };
@@ -83,8 +84,28 @@ export interface EpochInfo {
 	total_epoch: number;
 }
 
-export interface ZWAPDistribution {
+export interface Distributor {
+	name: string;
+	reward_token_symbol: string;
+	reward_token_address_hex: string;
+	distributor_address_hex: string;
+	emission_info: EmissionInfo;
+}
+
+export interface EmissionInfo {
+	epoch_period: number;
+	tokens_per_epoch: string;
+	tokens_for_retroactive_distribution: string;
+	retroactive_distribution_cutoff_time: number;
+	distribution_start_time: number;
+	total_number_of_epochs: number;
+	developer_token_ratio_bps: number;
+	trader_token_ratio_bps: number;
+}
+
+export interface Distribution {
 	id: string,
+	distributor_address: string,
 	epoch_number: number,
 	address_bech32: string,
 	address_hex: string,
@@ -289,17 +310,29 @@ export class ZAPStats {
 	}
 
 	/**
+	 * 
+	 * @param network MainNet | TestNet - defaults to `MainNet`
+	 * @returns response in JSON
+	 */
+	static getDistributors = async ({ network }: QueryOptions): Promise<Distributor[]>  => {
+		const http = ZAPStats.getApi(network);
+		const url = http.path("distribution/info");
+		const response = await http.get({ url });
+		return await response.json();
+	}
+
+	/**
 	 *
 	 *
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
-	static getZWAPDistributions = async ({ network, address, ...query }: GetZWAPDistribution = {}): Promise<ZWAPDistribution[]> => {
+	static getZWAPDistributions = async ({ network, address, ...query }: GetZWAPDistribution = {}): Promise<Distribution[]> => {
 		const http = ZAPStats.getApi(network);
-		const url = http.path("distribution/data", { address }, query);
+		const url = http.path("distribution/claimable_data", { address }, query);
 		const response = await http.get({ url });
 		const distributions = await response.json();
-		return distributions.map((distribution: any): ZWAPDistribution => ({
+		return distributions.map((distribution: any): Distribution => ({
 			...distribution,
 			amount: bnOrZero(distribution.amount),
 			proof: distribution.proof.split(" "),

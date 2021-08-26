@@ -1,6 +1,6 @@
 import { SimpleMap } from "app/utils";
 import BigNumber from "bignumber.js";
-import { EpochInfo, SwapVolume, ZWAPDistribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
+import { Distributor, EpochInfo, SwapVolume, Distribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
 import { Dayjs } from "dayjs";
 
 export interface PoolSwapVolume extends SwapVolume {
@@ -25,7 +25,7 @@ export interface ZAPEpochInfo {
 };
 
 export interface ZAPRewardDist {
-  info: ZWAPDistribution;
+  info: Distribution;
   readyToClaim: boolean;
   claimed?: boolean;
   claimTx?: any;
@@ -40,7 +40,6 @@ export interface GlobalClaimHistory {
 }
 
 export interface PendingClaimTx {
-  epoch: number;
   txHash: string;
   dispatchedAt: Dayjs;
 }
@@ -51,6 +50,7 @@ export interface PendingClaimTxCache {
 export interface RewardsState {
   epochInfo: ZAPEpochInfo | null;
   rewardByPools: SimpleMap<PoolZWAPReward>;
+  rewardDistributors: Distributor[];
   rewardDistributions: ZAPRewardDist[];
   potentialPoolRewards: ZWAPPotentialRewards;
   globalClaimHistory: GlobalClaimHistory;
