@@ -5,7 +5,7 @@ import { SimpleMap } from "app/utils";
 export type TokenUSDValues = {
   balance: BigNumber;
   poolLiquidity: BigNumber;
-  zapRewards: BigNumber;
+  rewardsPerSecond: BigNumber;
 };
 
 export type TokenInfo = {

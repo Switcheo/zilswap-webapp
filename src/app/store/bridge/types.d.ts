@@ -1,9 +1,6 @@
-import { TokenInfo } from "app/store/types";
-import { ChainTransferFlow } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { Blockchain, RestModels } from "tradehub-api-js";
-import { FeesData } from "core/utilities/bridge";
 
 export type BridgeableToken = {
   blockchain: Blockchain;

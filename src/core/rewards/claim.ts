@@ -4,17 +4,9 @@ import BigNumber from "bignumber.js";
 import { ConnectedWallet } from "core/wallet";
 import { ZilswapConnector } from 'core/zilswap';
 import { Network } from "zilswap-sdk/lib/constants";
-import { DIST_CONTRACT } from "./constants";
+import { REWARDS_DISTRIBUTOR_CONTRACT, CHAIN_IDS, MSG_VERSION } from "../zilswap/constants";
 import { ObservedTx } from "zilswap-sdk";
 import { logger } from 'core/utilities';
-
-export interface CheckClaimHistory {
-
-}
-
-export const fetchClaimHistory = async () => {
-
-}
 
 export interface Distribution {
   distrAddr: string;
@@ -36,12 +28,6 @@ export interface ClaimMultiOpts {
   wallet: ConnectedWallet;
   distributions: Distribution[];
 }
-
-const CHAIN_ID = {
-  [Network.TestNet]: 333, // chainId of the developer testnet
-  [Network.MainNet]: 1, // chainId of the mainnet
-}
-const msgVersion = 1; // current msgVersion
 
 const getTxArgs = (epoch: number, proof: string[], address: string, amount: BigNumber, contractAddr: string) => {
   const contractAddrByStr20 = fromBech32Address(contractAddr).toLowerCase();
@@ -70,8 +56,8 @@ export const claim = async (claimOpts: ClaimEpochOpts): Promise<ObservedTx> => {
 
   if (!zilswap.zilliqa) throw new Error("Wallet not connected");
 
-  const contractAddr = DIST_CONTRACT[network]
-  const chainId = CHAIN_ID[network];
+  const contractAddr = REWARDS_DISTRIBUTOR_CONTRACT[network]
+  const chainId = CHAIN_IDS[network];
   const distContract = zilswap.getContract(contractAddr);
 
   const address = wallet.addressInfo.byte20;
@@ -83,7 +69,7 @@ export const claim = async (claimOpts: ClaimEpochOpts): Promise<ObservedTx> => {
     amount: new BN(0),
     gasPrice: new BN(minGasPrice),
     gasLimit: "5000",
-    version: bytes.pack(chainId, msgVersion),
+    version: bytes.pack(chainId, MSG_VERSION),
   };
 
   const claimTx = await zilswap.callContract(distContract, "Claim", args, params, true);
@@ -138,8 +124,8 @@ export const claimMulti = async (claimOpts: ClaimMultiOpts): Promise<ObservedTx>
 
   if (!zilswap.zilliqa) throw new Error("Wallet not connected");
 
-  const contractAddr = DIST_CONTRACT[network]
-  const chainId = CHAIN_ID[network];
+  const contractAddr = REWARDS_DISTRIBUTOR_CONTRACT[network]
+  const chainId = CHAIN_IDS[network];
   const distContract = zilswap.getContract(contractAddr);
 
   const address = wallet.addressInfo.byte20;
@@ -151,7 +137,7 @@ export const claimMulti = async (claimOpts: ClaimMultiOpts): Promise<ObservedTx>
     amount: new BN(0),
     gasPrice: new BN(minGasPrice),
     gasLimit: "5000",
-    version: bytes.pack(chainId, msgVersion),
+    version: bytes.pack(chainId, MSG_VERSION),
   };
 
   const claimTx = await zilswap.callContract(distContract, "ClaimMulti", args, params, true);

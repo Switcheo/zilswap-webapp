@@ -7,7 +7,7 @@ import { useAsyncTask } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { getZilStreamTokenRates, TimeFilter, ZilStreamRates } from "core/zilswap";
+import { getZilStreamTokenRates, TimeFilter, ZilStreamRates } from "core/utilities";
 import { createChart, CrosshairMode, IChartApi, ISeriesApi, Time, UTCTimestamp } from "lightweight-charts";
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";

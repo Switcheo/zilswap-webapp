@@ -240,7 +240,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
                       <Typography>MAX</Typography>
                     </Button>
                   }
-                  <Button disabled={disabled} disableRipple className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
+                  <Button disableRipple className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
                     <Box display="flex" alignItems="center">
                       {token && <CurrencyLogo currency={token.registered && token.symbol} blockchain={token?.blockchain} address={token.address} className={classes.currencyLogo} />}
                       <Typography variant="button" className={classes.currencyText}>{token?.symbol || "Select Token"}</Typography>

@@ -1,6 +1,7 @@
 import { Box, BoxProps, Button, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowDropDownRounded, ArrowDropUpRounded } from "@material-ui/icons";
+import { BigNumber } from "bignumber.js"
 import { Link } from "react-router-dom";
 import cls from "classnames";
 import React, { useState } from "react";
@@ -10,9 +11,8 @@ import { AmountLabel, ContrastBox, KeyValueDisplay, PoolLogo, Text } from "app/c
 import { RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { BIG_ZERO } from "app/utils/constants";
-import { bnOrZero, toHumanNumber } from "app/utils/strings/strings";
+import { toHumanNumber } from "app/utils/strings/strings";
 import { useValueCalculators, useNetwork } from "app/utils";
-import { ZWAPRewards } from "core/zwap";
 
 interface Props extends BoxProps {
   token: TokenInfo;
@@ -39,9 +39,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
   const { children, className, token, ...rest } = props;
+  const dispatch = useDispatch();
   const classes = useStyles();
   const valueCalculators = useValueCalculators();
-  const dispatch = useDispatch();
   const network = useNetwork();
   const rewardsState = useSelector<RootState, RewardsState>((state) => state.rewards);
   const tokenState = useSelector<RootState, TokenState>((state) => state.token);
@@ -52,57 +52,25 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
     setActive(!active);
   };
 
-  const {
-    poolShareLabel,
-    tokenAmount,
-    zilAmount,
-    poolShare,
-  } = React.useMemo(() => {
-    const poolShare = token.pool?.contributionPercentage.shiftedBy(-2);
-    const tokenAmount = poolShare?.times(token.pool?.tokenReserve ?? BIG_ZERO);
-    const zilAmount = poolShare?.times(token.pool?.zilReserve ?? BIG_ZERO);
+  const poolShare = token.pool?.contributionPercentage.shiftedBy(-2) ?? BIG_ZERO;
+  const poolShareLabel = poolShare.shiftedBy(2).decimalPlaces(3).toString(10) ?? ""
+  const tokenAmount = poolShare.times(token.pool?.tokenReserve ?? BIG_ZERO);
+  const zilAmount = poolShare.times(token.pool?.zilReserve ?? BIG_ZERO);
 
+  const poolValue = valueCalculators.pool(tokenState.prices, token);
+  const depositedValue = poolShare.times(poolValue);
+
+  const potentialRewards = rewardsState.potentialRewardsByPool[token.address].map(item => {
+    const rewardToken = tokenState.tokens[item.token_address];
     return {
-      poolShareLabel: poolShare?.shiftedBy(2).decimalPlaces(3).toString(10) ?? "",
-      tokenAmount,
-      zilAmount,
-      poolShare: poolShare ?? BIG_ZERO,
+      rewardToken,
+      amount: item.amount,
+      value: valueCalculators.amount(tokenState.prices, rewardToken, item.amount),
     }
-  }, [token]);
+  })
 
-  const {
-    potentialRewards,
-    depositedValue,
-    rewardsValue,
-    roiLabel,
-  } = React.useMemo(() => {
-    if (!rewardsState.epochInfo) return {
-      rewardsValue: BIG_ZERO,
-      potentialRewards: BIG_ZERO,
-      depositedValue: BIG_ZERO,
-      roiLabel: "-",
-    };
-
-    const poolRewards = bnOrZero(rewardsState.potentialPoolRewards[token.address]);
-
-    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[network] ?? "";
-    const zapToken = tokenState.tokens[zapContractAddr];
-
-    const rewardsValue = valueCalculators.amount(tokenState.prices, zapToken, poolRewards);
-    const poolValue = valueCalculators.pool(tokenState.prices, token);
-    const depositedValue = poolShare.times(poolValue);
-    const roiPerEpoch = rewardsValue.dividedBy(depositedValue);
-    const epochDuration = rewardsState.epochInfo.raw.epoch_period;
-    const secondsInDay = 24 * 3600;
-    const roiPerDay = bnOrZero(roiPerEpoch.dividedBy(epochDuration).times(secondsInDay).shiftedBy(2).decimalPlaces(2));
-
-    return {
-      potentialRewards: poolRewards,
-      rewardsValue,
-      depositedValue,
-      roiLabel: roiPerDay.isZero() ? "-" : `${toHumanNumber(roiPerDay, 2)}%`,
-    };
-  }, [network, rewardsState.epochInfo, rewardsState.potentialPoolRewards, poolShare, token, tokenState.prices, tokenState.tokens, valueCalculators]);
+  const roiPerDay = potentialRewards.reduce((acc, item) => acc.plus(item.value.div(7)), new BigNumber(0)) // TODO: fixme, use actual epoch instead of 7 days
+  const roiLabel = roiPerDay.isZero() ? "-" : `${toHumanNumber(roiPerDay, 2)}%`
 
   const onGotoAdd = () => {
     dispatch(actions.Pool.select({ token, network }));
@@ -127,17 +95,23 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
       </Button>
       {active && (
         <ContrastBox>
-          <KeyValueDisplay marginBottom={1.5} kkey="Your Potential Rewards" ValueComponent="span">
-            <Text color="textPrimary">
-              {toHumanNumber(potentialRewards.shiftedBy(-12))} ZWAP
-            </Text>
-            <Text variant="body2" className={classes.textGreen} align="right">
-              ≈ ${toHumanNumber(rewardsValue, 2)}
-            </Text>
-          </KeyValueDisplay>
-          <KeyValueDisplay marginBottom={1.5} kkey="ROI" ValueComponent="span">
-            <Text color="textPrimary">{roiLabel} / daily</Text>
-          </KeyValueDisplay>
+          {
+            potentialRewards.map(reward => (
+              [
+              <KeyValueDisplay marginBottom={1.5} kkey="Your Potential Rewards" ValueComponent="span">
+                <Text color="textPrimary">
+                  {toHumanNumber(reward.amount.shiftedBy(-reward.rewardToken.decimals))} {reward.rewardToken.symbol}
+                </Text>
+                <Text variant="body2" className={classes.textGreen} align="right">
+                  ≈ ${toHumanNumber(reward.value, 2)}
+                </Text>
+              </KeyValueDisplay>,
+              <KeyValueDisplay marginBottom={1.5} kkey="ROI" ValueComponent="span">
+                <Text color="textPrimary">{roiLabel} / daily</Text>
+              </KeyValueDisplay>
+              ]
+            ))
+          }
           <KeyValueDisplay kkey={`Your Pool Share ${poolShareLabel}%`} ValueComponent="span">
             <AmountLabel
               justifyContent="flex-end"

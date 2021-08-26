@@ -8,15 +8,15 @@ import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBoxR
 import { CurrencyLogo, HelpInfo, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
-import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState, ZAPRewardDist } from "app/store/types";
+import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState, DistributionWithStatus } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useNetwork, useTokenFinder, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import { formatZWAPLabel } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ZWAPRewards } from "core/zwap";
-import { TOKEN_CONTRACT } from "core/zwap/constants";
+import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
+import { claimMulti } from "core/rewards";
 import dayjs from "dayjs";
 import groupBy from "lodash/groupBy";
 import React, { useMemo, useRef, useState } from "react";
@@ -228,7 +228,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const [active, setActive] = useState<boolean>(false);
   const [claimResult, setClaimResult] = useState<any>(null);
   const [showDetails, setShowDetails] = useState<boolean>(false);
-  const [selectedDistributions, setSelectedDistributions] = useState<ZAPRewardDist[]>([]); // default should be all claimable distributions
+  const [selectedDistributions, setSelectedDistributions] = useState<DistributionWithStatus[]>([]); // default should be all claimable distributions
   const [runClaimRewards, loading, error] = useAsyncTask("claimRewards");
   const buttonRef = useRef();
   const theme = useTheme();
@@ -236,17 +236,12 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const tokenFinder = useTokenFinder();
 
   const walletAddress = useMemo(() => walletState.wallet?.addressInfo.bech32, [walletState.wallet]);
-  // const claimHistoryLoaded = useMemo(() => Object.keys(rewardsState.globalClaimHistory).length > 0, [rewardsState.globalClaimHistory])
 
   const {
     claimableRewards,
     claimTooltip,
   } = useMemo(() => {
-    // const pendingClaimTxs = rewardsState.claimTxs[walletAddress ?? ""] ?? {};
-
-    // TODO: filter out pending claims
-    // const pendingClaimEpochs = Object.values(pendingClaimTxs).map(pendingTx => pendingTx.epoch);
-    const claimableRewards = rewardsState.rewardDistributions.reduce((sum, dist) => {
+    const claimableRewards = rewardsState.distributions.reduce((sum, dist) => {
       return (dist.readyToClaim) ? sum.plus(dist.info.amount) : sum;
     }, BIG_ZERO);
 
@@ -261,19 +256,19 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     };
 
     // eslint-disable-next-line
-  }, [walletAddress, rewardsState.claimTxs, rewardsState.rewardDistributions]);
+  }, [walletAddress, rewardsState.distributions]);
 
   // New code for claimable rewards
-  const rewardDistributions = rewardsState.rewardDistributions.filter(distribution => distribution.readyToClaim);
-  const rewardDistributors = rewardsState.rewardDistributors;
+  const distributions = rewardsState.distributions.filter(distribution => distribution.readyToClaim);
+  const distributors = rewardsState.distributors;
 
   // group by epoch
-  const distributionsByEpoch = groupBy(rewardDistributions, (reward) => {
+  const distributionsByEpoch = groupBy(distributions, (reward) => {
     return reward.info.epoch_number;
   })
 
   // group by token (distributor address)
-  const distributionsByToken = groupBy(rewardDistributions, (reward) => {
+  const distributionsByToken = groupBy(distributions, (reward) => {
     return reward.info.distributor_address;
   })
 
@@ -286,7 +281,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   // USD values
   const totalTokenValue = Object.keys(claimableRewardsByToken).reduce((sum, dist) => {
-    const rewardDistributor = rewardDistributors.find(distributor => distributor.distributor_address_hex === dist);
+    const rewardDistributor = distributors.find(distributor => distributor.distributor_address_hex === dist);
 
     if (rewardDistributor) {
       const token = tokenFinder(rewardDistributor.reward_token_address_hex);
@@ -299,14 +294,14 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   const valuesByEpoch = Object.fromEntries(Object.entries(distributionsByEpoch).map(([epochNumber, distributions]) => {
     return [epochNumber, distributions.reduce((sum, dist) => {
-        const rewardDistributor = rewardDistributors.find(distributor => distributor.distributor_address_hex === dist.info.distributor_address);
-       
+        const rewardDistributor = distributors.find(distributor => distributor.distributor_address_hex === dist.info.distributor_address);
+
         if (rewardDistributor) {
           const token = tokenFinder(rewardDistributor.reward_token_address_hex);
-    
+
           return token ? sum.plus(valueCalculators.amount(tokenState.prices, token, dist.info.amount)) : sum;
         }
-    
+
         return sum;
       }, BIG_ZERO)
     ];
@@ -314,21 +309,21 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   const epochNumberToDate = (epochNo: string) => {
     const epoch_number = parseInt(epochNo);
-    const { distribution_start_time, epoch_period } = rewardDistributors[0].emission_info;
+    const { distribution_start_time, epoch_period } = distributors[0].emission_info;
 
     return dayjs.unix(distribution_start_time + (epoch_period * epoch_number)).format('DD MMM');
   }
 
   // ZWAP Balance
   const zapTokenBalance: BigNumber = useMemo(() => {
-    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[network] ?? "";
+    const zapContractAddr = ZWAP_TOKEN_CONTRACT[network] ?? "";
     return tokenState.tokens[zapContractAddr]?.balance ?? BIG_ZERO;
   }, [network, tokenState.tokens]);
 
   const zapTokenValue: BigNumber = useMemo(() => {
     if (zapTokenBalance.isZero()) return BIG_ZERO;
 
-    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[network] ?? "";
+    const zapContractAddr = ZWAP_TOKEN_CONTRACT[network] ?? "";
     const zapToken = tokenState.tokens[zapContractAddr];
     if (!zapToken) return BIG_ZERO;
 
@@ -354,7 +349,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         }
       })
 
-      claimTx = await ZWAPRewards.claimMulti({
+      claimTx = await claimMulti({
         network,
         wallet: walletState.wallet,
         distributions
@@ -383,7 +378,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   };
 
   // Logic for checkboxes - check if there's a more efficient way -> just storing ids?
-  const handleSelect = (distribution: ZAPRewardDist) => (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelect = (distribution: DistributionWithStatus) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDistributionsCopy = selectedDistributions.slice();
 
     // if checked, add to selectedDistributions array
@@ -401,24 +396,26 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   // selectedDistributions.length same as reward distributions that are readyToClaim
   const isAllSelected = useMemo(() => {
-    return rewardDistributions.length === selectedDistributions.length;
-  }, [rewardDistributions, selectedDistributions])
+    return distributions.length === selectedDistributions.length;
+  }, [distributions, selectedDistributions])
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     // if checked, selectedDistributions should contain all claimable distributions
     if (event.target.checked) {
-      setSelectedDistributions(rewardDistributions);
+      setSelectedDistributions(distributions);
     } else {
       setSelectedDistributions([]);
     }
   }
 
-  const isDistributionSelected = (distribution: ZAPRewardDist) => {
+  const isDistributionSelected = (distribution: DistributionWithStatus) => {
     return selectedDistributions.includes(distribution);
   }
 
   const claimButtonText = () => {
-    if (claimableRewards.isZero() || isAllSelected) {
+    if (claimableRewards.isZero()) {
+      return "Nothing to Claim"
+    } else if (isAllSelected) {
       return "Claim Rewards (All)";
     } else if (selectedDistributions.length) {
       return `Claim Rewards (${selectedDistributions.length})`;
@@ -427,7 +424,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     }
   }
 
-  const zwapAddress = TOKEN_CONTRACT[network];
+  const zwapAddress = ZWAP_TOKEN_CONTRACT[network];
   if (!walletState.wallet) return null;
 
   const popperModifiers = {
@@ -448,10 +445,10 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     <Box {...rest} className={cls(classes.root, className)}>
       <span>
         {
-          isMobileView 
+          isMobileView
           ? <IconButton onClick={() => setActive(!active)} buttonRef={buttonRef}>
               <IconSVG />
-            </IconButton> 
+            </IconButton>
           : <Badge variant="dot" invisible={claimableRewards.isZero()}>
               <Button
                 size="small"
@@ -476,55 +473,49 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
           <ClickAwayListener onClickAway={() => setActive(false)}>
             <Card className={classes.card}>
               <Box display="flex" flexDirection="column" alignItems="center">
-                <Text variant="h6" color="textPrimary" className={classes.header}>Your Balance</Text>
+                <Text variant="h6" color="textPrimary" className={classes.header}>Your ZWAP Balance</Text>
                 <Box display="flex" marginTop={1}>
                   <Text variant="h2" className={cls(classes.textColoured, classes.balanceAmount)}>
                     {zapBalanceLabel}
                   </Text>
                   <CurrencyLogo currency="ZWAP" address={zwapAddress} className={classes.currencyLogo}/>
                 </Box>
-                <Text marginTop={1} className={cls(classes.textColoured, classes.body)}>
+                <Text marginTop={0.5} className={cls(classes.textColoured, classes.body)}>
                   ≈ ${zapTokenValue.toFormat(2)}
                 </Text>
               </Box>
-
-              {/* Rewards claimable */}
-              <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
+              <Box display="flex" flexDirection="column" alignItems="center" mt={3}>
                 <Text className={classes.body}>
-                  Rewards Claimable
+                  Claimable Rewards
                   <HelpInfo placement="bottom" title="The estimated amount of rewards you have collected and are eligible to claim." className={classes.tooltip}/>
                 </Text>
-                <Box className={classes.rewardBox} bgcolor="background.contrast" width="100%">
-                  {claimableRewards.isZero() &&
-                    <Text variant="h4" className={classes.totalReward}>
-                      All rewards claimed.
+                {
+                  !claimableRewards.isZero() &&
+                  <Box className={classes.rewardBox} bgcolor="background.contrast" width="100%">
+                    {
+                      Object.keys(claimableRewardsByToken).map(key => {
+                        // to check if can be more efficient here
+                        const rewardDistributor = distributors.find(distributor => distributor.distributor_address_hex === key);
+
+                        // to get token decimals
+                        const token = tokenFinder(rewardDistributor!.reward_token_address_hex);
+
+                        return (
+                          <Text variant="h4" className={classes.totalReward}>
+                            {/* toHumanNumber? */}
+                            {claimableRewardsByToken[key].shiftedBy(-token!.decimals).toFormat(2)}
+                            <CurrencyLogo address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoMd)}/>
+                            <span className={classes.currency}>
+                              {rewardDistributor?.reward_token_symbol}
+                            </span>
+                          </Text>
+                        )
+                      })
+                    }
+                    <Text marginBottom={1} variant="body2" color="textSecondary" className={classes.usdAmount}>
+                      ≈ ${totalTokenValue.toFormat(2)}
                     </Text>
-                  }
-
-                  {!claimableRewards.isZero() && Object.keys(claimableRewardsByToken).map(key => {
-                    // to check if can be more efficient here
-                    const rewardDistributor = rewardDistributors.find(distributor => distributor.distributor_address_hex === key);
-
-                    // to get token decimals
-                    const token = tokenFinder(rewardDistributor!.reward_token_address_hex);
-
-                    return (
-                      <Text variant="h4" className={classes.totalReward}>
-                        {/* toHumanNumber? */}
-                        {claimableRewardsByToken[key].shiftedBy(-token!.decimals).toFormat(2)}
-                        <CurrencyLogo address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoMd)}/>
-                        <span className={classes.currency}>
-                          {rewardDistributor?.reward_token_symbol}
-                        </span>
-                      </Text>
-                    )
-                  })}
-
-                  <Text marginBottom={1} variant="body2" color="textSecondary" className={classes.usdAmount}>
-                    ≈ ${totalTokenValue.toFormat(2)}
-                  </Text>
-
-                  {!claimableRewards.isZero() && <Accordion className={classes.accordion} expanded={showDetails} onChange={(_, expanded) => setShowDetails(expanded)}>
+                    <Accordion className={classes.accordion} expanded={showDetails} onChange={(_, expanded) => setShowDetails(expanded)}>
                       <Box display="flex" justifyContent="center" width="100%">
                         <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon} />}>
                           <Text color="textSecondary">View Details</Text>
@@ -567,12 +558,12 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                     ≈ ${valuesByEpoch[key].toFormat(2)}
                                   </Text>
                                 </Box>
-                                <Divider />    
+                                <Divider />
                                 {distributionsByEpoch[key].map(reward => {
                                   // to check if can be more efficient here
-                                  const rewardDistributor = rewardDistributors.find(distributor => distributor.distributor_address_hex === reward.info.distributor_address);
+                                  const rewardDistributor = distributors.find(distributor => distributor.distributor_address_hex === reward.info.distributor_address);
                                   // const rewardDistributor = {"name":"ZWAP Rewards","reward_token_symbol":"ZWAP","reward_token_address_hex":"0xb2b119e2496f24590eff419f15aa1b6e82aa7074","distributor_name":"Zilswap","distributor_address_hex":"0x55fc7c40cc9d190aad1499c00102de0828c06d41","developer_address":"zil1ytk3ykwlc2vy8fyp7wqp492zjassj5mxzgscv6","emission_info":{"epoch_period":604800,"tokens_per_epoch":"6250_000_000_000_000","tokens_for_retroactive_distribution":"50000_000_000_000_000","retroactive_distribution_cutoff_time":1628230000,"distribution_start_time":1628240000,"total_number_of_epochs":152,"initial_epoch_number":1,"developer_token_ratio_bps":1500,"trader_token_ratio_bps":2000},"incentived_pools":{"zil10a9z324aunx2qj64984vke93gjdnzlnl5exygv":2,"zil1k2c3ncjfduj9jrhlgx03t2smd6p25ur56cfzgz":5,"zil1fytuayks6njpze00ukasq3m4y4s44k79hvz8q5":3}};
-                                  
+
                                   // to get token decimals
                                   const token = tokenFinder(rewardDistributor!.reward_token_address_hex);
 
@@ -602,29 +593,19 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                 })}
                               </Box>
                             )
-                          })}                 
+                          })}
                         </Box>
                       </AccordionDetails>
                     </Accordion>
-                  }
-                </Box>
+                  </Box>
+                }
               </Box>
-              
+
               <Box marginTop={2} />
-
-              {!claimResult && (
-                <Tooltip title={claimTooltip}>
-                  <span>
-                    <Button fullWidth variant="contained" color="primary" disabled={claimableRewards.isZero()} onClick={onClaimRewards} className={classes.claimRewardsButton}>
-                      {loading && <CircularProgress size="1em" color="inherit" className={classes.progress} />}
-                      {claimButtonText()}
-                    </Button>
-                  </span>
-                </Tooltip>
-              )}
-
-              {!!claimResult && (
-                <Box display="flex" flexDirection="column" alignItems="center"> 
+              {
+                claimResult
+                ?
+                <Box display="flex" flexDirection="column" alignItems="center">
                   <Text marginTop={2} variant="h4" className={classes.textColoured}>
                     <CheckCircleRoundedIcon fontSize="inherit" className={classes.successIcon} />
                     {" "}
@@ -642,7 +623,16 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                       </Box>
                   </Link>
                 </Box>
-              )}
+                :
+                <Tooltip title={claimTooltip}>
+                  <span>
+                    <Button fullWidth variant="contained" color="primary" disabled={claimableRewards.isZero()} onClick={onClaimRewards} className={classes.claimRewardsButton}>
+                      {loading && <CircularProgress size="1em" color="inherit" className={classes.progress} />}
+                      {claimButtonText()}
+                    </Button>
+                  </span>
+                </Tooltip>
+              }
 
               {!!error && (
                 <Box mt={1.5} display="flex" justifyContent="center">
@@ -651,7 +641,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   </Text>
                 </Box>
               )}
-  
+
             </Card>
           </ClickAwayListener>
         </Box>

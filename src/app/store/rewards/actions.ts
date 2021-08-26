@@ -1,65 +1,41 @@
 import { SimpleMap } from "app/utils";
-import { Distributor, EpochInfo, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
-import { GlobalClaimHistory, PendingClaimTx, PoolZWAPReward, ZAPRewardDist } from "./types";
+import { PotentialRewards } from "core/utilities";
+import { PendingClaimTx, PoolRewards, DistributionWithStatus, DistributorWithTimings } from "./types";
 
 export const RewardsActionTypes = {
-  UPDATE_EPOCH_INFO: "UPDATE_EPOCH_INFO",
-  UPDATE_ZWAP_REWARDS: "UPDATE_ZWAP_REWARDS",
   UPDATE_DISTRIBUTORS: "UPDATE_DISTRIBUTORS",
   UPDATE_DISTRIBUTIONS: "UPDATE_DISTRIBUTIONS",
-  UPDATE_CLAIM_HISTORY: "UPDATE_CLAIM_HISTORY",
+  UPDATE_POOL_REWARDS: "UPDATE_POOL_REWARDS",
   UPDATE_POTENTIAL_REWARDS: "UPDATE_POTENTIAL_REWARDS",
-  UPDATE_POOL_WEIGHTS: "UPDATE_POOL_WEIGHTS",
   ADD_PENDING_CLAIM_TX: "ADD_PENDING_CLAIM_TX",
   REMOVE_PENDING_CLAIM_TX: "REMOVE_PENDING_CLAIM_TX",
 };
 
-export function updateEpochInfo(info: EpochInfo) {
-  return {
-    type: RewardsActionTypes.UPDATE_EPOCH_INFO,
-    info,
-  }
-};
-
-export function updatePoolWeights(poolWeights: ZWAPPoolWeights) {
-  return {
-    type: RewardsActionTypes.UPDATE_POOL_WEIGHTS,
-    poolWeights,
-  }
-};
-
-export function updateDistributors(distributors: Distributor[]) {
+export function updateDistributors(distributors: ReadonlyArray<DistributorWithTimings>) {
   return {
     type: RewardsActionTypes.UPDATE_DISTRIBUTORS,
     distributors,
   }
 }
 
-export function updateZwapRewards(rewards: SimpleMap<PoolZWAPReward>) {
+export function updatePoolRewards(rewards: SimpleMap<PoolRewards>) {
   return {
-    type: RewardsActionTypes.UPDATE_ZWAP_REWARDS,
+    type: RewardsActionTypes.UPDATE_POOL_REWARDS,
     rewards,
   }
 };
 
-export function updateDistributions(distributions: ZAPRewardDist[]) {
+export function updateDistributions(distributions: DistributionWithStatus[]) {
   return {
     type: RewardsActionTypes.UPDATE_DISTRIBUTIONS,
     distributions,
   }
 };
 
-export function updateClaimHistory(history: GlobalClaimHistory) {
-  return {
-    type: RewardsActionTypes.UPDATE_CLAIM_HISTORY,
-    history,
-  }
-};
-
-export function updatePotentialRewards(potentialPoolRewards: ZWAPPotentialRewards) {
+export function updatePotentialRewards(potentialRewards: PotentialRewards) {
   return {
     type: RewardsActionTypes.UPDATE_POTENTIAL_REWARDS,
-    potentialPoolRewards,
+    potentialRewards,
   }
 };
 

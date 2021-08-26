@@ -11,8 +11,8 @@ import { Transaction, TokenInfo } from "app/store/types";
 import { RPCEndpoints, ZIL_ADDRESS } from "app/utils/constants";
 import { connectWalletZilPay, ConnectedWallet, WalletConnectType } from "core/wallet";
 import { ZILO_DATA } from "core/zilo/constants";
-import { ZWAPRewards } from "core/zwap";
 import { toBech32Address, ZilswapConnector } from "core/zilswap";
+import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import { logger } from "core/utilities";
 import { getConnectedZilPay } from "core/utilities/zilpay";
 import { PoolTransaction, PoolTransactionResult, ZAPStats } from "core/utilities/zap-stats";
@@ -218,7 +218,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
         registered: tkn.registered,
         whitelisted: tkn.whitelisted,
         isZil: tkn.address === ZIL_ADDRESS,
-        isZwap: tkn.address === ZWAPRewards.TOKEN_CONTRACT[network],
+        isZwap: tkn.address === ZWAP_TOKEN_CONTRACT[network],
         address: tkn.address,
         decimals: tkn.decimals,
         symbol: tkn.symbol,
