@@ -63,6 +63,9 @@ export const DEFAULT_TX_EXPIRY = 3;
 
 export const STATS_REFRESH_RATE = 30000; // ms
 
+export const BRIDGE_TX_DEPOSIT_CONFIRM_ZIL = 3;
+export const BRIDGE_TX_DEPOSIT_CONFIRM_ETH = 12;
+
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const ZIL_ADDRESS = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
 export const ZIL_DECIMALS = 12;

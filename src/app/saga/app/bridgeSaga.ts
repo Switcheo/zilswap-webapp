@@ -1,9 +1,10 @@
 import { Transaction } from "@zilliqa-js/account";
 import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { actions } from "app/store";
+import { Transaction as EthTransaction } from "ethers";
 import { BridgeableToken, BridgeableTokenMapping, BridgeTx, RootState } from "app/store/types";
 import { SimpleMap } from "app/utils";
-import { PollIntervals } from "app/utils/constants";
+import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL, PollIntervals } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
@@ -15,6 +16,7 @@ import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK,
 import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
 import { getBlockchain, getBridge } from '../selectors';
+import { ZilswapConnector } from "core/zilswap";
 
 export enum Status {
   NotStarted,
@@ -23,6 +25,10 @@ export enum Status {
   DepositTxConfirmed,
   WithdrawTxStarted,
   WithdrawTxConfirmed,
+}
+
+export interface EthTransactionResponse extends EthTransaction {
+  confirmations?: number
 }
 
 function getBridgeTxStatus(tx: BridgeTx): Status {
@@ -228,22 +234,37 @@ function* watchActiveTxConfirmations() {
   while (true) {
     logger("bridge saga", "query block confirmations");
     try {
-      const { activeBridgeTx } = getBridge(yield select());
+      const { activeBridgeTx, previewBridgeTx } = getBridge(yield select());
       const { network } = getBlockchain(yield select());
-      if (activeBridgeTx) {
-        if (activeBridgeTx?.withdrawTxHash) {
-          try {
-            const tradehubNetwork = network === Network.MainNet ? TradeHubSDK.Network.MainNet : TradeHubSDK.Network.DevNet;
-            const sdk = new TradeHubSDK({ network: tradehubNetwork });
-            yield call([sdk, sdk.initialize]);
-            const tradehubtx = (yield sdk.api.getTx({ hash: activeBridgeTx.withdrawTxHash })) as TradeHubSDK.RestModels.TxnHistory;
-            const blocks = (yield sdk.api.getLatestBlock()) as TradeHubSDK.RestModels.CosmosBlock;
-            activeBridgeTx.depositConfirmations = Number(blocks?.block.header.height) - Number(tradehubtx.height);
-            yield put(actions.Bridge.addBridgeTx([activeBridgeTx]));
-          } catch (error) {
-            console.error("error retrieving tradehub confirmation info");
-            console.error(error);
+
+      const bridgeTx = previewBridgeTx ?? activeBridgeTx; // previewTx will show on top of activeBridgeTx
+
+      const requiredConfirmations = bridgeTx?.srcChain === Blockchain.Zilliqa ? BRIDGE_TX_DEPOSIT_CONFIRM_ZIL : BRIDGE_TX_DEPOSIT_CONFIRM_ETH;
+      if (bridgeTx?.sourceTxHash && (bridgeTx.depositConfirmations ?? 0) <= requiredConfirmations) {
+        try {
+          switch (bridgeTx.srcChain) {
+            case Blockchain.Zilliqa: {
+              const zilswapSdk = ZilswapConnector.getSDK();
+              const sourceTx: Transaction = yield zilswapSdk.zilliqa.blockchain.getTransaction(bridgeTx.sourceTxHash)
+              if (sourceTx.blockConfirmation)
+                bridgeTx.depositConfirmations = sourceTx.blockConfirmation;
+              yield put(actions.Bridge.addBridgeTx([bridgeTx]));
+              break;
+            };
+            case Blockchain.Ethereum: {
+              const tradehubNetwork = network === Network.MainNet ? TradeHubSDK.Network.MainNet : TradeHubSDK.Network.DevNet;
+              const sdk = new TradeHubSDK({ network: tradehubNetwork });
+
+              const sourceTx: EthTransactionResponse = yield sdk.eth.getProvider().getTransaction(bridgeTx.sourceTxHash);
+              if (sourceTx.confirmations)
+                bridgeTx.depositConfirmations = sourceTx.confirmations;
+              yield put(actions.Bridge.addBridgeTx([bridgeTx]));
+              break;
+            };
           }
+        } catch (error) {
+          console.error("error retrieving tradehub confirmation info");
+          console.error(error);
         }
       }
     } catch (error) {

@@ -13,6 +13,7 @@ import { actions } from "app/store";
 import { BridgeTx } from "app/store/bridge/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate, useBridgeableTokenFinder, useNetwork } from "app/utils";
+import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL } from "app/utils/constants";
 import { ReactComponent as EthereumLogo } from "app/views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "app/views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "app/views/main/Bridge/zilliqa-logo.svg";
@@ -303,6 +304,10 @@ const TransactionDetail = (props: TransactionDetailProps) => {
   let currentBridgeTx = currentTx;
 
   const { dstChain, srcChain } = currentBridgeTx;
+  const requiredDepositConfirms = srcChain === Blockchain.Zilliqa ? BRIDGE_TX_DEPOSIT_CONFIRM_ZIL : BRIDGE_TX_DEPOSIT_CONFIRM_ETH;
+  const depositConfirmations = currentBridgeTx.depositConfirmations && (currentBridgeTx.depositConfirmations > requiredDepositConfirms
+    ? `${requiredDepositConfirms}+`
+    : currentBridgeTx.depositConfirmations.toString())
 
   const { fromChainName, toChainName } = useMemo(() => {
     return {
@@ -565,11 +570,11 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                     <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, currentBridgeTx?.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> TradeHub Deposit Confirmation
                     </Text>
-                    {/* {!!currentBridgeTx.depositConfirmations && ( */}
-                    <Text flexGrow={1} align="right">
-                      <b className={classes.checkIconCompleted}>{"12+"}</b>&nbsp;of&nbsp;<b className={classes.checkIconCompleted}>12</b>&nbsp;Blocks
-                    </Text>
-                    {/* )} */}
+                    {!!depositConfirmations && (
+                      <Text flexGrow={1} align="right">
+                        <b className={classes.checkIconCompleted}>{depositConfirmations}</b>&nbsp;of&nbsp;<b className={classes.checkIconCompleted}>{requiredDepositConfirms}</b>&nbsp;Blocks
+                      </Text>
+                    )}
                   </Box>
                   <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
