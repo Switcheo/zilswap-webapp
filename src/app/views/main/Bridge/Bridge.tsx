@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: "transparent",
     border: `1px solid ${theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : "#D2E5DF"}`,
     "&:hover": {
-      backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.2)}`
+      backgroundColor: theme.palette.label
     }
   },
   textColoured: {
@@ -80,10 +80,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minWidth: 120,
     display: "contents",
     "& .MuiSelect-select:focus": {
-      borderRadius: 12
+      backgroundColor: "transparent"
+    },
+    "& .MuiSelect-root": {
+      borderRadius: 12,
+      "&:hover": {
+        backgroundColor: theme.palette.type === "dark" ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)"
+      }
     },
     "& .MuiOutlinedInput-root": {
-      border: "none"
+      border: "none",
     },
     "& .MuiInputBase-input": {
       fontWeight: "bold",
@@ -95,7 +101,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "& .MuiSelect-selectMenu": {
       minHeight: 0
-    }
+    },
   },
   selectMenu: {
     backgroundColor: theme.palette.background.default,
@@ -105,7 +111,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       justifyContent: "center",
     },
     "& .MuiListItem-root.Mui-focusVisible": {
-      backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.08)}` : "rgba(0, 0, 0, 0.04)",
+      backgroundColor: theme.palette.type === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
     },
     "& .MuiListItem-root.Mui-selected": {
       backgroundColor: theme.palette.label,
@@ -485,6 +491,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }
   }
 
+  // eth takes awhile to load, need to fix
   const onSelectMax = async () => {
     if (!fromToken || !sdk) return;
 
@@ -509,6 +516,12 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }))
   }
 
+  const onEnterKeyPress = () => {
+    if (isSubmitEnabled) {
+      showTransfer();
+    }
+  }
+  
   const popperModifiers = {
     flip: {
       enabled: true,
@@ -606,6 +619,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             tokenList={tokenList}
             onSelectMax={onSelectMax}
             showMaxButton={true}
+            onEnterKeyPress={onEnterKeyPress}
           />
 
           <Button

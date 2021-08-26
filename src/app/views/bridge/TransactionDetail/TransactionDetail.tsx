@@ -37,6 +37,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       maxWidth: 450,
       padding: theme.spacing(2, 2, 0),
     },
+    "& .MuiAccordion-root.Mui-expanded": {
+      backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`
+    },
     "& .MuiAccordionSummary-root": {
       display: "inline-flex"
     },
@@ -119,10 +122,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px",
     boxShadow: "none",
     border: "none",
-    backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`,
+    backgroundColor: "transparent",
     "& .MuiIconButton-root": {
       padding: 0,
       marginRight: 0
+    },
+    "&:hover": {
+      backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`
     }
   },
   arrowIcon: {
@@ -449,7 +455,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
               }
             </Box>
             <Text variant="h4" className={classes.chainName}>{fromChainName} Network</Text>
-            <Text variant="button" className={classes.walletAddress}>{formatAddress(currentBridgeTx?.srcAddr, srcChain)}</Text>
+            <Text variant="button" className={classes.walletAddress}>{currentBridgeTx?.srcAddr ? formatAddress(currentBridgeTx.srcAddr, srcChain) : "-"}</Text>
           </Box>
           <Box flex={0.2} />
           {!!currentBridgeTx?.destinationTxHash

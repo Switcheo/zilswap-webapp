@@ -5,8 +5,8 @@ import { Text } from 'app/components';
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA } from "app/utils";
-import React, { Fragment, useState } from "react";
 import cls from "classnames";
+import React, { useState } from "react";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         padding: theme.spacing(1, 7, 2),
         maxWidth: 510,
         [theme.breakpoints.down("sm")]: {
-            padding: theme.spacing(2, 3, 2),
+            padding: theme.spacing(0, 3, 2),
         },
         [theme.breakpoints.down("xs")]: {
             minWidth: 320
@@ -111,10 +111,9 @@ const MnemonicBox = (props: any) => {
                     {isHistory
                         ? <span>You may only use the following key phrase to recover <br/> your transfer if it failed in Stage 2.</span>
                         : <span>
-                            <strong>In the event you are not able to complete Stage 2 of your transfer</strong>, you may retrieve and resume your fund transfer by entering the following 
-                            unique transfer key phrase on <a className={classes.warningLink} href="https://app.dem.exchange/reset_password" target="_blank" rel="noreferrer">Demex</a>. This phrase can also be retrieved later 
-                            from your <strong>Transfer History</strong> page. Do not ever reveal your mnemonic 
-                            phrase to anyone. ZilSwap will not be held accountable and cannot help you 
+                            <strong>In the event you are not able to complete Stage 2 of your transfer</strong>, you may retrieve and resume your transfer by entering the following 
+                            unique transfer key phrase on your Transfer History page. 
+                            Do not ever reveal your key phrase to anyone. ZilSwap will not be held accountable and cannot help you 
                             retrieve those funds once they are lost.
                         </span>
                     }
@@ -142,37 +141,14 @@ const MnemonicBox = (props: any) => {
                 ))}
             </Grid>
 
-            {isHistory
-                ? <Fragment>
-                    <Box mt={1.5} mb={0.5} display="flex" justifyContent="center">
-                        <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(mnemonic)} open={!!copyMap[mnemonic]} title="Copied!">
-                            <IconButton className={classes.copy} size="small">
-                                <Text>Copy Phrase</Text>
-                                <CopyIcon className={classes.copyIcon}/>
-                            </IconButton>
-                        </Tooltip>
-                    </Box>        
-                        
-
-                    <Button
-                        href="https://app.dem.exchange/reset_password"
-                        target="_blank"
-                        variant="contained"
-                        color="primary"
-                        className={classes.actionButton}
-                    >
-                        Begin Recovery
-                    </Button>
-                </Fragment>
-                : <Box mt={1.5} mb={1} display="flex" justifyContent="center">
-                    <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(mnemonic)} open={!!copyMap[mnemonic]} title="Copied!">
-                        <IconButton className={classes.copy} size="small">
-                            <Text>Copy Phrase</Text>
-                            <CopyIcon className={classes.copyIcon}/>
-                        </IconButton>
-                    </Tooltip>
-                </Box>        
-            }
+            <Box mt={1.5} mb={1} display="flex" justifyContent="center">
+                <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(mnemonic)} open={!!copyMap[mnemonic]} title="Copied!">
+                    <IconButton className={classes.copy} size="small">
+                        <Text>Copy Phrase</Text>
+                        <CopyIcon className={classes.copyIcon}/>
+                    </IconButton>
+                </Tooltip>
+            </Box>
         </Box>
     )
 }
