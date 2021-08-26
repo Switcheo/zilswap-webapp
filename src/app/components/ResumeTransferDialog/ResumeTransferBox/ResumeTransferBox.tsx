@@ -215,7 +215,7 @@ const ResumeTransferBox = (props: any) => {
             const extTransfers = await sdk.api.getTransfers({ account: swthAddress }) as RestModels.Transfer[];
             const depositTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'deposit');
 
-            if (depositTransfer && depositTransfer.status === 'success') {
+            if (depositTransfer) {
                 setErrorMsg("");
                 setDepositTransfer(depositTransfer);
             } else {
