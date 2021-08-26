@@ -4,7 +4,7 @@ jobs:
     resource_class: large
     docker:
       # image with node, npm and yarn installed
-      - image: cimg/node:14.17.1
+      - image: cimg/node:14.17.5
     steps:
       # checkout workspace to repo code
       - checkout
@@ -23,7 +23,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-            - ~/.npm 
+            - ~/.npm
             - ~/.cache
           key: v1-dependencies-{{ checksum "yarn.lock" }}
 
@@ -44,17 +44,29 @@ jobs:
 
   deploy:
     docker:
-      - image: circleci/node:13.7.0-buster
+      - image: cimg/node:14.17.5
     steps:
-
       - attach_workspace:
           at: .
+
+      - restore_cache:
+          keys:
+            - v1-npm-global
+
+      - run:
+          name: install ipfs-deploy
+          command: NPM_CONFIG_PREFIX=~/.npm-global npm install -g ipfs-deploy
 
       - run:
           name: install AWS CLI
           command: |
             sudo apt-get --allow-releaseinfo-change update
             sudo apt-get install awscli
+
+      - save_cache:
+          paths:
+            - ~/.npm-global
+          key: v1-npm-global
 
       - run:
           name: deploy to aws
@@ -67,17 +79,30 @@ jobs:
               aws cloudfront create-invalidation --distribution-id="ESU80N8RF88HZ" --paths=/*
             fi
 
-workflows: 
-  deploy-staging:
+      - run:
+          name: deploy to ipfs
+          command: |
+            if [ "${CIRCLE_BRANCH}" = "staging" ]; then
+              IPFS_DEPLOY_CLOUDFLARE__ZONE=staging.zilswap.exchange \
+              IPFS_DEPLOY_CLOUDFLARE__RECORD=_dnslink.staging.zilswap.exchange \
+              ~/.npm-global/bin/ipfs-deploy build/ -d cloudflare -C
+            elif [ "${CIRCLE_BRANCH}" = "master" ]; then
+              IPFS_DEPLOY_CLOUDFLARE__ZONE=zilswap.exchange \
+              IPFS_DEPLOY_CLOUDFLARE__RECORD=_dnslink.zilswap.exchange \
+              ~/.npm-global/bin/ipfs-deploy build/ -d cloudflare -C
+            fi
+
+workflows:
+  build-and-deploy:
     jobs:
       - build:
           context: org-switcheo
           filters:
             branches:
-              only: 
+              only:
                 - master
                 - staging
-      - deploy: 
+      - deploy:
           context: org-switcheo
           requires:
             - build
