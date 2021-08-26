@@ -53,14 +53,15 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
   };
 
   const poolShare = token.pool?.contributionPercentage.shiftedBy(-2) ?? BIG_ZERO;
-  const poolShareLabel = poolShare.shiftedBy(2).decimalPlaces(3).toString(10) ?? ""
+  const poolShareLabel = poolShare.shiftedBy(2).decimalPlaces(3).toString(10) ?? "";
   const tokenAmount = poolShare.times(token.pool?.tokenReserve ?? BIG_ZERO);
   const zilAmount = poolShare.times(token.pool?.zilReserve ?? BIG_ZERO);
 
   const poolValue = valueCalculators.pool(tokenState.prices, token);
   const depositedValue = poolShare.times(poolValue);
 
-  const potentialRewards = rewardsState.potentialRewardsByPool[token.address].map(item => {
+  const rawPotentialRewards = rewardsState.potentialRewardsByPool[token.address] ?? [];
+  const potentialRewards = rawPotentialRewards.map(item => {
     const rewardToken = tokenState.tokens[item.token_address];
     return {
       rewardToken,
