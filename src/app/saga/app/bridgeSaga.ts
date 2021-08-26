@@ -1,9 +1,10 @@
 import { Transaction } from "@zilliqa-js/account";
 import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { actions } from "app/store";
+import { Transaction as EthTransaction } from "ethers";
 import { BridgeableToken, BridgeableTokenMapping, BridgeTx, RootState } from "app/store/types";
 import { SimpleMap } from "app/utils";
-import { PollIntervals } from "app/utils/constants";
+import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL, PollIntervals } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
@@ -14,7 +15,8 @@ import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK, TradeHubTx } from "tradehub-api-js";
 import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
-import { getBridge } from '../selectors';
+import { getBlockchain, getBridge } from '../selectors';
+import { ZilswapConnector } from "core/zilswap";
 
 export enum Status {
   NotStarted,
@@ -23,6 +25,10 @@ export enum Status {
   DepositTxConfirmed,
   WithdrawTxStarted,
   WithdrawTxConfirmed,
+}
+
+export interface EthTransactionResponse extends EthTransaction {
+  confirmations?: number
 }
 
 function getBridgeTxStatus(tx: BridgeTx): Status {
@@ -224,6 +230,52 @@ function* watchWithdrawConfirmation() {
   }
 }
 
+function* watchActiveTxConfirmations() {
+  while (true) {
+    logger("bridge saga", "query block confirmations");
+    try {
+      const { activeBridgeTx, previewBridgeTx } = getBridge(yield select());
+      const { network } = getBlockchain(yield select());
+
+      const bridgeTx = previewBridgeTx ?? activeBridgeTx; // previewTx will show on top of activeBridgeTx
+
+      const requiredConfirmations = bridgeTx?.srcChain === Blockchain.Zilliqa ? BRIDGE_TX_DEPOSIT_CONFIRM_ZIL : BRIDGE_TX_DEPOSIT_CONFIRM_ETH;
+      if (bridgeTx?.sourceTxHash && (bridgeTx.depositConfirmations ?? 0) <= requiredConfirmations) {
+        try {
+          switch (bridgeTx.srcChain) {
+            case Blockchain.Zilliqa: {
+              const zilswapSdk = ZilswapConnector.getSDK();
+              const sourceTx: Transaction = yield zilswapSdk.zilliqa.blockchain.getTransaction(bridgeTx.sourceTxHash)
+              if (sourceTx.blockConfirmation)
+                bridgeTx.depositConfirmations = sourceTx.blockConfirmation;
+              yield put(actions.Bridge.addBridgeTx([bridgeTx]));
+              break;
+            };
+            case Blockchain.Ethereum: {
+              const tradehubNetwork = network === Network.MainNet ? TradeHubSDK.Network.MainNet : TradeHubSDK.Network.DevNet;
+              const sdk = new TradeHubSDK({ network: tradehubNetwork });
+
+              const sourceTx: EthTransactionResponse = yield sdk.eth.getProvider().getTransaction(bridgeTx.sourceTxHash);
+              if (sourceTx.confirmations)
+                bridgeTx.depositConfirmations = sourceTx.confirmations;
+              yield put(actions.Bridge.addBridgeTx([bridgeTx]));
+              break;
+            };
+          }
+        } catch (error) {
+          console.error("error retrieving tradehub confirmation info");
+          console.error(error);
+        }
+      }
+    } catch (error) {
+      console.error("watchActiveTxConfirmations error")
+      console.error(error)
+    } finally {
+      yield delay(PollIntervals.BridgeDepositWatcher);
+    }
+  }
+}
+
 function* queryTokenFees() {
   let lastCheckedToken: BridgeableToken | undefined = undefined;
   while (true) {
@@ -252,7 +304,7 @@ function* queryTokenFees() {
         const price = bnOrZero(yield sdk.token.getUSDValue(tradehubToken.denom));
 
         logger("bridge saga", "withdraw fees", tradehubToken.denom, feeEst?.withdrawalFee?.toString(10), price.toString(10))
-        
+
         yield put(actions.Bridge.updateFee({
           amount: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-tradehubToken!.decimals),
           value: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-tradehubToken!.decimals).times(price),
@@ -279,4 +331,5 @@ export default function* bridgeSaga() {
   yield fork(watchDepositConfirmation);
   yield fork(watchWithdrawConfirmation);
   yield fork(queryTokenFees);
+  yield fork(watchActiveTxConfirmations);
 }

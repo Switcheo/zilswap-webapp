@@ -22,6 +22,7 @@ export interface BridgeState {
   formState: BridgeFormState;
   bridgeTxs: BridgeTx[];
   activeBridgeTx?: BridgeTx;
+  previewBridgeTx?: BridgeTx;
 
   tokens: BridgeableTokenMapping;
 }
@@ -98,4 +99,7 @@ export interface BridgeTx {
 
   // populated when bridge tx is added
   depositDispatchedAt?: dayjs.Dayjs;
+
+  // block confirmations
+  depositConfirmations?: number;
 }

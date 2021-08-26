@@ -11,7 +11,7 @@ import { hexToRGBA, useBridgeableTokenFinder } from "app/utils";
 import { toHumanNumber } from "app/utils/strings/strings";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
 import cls from "classnames";
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Blockchain } from "tradehub-api-js";
@@ -222,6 +222,7 @@ const CHAIN_NAMES = {
     [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
 }
 
+// TODO: remove any, type the props properly
 const TransferHistory = (props: any) => {
     const { className, ...rest } = props;
     const classes = useStyles();
@@ -229,9 +230,9 @@ const TransferHistory = (props: any) => {
     const bridgeableTokenFinder = useBridgeableTokenFinder();
 
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
+    const previewTx = useSelector<RootState, BridgeTx | undefined>(state => state.bridge.previewBridgeTx);
     const bridgeTxs = bridgeState.bridgeTxs;
     const pendingBridgeTx = bridgeState.activeBridgeTx;
-    const [previewTx, setPreviewTx] = useState<BridgeTx | null>(null);
 
     const handleNewTransfer = () => {
         if (pendingBridgeTx) {
@@ -303,11 +304,11 @@ const TransferHistory = (props: any) => {
     }
 
     const setDisplayTx = (tx: BridgeTx) => {
-        setPreviewTx(tx);
+        dispatch(actions.Bridge.setPreviewBridgeTx(tx));
     }
 
     const clearPreview = () => {
-        setPreviewTx(null);
+        dispatch(actions.Bridge.setPreviewBridgeTx(undefined));
     }
 
     return (

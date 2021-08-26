@@ -29,6 +29,7 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
       dismissedAt: DataCoder.encodeDayjs(tx.dismissedAt),
       depositFailedAt: DataCoder.encodeDayjs(tx.depositFailedAt),
       depositDispatchedAt: DataCoder.encodeDayjs(tx.depositDispatchedAt),
+      depositConfirmations: tx.depositConfirmations,
     };
   },
 
@@ -53,6 +54,7 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
       dismissedAt: DataCoder.decodeDayjs(object.dismissedAt),
       depositFailedAt: DataCoder.decodeDayjs(object.depositFailedAt),
       depositDispatchedAt: DataCoder.decodeDayjs(object.depositDispatchedAt),
+      depositConfirmations: object.depositConfirmations,
     }
   }
 }
@@ -83,6 +85,7 @@ const saveBridgeTxs = (txs: BridgeTx[]) => {
 const initial_state: BridgeState = {
   bridgeTxs: loadedBridgeTxs,
   activeBridgeTx: findActiveBridgeTx(loadedBridgeTxs),
+  previewBridgeTx: undefined,
 
   tokens: {
     [Blockchain.Zilliqa]: [],
@@ -161,6 +164,13 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
         ...state,
         activeBridgeTx,
         bridgeTxs: newBridgeTxs,
+      };
+
+    case BridgeActionTypes.SET_PREVIEW_BRIDGE_TX:
+      const previewBridgeTx = action.payload;
+      return {
+        ...state,
+        previewBridgeTx,
       };
 
     case BridgeActionTypes.UPDATE_FORM:
