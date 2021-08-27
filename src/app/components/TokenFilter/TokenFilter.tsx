@@ -83,18 +83,25 @@ interface Props {
 const TokenFilter = (props: Props) => {
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [initialized, setInitialized] = useState<boolean>(false);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const [selectedState, setSelectedState] = useState<{[id: string]: boolean}>({})
 
   useEffect(() => {
-    if(!tokenState.initialized) return
+
+  }, [])
+
+  useEffect(() => {
+    if(!tokenState.initialized || initialized) return
     var initialSelectedState: {[id: string]: boolean} = {}
 
     Object.values(tokenState.tokens).forEach(token => {
       initialSelectedState[token.address] = true
     })
+    
     setSelectedState(initialSelectedState)
-  }, [tokenState])
+    setInitialized(true)
+  }, [tokenState, initialized])
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
