@@ -119,6 +119,7 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
   };
 
   const onFilterChange = (tokens: string[]) => {
+    console.log(tokens)
     setQueryOpts({
       ...queryOpts,
       pool: tokens.join()

@@ -147,7 +147,7 @@ const TokenFilter = (props: Props) => {
     let newState = {...selectedState}
     newState[token.address] = !selectedState[token.address]
     setSelectedState(newState)
-    props.onFilterChange(selectedTokens.map(token => token.address))
+    props.onFilterChange(Object.keys(newState).filter(address => newState[address]))
   }
   
   const handleGroupChange = (event: React.ChangeEvent<HTMLInputElement>, registered: boolean) => {
@@ -156,7 +156,7 @@ const TokenFilter = (props: Props) => {
       newState[token.address] = event.target.checked
     })
     setSelectedState(newState)
-    props.onFilterChange(selectedTokens.map(token => token.address))
+    props.onFilterChange(Object.keys(newState).filter(address => newState[address]))
   }
 
   const handleChangeAll = () => {
@@ -165,7 +165,7 @@ const TokenFilter = (props: Props) => {
       newState[token.address] = selectedTokens.length !== tokens.length
     })
     setSelectedState(newState)
-    props.onFilterChange(selectedTokens.map(token => token.address))
+    props.onFilterChange(Object.keys(newState).filter(address => newState[address]))
   }
 
   return (

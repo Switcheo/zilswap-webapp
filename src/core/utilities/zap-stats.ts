@@ -229,7 +229,7 @@ export class ZAPStats {
 	 */
 	static getPoolTransactions = async ({ network, ...query }: TxOpts): Promise<PoolTransactionResult> => {
 		const http = ZAPStats.getApi(network);
-		const url = http.path("transactions", {}, query);
+		const url = http.path("transactions", {}, query).replaceAll('%2C', ',');
 		const response = await http.get({ url });
 		const result = await response.json();
 		return {
