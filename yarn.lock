@@ -3388,6 +3388,11 @@
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha1-7ihweulOEdK4J7y+UnC86n8+ce4=
 
+"@types/lodash@^4.14.172":
+  version "4.14.172"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.172.tgz#aad774c28e7bfd7a67de25408e03ee5a8c3d028a"
+  integrity sha512-/BHF5HAx3em7/KkzVKm3LrsD6HZAXuXO1AJZQ3cRRBZj4oHZDviWPYu0aEplAqDFNHZPW6d3G7KN+ONcCCC7pw==
+
 "@types/long@^4.0.0", "@types/long@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.1.tgz#459c65fa1867dafe6a8f322c4c51695663cc55e9"
@@ -18582,10 +18587,10 @@ zeeves-auth-sdk-js@^2.0.12:
     "@zilliqa-js/zilliqa" "^2.2.0"
     crypto-js "^4.0.0"
 
-zilswap-sdk@^1.3.10:
-  version "1.3.10"
-  resolved "https://registry.yarnpkg.com/zilswap-sdk/-/zilswap-sdk-1.3.10.tgz#1b6c02542c0220bb2e080bf373f141c80e597b35"
-  integrity sha512-C+WXjQAA9T26pXdwrjjQNXQMAPmu+oqq+VSCLHBIKnkfw06MFLTAPC9iSSyttLzV++y0+OQxmGgAMhFs0r9/dA==
+zilswap-sdk@^1.3.11:
+  version "1.3.11"
+  resolved "https://registry.yarnpkg.com/zilswap-sdk/-/zilswap-sdk-1.3.11.tgz#10003a19189ef1ca1b9544c084ad3e6610d907eb"
+  integrity sha512-p+Zw8mTn6eWvXnSPfbyJ9OapGMN+mCHUUlOUJ13F/C+feVJ4lYX2sR1uTcK3ujIoZ7EqXqiwkwO9tt6WQ42eVA==
   dependencies:
     "@zilliqa-js/zilliqa" "^2.2.0"
     async-mutex "^0.2.2"

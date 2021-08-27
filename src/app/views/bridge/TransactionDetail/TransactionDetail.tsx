@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, IconButton, Link, makeStyles, Step, StepConnector, StepLabel, Stepper, withStyles } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, CircularProgress, IconButton, Link, makeStyles, Step, StepConnector, StepLabel, Stepper, withStyles } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
@@ -10,16 +10,16 @@ import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, MnemonicDialog, T
 import { ReactComponent as StraightLine } from "app/components/ConfirmTransfer/straight-line.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
-import { BridgeFormState, BridgeTx } from "app/store/bridge/types";
-import { RootState } from "app/store/types";
+import { BridgeTx } from "app/store/bridge/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useNetwork, useBridgeableTokenFinder } from "app/utils";
+import { hexToRGBA, truncate, useBridgeableTokenFinder, useNetwork } from "app/utils";
+import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL } from "app/utils/constants";
 import { ReactComponent as EthereumLogo } from "app/views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "app/views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "app/views/main/Bridge/zilliqa-logo.svg";
 import cls from "classnames";
 import React, { Fragment, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
 import { Network } from "zilswap-sdk/lib/constants";
 
@@ -37,6 +37,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("sm")]: {
       maxWidth: 450,
       padding: theme.spacing(2, 2, 0),
+    },
+    "& .MuiAccordion-root.Mui-expanded": {
+      backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`
     },
     "& .MuiAccordionSummary-root": {
       display: "inline-flex"
@@ -82,7 +85,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignItems: "center",
     borderRadius: 12,
     backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`,
-    padding: theme.spacing(1)
+    padding: theme.spacing(1),
+    overflow: "auto",
   },
   networkBox: {
     display: "flex",
@@ -119,10 +123,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px",
     boxShadow: "none",
     border: "none",
-    backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`,
+    backgroundColor: "transparent",
     "& .MuiIconButton-root": {
       padding: 0,
       marginRight: 0
+    },
+    "&:hover": {
+      backgroundColor: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : `rgba${hexToRGBA("#003340", 0.05)}`
     }
   },
   arrowIcon: {
@@ -240,6 +247,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     textDecoration: "inherit",
     color: "inherit"
   },
+  progress: {
+    color: "rgba(255,255,255,.5)",
+    marginRight: theme.spacing(1)
+  },
 }));
 
 const ColorlibConnector = withStyles({
@@ -292,8 +303,6 @@ const TransactionDetail = (props: TransactionDetailProps) => {
   const bridgeableTokenFinder = useBridgeableTokenFinder();
   const { currentTx, onBack, tokenApproval, approvalHash, isHistory, onNewTransfer } = props;
 
-  const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
-
   const [showTransactions, setShowTransactions] = useState<boolean>(true);
 
   const fromToken = bridgeableTokenFinder(currentTx.srcToken, currentTx.srcChain);
@@ -301,6 +310,10 @@ const TransactionDetail = (props: TransactionDetailProps) => {
   let currentBridgeTx = currentTx;
 
   const { dstChain, srcChain } = currentBridgeTx;
+  const requiredDepositConfirms = srcChain === Blockchain.Zilliqa ? BRIDGE_TX_DEPOSIT_CONFIRM_ZIL : BRIDGE_TX_DEPOSIT_CONFIRM_ETH;
+  const depositConfirmations = currentBridgeTx.depositConfirmations && (currentBridgeTx.depositConfirmations > requiredDepositConfirms
+    ? `${requiredDepositConfirms}+`
+    : currentBridgeTx.depositConfirmations.toString())
 
   const { fromChainName, toChainName } = useMemo(() => {
     return {
@@ -431,7 +444,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
         <Box className={classes.transferBox}>
           <Text>{!currentBridgeTx?.destinationTxHash ? "Transferring" : "Transferred"}</Text>
           <Text variant="h2" className={classes.amount}>
-            {currentBridgeTx?.inputAmount.toString(10) ?? bridgeFormState.transferAmount.toString(10)}
+            {currentBridgeTx?.inputAmount.toString(10)}
             <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} blockchain={fromToken?.blockchain} />
             {fromToken?.symbol}
           </Text>
@@ -447,7 +460,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
               }
             </Box>
             <Text variant="h4" className={classes.chainName}>{fromChainName} Network</Text>
-            <Text variant="button" className={classes.walletAddress}>{formatAddress(currentBridgeTx?.srcAddr, srcChain)}</Text>
+            <Text variant="button" className={classes.walletAddress}>{currentBridgeTx?.srcAddr ? formatAddress(currentBridgeTx.srcAddr, srcChain) : "-"}</Text>
           </Box>
           <Box flex={0.2} />
           {!!currentBridgeTx?.destinationTxHash
@@ -563,6 +576,11 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                     <Text flexGrow={1} align="left">
                       <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, currentBridgeTx?.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> TradeHub Deposit Confirmation
                     </Text>
+                    {!!depositConfirmations && (
+                      <Text flexGrow={1} align="right">
+                        <b className={classes.checkIconCompleted}>{depositConfirmations}</b>&nbsp;of&nbsp;<b className={classes.checkIconCompleted}>{requiredDepositConfirms}</b>&nbsp;Blocks
+                      </Text>
+                    )}
                   </Box>
                   <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
@@ -630,6 +648,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
               variant="contained"
               color="primary"
               className={classes.actionButton}>
+              <CircularProgress size={20} className={classes.progress} />
               Transfer in Progress...
             </FancyButton>
           )}

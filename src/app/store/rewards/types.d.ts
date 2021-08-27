@@ -1,59 +1,50 @@
 import { SimpleMap } from "app/utils";
 import BigNumber from "bignumber.js";
-import { EpochInfo, SwapVolume, ZWAPDistribution, ZWAPPoolWeights, ZWAPPotentialRewards } from "core/utilities";
+import { Distributor, SwapVolume, Distribution, PotentialRewards } from "core/utilities";
 import { Dayjs } from "dayjs";
+import { TokenInfo } from "../token/types";
 
 export interface PoolSwapVolume extends SwapVolume {
   totalZilVolume: BigNumber;
   totalTokenVolume: BigNumber;
 }
 
-export type PoolZWAPReward = {
-  weeklyReward: BigNumber;
-  rewardShare: BigNumber; // pool reward weight ÷ total weight
-  weight: number;
-
+export type PoolReward = {
+  distributorName: string;
+  rewardToken: TokenInfo;
+  currentEpochStart: number;
+  currentEpochEnd: number;
+  amountPerEpoch: BigNumber;
   weightedLiquidity: BigNumber;
-};
+}
 
-export interface ZAPEpochInfo {
-  current: number;
-  epochStart: Dayjs;
-  nextEpoch: Dayjs;
-  maxEpoch: number;
-  raw: EpochInfo;
-};
+export type PoolRewards = ReadonlyArray<PoolReward>;
 
-export interface ZAPRewardDist {
-  info: ZWAPDistribution;
+export interface DistributionWithStatus {
+  info: Distribution;
   readyToClaim: boolean;
   claimed?: boolean;
   claimTx?: any;
 }
 
-
-export interface EpochClaimHistory {
-  [leaf: string]: any; // claim content doesnt hold relevant information
-}
-export interface GlobalClaimHistory {
-  [epoch: number]: EpochClaimHistory;
-}
-
-export interface PendingClaimTx {
-  epoch: number;
-  txHash: string;
-  dispatchedAt: Dayjs;
-}
-export interface PendingClaimTxCache {
-  [hash: string]: PendingClaimTx;
+export interface DistributorWithTimings extends Distributor {
+  currentEpochStart: number;
+  currentEpochEnd: number;
 }
 
 export interface RewardsState {
-  epochInfo: ZAPEpochInfo | null;
-  rewardByPools: SimpleMap<PoolZWAPReward>;
-  rewardDistributions: ZAPRewardDist[];
-  potentialPoolRewards: ZWAPPotentialRewards;
-  globalClaimHistory: GlobalClaimHistory;
-  poolWeights: ZWAPPoolWeights;
-  claimTxs: SimpleMap<PendingClaimTxCache>;
+  distributors: ReadonlyArray<DistributorWithTimings>;
+  distributions: ReadonlyArray<DistributionWithStatus>;
+  rewardsByPool: SimpleMap<PoolRewards>;
+  potentialRewardsByPool: PotentialRewards;
 };
+
+// TODO: maybe remove these?
+export interface PendingClaimTx {
+  txHash: string;
+  dispatchedAt: Dayjs;
+}
+
+export interface PendingClaimTxCache {
+  [hash: string]: PendingClaimTx;
+}
