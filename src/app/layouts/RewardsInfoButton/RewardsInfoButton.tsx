@@ -97,8 +97,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   const {
     unclaimedRewards,
-    claimableRewards,
-    claimTooltip,
+    // claimableRewards,
+    // claimTooltip,
   } = useMemo(() => {
     const pendingClaimTxs = rewardsState.claimTxs[walletAddress ?? ""] ?? {};
     const pendingClaimEpochs = Object.values(pendingClaimTxs).map(pendingTx => pendingTx.epoch);
@@ -294,11 +294,11 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
               <Box marginTop={3} />
 
               {!claimResult && (
-                <Tooltip title={claimTooltip}>
+                <Tooltip title="Claim temporarily disabled, check back soon!">
                   <span>
-                    <Button fullWidth variant="contained" color="primary" disabled={claimableRewards.isZero()} onClick={onClaimRewards} className={classes.claimRewardsButton}>
+                    <Button fullWidth variant="contained" color="primary" disabled onClick={onClaimRewards} className={classes.claimRewardsButton}>
                       {(loading || !claimHistoryLoaded) && <CircularProgress size="1em" color="inherit" />}
-                      {(!loading && claimHistoryLoaded) && "Claim Rewards"}
+                      {(!loading && claimHistoryLoaded) && "Claim disabled"}
                     </Button>
                   </span>
                 </Tooltip>
