@@ -1,7 +1,7 @@
-import { Box, Button, FormControl, Paper, MenuItem, Select, Popper, ClickAwayListener } from "@material-ui/core";
+import { Box, Button, FormControl, MenuItem, Select } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
-import { ConfirmTransfer, CurrencyInput, Text } from 'app/components';
+import { ConfirmTransfer, ConnectETHPopper, CurrencyInput, Text } from 'app/components';
 import FailedBridgeTxWarning from "app/components/FailedBridgeTxWarning";
 import NetworkSwitchDialog from "app/components/NetworkSwitchDialog";
 import BridgeCard from "app/layouts/BridgeCard";
@@ -17,7 +17,7 @@ import { providerOptions } from "core/ethereum";
 import { ConnectedWallet } from "core/wallet";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ethers } from "ethers";
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Blockchain, RestModels, TradeHubSDK } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
@@ -141,7 +141,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: 5,
   },
   priority: {
-    zIndex: 10
+    zIndex: 10,
+  },
+  extraPadding: {
+    padding: theme.spacing(1)
   }
 }))
 
@@ -434,7 +437,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }
   };
 
-  const onDisconnectEthWallet = () => {
+  const onDisconnectEthWallet = (clear?: boolean) => {
     let disconnectForm = {};
     if (toBlockchain === Blockchain.Zilliqa) {
       disconnectForm = {
@@ -453,7 +456,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       network: "ropsten",
       providerOptions
     });
-    web3Modal.clearCachedProvider();
+    if (clear) {
+      web3Modal.clearCachedProvider();
+    }
     setDisconnectMenu(null)
     dispatch(actions.Bridge.updateForm(disconnectForm));
     dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: null }));
@@ -521,20 +526,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       showTransfer();
     }
   }
-  
-  const popperModifiers = {
-    flip: {
-      enabled: true,
-    },
-    preventOverflow: {
-      enabled: true,
-      boundariesElement: 'scrollParent',
-    },
-    arrow: {
-      enabled: true,
-      element: disconnectMenu?.current,
-    },
-  } as const;
 
   return (
     <BridgeCard {...rest} className={cls(classes.root, className)}>
@@ -640,25 +631,17 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       <NetworkSwitchDialog />
       <FailedBridgeTxWarning />
       <ConfirmTransfer showTransfer={layoutState.showTransferConfirmation} />
-      <Popper
+      <ConnectETHPopper
         open={!!disconnectMenu}
-        placement="bottom-end"
         anchorEl={disconnectMenu?.current}
-        modifiers={popperModifiers}
         className={classes.priority}
+        onChangeWallet={() => { onDisconnectEthWallet(true); onClickConnectETH() }}
+        onDisconnectEth={() => onDisconnectEthWallet()}
+        onClickaway={() => setDisconnectMenu(undefined)}
       >
-        <ClickAwayListener onClickAway={() => setDisconnectMenu(null)}>
-          <FormControl variant="outlined" className={classes.formControl}>
-            <Paper className={classes.selectMenu}>
-              <MenuItem onClick={() => { onDisconnectEthWallet(); onClickConnectETH() }}>Change Wallet</MenuItem>
-              <MenuItem onClick={onDisconnectEthWallet}>Disconnect</MenuItem>
-            </Paper>
-          </FormControl>
-        </ClickAwayListener>
+      </ConnectETHPopper>
 
-      </Popper>
     </BridgeCard >
   )
 }
-
 export default BridgeView

@@ -26,7 +26,8 @@ const ResumeTransferDialog = (props: any) => {
             className={classes.root}
             open={showResumeTransferDialog}
             onClose={onCloseDialog}
-            >
+            style={{ zIndex: 0 }} // manually override style
+        >
             <ResumeTransferBox />
         </DialogModal>
     )
