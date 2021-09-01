@@ -89,33 +89,33 @@ export const claim = async (claimOpts: ClaimEpochOpts): Promise<ObservedTx> => {
   return observeTxn
 };
 
-// Needs checking - ClaimMulti accepts List (Pair ByStr20 Claim) -> Address Claim?
-const getMultiTxArgs = (distributions: Distribution[], address: string, contractAddr: string) => {
-  const contractAddrByStr20 = fromBech32Address(contractAddr).toLowerCase();
+const getMultiTxArgs = (distributions: Distribution[], userAddr: string, contractAddr: string) => {
   return [{
-    vname: "claimMulti",
-    type: `${contractAddrByStr20}.ClaimMulti`,
-    value: {
-      constructor: `${contractAddrByStr20}.ClaimMulti`,
-      argtypes: [],
-      arguments: [
-        distributions.map((distribution) => {
-          return [
-            distribution.distrAddr,
-            [
+    vname: "claims",
+    type: `List(Pair ByStr20 ${contractAddr}.Claim)`,
+    value: distributions.map((distribution) => (
+      {
+        constructor: "Pair",
+        argtypes: ["ByStr20", `${contractAddr}.Claim`],
+        arguments: [
+          distribution.distrAddr,
+          {
+            constructor: `${contractAddr}.Claim`,
+            argtypes: [],
+            arguments: [
               distribution.epochNumber.toString(),
               {
-                constructor: `${contractAddrByStr20}.DistributionLeaf`,
+                constructor: `${contractAddr}.DistributionLeaf`,
                 argtypes: [],
-                arguments: [address, distribution.amount.toString(10)],
+                arguments: [userAddr, distribution.amount.toString(10)],
               },
               distribution.proof.map(item => `0x${item}`)
             ]
-          ]
-        })
-      ],
-    },
-  }];
+          }
+        ]
+      }
+    ))
+  }]
 };
 
 export const claimMulti = async (claimOpts: ClaimMultiOpts): Promise<ObservedTx> => {
@@ -128,9 +128,10 @@ export const claimMulti = async (claimOpts: ClaimMultiOpts): Promise<ObservedTx>
   const chainId = CHAIN_IDS[network];
   const distContract = zilswap.getContract(contractAddr);
 
-  const address = wallet.addressInfo.byte20;
+  const userAddr = wallet.addressInfo.byte20;
 
-  const args: any = getMultiTxArgs(distributions, address, contractAddr);
+  const contractAddrByStr20 = fromBech32Address(contractAddr).toLowerCase();
+  const args: any = getMultiTxArgs(distributions, userAddr, contractAddrByStr20);
 
   const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
   const params: any = {

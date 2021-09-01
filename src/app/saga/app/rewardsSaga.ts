@@ -105,18 +105,24 @@ function* queryDistribution() {
         network,
       });
 
-      const distributions: DistributionWithStatus[] = d.map((info: Distribution): DistributionWithStatus => {
-        const zilswap = ZilswapConnector.getSDK();
-        const contract = zilswap.getContract(info.distributor_address);
-
-        const uploadState: any = call([contract, contract.getSubState], "merkle_roots");
-        const merkleRoots = (uploadState?.merkle_roots ?? {}) as SimpleMap<string>;
-
-        return {
+      type Substate = { merkle_roots: { [epoch_number: string]: string } }
+      const uploadStates: { [distributor_address: string]: Substate } = {}
+      const distributions: DistributionWithStatus[] = []
+      const zilswap = ZilswapConnector.getSDK();
+      for (let i = 0; i < d.length; ++i) {
+        const info = d[i]
+        const addr = info.distributor_address
+        let uploadState = uploadStates[addr]
+        if (!uploadState) {
+          const contract = zilswap.getContract(addr);
+          uploadStates[addr] = uploadState = yield call([contract, contract.getSubState], "merkle_roots");
+        }
+        const merkleRoots = uploadState?.merkle_roots ?? {};
+        distributions.push({
           info,
           readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
-        }
-      })
+        })
+      }
 
       yield put(actions.Rewards.updateDistributions(distributions));
 
@@ -167,8 +173,8 @@ function* queryPotentialRewards() {
   }
 }
 
-export default function* zapSaga() {
-  logger("init zap saga");
+export default function* rewardsSaga() {
+  logger("init rewards saga");
   yield take(BlockchainActionTypes.INITIALIZED) // wait for first init
   yield fork(queryDistributors);
   yield fork(queryDistribution);
