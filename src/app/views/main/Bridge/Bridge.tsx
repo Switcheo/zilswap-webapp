@@ -261,7 +261,13 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       providerOptions
     });
 
-    const provider = await web3Modal.connect();
+    const provider = await web3Modal.connect().catch(error => {
+      // handle user rejection
+      console.log(error)
+    });
+    if (!provider) {
+      return;
+    }
     const ethersProvider = new ethers.providers.Web3Provider(provider)
     const signer = ethersProvider.getSigner();
     const ethAddress = await signer.getAddress();

@@ -36,5 +36,8 @@ export const providerOptions = {
   },
   authereum: {
       package: Authereum
+  },
+  boltx: {
+    package: true
   }
 };

@@ -105,6 +105,7 @@ const ConnectedWalletBox = (props: any) => {
       case WalletConnectType.PrivateKey: return "Private Key";
       case WalletConnectType.Zeeves: return "Zeeves Wallet";
       case WalletConnectType.ZilPay: return "ZilPay";
+      case WalletConnectType.BoltX: return "Bolt-X";
       default: return "Unknown";
     }
   }, [wallet?.type]);

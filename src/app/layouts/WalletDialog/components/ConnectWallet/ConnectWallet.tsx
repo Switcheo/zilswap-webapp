@@ -12,6 +12,7 @@ import { ReactComponent as PrivateKeyIconDark } from "./private-key-dark.svg";
 import { ReactComponent as PrivateKeyIcon } from "./private-key.svg";
 import { ReactComponent as ZeevesIcon } from "./zeeves.svg";
 import { ReactComponent as ZilPayIcon } from "./zilpay.svg";
+import { ReactComponent as BoltXIcon } from "./boltx.svg";
 
 export interface ConnectWalletProps {
   onSelectConnectOption: (option: ConnectOptionType) => void;
@@ -64,6 +65,7 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
     <Box {...rest} className={cls(classes.root, className)}>
       <DialogContent>
         <ConnectWalletOption label="ZilPay" icon={ZilPayIcon} secureLevel={4} buttonText="Connect ZilPay" onSelect={() => onSelectConnectOption("zilpay")} />
+        <ConnectWalletOption label="BoltX" icon={BoltXIcon} secureLevel={4} buttonText="Connect Bolt-X" onSelect={() => onSelectConnectOption("boltX")} />
         <ConnectWalletOption label="Zeeves" icon={ZeevesIcon} secureLevel={4} buttonText="Connect Zeeves" onSelect={() => onSelectConnectOption("zeeves")} />
         {showPrivateKeyOption && (
           <ConnectWalletOption label="Private Key" icon={theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon} secureLevel={1} buttonText="Enter Private Key" onSelect={() => onSelectConnectOption("privateKey")} />

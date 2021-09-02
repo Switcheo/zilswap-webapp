@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const NetworkSwitchBox = (props: any) => {
-    const { className, chainName, network } = props;
+    const { className, chainName, network, walletName, bridgeName } = props;
     const classes = useStyles();
     const dispatch = useDispatch();
     
@@ -69,7 +69,7 @@ const NetworkSwitchBox = (props: any) => {
 
     const switchChain = async () => {
         try {
-            const ethereum = window.ethereum;
+            const ethereum = (window as any).ethereum;
             await ethereum.request({
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: '0x3' }],
@@ -100,7 +100,7 @@ const NetworkSwitchBox = (props: any) => {
             
 
             <Text marginBottom={2.5} align="center">
-                Switch to the <span style={{ fontWeight: "bold" }}>{chainName ? 'Ropsten Test Network' : 'Zilliqa TestNet'}</span> on <span style={{ fontWeight: "bold" }}>{chainName ? 'MetaMask' : 'ZilPay'}</span> to start using ZilBridge.
+                Switch to the <span style={{ fontWeight: "bold" }}>{chainName ? 'Ropsten Test Network' : 'Zilliqa TestNet'}</span> on <span style={{ fontWeight: "bold" }}>{chainName ? bridgeName : walletName}</span> to start using ZilBridge.
             </Text>
 
             {chainName 

@@ -2,10 +2,10 @@ import { Dayjs } from "dayjs";
 import { WalletProvider } from "zilswap-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 
-export type ConnectOptionType = "zilpay" | "privateKey" | "zeeves";
+export type ConnectOptionType = "zilpay" | "boltX" | "privateKey" | "zeeves";
 
 export enum WalletConnectType {
-  Moonlet, PrivateKey, ZilPay, Zeeves
+  Moonlet, PrivateKey, ZilPay, Zeeves, BoltX
 };
 
 export type WalletAccountInfo = {

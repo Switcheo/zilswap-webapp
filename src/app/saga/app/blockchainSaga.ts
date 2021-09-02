@@ -8,8 +8,8 @@ import { actions } from "app/store";
 import { ChainInitAction } from "app/store/blockchain/actions";
 import { BridgeWalletAction, WalletAction, WalletActionTypes } from "app/store/wallet/actions";
 import { Transaction, TokenInfo } from "app/store/types";
-import { RPCEndpoints, ZIL_ADDRESS } from "app/utils/constants";
-import { connectWalletZilPay, ConnectedWallet, WalletConnectType } from "core/wallet";
+import { BoltXNetworkMap, RPCEndpoints, ZIL_ADDRESS } from "app/utils/constants";
+import { connectWalletZilPay, ConnectedWallet, WalletConnectType, connectWalletBoltX } from "core/wallet";
 import { ZILO_DATA } from "core/zilo/constants";
 import { ZWAPRewards } from "core/zwap";
 import { toBech32Address, ZilswapConnector } from "core/zilswap";
@@ -23,6 +23,7 @@ import { Network } from "zilswap-sdk/lib/constants";
 import { Blockchain } from "tradehub-api-js";
 import { SimpleMap } from "app/utils";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
+import { getConnectedBoltX } from "core/utilities/boltx";
 
 const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
   if (!wallet) return null;
@@ -32,6 +33,7 @@ const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
       return wallet.addressInfo.privateKey
     case WalletConnectType.Zeeves:
     case WalletConnectType.ZilPay:
+    case WalletConnectType.BoltX:
       return wallet.provider;
     case WalletConnectType.Moonlet:
       throw new Error("moonlet support under development");
@@ -67,6 +69,42 @@ const zilPayObserver = (zilPay: any) => {
       logger('deregistered zilpay observer')
       accountObserver.unsubscribe()
       networkObserver.unsubscribe()
+    }
+  })
+}
+
+const boltXObserver = (boltX: any) => {
+  return eventChannel<ConnectedWallet>(emitter => {
+    const accountSubscription = async (account: any) => {
+      if (account) {
+        logger(`BoltX account changed to: ${account.bech32}`)
+        const walletResult = await connectWalletBoltX(boltX);
+        if (walletResult?.wallet) {
+          emitter(walletResult.wallet)
+        }
+      } else {
+        logger(`BoltX disconnected`)
+        put(actions.Blockchain.initialize({ wallet: null, network: BoltXNetworkMap[boltX.zilliqa.wallet.net] }));
+      }
+    };
+
+    const networkSubscription = async (net: string) => {
+      logger(`BoltX network changed to: ${net}`)
+      const walletResult = await connectWalletBoltX(boltX);
+      if (walletResult?.wallet) {
+        emitter(walletResult.wallet)
+      }
+    };
+
+    const { ACCOUNT_CHANGED, NETWORK_CHANGED } = boltX.zilliqa.wallet.events;
+    boltX.zilliqa.wallet.on(ACCOUNT_CHANGED, accountSubscription);
+    boltX.zilliqa.wallet.on(NETWORK_CHANGED, networkSubscription);
+    logger('registered boltX observer')
+
+    return () => {
+      logger('deregistered boltX observer')
+      boltX.zilliqa.wallet.off(ACCOUNT_CHANGED, accountSubscription);
+      boltX.zilliqa.wallet.off(NETWORK_CHANGED, networkSubscription);
     }
   })
 }
@@ -355,6 +393,38 @@ function* watchZilPay() {
   }
 }
 
+function* watchBoltX() {
+  let chan
+  while (true) {
+    try {
+      const action: WalletAction = yield take(WalletActionTypes.WALLET_UPDATE)
+      if (action.payload.wallet?.type === WalletConnectType.BoltX) {
+        logger('starting to watch boltx')
+        const boltX = (yield call(getConnectedBoltX)) as unknown as any;
+        chan = (yield call(boltXObserver, boltX)) as EventChannel<ConnectedWallet>;
+        break
+      }
+    } catch (e) {
+      console.warn('Watch BoltX failed, will automatically retry on reconnect. Error:')
+      console.warn(e)
+    }
+  }
+  try {
+    while (true) {
+      const newWallet = (yield take(chan)) as ConnectedWallet
+      const { wallet: oldWallet } = getWallet(yield select())
+      if (oldWallet?.type !== WalletConnectType.BoltX) continue
+      if (newWallet.addressInfo.bech32 === oldWallet?.addressInfo.bech32 &&
+        newWallet.network === oldWallet.network) continue
+      yield put(actions.Blockchain.initialize({ wallet: newWallet, network: newWallet.network }))
+    }
+  } finally {
+    if (yield cancelled()) {
+      chan.close()
+    }
+  }
+}
+
 function* watchWeb3() {
   let chan
   while (true) {
@@ -386,6 +456,7 @@ export default function* blockchainSaga() {
   logger("init blockchain saga");
   yield fork(watchInitialize);
   yield fork(watchZilPay);
+  yield fork(watchBoltX);
   yield fork(watchWeb3)
   yield put(actions.Blockchain.ready())
 }

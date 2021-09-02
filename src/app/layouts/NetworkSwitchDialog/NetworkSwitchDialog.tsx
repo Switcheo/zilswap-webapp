@@ -5,7 +5,7 @@ import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useNetwork } from "app/utils";
 import cls from "classnames";
-import { ConnectedWallet } from "core/wallet";
+import { ConnectedWallet, WalletConnectType } from "core/wallet";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -34,6 +34,27 @@ const NetworkSwitchDialog = (props: any) => {
 
         return true;
     }, [wallet]);
+    const walletName = useMemo(() => {
+        if (!wallet?.type) return undefined;
+        switch (wallet?.type) {
+        case WalletConnectType.PrivateKey: return "Private Key";
+        case WalletConnectType.Zeeves: return "Zeeves Wallet";
+        case WalletConnectType.ZilPay: return "ZilPay";
+        case WalletConnectType.BoltX: return "Bolt-X";
+        default: return "Unknown";
+        }
+    }, [wallet?.type]);
+
+    const bridgeWalletName = useMemo(() => {
+        if (!bridgeWallet?.provider) return undefined;
+        if (bridgeWallet?.provider.isBoltX) {
+            return 'Bolt-X';
+        } else if (bridgeWallet?.provider.isMetamask) {
+            return 'Metamask';
+        } else {
+            return 'Unknown';
+        }
+    }, [bridgeWallet?.provider]);
 
     useEffect(() => {
         if (bridgeWallet && Number(bridgeWallet.chainId) !== 3) {
@@ -72,7 +93,7 @@ const NetworkSwitchDialog = (props: any) => {
             {...rest}
             className={cls(classes.root, className)}
             >
-            <NetworkSwitchBox chainName={chainName} network={network} />
+            <NetworkSwitchBox chainName={chainName} network={network} walletName={walletName} bridgeName={bridgeWalletName}/>
         </DialogModal>
     )
 }
