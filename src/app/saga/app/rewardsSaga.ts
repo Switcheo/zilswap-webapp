@@ -4,7 +4,7 @@ import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { actions } from "app/store";
 import { BlockchainActionTypes } from "app/store/blockchain/actions";
 import { RewardsActionTypes } from "app/store/rewards/actions";
-import { WalletState, DistributorWithTimings, DistributionWithStatus, PoolReward, PotentialRewards } from "app/store/types";
+import { DistributorWithTimings, DistributionWithStatus, PoolReward, PotentialRewards } from "app/store/types";
 import { WalletActionTypes } from "app/store/wallet/actions";
 import { SimpleMap } from "app/utils";
 import { PollIntervals } from "app/utils/constants";

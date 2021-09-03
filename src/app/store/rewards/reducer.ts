@@ -1,7 +1,6 @@
 import { SimpleMap } from "app/utils";
-import { PotentialRewards } from "core/utilities";
 import { RewardsActionTypes } from "./actions";
-import { PoolRewards, RewardsState, DistributionWithStatus, DistributorWithTimings } from "./types";
+import { PoolRewards, PotentialRewards, RewardsState, DistributionWithStatus, DistributorWithTimings } from "./types";
 
 const initial_state: RewardsState = {
   distributors: [],

@@ -40,8 +40,8 @@ const typography = (palette) => ({
   subtitle2: {
     fontSize: "12px",
     lineHeight: "14px",
-    fontWeight: "bold",
-    letterSpacing: 0,
+    fontWeight: 500,
+    letterSpacing: 0.05,
   },
   body1: {
     fontFamily: "Avenir Next",

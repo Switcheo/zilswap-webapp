@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fontSize: '14px',
       lineHeight: '16px',
     },
-    color: theme.palette.primary.dark,
+    color: theme.palette.text?.primary,
   },
   rewardContainer: {
     [theme.breakpoints.down("sm")]: {
@@ -241,7 +241,15 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
 
   if (token.isZil) return null;
 
-  const decimals = token.symbol === "ZIL" ? 12 : (token.decimals ?? 0);
+  const decimals = token.address === ZIL_ADDRESS ? 12 : (token.decimals ?? 0);
+
+  const poolShare = token.pool?.contributionPercentage.shiftedBy(-2) ?? BIG_ZERO;
+  const poolShareLabel = poolShare.shiftedBy(2).decimalPlaces(3).toString(10) ?? "";
+  const tokenAmount = toHumanNumber(poolShare.times(token.pool?.tokenReserve ?? BIG_ZERO).shiftedBy(-decimals));
+  const zilAmount = toHumanNumber(poolShare.times(token.pool?.zilReserve ?? BIG_ZERO).shiftedBy(-12));
+  const depositedValue = poolShare.times(usdValues?.poolLiquidity ?? BIG_ZERO);
+
+  const potentialRewards = rewardsState.potentialRewardsByPool[token.address] || [];
 
   return (
     <Card {...rest} className={cls(classes.root, className)}>
@@ -328,15 +336,38 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
           <Divider className={classes.divider}/>
         </Box>
 
-        <Box display="flex" flexDirection="column" className={classes.liquidityVolumeContainer}>
-          <KeyValueDisplay marginBottom={2.25} kkey="Total Liquidity" ValueComponent="span">
+        <Box marginBottom={1} display="flex" flexDirection="column" className={classes.liquidityVolumeContainer}>
+          <KeyValueDisplay marginBottom={1.5} kkey="Total Liquidity" ValueComponent="span">
             <Text className={classes.label}>${usdValues?.poolLiquidity.dp(0).toFormat()}</Text>
           </KeyValueDisplay>
-          <KeyValueDisplay marginBottom={2.25} kkey="24-Hour Volume" ValueComponent="span">
+          <KeyValueDisplay marginBottom={1.5} kkey="24-Hour Volume" ValueComponent="span">
             <Text align="right" className={classes.label}>
-              <span className={classes.textColoured}>{(swapVolumes[token.address]?.totalZilVolume || BIG_ZERO).shiftedBy(-12).dp(0).toFormat()} ZIL</span> (${totalZilVolumeUSD?.dp(0).toFormat()})
+              <span className={classes.textColoured}>{(swapVolumes[token.address]?.totalZilVolume || BIG_ZERO).shiftedBy(-12).dp(0).toFormat()}</span> ZIL
+              (${totalZilVolumeUSD?.dp(0).toFormat()})
             </Text>
           </KeyValueDisplay>
+          {
+            !poolShare.isZero() &&
+              <KeyValueDisplay marginBottom={1.5} kkey={`Your Pool Share (${poolShareLabel}%)`} ValueComponent="span">
+                <Text align="right" className={classes.label}>
+                  <span className={classes.textColoured}>{tokenAmount}</span> {token.symbol} + <span className={classes.textColoured}>{zilAmount}</span> ZIL
+                  (${toHumanNumber(depositedValue, 2)})
+                </Text>
+            </KeyValueDisplay>
+          }
+          {
+            potentialRewards.flatMap(reward => {
+              const rewardToken = tokenState.tokens[reward.tokenAddress]
+              if (!rewardToken) return []
+              return [
+                <KeyValueDisplay key={token.address} marginBottom={1.5} kkey="Your Estimated Rewards" ValueComponent="span">
+                  <Text align="right" className={classes.label}>
+                    <span className={classes.textColoured}>{reward.amount.shiftedBy(-rewardToken.decimals).dp(5).toFormat()}</span> {rewardToken.symbol}
+                  </Text>
+                </KeyValueDisplay>
+              ]
+            })
+          }
         </Box>
       </CardContent>
     </Card>
