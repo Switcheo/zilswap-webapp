@@ -3,12 +3,13 @@ import { makeStyles } from "@material-ui/core/styles";
 import { StatsCard, Text } from "app/components";
 import { RewardsState, RootState, StatsState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useValueCalculators } from "app/utils";
+import { useValueCalculators, useNetwork } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
+import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import cls from "classnames";
 import dayjs from "dayjs";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import HelpInfo from "../HelpInfo";
 import CurrencyLogo from "../CurrencyLogo";
@@ -71,10 +72,9 @@ interface Countdown {
   seconds: string;
 }
 
-const ZWAP_TOKEN_ADDRESS = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
-
 const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
+  const network = useNetwork();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
   const statsState = useSelector<RootState, StatsState>(state => state.stats);
@@ -88,7 +88,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
     return () => clearInterval(interval);
 
     // eslint-disable-next-line
-  }, [rewardsState.epochInfo]);
+  }, [rewardsState.distributors]);
 
   const { totalLiquidity, liquidityChangePercent } = React.useMemo(() => {
 
@@ -120,17 +120,12 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
 
   }, [tokenState, valueCalculators, statsState.liquidityChange24h]);
 
-  const nextRewards = useMemo(() => {
-    if (!rewardsState.epochInfo) return BIG_ZERO;
-    return bnOrZero(rewardsState.epochInfo.raw.tokens_per_epoch);
-  }, [rewardsState.epochInfo])
-
   const updateCountdown = () => {
-    if (!rewardsState.epochInfo) return setCountdown(null);
+    if (rewardsState.distributors.length === 0) return
 
-    const nextEpoch = rewardsState.epochInfo.nextEpoch;
     const currentTime = dayjs();
-    const diffSeconds = Math.max(0, nextEpoch.unix() - currentTime.unix()) % rewardsState.epochInfo.raw.epoch_period;
+    const endEpoch = dayjs.unix(Math.min(...rewardsState.distributors.map(d => d.currentEpochEnd)))
+    const diffSeconds = Math.max(0, endEpoch.diff(currentTime, 'seconds'))
     const days = Math.floor(diffSeconds / 86400);
     const hours = Math.floor((diffSeconds % 86400) / 3600);
     const minutes = Math.floor((diffSeconds % 3600) / 60);
@@ -143,8 +138,6 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
       seconds: `0${seconds}`.substr(-2),
     });
   };
-
-  const epochInfo = rewardsState.epochInfo;
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
@@ -174,24 +167,16 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
                 </Box>
               )}>
                 <Text marginBottom={2} variant="h1" className={cls(classes.statistic, classes.reward)}>
-                  {nextRewards.toFormat(0)}
-                  <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} className={classes.currencyLogo}/>
+                  {'-'}
+                  <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_CONTRACT[network]} className={classes.currencyLogo}/>
                   <span className={classes.currency}>
                     ZWAP
                   </span>
                 </Text>
                 <Box alignItems="center" display="flex" className={classes.subtitle}>
-                  {!!epochInfo && epochInfo.current < epochInfo.maxEpoch && (
-                    <Text>
-                      Per Week
-                    </Text>
-                  )}
-
-                  {!!epochInfo && epochInfo.current >= epochInfo.maxEpoch && (
-                    <Text>
-                      All ZWAP rewards distributed
-                    </Text>
-                  )}
+                  <Text>
+                    Per Week
+                  </Text>
                 </Box>
               </StatsCard>
             </Grid>

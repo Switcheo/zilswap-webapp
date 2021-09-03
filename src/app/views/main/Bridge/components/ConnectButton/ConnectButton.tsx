@@ -14,7 +14,7 @@ import { Blockchain } from "tradehub-api-js";
 
 interface Props extends ButtonProps {
   address: string;
-  chain: Blockchain;
+  chain: Blockchain | null;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({

@@ -7,8 +7,7 @@ import { useClaimEnabled, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ONE, BIG_ZERO } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ZWAPRewards } from "core/zwap";
-import { TOKEN_CONTRACT } from "core/zwap/constants";
+import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import NetworkToggle from "../NetworkToggle";
@@ -96,14 +95,14 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
   const network = useNetwork();
 
   const zapTokenValue: BigNumber = useMemo(() => {
-    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[network] ?? "";
+    const zapContractAddr = ZWAP_TOKEN_CONTRACT[network] ?? "";
     const zapToken = tokenState.tokens[zapContractAddr];
     if (!zapToken) return BIG_ZERO;
 
     return valueCalculators.amount(tokenState.prices, zapToken, BIG_ONE).shiftedBy(zapToken.decimals);
   }, [network, tokenState.prices, tokenState.tokens, valueCalculators]);
 
-  const zwapAddress = TOKEN_CONTRACT[network];
+  const zwapAddress = ZWAP_TOKEN_CONTRACT[network];
   return (
     <Drawer PaperProps={{ className: classes.paper }} onClose={onClose} {...rest} className={cls(classes.root, className)}>
       <div className={classes.drawerHeader}>

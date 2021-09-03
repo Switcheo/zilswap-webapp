@@ -26,12 +26,12 @@ interface Props extends BoxProps {
 const useStyles = makeStyles((theme: AppTheme) => ({
   icon: {
     fontSize: "16px",
-    color: theme.palette.text?.secondary,
+    color: theme.palette.label,
   },
   snackbar: {
     background: theme.palette.background.default,
     border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    color: theme.palette.text?.secondary,
+    color: theme.palette.label,
     padding: theme.spacing(2),
     borderRadius: "12px",
     display: "flex",
@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     textAlign: "center"
   },
   link: {
-    color: theme.palette.text?.secondary,
+    color: theme.palette.label,
   },
   linkIcon: {
     marginLeft: 4,

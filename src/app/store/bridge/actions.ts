@@ -6,6 +6,7 @@ export enum BridgeActionTypes {
   UPDATE_FORM = "BRIDGE_UPDATE_FORM",
   SET_TOKENS = "BRIDGE_SET_TOKENS",
   ADD_BRIDGE_TXS = "BRIDGE_ADD_BRIDGE_TXS",
+  SET_PREVIEW_BRIDGE_TX = "BRIDGE_SET_PREVIEW_BRIDGE_TX",
   UPDATE_FEE = "BRIDGE_UPDATE_FEE",
 }
 
@@ -19,6 +20,13 @@ export function updateForm(payload: Partial<BridgeFormState>) {
 export function addBridgeTx(payload: BridgeTx[]) {
   return {
     type: BridgeActionTypes.ADD_BRIDGE_TXS,
+    payload
+  }
+}
+
+export function setPreviewBridgeTx(payload: BridgeTx | undefined) {
+  return {
+    type: BridgeActionTypes.SET_PREVIEW_BRIDGE_TX,
     payload
   }
 }

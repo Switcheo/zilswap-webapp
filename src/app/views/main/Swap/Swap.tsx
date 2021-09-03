@@ -16,7 +16,7 @@ import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_ADDRESS } from "app/utils/co
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { toBasisPoints, ZilswapConnector } from "core/zilswap";
-import { TOKEN_CONTRACT } from "core/zwap/constants";
+import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router";
@@ -237,7 +237,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       return;
     }
 
-    const zwapAddress = TOKEN_CONTRACT[network];
+    const zwapAddress = ZWAP_TOKEN_CONTRACT[network];
     const queryInput = queryParams.get("tokenIn") ?? ZIL_ADDRESS;
     const queryOutput = queryParams.get("tokenOut") ?? zwapAddress;
     if (queryInput === queryOutput && queryOutput) {

@@ -8,9 +8,8 @@ import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } fro
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
-import { bnOrZero, toHumanNumber } from "app/utils/strings/strings";
+import { toHumanNumber } from "app/utils/strings/strings";
 import cls from "classnames";
-import { ZWAPRewards } from "core/zwap";
 import React, { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
@@ -142,8 +141,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.primary.dark,
     marginBottom: theme.spacing(1)
   },
-  zwapLogo: {
+  rewardTokenLogo: {
     marginLeft: theme.spacing(.5),
+    height: 26,
+    width: 26,
     [theme.breakpoints.down("sm")]: {
       paddingBottom: theme.spacing(1.8),
       marginLeft: 0
@@ -174,14 +175,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   logo: {
+    height: 27,
+    width: 27,
+    marginRight: 3,
     [theme.breakpoints.down("xs")]: {
-      height: "24px",
-      width: "24px"
+      height: 23,
+      width: 23
     },
   }
 }));
-
-const ZWAP_TOKEN_ADDRESS = "zil1p5suryq6q647usxczale29cu3336hhp376c627";
 
 const PoolInfoCard: React.FC<Props> = (props: Props) => {
   const { children, className, token, ...rest } = props;
@@ -216,38 +218,24 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
 
 
   const {
-    potentialRewards,
-    // rewardsValue,
-    roiLabel,
+    poolRewards,
+    roi,
     apr,
   } = React.useMemo(() => {
-    if (!rewardsState.epochInfo) return {
-      rewardsValue: BIG_ZERO,
-      potentialRewards: BIG_ZERO,
-      roiLabel: "-",
-      apr: BIG_ZERO,
-    };
+    const poolRewards = rewardsState.rewardsByPool[token.address] || [];
 
-    const poolRewards = bnOrZero(rewardsState.rewardByPools[token.address]?.weeklyReward);
-
-    const zapContractAddr = ZWAPRewards.TOKEN_CONTRACT[network];
-    const zapToken = tokenState.tokens[zapContractAddr];
-
-    const rewardsValue = valueCalculators.amount(tokenState.prices, zapToken, poolRewards.shiftedBy(12));
-    const roiPerEpoch = rewardsValue.dividedBy(usdValues.poolLiquidity);
-    const epochsPerYear = 52
-    const apr = bnOrZero(roiPerEpoch.times(epochsPerYear).shiftedBy(2).decimalPlaces(1));
-    const epochDuration = rewardsState.epochInfo.raw.epoch_period;
-    const secondsInDay = 24 * 3600;
-    const roiPerDay = bnOrZero(roiPerEpoch.dividedBy(epochDuration).times(secondsInDay).shiftedBy(2).decimalPlaces(2));
+    // calculate total roi and apr
+    const roiPerSecond = usdValues.rewardsPerSecond.dividedBy(usdValues.poolLiquidity);
+    const secondsPerDay = 24 * 3600
+    const roiPerDay = roiPerSecond.times(secondsPerDay).shiftedBy(2).decimalPlaces(2);
+    const apr = roiPerSecond.times(secondsPerDay * 365).shiftedBy(2).decimalPlaces(1);
 
     return {
-      potentialRewards: poolRewards,
-      rewardsValue,
-      roiLabel: roiPerDay.isZero() ? "0%" : `${roiPerDay.toFormat()}%`,
-      apr,
+      poolRewards,
+      roi: roiPerDay.isZero() || roiPerDay.isNaN() ? "-" : `${roiPerDay.toFormat()}%`,
+      apr: apr.isZero() || apr.isNaN() ? '-' : `${toHumanNumber(apr, 1)}%`,
     };
-  }, [network, rewardsState.epochInfo, rewardsState.rewardByPools, token, usdValues, tokenState.prices, tokenState.tokens, valueCalculators]);
+  }, [rewardsState.rewardsByPool, token, usdValues]);
 
 
   if (token.isZil) return null;
@@ -284,7 +272,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
             <Box py={"4px"} px={"16px"}>
                 <Box mt={1} mb={1} display="flex" justifyContent="space-between">
                   <Box display="flex" alignItems="flex-end">
-                    <CurrencyLogo className={classes.logo} currency="ZIL" address={token.address} />
+                    <CurrencyLogo className={classes.logo} currency="ZIL" address={ZIL_ADDRESS} />
                     <Text className={classes.token}>ZIL</Text>
                   </Box>
                   <HelpInfo placement="top" title={`This shows the current ${token.symbol}-ZIL pool size.`}/>
@@ -297,19 +285,30 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
         <Box display="flex" className={classes.statContainer} px={1}>
           <Box display="flex" className={classes.statItem}>
             <Text variant="subtitle2" marginBottom={1.5}>Reward to be Distributed</Text>
-            <Box display="flex" className={classes.rewardContainer} alignItems="flex-end" flexWrap="wrap">
-              <Text variant="h1" color="textPrimary" className={classes.rewardValue}>
-                {potentialRewards.isZero() ? "0" : potentialRewards.toFormat()}
+            {
+              poolRewards.length > 0 ?
+                poolRewards.map(reward => {
+                  return (
+                    <Box display="flex" className={classes.rewardContainer} alignItems="flex-end" flexWrap="wrap" key={reward.rewardToken.address}>
+                      <Text variant="h1" color="textPrimary" className={classes.rewardValue}>
+                        {reward.amountPerEpoch.isZero() ? "0" : reward.amountPerEpoch.shiftedBy(-reward.rewardToken.decimals).toFormat(2)}
+                      </Text>
+                      <CurrencyLogo className={classes.rewardTokenLogo} currency={reward.rewardToken.symbol} address={reward.rewardToken.address} />
+                    </Box>
+                  )
+                })
+              :
+              <Text color="textPrimary" className={classes.rewardValue}>
+                -
               </Text>
-              <CurrencyLogo className={classes.zwapLogo} currency="ZWAP" address={ZWAP_TOKEN_ADDRESS} />
-            </Box>
+            }
           </Box>
 
           <Box display="flex" className={classes.statItem}>
             <Text align="right" variant="subtitle2" marginBottom={1.5}>Daily ROI</Text>
             <Box display="flex" className={classes.roiContainer}>
               <Text color="textPrimary" className={classes.rewardValue}>
-                {roiLabel}
+                {roi}
               </Text>
             </Box>
           </Box>
@@ -318,12 +317,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
             <Text align="right" variant="subtitle2" marginBottom={1.5}>APR</Text>
             <Box display="flex" className={classes.roiContainer}>
               <Text color="textPrimary" className={classes.rewardValue}>
-                {!apr.isZero() && (
-                  <span>{toHumanNumber(apr, 1)}%</span>
-                )}
-                {apr.isZero() && (
-                  <span>0%</span>
-                )}
+                {apr}
               </Text>
             </Box>
           </Box>
@@ -339,7 +333,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
           </KeyValueDisplay>
           <KeyValueDisplay marginBottom={2.25} kkey="24-Hour Volume" ValueComponent="span">
             <Text align="right" className={classes.label}>
-              <span className={classes.textColoured}>{swapVolumes[token.address]?.totalZilVolume.shiftedBy(-12).dp(0).toFormat()} ZIL</span> (${totalZilVolumeUSD?.dp(0).toFormat()})
+              <span className={classes.textColoured}>{(swapVolumes[token.address]?.totalZilVolume || BIG_ZERO).shiftedBy(-12).dp(0).toFormat()} ZIL</span> (${totalZilVolumeUSD?.dp(0).toFormat()})
             </Text>
           </KeyValueDisplay>
         </Box>

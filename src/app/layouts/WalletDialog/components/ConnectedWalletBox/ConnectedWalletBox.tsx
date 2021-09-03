@@ -22,7 +22,7 @@ const useStyles = makeStyles(theme => ({
     borderRadius: "0 0 12px 12px"
   },
   walletDetail: {
-    margin: theme.spacing(16, 8, 0),
+    margin: theme.spacing(8, 8, 0),
     display: "flex",
     flexDirection: "column",
     alignItems: "center"
@@ -60,9 +60,9 @@ const useStyles = makeStyles(theme => ({
     cursor: "pointer"
   },
   buttonBox: {
-    padding: theme.spacing(16, 8, 2),
+    padding: theme.spacing(8, 8, 2),
     [theme.breakpoints.down("sm")]: {
-      padding: theme.spacing(16, 3, 2),
+      padding: theme.spacing(8, 3, 2),
     },
   },
   button: {

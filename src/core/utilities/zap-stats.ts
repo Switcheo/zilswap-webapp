@@ -11,10 +11,9 @@ const PATHS = {
 	"swaps": "/swaps",
 	"volume": "/volume",
 	"transactions": "/transactions",
-	"epoch/info": "/epoch/info",
-	"distribution/data": "/distribution/data/:address",
-	"distribution/weights": "/distribution/pool_weights",
-	"distribution/current": "/distribution/current/:address",
+	"distribution/info": "/distribution/info",
+	"distribution/claimable_data": "/distribution/claimable_data/:address",
+	"distribution/estimated_amounts": "/distribution/estimated_amounts/:address",
 };
 
 const mainnetApi = new HTTP(process.env.REACT_APP_ZAP_API_MAINNET as string, PATHS);
@@ -74,17 +73,33 @@ export interface SwapVolume {
 	in_token_amount: BigNumber;
 }
 
-export interface EpochInfo {
-	current_epoch: number;
-	epoch_period: number;
-	first_epoch_start: number;
-	next_epoch_start: number;
-	tokens_per_epoch: number;
-	total_epoch: number;
+export interface Distributor {
+	name: string;
+  distributor_name: string;
+	reward_token_symbol: string;
+	reward_token_address_hex: string;
+	distributor_address_hex: string;
+	emission_info: EmissionInfo;
+  incentivized_pools: {
+    [pool: string]: number;
+  }
 }
 
-export interface ZWAPDistribution {
+export interface EmissionInfo {
+	epoch_period: number;
+  initial_epoch_number: number;
+	tokens_per_epoch: string;
+	tokens_for_retroactive_distribution: string;
+	retroactive_distribution_cutoff_time: number;
+	distribution_start_time: number;
+	total_number_of_epochs: number;
+	developer_token_ratio_bps: number;
+	trader_token_ratio_bps: number;
+}
+
+export interface Distribution {
 	id: string,
+	distributor_address: string,
 	epoch_number: number,
 	address_bech32: string,
 	address_hex: string,
@@ -92,12 +107,11 @@ export interface ZWAPDistribution {
 	proof: string[],
 }
 
-export interface ZWAPPotentialRewards {
-	[pool: string]: BigNumber;
-}
-
-export interface ZWAPPoolWeights {
-	[pool: string]: BigNumber;
+export interface PotentialRewards {
+  [pool: string]: ReadonlyArray<{
+    amount: BigNumber,
+    token_address: string
+  }>
 }
 
 export interface QueryOptions {
@@ -161,51 +175,38 @@ export class ZAPStats {
 		}
 	}
 
-	/**
-	 *
-	 *
-	 * @param network MainNet | TestNet - defaults to `MainNet`
-	 * @returns response in JSON
-	 */
-	static getEpochInfo = async ({ network }: QueryOptions): Promise<EpochInfo> => {
-		const http = ZAPStats.getApi(network);
-		const url = http.path("epoch/info");
-		const response = await http.get({ url });
-		return await response.json();
-	}
+  /**
+   *
+   *
+   * @param network MainNet | TestNet - defaults to `MainNet`
+   * @returns array of PoolLiquidity
+   */
+  static getLiquidity = async ({ network, ...query }: GetLiquidityOpts): Promise<ReadonlyArray<PoolLiquidity>> => {
+    const http = ZAPStats.getApi(network);
+    const url = http.path("liquidity", {}, query);
+    const response = await http.get({ url });
+    const result = await response.json();
+    return result.map((pool: any) => ({
+      ...pool,
+      amount: bnOrZero(pool.amount),
+    }));
+  }
 
 	/**
 	 *
 	 *
 	 * @param network MainNet | TestNet - defaults to `MainNet`
-	 * @returns response in JSON
+	 * @returns map of token (pool) address to BigNumber in weighted liquidity amount
 	 */
-	static getLiquidity = async ({ network, ...query }: GetLiquidityOpts): Promise<PoolLiquidity[]> => {
-		const http = ZAPStats.getApi(network);
-		const url = http.path("liquidity", {}, query);
-		const response = await http.get({ url });
-		const result = await response.json();
-		return result.map((pool: any) => ({
-			...pool,
-			amount: bnOrZero(pool.amount),
-		}));
-	}
-
-	/**
-	 *
-	 *
-	 * @param network MainNet | TestNet - defaults to `MainNet`
-	 * @returns response in JSON
-	 */
-	static getWeightedLiquidity = async ({ network, from, until }: GetWeightedLiquidityOpts): Promise<PoolLiquidity[]> => {
+	static getWeightedLiquidity = async ({ network, from, until }: GetWeightedLiquidityOpts): Promise<{[pool: string]: BigNumber}> => {
 		const http = ZAPStats.getApi(network);
 		const url = http.path("liquidity/weighted", {}, { from, until });
 		const response = await http.get({ url });
-		const result = await response.json();
-		return result?.map((pool: any) => ({
-			...pool,
-			amount: bnOrZero(pool.amount),
-		}));
+		const result = await response.json() as ReadonlyArray<{ pool: string, amount: string }>;
+		return result?.reduce((acc, item) => {
+      acc[item.pool] = bnOrZero(item.amount);
+      return acc
+    }, {} as { [pool: string]: BigNumber });
 	}
 
 	/**
@@ -229,7 +230,7 @@ export class ZAPStats {
 	 */
 	static getPoolTransactions = async ({ network, ...query }: TxOpts): Promise<PoolTransactionResult> => {
 		const http = ZAPStats.getApi(network);
-		const url = http.path("transactions", {}, query);
+		const url = http.path("transactions", {}, query).replaceAll('%2C', ',');
 		const response = await http.get({ url });
 		const result = await response.json();
 		return {
@@ -290,16 +291,28 @@ export class ZAPStats {
 
 	/**
 	 *
+	 * @param network MainNet | TestNet - defaults to `MainNet`
+	 * @returns response in JSON
+	 */
+	static getDistributionInfo = async ({ network }: QueryOptions): Promise<ReadonlyArray<Distributor>>  => {
+		const http = ZAPStats.getApi(network);
+		const url = http.path("distribution/info");
+		const response = await http.get({ url });
+		return await response.json();
+	}
+
+	/**
+	 *
 	 *
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
-	static getZWAPDistributions = async ({ network, address, ...query }: GetZWAPDistribution = {}): Promise<ZWAPDistribution[]> => {
+	static getClaimableDistributions = async ({ network, address, ...query }: GetZWAPDistribution = {}): Promise<ReadonlyArray<Distribution>> => {
 		const http = ZAPStats.getApi(network);
-		const url = http.path("distribution/data", { address }, query);
+		const url = http.path("distribution/claimable_data", { address }, query);
 		const response = await http.get({ url });
 		const distributions = await response.json();
-		return distributions.map((distribution: any): ZWAPDistribution => ({
+		return distributions.map((distribution: any): Distribution => ({
 			...distribution,
 			amount: bnOrZero(distribution.amount),
 			proof: distribution.proof.split(" "),
@@ -312,36 +325,11 @@ export class ZAPStats {
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
-	static getPotentialRewards = async ({ network, address, ...query }: GetPotentialRewards = {}): Promise<ZWAPPotentialRewards> => {
+	static getPotentialRewards = async ({ network, address, ...query }: GetPotentialRewards = {}): Promise<PotentialRewards> => {
 		const http = ZAPStats.getApi(network);
-		const url = http.path("distribution/current", { address }, query);
+		const url = http.path("distribution/estimated_amounts", { address }, query);
 		const response = await http.get({ url });
-		const result = await response.json();
-
-		const output: ZWAPPotentialRewards = {};
-		Object.keys(result).forEach((poolAddress) => {
-			output[poolAddress] = bnOrZero(result[poolAddress]);
-		});
-
-		return output;
-	}
-	/**
-	 *
-	 *
-	 * @param network MainNet | TestNet - defaults to `MainNet`
-	 * @returns response in JSON
-	 */
-	static getPoolWeights = async ({ network }: QueryOptions = {}): Promise<ZWAPPoolWeights> => {
-		const http = ZAPStats.getApi(network);
-		const url = http.path("distribution/weights");
-		const response = await http.get({ url });
-		const result = await response.json();
-
-		const output: ZWAPPoolWeights = {};
-		Object.keys(result).forEach((poolAddress) => {
-			output[poolAddress] = bnOrZero(result[poolAddress]);
-		});
-
-		return output;
+		const result = await response.json() as PotentialRewards;
+    return result
 	}
 }

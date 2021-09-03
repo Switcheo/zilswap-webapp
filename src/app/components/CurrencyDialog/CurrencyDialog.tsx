@@ -39,6 +39,7 @@ const useStyles = makeStyles(theme => ({
     borderColor: theme.palette.type === "dark" ? "#29475A" : "#D4FFF2",
     '&.Mui-focused': {
       borderColor: theme.palette.primary.dark,
+      caretColor: theme.palette.primary.dark,
     },
   },
   inputText: {

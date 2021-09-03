@@ -8,8 +8,10 @@ import { actions } from "app/store";
 import { TokenInfo } from "app/store/types";
 import { SimpleMap, strings } from "app/utils";
 import { logger } from "core/utilities";
-import { balanceBatchRequest, BatchRequestType, sendBatchRequest,
-  tokenAllowancesBatchRequest, tokenBalanceBatchRequest, ZilswapConnector } from "core/zilswap";
+import {
+  balanceBatchRequest, BatchRequestType, sendBatchRequest,
+  tokenAllowancesBatchRequest, tokenBalanceBatchRequest, ZilswapConnector
+} from "core/zilswap";
 import { getWallet, getTokens, getBlockchain } from "../selectors";
 import { PollIntervals, ETH_ADDRESS } from "app/utils/constants";
 import { Blockchain } from "tradehub-api-js";
@@ -18,7 +20,7 @@ import { ETHBalances } from "core/ethereum";
 const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string | null) => {
   const updates: SimpleMap<TokenInfo> = {};
 
-  if (!address) {
+  if (!address || Object.values(tokens).length < 1) {
     return updates
   }
 
@@ -54,7 +56,7 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
 const fetchZilTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string | null) => {
   const updates: SimpleMap<TokenInfo> = {};
 
-  if (!address) {
+  if (!address || Object.values(tokens).length < 1) {
     return updates
   }
 
@@ -85,7 +87,7 @@ const fetchZilTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
       updates[token.address] = { ...token }
     }
 
-    switch(request.type) {
+    switch (request.type) {
       case BatchRequestType.Balance: {
         let balance: BigNumber | undefined = strings.bnOrZero(result.balance);
 

@@ -10,7 +10,7 @@ import { ZIL_ADDRESS } from 'app/utils/constants';
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { ILOData } from 'core/zilo/constants';
-import { TOKEN_CONTRACT } from 'core/zwap/constants';
+import { ZWAP_TOKEN_CONTRACT } from 'core/zilswap/constants';
 import { Dayjs } from 'dayjs';
 import React from 'react';
 import { useSelector } from 'react-redux';
@@ -103,7 +103,7 @@ const SampleILOCard = (props: Props) => {
   const network = useNetwork();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
-  const zwapAddress = TOKEN_CONTRACT[network];
+  const zwapAddress = ZWAP_TOKEN_CONTRACT[network];
   const zilToken = tokenState.tokens[ZIL_ADDRESS];
   const zwapToken = tokenState.tokens[zwapAddress];
 
