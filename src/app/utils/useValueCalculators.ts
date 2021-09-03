@@ -1,11 +1,11 @@
 import { TokenInfo } from "app/store/types";
 import BigNumber from "bignumber.js";
-import { BIG_ZERO } from "./constants";
+import { BIG_ZERO, ZIL_ADDRESS } from "./constants";
 
 export const valueCalculators = {
   pool: (prices: { [index: string]: BigNumber }, token: TokenInfo) => {
     const tokenPrice = prices[token.address] ?? BIG_ZERO;
-    const zilPrice = prices.ZIL ?? BIG_ZERO;
+    const zilPrice = prices[ZIL_ADDRESS] ?? BIG_ZERO;
 
     const totalTokenValue = token.pool?.tokenReserve.shiftedBy(-token.decimals).times(tokenPrice) ?? BIG_ZERO;
     const totalZilValue = token.pool?.zilReserve.shiftedBy(-12).times(zilPrice) ?? BIG_ZERO;

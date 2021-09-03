@@ -32,6 +32,13 @@ export interface DistributorWithTimings extends Distributor {
   currentEpochEnd: number;
 }
 
+export interface PotentialRewards {
+  [pool: string]: ReadonlyArray<{
+    amount: BigNumber,
+    tokenAddress: string
+  }>
+}
+
 export interface RewardsState {
   distributors: ReadonlyArray<DistributorWithTimings>;
   distributions: ReadonlyArray<DistributionWithStatus>;

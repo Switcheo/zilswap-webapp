@@ -13,6 +13,7 @@ import cls from "classnames";
 import React, { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
+import groupBy from "lodash/groupBy";
 
 interface Props extends CardProps {
   token: TokenInfo;
@@ -287,13 +288,13 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
             <Text variant="subtitle2" marginBottom={1.5}>Reward to be Distributed</Text>
             {
               poolRewards.length > 0 ?
-                poolRewards.map(reward => {
+                Object.entries(groupBy(poolRewards, (reward) => reward.rewardToken.address)).map(([address, rewards]) => {
                   return (
-                    <Box display="flex" className={classes.rewardContainer} alignItems="flex-end" flexWrap="wrap" key={reward.rewardToken.address}>
+                    <Box display="flex" className={classes.rewardContainer} alignItems="flex-end" flexWrap="wrap" key={address}>
                       <Text variant="h1" color="textPrimary" className={classes.rewardValue}>
-                        {reward.amountPerEpoch.isZero() ? "0" : reward.amountPerEpoch.shiftedBy(-reward.rewardToken.decimals).toFormat(2)}
+                        {rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}
                       </Text>
-                      <CurrencyLogo className={classes.rewardTokenLogo} currency={reward.rewardToken.symbol} address={reward.rewardToken.address} />
+                      <CurrencyLogo className={classes.rewardTokenLogo} currency={rewards[0].rewardToken.symbol} address={address} />
                     </Box>
                   )
                 })

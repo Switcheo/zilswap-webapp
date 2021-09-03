@@ -4,18 +4,18 @@ import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { actions } from "app/store";
 import { BlockchainActionTypes } from "app/store/blockchain/actions";
 import { RewardsActionTypes } from "app/store/rewards/actions";
-import { WalletState, DistributorWithTimings, DistributionWithStatus, PoolReward } from "app/store/types";
+import { WalletState, DistributorWithTimings, DistributionWithStatus, PoolReward, PotentialRewards } from "app/store/types";
 import { WalletActionTypes } from "app/store/wallet/actions";
 import { SimpleMap } from "app/utils";
 import { PollIntervals } from "app/utils/constants";
-import { logger, ZAPStats, Distribution, Distributor, PotentialRewards } from "core/utilities";
+import { logger, ZAPStats, Distribution, Distributor, EstimatedRewards } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
-import { getWallet, getTokens, getBlockchain } from "../selectors";
+import { getWallet, getTokens, getRewards, getBlockchain } from "../selectors";
 
 function* queryDistributors() {
   while (true) {
     logger("zap saga", "query distributors");
-    const { network } = getBlockchain(yield select());;
+    const { network } = getBlockchain(yield select())
     const { tokens } = getTokens(yield select())
 
     try {
@@ -51,6 +51,8 @@ function* queryDistributors() {
         const totalWeight = Object.values(incentivized_pools).reduce((prev, cur) => prev + cur, 0)
         const totalAmount = new BigNumber(tokens_per_epoch.replace(/_/g, '')).times(10000 - developer_token_ratio_bps).div(10000)
         for (const tokenAddress in tokens) {
+          if (totalWeight === 0) continue
+
           const amountPerEpoch = totalAmount.times(incentivized_pools[tokenAddress] ?? 0).div(totalWeight)
 
           if (amountPerEpoch.isZero()) {
@@ -92,8 +94,8 @@ function* queryDistribution() {
     try {
       logger("zap saga", "query distributions");
 
-      const { network } = getBlockchain(yield select());;
-      const walletState = getWallet(yield select());
+      const { network } = getBlockchain(yield select())
+      const walletState = getWallet(yield select())
 
       if (!walletState.wallet) {
         yield put(actions.Rewards.updateDistributions([]));
@@ -145,18 +147,36 @@ function* queryPotentialRewards() {
   while (true) {
     logger("zap saga", "query potential rewards");
     try {
-      const { network } = getBlockchain(yield select());;
-      const walletState: WalletState = getWallet(yield select());
+      const { network } = getBlockchain(yield select())
+      const { wallet } = getWallet(yield select())
+      const { distributors } = getRewards(yield select())
 
-      if (!walletState.wallet) {
+      if (!wallet) {
         yield put(actions.Rewards.updatePotentialRewards({}));
         continue;
       }
 
-      const rewardsByPool: PotentialRewards = yield ZAPStats.getPotentialRewards({
-        address: walletState.wallet.addressInfo.bech32,
+      const estRewards: EstimatedRewards = yield ZAPStats.getEstimatedRewards({
+        address: wallet.addressInfo.bech32,
         network,
       });
+
+      const rewardsByPool: PotentialRewards = {}
+      Object.entries(estRewards).forEach(([distributorAddress, rewards]) => {
+        const d = distributors.find(d => d.distributor_address_hex === distributorAddress)
+        if (!d) return
+        Object.entries(rewards).forEach(([poolAddress, amount]) => {
+          if (poolAddress === 'developer') return
+          if (!rewardsByPool[poolAddress]) rewardsByPool[poolAddress] = []
+          const tokenAddress = toBech32Address(d.reward_token_address_hex)
+          const i = rewardsByPool[poolAddress].findIndex(r => r.tokenAddress === tokenAddress)
+          if (i < 0) {
+            rewardsByPool[poolAddress] = rewardsByPool[poolAddress].concat({ tokenAddress, amount: new BigNumber(amount) })
+          } else {
+            rewardsByPool[poolAddress][i].amount = rewardsByPool[poolAddress][i].amount.plus(amount)
+          }
+        })
+      })
 
       yield put(actions.Rewards.updatePotentialRewards(rewardsByPool));
     } catch (e) {

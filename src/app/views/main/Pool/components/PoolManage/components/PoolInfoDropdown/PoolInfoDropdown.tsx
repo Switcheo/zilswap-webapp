@@ -1,16 +1,15 @@
 import { Box, BoxProps, Button, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowDropDownRounded, ArrowDropUpRounded } from "@material-ui/icons";
-import { BigNumber } from "bignumber.js"
 import { Link } from "react-router-dom";
 import cls from "classnames";
 import React, { useState } from "react";
 import { actions } from "app/store";
 import { useDispatch, useSelector } from "react-redux";
 import { AmountLabel, ContrastBox, KeyValueDisplay, PoolLogo, Text } from "app/components";
-import { RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
+import { PotentialRewards, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { BIG_ZERO } from "app/utils/constants";
+import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import { toHumanNumber } from "app/utils/strings/strings";
 import { useValueCalculators, useNetwork } from "app/utils";
 
@@ -30,6 +29,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     margin: theme.spacing(1, 0),
   },
   textGreen: {
+    marginTop: theme.spacing(0.2),
     color: theme.palette.primary.dark
   },
   arrowIcon: {
@@ -43,7 +43,7 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const valueCalculators = useValueCalculators();
   const network = useNetwork();
-  const rewardsState = useSelector<RootState, RewardsState>((state) => state.rewards);
+  const potentialRewardsByPool = useSelector<RootState, PotentialRewards>((state) => state.rewards.potentialRewardsByPool);
   const tokenState = useSelector<RootState, TokenState>((state) => state.token);
   const [active, setActive] = useState<boolean>(false);
   const poolPair: [string, string] = [token.symbol, "ZIL"];
@@ -60,9 +60,9 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
   const poolValue = valueCalculators.pool(tokenState.prices, token);
   const depositedValue = poolShare.times(poolValue);
 
-  const rawPotentialRewards = rewardsState.potentialRewardsByPool[token.address] ?? [];
+  const rawPotentialRewards = potentialRewardsByPool[token.address] ?? [];
   const potentialRewards = rawPotentialRewards.map(item => {
-    const rewardToken = tokenState.tokens[item.token_address];
+    const rewardToken = tokenState.tokens[item.tokenAddress];
     return {
       rewardToken,
       amount: item.amount,
@@ -70,7 +70,7 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
     }
   })
 
-  const roiPerDay = potentialRewards.reduce((acc, item) => acc.plus(item.value.div(7)), new BigNumber(0)) // TODO: fixme, use actual epoch instead of 7 days
+  const roiPerDay = potentialRewards.reduce((acc, item) => acc.plus(item.value.div(700)), BIG_ZERO) // XXX: assumes a weekly epoch of 7 days
   const roiLabel = roiPerDay.isZero() ? "-" : `${toHumanNumber(roiPerDay, 2)}%`
 
   const onGotoAdd = () => {
@@ -96,6 +96,26 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
       </Button>
       {active && (
         <ContrastBox>
+          <KeyValueDisplay marginBottom={1.5} kkey={`Your Pool Share (${poolShareLabel}%)`} ValueComponent="span">
+            <AmountLabel
+              iconStyle="small"
+              justifyContent="flex-end"
+              marginBottom={1}
+              marginTop={-0.5}
+              currency={token.symbol}
+              address={token.address}
+              amount={tokenAmount}
+              compression={token.decimals} />
+            <AmountLabel
+              iconStyle="small"
+              justifyContent="flex-end"
+              currency="ZIL"
+              address={ZIL_ADDRESS}
+              amount={zilAmount} />
+            <Text variant="body2" className={classes.textGreen} align="right">
+              ≈ ${toHumanNumber(depositedValue, 2)}
+            </Text>
+          </KeyValueDisplay>
           {
             potentialRewards.map(reward => (
               [
@@ -113,23 +133,6 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
               ]
             ))
           }
-          <KeyValueDisplay kkey={`Your Pool Share ${poolShareLabel}%`} ValueComponent="span">
-            <AmountLabel
-              justifyContent="flex-end"
-              marginBottom={1}
-              currency={token.symbol}
-              address={token.address}
-              amount={tokenAmount}
-              compression={token.decimals} />
-            <AmountLabel
-              justifyContent="flex-end"
-              currency="ZIL"
-              address=""
-              amount={zilAmount} />
-            <Text variant="body2" className={classes.textGreen} align="right">
-              ≈ ${toHumanNumber(depositedValue, 2)}
-            </Text>
-          </KeyValueDisplay>
 
           <Box display="flex" marginTop={3}>
             <Button

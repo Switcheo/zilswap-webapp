@@ -1,6 +1,8 @@
 import { SimpleMap } from "app/utils";
-import { PotentialRewards } from "core/utilities";
-import { PendingClaimTx, PoolRewards, DistributionWithStatus, DistributorWithTimings } from "./types";
+import {
+  PendingClaimTx, PoolRewards, PotentialRewards,
+  DistributionWithStatus, DistributorWithTimings
+} from "./types";
 
 export const RewardsActionTypes = {
   UPDATE_DISTRIBUTORS: "UPDATE_DISTRIBUTORS",
