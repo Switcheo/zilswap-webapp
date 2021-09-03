@@ -87,6 +87,7 @@ export interface Distributor {
 
 export interface EmissionInfo {
 	epoch_period: number;
+  initial_epoch_number: number;
 	tokens_per_epoch: string;
 	tokens_for_retroactive_distribution: string;
 	retroactive_distribution_cutoff_time: number;

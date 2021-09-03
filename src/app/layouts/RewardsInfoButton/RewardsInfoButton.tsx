@@ -243,16 +243,16 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const zwapAddress = ZWAP_TOKEN_CONTRACT[network];
   const { distributors, distributions } = rewardsState;
 
-  const claimableRewards: ReadonlyArray<ClaimableRewards> = distributions.filter(distribution => distribution.readyToClaim).map((d: DistributionWithStatus) => {
+  const claimableRewards: ReadonlyArray<ClaimableRewards> = distributions.filter(distribution => distribution.readyToClaim).flatMap((d: DistributionWithStatus) => {
     const rewardDistributor = distributors.find(distributor => distributor.distributor_address_hex === d.info.distributor_address)
 
     if (!rewardDistributor) {
-      throw new Error(`Could not find ${d.info.distributor_address} in distributors!`)
+      return []
     }
     const rewardToken = tokenFinder(rewardDistributor.reward_token_address_hex)!
 
-    return { rewardToken, rewardDistributor, ...d }
-  })
+    return [{ rewardToken, rewardDistributor, ...d }]
+  }).filter(r => !!r)
 
   const claimTooltip = claimableRewards.length === 0 ? 'No rewards to claim' : 'Click to claim your rewards!'
 
@@ -288,9 +288,9 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   const epochNumberToDate = (epochNo: string) => {
     const epoch_number = parseInt(epochNo);
-    const { distribution_start_time, epoch_period } = distributors[0].emission_info;
+    const { distribution_start_time, epoch_period, initial_epoch_number } = distributors[0].emission_info;
 
-    return dayjs.unix(distribution_start_time + (epoch_period * epoch_number)).format('DD MMM');
+    return dayjs.unix(distribution_start_time + (epoch_period * (epoch_number - initial_epoch_number + 1))).format('DD MMM');
   }
 
   // ZWAP Balance
