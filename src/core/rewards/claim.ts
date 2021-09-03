@@ -1,4 +1,4 @@
-import { BN, bytes } from '@zilliqa-js/util';
+import { BN, Long, bytes } from '@zilliqa-js/util';
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
 import { ConnectedWallet } from "core/wallet";
@@ -137,7 +137,7 @@ export const claimMulti = async (claimOpts: ClaimMultiOpts): Promise<ObservedTx>
   const params: any = {
     amount: new BN(0),
     gasPrice: new BN(minGasPrice),
-    gasLimit: "5000",
+    gasLimit: Long.fromNumber(15000),
     version: bytes.pack(chainId, MSG_VERSION),
   };
 

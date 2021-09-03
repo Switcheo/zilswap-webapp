@@ -22,6 +22,7 @@ import groupBy from "lodash/groupBy";
 import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ReactComponent as IconSVG } from './icon.svg';
+import { EmissionInfo } from "core/utilities";
 
 interface Props extends BoxProps {
 
@@ -257,8 +258,15 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const claimTooltip = claimableRewards.length === 0 ? 'No rewards to claim' : 'Click to claim your rewards!'
 
   // group by epoch
-  const rewardsByEpoch = groupBy(claimableRewards, (reward) => {
-    return reward.info.epoch_number;
+  const rewardsByDate = groupBy(claimableRewards, (reward) => {
+    const {
+      distribution_start_time, epoch_period,
+      initial_epoch_number, retroactive_distribution_cutoff_time
+    } = reward.rewardDistributor.emission_info;
+
+    return dayjs.unix(distribution_start_time +
+      (epoch_period * (reward.info.epoch_number - initial_epoch_number + (!!retroactive_distribution_cutoff_time ? 0 : 1))))
+      .format('DD MMM YY');
   })
 
   // group by token address
@@ -279,19 +287,12 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     return sum.plus(valueCalculators.amount(tokenState.prices, token!, claimableAmountsByToken[tokenAddress]));
   }, BIG_ZERO)
 
-  const valuesByEpoch = Object.fromEntries(Object.entries(rewardsByEpoch).map(([epochNumber, rewards]) => {
-    return [epochNumber, rewards.reduce((sum, reward) => {
+  const valuesByDate = Object.fromEntries(Object.entries(rewardsByDate).map(([date, rewards]) => {
+    return [date, rewards.reduce((sum, reward) => {
         return sum.plus(valueCalculators.amount(tokenState.prices, reward.rewardToken, reward.info.amount));
       }, BIG_ZERO)
     ];
   }))
-
-  const epochNumberToDate = (epochNo: string) => {
-    const epoch_number = parseInt(epochNo);
-    const { distribution_start_time, epoch_period, initial_epoch_number } = distributors[0].emission_info;
-
-    return dayjs.unix(distribution_start_time + (epoch_period * (epoch_number - initial_epoch_number + 1))).format('DD MMM');
-  }
 
   // ZWAP Balance
   const zapTokenBalance: BigNumber = useMemo(() => {
@@ -525,21 +526,19 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
                           <Box mb={0.5} />
 
-                          {/* Rewards by epoch should be refactored into one component*/}
-                          {Object.keys(rewardsByEpoch).reverse().map(epoch => {
+                          {Object.keys(rewardsByDate).sort((a, b) => a === b ? 0 : (dayjs(a) > dayjs(b) ? -1 : 1)).map(date => {
                             return (
-                              <Box mt={1} key={epoch}>
+                              <Box mt={1} key={date}>
                                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
                                   <Text className={classes.date}>
-                                    {/* Convert epoch number into date */}
-                                    {epochNumberToDate(epoch)}
+                                    {date}
                                   </Text>
                                   <Text variant="body2" color="textSecondary" className={classes.usdAmount}>
-                                    ≈ ${valuesByEpoch[epoch].toFormat(2)}
+                                    ≈ ${valuesByDate[date].toFormat(2)}
                                   </Text>
                                 </Box>
                                 <Divider />
-                                {rewardsByEpoch[epoch].map(reward => {
+                                {rewardsByDate[date].map(reward => {
                                   const token = reward.rewardToken
 
                                   return (

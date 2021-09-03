@@ -1,7 +1,7 @@
 import { Network } from "zilswap-sdk/lib/constants";
 
 export const REWARDS_DISTRIBUTOR_CONTRACT = {
-  [Network.MainNet]: "zil1efkn743p324gnnfqgpk0y2hwy6ag7cyfephyjt",
+  [Network.MainNet]: "zil1x9sgg50evk67le33ntcwzj7xuj7x69rlh9lzsc",
   [Network.TestNet]: "zil1clfx0r4ks4gfyxrz4u98p9srmmq7lwtx9uh0jh",
 }
 
