@@ -38,6 +38,18 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     showUntil: dayjs('2021-08-16T10:00:00.000+0800'),
     usdRatio: '0.7',
     usdTarget: '$550,000',
+  }, {
+    projectURL: 'https://docs.zilswap.io/zilo/launches/03-demons',
+    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-3-DMZ-banner2x.png',
+    tokenSymbol: 'DMZ',
+    tokenName: 'DeMons',
+    tokenDecimals: 18,
+    comingSoon: true,
+    description: 'DeMons is a decentralised community-driven collectible NFT metaverse on the Zilliqa blockchain! DeMons looks to reinvent NFTs by combining the three things you love: (i) DeFi, (ii) games, and (iii) NFTs and forming a comprehensive NFT ecosystem for collectors, investors, gamers, and traders alike.',
+    contractAddress: 'zil163lpumypene0lhf9v39qka37lraq6amwpn04n3',
+    showUntil: dayjs('2021-09-10T10:00:00.000+0800'),
+    usdRatio: '0.7',
+    usdTarget: '',
   }],
   [Network.TestNet]: [{
     projectURL: 'https://docs.zilswap.io/how-to/zilo/launches/01-zilstream',
