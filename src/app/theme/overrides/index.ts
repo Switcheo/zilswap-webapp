@@ -3,8 +3,8 @@ import MuiAccordionDetails from "./MuiAccordionDetails";
 import MuiAccordionSummary from "./MuiAccordionSummary";
 import MuiButton from './MuiButton';
 import MuiButtonGroup from './MuiButtonGroup';
-import MuiCollapse from "./MuiCollapse";
 import MuiCircularProgress from "./MuiCircularProgress";
+import MuiCollapse from "./MuiCollapse";
 import MuiCssBaseline from './MuiCssBaseline';
 import MuiDialog from './MuiDialog';
 import MuiDialogContent from './MuiDialogContent';
@@ -16,9 +16,9 @@ import MuiLink from './MuiLink';
 import MuiOutlinedInput from './MuiOutlinedInput';
 import MuiPaper from './MuiPaper';
 import MuiSwitch from './MuiSwitch';
-import MuiToolbar from './MuiToolbar';
 import MuiToggleButton from './MuiToggleButton';
 import MuiToggleButtonGroup from './MuiToggleButtonGroup';
+import MuiToolbar from './MuiToolbar';
 
 const overrides = {
   MuiAccordion,

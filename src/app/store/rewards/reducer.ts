@@ -7,9 +7,10 @@ const initial_state: RewardsState = {
   distributions: [],
   rewardsByPool: {},
   potentialRewardsByPool: {},
+  claimedDistributions: [],
 };
 
-const reducer = (state: RewardsState = initial_state, action: any) => {
+const reducer = (state: RewardsState = initial_state, action: any): RewardsState => {
   switch (action.type) {
     case RewardsActionTypes.UPDATE_DISTRIBUTORS: {
       const distributors = action.distributors as ReadonlyArray<DistributorWithTimings>;
@@ -23,6 +24,16 @@ const reducer = (state: RewardsState = initial_state, action: any) => {
       return {
         ...state,
         distributions,
+      };
+    }
+    case RewardsActionTypes.ADD_CLAIMED_DISTRIBUTIONS: {
+      const ids = action.distributionIds as string[];
+      return {
+        ...state,
+        claimedDistributions: [
+          ...state.claimedDistributions,
+          ...ids,
+        ],
       };
     }
     case RewardsActionTypes.UPDATE_POOL_REWARDS:

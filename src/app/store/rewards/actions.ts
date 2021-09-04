@@ -1,6 +1,6 @@
 import { SimpleMap } from "app/utils";
 import {
-  PendingClaimTx, PoolRewards, PotentialRewards,
+  PoolRewards, PotentialRewards,
   DistributionWithStatus, DistributorWithTimings
 } from "./types";
 
@@ -9,8 +9,7 @@ export const RewardsActionTypes = {
   UPDATE_DISTRIBUTIONS: "UPDATE_DISTRIBUTIONS",
   UPDATE_POOL_REWARDS: "UPDATE_POOL_REWARDS",
   UPDATE_POTENTIAL_REWARDS: "UPDATE_POTENTIAL_REWARDS",
-  ADD_PENDING_CLAIM_TX: "ADD_PENDING_CLAIM_TX",
-  REMOVE_PENDING_CLAIM_TX: "REMOVE_PENDING_CLAIM_TX",
+  ADD_CLAIMED_DISTRIBUTIONS: "ADD_CLAIMED_DISTRIBUTIONS",
 };
 
 export function updateDistributors(distributors: ReadonlyArray<DistributorWithTimings>) {
@@ -41,17 +40,9 @@ export function updatePotentialRewards(potentialRewards: PotentialRewards) {
   }
 };
 
-export function addPendingClaimTx(bech32Address: string, pendingTx: PendingClaimTx) {
+export function addClaimedDistributions(distributionIds: string[]) {
   return {
-    type: RewardsActionTypes.ADD_PENDING_CLAIM_TX,
-    bech32Address,
-    pendingTx,
-  }
-};
-
-export function removePendingClaimTx(hash: string) {
-  return {
-    type: RewardsActionTypes.REMOVE_PENDING_CLAIM_TX,
-    hash,
+    type: RewardsActionTypes.ADD_CLAIMED_DISTRIBUTIONS,
+    distributionIds,
   }
 };

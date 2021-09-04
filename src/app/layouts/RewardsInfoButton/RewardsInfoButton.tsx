@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Backdrop, Badge, Box, BoxProps, Button, Card, Checkbox, CircularProgress, ClickAwayListener, Divider, FormControlLabel, IconButton, Link, Popper, Tooltip } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, Backdrop, Box, BoxProps, Button, Card, Checkbox, CircularProgress, ClickAwayListener, Divider, FormControlLabel, IconButton, Link, Popper, Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
@@ -8,18 +8,18 @@ import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBoxR
 import { CurrencyLogo, HelpInfo, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
-import { PendingClaimTx, RewardsState, RootState, TokenState, WalletState, DistributionWithStatus, TokenInfo, DistributorWithTimings } from "app/store/types";
+import { DistributionWithStatus, DistributorWithTimings, RewardsState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useNetwork, useTokenFinder, useValueCalculators } from "app/utils";
-import { BIG_ZERO } from "app/utils/constants";
+import { BIG_ZERO, MAX_CLAIMS_PER_TX } from "app/utils/constants";
 import { formatZWAPLabel } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import { claimMulti } from "core/rewards";
+import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import dayjs from "dayjs";
 import groupBy from "lodash/groupBy";
-import React, { useMemo, useRef, useState } from "react";
+import React, { Fragment, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ReactComponent as IconSVG } from './icon.svg';
 
@@ -123,6 +123,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     height: "17px",
     width: "17px"
   },
+  tooltipLeft: {
+    marginRight: "5px",
+    verticalAlign: "top!important",
+  },
   tooltip: {
     marginLeft: "5px",
     verticalAlign: "top!important",
@@ -175,6 +179,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   checkbox: {
     "& .MuiSvgIcon-root": {
       fontSize: "1rem",
+    },
+    "&.Mui-checked.Mui-disabled": {
+      color: "#9e9e9e",
     },
     "&:hover": {
       backgroundColor: "transparent"
@@ -241,7 +248,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const tokenFinder = useTokenFinder();
 
   const zwapAddress = ZWAP_TOKEN_CONTRACT[network];
-  const { distributors, distributions } = rewardsState;
+  const { distributors, distributions, claimedDistributions } = rewardsState;
 
   const claimableRewards: ReadonlyArray<ClaimableRewards> = distributions.filter(distribution => distribution.readyToClaim).flatMap((d: DistributionWithStatus) => {
     const rewardDistributor = distributors.find(distributor => distributor.distributor_address_hex === d.info.distributor_address)
@@ -275,8 +282,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   const claimableAmountsByToken = Object.fromEntries(Object.entries(rewardsByToken).map(([tokenAddress, rewards]) => {
     return [tokenAddress, rewards.reduce((sum, dist) => {
-        return sum.plus(dist.info.amount);
-      }, BIG_ZERO)
+      return sum.plus(dist.info.amount);
+    }, BIG_ZERO)
     ];
   }))
 
@@ -288,8 +295,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   const valuesByDate = Object.fromEntries(Object.entries(rewardsByDate).map(([date, rewards]) => {
     return [date, rewards.reduce((sum, reward) => {
-        return sum.plus(valueCalculators.amount(tokenState.prices, reward.rewardToken, reward.info.amount));
-      }, BIG_ZERO)
+      return sum.plus(valueCalculators.amount(tokenState.prices, reward.rewardToken, reward.info.amount));
+    }, BIG_ZERO)
     ];
   }))
 
@@ -318,12 +325,14 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       // guide users to select rewards
       if (selectedDistributions.length === 0) {
         if (showDetails) {
-          setSelectedDistributions(claimableRewards);
+          setSelectedDistributions(claimableRewards.slice(-MAX_CLAIMS_PER_TX));
         } else {
           setShowDetails(true)
         }
         return
       }
+
+      setClaimResult(null);
 
       let claimTx = null;
 
@@ -345,19 +354,13 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         distributions
       });
 
-      // pendingTx
-      const pendingTx: PendingClaimTx = {
-        dispatchedAt: dayjs(),
-        txHash: claimTx.hash,
-      };
-
-      dispatch(actions.Rewards.addPendingClaimTx(
-        walletState.wallet.addressInfo.bech32,
-        pendingTx,
-      ));
-
       if (claimTx) {
         setClaimResult(claimTx);
+
+        setSelectedDistributions([]);
+
+        const claimedIds = selectedDistributions.map((dist) => dist.info.id);
+        dispatch(actions.Rewards.addClaimedDistributions(claimedIds));
         setTimeout(() => {
           dispatch(actions.Token.refetchState());
         }, 5000);
@@ -372,6 +375,10 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     const selectedDistributionsCopy = selectedDistributions.slice();
     const index = selectedDistributionsCopy.findIndex((d) => d.info.id === distribution.info.id);
     if (index === -1) {
+      if (selectedDistributions.length >= MAX_CLAIMS_PER_TX) {
+        return;
+      }
+
       selectedDistributionsCopy.push(distribution);
       setSelectedDistributions(selectedDistributionsCopy);
     } else {
@@ -388,13 +395,14 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     // if checked, selectedDistributions should contain all claimable distributions
     if (event.target.checked) {
-      setSelectedDistributions(claimableRewards);
+      setSelectedDistributions(claimableRewards.slice(-MAX_CLAIMS_PER_TX));
     } else {
       setSelectedDistributions([]);
     }
   }
 
   const isDistributionSelected = (distribution: DistributionWithStatus) => {
+    if (claimedDistributions.includes(distribution.info.id)) return true;
     return selectedDistributions.map(d => d.info.id).includes(distribution.info.id);
   }
 
@@ -428,13 +436,14 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <span>
+      <Fragment>
         {
           isMobileView
-          ? <IconButton onClick={() => setActive(!active)} buttonRef={buttonRef}>
-              <IconSVG />
-            </IconButton>
-          : <Badge variant="dot" invisible={claimableRewards.length === 0}>
+            ? (
+              <IconButton onClick={() => setActive(!active)} buttonRef={buttonRef}>
+                <IconSVG />
+              </IconButton>
+            ) : (
               <Button
                 size="small"
                 buttonRef={buttonRef}
@@ -442,11 +451,10 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                 variant="outlined"
                 onClick={() => setActive(!active)}>
                 {zapBalanceLabel}
-                <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoButton)}/>
+                <CurrencyLogo currency="ZWAP" address={zwapAddress} className={cls(classes.currencyLogo, classes.currencyLogoButton)} />
               </Button>
-            </Badge>
-        }
-      </span>
+            )}
+      </Fragment>
       <Popper
         open={active}
         placement="bottom-end"
@@ -463,7 +471,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   <Text variant="h2" className={cls(classes.textColoured, classes.balanceAmount)}>
                     {zapBalanceLabel}
                   </Text>
-                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={classes.currencyLogo}/>
+                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={classes.currencyLogo} />
                 </Box>
                 <Text marginTop={0.5} className={cls(classes.textColoured, classes.body)}>
                   ≈ ${zapTokenValue.toFormat(2)}
@@ -472,7 +480,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
               <Box display="flex" flexDirection="column" alignItems="center" mt={3}>
                 <Text className={classes.body}>
                   Claimable Rewards
-                  <HelpInfo placement="bottom" title="The estimated amount of rewards you have collected and are eligible to claim." className={classes.tooltip}/>
+                  <HelpInfo placement="bottom" title="The estimated amount of rewards you have collected and are eligible to claim." className={classes.tooltip} />
                 </Text>
                 {
                   claimableRewards.length !== 0 &&
@@ -484,7 +492,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                           <Text variant="h4" className={classes.totalReward} key={tokenAddress}>
                             {/* toHumanNumber? */}
                             {claimableAmountsByToken[tokenAddress].shiftedBy(-token!.decimals).toFormat(2)}
-                            <CurrencyLogo address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoMd)}/>
+                            <CurrencyLogo address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoMd)} />
                             <span className={classes.currency}>
                               {token.symbol}
                             </span>
@@ -545,20 +553,20 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                       <FormControlLabel
                                         control={
                                           <Checkbox
-                                          className={classes.checkbox}
-                                          checked={isDistributionSelected(reward)}
-                                          onChange={handleSelect(reward)}
+                                            disabled={claimedDistributions.includes(reward.info.id)}
+                                            className={classes.checkbox}
+                                            checked={isDistributionSelected(reward)}
+                                            onChange={handleSelect(reward)}
                                           />
                                         }
                                         label={
                                           <Text className={classes.epochReward}>
                                             {/* Need toHumanNumber? */}
                                             {reward.info.amount.shiftedBy(-token.decimals).toFormat(2)}
-                                            <CurrencyLogo address={token.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)}/>
+                                            <CurrencyLogo address={token.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)} />
                                             <span className={classes.currency}>
-                                            {token.symbol}
-                                            <HelpInfo placement="top" title={`${reward.rewardDistributor.name} from ${reward.rewardDistributor.distributor_name} at ${
-                                              reward.rewardDistributor.distributor_address_hex} for epoch ${reward.info.epoch_number}.`} className={classes.tooltip}/>
+                                              {token.symbol}
+                                              <HelpInfo placement="top" title={`${reward.rewardDistributor.name} from ${reward.rewardDistributor.distributor_name} at ${reward.rewardDistributor.distributor_address_hex} for epoch ${reward.info.epoch_number}.`} className={classes.tooltip} />
                                             </span>
                                           </Text>
                                         }
@@ -576,11 +584,17 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                 }
               </Box>
 
-              <Box marginTop={2} />
-              {
-                claimResult
-                ?
-                <Box display="flex" flexDirection="column" alignItems="center">
+              {claimableRewards.length > 4 && (
+                <Box marginTop={2}>
+                  <Text variant="body1">
+                    <HelpInfo placement="bottom" title="Limited by Zilliqa transaction restriction which may be reviewed in the near future." className={classes.tooltipLeft} />
+                    Claim up to 4 distributions per transaction.
+                  </Text>
+                </Box>
+              )}
+
+              {claimResult && (
+                <Box display="flex" marginTop={2} flexDirection="column" alignItems="center">
                   <Text marginTop={2} variant="h4" className={classes.textColoured}>
                     <CheckCircleRoundedIcon fontSize="inherit" className={classes.successIcon} />
                     {" "}
@@ -592,13 +606,14 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                     rel="noopener noreferrer"
                     target="_blank"
                     href={`https://viewblock.io/zilliqa/tx/0x${claimResult?.hash}?network=${network?.toLowerCase()}`}>
-                      <Box display="flex" justifyContent="center" alignItems="center" mt={0.5}>
-                        <Text className={classes.body}>View on Viewblock</Text>
-                        <NewLinkIcon className={classes.linkIcon} />
-                      </Box>
+                    <Box display="flex" justifyContent="center" alignItems="center" mt={0.5}>
+                      <Text className={classes.body}>View on Viewblock</Text>
+                      <NewLinkIcon className={classes.linkIcon} />
+                    </Box>
                   </Link>
                 </Box>
-                :
+              )}
+              <Box marginTop={2}>
                 <Tooltip title={claimTooltip}>
                   <span>
                     <Button fullWidth variant="contained" color="primary" disabled={claimableRewards.length === 0} onClick={onClaimRewards} className={classes.claimRewardsButton}>
@@ -607,7 +622,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                     </Button>
                   </span>
                 </Tooltip>
-              }
+              </Box>
 
               {!!error && (
                 <Box mt={1.5} display="flex" justifyContent="center">

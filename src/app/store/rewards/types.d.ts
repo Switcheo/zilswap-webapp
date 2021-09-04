@@ -44,14 +44,5 @@ export interface RewardsState {
   distributions: ReadonlyArray<DistributionWithStatus>;
   rewardsByPool: SimpleMap<PoolRewards>;
   potentialRewardsByPool: PotentialRewards;
+  claimedDistributions: ReadonlyArray<string>;
 };
-
-// TODO: maybe remove these?
-export interface PendingClaimTx {
-  txHash: string;
-  dispatchedAt: Dayjs;
-}
-
-export interface PendingClaimTxCache {
-  [hash: string]: PendingClaimTx;
-}
