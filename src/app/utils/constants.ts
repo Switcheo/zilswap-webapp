@@ -61,7 +61,12 @@ export const isProduction = () => {
 export const DEFAULT_TX_SLIPPAGE = 0.01;
 export const DEFAULT_TX_EXPIRY = 3;
 
+export const MAX_CLAIMS_PER_TX = 4;
+
 export const STATS_REFRESH_RATE = 30000; // ms
+
+export const BRIDGE_TX_DEPOSIT_CONFIRM_ZIL = 3;
+export const BRIDGE_TX_DEPOSIT_CONFIRM_ETH = 12;
 
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const ZIL_ADDRESS = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
@@ -78,9 +83,7 @@ export class PollIntervals {
 
   public static USDRates = 10000;
 
-  public static ZWAPClaimHistory = 600_000;
-  public static EpochInfo = 60000;
-  public static PoolWeights = 3600000;
+  public static Distributors = 60000;
 
   public static RetryAfterError = 5000;
 

@@ -23,7 +23,7 @@ const initial_state: TokenState = {
 export const EMPTY_USD_VALUE: TokenUSDValues = {
   balance: BIG_ZERO,
   poolLiquidity: BIG_ZERO,
-  zapRewards: BIG_ZERO,
+  rewardsPerSecond: BIG_ZERO,
 }
 
 const reducer = (state: TokenState = initial_state, action: any) => {

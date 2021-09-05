@@ -1,22 +1,22 @@
 import { Box, Button, Chip, makeStyles, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import AddIcon from '@material-ui/icons/AddRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
-import { CurrencyLogo, HelpInfo, RevealMnemonic, Text } from 'app/components';
-import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
+import RefreshIcon from '@material-ui/icons/RefreshRounded';
+import { CurrencyLogo, HelpInfo, ResumeTransferDialog, RevealMnemonic, Text } from 'app/components';
 import BridgeCard from "app/layouts/BridgeCard";
 import { actions } from "app/store";
 import { BridgeState, BridgeTx, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useBridgeableTokenFinder } from "app/utils";
 import { toHumanNumber } from "app/utils/strings/strings";
+import TransactionDetail from "app/views/bridge/TransactionDetail";
 import cls from "classnames";
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { Blockchain } from "tradehub-api-js";
 import { ReactComponent as EthereumLogo } from "../../main/Bridge/ethereum-logo.svg";
 import { ReactComponent as ZilliqaLogo } from "../../main/Bridge/zilliqa-logo.svg";
-import { Link } from "react-router-dom";
-import TransactionDetail from "app/views/bridge/TransactionDetail";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -29,12 +29,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
         backgroundColor: theme.palette.background.default,
         padding: theme.spacing(2, 8, 2),
-        maxWidth: 1200,
+        maxWidth: 1100,
         [theme.breakpoints.down("sm")]: {
             padding: theme.spacing(2, 3, 2),
         },
         [theme.breakpoints.down("xs")]: {
-            minWidth: 320
+            maxWidth: 450,
         },
         "& .MuiChip-root": {
             borderRadius: 12,
@@ -57,22 +57,65 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             fontSize: "14px"
         }
     },
+    headerBox: {
+        [theme.breakpoints.down("xs")]: {
+            flexDirection: "column",
+        },
+    },
+    titleBox: {
+        [theme.breakpoints.down("xs")]: {
+            alignItems: "center",
+            marginBottom: theme.spacing(2)
+        },
+    },
+    buttonBox: {
+        [theme.breakpoints.down("xs")]: {
+            flexDirection: "column",
+        },
+    },
     textColoured: {
         color: theme.palette.primary.dark
+    },
+    refreshIcon: {
+        marginRight: theme.spacing(0.5),
+        verticalAlign: "middle",
     },
     addIcon: {
         marginRight: theme.spacing(0.5),
         verticalAlign: "middle",
     },
-    newTransferButton: {
+    resumeTransferButton: {
         color: theme.palette.action?.disabled,
         backgroundColor: theme.palette.action?.disabledBackground,
+        textAlign: "center",
         "&:hover": {
             backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#003340" : "rgba(0, 51, 64, 0.5)", 0.8)}`,
         },
+        [theme.breakpoints.down("xs")]: {
+            height: 46
+        },
     },
-    textWhite: {
-        color: theme.palette.primary.contrastText
+    resumeTransferText: {
+        color: theme.palette.primary.contrastText,
+        paddingRight: theme.spacing(0.5),
+    },
+    newTransferButton: {
+        color: theme.palette.action?.disabled,
+        backgroundColor: theme.palette.action?.disabledBackground,
+        textAlign: "center",
+        "&:hover": {
+            backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#003340" : "rgba(0, 51, 64, 0.5)", 0.8)}`,
+        },
+        marginRight: theme.spacing(1),
+        [theme.breakpoints.down("xs")]: {
+            marginRight: 0,
+            marginBottom: theme.spacing(1),
+            height: 46
+        },
+    },
+    newTransferText: {
+        color: theme.palette.primary.contrastText,
+        paddingRight: theme.spacing(0.5),
     },
     tableContainer: {
         '&::-webkit-scrollbar': {
@@ -117,12 +160,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     helpInfo: {
         verticalAlign: "top!important",
         marginLeft: "2px!important"
-    },
-    newLinkIcon: {
-        "& path": {
-            fill: theme.palette.label
-        },
-        marginBottom: "2px"
     },
     arrowRightIcon: {
         color: theme.palette.label,
@@ -185,6 +222,7 @@ const CHAIN_NAMES = {
     [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
 }
 
+// TODO: remove any, type the props properly
 const TransferHistory = (props: any) => {
     const { className, ...rest } = props;
     const classes = useStyles();
@@ -192,16 +230,19 @@ const TransferHistory = (props: any) => {
     const bridgeableTokenFinder = useBridgeableTokenFinder();
 
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
+    const previewTx = useSelector<RootState, BridgeTx | undefined>(state => state.bridge.previewBridgeTx);
     const bridgeTxs = bridgeState.bridgeTxs;
     const pendingBridgeTx = bridgeState.activeBridgeTx;
-    const [previewTx, setPreviewTx] = useState<BridgeTx | null>(null);
 
-    // Need to check this part
     const handleNewTransfer = () => {
         if (pendingBridgeTx) {
             dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
         }
         dispatch(actions.Layout.showTransferConfirmation(false));
+    }
+
+    const handleResumeTransfer = () => {
+        dispatch(actions.Layout.toggleShowResumeTransfer("open"));
     }
 
     const getTransferStage = (tx: BridgeTx) => {
@@ -263,19 +304,19 @@ const TransferHistory = (props: any) => {
     }
 
     const setDisplayTx = (tx: BridgeTx) => {
-        setPreviewTx(tx);
+        dispatch(actions.Bridge.setPreviewBridgeTx(tx));
     }
 
     const clearPreview = () => {
-        setPreviewTx(null);
+        dispatch(actions.Bridge.setPreviewBridgeTx(undefined));
     }
 
     return (
         <BridgeCard {...rest} className={cls(classes.root, className)}>
             {!previewTx && (
                 <Box overflow="hidden" display="flex" flexDirection="column" className={classes.container}>
-                    <Box display="flex" justifyContent="space-between" mt={2} pl={2} pr={2}>
-                        <Box display="flex" flexDirection="column">
+                    <Box display="flex" justifyContent="space-between" mt={2} pl={2} className={classes.headerBox}>
+                        <Box display="flex" flexDirection="column" className={classes.titleBox}>
                             <Text variant="h2">
                                 Zil<span className={classes.textColoured}>Bridge</span>
                             </Text>
@@ -285,10 +326,15 @@ const TransferHistory = (props: any) => {
                             </Text>
                         </Box>
 
-                        <Box display="flex" pt={0.5} pb={0.5}>
+                        <Box display="flex" pt={0} pb={0} className={classes.buttonBox}>
                             <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.newTransferButton} onClick={handleNewTransfer}>
                                 <AddIcon fontSize="small" className={classes.addIcon} />
-                                <Text variant="button" className={classes.textWhite}>New Transfer</Text>
+                                <Text variant="button" className={classes.newTransferText}>New Transfer</Text>
+                            </Button>
+
+                            <Button color="primary" variant="contained" className={classes.resumeTransferButton} onClick={handleResumeTransfer}>
+                                <RefreshIcon fontSize="small" className={classes.refreshIcon} />
+                                <Text variant="button" className={classes.resumeTransferText}>Resume Transfer</Text>
                             </Button>
                         </Box>
                     </Box>
@@ -324,13 +370,7 @@ const TransferHistory = (props: any) => {
                                     <TableCell align="center">
                                         <Box display="flex" flexDirection="column">
                                             <Text variant="h6">Transfer</Text>
-                                            <Text>Key <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Transfer Key to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
-                                        </Box>
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        <Box display="flex" flexDirection="column">
-                                            <Text variant="h6">Recover</Text>
-                                            <Text>Transfer <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Transfer Key to recover failed transfers. Only failed transfers that have successfuly passed Stage 1 are available for recovery." /></Text>
+                                            <Text>Key <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Transfer Key to recover failed transfers that failed in Stage 2." /></Text>
                                         </Box>
                                     </TableCell>
                                     <TableCell align="center">
@@ -380,16 +420,6 @@ const TransferHistory = (props: any) => {
                                         </TableCell>
                                         <TableCell align="center">
                                             <Button
-                                                href="https://app.dem.exchange/reset_password"
-                                                target="_blank"
-                                                className={classes.button}
-                                                endIcon={<NewLinkIcon className={classes.newLinkIcon} />}
-                                            >
-                                                <Text>Recover</Text>
-                                            </Button>
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Button
                                                 className={classes.button}
                                                 onClick={() => setDisplayTx(tx)}
                                                 endIcon={<ArrowRightRoundedIcon className={classes.arrowRightIcon} />}
@@ -411,6 +441,8 @@ const TransferHistory = (props: any) => {
             {previewTx && (
                 <TransactionDetail onBack={clearPreview} currentTx={previewTx} approvalHash="" isHistory={true} />
             )}
+
+            <ResumeTransferDialog />
         </BridgeCard>
     )
 }

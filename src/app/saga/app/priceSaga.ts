@@ -3,15 +3,14 @@ import { RewardsActionTypes } from "app/store/rewards/actions";
 import { TokenActionTypes } from "app/store/token/actions";
 import { TokenInfo, TokenUSDValues } from "app/store/types";
 import { SimpleMap, valueCalculators } from "app/utils";
-import { BIG_ONE, BIG_ZERO, PollIntervals, ZIL_ADDRESS, ZIL_DECIMALS } from "app/utils/constants";
+import { BIG_ONE, PollIntervals, ZIL_ADDRESS, ZIL_DECIMALS } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
 import { CoinGecko, CoinGeckoPriceResult } from "core/utilities/coingecko";
 import { ZilswapConnector } from "core/zilswap";
-import { ZWAPRewards } from "core/zwap";
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
-import { getBlockchain, getTokens, getRewards } from '../selectors'
+import { getTokens, getRewards } from '../selectors'
 
 const computeTokenPrice = (zilPrice: BigNumber, tokens: SimpleMap<TokenInfo>) => {
   const prices = Object.values(tokens).reduce((accum, token) => {
@@ -41,27 +40,28 @@ function* updatePoolUSDValues() {
     try {
       const tokenState = getTokens(yield select())
       const rewardsState = getRewards(yield select())
-      const blockchainState = getBlockchain(yield select())
 
       if (!tokenState.prices) continue;
       if (!tokenState.initialized) continue;
 
       const usdValues: SimpleMap<TokenUSDValues> = {};
-      const zapContractAddr: string = ZWAPRewards.TOKEN_CONTRACT[blockchainState.network] ?? "";
-      const zapToken = tokenState.tokens[zapContractAddr];
 
       for (const token of Object.values(tokenState.tokens)) {
         if (token.isZil) continue;
 
         const balance = valueCalculators.amount(tokenState.prices, token, bnOrZero(token.balance));
         const poolLiquidity = valueCalculators.pool(tokenState.prices, token);
-        const weeklyReward = rewardsState.rewardByPools[token.address]?.weeklyReward
-        const zapRewards = valueCalculators.amount(tokenState.prices, zapToken, weeklyReward ?? BIG_ZERO);
+        const weeklyReward = rewardsState.rewardsByPool[token.address] || [];
+        const rewardsPerSecond = weeklyReward.reduce((acc, item) => {
+          const token = tokenState.tokens[item.rewardToken.address];
+          const value = valueCalculators.amount(tokenState.prices, token, item.amountPerEpoch)
+          return acc.plus(value.div(item.currentEpochEnd - item.currentEpochStart))
+        }, new BigNumber(0))
 
         usdValues[token.address] = {
           balance,
           poolLiquidity,
-          zapRewards,
+          rewardsPerSecond,
         };
       }
 
@@ -71,7 +71,7 @@ function* updatePoolUSDValues() {
       console.warn(e)
     } finally {
       yield race({
-        rewardsUpdated: take(RewardsActionTypes.UPDATE_ZWAP_REWARDS),
+        rewardsUpdated: take(RewardsActionTypes.UPDATE_POOL_REWARDS),
         usdUpdated: take(TokenActionTypes.TOKEN_UPDATE_PRICES),
         tokenUpdated: take(TokenActionTypes.TOKEN_UPDATE),
         allTokensUpdated: take(TokenActionTypes.TOKEN_UPDATE_ALL),

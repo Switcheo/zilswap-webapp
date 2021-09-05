@@ -147,7 +147,7 @@ const TokenILOCard = (props: Props) => {
   // const targetZwap = new BigNumber('30000').shiftedBy(12)
 
   const totalContributions = new BigNumber(totalContributionStr)
-  const totalCommittedUSD = totalContributions.shiftedBy(-12).dividedBy(data.usdRatio).times(tokenState.prices.ZIL).toFormat(2)
+  const totalCommittedUSD = totalContributions.shiftedBy(-12).dividedBy(data.usdRatio).times(tokenState.prices[ZIL_ADDRESS]).toFormat(2)
   const progress = totalContributions.dividedBy(targetZil).times(100).integerValue()
   const iloStarted = iloState === ILOState.Active
   const iloOver = iloState === ILOState.Failed || iloState === ILOState.Completed
