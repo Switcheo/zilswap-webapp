@@ -80,7 +80,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     tokenName: 'DeMons',
     tokenDecimals: 18,
     description: 'DeMons is a decentralised community-driven collectible NFT metaverse on the Zilliqa blockchain! DeMons looks to reinvent NFTs by combining the three things you love: (i) DeFi, (ii) games, and (iii) NFTs and forming a comprehensive NFT ecosystem for collectors, investors, gamers, and traders alike.',
-    contractAddress: 'zil18j8pherngh4t0u5n7hsurr7x9xujzgr5vqdu2p',
+    contractAddress: 'zil1qprynrymacc7leww9ady3jl8szwfhfdstvvpun',
     showUntil: dayjs('2021-09-10T10:00:00.000+0800'),
     usdRatio: '0.7',
     usdTarget: '$1,200,000',
