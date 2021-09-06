@@ -87,6 +87,7 @@ export interface Distributor {
 
 export interface EmissionInfo {
 	epoch_period: number;
+  initial_epoch_number: number;
 	tokens_per_epoch: string;
 	tokens_for_retroactive_distribution: string;
 	retroactive_distribution_cutoff_time: number;
@@ -106,13 +107,9 @@ export interface Distribution {
 	proof: string[],
 }
 
-export interface PotentialRewards {
-  [pool: string]: ReadonlyArray<{
-    amount: BigNumber,
-    token_address: string
-  }>
+export interface EstimatedRewards {
+  [distributor_address: string]: {  [pool: string]: string }
 }
-
 export interface QueryOptions {
 	network?: Network;
 }
@@ -158,7 +155,7 @@ export interface GetEpochData extends QueryOptions {
 export interface GetZWAPDistribution extends QueryOptions {
 	address?: string;
 }
-export interface GetPotentialRewards extends QueryOptions {
+export interface GetEstimatedRewards extends QueryOptions {
 	address?: string;
 }
 
@@ -324,11 +321,12 @@ export class ZAPStats {
 	 * @param network MainNet | TestNet - defaults to `MainNet`
 	 * @returns response in JSON
 	 */
-	static getPotentialRewards = async ({ network, address, ...query }: GetPotentialRewards = {}): Promise<PotentialRewards> => {
+
+	static getEstimatedRewards = async ({ network, address, ...query }: GetEstimatedRewards = {}): Promise<EstimatedRewards> => {
 		const http = ZAPStats.getApi(network);
 		const url = http.path("distribution/estimated_amounts", { address }, query);
 		const response = await http.get({ url });
-		const result = await response.json() as PotentialRewards;
+		const result = await response.json() as EstimatedRewards;
     return result
 	}
 }

@@ -58,7 +58,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: "30px"
   },
   reward: {
-    display: "inline-flex"
+    display: "inline-flex",
+    color: theme.palette.primary.dark
   },
   currency: {
     color: theme.palette.text?.primary
@@ -167,7 +168,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
                 </Box>
               )}>
                 <Text marginBottom={2} variant="h1" className={cls(classes.statistic, classes.reward)}>
-                  {'-'}
+                  5312.5
                   <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_CONTRACT[network]} className={classes.currencyLogo}/>
                   <span className={classes.currency}>
                     ZWAP

@@ -94,7 +94,7 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
     if (token.blockchain === Blockchain.Ethereum) {
       const tokenHash = token.address.replace(/^0x/i, "");
       const bridgeToken = bridgeState.tokens.eth.find((bridgeToken) => bridgeToken.tokenAddress === tokenHash)
-      
+
       if (bridgeToken) {
         return toBech32Address(bridgeToken.toTokenAddress);
       }
@@ -134,7 +134,7 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
             </Box>
             <Box flex={1}>
               {!!walletState.wallet && (
-                <Typography align="right" variant="h6" component="p">
+                <Typography align="right" variant="h6" component="div">
                   {moneyFormat(getTokenBalance(token), {
                     symbol: token.symbol,
                     maxFractionDigits: showContribution ? 5 : token.decimals,

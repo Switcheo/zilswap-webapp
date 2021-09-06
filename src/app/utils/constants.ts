@@ -61,6 +61,8 @@ export const isProduction = () => {
 export const DEFAULT_TX_SLIPPAGE = 0.01;
 export const DEFAULT_TX_EXPIRY = 3;
 
+export const MAX_CLAIMS_PER_TX = 4;
+
 export const STATS_REFRESH_RATE = 30000; // ms
 
 export const BRIDGE_TX_DEPOSIT_CONFIRM_ZIL = 3;

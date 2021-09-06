@@ -1,8 +1,7 @@
 import { Box, BoxProps, Checkbox, CircularProgress, Container, FormControlLabel, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Pagination } from "@material-ui/lab";
-import { PoolsNavigationTabs, PoolsOverviewBanner, Text } from "app/components";
-import TokenFilter from "app/components/TokenFilter";
+import { PoolsNavigationTabs, PoolsOverviewBanner, Text, TokenFilter } from "app/components";
 import Page from "app/layouts/Page";
 import { RootState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -119,7 +118,6 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
   };
 
   const onFilterChange = (tokens: string[]) => {
-    console.log(tokens)
     setQueryOpts({
       ...queryOpts,
       pool: tokens.join()

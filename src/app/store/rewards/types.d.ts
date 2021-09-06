@@ -1,6 +1,6 @@
 import { SimpleMap } from "app/utils";
 import BigNumber from "bignumber.js";
-import { Distributor, SwapVolume, Distribution, PotentialRewards } from "core/utilities";
+import { Distributor, SwapVolume, Distribution } from "core/utilities";
 import { Dayjs } from "dayjs";
 import { TokenInfo } from "../token/types";
 
@@ -32,19 +32,17 @@ export interface DistributorWithTimings extends Distributor {
   currentEpochEnd: number;
 }
 
+export interface PotentialRewards {
+  [pool: string]: ReadonlyArray<{
+    amount: BigNumber;
+    tokenAddress: string;
+  }>
+}
+
 export interface RewardsState {
   distributors: ReadonlyArray<DistributorWithTimings>;
   distributions: ReadonlyArray<DistributionWithStatus>;
   rewardsByPool: SimpleMap<PoolRewards>;
   potentialRewardsByPool: PotentialRewards;
+  claimedDistributions: ReadonlyArray<string>;
 };
-
-// TODO: maybe remove these?
-export interface PendingClaimTx {
-  txHash: string;
-  dispatchedAt: Dayjs;
-}
-
-export interface PendingClaimTxCache {
-  [hash: string]: PendingClaimTx;
-}

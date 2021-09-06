@@ -1,16 +1,16 @@
 import { SimpleMap } from "app/utils";
-import { PotentialRewards } from "core/utilities";
 import { RewardsActionTypes } from "./actions";
-import { PoolRewards, RewardsState, DistributionWithStatus, DistributorWithTimings } from "./types";
+import { PoolRewards, PotentialRewards, RewardsState, DistributionWithStatus, DistributorWithTimings } from "./types";
 
 const initial_state: RewardsState = {
   distributors: [],
   distributions: [],
   rewardsByPool: {},
   potentialRewardsByPool: {},
+  claimedDistributions: [],
 };
 
-const reducer = (state: RewardsState = initial_state, action: any) => {
+const reducer = (state: RewardsState = initial_state, action: any): RewardsState => {
   switch (action.type) {
     case RewardsActionTypes.UPDATE_DISTRIBUTORS: {
       const distributors = action.distributors as ReadonlyArray<DistributorWithTimings>;
@@ -24,6 +24,16 @@ const reducer = (state: RewardsState = initial_state, action: any) => {
       return {
         ...state,
         distributions,
+      };
+    }
+    case RewardsActionTypes.ADD_CLAIMED_DISTRIBUTIONS: {
+      const ids = action.distributionIds as string[];
+      return {
+        ...state,
+        claimedDistributions: [
+          ...state.claimedDistributions,
+          ...ids,
+        ],
       };
     }
     case RewardsActionTypes.UPDATE_POOL_REWARDS:

@@ -112,7 +112,6 @@ function* txObserved(payload: TxObservedPayload) {
   logger('tx observed action', payload)
   const { tx, status, receipt } = payload
 
-  yield put(actions.Rewards.removePendingClaimTx(tx.hash));
   yield put(actions.Transaction.update({ hash: tx.hash, status: status, txReceipt: receipt }));
 
   detachedToast(`transaction ${status ? status : "confirmed"}`, { hash: tx.hash });
