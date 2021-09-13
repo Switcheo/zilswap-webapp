@@ -2,7 +2,7 @@ import { Box, Button, CircularProgress, Grid, makeStyles, OutlinedInput } from "
 import { Visibility, VisibilityOff } from "@material-ui/icons";
 import RefreshIcon from '@material-ui/icons/RefreshRounded';
 import CheckCircleIcon from "@material-ui/icons/CheckCircleOutlineRounded";
-import { Text } from 'app/components';
+import { ConnectETHPopper, Text } from 'app/components';
 import { actions } from "app/store";
 import { BridgeableTokenMapping, BridgeState, BridgeTx } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
@@ -15,7 +15,7 @@ import { ConnectedWallet } from "core/wallet";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import dayjs from "dayjs";
 import { ethers } from "ethers";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useHistory } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
@@ -82,7 +82,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         borderColor: "transparent",
         '&.Mui-focused': {
             borderColor: theme.palette.primary.dark,
-            caretColor: theme.palette.primary.dark, 
+            caretColor: theme.palette.primary.dark,
         },
         "&.Mui-disabled": {
             color: theme.palette.primary.dark
@@ -99,7 +99,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         backgroundColor: "transparent",
         border: `1px solid ${theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : "#D2E5DF"}`,
         "&:hover": {
-        backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.2)}`
+            backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.2)}`
         },
         "&.Mui-disabled": {
             backgroundColor: "transparent",
@@ -145,6 +145,9 @@ const ResumeTransferBox = (props: any) => {
     const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
 
     const [runGetTransfer, loading, error] = useAsyncTask("getTransfer");
+    const [showMenu, setShowMenu] = useState<MutableRefObject<undefined>>();
+
+    const buttonRef = useRef();
 
     const isMnemonicFilled = useMemo(() => {
         return mnemonic.indexOf("") === -1;
@@ -205,12 +208,12 @@ const ResumeTransferBox = (props: any) => {
     const handleGetTransfer = () => {
         runGetTransfer(async () => {
             if (!sdk) return;
-            
+
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
             const mnemonicString = mnemonic.join(" ");
             const swthAddress = SWTHAddress.generateAddress(mnemonicString, undefined, { network });
-    
+
             // find deposit confirmation tx
             const extTransfers = await sdk.api.getTransfers({ account: swthAddress }) as RestModels.Transfer[];
             const depositTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'deposit');
@@ -245,7 +248,7 @@ const ResumeTransferBox = (props: any) => {
                     sourceTxHash: depositTransfer.transaction_hash,
                     depositDispatchedAt: dayjs(),
                 }
-    
+
                 if (pendingBridgeTx) {
                     dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
                 }
@@ -260,20 +263,20 @@ const ResumeTransferBox = (props: any) => {
     // TODO: option to change/disconnect wallet
     const onClickConnectETH = async () => {
         const web3Modal = new Web3Modal({
-          cacheProvider: true,
-          disableInjectedProvider: false,
-          providerOptions
+            cacheProvider: true,
+            disableInjectedProvider: false,
+            providerOptions
         });
-    
+
         const provider = await web3Modal.connect();
         const ethersProvider = new ethers.providers.Web3Provider(provider)
         const signer = ethersProvider.getSigner();
         const ethAddress = await signer.getAddress();
         const chainId = (await ethersProvider.getNetwork()).chainId;
-    
+
         dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: { provider: provider, address: ethAddress, chainId: chainId } }));
     };
-    
+
     const onClickConnectZIL = () => {
         dispatch(actions.Layout.toggleShowWallet());
     };
@@ -282,15 +285,33 @@ const ResumeTransferBox = (props: any) => {
         if (dstChain === Blockchain.Zilliqa) {
             return onClickConnectZIL();
         } else {
-            return onClickConnectETH();
+            if (bridgeWallet) {
+                setShowMenu(buttonRef)
+            } else {
+                return onClickConnectETH();
+            }
         }
+    }
+
+    const onDisconnectEthWallet = (clear?: boolean) => {
+        const web3Modal = new Web3Modal({
+            cacheProvider: true,
+            disableInjectedProvider: false,
+            network: "ropsten",
+            providerOptions
+        });
+        if (clear) {
+            web3Modal.clearCachedProvider();
+        }
+        setShowMenu(undefined)
+        dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: null }));
     }
 
     const verifyButtonText = () => {
         if (depositTransfer) {
             return (
                 <Text variant="h4">
-                    <CheckCircleIcon className={classes.checkIcon}/>
+                    <CheckCircleIcon className={classes.checkIcon} />
                     Transfer Key Verified
                 </Text>
             )
@@ -320,11 +341,11 @@ const ResumeTransferBox = (props: any) => {
             </Text>
 
             <Text marginTop={2} marginBottom={2.5} variant="h6" align="center">
-                Enter your transfer key and connect your wallet <br/> to resume your paused transfer.
+                Enter your transfer key and connect your wallet <br /> to resume your paused transfer.
             </Text>
 
             <Box display="flex" justifyContent="space-evenly" mb={1.5}>
-                <Box flex={1}/>
+                <Box flex={1} />
 
                 <Box display="flex" justifyContent="center" flex={1}>
                     <Text className={classes.step}>
@@ -343,13 +364,13 @@ const ResumeTransferBox = (props: any) => {
 
             <Grid container spacing={1}>
                 {mnemonic.map((word: string, index) => (
-                     <Grid item xs={4}>
+                    <Grid item xs={4}>
                         <OutlinedInput
                             className={classes.inputWord}
                             disabled={!!depositTransfer}
                             value={word}
                             onChange={handleWordChange(index)}
-                            onPaste={index === 0 ? handlePaste : () => {}}
+                            onPaste={index === 0 ? handlePaste : () => { }}
                             type={showPhrase ? 'text' : 'password'}
                         />
                     </Grid>
@@ -361,10 +382,10 @@ const ResumeTransferBox = (props: any) => {
                     onClick={handleShowPhrase}
                     className={classes.button}
                     variant="outlined"
-                    endIcon={showPhrase ? <VisibilityOff className={classes.visibilityIcon}/> : <Visibility className={classes.visibilityIcon}/>}
+                    endIcon={showPhrase ? <VisibilityOff className={classes.visibilityIcon} /> : <Visibility className={classes.visibilityIcon} />}
                     focusRipple={false}
                     disableRipple
-                    >
+                >
                     <Text>{showPhrase ? "Hide Phrase" : "Show Phrase"}</Text>
                 </Button>
             </Box>
@@ -396,7 +417,7 @@ const ResumeTransferBox = (props: any) => {
                     <strong>Step 2:</strong> Destination Wallet Address
                 </Text>
 
-                <ConnectButton address={dstWalletAddr} chain={dstChain} className={classes.connectButton} onClick={handleConnectWallet} disabled={!isConnectWalletEnabled} />
+                <ConnectButton buttonRef={buttonRef} address={dstWalletAddr} chain={dstChain} className={classes.connectButton} onClick={handleConnectWallet} disabled={!isConnectWalletEnabled} />
             </Box>
 
             <Box mt={1}>
@@ -411,6 +432,14 @@ const ResumeTransferBox = (props: any) => {
                     Resume Transfer
                 </Button>
             </Box>
+            <ConnectETHPopper
+                open={!!showMenu?.current}
+                anchorEl={showMenu?.current}
+                onClickaway={() => setShowMenu(undefined)}
+                onDisconnectEth={() => onDisconnectEthWallet()}
+                onChangeWallet={() => { onDisconnectEthWallet(true); onClickConnectETH() }}
+            >
+            </ConnectETHPopper>
         </Box>
     )
 }
