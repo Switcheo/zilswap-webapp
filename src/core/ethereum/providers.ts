@@ -3,6 +3,7 @@ import Fortmatic from "fortmatic";
 import Portis from "@portis/web3";
 import Authereum from "authereum";
 import Torus from "@toruslabs/torus-embed";
+import Web3Modal from 'web3modal';
 
 export const providerOptions = {
   injected: {
@@ -38,6 +39,17 @@ export const providerOptions = {
       package: Authereum
   },
   boltx: {
-    package: true
+    package: null
+    // options: {
+    //     key: process.env.REACT_APP_FORTMATIC_KEY
+    // },
+    // connector: async (ProviderPackage: new (arg0: any) => any, options: any) => {
+    //     const provider = new ProviderPackage(options);
+
+    //     await provider.enable()
+
+    //     return provider;
+    // }
   }
 };
+

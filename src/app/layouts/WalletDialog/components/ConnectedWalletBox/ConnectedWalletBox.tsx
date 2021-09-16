@@ -101,6 +101,10 @@ const ConnectedWalletBox = (props: any) => {
 
   const walletType = useMemo(() => {
     if (!wallet?.type) return undefined;
+
+  //  console.log(" wallet?.type " + wallet?.type)
+  //  console.log(" WalletConnectType.BoltX " + WalletConnectType.BoltX)
+
     switch (wallet?.type) {
       case WalletConnectType.PrivateKey: return "Private Key";
       case WalletConnectType.Zeeves: return "Zeeves Wallet";
@@ -119,13 +123,33 @@ const ConnectedWalletBox = (props: any) => {
   }
 
   const onDisconnect = () => {
+
     dispatch(actions.Blockchain.initialize({ wallet: null, network }));
     onBack();
   };
 
   if (!wallet) return null;
-  const address = wallet.addressInfo.byte20;
-  const humanAddress = wallet.addressInfo.bech32;
+  let address: string
+  let humanAddress: string
+  if(walletType == "Bolt-X") {
+    console.log( " walletType == Bolt-X " ) 
+     address = wallet.addressInfo.byte20;
+     humanAddress = address// wallet.addressInfo.bech32;
+   // console.log( " address is " + address) 
+   // console.log( " humanAddress is " + humanAddress) 
+  } else {
+   // console.log( " walletType != Bolt-X " ) 
+     address = wallet.addressInfo.byte20;
+     humanAddress = wallet.addressInfo.bech32;
+   // console.log( " address is " + address) 
+   // console.log( " humanAddress is " + humanAddress) 
+  }
+  // const address = wallet.addressInfo.byte20;
+  // const humanAddress = wallet.addressInfo.bech32;
+  
+
+//  console.log( " walletType is " + walletType) 
+
   return (
     <Box display="flex" flexDirection="column" className={cls(classes.root, className)}>
       <Box className={classes.walletDetail}>

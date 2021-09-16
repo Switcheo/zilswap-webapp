@@ -13,6 +13,7 @@ import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { providerOptions } from "core/ethereum";
+import { getConnectedBoltX } from "core/utilities/boltx";
 import { ConnectedWallet } from "core/wallet";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ethers } from "ethers";
@@ -194,7 +195,8 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }, [wallet, bridgeFormState.fromBlockchain])
 
   const setSourceAddress = (address: string) => {
-    setFormState(prevState => ({
+
+  setFormState(prevState => ({
       ...prevState,
       sourceAddress: address
     }))
@@ -254,12 +256,35 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const onClickConnectETH = async () => {
+
+//
+    dispatch(actions.Layout.toggleShowWallet());
+
+    if (wallet !== null && bridgeFormState.fromBlockchain === Blockchain.Ethereum) {
+
+  //    console.log(" wallet.addressInfo.byte20  from " + wallet.addressInfo.byte20 )
+      setSourceAddress(wallet.addressInfo.byte20);
+    }
+
+    if (wallet !== null && bridgeFormState.toBlockchain === Blockchain.Ethereum) {
+
+    //  console.log(" wallet.addressInfo.byte20 to " + wallet.addressInfo.byte20 )
+      setDestAddress(wallet.addressInfo.byte20);
+    }
+//\
+
+/*
+    console.log("onClickConnectETH " )
+
+    const boltX = getConnectedBoltX();
+
     const web3Modal = new Web3Modal({
       cacheProvider: true,
       disableInjectedProvider: false,
       network: "ropsten",
       providerOptions
     });
+    console.log(" web3Modal " )
 
     const provider = await web3Modal.connect().catch(error => {
       // handle user rejection
@@ -269,21 +294,30 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       return;
     }
     const ethersProvider = new ethers.providers.Web3Provider(provider)
+    console.log("ethersProvider")
     const signer = ethersProvider.getSigner();
+    console.log("error")
     const ethAddress = await signer.getAddress();
+    console.log("ethAddress")
     const chainId = (await ethersProvider.getNetwork()).chainId;
+    console.log("chainId")
 
     if (bridgeFormState.fromBlockchain === Blockchain.Ethereum) {
       setSourceAddress(ethAddress);
+      console.log("setSourceAddress " + ethAddress)
     }
 
     if (bridgeFormState.toBlockchain === Blockchain.Ethereum) {
       setDestAddress(ethAddress);
+      console.log("setDestAddress " + ethAddress)
     }
 
     setEthConnectedAddress(ethAddress);
+    console.log("setEthConnectedAddress " + ethAddress)
+    console.log("dispatching")
     dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: { provider: provider, address: ethAddress, chainId: chainId } }));
     dispatch(actions.Token.refetchState());
+    */
   };
 
   const onClickConnectZIL = () => {

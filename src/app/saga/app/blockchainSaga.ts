@@ -74,6 +74,7 @@ const zilPayObserver = (zilPay: any) => {
 }
 
 const boltXObserver = (boltX: any) => {
+
   return eventChannel<ConnectedWallet>(emitter => {
     const accountSubscription = async (account: any) => {
       if (account) {
@@ -107,6 +108,7 @@ const boltXObserver = (boltX: any) => {
       boltX.zilliqa.wallet.off(NETWORK_CHANGED, networkSubscription);
     }
   })
+  
 }
 
 const web3Observer = (wallet: ConnectedBridgeWallet) => {
