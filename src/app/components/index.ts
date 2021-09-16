@@ -1,5 +1,6 @@
 export { default as AmountLabel } from "./AmountLabel";
 export { default as ConfirmTransfer } from "./ConfirmTransfer";
+export { default as ConnectETHPopper } from "./ConnectETHPopper";
 export { default as ContrastBox } from "./ContrastBox";
 export { default as CopyIcon } from "./copy.svg";
 export { default as CurrencyInput } from "./CurrencyInput";
