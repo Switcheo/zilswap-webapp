@@ -2,7 +2,6 @@ import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { NavDrawer, TopBar } from "app/components";
 import ConnectWalletButton from "app/components/ConnectWalletButton";
-import TBMBanner from "app/components/TBMBanner";
 import { AppTheme } from "app/theme/types";
 import React, { Suspense, useState } from "react";
 import { renderRoutes } from "react-router-config";
@@ -26,11 +25,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     // paddingBottom: theme.spacing(8),
     [theme.breakpoints.down("sm")]: {
       display: "block",
-    }
+    },
   },
 }));
 
-const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
+  props: any
+) => {
   const { route } = props;
   const classes = useStyles();
   const [showDrawer, setShowDrawer] = useState(false);
@@ -44,13 +45,12 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       <TopBar onToggleDrawer={onToggleDrawer} />
       <main className={classes.content}>
         <DevInfoBadge />
-        <TBMBanner />
         <Suspense fallback={<LinearProgress />}>
           {renderRoutes(route.routes)}
         </Suspense>
       </main>
       <Hidden smUp>
-        <ConnectWalletButton/>
+        <ConnectWalletButton />
       </Hidden>
       <WalletDialog />
       <TransactionDialog />

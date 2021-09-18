@@ -1,4 +1,11 @@
-import { AppBar, Box, Button, Hidden, IconButton, Toolbar } from "@material-ui/core";
+import {
+  AppBar,
+  Box,
+  Button,
+  Hidden,
+  IconButton,
+  Toolbar,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Brand } from "app/components/TopBar/components";
 import RewardsInfoButton from "app/layouts/RewardsInfoButton";
@@ -9,16 +16,17 @@ import ConnectWalletButton from "../ConnectWalletButton";
 import { ReactComponent as MenuIcon } from "./menu.svg";
 import { TopBarProps } from "./types";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     minWidth: "100%",
   },
   toolBar: {
     padding: 0,
     borderBottom: "1px solid transparent",
-    borderImage: theme.palette.type === "dark" 
-                  ? "linear-gradient(to left, #003340 1%, #00FFB0  50%, #003340 100%) 0 0 100% 0/0 0 1px 0 stretch"
-                  : "",
+    borderImage:
+      theme.palette.type === "dark"
+        ? "linear-gradient(to left, #003340 1%, #00FFB0  50%, #003340 100%) 0 0 100% 0/0 0 1px 0 stretch"
+        : "",
     [theme.breakpoints.up("sm")]: {
       "&>div": {
         flex: 1,
@@ -40,27 +48,34 @@ const useStyles = makeStyles(theme => ({
     flexGrow: 1,
   },
   chipText: {
-    color: theme.palette.text.primary
+    color: theme.palette.text.primary,
   },
   drawerHeader: {
-    display: 'flex',
-    alignItems: 'center',
+    display: "flex",
+    alignItems: "center",
     padding: theme.spacing(0, 2),
-    justifyContent: 'flex-start',
+    justifyContent: "flex-start",
   },
   brandButton: {
     "&:hover": {
-      backgroundColor: "transparent"
-    }
-  }
+      backgroundColor: "transparent",
+    },
+  },
 }));
 
-const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (
+  props: any
+) => {
   const { children, className, onToggleDrawer, ...rest } = props;
   const classes = useStyles();
 
   return (
-    <AppBar {...rest} elevation={0} position="static" className={cls(classes.root, className)}>
+    <AppBar
+      {...rest}
+      elevation={0}
+      position="static"
+      className={cls(classes.root, className)}
+    >
       <Toolbar className={classes.toolBar} variant="dense">
         <Box justifyContent="flex-start" flex={1}>
           <div className={classes.drawerHeader}>
@@ -70,18 +85,28 @@ const TopBar: React.FC<TopBarProps & React.HTMLAttributes<HTMLDivElement>> = (pr
           </div>
         </Box>
         <Box justifyContent="center">
-          <Button component={Link} to="/" className={classes.brandButton} disableRipple>
+          <Button
+            component={Link}
+            to="/"
+            className={classes.brandButton}
+            disableRipple
+          >
             <Brand />
           </Button>
         </Box>
-        <Box display="flex" flex={1} justifyContent="flex-end" alignItems="center">
+        <Box
+          display="flex"
+          flex={1}
+          justifyContent="flex-end"
+          alignItems="center"
+        >
           <RewardsInfoButton />
           <Hidden xsDown>
             <ConnectWalletButton />
           </Hidden>
         </Box>
       </Toolbar>
-    </AppBar >
+    </AppBar>
   );
 };
 

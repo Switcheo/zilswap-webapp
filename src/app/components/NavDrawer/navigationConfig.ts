@@ -11,6 +11,11 @@ const navigationConfig: NavigationOptions[] = [{
     href: "/pools",
     icon: "Layers",
   }, {
+    title: "ARK",
+    href: "/ark",
+    icon: "Flame",
+  },
+  {
     title: "ZilBridge",
     href: "/bridge",
     icon: "Bridge",
