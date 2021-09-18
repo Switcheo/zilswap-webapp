@@ -11,6 +11,7 @@ import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 interface Props extends ButtonProps {
   address: string;
@@ -63,6 +64,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       },
     },
   },
+  vertIcon: {
+    color: theme.palette.text?.secondary,
+    overflow: "hidden",
+    position: "absolute",
+    right: "1px",
+  },
 }));
 
 const ConnectButton: React.FC<Props> = (props: Props) => {
@@ -107,11 +114,11 @@ const ConnectButton: React.FC<Props> = (props: Props) => {
       {...rest}
     >
       {isTestNet && (
-          <Tooltip placement="top-start" title={`You have selected TestNet. Switch to MainNet for actual trade.`}>
-            <Box className={classes.altnetRibbon}>
-              <Typography component="span">TestNet</Typography>
-            </Box>
-          </Tooltip>
+        <Tooltip placement="top-start" title={`You have selected TestNet. Switch to MainNet for actual trade.`}>
+          <Box className={classes.altnetRibbon}>
+            <Typography component="span">TestNet</Typography>
+          </Box>
+        </Tooltip>
       )}
       {!address
         ? "Connect Wallet"
@@ -120,6 +127,7 @@ const ConnectButton: React.FC<Props> = (props: Props) => {
           <Text color="textSecondary"><DotIcon className={classes.dotIcon} />Connected</Text>
         </Box>
       }
+      {address ? <MoreVertIcon className={classes.vertIcon} /> : null}
     </Button>
   );
 };
