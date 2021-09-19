@@ -47,12 +47,17 @@ const routes: RouteConfig[] = [
     component: MainLayout,
     routes: [
       {
-        path: "/ark",
+        path: "/ark/collections",
         exact: true,
         component: lazy(() => import("./views/ark/Collections")),
       },
       {
-        component: () => <Redirect to="/ark"></Redirect>,
+        path: "/ark/profile",
+        exact: true,
+        component: lazy(() => import("./views/ark/Profile")),
+      },
+      {
+        component: () => <Redirect to="/ark/collections"></Redirect>,
       },
     ],
   },

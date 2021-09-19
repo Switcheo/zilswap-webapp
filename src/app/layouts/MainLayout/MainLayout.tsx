@@ -22,7 +22,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flex: 1,
     display: "flex",
     flexDirection: "column",
-    // paddingBottom: theme.spacing(8),
     [theme.breakpoints.down("sm")]: {
       display: "block",
     },

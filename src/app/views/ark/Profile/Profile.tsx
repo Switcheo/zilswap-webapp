@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
+const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
 ) => {
   const { children, className, ...rest } = props;
@@ -21,10 +21,10 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   return (
     <ARKPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
-        <span>Collections</span>
+        <span>Profile</span>
       </Container>
     </ARKPage>
   );
 };
 
-export default Collections;
+export default Profile;
