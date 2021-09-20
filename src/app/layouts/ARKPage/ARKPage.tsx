@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const ARKPage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
+const ArkPage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
 ) => {
   const { children } = props;
@@ -30,4 +30,4 @@ const ARKPage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   );
 };
 
-export default ARKPage;
+export default ArkPage;

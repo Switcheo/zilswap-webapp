@@ -64,6 +64,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     borderRight: "1px solid rgba(222, 255, 255, 0.5)",
   },
   brandButton: {
+    padding: theme.spacing(0.5, 4),
     "&:hover": {
       backgroundColor: "transparent",
     },
@@ -110,7 +111,7 @@ const ARKNavBar: React.FC<React.HTMLAttributes<HTMLDivElement>> = () => {
         <Box className={classes.borderBottomRight} />
 
         <Toolbar className={classes.toolbar}>
-          <Grid container justify="space-between">
+          <Grid container>
             <Button
               component={Link}
               to="/ark"
