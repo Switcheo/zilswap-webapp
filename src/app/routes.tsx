@@ -2,6 +2,7 @@ import React, { lazy } from "react";
 import { RouteConfig } from "react-router-config";
 import { Redirect } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
+import ARKLayout from "./layouts/ARKLayout";
 
 const routes: RouteConfig[] = [
   {
@@ -44,12 +45,17 @@ const routes: RouteConfig[] = [
   },
   {
     path: "/ark",
-    component: MainLayout,
+    component: ARKLayout,
     routes: [
       {
         path: "/ark/collections",
         exact: true,
         component: lazy(() => import("./views/ark/Collections")),
+      },
+      {
+        path: "/ark/collections/:collection",
+        exact: true,
+        component: lazy(() => import("./views/ark/Collection")),
       },
       {
         path: "/ark/profile",

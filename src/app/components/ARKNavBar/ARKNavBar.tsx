@@ -92,7 +92,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   selectedMenu: {
     color: "#26D4FF",
-    textShadow: "0 0 4px rgba(107, 225, 255, 0.2)",
+    "-webkit-text-stroke-color": "rgba(107, 225, 255, 0.2)",
+    "-webkit-text-stroke-width": "1px",
+    // textShadow: "0 0 4px rgba(107, 225, 255, 0.2)",
   },
 }));
 
@@ -130,7 +132,7 @@ const ARKNavBar: React.FC<React.HTMLAttributes<HTMLDivElement>> = () => {
                 <Typography
                   className={cls(classes.navLink, {
                     [classes.selectedMenu]:
-                      location.pathname === "/ark/collections",
+                      location.pathname.indexOf("/ark/collections") === 0,
                   })}
                 >
                   Collections

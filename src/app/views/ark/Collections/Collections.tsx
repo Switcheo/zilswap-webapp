@@ -10,10 +10,12 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
+import { Text } from "app/components";
 import ARKPage from "app/layouts/ARKPage";
 import { AppTheme } from "app/theme/types";
 import React, { useState } from "react";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -119,9 +121,16 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           }
         />
 
-        <span style={{ marginTop: 16, display: "inline-block" }}>
+        <Text marginTop={2} variant="h1">
           Collections
-        </span>
+        </Text>
+
+        {/* List of collections here */}
+        <Link to="/ark/collections/thebearmarket">
+          <Text marginTop={2} variant="h1">
+            The Bear Market
+          </Text>
+        </Link>
       </Container>
     </ARKPage>
   );
