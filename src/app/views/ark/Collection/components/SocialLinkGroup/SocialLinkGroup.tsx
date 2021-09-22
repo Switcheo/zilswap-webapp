@@ -40,6 +40,7 @@ const SocialLinkGroup: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { children, className, ...rest } = props;
   const classes = useStyles();
   return (
+    // not mobile responsive yet
     <Box {...rest} className={cls(classes.root, className)}>
       <Button
         className={classes.fill}

@@ -15,8 +15,8 @@ import ARKPage from "app/layouts/ARKPage";
 import { AppTheme } from "app/theme/types";
 import React from "react";
 import { Link } from "react-router-dom";
+import { NftCard, SocialLinkGroup } from "./components";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
-import { SocialLinkGroup } from "./components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -64,6 +64,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "35px",
     color: "#FFFFFF",
     textAlign: "center",
+    [theme.breakpoints.down("xs")]: {
+      marginTop: "10px",
+    },
   },
   collectionCreator: {
     color: "rgba(222, 255, 255, 0.5)",
@@ -123,6 +126,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   socialLinkGroup: {
     alignSelf: "flex-end",
     marginTop: "-22px",
+    [theme.breakpoints.down("xs")]: {
+      display: "none",
+    },
+  },
+  socialLinkGroupMobile: {
+    marginTop: theme.spacing(1),
+    [theme.breakpoints.up("sm")]: {
+      display: "none",
+    },
+  },
+  nftContainer: {
+    marginTop: theme.spacing(3),
+  },
+  gridItem: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
   },
 }));
 
@@ -211,6 +231,9 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               </Text>
             </Box>
 
+            {/* TODO: hacky way for mobile view, to clean up */}
+            <SocialLinkGroup className={classes.socialLinkGroupMobile} />
+
             {/* Stats */}
             <Grid container spacing={2} className={classes.statsContainer}>
               <Grid item xs={6} sm={3}>
@@ -257,6 +280,15 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         </Card>
 
         {/* NFTs in collection */}
+        <Grid container spacing={2} className={classes.nftContainer}>
+          {[...Array(10)].map((x, i) => {
+            return (
+              <Grid item key={i} xs={12} md={3} className={classes.gridItem}>
+                <NftCard />
+              </Grid>
+            );
+          })}
+        </Grid>
       </Container>
     </ARKPage>
   );
