@@ -54,6 +54,20 @@ const useStyles = makeStyles((theme) => ({
     height: "15px",
     verticalAlign: "text-top",
   },
+  rarityBackground: {
+    backgroundColor: "rgba(255, 223, 107, 0.2)",
+    borderRadius: 5,
+    display: "flex",
+    marginTop: theme.spacing(1),
+    padding: "3px",
+  },
+  rarityBar: {
+    display: "flex",
+    backgroundColor: "#FFDF6B",
+    borderRadius: 5,
+    padding: "1.5px",
+    width: "100%",
+  },
 }));
 
 const NftCard: React.FC<Props> = (props: Props) => {
@@ -88,6 +102,9 @@ const NftCard: React.FC<Props> = (props: Props) => {
         </Box>
 
         {/* Rarity indicator */}
+        <Box className={classes.rarityBackground}>
+          <Box className={classes.rarityBar} />
+        </Box>
       </CardContent>
     </Card>
   );

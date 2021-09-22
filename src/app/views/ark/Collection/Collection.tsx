@@ -246,7 +246,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               <Grid item xs={6} sm={3}>
                 <Box className={classes.statsItem}>
                   <Text className={classes.statsHeader}>Number of Owners</Text>
-                  <Text className={classes.statsContent}>8</Text>
+                  <Text className={classes.statsContent}>8,193</Text>
                 </Box>
               </Grid>
 
