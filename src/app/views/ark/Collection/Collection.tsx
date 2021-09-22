@@ -16,6 +16,7 @@ import { AppTheme } from "app/theme/types";
 import React from "react";
 import { Link } from "react-router-dom";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
+import { SocialLinkGroup } from "./components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -62,21 +63,31 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "30px",
     lineHeight: "35px",
     color: "#FFFFFF",
+    textAlign: "center",
   },
   collectionCreator: {
     color: "rgba(222, 255, 255, 0.5)",
     fontSize: "16px",
+    lineHeight: "24px",
+    textAlign: "center",
   },
   infoBox: {
-    marginTop: "-65px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
   },
+  avatarBox: {
+    marginTop: "-65px",
+    display: "flex",
+  },
   statsContainer: {
     width: "fit-content",
+    minWidth: "750px",
     marginTop: theme.spacing(2),
+    [theme.breakpoints.down("md")]: {
+      minWidth: "0",
+    },
   },
   statsItem: {
     display: "flex",
@@ -108,6 +119,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     maxWidth: "750px",
     marginTop: theme.spacing(2),
     textAlign: "center",
+  },
+  socialLinkGroup: {
+    alignSelf: "flex-end",
+    marginTop: "-22px",
   },
 }));
 
@@ -163,12 +178,11 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             className={classes.bannerImage}
           />
 
-          <Box display="flex">
-            <Box flex={1} />
-
-            {/* Collection info */}
-            <Box className={classes.infoBox}>
-              {/* TODO: add tooltip to badge */}
+          {/* Collection info */}
+          <Box className={classes.infoBox}>
+            {/* TODO: add tooltip to badge */}
+            {/* Avatar */}
+            <Box className={classes.avatarBox}>
               <Badge
                 overlap="circle"
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
@@ -182,70 +196,63 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                   src="https://pbs.twimg.com/profile_images/1432977604563193858/z01O7Sey_400x400.jpg"
                 />
               </Badge>
+            </Box>
 
-              {/* Collection name */}
-              <Text
-                variant="h1"
-                marginTop={1.5}
-                className={classes.collectionName}
-              >
+            <SocialLinkGroup className={classes.socialLinkGroup} />
+
+            {/* Collection name and creator  */}
+            <Box display="flex" flexDirection="column" maxWidth={750}>
+              <Text variant="h1" className={classes.collectionName}>
                 The Bear Market
               </Text>
 
-              {/* Creator */}
               <Text marginTop={1} className={classes.collectionCreator}>
                 by Switcheo Labs
               </Text>
-
-              {/* Stats */}
-              <Grid container spacing={2} className={classes.statsContainer}>
-                <Grid item xs={6} sm={3}>
-                  <Box className={classes.statsItem}>
-                    <Text className={classes.statsHeader}>Collection Size</Text>
-                    <Text className={classes.statsContent}>10,000</Text>
-                  </Box>
-                </Grid>
-
-                <Grid item xs={6} sm={3}>
-                  <Box className={classes.statsItem}>
-                    <Text className={classes.statsHeader}>
-                      Number of Owners
-                    </Text>
-                    <Text className={classes.statsContent}>8,193</Text>
-                  </Box>
-                </Grid>
-
-                {/* Need to convert to human number else might overflow */}
-                <Grid item xs={6} sm={3}>
-                  <Box className={classes.statsItem}>
-                    <Text className={classes.statsHeader}>Floor Price</Text>
-                    <Text className={classes.statsContent}>2,000 ZIL</Text>
-                  </Box>
-                </Grid>
-
-                <Grid item xs={6} sm={3}>
-                  <Box className={classes.statsItem}>
-                    <Text className={classes.statsHeader}>Volume Traded</Text>
-                    <Text className={classes.statsContent}>1,000 ZIL</Text>
-                  </Box>
-                </Grid>
-              </Grid>
-
-              {/* Description */}
-              <Text className={classes.description}>
-                Well we aren't just a bear market. We are The Bear Market. We
-                know a couple of fudders who have been releasing bears into the
-                unknown, and because of you guys we now have a shelter full of
-                lost and lonely bears. As much as we would love to care for all
-                these unbearably cuddly bears, we simply can't keep up! Thus
-                we've launched The Bear Market, in hope that every one of you
-                will adopt one because these koala-ity bears deserve a loving
-                home!
-              </Text>
             </Box>
 
-            {/* Social Media Links */}
-            <Box flex={1} />
+            {/* Stats */}
+            <Grid container spacing={2} className={classes.statsContainer}>
+              <Grid item xs={6} sm={3}>
+                <Box className={classes.statsItem}>
+                  <Text className={classes.statsHeader}>Collection Size</Text>
+                  <Text className={classes.statsContent}>10,000</Text>
+                </Box>
+              </Grid>
+
+              <Grid item xs={6} sm={3}>
+                <Box className={classes.statsItem}>
+                  <Text className={classes.statsHeader}>Number of Owners</Text>
+                  <Text className={classes.statsContent}>8</Text>
+                </Box>
+              </Grid>
+
+              {/* Need to convert to human number else might overflow */}
+              <Grid item xs={6} sm={3}>
+                <Box className={classes.statsItem}>
+                  <Text className={classes.statsHeader}>Floor Price</Text>
+                  <Text className={classes.statsContent}>2,000 ZIL</Text>
+                </Box>
+              </Grid>
+
+              <Grid item xs={6} sm={3}>
+                <Box className={classes.statsItem}>
+                  <Text className={classes.statsHeader}>Volume Traded</Text>
+                  <Text className={classes.statsContent}>1,000 ZIL</Text>
+                </Box>
+              </Grid>
+            </Grid>
+
+            {/* Description */}
+            <Text className={classes.description}>
+              Well we aren't just a bear market. We are The Bear Market. We know
+              a couple of fudders who have been releasing bears into the
+              unknown, and because of you guys we now have a shelter full of
+              lost and lonely bears. As much as we would love to care for all
+              these unbearably cuddly bears, we simply can't keep up! Thus we've
+              launched The Bear Market, in hope that every one of you will adopt
+              one because these koala-ity bears deserve a loving home!
+            </Text>
           </Box>
         </Card>
 
