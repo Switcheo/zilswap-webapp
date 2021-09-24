@@ -1,19 +1,22 @@
 import {
   Box,
   Card,
+  CardActionArea,
   CardContent,
   CardMedia,
   CardProps,
   makeStyles,
 } from "@material-ui/core";
+import { Text } from "app/components";
+import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React from "react";
-import { Text } from "app/components";
+import { Link } from "react-router-dom";
 import { ReactComponent as VerifiedBadge } from "../../verified-badge.svg";
 
 export interface Props extends CardProps {}
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     width: "100%",
     maxWidth: "308px",
@@ -21,6 +24,9 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: "none",
     backgroundColor: "transparent",
     position: "relative",
+    "&:hover": {
+      cursor: "pointer",
+    },
   },
   tokenId: {
     color: "#511500",
@@ -76,36 +82,43 @@ const NftCard: React.FC<Props> = (props: Props) => {
 
   return (
     <Card {...rest} className={cls(classes.root, className)}>
-      <CardMedia
-        component="img"
-        alt="NFT image"
-        height="308"
-        image="https://thebearmarket.s3.ap-southeast-1.amazonaws.com/assets/082479c2cecf1c0a6ad7da55bbf7643486533457543af13c4ee732a3d2871b4c.png"
-      />
-      <CardContent className={classes.cardContent}>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          {/* to truncate if too long? */}
-          <Text className={classes.title}>
-            the bear market
-            <VerifiedBadge className={classes.verifiedBadge} />
-          </Text>
-          <Text className={classes.title}>1M ZIL</Text>
-        </Box>
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          mt={0.5}
-        >
-          <Text className={classes.body}>#8888</Text>
-          <Text className={classes.body}>~$100,000</Text>
-        </Box>
+      <CardActionArea component={Link} to="/ark/collections/thebearmarket/8888">
+        <CardMedia
+          component="img"
+          alt="NFT image"
+          height="308"
+          image="https://thebearmarket.s3.ap-southeast-1.amazonaws.com/assets/082479c2cecf1c0a6ad7da55bbf7643486533457543af13c4ee732a3d2871b4c.png"
+        />
+        <CardContent className={classes.cardContent}>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            {/* to truncate if too long? */}
+            <Text className={classes.title}>
+              the bear market
+              <VerifiedBadge className={classes.verifiedBadge} />
+            </Text>
+            <Text className={classes.title}>1M ZIL</Text>
+          </Box>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            mt={0.5}
+          >
+            <Text className={classes.body}>#8888</Text>
+            <Text className={classes.body}>~$100,000</Text>
+          </Box>
 
-        {/* Rarity indicator */}
-        <Box className={classes.rarityBackground}>
-          <Box className={classes.rarityBar} />
-        </Box>
-      </CardContent>
+          {/* TODO: refactor and take in a rarity as prop */}
+          {/* Rarity indicator */}
+          <Box className={classes.rarityBackground}>
+            <Box className={classes.rarityBar} />
+          </Box>
+        </CardContent>
+      </CardActionArea>
     </Card>
   );
 };

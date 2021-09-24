@@ -1,12 +1,11 @@
 import { Box, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ReactComponent as TwitterIcon } from "app/components/SocialLinkGroup/social-icons/twitter.svg";
-import { hexToRGBA } from "app/utils";
 import cls from "classnames";
 import React from "react";
 import { ReactComponent as DiscordIcon } from "./social-icons/discord.svg";
-import { ReactComponent as TelegramIcon } from "./social-icons/telegram.svg";
 import { ReactComponent as GlobeIcon } from "./social-icons/globe.svg";
+import { ReactComponent as TelegramIcon } from "./social-icons/telegram.svg";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
   fill: {
     "& svg": {
       "& path": {
-        fill: `rgba${hexToRGBA(theme.palette.text.primary, 0.5)}`,
+        fill: "rgba(222, 255, 255, 0.5)",
       },
     },
   },

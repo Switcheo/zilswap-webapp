@@ -7,10 +7,10 @@ import {
   CardMedia,
   Container,
   Grid,
+  Typography,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import SvgIcon from "@material-ui/core/SvgIcon";
-import { Text } from "app/components";
 import ARKPage from "app/layouts/ARKPage";
 import { AppTheme } from "app/theme/types";
 import React from "react";
@@ -73,6 +73,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "16px",
     lineHeight: "24px",
     textAlign: "center",
+    marginTop: theme.spacing(1),
   },
   infoBox: {
     display: "flex",
@@ -112,7 +113,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 900,
     fontSize: "24px",
     lineHeight: "36px",
-    color: "#FFFFFF",
+    color: "#DEFFFF",
     whiteSpace: "nowrap",
   },
   description: {
@@ -222,13 +223,13 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
             {/* Collection name and creator  */}
             <Box display="flex" flexDirection="column" maxWidth={750}>
-              <Text variant="h1" className={classes.collectionName}>
+              <Typography variant="h1" className={classes.collectionName}>
                 The Bear Market
-              </Text>
+              </Typography>
 
-              <Text marginTop={1} className={classes.collectionCreator}>
+              <Typography className={classes.collectionCreator}>
                 by Switcheo Labs
-              </Text>
+              </Typography>
             </Box>
 
             {/* TODO: hacky way for mobile view, to clean up */}
@@ -238,36 +239,52 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             <Grid container spacing={2} className={classes.statsContainer}>
               <Grid item xs={6} sm={3}>
                 <Box className={classes.statsItem}>
-                  <Text className={classes.statsHeader}>Collection Size</Text>
-                  <Text className={classes.statsContent}>10,000</Text>
+                  <Typography className={classes.statsHeader}>
+                    Collection Size
+                  </Typography>
+                  <Typography className={classes.statsContent}>
+                    10,000
+                  </Typography>
                 </Box>
               </Grid>
 
               <Grid item xs={6} sm={3}>
                 <Box className={classes.statsItem}>
-                  <Text className={classes.statsHeader}>Number of Owners</Text>
-                  <Text className={classes.statsContent}>8,193</Text>
+                  <Typography className={classes.statsHeader}>
+                    Number of Owners
+                  </Typography>
+                  <Typography className={classes.statsContent}>
+                    8,193
+                  </Typography>
                 </Box>
               </Grid>
 
               {/* Need to convert to human number else might overflow */}
               <Grid item xs={6} sm={3}>
                 <Box className={classes.statsItem}>
-                  <Text className={classes.statsHeader}>Floor Price</Text>
-                  <Text className={classes.statsContent}>2,000 ZIL</Text>
+                  <Typography className={classes.statsHeader}>
+                    Floor Price
+                  </Typography>
+                  <Typography className={classes.statsContent}>
+                    2,000 ZIL
+                  </Typography>
                 </Box>
               </Grid>
 
               <Grid item xs={6} sm={3}>
                 <Box className={classes.statsItem}>
-                  <Text className={classes.statsHeader}>Volume Traded</Text>
-                  <Text className={classes.statsContent}>1,000 ZIL</Text>
+                  <Typography className={classes.statsHeader}>
+                    Volume Traded
+                  </Typography>
+                  <Typography className={classes.statsContent}>
+                    1,000 ZIL
+                  </Typography>
                 </Box>
               </Grid>
             </Grid>
 
             {/* Description */}
-            <Text className={classes.description}>
+            <Typography className={classes.description}>
               Well we aren't just a bear market. We are The Bear Market. We know
               a couple of fudders who have been releasing bears into the
               unknown, and because of you guys we now have a shelter full of
@@ -275,7 +292,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               these unbearably cuddly bears, we simply can't keep up! Thus we've
               launched The Bear Market, in hope that every one of you will adopt
               one because these koala-ity bears deserve a loving home!
-            </Text>
+            </Typography>
           </Box>
         </Card>
 
