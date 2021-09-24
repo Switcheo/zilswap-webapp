@@ -290,6 +290,13 @@ const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
             </Table>
           </TableContainer>
         </Box>
+
+        {/* Other info and price history */}
+        <Box display="flex" mt={3}>
+          {/* Other Info */}
+
+          {/* Price History */}
+        </Box>
       </Container>
     </ARKPage>
   );
