@@ -1,15 +1,15 @@
 import { Container, Typography, Box, useMediaQuery } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import ARKPage from "app/layouts/ARKPage";
 import { AppTheme } from "app/theme/types";
-import React, { useState } from "react";
 import { ArkTab, ArkBanner } from "app/components";
 import { useSelector } from "react-redux";
 import { RootState, WalletState } from "app/store/types";
 import { truncate } from "app/utils";
 import { ReactComponent as EditIcon } from "./edit-icon.svg";
-import { EditProfile } from "./components";
+import { EditProfile, OfferTable, OfferReceivedTable } from "./components";
 import cls from "classnames";
+import ARKPage from "app/layouts/ARKPage";
+import React, { useState } from "react";
 
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -55,6 +55,7 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
   const [description] = useState<string | null>(null);
   const [showEdit, setShowEdit] = useState(false);
+  const [currentTab, setCurrentTab] = useState("Collected");
 
   return (
     <ARKPage {...rest}>
@@ -77,7 +78,13 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             </Box>
 
           </ArkBanner>
-          <ArkTab tabHeaders={["Collected", "Onsale", "Liked", "Offers Made", "Offers Received"]} />
+          <ArkTab setCurrentTab={(value) => setCurrentTab(value)} currentTab={currentTab} tabHeaders={["Collected", "Onsale", "Liked", "Offers Made", "Offers Received"]} />
+          {(currentTab === "Offers Made") && (
+            <OfferTable />
+          )}
+          {(currentTab === "Offers Received") && (
+            <OfferReceivedTable />
+          )}
         </Container>
       )}
       {showEdit && (

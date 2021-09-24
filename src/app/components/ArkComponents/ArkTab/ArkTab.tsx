@@ -7,6 +7,8 @@ import React, { useState } from "react";
 interface Props extends BoxProps {
   tabTitle?: string;
   tabHeaders: string[];
+  setCurrentTab: (value: string) => void;
+  currentTab: string;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -69,12 +71,13 @@ const tabProps = (index: number) => {
 }
 
 const ArkTab: React.FC<Props> = (props: Props) => {
-  const { tabTitle = "Tabs", tabHeaders = [], children, className, ...rest } = props;
+  const { currentTab, setCurrentTab, tabTitle = "Tabs", tabHeaders = [], children, className, ...rest } = props;
   const classes = useStyles();
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(currentTab ? tabHeaders.indexOf(currentTab) : 0);
 
   const handleTabChange = (e: React.ChangeEvent<{}>, newTabValue: number) => {
     setTabValue(newTabValue);
+    setCurrentTab(tabHeaders[newTabValue]);
   }
 
   return (

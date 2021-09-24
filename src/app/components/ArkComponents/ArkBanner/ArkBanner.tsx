@@ -43,13 +43,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const TEMP_BANNER_URL = "https://pbs.twimg.com/profile_banners/1429715941399486466/1630400388/1500x500";
-const TEMP_BEAR_AVATAR_URL = "https://pbs.twimg.com/profile_images/1432977604563193858/z01O7Sey_400x400.jpg";
 
 const ArkBanner: React.FC<Props> = (props: Props) => {
   const {
-    children, className, badgeContent, avatarImage = TEMP_BEAR_AVATAR_URL,
-    bannerImage = TEMP_BANNER_URL, hideBanner
+    children, className, badgeContent, avatarImage,
+    bannerImage, hideBanner
   } = props;
   const classes = useStyles();
 
