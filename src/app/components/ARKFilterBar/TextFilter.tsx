@@ -62,6 +62,7 @@ const useStyles = makeStyles((theme: AppTheme) =>({
   },
   radioButton: {
     padding: "3px 0px",
+    marginTop: -2,
     marginRight: 6,
     "&:hover": {
       background: "transparent!important",

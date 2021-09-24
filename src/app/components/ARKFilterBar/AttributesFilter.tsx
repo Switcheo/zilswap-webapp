@@ -105,6 +105,24 @@ const useStyles = makeStyles((theme: AppTheme) =>({
     fontSize: 12,
     opacity: 0.5,
     fontWeight: "bold"
+  },
+  attributeLabel: {
+    color: theme.palette.type === "dark" ? "white" : "",
+    fontSize: 11,
+  },
+  attributeMeta: {
+    width: 60,
+    textAlign: "right",
+    color: theme.palette.type === "dark" ? "white" : "",
+    fontSize: 11,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "right"
+  },
+  attributeMetaDetail: {
+    fontSize: 11,
+    opacity: 0.5,
+    marginLeft: 2
   }
 }))
 
@@ -219,16 +237,70 @@ const AttributesFilter = () => {
             </Box>
             <Box flexGrow="1">
               <Box display="flex" marginBottom={1}>
-                <Text flexGrow="1">Basic</Text>
-                <Text>(24)</Text>
+                <Radio
+                  className={classes.radioButton}
+                  checkedIcon={<CheckedIcon />}
+                  icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                  disableRipple
+                />
+                <Text flexGrow="1" className={classes.filterValue}>BASE</Text>
+                <Text className={classes.attributeMeta}>Att. Rarity</Text>
+                <Text className={classes.attributeMeta}>Match</Text>
               </Box>
-              <Box display="flex" marginBottom={1}>
-                <Text flexGrow="1">Panda</Text>
-                <Text>(24)</Text>
+              <Box display="flex" marginBottom={1} marginLeft={3}>
+                <Radio
+                  className={classes.radioButton}
+                  checkedIcon={<CheckedIcon />}
+                  icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                  disableRipple
+                />
+                <Text className={classes.attributeLabel} flexGrow="1">Basic</Text>
+                <Text className={classes.attributeMeta}>10% <Text className={classes.attributeMetaDetail}>(2.5K)</Text></Text>
+                <Text className={classes.attributeMeta}>5% <Text className={classes.attributeMetaDetail}>(2.5K)</Text></Text>
               </Box>
-              <Box display="flex" marginBottom={1}>
-                <Text flexGrow="1">Polar</Text>
-                <Text>(24)</Text>
+              <Box display="flex" marginBottom={1} marginLeft={3}>
+                <Radio
+                  className={classes.radioButton}
+                  checkedIcon={<CheckedIcon />}
+                  icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                  disableRipple
+                />
+                <Text className={classes.attributeLabel} flexGrow="1">Panda</Text>
+                <Text className={classes.attributeMeta}>10% <Text className={classes.attributeMetaDetail}>(2.5K)</Text></Text>
+                <Text className={classes.attributeMeta}>5% <Text className={classes.attributeMetaDetail}>(2.5K)</Text></Text>
+              </Box>
+              <Box display="flex" marginBottom={1} marginLeft={3}>
+                <Radio
+                  className={classes.radioButton}
+                  checkedIcon={<CheckedIcon />}
+                  icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                  disableRipple
+                />
+                <Text className={classes.attributeLabel} flexGrow="1">Polar</Text>
+                <Text className={classes.attributeMeta}>10% <Text className={classes.attributeMetaDetail}>(2.5K)</Text></Text>
+                <Text className={classes.attributeMeta}>5% <Text className={classes.attributeMetaDetail}>(2.5K)</Text></Text>
+              </Box>
+              <Box display="flex" marginBottom={1} marginLeft={3}>
+                <Radio
+                  className={classes.radioButton}
+                  checkedIcon={<CheckedIcon />}
+                  icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                  disableRipple
+                />
+                <Text className={classes.attributeLabel} flexGrow="1">Koala</Text>
+                <Text className={classes.attributeMeta}>10% <Text className={classes.attributeMetaDetail}>(2.5K)</Text></Text>
+                <Text className={classes.attributeMeta}>5% <Text className={classes.attributeMetaDetail}>(2.5K)</Text></Text>
+              </Box>
+              <Box display="flex" marginBottom={1} marginLeft={3}>
+                <Radio
+                  className={classes.radioButton}
+                  checkedIcon={<CheckedIcon />}
+                  icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                  disableRipple
+                />
+                <Text className={classes.attributeLabel} flexGrow="1">Alien</Text>
+                <Text className={classes.attributeMeta}>10% <Text className={classes.attributeMetaDetail}>(2.5K)</Text></Text>
+                <Text className={classes.attributeMeta}>5% <Text className={classes.attributeMetaDetail}>(2.5K)</Text></Text>
               </Box>
             </Box>
           </Box>
