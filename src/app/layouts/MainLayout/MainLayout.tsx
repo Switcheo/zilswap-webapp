@@ -42,6 +42,7 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   return (
     <Box className={classes.root}>
       <TopBar onToggleDrawer={onToggleDrawer} />
+      <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />
       <main className={classes.content}>
         <DevInfoBadge />
         <Suspense fallback={<LinearProgress />}>
@@ -53,7 +54,6 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       </Hidden>
       <WalletDialog />
       <TransactionDialog />
-      <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />
     </Box>
   );
 };

@@ -56,6 +56,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       theme.palette.type === "dark"
         ? "inset 5px 0 0 #00FFB0"
         : "inset 5px 0 0 #003340",
+    "& svg": {
+      "& path": {
+        fill: theme.palette.type === "dark" ? "#00FFB0" : "",
+      },
+    },
+    "& .MuiButton-label": {
+      color: theme.palette.type === "dark" ? "#00FFB0" : "",
+    },
   },
   highlightTitle: {
     color: theme.palette.type === "dark" ? "#00FFB0" : "",
@@ -69,7 +77,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   icon: {
     marginRight: "12px",
     "& path": {
-      fill: theme.palette.type === "dark" ? "#00FFB0" : "#003340",
+      fill: theme.palette.text?.primary,
     },
   },
   expandedList: {
@@ -78,6 +86,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   textColoured: {
     color: theme.palette.type === "dark" ? "#00FFB0" : "#003340",
+  },
+  buyZil: {
+    "& svg": {
+      "& path": {
+        fill: theme.palette.type === "dark" ? "#FFDF6B" : "",
+      },
+    },
+    "& .MuiButton-label": {
+      color: theme.palette.type === "dark" ? "#FFDF6B" : "",
+    },
   },
 }));
 
@@ -189,6 +207,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (
         <ListItem className={classes.listItem} disableGutters button>
           <Button
             className={cls(
+              classes.buyZil,
               {
                 [classes.highlightTitle]: navigation.highlight,
                 [classes.secondaryFont]: secondary,

@@ -1,4 +1,6 @@
-import { FormControlLabel, FormGroup, Switch, Typography } from "@material-ui/core";
+import { FormControlLabel, FormGroup, Switch } from "@material-ui/core";
+import DarkIcon from "@material-ui/icons/Brightness2Rounded";
+import LightIcon from "@material-ui/icons/Brightness4Rounded";
 import { makeStyles } from "@material-ui/styles";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
@@ -15,26 +17,33 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: (props: ThemeSwitchProps) => ({
     "& .MuiSwitch-track": {
       position: "relative",
-      ...props.forceDark && {
-        backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.5)}`,
-      },
+      ...(props.forceDark && {
+        backgroundColor: `rgba${hexToRGBA("#00FFB0", 0.5)}`,
+      }),
     },
     "& .Mui-checked+.MuiSwitch-track": {
       backgroundColor: `rgba${hexToRGBA("#003340", 0.5)}`,
     },
     "& .MuiSwitch-thumb": {
-      backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#003340",
+      backgroundColor: theme.palette.type === "dark" ? "#00FFB0" : "#003340",
       width: 14,
       height: 14,
     },
     "& .MuiSwitch-switchBase": {
-      padding: "12px"
+      padding: "12px 12px",
     },
   }),
   label: {
     marginLeft: theme.spacing(1),
     marginRight: 0,
-    color: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.5)}` : "#003340"
+    color:
+      theme.palette.type === "dark"
+        ? `rgba${hexToRGBA("#DEFFFF", 0.5)}`
+        : "#003340",
+  },
+  icon: {
+    fontSize: "1.4rem",
+    verticalAlign: "middle",
   },
 }));
 
@@ -42,7 +51,9 @@ const ThemeSwitch: React.FC<ThemeSwitchProps> = (props: ThemeSwitchProps) => {
   const { className, forceDark, ...rest } = props;
   const classes = useStyles(props);
 
-  const themeType = useSelector<RootState, string>(state => state.preference.theme);
+  const themeType = useSelector<RootState, string>(
+    (state) => state.preference.theme
+  );
   const dispatch = useDispatch();
 
   const onToggleTheme = () => {
@@ -53,13 +64,22 @@ const ThemeSwitch: React.FC<ThemeSwitchProps> = (props: ThemeSwitchProps) => {
   return (
     <FormGroup row>
       <FormControlLabel
-        control={<Switch
-          color="secondary"
-          checked={themeType === THEME_TOGGLE_SELECTED}
-          onChange={() => onToggleTheme()}
-          {...rest}
-          className={clsx(classes.root, className)} />}
-        label={<Typography variant="h6">Classic</Typography>}
+        control={
+          <Switch
+            color="secondary"
+            checked={themeType === THEME_TOGGLE_SELECTED}
+            onChange={() => onToggleTheme()}
+            {...rest}
+            className={clsx(classes.root, className)}
+          />
+        }
+        label={
+          themeType === "dark" ? (
+            <LightIcon className={classes.icon} />
+          ) : (
+            <DarkIcon className={classes.icon} />
+          )
+        }
         labelPlacement="start"
         className={classes.label}
       />

@@ -13,7 +13,8 @@ const navigationConfig: NavigationOptions[] = [{
   }, {
     title: "ARK",
     href: "/ark",
-    icon: "Flame",
+    icon: "Dashboard",
+    badge: "COMING SOON",
   },
   {
     title: "ZilBridge",

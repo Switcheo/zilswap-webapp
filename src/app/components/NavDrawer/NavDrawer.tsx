@@ -1,5 +1,13 @@
-import { Box, Drawer, DrawerProps, IconButton, List } from "@material-ui/core";
+import {
+  Box,
+  Button,
+  Drawer,
+  DrawerProps,
+  IconButton,
+  List,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import ArrowBackRoundedIcon from "@material-ui/icons/ArrowBackRounded";
 import { CurrencyLogo, Text } from "app/components";
 import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -10,10 +18,11 @@ import cls from "classnames";
 import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import NetworkToggle from "../NetworkToggle";
 import SocialLinkGroup from "../SocialLinkGroup";
 import ThemeSwitch from "../ThemeSwitch";
-import { ReactComponent as CloseSVG } from "./close.svg";
+import { Brand } from "../TopBar/components";
 import { NavigationContent } from "./components";
 import navigationConfig from "./navigationConfig";
 
@@ -67,24 +76,41 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   drawerHeader: {
     display: "flex",
     alignItems: "center",
-    padding: "0px 22px",
+    padding: "4px 22px",
     justifyContent: "flex-start",
     minHeight: "49px",
-    borderBottom:
-      theme.palette.type === "dark"
-        ? "1px solid #003340"
-        : "1px solid transparent",
     backgroundColor: theme.palette.toolbar.main,
   },
   price: {
     color: theme.palette.primary.dark,
     fontSize: 16,
+    marginTop: "1px",
   },
   currencyLogo: {
     height: 24,
     width: 24,
     marginRight: theme.spacing(0.3),
     marginLeft: theme.spacing(0.5),
+  },
+  closeButton: {
+    padding: "8px",
+    "& svg": {
+      height: 22,
+      width: 22,
+    },
+    "& path": {
+      fill:
+        theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#D4FFF2",
+    },
+    [theme.breakpoints.down("xs")]: {
+      display: "none",
+    },
+  },
+  brandButton: {
+    padding: "4px 10px",
+    "&:hover": {
+      backgroundColor: "transparent",
+    },
   },
 }));
 
@@ -114,11 +140,19 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
       {...rest}
       className={cls(classes.root, className)}
     >
-      <div className={classes.drawerHeader}>
-        <IconButton onClick={onClose}>
-          <CloseSVG />
+      <Box className={classes.drawerHeader}>
+        <IconButton className={classes.closeButton} onClick={onClose}>
+          <ArrowBackRoundedIcon />
         </IconButton>
-      </div>
+        <Button
+          component={Link}
+          to="/"
+          className={classes.brandButton}
+          disableRipple
+        >
+          <Brand />
+        </Button>
+      </Box>
       <Box className={classes.content}>
         {navigationConfig.map((navigation, listIndex) => (
           <List key={listIndex}>
