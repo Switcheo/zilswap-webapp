@@ -585,7 +585,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   <Text marginTop={2} variant="h4" className={classes.textColoured}>
                     <CheckCircleRoundedIcon fontSize="inherit" className={classes.successIcon} />
                     {" "}
-                    Reward claims successful!
+                    Claim transaction submitted!
                   </Text>
                   <Link
                     className={classes.link}
