@@ -2,7 +2,7 @@ import { Network } from "zilswap-sdk/lib/constants";
 
 export const REWARDS_DISTRIBUTOR_CONTRACT = {
   [Network.MainNet]: "zil1x9sgg50evk67le33ntcwzj7xuj7x69rlh9lzsc",
-  [Network.TestNet]: "zil1clfx0r4ks4gfyxrz4u98p9srmmq7lwtx9uh0jh",
+  [Network.TestNet]: "zil1p3en4rzqcfuntf8fh6tr7j6wy5qs4utwck0d38",
 }
 
 export const ZWAP_TOKEN_CONTRACT = {

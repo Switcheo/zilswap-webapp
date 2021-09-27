@@ -140,7 +140,7 @@ const ConnectedWalletBox = (props: any) => {
             <Typography color="textSecondary" className={classes.iconText}>Copy Address</Typography>
           </IconButton>
         </Tooltip>
-        <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network}`} className={classes.newLink} size="small">
+        <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network.toLowerCase()}`} className={classes.newLink} size="small">
           <NewLinkIcon className={classes.icons}/>
           <Typography color="textSecondary" className={classes.iconText}>View on Explorer</Typography>
         </IconButton>

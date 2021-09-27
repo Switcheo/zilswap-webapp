@@ -11,7 +11,7 @@ import { actions } from "app/store";
 import { DistributionWithStatus, DistributorWithTimings, RewardsState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useNetwork, useTokenFinder, useValueCalculators } from "app/utils";
-import { BIG_ZERO, MAX_CLAIMS_PER_TX } from "app/utils/constants";
+import { BIG_ZERO } from "app/utils/constants";
 import { formatZWAPLabel } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -325,7 +325,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       // guide users to select rewards
       if (selectedDistributions.length === 0) {
         if (showDetails) {
-          setSelectedDistributions(claimableRewards.slice(-MAX_CLAIMS_PER_TX));
+          setSelectedDistributions(claimableRewards.filter(r => !claimedDistributions.includes(r.info.id)));
         } else {
           setShowDetails(true)
         }
@@ -375,10 +375,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     const selectedDistributionsCopy = selectedDistributions.slice();
     const index = selectedDistributionsCopy.findIndex((d) => d.info.id === distribution.info.id);
     if (index === -1) {
-      if (selectedDistributions.length >= MAX_CLAIMS_PER_TX) {
-        return;
-      }
-
       selectedDistributionsCopy.push(distribution);
       setSelectedDistributions(selectedDistributionsCopy);
     } else {
@@ -389,13 +385,13 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   // selectedDistributions.length same as reward distributions that are readyToClaim
   const isAllSelected = useMemo(() => {
-    return claimableRewards.length === selectedDistributions.length;
+    return claimableRewards.length === selectedDistributions.length && selectedDistributions.length > 0;
   }, [claimableRewards, selectedDistributions])
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     // if checked, selectedDistributions should contain all claimable distributions
     if (event.target.checked) {
-      setSelectedDistributions(claimableRewards.slice(-MAX_CLAIMS_PER_TX));
+      setSelectedDistributions(claimableRewards.filter(r => !claimedDistributions.includes(r.info.id)));
     } else {
       setSelectedDistributions([]);
     }
@@ -583,15 +579,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   </Box>
                 }
               </Box>
-
-              {claimableRewards.length > 4 && (
-                <Box marginTop={2}>
-                  <Text variant="body1">
-                    <HelpInfo placement="bottom" title="Limited by Zilliqa transaction restriction which may be reviewed in the near future." className={classes.tooltipLeft} />
-                    Claim up to 4 distributions per transaction.
-                  </Text>
-                </Box>
-              )}
 
               {claimResult && (
                 <Box display="flex" marginTop={2} flexDirection="column" alignItems="center">
