@@ -579,12 +579,22 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   </Box>
                 }
               </Box>
+              <Box marginTop={2}>
+                <Tooltip title={claimTooltip}>
+                  <span>
+                    <Button fullWidth variant="contained" color="primary" disabled={claimableRewards.length === 0} onClick={onClaimRewards} className={classes.claimRewardsButton}>
+                      {loading && <CircularProgress size="1em" color="inherit" className={classes.progress} />}
+                      {claimButtonText()}
+                    </Button>
+                  </span>
+                </Tooltip>
+              </Box>
 
               {claimResult && (
-                <Box display="flex" marginTop={2} flexDirection="column" alignItems="center">
+                <Box display="flex" marginTop={1} flexDirection="column" alignItems="center">
                   <Text marginTop={2} variant="h4" className={classes.textColoured}>
                     <CheckCircleRoundedIcon fontSize="inherit" className={classes.successIcon} />
-                    {" "}
+                    &nbsp;
                     Claim transaction submitted!
                   </Text>
                   <Link
@@ -600,16 +610,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   </Link>
                 </Box>
               )}
-              <Box marginTop={2}>
-                <Tooltip title={claimTooltip}>
-                  <span>
-                    <Button fullWidth variant="contained" color="primary" disabled={claimableRewards.length === 0} onClick={onClaimRewards} className={classes.claimRewardsButton}>
-                      {loading && <CircularProgress size="1em" color="inherit" className={classes.progress} />}
-                      {claimButtonText()}
-                    </Button>
-                  </span>
-                </Tooltip>
-              </Box>
 
               {!!error && (
                 <Box mt={1.5} display="flex" justifyContent="center">
