@@ -365,8 +365,6 @@ const ConfirmTransfer = (props: any) => {
       signer: signer,
     });
 
-    await lock_tx.wait();
-
     toaster(`Submitted: (Ethereum - Lock Asset)`, { sourceBlockchain: "eth", hash: lock_tx.hash! });
     logger("lock tx", lock_tx.hash!);
 
@@ -509,6 +507,10 @@ const ConfirmTransfer = (props: any) => {
         depositDispatchedAt: dayjs(),
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
+
+      if (fromBlockchain === Blockchain.Ethereum) {
+        await sdk.eth.getProvider().waitForTransaction(sourceTxHash!, 1);
+      }
 
       addNavigationHook(history);
     })
