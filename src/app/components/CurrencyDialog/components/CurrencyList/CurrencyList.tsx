@@ -7,6 +7,7 @@ import { BridgeState, RootState, TokenInfo, TokenState, WalletState } from "app/
 import { AppTheme } from "app/theme/types";
 import { useMoneyFormatter } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
+import { formatSymbol } from "app/utils/currencies";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import React from "react";
@@ -119,7 +120,7 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
           <ContrastBox className={classes.currencyBox}>
             <CurrencyLogo className={classes.currencyLogo} currency={token.registered && token.symbol} address={getLogoAddress(token)} />
             <Box display="flex" flexDirection="column">
-              <Typography variant="h3">{token.symbol}</Typography>
+              <Typography variant="h3">{formatSymbol(token)}</Typography>
 
               <Box display="flex" flexDirection="row">
                 {!!token.name && (
@@ -136,7 +137,7 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
               {!!walletState.wallet && (
                 <Typography align="right" variant="h6" component="div">
                   {moneyFormat(getTokenBalance(token), {
-                    symbol: token.symbol,
+                    symbol: formatSymbol(token),
                     maxFractionDigits: showContribution ? 5 : token.decimals,
                     compression: token.decimals,
                     showCurrency: true,

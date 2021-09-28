@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js";
 import { Network } from "zilswap-sdk/lib/constants";
+import { SimpleMap } from "./types";
 
 export const DefaultFallbackNetwork = Network.MainNet;
 
@@ -76,6 +77,12 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
   [Network.MainNet]: ["zusdt.z.2", "zeth.z.1", "zwbtc.z.1"],
   [Network.TestNet]: ["zil5.e", "zwap5.e", "eth6.z", "dai6.z"],
 }
+
+export const TOKEN_SYMBOLS = {
+  "ZETH": "zETH",
+  "ZWBTC": "zWBTC",
+  "ZUSDT": "zUSDT",
+} as SimpleMap<string>;
 
 export const TRANSAK_API_KEY = {
   DEVELOPMENT: process.env.REACT_APP_TRANSAK_DEV,
