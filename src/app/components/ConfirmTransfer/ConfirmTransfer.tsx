@@ -29,6 +29,8 @@ import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
 
+const TRANSFER_KEY_MESSAGE = "In the event you are not able to complete Stage 2 of your transfer, you may retrieve and resume your transfer by entering the following unique transfer key phrase on your Transfer History page. Do not ever reveal your transfer key phrase to anyone. ZilSwap will not be held accountable and cannot help you retrieve those funds once they are lost.\n\n";
+
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     "& .MuiAccordionSummary-root": {
@@ -450,6 +452,16 @@ const ConfirmTransfer = (props: any) => {
     return lock_tx.id;
   }
 
+  const downloadTransferKey = (key: string) => {
+    const element = document.createElement("a");
+    const file = new Blob([`${TRANSFER_KEY_MESSAGE}\n${key}`], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = "private-transfer-key.txt";
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
+    toaster("Transfer key downloaded", { overridePersist: false });
+  }
+
   const onConfirm = async () => {
     if (!localStorage) {
       console.error("localStorage not available");
@@ -468,14 +480,24 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
+    if (!swthAddrMnemonic) {
+      console.error("tradehub mnemonic not initialized");
+      return null;
+    }
+
+    if (!withdrawFee) {
+      toaster("Transfer fee not loaded", { overridePersist: false });
+      return null;
+    }
+
+    if (withdrawFee?.amount.gte(bridgeFormState.transferAmount)) {
+      toaster("Transfer amount too low", { overridePersist: false });
+      return null;
+    }
+
+    downloadTransferKey(swthAddrMnemonic);
+
     runConfirmTransfer(async () => {
-      if (!withdrawFee)
-        throw new Error("Transfer fee not loaded");
-
-      if (withdrawFee?.amount.gte(bridgeFormState.transferAmount)) {
-        throw new Error("Transfer amount too low");
-      }
-
       let sourceTxHash;
       if (fromBlockchain === Blockchain.Zilliqa) {
         // init lock on zil side
