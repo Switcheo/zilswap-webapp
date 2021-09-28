@@ -115,7 +115,7 @@ function* watchDepositConfirmation() {
                 const tradehubNetwork = netZilToTradeHub(tx.network);
                 const sdk = new TradeHubSDK({ network: tradehubNetwork });
                 const provider = sdk.eth.getProvider();
-                const transaction = (yield call([provider, provider.getTransactionReceipt], tx.sourceTxHash)) as ethers.providers.TransactionReceipt
+                const transaction = (yield call([provider, provider.getTransactionReceipt], tx.sourceTxHash!)) as ethers.providers.TransactionReceipt
                 logger("bridge saga", tx.sourceTxHash, transaction?.confirmations);
                 if (!transaction?.confirmations) continue;
                 if (transaction.status === 0) {

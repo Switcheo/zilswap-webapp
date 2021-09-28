@@ -343,7 +343,7 @@ const ConfirmTransfer = (props: any) => {
         });
 
         logger("approve tx", approve_tx.hash);
-        toaster(`Submitted: (Ethereum - ERC20 Approval)`, { hash: approve_tx.hash!, sourceBlockchain: "eth" });
+        toaster(`Submitted: (Ethereum - ERC20 Approval)`, { hash: approve_tx.hash!.replace(/^0x/i, ""), sourceBlockchain: "eth" });
         setApprovalHash(approve_tx.hash!);
         await approve_tx.wait();
 
@@ -367,7 +367,7 @@ const ConfirmTransfer = (props: any) => {
       signer: signer,
     });
 
-    toaster(`Submitted: (Ethereum - Lock Asset)`, { sourceBlockchain: "eth", hash: lock_tx.hash! });
+    toaster(`Submitted: (Ethereum - Lock Asset)`, { sourceBlockchain: "eth", hash: lock_tx.hash!.replace(/^0x/i, "") });
     logger("lock tx", lock_tx.hash!);
 
     return lock_tx.hash!;
