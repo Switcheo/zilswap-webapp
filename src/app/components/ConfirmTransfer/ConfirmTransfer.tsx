@@ -607,10 +607,7 @@ const ConfirmTransfer = (props: any) => {
           <KeyValueDisplay kkey={<span>&nbsp; • &nbsp;{fromChainName} Txn Fee</span>} mb="8px">
             <span className={classes.textColoured}>{withdrawFee?.amount.toFixed(2)}</span>
             {" "}
-            {bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
-              ? "ZIL"
-              : "ETH"
-            }
+            {fromToken?.symbol}
             {" "}
             ~<span className={classes.textColoured}>${withdrawFee?.value.toFixed(2) || 0}</span>
             <HelpInfo className={classes.helpInfo} placement="top" title="Estimated network fees incurred to pay the relayer." />
