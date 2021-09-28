@@ -516,15 +516,12 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const onSelectMax = async () => {
-    console.log("onSelectMax", fromToken, sdk)
     if (!fromToken || !sdk) return;
 
     let balance = strings.bnOrZero(fromToken.balance);
     const asset = sdk.token.tokens[bridgeToken?.denom ?? ""];
 
-    console.log(fromToken, sdk, asset)
     if (!asset) return;
-
 
     // Check if gas fees need to be deducted
     if (isNativeAsset(asset) && CHAIN_NAMES[fromToken.blockchain] === fromBlockchain) {

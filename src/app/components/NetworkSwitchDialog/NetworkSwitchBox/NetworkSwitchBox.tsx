@@ -84,7 +84,7 @@ const NetworkSwitchBox = (props: Props) => {
         });
         dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
       } catch (switchError) {
-        console.log(switchError);
+        console.error(switchError);
       }
     }
 

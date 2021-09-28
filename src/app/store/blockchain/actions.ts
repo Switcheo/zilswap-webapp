@@ -22,7 +22,6 @@ export function initialized() {
 
 export type ChainInitAction = ReturnType<typeof initialize>
 export function initialize(payload: ChainInitProps) {
-  console.log(" initialize " + payload.network)
   return {
     type: BlockchainActionTypes.CHAIN_INIT,
     payload
