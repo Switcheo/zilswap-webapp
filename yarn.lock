@@ -16857,10 +16857,10 @@ tr46@^2.1.0:
   dependencies:
     punycode "^2.1.1"
 
-tradehub-api-js@^1.0.11:
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/tradehub-api-js/-/tradehub-api-js-1.0.11.tgz#1f02bd85c4e87833bcf7cbafbb96b94798fc296b"
-  integrity sha512-uabXAo4j1IwXe3h/WfFEnH2yG/gllh/VBvhKLc2gU7l8W002wVUcgMhshkeGgnp4CVhI6wRC+uyj9igr5FihMw==
+tradehub-api-js@^1.0.12:
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/tradehub-api-js/-/tradehub-api-js-1.0.12.tgz#e67ee2b8d570acdf9648ee7d7306ec4395c839d9"
+  integrity sha512-ZsIH0sbRYdb61Fl4A9r/dRf1S3QwiGxAs9TNjuTtl3GscHAhXPifsnjp1FXi0hDpA0/ajzaf2qKSGR4gzQ5uAQ==
   dependencies:
     "@cityofzion/neon-core" "^4.8.0"
     "@cityofzion/neon-js" "^4.8.0"
