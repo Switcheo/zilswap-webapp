@@ -53,7 +53,7 @@ function getBridgeTxStatus(tx: BridgeTx): Status {
 
 const makeTxFilter = (statuses: Status[]) => {
   return (state: RootState) => {
-    return state.bridge.bridgeTxs.filter((tx) => !tx.dismissedAt && statuses.includes(getBridgeTxStatus(tx)));
+    return state.bridge.bridgeTxs.filter((tx) => statuses.includes(getBridgeTxStatus(tx)));
   }
 }
 
