@@ -8,7 +8,7 @@ import { actions } from "app/store";
 import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useAsyncTask, useToaster, useTokenFinder, trimValue } from "app/utils";
+import { hexToRGBA, truncate, useAsyncTask, useToaster, useTokenFinder, trimValue, netZilToTradeHub, useNetwork } from "app/utils";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
+import { Network } from "zilswap-sdk/lib/constants";
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
@@ -166,12 +167,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 // initialize a tradehub sdk client
 // @param mnemonic initialize the sdk with an account
-async function initTradehubSDK(mnemonic: string) {
+async function initTradehubSDK(mnemonic: string, network: Network) {
   let attempts = 0;
+  const tradehubNetwork = netZilToTradeHub(network);
   while (attempts++ < 10) {
     try {
       const sdk = new TradeHubSDK({
-        network: TradeHubSDK.Network.DevNet,
+        network: tradehubNetwork,
         debugMode: isDebug(),
       });
       return await sdk.connectWithMnemonic(mnemonic);
@@ -217,6 +219,7 @@ const ConfirmTransfer = (props: any) => {
   const toaster = useToaster();
   const history = useHistory();
   const tokenFinder = useTokenFinder();
+  const network = useNetwork();
 
   const [sdk, setSdk] = useState<ConnectedTradeHubSDK | null>(null);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
@@ -276,13 +279,13 @@ const ConfirmTransfer = (props: any) => {
     if (!swthAddrMnemonic) return;
 
     runInitTradeHubSDK(async () => {
-      const sdk = await initTradehubSDK(swthAddrMnemonic);
+      const sdk = await initTradehubSDK(swthAddrMnemonic, network);
       await sdk.token.reloadTokens();
       setSdk(sdk);
     })
 
     // eslint-disable-next-line
-  }, [swthAddrMnemonic])
+  }, [swthAddrMnemonic, network])
 
   if (!showTransfer) return null;
 
@@ -467,9 +470,8 @@ const ConfirmTransfer = (props: any) => {
     }
 
     runConfirmTransfer(async () => {
-      // TODO: uncomment when fees fixed.
-      // if (!withdrawFee)
-      //   throw new Error("withdraw fee not loaded");
+      if (!withdrawFee)
+        throw new Error("Transfer fee not loaded");
 
       if (withdrawFee?.amount.gte(bridgeFormState.transferAmount)) {
         throw new Error("Transfer amount too low");
@@ -497,6 +499,7 @@ const ConfirmTransfer = (props: any) => {
         srcAddr: sourceAddress,
         dstChain: toBlockchain,
         srcChain: fromBlockchain,
+        network: network,
         dstToken: bridgeToken.toDenom,
         srcToken: bridgeToken.denom,
         sourceTxHash: sourceTxHash,

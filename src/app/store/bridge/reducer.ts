@@ -5,6 +5,7 @@ import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
 import dayjs from "dayjs";
 import { Blockchain } from "tradehub-api-js";
+import { Network } from "zilswap-sdk/lib/constants";
 import { BridgeActionTypes } from "./actions";
 import { BridgeableTokenMapping, BridgeState, BridgeTx } from "./types";
 
@@ -13,6 +14,7 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
     return {
       srcChain: tx.srcChain,
       dstChain: tx.dstChain,
+      network: tx.network,
       srcAddr: tx.srcAddr,
       dstAddr: tx.dstAddr,
       srcToken: tx.srcToken,
@@ -38,6 +40,7 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
     return {
       srcChain: object.srcChain,
       dstChain: object.dstChain,
+      network: object.network ?? Network.TestNet,
       srcAddr: object.srcAddr,
       dstAddr: object.dstAddr,
       srcToken: object.srcToken,

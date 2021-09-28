@@ -3,7 +3,7 @@ import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { actions } from "app/store";
 import { Transaction as EthTransaction } from "ethers";
 import { BridgeableToken, BridgeableTokenMapping, BridgeTx, RootState } from "app/store/types";
-import { SimpleMap } from "app/utils";
+import { netZilToTradeHub, SimpleMap } from "app/utils";
 import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL, PollIntervals } from "app/utils/constants";
 import { bnOrZero } from "app/utils/strings/strings";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
@@ -68,9 +68,9 @@ function* watchDepositConfirmation() {
       logger("bridge saga", "watch deposit confirmation", bridgeTxs.length);
 
       const updatedTxs: SimpleMap<BridgeTx> = {};
-      const network = TradeHubSDK.Network.DevNet
       for (const tx of bridgeTxs) {
         try {
+          const network = netZilToTradeHub(tx.network ?? Network.TestNet);
           const sdk = new TradeHubSDK({ network });
 
           const swthAddress = SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
@@ -178,15 +178,16 @@ function* watchWithdrawConfirmation() {
     try {
       // watch and update relevant txs
       const bridgeTxs = (yield select(getFilteredTx)) as BridgeTx[];
+      const { network } = getBlockchain(yield select());
       logger("bridge saga", "watch withdraw confirmation", bridgeTxs.length);
 
       const updatedTxs: SimpleMap<BridgeTx> = {};
-      const network = TradeHubSDK.Network.DevNet;
+      const tradehubNetwork = netZilToTradeHub(network)
       for (const tx of bridgeTxs) {
         logger("bridge saga", "checking tx withdraw", tx.withdrawTxHash);
         try {
-          const sdk = new TradeHubSDK({ network });
-          const swthAddress = SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
+          const sdk = new TradeHubSDK({ network: tradehubNetwork });
+          const swthAddress = SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network: tradehubNetwork });
           const extTransfers = (yield call([sdk.api, sdk.api.getTransfers], { account: swthAddress })) as RestModels.Transfer[];
 
           const withdrawTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'withdrawal' && transfer.blockchain === tx.dstChain);
@@ -252,7 +253,7 @@ function* watchActiveTxConfirmations() {
               break;
             };
             case Blockchain.Ethereum: {
-              const tradehubNetwork = network === Network.MainNet ? TradeHubSDK.Network.MainNet : TradeHubSDK.Network.DevNet;
+              const tradehubNetwork = netZilToTradeHub(network);
               const sdk = new TradeHubSDK({ network: tradehubNetwork });
 
               const sourceTx: EthTransactionResponse = yield sdk.eth.getProvider().getTransaction(bridgeTx.sourceTxHash);

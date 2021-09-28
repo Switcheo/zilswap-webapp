@@ -9,7 +9,7 @@ import { actions } from "app/store";
 import { BridgeFormState, BridgeState } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, strings, useAsyncTask, useNetwork, useTokenFinder } from "app/utils";
+import { hexToRGBA, netZilToTradeHub, strings, useAsyncTask, useNetwork, useTokenFinder } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
@@ -177,19 +177,33 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
   const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
   const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK");
+  const [runLoadGasPrice] = useAsyncTask("loadGasPrice");
   const [disconnectMenu, setDisconnectMenu] = useState<any>();
+  const [gasPrice, setGasPrice] = useState<BigNumber | undefined>();
   const disconnectSrcButtonRef = useRef();
   const disconnectDestButtonRef = useRef();
 
   useEffect(() => {
+    if (gasPrice?.gt(0) || !sdk) return;
+
+    runLoadGasPrice(async () => {
+      const gasPrice = await sdk?.eth.getProvider().getGasPrice();
+      setGasPrice(new BigNumber(gasPrice.toString()));
+    })
+
+    // eslint-disable-next-line
+  }, [sdk, gasPrice])
+
+  useEffect(() => {
     runInitTradeHubSDK(async () => {
-      const sdk = new TradeHubSDK({ network: TradeHubSDK.Network.DevNet });
+      const tradehubNetwork = netZilToTradeHub(network)
+      const sdk = new TradeHubSDK({ network: tradehubNetwork });
       await sdk.token.reloadTokens();
       setSdk(sdk);
     })
 
     // eslint-disable-next-line
-  }, []);
+  }, [network]);
 
   const tokenList: 'bridge-zil' | 'bridge-eth' = bridgeFormState.fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth';
 
@@ -476,33 +490,34 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     return (asset.asset_id === zeroAddress)
   }
 
-  const adjustedForGas = async (balance: BigNumber, blockchain: Blockchain, sdk: TradeHubSDK) => {
+  const adjustedForGas = (balance: BigNumber, blockchain: Blockchain) => {
     if (blockchain === Blockchain.Zilliqa) {
       const gasPrice = new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`);
       const gasLimit = new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`);
 
       return balance.minus(gasPrice.multipliedBy(gasLimit));
     } else {
-      const gasPrice = await sdk.eth.getProvider().getGasPrice();
-      const gasPriceGwei = new BigNumber(ethers.utils.formatUnits(gasPrice, "gwei"));
+      const gasPriceGwei = new BigNumber(ethers.utils.formatUnits((gasPrice ?? new BigNumber(65)).toString(10), "gwei"));
       const gasLimit = new BigNumber(`${BridgeParamConstants.ETH_GAS_LIMIT}`);
 
       return balance.minus(gasPriceGwei.multipliedBy(gasLimit));
     }
   }
 
-  // eth takes awhile to load, need to fix
   const onSelectMax = async () => {
+    console.log("onSelectMax", fromToken, sdk)
     if (!fromToken || !sdk) return;
 
     let balance = strings.bnOrZero(fromToken.balance);
     const asset = sdk.token.tokens[bridgeToken?.denom ?? ""];
 
+    console.log(fromToken, sdk, asset)
     if (!asset) return;
+
 
     // Check if gas fees need to be deducted
     if (isNativeAsset(asset) && CHAIN_NAMES[fromToken.blockchain] === fromBlockchain) {
-      balance = await adjustedForGas(balance, fromToken.blockchain, sdk);
+      balance = adjustedForGas(balance, fromToken.blockchain);
     }
 
     setFormState({
