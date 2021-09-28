@@ -456,10 +456,10 @@ const ConfirmTransfer = (props: any) => {
     const element = document.createElement("a");
     const file = new Blob([`${TRANSFER_KEY_MESSAGE}\n${key}`], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
-    element.download = "private-transfer-key.txt";
+    element.download = "private-transfer-recovery-key.txt";
     document.body.appendChild(element); // Required for this to work in FireFox
     element.click();
-    toaster("Transfer key downloaded", { overridePersist: false });
+    toaster("Recovery key downloaded", { overridePersist: false });
   }
 
   const onConfirm = async () => {
