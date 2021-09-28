@@ -282,8 +282,9 @@ function* queryTokenFees() {
     logger("bridge saga", "query withdraw fees");
     try {
       const { formState } = getBridge(yield select());
+      const { network: zilNetwork } = getBlockchain(yield select());
       const bridgeToken = formState.token;
-      const network = TradeHubSDK.Network.DevNet;
+      const network = zilNetwork === Network.MainNet ? TradeHubSDK.Network.MainNet : TradeHubSDK.Network.DevNet;
       if (lastCheckedToken !== bridgeToken) {
         yield put(actions.Bridge.updateFee());
       }
