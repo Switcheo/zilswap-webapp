@@ -21,7 +21,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Blockchain, RestModels, TradeHubSDK } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
-import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectButton } from "./components";
 import { BridgeParamConstants } from "./components/constants";
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
@@ -191,10 +190,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
     // eslint-disable-next-line
   }, []);
-
-  const isCorrectChain = useMemo(() => {
-    return network === Network.TestNet && Number(bridgeWallet?.chainId) === 3;
-  }, [bridgeWallet, network]);
 
   const tokenList: 'bridge-zil' | 'bridge-eth' = bridgeFormState.fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth';
 
@@ -465,7 +460,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const isSubmitEnabled = useMemo(() => {
-    if (!isCorrectChain || !formState.sourceAddress || !formState.destAddress)
+    if (!formState.sourceAddress || !formState.destAddress)
       return false;
     if (bridgeFormState.transferAmount.isZero())
       return false;
@@ -473,7 +468,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       return false;
 
     return true
-  }, [isCorrectChain, formState, bridgeFormState.transferAmount, fromToken])
+  }, [formState, bridgeFormState.transferAmount, fromToken])
 
   // returns true if asset is native coin, false otherwise
   const isNativeAsset = (asset: RestModels.Token) => {

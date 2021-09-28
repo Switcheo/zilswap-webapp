@@ -300,7 +300,7 @@ function* queryTokenFees() {
           throw new Error(`token not found ${bridgeToken.toDenom}`);
         }
 
-        const retrievedFees = (yield call(Bridge.getEstimatedFees, { denom: tradehubToken.denom })) as FeesData | undefined;
+        const retrievedFees = (yield call(Bridge.getEstimatedFees, { denom: tradehubToken.denom, network: zilNetwork })) as FeesData | undefined;
         const feeEst = retrievedFees ?? { withdrawalFee: BN_ONE.shiftedBy(3 - tradehubToken.decimals) }; // 1000 sat to bypass min fee check
         const price = bnOrZero(yield sdk.token.getUSDValue(tradehubToken.denom));
 

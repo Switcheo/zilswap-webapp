@@ -41,6 +41,9 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
 
   // get rest
   const tokenAddresses = Object.values(tokens).filter(t => t.blockchain === Blockchain.Ethereum && t.address !== ETH_ADDRESS).map(t => t.address)
+  if (!tokenAddresses.length)
+    return updates;
+
   const balances = await ETHBalances.getTokenBalances({ network, tokenAddresses, walletAddress: address })
   Object.entries(balances).forEach(([address, balance]) => {
     updates[address] = {
