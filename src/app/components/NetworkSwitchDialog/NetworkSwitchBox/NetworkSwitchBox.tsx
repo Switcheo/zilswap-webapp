@@ -3,11 +3,15 @@ import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernetRounded';
 import { Text } from 'app/components';
 import { ReactComponent as DotIcon } from "app/components/ConnectWalletButton/dot.svg";
 import { actions } from "app/store";
+import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA } from "app/utils";
 import cls from "classnames";
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import React, { Fragment } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { Blockchain } from "tradehub-api-js";
+import { Network } from "zilswap-sdk/lib/constants";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -53,7 +57,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         backgroundColor: "transparent",
         border: `1px solid ${theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : "#D2E5DF"}`,
         "&:hover": {
-          backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.2)}`
+            backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.2)}`
         }
     },
 }));
@@ -62,7 +66,9 @@ const NetworkSwitchBox = (props: any) => {
     const { className, chainName, network } = props;
     const classes = useStyles();
     const dispatch = useDispatch();
-    
+    const srcChain = useSelector<RootState, Blockchain>(state => state.bridge.formState.fromBlockchain);
+    const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]); // eth wallet
+
     const onCloseDialog = () => {
         dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
     };
@@ -77,6 +83,23 @@ const NetworkSwitchBox = (props: any) => {
             dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
         } catch (switchError) {
             console.log(switchError);
+        }
+    }
+
+    const getRequiredChain = () => {
+        if (chainName) {
+            if (network === Network.MainNet)
+                return "Ethereum Network";
+            else
+                return "Ropsten Test Network";
+        } else {
+            if (srcChain === Blockchain.Ethereum) {
+                if (!bridgeWallet) return "";
+                if (Number(bridgeWallet.chainId) === 3) return `Zilliqa (${Network.TestNet})`
+                return `Zilliqa (${Network.MainNet})`
+            } else {
+                return `Zilliqa (${network})`;
+            }
         }
     }
 
@@ -97,21 +120,21 @@ const NetworkSwitchBox = (props: any) => {
                     </Text>
                 </Button>
             </Box>
-            
+
 
             <Text marginBottom={2.5} align="center">
-                Switch to the <span style={{ fontWeight: "bold" }}>{chainName ? 'Ropsten Test Network' : 'Zilliqa TestNet'}</span> on <span style={{ fontWeight: "bold" }}>{chainName ? 'MetaMask' : 'ZilPay'}</span> to start using ZilBridge.
+                Switch to the <span style={{ fontWeight: "bold" }}>{getRequiredChain()}</span> on <span style={{ fontWeight: "bold" }}>{chainName ? 'MetaMask' : 'ZilPay'}</span> to start using ZilBridge.
             </Text>
 
-            {chainName 
+            {chainName && !(chainName && network === Network.MainNet)
                 ? <Fragment>
                     <Button
                         variant="contained"
                         color="primary"
                         className={classes.actionButton}
                         onClick={switchChain}
-                        >
-                        Switch to Ropsten Test Network
+                    >
+                        Switch to {getRequiredChain()}
                     </Button>
 
                     <Text marginTop={1.5} marginBottom={1.5} className={classes.cancel} align="center" onClick={onCloseDialog}>
@@ -125,7 +148,7 @@ const NetworkSwitchBox = (props: any) => {
                         className={classes.actionButton}
                         onClick={onCloseDialog}
                         fullWidth
-                        >
+                    >
                         Close
                     </Button>
                 </Box>

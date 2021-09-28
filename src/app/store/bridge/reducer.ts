@@ -94,8 +94,8 @@ const initial_state: BridgeState = {
 
   formState: {
     transferAmount: new BigNumber(0),
-    fromBlockchain: Blockchain.Zilliqa,
-    toBlockchain: Blockchain.Ethereum,
+    fromBlockchain: Blockchain.Ethereum,
+    toBlockchain: Blockchain.Zilliqa,
 
     isInsufficientReserves: false,
     forNetwork: null,

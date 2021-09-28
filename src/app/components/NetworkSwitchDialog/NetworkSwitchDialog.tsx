@@ -27,6 +27,7 @@ const NetworkSwitchDialog = (props: any) => {
     const showNetworkSwitchDialog = useSelector<RootState, boolean>(state => state.layout.showNetworkSwitchDialog);
     const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
     const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]); // eth wallet
+    const srcChain = useSelector<RootState, Blockchain>(state => state.bridge.formState.fromBlockchain);
     const isWalletTestNet = useMemo(() => {
         if (wallet?.network) {
             return wallet.network === Network.TestNet;
@@ -36,22 +37,28 @@ const NetworkSwitchDialog = (props: any) => {
     }, [wallet]);
 
     useEffect(() => {
-        if (bridgeWallet && Number(bridgeWallet.chainId) !== 3) {
-            getChainName();
-            dispatch(actions.Layout.toggleShowNetworkSwitch("open"));
+        if (!bridgeWallet) return;
+
+        if (srcChain === Blockchain.Ethereum) {
+            if (Number(bridgeWallet.chainId) === 3 && !isWalletTestNet) {
+                setChainName("");
+                dispatch(actions.Layout.toggleShowNetworkSwitch("open"));
+            } else if (Number(bridgeWallet.chainId) === 1 && isWalletTestNet) {
+                setChainName("");
+                dispatch(actions.Layout.toggleShowNetworkSwitch("open"));
+            }
+        } else {
+            if (isWalletTestNet && Number(bridgeWallet.chainId) !== 3) {
+                getChainName();
+                dispatch(actions.Layout.toggleShowNetworkSwitch("open"));
+            } else if (!isWalletTestNet && Number(bridgeWallet.chainId) !== 1) {
+                getChainName();
+                dispatch(actions.Layout.toggleShowNetworkSwitch("open"));
+            }
         }
 
         // eslint-disable-next-line
-    }, [bridgeWallet]);
-
-    useEffect(() => {
-        if (wallet && network !== Network.TestNet) {
-            setChainName('');
-            dispatch(actions.Layout.toggleShowNetworkSwitch("open"));
-        }
-    
-        // eslint-disable-next-line
-    }, [network, isWalletTestNet, window.location.pathname]);
+    }, [bridgeWallet, isWalletTestNet]);
 
     const getChainName = async () => {
         const response = await fetch("https://chainid.network/chains.json");
@@ -70,7 +77,7 @@ const NetworkSwitchDialog = (props: any) => {
             onClose={onCloseDialog}
             {...rest}
             className={cls(classes.root, className)}
-            >
+        >
             <NetworkSwitchBox chainName={chainName} network={network} />
         </DialogModal>
     )
