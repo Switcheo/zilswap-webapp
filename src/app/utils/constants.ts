@@ -18,6 +18,7 @@ export const LoadingKeys = {
 export const LocalStorageKeys = {
   PrivateKey: "zilswap:private-key",
   ZilPayConnected: "zilswap:zilpay-connected",
+  BoltXConnected: "zilswap:boltx-connected",
   ZeevesConnected: "zilswap:zeeves-connected",
   Network: "zilswap:network",
   UserTokenList: "zilswap:user-token-list",
@@ -32,6 +33,11 @@ export const PlaceholderStrings = {
 };
 
 export const ZilPayNetworkMap = {
+  mainnet: Network.MainNet,
+  testnet: Network.TestNet,
+} as { [index: string]: Network };
+
+export const BoltXNetworkMap = {
   mainnet: Network.MainNet,
   testnet: Network.TestNet,
 } as { [index: string]: Network };
