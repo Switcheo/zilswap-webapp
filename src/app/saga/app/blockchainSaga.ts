@@ -8,7 +8,7 @@ import { actions } from "app/store";
 import { ChainInitAction } from "app/store/blockchain/actions";
 import { BridgeWalletAction, WalletAction, WalletActionTypes } from "app/store/wallet/actions";
 import { Transaction, TokenInfo } from "app/store/types";
-import { RPCEndpoints, ZIL_ADDRESS } from "app/utils/constants";
+import { BRIDGEABLE_WRAPPED_DENOMS, RPCEndpoints, ZIL_ADDRESS } from "app/utils/constants";
 import { connectWalletZilPay, ConnectedWallet, WalletConnectType } from "core/wallet";
 import { ZILO_DATA } from "core/zilo/constants";
 import { toBech32Address, ZilswapConnector } from "core/zilswap";
@@ -235,9 +235,9 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     const mappings: WrapperMappingsResult = yield call(fetchJSON, `https://${host}/coin/wrapper_mappings`)
     const data: TradeHubTokensResult = yield call(fetchJSON, `https://${host}/coin/tokens`)
     const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
+    const bridgeableDenoms = BRIDGEABLE_WRAPPED_DENOMS[network];
     Object.entries(mappings.result).forEach(([wrappedDenom, sourceDenom]) => {
-      // TODO: update whitelist (this is devnet only)
-      if (!["zil5.e", "zwap5.e", "eth6.z", "dai6.z"].includes(wrappedDenom)) {
+      if (!bridgeableDenoms.includes(wrappedDenom)) {
         return;
       }
 

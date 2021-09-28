@@ -72,6 +72,11 @@ export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const ZIL_ADDRESS = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
 export const ZIL_DECIMALS = 12;
 
+export const BRIDGEABLE_WRAPPED_DENOMS = {
+  [Network.MainNet]: ["zusdt.z.1", "zeth.z.1", "zwbtc.z.1"],
+  [Network.TestNet]: ["zil5.e", "zwap5.e", "eth6.z", "dai6.z"],
+}
+
 export const TRANSAK_API_KEY = {
   DEVELOPMENT: process.env.REACT_APP_TRANSAK_DEV,
   PRODUCTION: process.env.REACT_APP_TRANSAK_PROD,
