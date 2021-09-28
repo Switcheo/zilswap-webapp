@@ -62,6 +62,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   breakLine: {
     wordBreak: "break-word"
   },
+  link: {
+    color: theme.palette.link,
+    "&:hover": {
+      textDecoration: "underline"
+    }
+  }
 }));
 
 const FailedBridgeTxWarning = (props: any) => {
@@ -124,7 +130,7 @@ const FailedBridgeTxWarning = (props: any) => {
           </Text>
           <Text marginBottom={1} variant="h6" align="center">
             There is a known issue with bridging from Zilliqa to Ethereum, we are working on resolving this as soon as possible.
-            <br />Bridging Ethereum to Zilliqa is unaffected. Please check <a href="https://twitter.com/ZilSwap" target="_blank"
+            <br />Bridging Ethereum to Zilliqa is unaffected. Please check <a className={classes.link} href="https://twitter.com/ZilSwap" target="_blank"
               rel="noreferrer">ZilSwap Twitter</a> for updates.
           </Text>
 

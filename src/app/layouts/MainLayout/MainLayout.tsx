@@ -5,7 +5,6 @@ import ConnectWalletButton from "app/components/ConnectWalletButton";
 import { AppTheme } from "app/theme/types";
 import React, { Suspense, useState } from "react";
 import { renderRoutes } from "react-router-config";
-import NetworkSwitchDialog from "../NetworkSwitchDialog";
 import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
 import { DevInfoBadge } from "./components";
@@ -22,7 +21,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     position: "relative",
     flex: 1,
     display: "flex",
-    flexDirection: "row",
+    flexDirection: "column",
     // paddingBottom: theme.spacing(8),
     [theme.breakpoints.down("sm")]: {
       display: "block",
@@ -49,9 +48,8 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         </Suspense>
       </main>
       <Hidden smUp>
-        <ConnectWalletButton/>
+        <ConnectWalletButton />
       </Hidden>
-      <NetworkSwitchDialog />
       <WalletDialog />
       <TransactionDialog />
       <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />

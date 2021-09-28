@@ -1,39 +1,48 @@
 import { Box, Button, FormControl, MenuItem, Select } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
-import { ConfirmTransfer, CurrencyInput, Text } from 'app/components';
+import { ConfirmTransfer, ConnectETHPopper, CurrencyInput, Text } from 'app/components';
 import FailedBridgeTxWarning from "app/components/FailedBridgeTxWarning";
-import MainCard from 'app/layouts/MainCard';
+import NetworkSwitchDialog from "app/components/NetworkSwitchDialog";
+import BridgeCard from "app/layouts/BridgeCard";
 import { actions } from "app/store";
 import { BridgeFormState, BridgeState } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useNetwork, useTokenFinder } from "app/utils";
+import { hexToRGBA, netZilToTradeHub, strings, useAsyncTask, useNetwork, useTokenFinder } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { providerOptions } from "core/ethereum";
-import { getConnectedBoltX } from "core/utilities/boltx";
 import { ConnectedWallet } from "core/wallet";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ethers } from "ethers";
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain, RestModels, TradeHubSDK } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
 import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectButton } from "./components";
+import { BridgeParamConstants } from "./components/constants";
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "./wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "./zilliqa-logo.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
-  root: {},
+  root: {
+  },
   container: {
-    padding: theme.spacing(4, 4, 0),
-    [theme.breakpoints.down("xs")]: {
+    maxWidth: 488,
+    margin: "0 auto",
+    boxShadow: theme.palette.mainBoxShadow,
+    borderRadius: 12,
+    background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    [theme.breakpoints.down("sm")]: {
+      maxWidth: 450,
       padding: theme.spacing(2, 2, 0),
     },
+    padding: theme.spacing(4, 4, 0),
     marginBottom: 12
   },
   actionButton: {
@@ -49,7 +58,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: "transparent",
     border: `1px solid ${theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : "#D2E5DF"}`,
     "&:hover": {
-      backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.2)}`
+      backgroundColor: theme.palette.label
     }
   },
   textColoured: {
@@ -71,10 +80,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minWidth: 120,
     display: "contents",
     "& .MuiSelect-select:focus": {
-      borderRadius: 12
+      backgroundColor: "transparent"
+    },
+    "& .MuiSelect-root": {
+      borderRadius: 12,
+      "&:hover": {
+        backgroundColor: theme.palette.type === "dark" ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)"
+      }
     },
     "& .MuiOutlinedInput-root": {
-      border: "none"
+      border: "none",
     },
     "& .MuiInputBase-input": {
       fontWeight: "bold",
@@ -86,14 +101,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "& .MuiSelect-selectMenu": {
       minHeight: 0
-    }
+    },
   },
   selectMenu: {
     backgroundColor: theme.palette.background.default,
     "& .MuiListItem-root": {
       borderRadius: "12px",
       padding: theme.spacing(1.5),
-      justifyContent: "center"
+      justifyContent: "center",
+    },
+    "& .MuiListItem-root.Mui-focusVisible": {
+      backgroundColor: theme.palette.type === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
     },
     "& .MuiListItem-root.Mui-selected": {
       backgroundColor: theme.palette.label,
@@ -115,6 +133,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       width: "110px",
       marginLeft: "-55px",
     },
+  },
+  closeIcon: {
+    float: "right",
+    right: 0,
+    position: "absolute",
+    padding: 5,
+  },
+  priority: {
+    zIndex: 10,
+  },
+  extraPadding: {
+    padding: theme.spacing(1)
   }
 }))
 
@@ -124,6 +154,11 @@ const initialFormState = {
   transferAmount: '0',
 }
 
+const CHAIN_NAMES: any = {
+  zil: Blockchain.Zilliqa,
+  eth: Blockchain.Ethereum,
+}
+
 const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
@@ -131,16 +166,45 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const network = useNetwork();
   const tokenFinder = useTokenFinder();
   const [ethConnectedAddress, setEthConnectedAddress] = useState('');
-  const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
   const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]); // eth wallet
   const bridgeState = useSelector<RootState, BridgeState>(store => store.bridge);
   const bridgeFormState: BridgeFormState = useSelector<RootState, BridgeFormState>(store => store.bridge.formState);
+  const [formState, setFormState] = useState<typeof initialFormState>({
+    sourceAddress: bridgeFormState.sourceAddress || "",
+    destAddress: bridgeFormState.destAddress || "",
+    transferAmount: bridgeFormState.transferAmount.toString() || "0"
+  });
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
+  const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
+  const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK");
+  const [runLoadGasPrice] = useAsyncTask("loadGasPrice");
+  const [disconnectMenu, setDisconnectMenu] = useState<any>();
+  const [gasPrice, setGasPrice] = useState<BigNumber | undefined>();
+  const disconnectSrcButtonRef = useRef();
+  const disconnectDestButtonRef = useRef();
 
-  const isCorrectChain = useMemo(() => {
-    return network === Network.TestNet && Number(bridgeWallet?.chainId) === 3;
-  }, [bridgeWallet, network]);
+  useEffect(() => {
+    if (gasPrice?.gt(0) || !sdk) return;
+
+    runLoadGasPrice(async () => {
+      const gasPrice = await sdk?.eth.getProvider().getGasPrice();
+      setGasPrice(new BigNumber(gasPrice.toString()));
+    })
+
+    // eslint-disable-next-line
+  }, [sdk, gasPrice])
+
+  useEffect(() => {
+    runInitTradeHubSDK(async () => {
+      const tradehubNetwork = netZilToTradeHub(network)
+      const sdk = new TradeHubSDK({ network: tradehubNetwork });
+      await sdk.token.reloadTokens();
+      setSdk(sdk);
+    })
+
+    // eslint-disable-next-line
+  }, [network]);
 
   const tokenList: 'bridge-zil' | 'bridge-eth' = bridgeFormState.fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth';
 
@@ -190,7 +254,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         setDestAddress('')
       }
     }
-    
+
     // eslint-disable-next-line
   }, [wallet, bridgeFormState.fromBlockchain])
 
@@ -256,68 +320,31 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const onClickConnectETH = async () => {
-
-//
-    dispatch(actions.Layout.toggleShowWallet());
-
-    if (wallet !== null && bridgeFormState.fromBlockchain === Blockchain.Ethereum) {
-
-  //    console.log(" wallet.addressInfo.byte20  from " + wallet.addressInfo.byte20 )
-      setSourceAddress(wallet.addressInfo.byte20);
-    }
-
-    if (wallet !== null && bridgeFormState.toBlockchain === Blockchain.Ethereum) {
-
-    //  console.log(" wallet.addressInfo.byte20 to " + wallet.addressInfo.byte20 )
-      setDestAddress(wallet.addressInfo.byte20);
-    }
-//\
-
-/*
-    console.log("onClickConnectETH " )
-
-    const boltX = getConnectedBoltX();
-
     const web3Modal = new Web3Modal({
-      cacheProvider: true,
+      cacheProvider: false,
       disableInjectedProvider: false,
-      network: "ropsten",
+      network: network === Network.MainNet ? 'mainnet' : 'ropsten',
       providerOptions
     });
-    console.log(" web3Modal " )
 
-    const provider = await web3Modal.connect().catch(error => {
-      // handle user rejection
-      console.log(error)
-    });
-    if (!provider) {
-      return;
-    }
+    const provider = await web3Modal.connect();
     const ethersProvider = new ethers.providers.Web3Provider(provider)
-    console.log("ethersProvider")
     const signer = ethersProvider.getSigner();
-    console.log("error")
     const ethAddress = await signer.getAddress();
-    console.log("ethAddress")
     const chainId = (await ethersProvider.getNetwork()).chainId;
-    console.log("chainId")
 
     if (bridgeFormState.fromBlockchain === Blockchain.Ethereum) {
       setSourceAddress(ethAddress);
-      console.log("setSourceAddress " + ethAddress)
     }
 
     if (bridgeFormState.toBlockchain === Blockchain.Ethereum) {
       setDestAddress(ethAddress);
-      console.log("setDestAddress " + ethAddress)
     }
 
     setEthConnectedAddress(ethAddress);
-    console.log("setEthConnectedAddress " + ethAddress)
-    console.log("dispatching")
+
     dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: { provider: provider, address: ethAddress, chainId: chainId } }));
     dispatch(actions.Token.refetchState());
-    */
   };
 
   const onClickConnectZIL = () => {
@@ -393,6 +420,14 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   };
 
   const showTransfer = () => {
+    if (!(
+      (Number(bridgeWallet?.chainId) === 1 && wallet?.network === Network.MainNet) ||
+      (Number(bridgeWallet?.chainId) === 3 && wallet?.network === Network.TestNet)
+    )) {
+      dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
+      return
+    }
+
     dispatch(actions.Layout.showTransferConfirmation(!layoutState.showTransferConfirmation))
   }
 
@@ -400,7 +435,12 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     if (fromBlockchain === Blockchain.Zilliqa) {
       return onClickConnectZIL();
     } else {
-      return onClickConnectETH();
+      // if connected, open menu
+      if (bridgeFormState.sourceAddress && bridgeWallet) {
+        setDisconnectMenu(disconnectSrcButtonRef)
+      } else {
+        return onClickConnectETH();
+      }
     }
   };
 
@@ -408,21 +448,108 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     if (toBlockchain === Blockchain.Zilliqa) {
       return onClickConnectZIL();
     } else {
-      return onClickConnectETH();
+      // if connected, open menu
+      if (bridgeFormState.sourceAddress && bridgeWallet) {
+        setDisconnectMenu(disconnectDestButtonRef)
+      } else {
+        return onClickConnectETH();
+      }
     }
   };
 
+  const onDisconnectEthWallet = (clear?: boolean) => {
+    let disconnectForm = {};
+    if (toBlockchain === Blockchain.Zilliqa) {
+      disconnectForm = {
+        sourceAddress: undefined,
+        token: undefined,
+      }
+    } else {
+      disconnectForm = {
+        destAddress: undefined,
+        token: undefined,
+      }
+    }
+    const web3Modal = new Web3Modal({
+      cacheProvider: true,
+      disableInjectedProvider: false,
+      network: "ropsten",
+      providerOptions
+    });
+    if (clear) {
+      web3Modal.clearCachedProvider();
+    }
+    setDisconnectMenu(null)
+    dispatch(actions.Bridge.updateForm(disconnectForm));
+    dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: null }));
+  }
+
   const isSubmitEnabled = useMemo(() => {
-    if (!isCorrectChain || !formState.sourceAddress || !formState.destAddress)
+    if (!formState.sourceAddress || !formState.destAddress)
       return false;
     if (bridgeFormState.transferAmount.isZero())
       return false;
+    if (fromToken && bridgeFormState.transferAmount.isGreaterThan(strings.bnOrZero(fromToken.balance).shiftedBy(-fromToken.decimals)))
+      return false;
 
     return true
-  }, [isCorrectChain, formState, bridgeFormState.transferAmount])
+  }, [formState, bridgeFormState.transferAmount, fromToken])
+
+  // returns true if asset is native coin, false otherwise
+  const isNativeAsset = (asset: RestModels.Token) => {
+    const zeroAddress = "0000000000000000000000000000000000000000";
+    return (asset.asset_id === zeroAddress)
+  }
+
+  const adjustedForGas = (balance: BigNumber, blockchain: Blockchain) => {
+    if (blockchain === Blockchain.Zilliqa) {
+      const gasPrice = new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`);
+      const gasLimit = new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`);
+
+      return balance.minus(gasPrice.multipliedBy(gasLimit));
+    } else {
+      const gasPriceGwei = new BigNumber(ethers.utils.formatUnits((gasPrice ?? new BigNumber(65)).toString(10), "gwei"));
+      const gasLimit = new BigNumber(`${BridgeParamConstants.ETH_GAS_LIMIT}`);
+
+      return balance.minus(gasPriceGwei.multipliedBy(gasLimit));
+    }
+  }
+
+  const onSelectMax = async () => {
+    console.log("onSelectMax", fromToken, sdk)
+    if (!fromToken || !sdk) return;
+
+    let balance = strings.bnOrZero(fromToken.balance);
+    const asset = sdk.token.tokens[bridgeToken?.denom ?? ""];
+
+    console.log(fromToken, sdk, asset)
+    if (!asset) return;
+
+
+    // Check if gas fees need to be deducted
+    if (isNativeAsset(asset) && CHAIN_NAMES[fromToken.blockchain] === fromBlockchain) {
+      balance = adjustedForGas(balance, fromToken.blockchain);
+    }
+
+    setFormState({
+      ...formState,
+      transferAmount: balance.shiftedBy(-fromToken.decimals).toString(),
+    })
+
+    dispatch(actions.Bridge.updateForm({
+      forNetwork: network,
+      transferAmount: balance.shiftedBy(-fromToken.decimals),
+    }))
+  }
+
+  const onEnterKeyPress = () => {
+    if (isSubmitEnabled) {
+      showTransfer();
+    }
+  }
 
   return (
-    <MainCard {...rest} className={cls(classes.root, className)}>
+    <BridgeCard {...rest} className={cls(classes.root, className)}>
       {!layoutState.showTransferConfirmation && (
         <Box display="flex" flexDirection="column" className={classes.container}>
           <Text variant="h2" align="center" marginTop={2}>
@@ -453,6 +580,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               </Box>
 
               <ConnectButton
+                buttonRef={disconnectSrcButtonRef}
                 chain={fromBlockchain}
                 address={bridgeFormState.sourceAddress || ''}
                 onClick={onConnectSrcWallet}
@@ -461,7 +589,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             <Box flex={0.3} />
             <WavyLine className={classes.wavyLine} onClick={swapBridgeChains} />
             <Box className={classes.box} bgcolor="background.contrast">
+
               <Text variant="h4" align="center">To</Text>
+
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
                 {toBlockchain === Blockchain.Zilliqa
                   ? <ZilliqaLogo />
@@ -481,8 +611,8 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                   </Select>
                 </FormControl>
               </Box>
-
               <ConnectButton
+                buttonRef={disconnectDestButtonRef}
                 chain={toBlockchain}
                 address={bridgeFormState.destAddress || ''}
                 onClick={onConnectDstWallet}
@@ -492,14 +622,18 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
           <CurrencyInput
             label="Transfer Amount"
-            disabled={!formState.sourceAddress || !formState.destAddress}
+            disabled={!bridgeFormState.sourceAddress || !bridgeFormState.destAddress}
             token={fromToken ?? null}
             amount={formState.transferAmount}
             onEditorBlur={onEndEditTransferAmount}
             onAmountChange={onTransferAmountChange}
             onCurrencyChange={onCurrencyChange}
             tokenList={tokenList}
+            onSelectMax={onSelectMax}
+            showMaxButton={true}
+            onEnterKeyPress={onEnterKeyPress}
           />
+
           <Button
             onClick={showTransfer}
             disabled={!isSubmitEnabled}
@@ -515,10 +649,20 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           </Button>
         </Box>
       )}
+      <NetworkSwitchDialog />
       <FailedBridgeTxWarning />
       <ConfirmTransfer showTransfer={layoutState.showTransferConfirmation} />
-    </MainCard>
+      <ConnectETHPopper
+        open={!!disconnectMenu}
+        anchorEl={disconnectMenu?.current}
+        className={classes.priority}
+        onChangeWallet={() => { onDisconnectEthWallet(true); onClickConnectETH() }}
+        onDisconnectEth={() => onDisconnectEthWallet()}
+        onClickaway={() => setDisconnectMenu(undefined)}
+      >
+      </ConnectETHPopper>
+
+    </BridgeCard >
   )
 }
-
 export default BridgeView

@@ -9,6 +9,8 @@ const initial_state: LayoutState = {
   showNetworkSwitchDialog: false,
   showTransactionDialog: false,
   showTransferConfirmation: false,
+  showMnemonicDialog: false,
+  showResumeTransferDialog: false,
   liquidityEarnHidden: false,
   notification: undefined,
   showPoolType: "add",
@@ -54,7 +56,16 @@ const reducer = (state: LayoutState = initial_state, action: any) => {
         ...state,
         showCreatePool: !action.override ? !state.showWalletDialog : action.override === "open",
       };
-
+    case LayoutActionTypes.TOGGLE_SHOW_MNEMONIC:
+      return {
+        ...state,
+        showMnemonicDialog: !action.override ? !state.showMnemonicDialog : action.override === "open",
+      };
+    case LayoutActionTypes.TOGGLE_SHOW_RESUME_TRANSFER:
+      return {
+        ...state,
+        showResumeTransferDialog: !action.override ? !state.showResumeTransferDialog : action.override === "open",
+      };
     case LayoutActionTypes.HIDE_LIQUIDITY_EARN:
       return {
         ...state,

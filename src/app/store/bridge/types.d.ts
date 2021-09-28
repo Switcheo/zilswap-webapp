@@ -1,9 +1,7 @@
-import { TokenInfo } from "app/store/types";
-import { ChainTransferFlow } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { Blockchain, RestModels } from "tradehub-api-js";
-import { FeesData } from "core/utilities/bridge";
+import { Network } from "zilswap-sdk/lib/constants";
 
 export type BridgeableToken = {
   blockchain: Blockchain;
@@ -25,6 +23,7 @@ export interface BridgeState {
   formState: BridgeFormState;
   bridgeTxs: BridgeTx[];
   activeBridgeTx?: BridgeTx;
+  previewBridgeTx?: BridgeTx;
 
   tokens: BridgeableTokenMapping;
 }
@@ -53,6 +52,8 @@ export interface BridgeFormState {
 export interface BridgeTx {
   srcChain: BridgeableChains;
   dstChain: BridgeableChains;
+
+  network: Network;
 
   // in respective display formats
   // zil: bech32 (zil1…)
@@ -98,4 +99,10 @@ export interface BridgeTx {
 
   // deposit tx failure detected at
   depositFailedAt?: dayjs.Dayjs;
+
+  // populated when bridge tx is added
+  depositDispatchedAt?: dayjs.Dayjs;
+
+  // block confirmations
+  depositConfirmations?: number;
 }

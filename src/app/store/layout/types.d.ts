@@ -19,6 +19,8 @@ export interface LayoutState {
   showNetworkSwitchDialog: boolean;
   showTransactionDialog: boolean;
   showTransferConfirmation: boolean;
+  showMnemonicDialog: boolean;
+  showResumeTransferDialog: boolean;
   liquidityEarnHidden: boolean;
   showPoolType: PoolType;
   notification?: FormNotification;

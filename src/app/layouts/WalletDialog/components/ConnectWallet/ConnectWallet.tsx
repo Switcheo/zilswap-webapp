@@ -65,7 +65,7 @@ const ConnectWallet: React.FC<ConnectWalletProps & React.HTMLAttributes<HTMLDivE
     <Box {...rest} className={cls(classes.root, className)}>
       <DialogContent>
         <ConnectWalletOption label="ZilPay" icon={ZilPayIcon} secureLevel={4} buttonText="Connect ZilPay" onSelect={() => onSelectConnectOption("zilpay")} />
-        <ConnectWalletOption label="BoltX" icon={BoltXIcon} secureLevel={4} buttonText="Connect Bolt-X" onSelect={() => onSelectConnectOption("boltX")} />
+        <ConnectWalletOption label="BoltX" icon={BoltXIcon} secureLevel={4} buttonText="Connect BoltX" onSelect={() => onSelectConnectOption("boltX")} />
         <ConnectWalletOption label="Zeeves" icon={ZeevesIcon} secureLevel={4} buttonText="Connect Zeeves" onSelect={() => onSelectConnectOption("zeeves")} />
         {showPrivateKeyOption && (
           <ConnectWalletOption label="Private Key" icon={theme.palette.type === "dark" ? PrivateKeyIconDark : PrivateKeyIcon} secureLevel={1} buttonText="Enter Private Key" onSelect={() => onSelectConnectOption("privateKey")} />

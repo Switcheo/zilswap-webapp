@@ -1,5 +1,6 @@
 import { Box, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { FancyButton } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
@@ -22,7 +23,7 @@ const useStyles = makeStyles(theme => ({
     borderRadius: "0 0 12px 12px"
   },
   walletDetail: {
-    margin: theme.spacing(16, 8, 0),
+    margin: theme.spacing(8, 8, 0),
     display: "flex",
     flexDirection: "column",
     alignItems: "center"
@@ -60,9 +61,9 @@ const useStyles = makeStyles(theme => ({
     cursor: "pointer"
   },
   buttonBox: {
-    padding: theme.spacing(16, 8, 2),
+    padding: theme.spacing(8, 8, 2),
     [theme.breakpoints.down("sm")]: {
-      padding: theme.spacing(16, 3, 2),
+      padding: theme.spacing(8, 3, 2),
     },
   },
   button: {
@@ -99,18 +100,13 @@ const ConnectedWalletBox = (props: any) => {
   const theme = useTheme();
   const isMediaXS = useMediaQuery(theme.breakpoints.down("xs"));
 
-  const walletType = useMemo(() => {
-    if (!wallet?.type) return undefined;
-
-  //  console.log(" wallet?.type " + wallet?.type)
-  //  console.log(" WalletConnectType.BoltX " + WalletConnectType.BoltX)
-
+  const walletName = useMemo(() => {
     switch (wallet?.type) {
       case WalletConnectType.PrivateKey: return "Private Key";
       case WalletConnectType.Zeeves: return "Zeeves Wallet";
       case WalletConnectType.ZilPay: return "ZilPay";
-      case WalletConnectType.BoltX: return "Bolt-X";
-      default: return "Unknown";
+      case WalletConnectType.BoltX: return "BoltX";
+      default: return "Unknown Wallet";
     }
   }, [wallet?.type]);
 
@@ -123,32 +119,14 @@ const ConnectedWalletBox = (props: any) => {
   }
 
   const onDisconnect = () => {
-
     dispatch(actions.Blockchain.initialize({ wallet: null, network }));
     onBack();
   };
 
   if (!wallet) return null;
-  let address: string
-  let humanAddress: string
-  if(walletType == "Bolt-X") {
-    console.log( " walletType == Bolt-X " ) 
-     address = wallet.addressInfo.byte20;
-     humanAddress = address// wallet.addressInfo.bech32;
-   // console.log( " address is " + address) 
-   // console.log( " humanAddress is " + humanAddress) 
-  } else {
-   // console.log( " walletType != Bolt-X " ) 
-     address = wallet.addressInfo.byte20;
-     humanAddress = wallet.addressInfo.bech32;
-   // console.log( " address is " + address) 
-   // console.log( " humanAddress is " + humanAddress) 
-  }
-  // const address = wallet.addressInfo.byte20;
-  // const humanAddress = wallet.addressInfo.bech32;
-  
 
-//  console.log( " walletType is " + walletType) 
+  const address = wallet.addressInfo.byte20;
+  const humanAddress = wallet?.type === WalletConnectType.BoltX ? toBech32Address(address) : wallet.addressInfo.bech32;
 
   return (
     <Box display="flex" flexDirection="column" className={cls(classes.root, className)}>
@@ -156,7 +134,7 @@ const ConnectedWalletBox = (props: any) => {
         <Typography variant="h4">You are connected to</Typography>
         <Box display="flex" alignItems="center" justifyContent="center" className={classes.zilpayWallet}>
           <Icon className={classes.icon} />
-          <Typography variant="h1">{walletType}</Typography>
+          <Typography variant="h1">{walletName}</Typography>
         </Box>
         <Typography variant="h3">{isMediaXS ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
         <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(humanAddress)} open={!!copyMap[humanAddress]} title="Copied!">
@@ -165,7 +143,7 @@ const ConnectedWalletBox = (props: any) => {
             <Typography color="textSecondary" className={classes.iconText}>Copy Address</Typography>
           </IconButton>
         </Tooltip>
-        <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network}`} className={classes.newLink} size="small">
+        <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network.toLowerCase()}`} className={classes.newLink} size="small">
           <NewLinkIcon className={classes.icons}/>
           <Typography color="textSecondary" className={classes.iconText}>View on Explorer</Typography>
         </IconButton>

@@ -9,7 +9,7 @@ const MuiAccordion = theme => ({
     '&  $lastChild': {
       borderBottomRightRadius: "12px",
       borderBottomLeftRadius: "12px",
-    }
+    },
   },
   rounded: {
     borderRadius: "12px!important",

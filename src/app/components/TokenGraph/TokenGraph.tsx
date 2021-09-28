@@ -4,9 +4,10 @@ import { Skeleton } from "@material-ui/lab";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
+import { ZIL_ADDRESS } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { getZilStreamTokenRates, TimeFilter, ZilStreamRates } from "core/zilswap";
+import { getZilStreamTokenRates, TimeFilter, ZilStreamRates } from "core/utilities";
 import { createChart, CrosshairMode, IChartApi, ISeriesApi, Time, UTCTimestamp } from "lightweight-charts";
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -129,7 +130,7 @@ const TokenGraph: React.FC<Props> = (props: Props) => {
       if ((outToken && !outToken.isZil) || (outToken?.isZil && !inToken)) {
         outRates = await getZilStreamTokenRates(outToken.symbol, filter);
       }
-      setInTokenRate(outToken ? tokenState.prices[outToken.symbol] : tokenState.prices["ZIL"]);
+      setInTokenRate(outToken ? tokenState.prices[outToken.address] : tokenState.prices[ZIL_ADDRESS]);
       setInTokenRates(inRates);
       setOutTokenRates(outRates);
     })

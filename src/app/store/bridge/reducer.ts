@@ -5,6 +5,7 @@ import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
 import dayjs from "dayjs";
 import { Blockchain } from "tradehub-api-js";
+import { Network } from "zilswap-sdk/lib/constants";
 import { BridgeActionTypes } from "./actions";
 import { BridgeableTokenMapping, BridgeState, BridgeTx } from "./types";
 
@@ -13,6 +14,7 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
     return {
       srcChain: tx.srcChain,
       dstChain: tx.dstChain,
+      network: tx.network,
       srcAddr: tx.srcAddr,
       dstAddr: tx.dstAddr,
       srcToken: tx.srcToken,
@@ -28,6 +30,8 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
       destinationTxConfirmedAt: DataCoder.encodeDayjs(tx.destinationTxConfirmedAt),
       dismissedAt: DataCoder.encodeDayjs(tx.dismissedAt),
       depositFailedAt: DataCoder.encodeDayjs(tx.depositFailedAt),
+      depositDispatchedAt: DataCoder.encodeDayjs(tx.depositDispatchedAt),
+      depositConfirmations: tx.depositConfirmations,
     };
   },
 
@@ -36,6 +40,7 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
     return {
       srcChain: object.srcChain,
       dstChain: object.dstChain,
+      network: object.network ?? Network.TestNet,
       srcAddr: object.srcAddr,
       dstAddr: object.dstAddr,
       srcToken: object.srcToken,
@@ -51,6 +56,8 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
       destinationTxConfirmedAt: DataCoder.decodeDayjs(object.destinationTxConfirmedAt),
       dismissedAt: DataCoder.decodeDayjs(object.dismissedAt),
       depositFailedAt: DataCoder.decodeDayjs(object.depositFailedAt),
+      depositDispatchedAt: DataCoder.decodeDayjs(object.depositDispatchedAt),
+      depositConfirmations: object.depositConfirmations,
     }
   }
 }
@@ -81,6 +88,7 @@ const saveBridgeTxs = (txs: BridgeTx[]) => {
 const initial_state: BridgeState = {
   bridgeTxs: loadedBridgeTxs,
   activeBridgeTx: findActiveBridgeTx(loadedBridgeTxs),
+  previewBridgeTx: undefined,
 
   tokens: {
     [Blockchain.Zilliqa]: [],
@@ -89,8 +97,8 @@ const initial_state: BridgeState = {
 
   formState: {
     transferAmount: new BigNumber(0),
-    fromBlockchain: Blockchain.Zilliqa,
-    toBlockchain: Blockchain.Ethereum,
+    fromBlockchain: Blockchain.Ethereum,
+    toBlockchain: Blockchain.Zilliqa,
 
     isInsufficientReserves: false,
     forNetwork: null,
@@ -159,6 +167,13 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
         ...state,
         activeBridgeTx,
         bridgeTxs: newBridgeTxs,
+      };
+
+    case BridgeActionTypes.SET_PREVIEW_BRIDGE_TX:
+      const previewBridgeTx = action.payload;
+      return {
+        ...state,
+        previewBridgeTx,
       };
 
     case BridgeActionTypes.UPDATE_FORM:

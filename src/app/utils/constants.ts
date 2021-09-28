@@ -67,11 +67,21 @@ export const isProduction = () => {
 export const DEFAULT_TX_SLIPPAGE = 0.01;
 export const DEFAULT_TX_EXPIRY = 3;
 
+export const MAX_CLAIMS_PER_TX = 4;
+
 export const STATS_REFRESH_RATE = 30000; // ms
+
+export const BRIDGE_TX_DEPOSIT_CONFIRM_ZIL = 3;
+export const BRIDGE_TX_DEPOSIT_CONFIRM_ETH = 12;
 
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const ZIL_ADDRESS = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
 export const ZIL_DECIMALS = 12;
+
+export const BRIDGEABLE_WRAPPED_DENOMS = {
+  [Network.MainNet]: ["zusdt.z.2", "zeth.z.1", "zwbtc.z.1"],
+  [Network.TestNet]: ["zil5.e", "zwap5.e", "eth6.z", "dai6.z"],
+}
 
 export const TRANSAK_API_KEY = {
   DEVELOPMENT: process.env.REACT_APP_TRANSAK_DEV,
@@ -84,9 +94,7 @@ export class PollIntervals {
 
   public static USDRates = 10000;
 
-  public static ZWAPClaimHistory = 60000;
-  public static EpochInfo = 60000;
-  public static PoolWeights = 3600000;
+  public static Distributors = 60000;
 
   public static RetryAfterError = 5000;
 

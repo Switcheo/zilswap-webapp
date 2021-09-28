@@ -8,11 +8,11 @@ import { actions } from "app/store";
 import { ChainInitAction } from "app/store/blockchain/actions";
 import { BridgeWalletAction, WalletAction, WalletActionTypes } from "app/store/wallet/actions";
 import { Transaction, TokenInfo } from "app/store/types";
-import { BoltXNetworkMap, RPCEndpoints, ZIL_ADDRESS } from "app/utils/constants";
-import { connectWalletZilPay, ConnectedWallet, WalletConnectType, connectWalletBoltX } from "core/wallet";
+import { BRIDGEABLE_WRAPPED_DENOMS, RPCEndpoints, BoltXNetworkMap, ZIL_ADDRESS } from "app/utils/constants";
+import { connectWalletZilPay, connectWalletBoltX, ConnectedWallet, WalletConnectType } from "core/wallet";
 import { ZILO_DATA } from "core/zilo/constants";
-import { ZWAPRewards } from "core/zwap";
 import { toBech32Address, ZilswapConnector } from "core/zilswap";
+import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import { logger } from "core/utilities";
 import { getConnectedZilPay } from "core/utilities/zilpay";
 import { PoolTransaction, PoolTransactionResult, ZAPStats } from "core/utilities/zap-stats";
@@ -108,7 +108,7 @@ const boltXObserver = (boltX: any) => {
       boltX.zilliqa.wallet.off(NETWORK_CHANGED, networkSubscription);
     }
   })
-  
+
 }
 
 const web3Observer = (wallet: ConnectedBridgeWallet) => {
@@ -152,7 +152,6 @@ function* txObserved(payload: TxObservedPayload) {
   logger('tx observed action', payload)
   const { tx, status, receipt } = payload
 
-  yield put(actions.Rewards.removePendingClaimTx(tx.hash));
   yield put(actions.Transaction.update({ hash: tx.hash, status: status, txReceipt: receipt }));
 
   detachedToast(`transaction ${status ? status : "confirmed"}`, { hash: tx.hash });
@@ -258,12 +257,11 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
         registered: tkn.registered,
         whitelisted: tkn.whitelisted,
         isZil: tkn.address === ZIL_ADDRESS,
-        isZwap: tkn.address === ZWAPRewards.TOKEN_CONTRACT[network],
+        isZwap: tkn.address === ZWAP_TOKEN_CONTRACT[network],
         address: tkn.address,
         decimals: tkn.decimals,
         symbol: tkn.symbol,
-        name: "",
-        // name: zilswapToken.name,
+        name: tkn.name,
         balance: undefined,
         allowances: {},
         pool: sdk!.getPool(tkn.address) || undefined,
@@ -277,9 +275,9 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     const mappings: WrapperMappingsResult = yield call(fetchJSON, `https://${host}/coin/wrapper_mappings`)
     const data: TradeHubTokensResult = yield call(fetchJSON, `https://${host}/coin/tokens`)
     const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
+    const bridgeableDenoms = BRIDGEABLE_WRAPPED_DENOMS[network];
     Object.entries(mappings.result).forEach(([wrappedDenom, sourceDenom]) => {
-      // TODO: update whitelist (this is devnet only)
-      if (!["zil5.e", "zwap5.e", "eth5.z", "dai5.z"].includes(wrappedDenom)) {
+      if (!bridgeableDenoms.includes(wrappedDenom)) {
         return;
       }
 

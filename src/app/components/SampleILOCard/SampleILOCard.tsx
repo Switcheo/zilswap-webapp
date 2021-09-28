@@ -10,7 +10,7 @@ import { ZIL_ADDRESS } from 'app/utils/constants';
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { ILOData } from 'core/zilo/constants';
-import { TOKEN_CONTRACT } from 'core/zwap/constants';
+import { ZWAP_TOKEN_CONTRACT } from 'core/zilswap/constants';
 import { Dayjs } from 'dayjs';
 import React from 'react';
 import { useSelector } from 'react-redux';
@@ -31,7 +31,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   description: {
     fontFamily: "'Raleway', sans-serif",
-    fontSize: 14
+    fontSize: 14,
+    lineHeight: 1.2,
   },
   title: {
     fontWeight: 700,
@@ -69,7 +70,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     top: "50%",
     left: "50%",
     marginLeft: "-12px",
-    marginTop: "-12px"
+    transform: "translateY(-50%)"
   },
   label: {
     color: theme.palette.label
@@ -102,7 +103,7 @@ const SampleILOCard = (props: Props) => {
   const network = useNetwork();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
-  const zwapAddress = TOKEN_CONTRACT[network];
+  const zwapAddress = ZWAP_TOKEN_CONTRACT[network];
   const zilToken = tokenState.tokens[ZIL_ADDRESS];
   const zwapToken = tokenState.tokens[zwapAddress];
 
@@ -119,19 +120,19 @@ const SampleILOCard = (props: Props) => {
       </Box>
       {expanded &&
         <Box display="flex" flexDirection="column" className={classes.container}>
-        <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
-          <Text variant="h1" className={cls(classes.title, classes.meta)}>{data.tokenName} ({data.tokenSymbol})</Text>
-          <Text marginTop={2} marginBottom={0.75} className={classes.description}>{data.description}</Text>
-          {!!data.projectURL && (
-            <Link
-              className={classes.link}
-              underline="none"
-              rel="noopener noreferrer"
-              target="_blank"
-              href={data.projectURL}>
-              Learn more about this token <NewLinkIcon className={classes.linkIcon} />
-            </Link>
-          )}
+          <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
+            <Text variant="h1" className={cls(classes.title, classes.meta)}>{data.tokenName} ({data.tokenSymbol})</Text>
+            <Text marginTop={2} marginBottom={0.75} className={classes.description}>{data.description}</Text>
+            {!!data.projectURL && (
+              <Link
+                className={classes.link}
+                underline="none"
+                rel="noopener noreferrer"
+                target="_blank"
+                href={data.projectURL}>
+                Learn more about this token <NewLinkIcon className={classes.linkIcon} />
+              </Link>
+            )}
 
             <Text variant="h1" marginTop={2} className={classes.timer}>
               Coming Soon…
@@ -158,29 +159,25 @@ const SampleILOCard = (props: Props) => {
               </Box>
             </Box>
 
-            <Box position="relative">
-                <Text className={cls(classes.title, classes.description)} marginBottom={0.75}>Commit your tokens in a fixed ratio to participate.</Text>
-                <Text className={classes.description} color="textSecondary">{new BigNumber(1).minus(data.usdRatio).times(100).toFormat(0)}% ZWAP - {new BigNumber(data.usdRatio).times(100).toFormat(0)}% ZIL</Text>
-              <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
-                {zwapToken && (
-                  <CurrencyInputILO
-                    label="to Burn:"
-                    token={zwapToken}
-                    amount={"0"}
-                    disabled
-                    hideBalance={false}
-                  />
-                )}
+            <Box>
+              <Text className={cls(classes.title, classes.description)} marginBottom={0.75}>Commit your tokens in a fixed ratio to participate.</Text>
+              <Text className={classes.description} color="textSecondary">{new BigNumber(1).minus(data.usdRatio).times(100).toFormat(0)}% ZWAP - {new BigNumber(data.usdRatio).times(100).toFormat(0)}% ZIL</Text>
+              <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12} position="relative">
+                <CurrencyInputILO
+                  label="to Burn:"
+                  token={zwapToken}
+                  amount={"0"}
+                  disabled
+                  hideBalance={false}
+                />
                 <ViewHeadlineIcon className={classes.viewIcon} />
-                {zilToken && (
-                  <CurrencyInputILO
-                    label="for Project:"
-                    disabled
-                    token={zilToken}
-                    amount={"0"}
-                    hideBalance={false}
-                  />
-                )}
+                <CurrencyInputILO
+                  label="for Project:"
+                  disabled
+                  token={zilToken}
+                  amount={"0"}
+                  hideBalance={false}
+                />
               </Box>
               <FancyButton
                 className={classes.actionButton}

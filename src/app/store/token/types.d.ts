@@ -5,7 +5,7 @@ import { SimpleMap } from "app/utils";
 export type TokenUSDValues = {
   balance: BigNumber;
   poolLiquidity: BigNumber;
-  zapRewards: BigNumber;
+  rewardsPerSecond: BigNumber;
 };
 
 export type TokenInfo = {
@@ -29,6 +29,7 @@ export interface TokenState {
   prices: SimpleMap<BigNumber>,
   tokens: SimpleMap<TokenInfo>,
   values: SimpleMap<TokenUSDValues>,
+  userSavedTokens: string[],
 };
 
 export interface TokenUpdateProps extends Partial<TokenInfo> {

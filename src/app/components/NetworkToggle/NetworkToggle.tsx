@@ -102,7 +102,7 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
       } else if (wallet?.type === WalletConnectType.BoltX)  {
         dispatch(actions.Layout.updateNotification({
           type: "",
-          message: "Please change network using your Bolt-X wallet.",
+          message: "Please change network using your BoltX wallet.",
         }));
         return
       }

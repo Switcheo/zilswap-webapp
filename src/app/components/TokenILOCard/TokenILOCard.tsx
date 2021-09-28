@@ -38,7 +38,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   description: {
     fontFamily: "'Raleway', sans-serif",
-    fontSize: 14
+    fontSize: 14,
+    lineHeight: 1.2,
   },
   title: {
     fontWeight: 700,
@@ -76,7 +77,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     top: "50%",
     left: "50%",
     marginLeft: "-12px",
-    marginTop: "-18px"
+    transform: "translateY(-50%)"
   },
   label: {
     color: theme.palette.label
@@ -146,7 +147,7 @@ const TokenILOCard = (props: Props) => {
   // const targetZwap = new BigNumber('30000').shiftedBy(12)
 
   const totalContributions = new BigNumber(totalContributionStr)
-  const totalCommittedUSD = totalContributions.shiftedBy(-12).dividedBy(data.usdRatio).times(tokenState.prices.ZIL).toFormat(2)
+  const totalCommittedUSD = totalContributions.shiftedBy(-12).dividedBy(data.usdRatio).times(tokenState.prices[ZIL_ADDRESS]).toFormat(2)
   const progress = totalContributions.dividedBy(targetZil).times(100).integerValue()
   const iloStarted = iloState === ILOState.Active
   const iloOver = iloState === ILOState.Failed || iloState === ILOState.Completed
@@ -314,10 +315,10 @@ const TokenILOCard = (props: Props) => {
 
             {
               !iloOver &&
-              <Box position="relative">
+              <Box>
                 <Text className={cls(classes.title, classes.description)} marginBottom={0.75}>Commit your tokens in a fixed ratio to participate.</Text>
                 <Text className={classes.description} color="textSecondary">{new BigNumber(1).minus(data.usdRatio).times(100).toFormat(0)}% ZWAP - {new BigNumber(data.usdRatio).times(100).toFormat(0)}% ZIL</Text>
-                <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
+                <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12} position="relative">
                   <CurrencyInputILO
                     label="to Burn:"
                     token={zwapToken}
@@ -354,9 +355,9 @@ const TokenILOCard = (props: Props) => {
 
           {
             (iloStarted || contributed) &&
-            <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta} position="relative">
+            <Box display="flex" flexDirection="column" alignItems="stretch" className={classes.meta}>
               <Text className={cls(classes.title, classes.description)}>Tokens Committed</Text>
-              <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12}>
+              <Box marginTop={1.5} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12} position="relative">
                 <CurrencyInputILO
                   label="to Burn:"
                   token={zwapToken}

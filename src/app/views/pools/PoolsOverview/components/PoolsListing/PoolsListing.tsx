@@ -72,8 +72,8 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
     const queryRegexp = !!searchQuery ? new RegExp(searchQuery, "i") : undefined;
     const result = Object.values(tokenState.tokens)
       .sort((lhs, rhs) => {
-        const lhsRewardValue = tokenState.values[lhs.address]?.zapRewards ?? BIG_ZERO;
-        const rhsRewardValue = tokenState.values[rhs.address]?.zapRewards ?? BIG_ZERO;
+        const lhsRewardValue = tokenState.values[lhs.address]?.rewardsPerSecond ?? BIG_ZERO;
+        const rhsRewardValue = tokenState.values[rhs.address]?.rewardsPerSecond ?? BIG_ZERO;
 
         if (!lhsRewardValue.eq(rhsRewardValue))
           return rhsRewardValue.comparedTo(lhsRewardValue);

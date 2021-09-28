@@ -31,8 +31,8 @@ const PoolRouteIcon: React.FC<Props> = (props: Props) => {
         <CurrencyLogo
           key={index}
           className={classes.icon}
-          currency={token.symbol}
-          address={token.address} />
+          currency={token?.symbol}
+          address={token?.address} />
       ))}
     </Box>
   );

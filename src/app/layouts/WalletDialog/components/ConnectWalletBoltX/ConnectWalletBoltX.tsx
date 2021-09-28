@@ -16,8 +16,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     backgroundColor: theme.palette.background.default,
     borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF", 
-    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF", 
+    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     borderRadius: "0 0 12px 12px"
   },
   container: {
@@ -73,22 +73,27 @@ const ConnectWalletBoltX: React.FC<ConnectWalletManagerViewProps> = (props: any)
       if (isLoading) return;
 
       const boltX = (window as any).boltX;
-      if (typeof boltX === "undefined")
-        throw new Error("BoltX extension not installed");
+      if (typeof boltX === "undefined") {
+        throw new Error("BoltX wallet extension not installed");
+      }
 
       const result = await boltX.zilliqa.wallet.connect();
-      if (result !== boltX.zilliqa.wallet.isConnected)
-        throw new Error("BoltX could not be connected to.");
-      console.log(boltX);
+      if (result !== boltX.zilliqa.wallet.isConnected) {
+        throw new Error("Failed to connect to BoltX");
+      }
+
       const walletResult: ConnectWalletResult = await connectWalletBoltX(boltX);
-      if (walletResult.error)
+      if (walletResult.error) {
         throw walletResult.error;
+      }
 
       if (walletResult.wallet) {
         const { wallet } = walletResult
         const { network } = wallet
         dispatch(actions.Blockchain.initialize({ network, wallet }))
       }
+
+      throw new Error("Failed to connect to BoltX");
     });
   }
 
@@ -104,7 +109,7 @@ const ConnectWalletBoltX: React.FC<ConnectWalletManagerViewProps> = (props: any)
         <ContrastBox className={classes.container}>
           <Box display="flex" flexDirection="row" justifyContent="space-between">
             {isCheckingBoltX && (
-              <InputLabel>Checking Bolt-X Extension</InputLabel>
+              <InputLabel>Checking BoltX Extension</InputLabel>
             )}
             {errorConnect && (
               <Box>
@@ -113,7 +118,7 @@ const ConnectWalletBoltX: React.FC<ConnectWalletManagerViewProps> = (props: any)
                 </InputLabel>
                 <br />
                 <Typography color="textPrimary" variant="body2" align="center">
-                  New to Bolt-X? Download it
+                  New to BoltX? Download it
                   {" "}
                   <Link
                     rel="noopener noreferrer"

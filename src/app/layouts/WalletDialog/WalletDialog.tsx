@@ -21,7 +21,7 @@ import ConnectWalletZeeves from "./components/ConnectWalletZeeves";
 const DIALOG_HEADERS: { [key in ConnectOptionType]: string } = {
   zeeves: "Connect With Zeeves",
   zilpay: "Connect With ZilPay",
-  boltX: "Connect With Bolt-X",
+  boltX: "Connect With BoltX",
   privateKey: "Connect With Private Key",
 };
 

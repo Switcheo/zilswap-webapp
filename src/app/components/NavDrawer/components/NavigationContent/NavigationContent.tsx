@@ -18,6 +18,17 @@ const CustomRouterLink = forwardRef((props: any, ref: any) => (
   </div>
 ));
 
+const InternalRouteMap: any = {
+  "/pools/overview": "/pools",
+  "/pools/transactions": "/pools",
+  "/zilo/current": "/zilo",
+  "/zilo/past": "/zilo",
+  "/swap": "/swap",
+  "/pool": "/swap",
+  "/bridge": "/bridge",
+  "/history": "/bridge",
+}
+
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
   listItem: {
@@ -157,6 +168,10 @@ const NavigationContent: React.FC<NavigationContentProps> = (props: NavigationCo
               [classes.secondaryFont]: secondary
             }, classes.buttonLeaf)}
             activeClassName={classes.buttonLeafActive}
+            isActive={(match: any, location: any) => {
+              if (navigation.href === location.pathname) return true;
+              if (InternalRouteMap[location.pathname] === navigation.href) return true;
+            }}
             component={CustomRouterLink}
             to={navigation.disabled ? "/disabled-path" : navigation.href}
             exact={false}
