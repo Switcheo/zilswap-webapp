@@ -8,7 +8,7 @@ import { actions } from "app/store";
 import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useAsyncTask, useToaster, useTokenFinder, trimValue, netZilToTradeHub, useNetwork } from "app/utils";
+import { hexToRGBA, netZilToTradeHub, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
@@ -280,7 +280,7 @@ const ConfirmTransfer = (props: any) => {
 
     runInitTradeHubSDK(async () => {
       const sdk = await initTradehubSDK(swthAddrMnemonic, network);
-      await sdk.token.reloadTokens();
+      await sdk.initialize();
       setSdk(sdk);
     })
 
@@ -387,10 +387,6 @@ const ConfirmTransfer = (props: any) => {
     }
 
     const lockProxy = asset.lock_proxy_hash;
-    sdk.zil.configProvider.getConfig().Zil.LockProxyAddr = `0x${lockProxy}`;
-    sdk.zil.configProvider.getConfig().Zil.ChainId = 333;
-    sdk.zil.configProvider.getConfig().Zil.RpcURL = "https://dev-api.zilliqa.com";
-
     const amount = bridgeFormState.transferAmount;
     const zilAddress = santizedAddress(wallet.addressInfo.byte20);
     const swthAddress = sdk.wallet.bech32Address;
@@ -455,6 +451,11 @@ const ConfirmTransfer = (props: any) => {
   }
 
   const onConfirm = async () => {
+    if (!localStorage) {
+      console.error("localStorage not available");
+      return null;
+    }
+
     if (!sdk) {
       console.error("TradeHubSDK not initialized")
       return null;
@@ -507,10 +508,6 @@ const ConfirmTransfer = (props: any) => {
         depositDispatchedAt: dayjs(),
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
-
-      if (fromBlockchain === Blockchain.Ethereum) {
-        await sdk.eth.getProvider().waitForTransaction(sourceTxHash!, 1);
-      }
 
       addNavigationHook(history);
     })
