@@ -91,12 +91,3 @@ export class PollIntervals {
   public static BridgeWithdrawWatcher = 10000;
   public static BridgeTokenFee = 60000;
 }
-
-export const NftContractBech32 = {
-  [Network.MainNet]: {
-    Nft: "zil167flx79fykulp57ykmh9gnf3curcnyux6dcj5e",
-  },
-  [Network.TestNet]: {
-    Nft: "zil1e9yfgt64auz6jkjxhdvwaxc2v7c0su06mpfgjs",
-  }
-}
