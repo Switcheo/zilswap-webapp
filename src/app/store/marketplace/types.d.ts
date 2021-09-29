@@ -1,10 +1,11 @@
+import { SimpleMap } from "app/utils";
 import BigNumber from "bignumber.js";
 
 export interface MarketPlaceState {
-  collections: { [index: string]: Collection },
-  tokens: { [index: string]: Nft },
+  collections: SimpleMap<Collection>,
+  tokens: SimpleMap<Nft>,
   filter: {},
-  profile: ProfileInfo,
+  profile?: Profile,
 }
 
 export interface Nft {
@@ -26,7 +27,7 @@ export type TraitType = {
   trait: string,
   collection_id: string,
 }
-export interface Trait {
+export interface TraitValue {
   id: string,
   value: string,
   count: number,
@@ -45,7 +46,7 @@ export interface Collection {
   twitter_url: string,
   instagram_url: string,
 }
-export interface asset {
+export interface Asset {
   id: string,
   type: string,
   mime_type: string,
@@ -62,11 +63,11 @@ export interface NftAttribute {
   rarity: number;
 }
 
-export interface ProfileInfo {
-  ownedNft: { [index: string]: Nft },
-  biddedNft?: { [index: string]: BiddedNftInfo }
+export interface Profile {
+  ownedNft: SimpleMap<Nft>,
+  biddedNft?: SimpleMap<BiddedNft>
 }
 
-export interface BiddedNftInfo {
+export interface BiddedNft {
   nft: Nft,
 }
