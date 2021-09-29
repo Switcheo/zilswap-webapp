@@ -31,7 +31,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     position: "relative",
   },
   borderBox: {
-    border: "1px solid #29475A",
+    border: `1px solid ${
+      theme.palette.type === "dark" ? "#29475A" : "rgba(0, 51, 64, 0.5)"
+    }`,
     borderRadius: 10,
   },
   image: {
@@ -56,7 +58,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 900,
     fontSize: "13px",
     lineHeight: "16px",
-    color: "#DEFFFF",
+    color: theme.palette.text?.primary,
   },
   dotIcon: {
     fontSize: "inherit",
@@ -67,12 +69,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginRight: "2px",
   },
   lastOffer: {
-    color: "rgba(222, 255, 255, 0.5)",
+    color: theme.palette.primary.light,
     fontSize: "12px",
     lineHeight: "14px",
   },
   likes: {
-    color: "rgba(222, 255, 255, 0.5)",
+    color: theme.palette.label,
     fontSize: "12px",
     lineHeight: "14px",
     marginRight: "4px",
@@ -84,7 +86,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   likeButton: {
-    color: "rgba(222, 255, 255, 0.5)",
+    color: theme.palette.primary.light,
   },
   cardContent: {
     marginLeft: "-16px",
@@ -96,7 +98,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 900,
     fontSize: "14px",
     lineHeight: "16px",
-    color: "#DEFFFF",
+    color: theme.palette.text?.primary,
     textTransform: "uppercase",
   },
   bodyBox: {
@@ -105,7 +107,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   body: {
     fontSize: "12px",
     fontWeight: 700,
-    color: "rgba(222, 255, 255, 0.5)",
+    color: theme.palette.primary.light,
   },
   verifiedBadge: {
     marginLeft: "4px",

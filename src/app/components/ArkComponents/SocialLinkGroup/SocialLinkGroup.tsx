@@ -28,8 +28,13 @@ const useStyles = makeStyles((theme) => ({
   fill: {
     "& svg": {
       "& path": {
-        fill: "rgba(222, 255, 255, 0.5)",
+        fill: theme.palette.primary.light,
       },
+    },
+  },
+  globeIcon: {
+    "& path": {
+      stroke: theme.palette.primary.light,
     },
   },
 }));
@@ -66,7 +71,7 @@ const SocialLinkGroup: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         <TelegramIcon />
       </Button>
       <Button href="http://thebear.market" target="_blank" disableRipple>
-        <GlobeIcon />
+        <GlobeIcon className={classes.globeIcon} />
       </Button>
     </Box>
   );

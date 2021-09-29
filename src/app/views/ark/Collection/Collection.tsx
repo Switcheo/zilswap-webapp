@@ -23,14 +23,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 700,
     fontSize: "30px",
     lineHeight: "35px",
-    color: "#FFFFFF",
+    color: theme.palette.type === "dark" ? "#FFFFFF" : "#003340",
     textAlign: "center",
     [theme.breakpoints.down("xs")]: {
       marginTop: "10px",
     },
   },
   collectionCreator: {
-    color: "rgba(222, 255, 255, 0.5)",
+    color: theme.palette.primary.light,
     fontSize: "16px",
     lineHeight: "24px",
     textAlign: "center",
@@ -51,12 +51,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 12,
-    backgroundColor: "rgba(222, 255, 255, 0.1)",
+    backgroundColor:
+      theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#6BE1FF40",
   },
   statsHeader: {
     fontSize: "12px",
     lineHeight: "14px",
-    color: "rgba(222, 255, 255, 0.5)",
+    color: theme.palette.primary.light,
     whiteSpace: "nowrap",
   },
   statsContent: {
@@ -64,13 +65,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 900,
     fontSize: "24px",
     lineHeight: "36px",
-    color: "#DEFFFF",
+    color: theme.palette.text?.primary,
     whiteSpace: "nowrap",
   },
   description: {
     fontSize: "16px",
     lineHeight: "24px",
-    color: "rgba(222, 255, 255, 0.5)",
+    color: theme.palette.primary.light,
     maxWidth: "750px",
     marginTop: theme.spacing(2),
     textAlign: "center",

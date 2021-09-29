@@ -19,7 +19,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "column",
     background:
-      "radial-gradient(50% 50% at 50% 0%, #9CFFFF -800%, rgba(255, 156, 156, 0) 85%), radial-gradient(50% 50% at 50% 100%, #9CFFFF -800%, rgba(255, 156, 156, 0) 85%), #0D1B24",
+      theme.palette.type === "dark"
+        ? "radial-gradient(50% 50% at 50% 0%, #9CFFFF -800%, rgba(255, 156, 156, 0) 85%), radial-gradient(50% 50% at 50% 100%, #9CFFFF -800%, rgba(255, 156, 156, 0) 85%), #0D1B24"
+        : "#F6FFFC",
   },
   content: {
     position: "relative",
@@ -38,8 +40,12 @@ const ARKLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { route } = props;
   const classes = useStyles();
   const [showDrawer, setShowDrawer] = useState(false);
-  const blockchainState = useSelector<RootState, BlockchainState>(state => state.blockchain);
-  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+  const blockchainState = useSelector<RootState, BlockchainState>(
+    (state) => state.blockchain
+  );
+  const walletState = useSelector<RootState, WalletState>(
+    (state) => state.wallet
+  );
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -47,7 +53,7 @@ const ARKLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       dispatch(actions.MarketPlace.loadProfile());
     }
     // eslint-disable-next-line
-  }, [blockchainState.ready, walletState.wallet?.addressInfo.bech32])
+  }, [blockchainState.ready, walletState.wallet?.addressInfo.bech32]);
 
   const onToggleDrawer = (override?: boolean) => {
     setShowDrawer(typeof override === "boolean" ? override : !showDrawer);

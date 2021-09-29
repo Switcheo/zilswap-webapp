@@ -139,6 +139,9 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
       onClose={onClose}
       {...rest}
       className={cls(classes.root, className)}
+      // onMouseEnter={() => }
+      // onMouseLeave={() => }
+      // variant="permanent"
     >
       <Box className={classes.drawerHeader}>
         <IconButton className={classes.closeButton} onClick={onClose}>
