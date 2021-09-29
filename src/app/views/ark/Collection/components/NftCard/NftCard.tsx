@@ -75,6 +75,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "rgba(222, 255, 255, 0.5)",
     fontSize: "12px",
     lineHeight: "14px",
+    marginRight: "4px",
   },
   likeIconButton: {
     padding: 0,
@@ -83,7 +84,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   likeButton: {
-    marginLeft: "4px",
     color: "rgba(222, 255, 255, 0.5)",
   },
   cardContent: {
