@@ -98,8 +98,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const TEMP_BANNER_URL = "https://pbs.twimg.com/profile_banners/1429715941399486466/1630400388/1500x500";
-const TEMP_BEAR_AVATAR_URL = "https://pbs.twimg.com/profile_images/1432977604563193858/z01O7Sey_400x400.jpg";
+const TEMP_BANNER_URL =
+  "https://pbs.twimg.com/profile_banners/1429715941399486466/1630400388/1500x500";
+const TEMP_BEAR_AVATAR_URL =
+  "https://pbs.twimg.com/profile_images/1432977604563193858/z01O7Sey_400x400.jpg";
 
 const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
@@ -111,7 +113,10 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   const breadcrumbs = [
     { path: "/ark/collections", value: "Collections" },
-    { path: `/ark/collections/${match.params.collection}`, value: "The Bear Market" },
+    {
+      path: `/ark/collections/${match.params.collection}`,
+      value: "The Bear Market",
+    },
   ];
 
   return (
@@ -124,6 +129,8 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           avatarImage={TEMP_BEAR_AVATAR_URL}
           bannerImage={TEMP_BANNER_URL}
         >
+          <SocialLinkGroup className={classes.socialLinkGroup} />
+
           {/* TODO: hacky way for mobile view, to clean up */}
           <SocialLinkGroup className={classes.socialLinkGroupMobile} />
 
@@ -170,6 +177,16 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             </Grid>
           </Grid>
 
+          {/* Description */}
+          <Text className={classes.description}>
+            Well we aren't just a bear market. We are The Bear Market. We know a
+            couple of fudders who have been releasing bears into the unknown,
+            and because of you guys we now have a shelter full of lost and
+            lonely bears.As much as we would love to care for all these
+            unbearably cuddly bears, we simply can't keep up! Thus we've
+            launched The Bear Market, in hope that every one of you will adopt
+            one because these koala-ity bears deserve a loving home!
+          </Text>
 
           {/* NFTs in collection */}
           <Grid container spacing={2} className={classes.nftContainer}>
@@ -181,20 +198,9 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               );
             })}
           </Grid>
-
-          {/* Description */}
-          <Text className={classes.description}>
-            Well we aren't just a bear market. We are The Bear Market. We know
-            a couple of fudders who have been releasing bears into the
-            unknown, and because of you guys we now have a shelter full of
-            lost and lonely bears.As much as we would love to care for all
-            these unbearably cuddly bears, we simply can't keep up! Thus we've
-            launched The Bear Market, in hope that every one of you will adopt
-            one because these koala-ity bears deserve a loving home!
-          </Text>
         </ArkBanner>
-      </Container >
-    </ARKPage >
+      </Container>
+    </ARKPage>
   );
 };
 
