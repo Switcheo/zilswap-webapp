@@ -5,12 +5,17 @@ import {
   CardContent,
   CardMedia,
   CardProps,
+  IconButton,
   makeStyles,
+  SvgIcon,
+  Typography,
 } from "@material-ui/core";
-import { Text } from "app/components";
+import UnlikedIcon from "@material-ui/icons/FavoriteBorderRounded";
+import LikedIcon from "@material-ui/icons/FavoriteRounded";
+import DotIcon from "@material-ui/icons/FiberManualRecordRounded";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ReactComponent as VerifiedBadge } from "../../verified-badge.svg";
 
@@ -20,13 +25,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     width: "100%",
     maxWidth: "308px",
-    borderRadius: 5,
+    borderRadius: 10,
     boxShadow: "none",
     backgroundColor: "transparent",
     position: "relative",
-    "&:hover": {
-      cursor: "pointer",
-    },
+  },
+  borderBox: {
+    border: "1px solid #29475A",
+    borderRadius: 10,
+  },
+  image: {
+    borderRadius: "0px 0px 10px 10px!important",
   },
   tokenId: {
     color: "#511500",
@@ -37,9 +46,50 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       lineHeight: "40px",
     },
   },
+  cardHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: theme.spacing(1, 1.5),
+  },
+  bid: {
+    fontFamily: "'Raleway', sans-serif",
+    fontWeight: 900,
+    fontSize: "13px",
+    lineHeight: "16px",
+    color: "#DEFFFF",
+  },
+  dotIcon: {
+    fontSize: "inherit",
+    color: "#FF5252",
+    verticalAlign: "middle",
+    paddingBottom: "1.5px",
+    marginLeft: "-2px",
+    marginRight: "2px",
+  },
+  lastOffer: {
+    color: "rgba(222, 255, 255, 0.5)",
+    fontSize: "12px",
+    lineHeight: "14px",
+  },
+  likes: {
+    color: "rgba(222, 255, 255, 0.5)",
+    fontSize: "12px",
+    lineHeight: "14px",
+  },
+  likeIconButton: {
+    padding: 0,
+    "&:hover": {
+      backgroundColor: "transparent",
+    },
+  },
+  likeButton: {
+    marginLeft: "4px",
+    color: "rgba(222, 255, 255, 0.5)",
+  },
   cardContent: {
     marginLeft: "-16px",
     marginRight: "-16px",
+    paddingBottom: 0,
   },
   title: {
     fontFamily: "'Raleway', sans-serif",
@@ -48,6 +98,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "16px",
     color: "#DEFFFF",
     textTransform: "uppercase",
+  },
+  bodyBox: {
+    padding: theme.spacing(0, 1.5),
   },
   body: {
     fontSize: "12px",
@@ -61,7 +114,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     verticalAlign: "text-top",
   },
   rarityBackground: {
-    backgroundColor: "rgba(255, 223, 107, 0.2)",
+    backgroundColor: "rgba(107, 225, 255, 0.2)",
     borderRadius: 5,
     display: "flex",
     marginTop: theme.spacing(1),
@@ -69,7 +122,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   rarityBar: {
     display: "flex",
-    backgroundColor: "#FFDF6B",
+    backgroundColor: "#6BE1FF",
     borderRadius: 5,
     padding: "1.5px",
     width: "100%",
@@ -79,28 +132,66 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const NftCard: React.FC<Props> = (props: Props) => {
   const { className, ...rest } = props;
   const classes = useStyles();
+  const [liked, setLiked] = useState<boolean>(false);
 
   return (
     <Card {...rest} className={cls(classes.root, className)}>
-      <CardActionArea component={Link} to="/ark/collections/thebearmarket/8888">
-        <CardMedia
-          component="img"
-          alt="NFT image"
-          height="308"
-          image="https://thebearmarket.s3.ap-southeast-1.amazonaws.com/assets/082479c2cecf1c0a6ad7da55bbf7643486533457543af13c4ee732a3d2871b4c.png"
-        />
-        <CardContent className={classes.cardContent}>
+      <Box className={classes.borderBox}>
+        <Box className={classes.cardHeader}>
+          {/* to accept as props */}
+          <Box display="flex" flexDirection="column" justifyContent="center">
+            <Typography className={classes.bid}>
+              <DotIcon className={classes.dotIcon} /> BID LIVE 10:00:26 Left
+            </Typography>
+            <Typography className={classes.lastOffer}>
+              Last Offer 200,000 ZIL
+            </Typography>
+          </Box>
+          <Box display="flex" alignItems="center">
+            <Typography className={classes.likes}>100K</Typography>
+            {/* {liked ? (
+              <LikedIcon className={classes.likeButton} />
+            ) : (
+              <UnlikedIcon className={classes.likeButton} />
+            )} */}
+            <IconButton
+              onClick={() => setLiked(!liked)}
+              className={classes.likeIconButton}
+              disableRipple
+            >
+              <SvgIcon
+                component={liked ? LikedIcon : UnlikedIcon}
+                className={classes.likeButton}
+              />
+            </IconButton>
+          </Box>
+        </Box>
+        <CardActionArea
+          component={Link}
+          to="/ark/collections/thebearmarket/8888"
+        >
+          <CardMedia
+            className={classes.image}
+            component="img"
+            alt="NFT image"
+            height="308"
+            image="https://thebearmarket.s3.ap-southeast-1.amazonaws.com/assets/082479c2cecf1c0a6ad7da55bbf7643486533457543af13c4ee732a3d2871b4c.png"
+          />
+        </CardActionArea>
+      </Box>
+      <CardContent className={classes.cardContent}>
+        <Box className={classes.bodyBox}>
           <Box
             display="flex"
             alignItems="center"
             justifyContent="space-between"
           >
             {/* to truncate if too long? */}
-            <Text className={classes.title}>
+            <Typography className={classes.title}>
               the bear market
               <VerifiedBadge className={classes.verifiedBadge} />
-            </Text>
-            <Text className={classes.title}>1M ZIL</Text>
+            </Typography>
+            <Typography className={classes.title}>1M ZIL</Typography>
           </Box>
           <Box
             display="flex"
@@ -108,17 +199,17 @@ const NftCard: React.FC<Props> = (props: Props) => {
             justifyContent="space-between"
             mt={0.5}
           >
-            <Text className={classes.body}>#8888</Text>
-            <Text className={classes.body}>~$100,000</Text>
+            <Typography className={classes.body}>#8888</Typography>
+            <Typography className={classes.body}>~$100,000</Typography>
           </Box>
+        </Box>
 
-          {/* TODO: refactor and take in a rarity as prop */}
-          {/* Rarity indicator */}
-          <Box className={classes.rarityBackground}>
-            <Box className={classes.rarityBar} />
-          </Box>
-        </CardContent>
-      </CardActionArea>
+        {/* TODO: refactor and take in a rarity as prop */}
+        {/* Rarity indicator */}
+        <Box className={classes.rarityBackground}>
+          <Box className={classes.rarityBar} />
+        </Box>
+      </CardContent>
     </Card>
   );
 };
