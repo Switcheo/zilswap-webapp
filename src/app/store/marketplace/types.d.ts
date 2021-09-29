@@ -1,13 +1,13 @@
 import BigNumber from "bignumber.js";
 
 export interface MarketPlaceState {
-  collections: { [index: string]: CollectionData },
-  tokens: { [index: string]: NftData },
+  collections: { [index: string]: Collection },
+  tokens: { [index: string]: Nft },
   filter: {},
   profile: ProfileInfo,
 }
 
-export interface NftData {
+export interface Nft {
   id: string,
   name?: string,
   token_id: number,
@@ -16,9 +16,9 @@ export interface NftData {
   description?: string,
   metadata?: string,
   asset_id?: string,
-  asset?: AssetData,
-  collection?: CollectionData,
-  trait_values?: TraitData[]
+  asset?: Asset,
+  collection?: Collection,
+  trait_values?: Trait[]
 }
 
 export type TraitType = {
@@ -26,14 +26,14 @@ export type TraitType = {
   trait: string,
   collection_id: string,
 }
-export interface TraitData {
+export interface Trait {
   id: string,
   value: string,
   count: number,
   trait_type_id: string,
   trait_type: TraitType,
 }
-export interface CollectionData {
+export interface Collection {
   id: string,
   name: string,
   description: string,
@@ -45,7 +45,7 @@ export interface CollectionData {
   twitter_url: string,
   instagram_url: string,
 }
-export interface assetData {
+export interface asset {
   id: string,
   type: string,
   mime_type: string,
@@ -63,10 +63,10 @@ export interface NftAttribute {
 }
 
 export interface ProfileInfo {
-  ownedNft: { [index: string]: NftData },
+  ownedNft: { [index: string]: Nft },
   biddedNft?: { [index: string]: BiddedNftInfo }
 }
 
 export interface BiddedNftInfo {
-  nft: NftData,
+  nft: Nft,
 }
