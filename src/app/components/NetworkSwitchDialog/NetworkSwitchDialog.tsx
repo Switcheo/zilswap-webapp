@@ -30,7 +30,9 @@ const NetworkSwitchDialog = (props: any) => {
 
     const isMainNet = useMemo(() => {
       if (srcChain === Blockchain.Ethereum) {
-        return Number(ethWallet?.chainId) === 1
+        if (Number(ethWallet?.chainId) === 3) return false;
+        // set to mainnet even if currently set to some random net
+        return true;
       } else if (srcChain === Blockchain.Zilliqa) {
         return network === Network.MainNet
       }
@@ -86,7 +88,6 @@ const NetworkSwitchDialog = (props: any) => {
       }
       return [null, null, null, null]
     }, [dispatch, ethWallet, zilWallet, isMainNet])
-
 
     const onCloseDialog = () => {
         dispatch(actions.Layout.toggleShowNetworkSwitch("close"));

@@ -8,6 +8,7 @@ import { hexToRGBA } from "app/utils";
 import cls from "classnames";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import React, { Fragment } from "react";
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -71,6 +72,14 @@ const NetworkSwitchBox = (props: Props) => {
     const classes = useStyles();
     const dispatch = useDispatch();
 
+    useEffect(() => {
+        if (requiredChainID === null) {
+            dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
+        }
+
+        // eslint-disable-next-line
+    }, [requiredChainID]);
+
     const onCloseDialog = () => {
       dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
     };
@@ -82,7 +91,7 @@ const NetworkSwitchBox = (props: Props) => {
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: requiredChainID }],
         });
-        dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
+        onCloseDialog();
       } catch (switchError) {
         console.error(switchError);
       }
