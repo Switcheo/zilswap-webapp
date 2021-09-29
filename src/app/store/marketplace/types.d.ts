@@ -19,7 +19,7 @@ export interface Nft {
   asset_id?: string,
   asset?: Asset,
   collection?: Collection,
-  trait_values?: Trait[]
+  trait_values?: TraitValue[]
 }
 
 export type TraitType = {
