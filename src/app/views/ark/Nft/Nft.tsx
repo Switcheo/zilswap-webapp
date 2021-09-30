@@ -1,6 +1,5 @@
 import {
   Box,
-  Breadcrumbs,
   Button,
   Container,
   Table,
@@ -12,11 +11,10 @@ import {
   Typography,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import SvgIcon from "@material-ui/core/SvgIcon";
+import { ArkBreadcrumb } from "app/components";
 import ARKPage from "app/layouts/ARKPage";
 import { AppTheme } from "app/theme/types";
 import React from "react";
-import { Link } from "react-router-dom";
 import { ReactComponent as VerifiedBadge } from "../Collection/verified-badge.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -155,50 +153,27 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
+  const collectionId = match.params.collection;
   const tokenId = match.params.id;
 
   // fetch nft data, if none redirect back to collections / show not found view
 
   const breadcrumbs = [
-    <Link key="1" to="/ark/collections" className={classes.breadcrumb}>
-      Collections
-    </Link>,
-    <Link
-      key="2"
-      to={`/ark/collections/${match.params.collection}`}
-      className={classes.breadcrumb}
-    >
-      The Bear Market
-    </Link>,
-    <Link
-      key="3"
-      to={`/ark/collections/${match.params.collection}/${tokenId}`}
-      className={classes.breadcrumb}
-    >
-      #{tokenId}
-    </Link>,
+    { path: "/ark/collections", value: "Collections" },
+    {
+      path: `/ark/collections/${collectionId}`,
+      value: "The Bear Market",
+    },
+    {
+      path: `/ark/collections/${collectionId}/${tokenId}`,
+      value: `#${tokenId}`,
+    },
   ];
 
   return (
     <ARKPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
-        {/* TODO: refactor Breadcrumbs */}
-        <Breadcrumbs
-          className={classes.breadcrumbs}
-          separator={
-            <SvgIcon fontSize="small">
-              <path
-                d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
-                color="#6BE1FF"
-                strokeWidth={1.5}
-                stroke="rgba(107, 225, 255, 0.2)"
-              />
-            </SvgIcon>
-          }
-          aria-label="breadcrumb"
-        >
-          {breadcrumbs}
-        </Breadcrumbs>
+        <ArkBreadcrumb linkPath={breadcrumbs} />
 
         {/* Nft image and main info */}
         <Box display="flex" mt={3} justifyContent="flex-end">
