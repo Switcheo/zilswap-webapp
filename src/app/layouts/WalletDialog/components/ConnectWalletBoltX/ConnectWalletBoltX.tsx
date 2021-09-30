@@ -123,7 +123,7 @@ const ConnectWalletBoltX: React.FC<ConnectWalletManagerViewProps> = (props: any)
                   <Link
                     rel="noopener noreferrer"
                     target="_blank"
-                    href="https://chrome.google.com/webstore">
+                    href="https://chrome.google.com/webstore/detail/bolt-x/aodkkagnadcbobfpggfnjeongemjbjca">
                     here
                   </Link>!
                 </Typography>
