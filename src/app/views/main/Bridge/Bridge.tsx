@@ -360,7 +360,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   };
 
   const onTransferAmountChange = (rawAmount: string = "0") => {
-    let transferAmount = new BigNumber(rawAmount);
+    let transferAmount = new BigNumber(rawAmount).decimalPlaces(fromToken?.decimals ?? 0);
     if (transferAmount.isNaN() || transferAmount.isNegative() || !transferAmount.isFinite()) transferAmount = BIG_ZERO;
 
     setFormState({
