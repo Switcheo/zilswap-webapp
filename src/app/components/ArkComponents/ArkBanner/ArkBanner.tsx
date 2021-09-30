@@ -1,14 +1,21 @@
-import { Box, BoxProps, Avatar, Badge, Card, CardMedia } from "@material-ui/core";
+import {
+  Box,
+  BoxProps,
+  Avatar,
+  Badge,
+  Card,
+  CardMedia,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React from "react";
 
 interface Props extends BoxProps {
-  badgeContent?: React.Component | JSX.Element,
-  hideBanner?: boolean,
-  avatarImage?: string,
-  bannerImage?: string,
+  badgeContent?: React.Component | JSX.Element;
+  hideBanner?: boolean;
+  avatarImage?: string;
+  bannerImage?: string;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -33,7 +40,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   avatar: {
     height: 130,
     width: 130,
-    border: "5px solid #0D1B24",
+    border: `5px solid ${
+      theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"
+    }`,
   },
   infoBox: {
     display: "flex",
@@ -43,16 +52,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-
 const ArkBanner: React.FC<Props> = (props: Props) => {
   const {
-    children, className, badgeContent, avatarImage,
-    bannerImage, hideBanner
+    children,
+    className,
+    badgeContent,
+    avatarImage,
+    bannerImage,
+    hideBanner,
   } = props;
   const classes = useStyles();
 
   const Wrapper: React.FC<any> = ({ children, ...rest }) => {
-    if (!badgeContent) return children
+    if (!badgeContent) return children;
     return (
       <Badge
         overlap="circle"
@@ -62,8 +74,8 @@ const ArkBanner: React.FC<Props> = (props: Props) => {
       >
         {children}
       </Badge>
-    )
-  }
+    );
+  };
 
   return (
     <Card className={classes.root}>
