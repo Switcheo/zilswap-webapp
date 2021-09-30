@@ -21,6 +21,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Blockchain, RestModels, TradeHubSDK } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
+import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectButton } from "./components";
 import { BridgeParamConstants } from "./components/constants";
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
@@ -258,7 +259,8 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }, [wallet, bridgeFormState.fromBlockchain])
 
   const setSourceAddress = (address: string) => {
-    setFormState(prevState => ({
+
+  setFormState(prevState => ({
       ...prevState,
       sourceAddress: address
     }))
@@ -319,9 +321,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const onClickConnectETH = async () => {
     const web3Modal = new Web3Modal({
-      cacheProvider: true,
+      cacheProvider: false,
       disableInjectedProvider: false,
-      network: "ropsten",
+      network: network === Network.MainNet ? 'mainnet' : 'ropsten',
       providerOptions
     });
 
@@ -340,6 +342,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }
 
     setEthConnectedAddress(ethAddress);
+
     dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: { provider: provider, address: ethAddress, chainId: chainId } }));
     dispatch(actions.Token.refetchState());
   };
@@ -417,6 +420,14 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   };
 
   const showTransfer = () => {
+    if (!(
+      (Number(bridgeWallet?.chainId) === 1 && wallet?.network === Network.MainNet) ||
+      (Number(bridgeWallet?.chainId) === 3 && wallet?.network === Network.TestNet)
+    )) {
+      dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
+      return
+    }
+
     dispatch(actions.Layout.showTransferConfirmation(!layoutState.showTransferConfirmation))
   }
 
@@ -505,15 +516,12 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const onSelectMax = async () => {
-    console.log("onSelectMax", fromToken, sdk)
     if (!fromToken || !sdk) return;
 
     let balance = strings.bnOrZero(fromToken.balance);
     const asset = sdk.token.tokens[bridgeToken?.denom ?? ""];
 
-    console.log(fromToken, sdk, asset)
     if (!asset) return;
-
 
     // Check if gas fees need to be deducted
     if (isNativeAsset(asset) && CHAIN_NAMES[fromToken.blockchain] === fromBlockchain) {

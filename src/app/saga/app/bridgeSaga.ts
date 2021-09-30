@@ -1,7 +1,7 @@
 import { Transaction } from "@zilliqa-js/account";
 import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { actions } from "app/store";
-import { Transaction as EthTransaction } from "ethers";
+import { ethers, Transaction as EthTransaction } from "ethers";
 import { BridgeableToken, BridgeableTokenMapping, BridgeTx, RootState } from "app/store/types";
 import { netZilToTradeHub, SimpleMap } from "app/utils";
 import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL, PollIntervals } from "app/utils/constants";
@@ -53,7 +53,7 @@ function getBridgeTxStatus(tx: BridgeTx): Status {
 
 const makeTxFilter = (statuses: Status[]) => {
   return (state: RootState) => {
-    return state.bridge.bridgeTxs.filter((tx) => !tx.dismissedAt && statuses.includes(getBridgeTxStatus(tx)));
+    return state.bridge.bridgeTxs.filter((tx) => statuses.includes(getBridgeTxStatus(tx)));
   }
 }
 
@@ -101,6 +101,8 @@ function* watchDepositConfirmation() {
                 if (transaction?.isRejected()) {
                   tx.depositFailedAt = dayjs();
                   updatedTxs[tx.sourceTxHash!] = tx;
+                } else {
+                  tx.depositTxConfirmedAt = dayjs();
                 }
               } catch (error) {
                 if (error?.message !== "Txn Hash not Present") {
@@ -109,7 +111,21 @@ function* watchDepositConfirmation() {
                 }
               }
             } else {
-              // TODO: implement tx failed check for eth deposits
+              try {
+                const tradehubNetwork = netZilToTradeHub(tx.network);
+                const sdk = new TradeHubSDK({ network: tradehubNetwork });
+                const provider = sdk.eth.getProvider();
+                const transaction = (yield call([provider, provider.getTransactionReceipt], tx.sourceTxHash!)) as ethers.providers.TransactionReceipt
+                logger("bridge saga", tx.sourceTxHash, transaction?.confirmations);
+                if (!transaction?.confirmations) continue;
+                if (transaction.status === 0) {
+                  tx.depositFailedAt = dayjs();
+                  updatedTxs[tx.sourceTxHash!] = tx;
+                }
+              } catch (error) {
+                console.error("check tx status failed, will try again later");
+                console.error(error);
+              }
             }
           }
 
@@ -247,9 +263,12 @@ function* watchActiveTxConfirmations() {
             case Blockchain.Zilliqa: {
               const zilswapSdk = ZilswapConnector.getSDK();
               const sourceTx: Transaction = yield zilswapSdk.zilliqa.blockchain.getTransaction(bridgeTx.sourceTxHash)
-              if (sourceTx.blockConfirmation)
-                bridgeTx.depositConfirmations = sourceTx.blockConfirmation;
-              yield put(actions.Bridge.addBridgeTx([bridgeTx]));
+              if (sourceTx.blockConfirmation) {
+                yield put(actions.Bridge.addBridgeTx([{
+                  sourceTxHash: bridgeTx.sourceTxHash,
+                  depositConfirmations: sourceTx.blockConfirmation,
+                }]));
+              }
               break;
             };
             case Blockchain.Ethereum: {
@@ -257,9 +276,12 @@ function* watchActiveTxConfirmations() {
               const sdk = new TradeHubSDK({ network: tradehubNetwork });
 
               const sourceTx: EthTransactionResponse = yield sdk.eth.getProvider().getTransaction(bridgeTx.sourceTxHash);
-              if (sourceTx.confirmations)
-                bridgeTx.depositConfirmations = sourceTx.confirmations;
-              yield put(actions.Bridge.addBridgeTx([bridgeTx]));
+              if (sourceTx.confirmations) {
+                yield put(actions.Bridge.addBridgeTx([{
+                  sourceTxHash: bridgeTx.sourceTxHash,
+                  depositConfirmations: sourceTx.confirmations,
+                }]));
+              }
               break;
             };
           }

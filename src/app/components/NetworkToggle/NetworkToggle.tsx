@@ -99,6 +99,12 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
           message: "Please change network using your ZilPay wallet.",
         }));
         return
+      } else if (wallet?.type === WalletConnectType.BoltX)  {
+        dispatch(actions.Layout.updateNotification({
+          type: "",
+          message: "Please change network using your BoltX wallet.",
+        }));
+        return
       }
       dispatch(actions.Blockchain.initialize({ wallet, network: newNetwork }))
     });

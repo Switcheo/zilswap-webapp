@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js";
 import { Network } from "zilswap-sdk/lib/constants";
+import { SimpleMap } from "./types";
 
 export const DefaultFallbackNetwork = Network.MainNet;
 
@@ -17,6 +18,7 @@ export const LoadingKeys = {
 export const LocalStorageKeys = {
   PrivateKey: "zilswap:private-key",
   ZilPayConnected: "zilswap:zilpay-connected",
+  BoltXConnected: "zilswap:boltx-connected",
   ZeevesConnected: "zilswap:zeeves-connected",
   Network: "zilswap:network",
   UserTokenList: "zilswap:user-token-list",
@@ -31,6 +33,11 @@ export const PlaceholderStrings = {
 };
 
 export const ZilPayNetworkMap = {
+  mainnet: Network.MainNet,
+  testnet: Network.TestNet,
+} as { [index: string]: Network };
+
+export const BoltXNetworkMap = {
   mainnet: Network.MainNet,
   testnet: Network.TestNet,
 } as { [index: string]: Network };
@@ -73,9 +80,15 @@ export const ZIL_ADDRESS = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
 export const ZIL_DECIMALS = 12;
 
 export const BRIDGEABLE_WRAPPED_DENOMS = {
-  [Network.MainNet]: ["zusdt.z.1", "zeth.z.1", "zwbtc.z.1"],
+  [Network.MainNet]: ["zusdt.z.3", "zeth.z.1", "zwbtc.z.1"],
   [Network.TestNet]: ["zil5.e", "zwap5.e", "eth6.z", "dai6.z"],
 }
+
+export const TOKEN_SYMBOLS = {
+  "ZETH": "zETH",
+  "ZWBTC": "zWBTC",
+  "ZUSDT": "zUSDT",
+} as SimpleMap<string>;
 
 export const TRANSAK_API_KEY = {
   DEVELOPMENT: process.env.REACT_APP_TRANSAK_DEV,

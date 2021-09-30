@@ -1,5 +1,6 @@
 import { Box, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { FancyButton } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
@@ -99,13 +100,13 @@ const ConnectedWalletBox = (props: any) => {
   const theme = useTheme();
   const isMediaXS = useMediaQuery(theme.breakpoints.down("xs"));
 
-  const walletType = useMemo(() => {
-    if (!wallet?.type) return undefined;
+  const walletName = useMemo(() => {
     switch (wallet?.type) {
       case WalletConnectType.PrivateKey: return "Private Key";
       case WalletConnectType.Zeeves: return "Zeeves Wallet";
       case WalletConnectType.ZilPay: return "ZilPay";
-      default: return "Unknown";
+      case WalletConnectType.BoltX: return "BoltX";
+      default: return "Unknown Wallet";
     }
   }, [wallet?.type]);
 
@@ -123,15 +124,17 @@ const ConnectedWalletBox = (props: any) => {
   };
 
   if (!wallet) return null;
+
   const address = wallet.addressInfo.byte20;
-  const humanAddress = wallet.addressInfo.bech32;
+  const humanAddress = wallet?.type === WalletConnectType.BoltX ? toBech32Address(address) : wallet.addressInfo.bech32;
+
   return (
     <Box display="flex" flexDirection="column" className={cls(classes.root, className)}>
       <Box className={classes.walletDetail}>
         <Typography variant="h4">You are connected to</Typography>
         <Box display="flex" alignItems="center" justifyContent="center" className={classes.zilpayWallet}>
           <Icon className={classes.icon} />
-          <Typography variant="h1">{walletType}</Typography>
+          <Typography variant="h1">{walletName}</Typography>
         </Box>
         <Typography variant="h3">{isMediaXS ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
         <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(humanAddress)} open={!!copyMap[humanAddress]} title="Copied!">

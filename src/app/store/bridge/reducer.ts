@@ -156,7 +156,11 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
       // reconstruct txs to force component re-render.
       const newTxs: BridgeTx[] = payload.map((tx: BridgeTx) => ({ ...tx }));
       for (const tx of [...state.bridgeTxs, ...newTxs]) {
-        uniqueTxs[tx.sourceTxHash!] = tx;
+        const sourceTxHash = tx.sourceTxHash!
+        uniqueTxs[sourceTxHash] = {
+          ...state.bridgeTxs.find(tx => tx.sourceTxHash === sourceTxHash),
+          ...tx,
+        };
       }
 
       const newBridgeTxs = Object.values(uniqueTxs);

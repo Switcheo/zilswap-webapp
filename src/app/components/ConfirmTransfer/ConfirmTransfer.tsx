@@ -8,7 +8,7 @@ import { actions } from "app/store";
 import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useAsyncTask, useToaster, useTokenFinder, trimValue, netZilToTradeHub, useNetwork } from "app/utils";
+import { hexToRGBA, netZilToTradeHub, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
@@ -28,6 +28,8 @@ import { Network } from "zilswap-sdk/lib/constants";
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
+
+const TRANSFER_KEY_MESSAGE = "In the event you are not able to complete Stage 2 of your transfer, you may retrieve and resume your transfer by entering the following unique transfer key phrase on your Transfer History page. Do not ever reveal your transfer key phrase to anyone. ZilSwap will not be held accountable and cannot help you retrieve those funds once they are lost.\n\n";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -280,7 +282,7 @@ const ConfirmTransfer = (props: any) => {
 
     runInitTradeHubSDK(async () => {
       const sdk = await initTradehubSDK(swthAddrMnemonic, network);
-      await sdk.token.reloadTokens();
+      await sdk.initialize();
       setSdk(sdk);
     })
 
@@ -341,7 +343,7 @@ const ConfirmTransfer = (props: any) => {
         });
 
         logger("approve tx", approve_tx.hash);
-        toaster(`Submitted: (Ethereum - ERC20 Approval)`, { hash: approve_tx.hash!, sourceBlockchain: "eth" });
+        toaster(`Submitted: (Ethereum - ERC20 Approval)`, { hash: approve_tx.hash!.replace(/^0x/i, ""), sourceBlockchain: "eth" });
         setApprovalHash(approve_tx.hash!);
         await approve_tx.wait();
 
@@ -365,9 +367,7 @@ const ConfirmTransfer = (props: any) => {
       signer: signer,
     });
 
-    await lock_tx.wait();
-
-    toaster(`Submitted: (Ethereum - Lock Asset)`, { sourceBlockchain: "eth", hash: lock_tx.hash! });
+    toaster(`Submitted: (Ethereum - Lock Asset)`, { sourceBlockchain: "eth", hash: lock_tx.hash!.replace(/^0x/i, "") });
     logger("lock tx", lock_tx.hash!);
 
     return lock_tx.hash!;
@@ -389,10 +389,6 @@ const ConfirmTransfer = (props: any) => {
     }
 
     const lockProxy = asset.lock_proxy_hash;
-    sdk.zil.configProvider.getConfig().Zil.LockProxyAddr = `0x${lockProxy}`;
-    sdk.zil.configProvider.getConfig().Zil.ChainId = 333;
-    sdk.zil.configProvider.getConfig().Zil.RpcURL = "https://dev-api.zilliqa.com";
-
     const amount = bridgeFormState.transferAmount;
     const zilAddress = santizedAddress(wallet.addressInfo.byte20);
     const swthAddress = sdk.wallet.bech32Address;
@@ -456,7 +452,22 @@ const ConfirmTransfer = (props: any) => {
     return lock_tx.id;
   }
 
+  const downloadTransferKey = (key: string) => {
+    const element = document.createElement("a");
+    const file = new Blob([`${TRANSFER_KEY_MESSAGE}\n${key}`], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = "private-transfer-recovery-key.txt";
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
+    toaster("Recovery key downloaded", { overridePersist: false });
+  }
+
   const onConfirm = async () => {
+    if (!localStorage) {
+      console.error("localStorage not available");
+      return null;
+    }
+
     if (!sdk) {
       console.error("TradeHubSDK not initialized")
       return null;
@@ -469,14 +480,24 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
+    if (!swthAddrMnemonic) {
+      console.error("tradehub mnemonic not initialized");
+      return null;
+    }
+
+    if (!withdrawFee) {
+      toaster("Transfer fee not loaded", { overridePersist: false });
+      return null;
+    }
+
+    if (withdrawFee?.amount.gte(bridgeFormState.transferAmount)) {
+      toaster("Transfer amount too low", { overridePersist: false });
+      return null;
+    }
+
+    downloadTransferKey(swthAddrMnemonic);
+
     runConfirmTransfer(async () => {
-      if (!withdrawFee)
-        throw new Error("Transfer fee not loaded");
-
-      if (withdrawFee?.amount.gte(bridgeFormState.transferAmount)) {
-        throw new Error("Transfer amount too low");
-      }
-
       let sourceTxHash;
       if (fromBlockchain === Blockchain.Zilliqa) {
         // init lock on zil side
@@ -604,7 +625,7 @@ const ConfirmTransfer = (props: any) => {
             ~ <span className={classes.textColoured}>${withdrawFee?.value.toFixed(2) || 0}</span>
             <HelpInfo className={classes.helpInfo} placement="top" title="Estimated total fees to be incurred for this transfer (in USD). Please note that the fees will be deducted from the amount that is being transferred out of the network and you will receive less tokens as a result." />
           </KeyValueDisplay>
-          <KeyValueDisplay kkey={<span>&nbsp; • &nbsp;{fromChainName} Txn Fee</span>} mb="8px">
+          <KeyValueDisplay kkey={<span>&nbsp; • &nbsp;{toChainName} Txn Fee</span>} mb="8px">
             <span className={classes.textColoured}>{withdrawFee?.amount.toFixed(2)}</span>
             {" "}
             {fromToken?.symbol}
