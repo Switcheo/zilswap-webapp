@@ -13,7 +13,7 @@ import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlankRou
 import { Text } from "app/components";
 import ARKPage from "app/layouts/ARKPage";
 import { AppTheme } from "app/theme/types";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
 import { Link } from "react-router-dom";
 import ARKFilterBar from "app/components/ARKFilterBar";
@@ -75,7 +75,20 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const [search, setSearch] = useState<string>("");
   const [searchFilter, setSearchFilter] = useState<string>("");
 
-  // fetch collections
+  // fetch collections (to use store instead)
+  const [collections, setCollections] = useState<any[]>([]);
+
+  useEffect(() => {
+    getCollections();
+  }, []);
+
+  const getCollections = async () => {
+    const response = await fetch(
+      "https://api-ark.zilswap.org/nft/collection/list"
+    );
+    const data = await response.json();
+    setCollections(data.result.models);
+  };
 
   return (
     <ARKPage {...rest}>
@@ -129,11 +142,16 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         </Text>
 
         {/* List of collections here */}
-        <Link to="/ark/collections/thebearmarket">
-          <Text marginTop={2} variant="h1">
-            The Bear Market
-          </Text>
-        </Link>
+        {collections.map((collection) => {
+          console.log("collection: ", collection);
+          return (
+            <Link to={`/ark/collections/${collection.id}`}>
+              <Text marginTop={2} variant="h1">
+                {collection.name}
+              </Text>
+            </Link>
+          );
+        })}
       </Container>
     </ARKPage>
   );

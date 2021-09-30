@@ -3,10 +3,12 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Text } from "app/components";
 import ARKPage from "app/layouts/ARKPage";
 import { AppTheme } from "app/theme/types";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NftCard } from "./components";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 import { ArkBanner, SocialLinkGroup, ArkBreadcrumb } from "app/components";
+import { useHistory } from "react-router-dom";
+import { Nft } from "app/store/marketplace/types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -109,14 +111,50 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 ) => {
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
+  const history = useHistory();
+  const collectionId = match.params.collection;
 
-  // fetch nfts in collection
+  // fetch nfts in collection (to use store instead)
+  const [collection, setCollection] = useState<any>({});
+  const [tokens, setTokens] = useState<Nft[]>([]);
+
+  // get collection data
+  useEffect(() => {
+    getCollection();
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    if (Object.keys(collection).length) getTokens();
+    // eslint-disable-next-line
+  }, [collection]);
+
+  const getCollection = async () => {
+    const response = await fetch(
+      "https://api-ark.zilswap.org/nft/collection/list"
+    );
+    const data = await response.json();
+    const collection = data.result.models.find(
+      (collection: any) => collection.id === collectionId
+    );
+    if (collection && Object.keys(collection).length) setCollection(collection);
+    else history.push("/ark/collections");
+  };
+
+  // get tokens
+  const getTokens = async () => {
+    const response = await fetch(
+      `https://api-ark.zilswap.org/nft/token/list?collection=${collectionId}`
+    );
+    const data = await response.json();
+    setTokens(data.result.models);
+  };
 
   const breadcrumbs = [
     { path: "/ark/collections", value: "Collections" },
     {
-      path: `/ark/collections/${match.params.collection}`,
-      value: "The Bear Market",
+      path: `/ark/collections/${collectionId}`,
+      value: collection.name,
     },
   ];
 
@@ -136,14 +174,13 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           <SocialLinkGroup className={classes.socialLinkGroupMobile} />
 
           {/* Collection name and creator  */}
-          <Box display="flex" flexDirection="column" maxWidth={750}>
+          <Box display="flex" flexDirection="column" maxWidth={500}>
             <Text variant="h1" className={classes.collectionName}>
-              The Bear Market
+              {collection.name}
             </Text>
 
-            <Text marginTop={1} className={classes.collectionCreator}>
-              by Switcheo Labs
-            </Text>
+            {/* missing info */}
+            <Text className={classes.collectionCreator}>by Switcheo Labs</Text>
           </Box>
 
           {/* Stats */}
@@ -179,22 +216,14 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           </Grid>
 
           {/* Description */}
-          <Text className={classes.description}>
-            Well we aren't just a bear market. We are The Bear Market. We know a
-            couple of fudders who have been releasing bears into the unknown,
-            and because of you guys we now have a shelter full of lost and
-            lonely bears.As much as we would love to care for all these
-            unbearably cuddly bears, we simply can't keep up! Thus we've
-            launched The Bear Market, in hope that every one of you will adopt
-            one because these koala-ity bears deserve a loving home!
-          </Text>
+          <Text className={classes.description}>{collection.description}</Text>
 
           {/* NFTs in collection */}
           <Grid container spacing={2} className={classes.nftContainer}>
-            {[...Array(10)].map((x, i) => {
+            {tokens.map((token, i) => {
               return (
                 <Grid item key={i} xs={12} md={3} className={classes.gridItem}>
-                  <NftCard />
+                  <NftCard token={token} collectionId={collectionId} />
                 </Grid>
               );
             })}

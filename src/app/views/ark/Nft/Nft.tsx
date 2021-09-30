@@ -155,6 +155,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
+  const tokenId = match.params.id;
 
   // fetch nft data, if none redirect back to collections / show not found view
 
@@ -171,10 +172,10 @@ const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     </Link>,
     <Link
       key="3"
-      to={`/ark/collections/${match.params.collection}/${match.params.id}`}
+      to={`/ark/collections/${match.params.collection}/${tokenId}`}
       className={classes.breadcrumb}
     >
-      #{match.params.id}
+      #{tokenId}
     </Link>,
   ];
 
@@ -209,7 +210,7 @@ const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
             </Typography>
 
             {/* Token id */}
-            <Typography className={classes.id}>#{match.params.id}</Typography>
+            <Typography className={classes.id}>#{tokenId}</Typography>
 
             <Box display="flex" mt={2} gridGap={20}>
               {/* Buy button */}

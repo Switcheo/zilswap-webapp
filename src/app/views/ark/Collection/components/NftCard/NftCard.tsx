@@ -18,8 +18,7 @@ import cls from "classnames";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ReactComponent as VerifiedBadge } from "../../verified-badge.svg";
-
-export interface Props extends CardProps {}
+import { Nft } from "app/store/marketplace/types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -131,8 +130,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
+export interface Props extends CardProps {
+  token: Nft;
+  collectionId: string;
+}
+
 const NftCard: React.FC<Props> = (props: Props) => {
-  const { className, ...rest } = props;
+  const { className, token, collectionId, ...rest } = props;
   const classes = useStyles();
   const [liked, setLiked] = useState<boolean>(false);
 
@@ -151,11 +155,6 @@ const NftCard: React.FC<Props> = (props: Props) => {
           </Box>
           <Box display="flex" alignItems="center">
             <Typography className={classes.likes}>100K</Typography>
-            {/* {liked ? (
-              <LikedIcon className={classes.likeButton} />
-            ) : (
-              <UnlikedIcon className={classes.likeButton} />
-            )} */}
             <IconButton
               onClick={() => setLiked(!liked)}
               className={classes.likeIconButton}
@@ -170,14 +169,14 @@ const NftCard: React.FC<Props> = (props: Props) => {
         </Box>
         <CardActionArea
           component={Link}
-          to="/ark/collections/thebearmarket/8888"
+          to={`/ark/collections/${collectionId}/${token.token_id}`}
         >
           <CardMedia
             className={classes.image}
             component="img"
             alt="NFT image"
             height="308"
-            image="https://thebearmarket.s3.ap-southeast-1.amazonaws.com/assets/082479c2cecf1c0a6ad7da55bbf7643486533457543af13c4ee732a3d2871b4c.png"
+            image={token.asset?.url}
           />
         </CardActionArea>
       </Box>
@@ -190,7 +189,7 @@ const NftCard: React.FC<Props> = (props: Props) => {
           >
             {/* to truncate if too long? */}
             <Typography className={classes.title}>
-              the bear market
+              {token.name}
               <VerifiedBadge className={classes.verifiedBadge} />
             </Typography>
             <Typography className={classes.title}>1M ZIL</Typography>
@@ -201,7 +200,7 @@ const NftCard: React.FC<Props> = (props: Props) => {
             justifyContent="space-between"
             mt={0.5}
           >
-            <Typography className={classes.body}>#8888</Typography>
+            <Typography className={classes.body}>#{token.token_id}</Typography>
             <Typography className={classes.body}>~$100,000</Typography>
           </Box>
         </Box>
