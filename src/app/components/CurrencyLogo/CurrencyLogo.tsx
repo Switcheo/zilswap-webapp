@@ -54,11 +54,12 @@ const CurrencyLogo = (props: any) => {
     return address;
   }, [blockchain, address, bridgeTokens.eth])
 
-  const tokenKey = currency === 'ZIL' ? '' : `.${logoAddress}`
-
   if (network === Network.TestNet) {
     tokenIconUrl = `https://dr297zt0qngbx.cloudfront.net/tokens/testnet/${logoAddress}`
   } else {
+    let tokenKey = currency === 'ZIL' ? '' : `.${logoAddress}`
+    if (logoAddress?.startsWith("0x") && currency !== "ZIL")
+      tokenKey = `ZIL.${toBech32Address(logoAddress)}`;
     tokenIconUrl = `https://meta.viewblock.io/ZIL${tokenKey}/logo${urlSuffix}`
   }
   const fallbackImg = `https://meta.viewblock.io/ZIL.notfound/logo${urlSuffix}`;
