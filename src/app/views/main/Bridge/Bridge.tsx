@@ -530,12 +530,12 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
     setFormState({
       ...formState,
-      transferAmount: balance.shiftedBy(-fromToken.decimals).toString(),
+      transferAmount: balance.decimalPlaces(0).shiftedBy(-fromToken.decimals).toString(),
     })
 
     dispatch(actions.Bridge.updateForm({
       forNetwork: network,
-      transferAmount: balance.shiftedBy(-fromToken.decimals),
+      transferAmount: balance.decimalPlaces(0).shiftedBy(-fromToken.decimals),
     }))
   }
 
