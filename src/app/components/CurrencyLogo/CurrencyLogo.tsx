@@ -39,14 +39,13 @@ const CurrencyLogo = (props: any) => {
   const network = useNetwork();
 
   const urlSuffix = theme.palette.type === "dark" ? '?t=dark' : '';
-  const tokenKey = currency === 'ZIL' ? '' : `.${address}`
   var tokenIconUrl: string
 
   const logoAddress = useMemo(() => {
-    if (typeof blockchain !== "undefined" && blockchain === Blockchain.Ethereum) {
+    if (blockchain === Blockchain.Ethereum) {
       const tokenHash = address.replace(/^0x/i, "");
       const bridgeToken = bridgeTokens.eth.find((bridgeToken) => bridgeToken.tokenAddress === tokenHash)
-      
+
       if (bridgeToken) {
         return toBech32Address(bridgeToken.toTokenAddress);
       }
@@ -54,6 +53,8 @@ const CurrencyLogo = (props: any) => {
 
     return address;
   }, [blockchain, address, bridgeTokens.eth])
+
+  const tokenKey = currency === 'ZIL' ? '' : `.${logoAddress}`
 
   if (network === Network.TestNet) {
     tokenIconUrl = `https://dr297zt0qngbx.cloudfront.net/tokens/testnet/${logoAddress}`
@@ -64,8 +65,8 @@ const CurrencyLogo = (props: any) => {
 
   return (
     <div className={cls(classes.root, className)}>
-      <img 
-        className={classes.svg} 
+      <img
+        className={classes.svg}
         src={error ? fallbackImg : tokenIconUrl}
         alt={`${currency} Token Logo`}
         loading="lazy"
