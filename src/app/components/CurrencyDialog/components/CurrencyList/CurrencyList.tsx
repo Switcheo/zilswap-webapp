@@ -54,6 +54,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "10px",
     textDecoration: "underline",
   },
+  tokenName: {
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    maxWidth: 125,
+  },
 }));
 
 const CurrencyList: React.FC<CurrencyListProps> = (props) => {
@@ -124,7 +130,7 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
 
               <Box display="flex" flexDirection="row">
                 {!!token.name && (
-                  <Typography color="textSecondary" variant="body2">{token.name}</Typography>
+                  <Typography className={classes.tokenName} color="textSecondary" variant="body2">{token.name}</Typography>
                 )}
                 {!token.registered && (
                   <Typography className={classes.addRemoveFont} onClick={(e) => onAddRemove(e, token)}>
