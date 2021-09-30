@@ -24,6 +24,7 @@ import { Blockchain } from "tradehub-api-js";
 import { SimpleMap } from "app/utils";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { getConnectedBoltX } from "core/utilities/boltx";
+import { StatsActionTypes } from "app/store/stats/actions";
 
 const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
   if (!wallet) return null;
@@ -115,7 +116,7 @@ const web3Observer = (wallet: ConnectedBridgeWallet) => {
   return eventChannel<ConnectedBridgeWallet>(emitter => {
     const provider = wallet.provider
     provider.on("accountsChanged", (accounts: string[]) => {
-      if(accounts.length > 0) {
+      if (accounts.length > 0) {
         emitter({
           provider: provider,
           address: accounts[0],
@@ -234,6 +235,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     const { observingTxs } = getTransactions(yield select());
     const { network: prevNetwork } = getBlockchain(yield select());
 
+    logger('init chain zilswap sdk')
     sdk = new Zilswap(network, providerOrKey ?? undefined, { rpcEndpoint: RPCEndpoints[network] });
     logger('zilswap sdk initialized')
 
@@ -247,6 +249,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     }
     ZilswapConnector.setSDK(sdk)
 
+    logger('init chain load tokens')
     // load tokens
     const appState: AppState = yield call([sdk, sdk.getAppState]);
     const zilswapTokens = appState.tokens
@@ -294,13 +297,32 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
       addMapping(result, sourceToken, wrappedToken, sourceToken.blockchain)
     })
 
+    logger('init chain set tokens')
     yield put(actions.Bridge.setTokens(result))
     yield put(actions.Token.init({ tokens }));
     yield put(actions.Wallet.update({ wallet }))
     if (network !== prevNetwork) yield put(actions.Blockchain.setNetwork(network))
 
-    // preventing teardown due to zap api error
+    yield put(actions.Stats.reloadPoolTx());
+
+    logger('init chain refetch state')
+    yield put(actions.Token.refetchState());
+    yield put(actions.Blockchain.initialized());
+  } catch (err) {
+    console.error(err)
+    sdk = yield call(teardown, sdk)
+  } finally {
+    yield put(actions.Layout.removeBackgroundLoading('INIT_CHAIN'))
+  }
+  return sdk
+}
+
+function* watchReloadPoolTx() {
+  while (true) {
     try {
+      yield take(StatsActionTypes.RELOAD_POOL_TX)
+      const { wallet } = getWallet(yield select());
+      const { network } = getBlockchain(yield select());
       if (wallet) {
         const result: PoolTransactionResult = yield call(ZAPStats.getPoolTransactions, {
           network: network,
@@ -323,16 +345,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
       // set to empty transactions when zap api failed
       yield put(actions.Transaction.init({ transactions: [] }))
     }
-
-    yield put(actions.Token.refetchState());
-    yield put(actions.Blockchain.initialized());
-  } catch (err) {
-    console.error(err)
-    sdk = yield call(teardown, sdk)
-  } finally {
-    yield put(actions.Layout.removeBackgroundLoading('INIT_CHAIN'))
   }
-  return sdk
 }
 
 function* teardown(sdk: Zilswap | null) {
@@ -435,13 +448,13 @@ function* watchWeb3() {
         chan = (yield call(web3Observer, action.payload.wallet)) as EventChannel<ConnectedBridgeWallet>;
         break
       }
-    } catch(e) {
+    } catch (e) {
       console.warn('Watch web3 failed, will automatically retry to reconnect. Error:')
       console.warn(e)
     }
   }
   try {
-    while(true) {
+    while (true) {
       const newWallet = (yield take(chan)) as ConnectedBridgeWallet
       yield put(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: newWallet }))
     }
@@ -455,6 +468,7 @@ function* watchWeb3() {
 export default function* blockchainSaga() {
   logger("init blockchain saga");
   yield fork(watchInitialize);
+  yield fork(watchReloadPoolTx);
   yield fork(watchZilPay);
   yield fork(watchBoltX);
   yield fork(watchWeb3)
