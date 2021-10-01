@@ -153,7 +153,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const breadcrumbs = [
     { path: "/ark/collections", value: "Collections" },
     {
-      path: `/ark/collections/${collection.id}`,
+      path: `/ark/collections/${collection.address}`,
       value: collection.name,
     },
   ];
@@ -223,7 +223,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             {tokens.map((token, i) => {
               return (
                 <Grid item key={i} xs={12} md={3} className={classes.gridItem}>
-                  <NftCard token={token} collectionAddress={collection.id} />
+                  <NftCard token={token} collectionAddress={collection.address} />
                 </Grid>
               );
             })}
