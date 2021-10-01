@@ -1,4 +1,4 @@
-import { FormControlLabel, FormGroup, Switch } from "@material-ui/core";
+import { FormControlLabel, FormGroup, Switch, IconButton } from "@material-ui/core";
 import DarkIcon from "@material-ui/icons/Brightness2Rounded";
 import LightIcon from "@material-ui/icons/Brightness4Rounded";
 import { makeStyles } from "@material-ui/styles";
@@ -12,6 +12,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { ThemeSwitchProps } from "./types";
 
 const THEME_TOGGLE_SELECTED = "light";
+
+interface ToggleSwitchProps extends ThemeSwitchProps {
+  singleButton?: boolean;
+}
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: (props: ThemeSwitchProps) => ({
@@ -47,8 +51,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const ThemeSwitch: React.FC<ThemeSwitchProps> = (props: ThemeSwitchProps) => {
-  const { className, forceDark, ...rest } = props;
+const ThemeSwitch: React.FC<ToggleSwitchProps> = (props: ToggleSwitchProps) => {
+  const { className, forceDark, singleButton, ...rest } = props;
   const classes = useStyles(props);
 
   const themeType = useSelector<RootState, string>(
@@ -60,6 +64,16 @@ const ThemeSwitch: React.FC<ThemeSwitchProps> = (props: ThemeSwitchProps) => {
     const theme = themeType === "light" ? "dark" : "light";
     dispatch(actions.Preference.update({ theme }));
   };
+
+  if (singleButton) return (
+    <IconButton onClick={() => onToggleTheme()}>
+      {themeType === "dark"
+        ?
+        <LightIcon className={clsx(classes.label, classes.icon, className)} />
+        :
+        <DarkIcon className={clsx(classes.label, classes.icon, className)} />}
+    </IconButton>
+  )
 
   return (
     <FormGroup row>

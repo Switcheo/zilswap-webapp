@@ -12,6 +12,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { Network } from "zilswap-sdk/lib/constants";
 import { TypographyOptions } from "@material-ui/core/styles/createTypography";
 
+export interface NetworkToggleProps extends React.HTMLAttributes<HTMLFormElement> {
+  compact?: boolean;
+};
+
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     display: "flex",
@@ -57,9 +61,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       borderRadius: "12px"
     },
   },
+  compactButton: {
+    fontSize: "10px",
+    padding: "0px 2px",
+    minWidth: 50,
+  }
 }));
-const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
-  const { children, className, ...rest } = props;
+const NetworkToggle: React.FC<NetworkToggleProps> = (props: NetworkToggleProps) => {
+  const { children, className, compact, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null);
@@ -99,7 +108,7 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
           message: "Please change network using your ZilPay wallet.",
         }));
         return
-      } else if (wallet?.type === WalletConnectType.BoltX)  {
+      } else if (wallet?.type === WalletConnectType.BoltX) {
         dispatch(actions.Layout.updateNotification({
           type: "",
           message: "Please change network using your BoltX wallet.",
@@ -113,9 +122,9 @@ const NetworkToggle: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
   const isLoading = loadingNetworkChange || loadingConnectWallet;
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <Button className={classes.button} onClick={onOpenMenu}>
-        { !isLoading
-          ? <>{network.toUpperCase()}</>
+      <Button className={cls(classes.button, compact && classes.compactButton)} onClick={onOpenMenu}>
+        {!isLoading
+          ? <>{compact ? network.toUpperCase().replace("NET", "") : network.toUpperCase()}</>
           : <CircularProgress size={16} />
         }
       </Button>
