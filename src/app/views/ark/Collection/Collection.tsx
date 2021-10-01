@@ -9,6 +9,7 @@ import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 import { ArkBanner, SocialLinkGroup, ArkBreadcrumb } from "app/components";
 import { useHistory } from "react-router-dom";
 import { Nft } from "app/store/marketplace/types";
+import { toBech32Address } from "@zilliqa-js/crypto";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -135,7 +136,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     );
     const data = await response.json();
     const collection = data.result.models.find(
-      (collection: any) => collection.address === collectionAddress
+      (collection: any) => toBech32Address(collection.address) === collectionAddress
     );
     if (collection && Object.keys(collection).length) setCollection(collection);
     else history.push("/ark/collections");
@@ -153,7 +154,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const breadcrumbs = [
     { path: "/ark/collections", value: "Collections" },
     {
-      path: `/ark/collections/${collection.address}`,
+      path: `/ark/collections/${collectionAddress}`,
       value: collection.name,
     },
   ];
@@ -223,7 +224,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             {tokens.map((token, i) => {
               return (
                 <Grid item key={i} xs={12} md={3} className={classes.gridItem}>
-                  <NftCard token={token} collectionAddress={collection.address} />
+                  <NftCard token={token} collectionAddress={collectionAddress} />
                 </Grid>
               );
             })}
