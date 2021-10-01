@@ -19,6 +19,7 @@ const useStyles = makeStyles((theme: AppTheme) =>({
     borderRadius: "12px 12px",
     display: "flex",
     alignItems: "center",
+    gridColumn: "span 2 / span 2"
   },
   inactive: {
     borderRadius: "12px"
