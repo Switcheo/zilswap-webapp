@@ -16,6 +16,7 @@ import { AppTheme } from "app/theme/types";
 import React, { useEffect, useState } from "react";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
 import { Link } from "react-router-dom";
+import { toBech32Address } from "@zilliqa-js/crypto";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -143,7 +144,7 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         {collections.map((collection) => {
           console.log("collection: ", collection);
           return (
-            <Link to={`/ark/collections/${collection.id}`}>
+            <Link to={`/ark/collections/${toBech32Address(collection.address)}`}>
               <Text marginTop={2} variant="h1">
                 {collection.name}
               </Text>

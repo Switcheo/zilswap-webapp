@@ -42,8 +42,8 @@ const ArkBreadcrumb: React.FC<Props> = (props: Props) => {
           <path
             d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
             color="inherit"
-            // strokeWidth={1.5}
-            // stroke="rgba(107, 225, 255, 0.2)"
+          // strokeWidth={1.5}
+          // stroke="rgba(107, 225, 255, 0.2)"
           />
         </SvgIcon>
       }
