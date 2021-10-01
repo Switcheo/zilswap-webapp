@@ -132,11 +132,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 export interface Props extends CardProps {
   token: Nft;
-  collectionId: string;
+  collectionAddress: string;
 }
 
 const NftCard: React.FC<Props> = (props: Props) => {
-  const { className, token, collectionId, ...rest } = props;
+  const { className, token, collectionAddress, ...rest } = props;
   const classes = useStyles();
   const [liked, setLiked] = useState<boolean>(false);
 
@@ -169,7 +169,7 @@ const NftCard: React.FC<Props> = (props: Props) => {
         </Box>
         <CardActionArea
           component={Link}
-          to={`/ark/collections/${collectionId}/${token.token_id}`}
+          to={`/ark/collections/${collectionAddress}/${token.token_id}`}
         >
           <CardMedia
             className={classes.image}

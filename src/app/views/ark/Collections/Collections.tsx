@@ -145,7 +145,7 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         {collections.map((collection) => {
           console.log("collection: ", collection);
           return (
-            <Link to={`/ark/collections/${collection.id}`}>
+            <Link to={`/ark/collections/${collection.address}`}>
               <Text marginTop={2} variant="h1">
                 {collection.name}
               </Text>
