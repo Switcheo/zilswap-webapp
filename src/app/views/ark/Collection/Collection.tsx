@@ -10,6 +10,8 @@ import { ArkBanner, SocialLinkGroup, ArkBreadcrumb } from "app/components";
 import { useHistory } from "react-router-dom";
 import { Nft } from "app/store/marketplace/types";
 import { toBech32Address } from "@zilliqa-js/crypto";
+import { useMemo } from "react";
+import { fromBech32Address } from "core/zilswap";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -113,34 +115,53 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
-  const collectionAddress = match.params.collection;
 
   // fetch nfts in collection (to use store instead)
   const [collection, setCollection] = useState<any>({});
   const [tokens, setTokens] = useState<Nft[]>([]);
 
+  const { bech32Address, hexAddress } = useMemo(() => {
+    if (!match.params.collection) {
+      history.push("/ark/collections");
+      console.log("no collection param")
+      return {}
+    }
+    let collectionAddress = match.params.collection;
+    if (collectionAddress?.startsWith("zil1")) {
+      return {
+        bech32Address: collection,
+        hexAddress: fromBech32Address(collectionAddress)?.toLowerCase(),
+      }
+    } else {
+      history.push(`/ark/collections/${toBech32Address(collectionAddress)}`);
+      return {}
+    }
+    // eslint-disable-next-line
+  }, [match.params.collection]);
+
   // get collection data
   useEffect(() => {
+    if (!hexAddress) return;
+
+    const getCollection = async () => {
+      const response = await fetch("https://api-ark.zilswap.org/nft/collection/list");
+      const data = await response.json();
+      const collection = data.result.models.find((collection: any) => collection.address === hexAddress);
+      if (collection)
+        setCollection(collection);
+      else
+        history.push("/ark/collections");
+    };
+
     getCollection();
     // eslint-disable-next-line
-  }, []);
+  }, [hexAddress]);
 
   useEffect(() => {
     if (Object.keys(collection).length) getTokens();
     // eslint-disable-next-line
   }, [collection]);
 
-  const getCollection = async () => {
-    const response = await fetch(
-      "https://api-ark.zilswap.org/nft/collection/list"
-    );
-    const data = await response.json();
-    const collection = data.result.models.find(
-      (collection: any) => toBech32Address(collection.address) === collectionAddress
-    );
-    if (collection && Object.keys(collection).length) setCollection(collection);
-    else history.push("/ark/collections");
-  };
 
   // get tokens
   const getTokens = async () => {
@@ -154,7 +175,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const breadcrumbs = [
     { path: "/ark/collections", value: "Collections" },
     {
-      path: `/ark/collections/${collectionAddress}`,
+      path: `/ark/collections/${bech32Address}`,
       value: collection.name,
     },
   ];
@@ -224,7 +245,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             {tokens.map((token, i) => {
               return (
                 <Grid item key={i} xs={12} md={3} className={classes.gridItem}>
-                  <NftCard token={token} collectionAddress={collectionAddress} />
+                  <NftCard token={token} collectionAddress={collection?.address} />
                 </Grid>
               );
             })}
