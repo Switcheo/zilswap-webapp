@@ -31,7 +31,7 @@ const BaseTabs = styled((props) => (
     {...props}
     TabIndicatorProps={{ children: <span className="MuiTabs-indicatorSpan" /> }}
   />
-))({
+))(({ theme }) => ({
   alignItems: "center",
   alignContent: "center",
   '& .MuiTabs-indicator': {
@@ -45,8 +45,11 @@ const BaseTabs = styled((props) => (
   },
   '& .MuiTabs-flexContainer': {
     justifyContent: "center",
+    [theme.breakpoints.down("xs")]: {
+      display: "block",
+    }
   },
-});
+}));
 
 const BaseTab = styled((props) => <Tab disableRipple {...props} />)(({ theme }) => ({
   textTransform: 'none',
