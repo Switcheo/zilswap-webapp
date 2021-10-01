@@ -95,7 +95,8 @@ const useStyles = makeStyles((theme: AppTheme) =>({
     fontWeight: 'bolder',
     fontFamily: 'Avenir Next',
     color: theme.palette.type === "dark" ? "white" : "",
-    textTransform: "uppercase"
+    textTransform: "uppercase",
+    textAlign: "left"
   },
   filterLabel: {
     fontSize: 12,
@@ -110,13 +111,18 @@ const useStyles = makeStyles((theme: AppTheme) =>({
   filterValueSubText: {
     fontSize: 12,
     opacity: 0.5,
-    marginTop: 2
+    marginTop: 2,
+    textAlign: "left"
   },
   filterOption: {
     paddingTop: 6,
     paddingBottom: 6,
     display: "flex",
-    alignItems: "flex-start"
+    alignItems: "flex-start",
+    background: "none",
+    border: "none",
+    outline: "none",
+    cursor: "pointer"
   },
   filterOptionDetail: {
     fontWeight: 'normal'
@@ -136,7 +142,9 @@ const useStyles = makeStyles((theme: AppTheme) =>({
     height: 24,
     borderRadius: 12,
     backgroundColor: "gray",
-    marginRight: 10
+    marginRight: 10,
+    flexGrow: 0,
+    flexShrink: 0
   },
   attributeLabel: {
     color: theme.palette.type === "dark" ? "white" : "",
@@ -236,7 +244,7 @@ const AttributesFilter = (props: Props) => {
               </Box>
 
               {traits.map(trait => (
-                <Box className={classes.filterOption}>
+                <button className={classes.filterOption}>
                   <Radio
                     className={classes.radioButton}
                     checkedIcon={<CheckedIcon />}
@@ -247,7 +255,7 @@ const AttributesFilter = (props: Props) => {
                     <Text className={classes.filterCategoryLabel}>{trait.trait}</Text>
                     <Text className={classes.filterValueSubText}>2 of 10 selected</Text>
                   </Box>
-                </Box>
+                </button>
               ))}
 
             </Box>
@@ -284,7 +292,7 @@ const AttributesFilter = (props: Props) => {
                         />
                         <Box className={classes.attributeIcon}></Box>
                         <Text className={classes.attributeLabel} flexGrow="1">{value}</Text>
-                        <Text className={classes.attributeMeta}>2.5K <Text className={classes.attributeMetaDetail}>10%</Text></Text>
+                        <Text className={classes.attributeMeta}>2.5K <Text className={classes.attributeMetaDetail}>(10%)</Text></Text>
                         <Text className={classes.attributeMeta}>{trait.values[value]} <Text className={classes.attributeMetaDetail}>(5%)</Text></Text>
                       </Box>
                     ))}
