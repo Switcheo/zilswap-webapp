@@ -220,7 +220,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           <Text className={classes.description}>{collection.description}</Text>
 
           {/* Filters */}
-          <ARKFilterBar />
+          <ARKFilterBar collectionAddress={collection.address} />
 
           {/* NFTs in collection */}
           <Grid container spacing={2} className={classes.nftContainer}>

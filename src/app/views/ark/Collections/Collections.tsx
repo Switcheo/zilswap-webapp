@@ -16,7 +16,6 @@ import { AppTheme } from "app/theme/types";
 import React, { useEffect, useState } from "react";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
 import { Link } from "react-router-dom";
-import ARKFilterBar from "app/components/ARKFilterBar";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -93,7 +92,6 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   return (
     <ARKPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
-        <ARKFilterBar />
 
         <OutlinedInput
           placeholder="What are you looking for..."

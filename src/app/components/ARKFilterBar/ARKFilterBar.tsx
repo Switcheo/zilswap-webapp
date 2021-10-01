@@ -20,8 +20,14 @@ const useStyles = makeStyles((theme: AppTheme) =>({
   },
 }))
 
-const ARKFilterBar = () => {
+interface Props {
+  collectionAddress: any
+}
+
+const ARKFilterBar = (props: Props) => {
   const classes = useStyles();
+
+  // https://api-ark.zilswap.org/nft/collection/1ea41c92-ef33-4f4b-9578-a4b86934e135/traits
 
   return (
     <Box className={classes.root} marginTop={2}>
@@ -39,7 +45,7 @@ const ARKFilterBar = () => {
           ]}
         />
 
-        <AttributesFilter />
+        <AttributesFilter collectionAddress={props.collectionAddress} />
       </Box>
       <SortFilter />
     </Box>
