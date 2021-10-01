@@ -12,6 +12,7 @@ import { AppTheme } from "app/theme/types";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import { toHumanNumber } from "app/utils/strings/strings";
 import { useValueCalculators, useNetwork } from "app/utils";
+import { EMPTY_USD_VALUE } from "app/store/token/reducer";
 
 interface Props extends BoxProps {
   token: TokenInfo;
@@ -61,6 +62,8 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
   const depositedValue = poolShare.times(poolValue);
 
   const rawPotentialRewards = potentialRewardsByPool[token.address] ?? [];
+  const usdValues = tokenState.values[token.address] ?? EMPTY_USD_VALUE;
+
   const potentialRewards = rawPotentialRewards.map(item => {
     const rewardToken = tokenState.tokens[item.tokenAddress];
     return {
@@ -70,7 +73,9 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
     }
   })
 
-  const roiPerDay = potentialRewards.reduce((acc, item) => acc.plus(item.value.div(700)), BIG_ZERO) // XXX: assumes a weekly epoch of 7 days
+  const roiPerSecond = usdValues.rewardsPerSecond.dividedBy(usdValues.poolLiquidity);
+  const secondsPerDay = 24 * 3600
+  const roiPerDay = roiPerSecond.times(secondsPerDay).shiftedBy(2).decimalPlaces(2);
   const roiLabel = roiPerDay.isZero() ? "-" : `${toHumanNumber(roiPerDay, 2)}%`
 
   const onGotoAdd = () => {
@@ -119,17 +124,17 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
           {
             potentialRewards.map(reward => (
               [
-              <KeyValueDisplay marginBottom={1.5} kkey="Your Potential Rewards" ValueComponent="span">
-                <Text color="textPrimary">
-                  {toHumanNumber(reward.amount.shiftedBy(-reward.rewardToken.decimals))} {reward.rewardToken.symbol}
-                </Text>
-                <Text variant="body2" className={classes.textGreen} align="right">
-                  ≈ ${toHumanNumber(reward.value, 2)}
-                </Text>
-              </KeyValueDisplay>,
-              <KeyValueDisplay marginBottom={1.5} kkey="ROI" ValueComponent="span">
-                <Text color="textPrimary">{roiLabel} / daily</Text>
-              </KeyValueDisplay>
+                <KeyValueDisplay marginBottom={1.5} kkey="Your Potential Rewards" ValueComponent="span">
+                  <Text color="textPrimary">
+                    {toHumanNumber(reward.amount.shiftedBy(-reward.rewardToken.decimals))} {reward.rewardToken.symbol}
+                  </Text>
+                  <Text variant="body2" className={classes.textGreen} align="right">
+                    ≈ ${toHumanNumber(reward.value, 2)}
+                  </Text>
+                </KeyValueDisplay>,
+                <KeyValueDisplay marginBottom={1.5} kkey="ROI" ValueComponent="span">
+                  <Text color="textPrimary">{roiLabel} / daily</Text>
+                </KeyValueDisplay>
               ]
             ))
           }
