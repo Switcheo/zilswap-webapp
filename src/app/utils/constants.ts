@@ -109,3 +109,9 @@ export class PollIntervals {
   public static BridgeWithdrawWatcher = 10000;
   public static BridgeTokenFee = 60000;
 }
+
+export const ZILBRIDGE_WHITELISTED_TOKENS: { [key in string]: string } = {
+  "zUSDT": "zil1sxx29cshups269ahh5qjffyr58mxjv9ft78jqy",
+  "zWBTC": "zil1wha8mzaxhm22dpm5cav2tepuldnr8kwkvmqtjq",
+  "zETH": "zil19j33tapjje2xzng7svslnsjjjgge930jx0w09v",
+}

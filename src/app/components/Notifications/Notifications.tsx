@@ -7,6 +7,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import UserPoolMessage from "../UserPoolMessage";
+import { ZILBRIDGE_WHITELISTED_TOKENS } from "app/utils/constants";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -47,6 +48,7 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
     userToken = outToken;
 
   if (!userToken) return null;
+  if (ZILBRIDGE_WHITELISTED_TOKENS[userToken!.symbol] === userToken.address) return null
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
@@ -56,7 +58,7 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
           All tokens (including ZIL) deposited to the pool may be lost if the ZRC-2 token contract
           is malicious or otherwise exploited.
           Please verify the legitimacy of this token yourself before contributing liquidity.
-          </UserPoolMessage>
+        </UserPoolMessage>
         :
         <UserPoolMessage token={userToken}>
           ZRC-2 tokens issued by other users are not screened or audited by Zilswap.
