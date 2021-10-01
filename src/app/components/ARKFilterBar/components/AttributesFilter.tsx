@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme: AppTheme) =>({
     borderRadius: "12px"
   },
   active: {
-    borderColor: "#26D4FF",
+    borderColor: theme.palette.primary.dark,
     borderStyle: "solid",
     borderWidth: 1,
   },

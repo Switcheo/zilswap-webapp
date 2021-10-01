@@ -9,6 +9,7 @@ import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 import { ArkBanner, SocialLinkGroup, ArkBreadcrumb } from "app/components";
 import { useHistory } from "react-router-dom";
 import { Nft } from "app/store/marketplace/types";
+import ARKFilterBar from "app/components/ARKFilterBar";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -217,6 +218,9 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
           {/* Description */}
           <Text className={classes.description}>{collection.description}</Text>
+
+          {/* Filters */}
+          <ARKFilterBar />
 
           {/* NFTs in collection */}
           <Grid container spacing={2} className={classes.nftContainer}>

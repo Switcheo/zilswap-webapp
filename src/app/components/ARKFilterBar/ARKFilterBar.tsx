@@ -8,7 +8,9 @@ import SearchFilter from './components/SearchFilter';
 
 const useStyles = makeStyles((theme: AppTheme) =>({
   root: {
-    display: "flex"
+    display: "flex",
+    width: "100%",
+    marginTop: 32
   },
   grid: {
     flexGrow: 1,
