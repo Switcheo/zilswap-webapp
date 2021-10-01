@@ -1,10 +1,11 @@
 import { DialogContent, makeStyles, Typography } from "@material-ui/core";
 import { DialogModal, FancyButton } from "app/components";
 import { actions } from "app/store";
-import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
+import { RootState, TokenInfo, WalletState } from "app/store/types";
 import { useAsyncTask, useNetwork } from "app/utils";
 import { BIG_ZERO, PlaceholderStrings } from "app/utils/constants";
 import cls from "classnames";
+import { ZilswapConnector } from "core/zilswap";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
@@ -44,17 +45,19 @@ const CreatePoolDialog = (props: any) => {
   const [tokenPreview, setTokenPreview] = useState<TokenPreview | undefined>();
   const [runAsyncTask, loading, error] = useAsyncTask("createPool");
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
   const onCreatePool = () => {
     if (loading) return;
 
     runAsyncTask(async () => {
+      const zilswapSdk = ZilswapConnector.getSDK();
+      if (!zilswapSdk)
+        throw new Error("zilswap not initialized");
       if (!walletState.wallet)
         throw new Error("Connect wallet to create pool");
       if (!tokenPreview) throw new Error("Address not valid");
       const { address } = tokenPreview;
-      if (tokenState.tokens[address])
+      if (zilswapSdk.getAppState().tokens[address])
         throw new Error(`Pool for ${tokenPreview.symbol} already exists`);
 
       const token: TokenInfo = {

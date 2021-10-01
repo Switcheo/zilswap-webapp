@@ -1,26 +1,26 @@
 import { Box, Button, CircularProgress, Grid, makeStyles, OutlinedInput } from "@material-ui/core";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
-import RefreshIcon from '@material-ui/icons/RefreshRounded';
 import CheckCircleIcon from "@material-ui/icons/CheckCircleOutlineRounded";
+import RefreshIcon from '@material-ui/icons/RefreshRounded';
 import { ConnectETHPopper, Text } from 'app/components';
 import { actions } from "app/store";
 import { BridgeableTokenMapping, BridgeState, BridgeTx } from "app/store/bridge/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useAsyncTask } from "app/utils";
+import { hexToRGBA, netZilToTradeHub, useAsyncTask, useNetwork } from "app/utils";
 import { ConnectButton } from "app/views/main/Bridge/components";
 import BigNumber from 'bignumber.js';
+import cls from "classnames";
 import { providerOptions } from "core/ethereum";
 import { ConnectedWallet } from "core/wallet";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import dayjs from "dayjs";
 import { ethers } from "ethers";
 import React, { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
-import { useHistory } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router";
 import { Blockchain, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
-import cls from "classnames";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -129,6 +129,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const ResumeTransferBox = (props: any) => {
     const classes = useStyles();
     const dispatch = useDispatch();
+    const network = useNetwork();
     const history = useHistory();
     const [showPhrase, setShowPhrase] = useState<boolean>(false);
     const [mnemonic, setMnemonic] = useState<Array<string>>(Array(12).fill(""));
@@ -138,8 +139,6 @@ const ResumeTransferBox = (props: any) => {
     const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]); // eth wallet
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
     const pendingBridgeTx = bridgeState.activeBridgeTx;
-
-    const network = TradeHubSDK.Network.DevNet;
 
     const [depositTransfer, setDepositTransfer] = useState<RestModels.Transfer | null>(null);
     const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
@@ -154,7 +153,8 @@ const ResumeTransferBox = (props: any) => {
     }, [mnemonic])
 
     useEffect(() => {
-        const sdk = new TradeHubSDK({ network });
+        const tradehubNetwork = netZilToTradeHub(network);
+        const sdk = new TradeHubSDK({ network: tradehubNetwork });
         setSdk(sdk);
     }, [network])
 
@@ -212,6 +212,7 @@ const ResumeTransferBox = (props: any) => {
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
             const mnemonicString = mnemonic.join(" ");
+            const network = sdk.network;
             const swthAddress = SWTHAddress.generateAddress(mnemonicString, undefined, { network });
 
             // find deposit confirmation tx
@@ -247,6 +248,7 @@ const ResumeTransferBox = (props: any) => {
                     withdrawFee: new BigNumber(depositTransfer.fee_amount), // need to check
                     sourceTxHash: depositTransfer.transaction_hash,
                     depositDispatchedAt: dayjs(),
+                    network,
                 }
 
                 if (pendingBridgeTx) {

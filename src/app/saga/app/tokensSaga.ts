@@ -20,35 +20,44 @@ import { ETHBalances } from "core/ethereum";
 const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string | null) => {
   const updates: SimpleMap<TokenInfo> = {};
 
-  if (!address || Object.values(tokens).length < 1) {
-    return updates
-  }
+  try {
+    if (!address || Object.values(tokens).length < 1) {
+      return updates
+    }
 
-  logger("tokens saga", "retrieving eth token balances/allowances");
+    logger("tokens saga", "retrieving eth token balances/allowances");
 
-  // get eth balance
-  const balance = await ETHBalances.getETHBalance({ network, walletAddress: address })
-  updates[ETH_ADDRESS] = {
-    ...tokens[ETH_ADDRESS],
-    address: ETH_ADDRESS,
-    initialized: true,
-    name: "Ethereum",
-    symbol: "ETH",
-    decimals: 18,
-    blockchain: Blockchain.Ethereum,
-    balance,
-  }
-
-  // get rest
-  const tokenAddresses = Object.values(tokens).filter(t => t.blockchain === Blockchain.Ethereum && t.address !== ETH_ADDRESS).map(t => t.address)
-  const balances = await ETHBalances.getTokenBalances({ network, tokenAddresses, walletAddress: address })
-  Object.entries(balances).forEach(([address, balance]) => {
-    updates[address] = {
-      ...tokens[address],
+    // get eth balance
+    const balance = await ETHBalances.getETHBalance({ network, walletAddress: address })
+    updates[ETH_ADDRESS] = {
+      ...tokens[ETH_ADDRESS],
+      address: ETH_ADDRESS,
       initialized: true,
+      name: "Ethereum",
+      symbol: "ETH",
+      decimals: 18,
+      blockchain: Blockchain.Ethereum,
       balance,
     }
-  })
+
+    // get rest
+    const tokenAddresses = Object.values(tokens).filter(t => t.blockchain === Blockchain.Ethereum && t.address !== ETH_ADDRESS).map(t => t.address)
+    if (!tokenAddresses.length)
+      return updates;
+
+    const balances = await ETHBalances.getTokenBalances({ network, tokenAddresses, walletAddress: address })
+    Object.entries(balances).forEach(([address, balance]) => {
+      updates[address] = {
+        ...tokens[address],
+        initialized: true,
+        balance,
+      }
+    })
+  } catch (error) {
+    console.error("failed to read eth balances")
+    console.error(error);
+    return updates;
+  }
 
   return updates
 }
@@ -56,79 +65,85 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
 const fetchZilTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string | null) => {
   const updates: SimpleMap<TokenInfo> = {};
 
-  if (!address || Object.values(tokens).length < 1) {
-    return updates
-  }
+  try {
 
-  logger("tokens saga", "retrieving zil token balances/allowances");
-
-  const batchRequests: any[] = [];
-  for (const t in tokens) {
-    const token = tokens[t];
-    if (token.blockchain !== Blockchain.Zilliqa) {
-      continue
+    if (!address || Object.values(tokens).length < 1) {
+      return updates
     }
 
-    if (token.isZil) {
-      batchRequests.push(balanceBatchRequest(token, address.replace("0x", "")))
-    } else {
-      batchRequests.push(tokenBalanceBatchRequest(token, address))
-      batchRequests.push(tokenAllowancesBatchRequest(token, address))
-    }
-  }
+    logger("tokens saga", "retrieving zil token balances/allowances");
 
-  const batchResults = await sendBatchRequest(network, batchRequests)
-
-  batchResults.forEach(r => {
-    const { request, result } = r;
-    const { token } = request;
-
-    if (!updates[token.address]) {
-      updates[token.address] = { ...token }
-    }
-
-    switch (request.type) {
-      case BatchRequestType.Balance: {
-        let balance: BigNumber | undefined = strings.bnOrZero(result.balance);
-
-        const tokenInfo: Partial<TokenInfo> = {
-          ...updates[token.address],
-          initialized: true,
-          name: "Zilliqa",
-          symbol: "ZIL",
-          balance,
-        };
-
-        updates[token.address] = { ...updates[token.address], ...tokenInfo };
-        break;
+    const batchRequests: any[] = [];
+    for (const t in tokens) {
+      const token = tokens[t];
+      if (token.blockchain !== Blockchain.Zilliqa) {
+        continue
       }
 
-      case BatchRequestType.TokenBalance: {
-        const tokenDetails = ZilswapConnector.getToken(token.address);
-        const tokenPool = ZilswapConnector.getPool(token.address);
+      if (token.isZil) {
+        batchRequests.push(balanceBatchRequest(token, address.replace("0x", "")))
+      } else {
+        batchRequests.push(tokenBalanceBatchRequest(token, address))
+        batchRequests.push(tokenAllowancesBatchRequest(token, address))
+      }
+    }
 
-        const tokenInfo: Partial<TokenInfo> = {
-          initialized: true,
-          symbol: tokenDetails?.symbol ?? token.symbol,
-          pool: tokenPool ?? undefined,
-          balance: result ? strings.bnOrZero(result.balances[address]) : token.balance,
-        };
+    const batchResults = await sendBatchRequest(network, batchRequests)
 
-        updates[token.address] = { ...updates[token.address], ...tokenInfo };
-        break;
+    batchResults.forEach(r => {
+      const { request, result } = r;
+      const { token } = request;
+
+      if (!updates[token.address]) {
+        updates[token.address] = { ...token }
       }
 
-      case BatchRequestType.TokenAllowance: {
-        const allowances = result?.allowances[address]
-        if (allowances) {
-          updates[token.address] = { ...updates[token.address], allowances };
+      switch (request.type) {
+        case BatchRequestType.Balance: {
+          let balance: BigNumber | undefined = strings.bnOrZero(result.balance);
+
+          const tokenInfo: Partial<TokenInfo> = {
+            ...updates[token.address],
+            initialized: true,
+            name: "Zilliqa",
+            symbol: "ZIL",
+            balance,
+          };
+
+          updates[token.address] = { ...updates[token.address], ...tokenInfo };
+          break;
         }
-        break;
-      }
-    }
-  })
 
-  return updates;
+        case BatchRequestType.TokenBalance: {
+          const tokenDetails = ZilswapConnector.getToken(token.address);
+          const tokenPool = ZilswapConnector.getPool(token.address);
+
+          const tokenInfo: Partial<TokenInfo> = {
+            initialized: true,
+            symbol: tokenDetails?.symbol ?? token.symbol,
+            pool: tokenPool ?? undefined,
+            balance: result ? strings.bnOrZero(result.balances[address]) : token.balance,
+          };
+
+          updates[token.address] = { ...updates[token.address], ...tokenInfo };
+          break;
+        }
+
+        case BatchRequestType.TokenAllowance: {
+          const allowances = result?.allowances[address]
+          if (allowances) {
+            updates[token.address] = { ...updates[token.address], allowances };
+          }
+          break;
+        }
+      }
+    })
+    return updates;
+  } catch (error) {
+    console.error("failed to read zil balances")
+    console.error(error);
+    return updates;
+  }
 }
 
 function* updateTokensState() {

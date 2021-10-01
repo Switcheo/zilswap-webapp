@@ -7,6 +7,7 @@ import { BIG_ZERO } from "app/utils/constants";
 import cls from "classnames";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { Blockchain } from "tradehub-api-js";
 import PoolInfoCard from "../PoolInfoCard";
 import PoolsSearchInput from "../PoolsSearchInput";
 
@@ -98,6 +99,8 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
           return accum;
         }
 
+        if (token.blockchain !== Blockchain.Zilliqa) return accum;
+
         if (token.registered) {
           accum.registeredTokens.push(token);
         } else {
@@ -126,7 +129,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
     <Box {...rest} className={cls(classes.root, className)} mt={6} mb={2}>
       <Box display="flex" justifyContent="space-between" mb={2} className={classes.header}>
         <Text variant="h2" margin={2}>Registered Pools ({registeredTokens.length})</Text>
-        <PoolsSearchInput onSearch={onSearch}/>
+        <PoolsSearchInput onSearch={onSearch} />
       </Box>
       <Grid container spacing={2}>
         {registeredTokens.slice(0, limits.registered).map((token) => (
