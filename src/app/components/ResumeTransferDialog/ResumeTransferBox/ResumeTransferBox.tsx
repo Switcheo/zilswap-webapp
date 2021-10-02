@@ -223,7 +223,7 @@ const ResumeTransferBox = (props: any) => {
                 setErrorMsg("");
                 setDepositTransfer(depositTransfer);
             } else {
-                setErrorMsg("Please enter a valid transfer key.");
+                setErrorMsg(`No transactions found for TradeHub address "${swthAddress}". Please enter a valid transfer key.`);
                 setDepositTransfer(null);
             }
         })
