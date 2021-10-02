@@ -239,7 +239,7 @@ const ResumeTransferBox = (props: any) => {
                 const bridgeTx: BridgeTx = {
                     srcChain,
                     dstChain,
-                    srcAddr: "",
+                    srcAddr: depositTransfer.transaction_hash ?? "",
                     dstAddr: dstWalletAddr,
                     srcToken: depositTransfer.denom,
                     dstToken: bridgeToken.toDenom,
