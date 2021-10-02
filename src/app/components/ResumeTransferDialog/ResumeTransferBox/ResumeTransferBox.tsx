@@ -226,9 +226,9 @@ const ResumeTransferBox = (props: any) => {
                 setDepositTransfer(depositTransfer);
                 setSwthAddress(swthAddress);
             } else {
-                setErrorMsg(`No transactions found for TradeHub address "${swthAddress}". Please enter a valid transfer key.`);
+                setErrorMsg("Please enter a valid transfer key.");
                 setDepositTransfer(null);
-                setSwthAddress(null);
+                setSwthAddress(swthAddress);
             }
         })
     }
@@ -412,10 +412,13 @@ const ResumeTransferBox = (props: any) => {
             </Box>
 
             {(errorMsg || error) &&
-                <Box display="flex" justifyContent="center" mb={0.5}>
-                    <Text color="error">
-                        <strong>Error:</strong> Please enter a valid transfer key.
+                <Box display="flex" flexDirection="column" justifyContent="center" mb={0.5}>
+                    <Text color="error" variant="body1">
+                        <strong>Error:</strong> {errorMsg ?? error?.message ?? "Please enter a valid transfer key."}
                     </Text>
+                    {swthAddress && !depositTransfer && (
+                        <Text color="error" variant="body2" marginTop={0.5}>No transactions found for TradeHub address: {swthAddress}.</Text>
+                    )}
                 </Box>
             }
 
