@@ -134,6 +134,7 @@ const ResumeTransferBox = (props: any) => {
     const [showPhrase, setShowPhrase] = useState<boolean>(false);
     const [mnemonic, setMnemonic] = useState<Array<string>>(Array(12).fill(""));
     const [errorMsg, setErrorMsg] = useState<string>("");
+    const [swthAddress, setSwthAddress] = useState<string | null>(null);
     const bridgeableTokens = useSelector<RootState, BridgeableTokenMapping>(store => store.bridge.tokens);
     const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
     const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]); // eth wallet
@@ -203,6 +204,7 @@ const ResumeTransferBox = (props: any) => {
     const handleClearAll = () => {
         setMnemonic(Array(12).fill(""));
         setDepositTransfer(null);
+        setSwthAddress(null);
     }
 
     const handleGetTransfer = () => {
@@ -222,9 +224,11 @@ const ResumeTransferBox = (props: any) => {
             if (depositTransfer) {
                 setErrorMsg("");
                 setDepositTransfer(depositTransfer);
+                setSwthAddress(swthAddress);
             } else {
                 setErrorMsg(`No transactions found for TradeHub address "${swthAddress}". Please enter a valid transfer key.`);
                 setDepositTransfer(null);
+                setSwthAddress(null);
             }
         })
     }
@@ -315,6 +319,7 @@ const ResumeTransferBox = (props: any) => {
                 <Text variant="h4">
                     <CheckCircleIcon className={classes.checkIcon} />
                     Transfer Key Verified
+                    <Text variant="body2">{swthAddress}</Text>
                 </Text>
             )
         } else {
