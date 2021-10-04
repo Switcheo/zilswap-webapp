@@ -73,12 +73,12 @@ const NetworkSwitchBox = (props: Props) => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        if (requiredChainID === null) {
+        if (requiredChainName === null) {
             dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
         }
 
         // eslint-disable-next-line
-    }, [requiredChainID]);
+    }, [requiredChainName]);
 
     const onCloseDialog = () => {
       dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
