@@ -10,6 +10,8 @@ import dayjs from "dayjs";
 import React from "react";
 import ArkCollapsibleRow from "../ArkCollapsibleRow";
 import { BidRow } from "../ArkCollapsibleRow/ArkCollapsibleRow";
+import { ArkPaginator } from "app/components";
+
 interface Props extends BoxProps {
 }
 
@@ -127,6 +129,7 @@ const OfferTable: React.FC<Props> = (props: Props) => {
 
         </Card>
       )}
+      <ArkPaginator itemPerPage={2} totalItem={TEMP_DATA.length} />
     </Box>
   );
 };
