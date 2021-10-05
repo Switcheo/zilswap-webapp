@@ -1,6 +1,7 @@
 import { BN, Long, bytes } from '@zilliqa-js/util';
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
+import groupBy from "lodash/groupBy";
 import { ConnectedWallet } from "core/wallet";
 import { ZilswapConnector } from 'core/zilswap';
 import { Network } from "zilswap-sdk/lib/constants";
@@ -90,28 +91,39 @@ export const claim = async (claimOpts: ClaimEpochOpts): Promise<ObservedTx> => {
 };
 
 const getMultiTxArgs = (distributions: Distribution[], userAddr: string, contractAddr: string) => {
-  return [{
+  const groupedDistrs = groupBy(distributions, "distrAddr")
+  return [
+    {
+      vname: "account",
+      type: "ByStr20",
+      value: userAddr,
+    },
+    {
     vname: "claims",
-    type: `List(Pair ByStr20 ${contractAddr}.Claim)`,
-    value: distributions.map((distribution) => (
+    type: `List(Pair ByStr20 (List (Pair (Pair Uint32 Uint128) (List ByStr32))))`,
+    value: Object.entries(groupedDistrs).map(([distrAddr, distrs]) => (
       {
         constructor: "Pair",
-        argtypes: ["ByStr20", `${contractAddr}.Claim`],
+        argtypes: ["ByStr20", "List (Pair (Pair Uint32 Uint128) (List ByStr32))"],
         arguments: [
-          distribution.distrAddr,
-          {
-            constructor: `${contractAddr}.Claim`,
-            argtypes: [],
-            arguments: [
-              distribution.epochNumber.toString(),
-              {
-                constructor: `${contractAddr}.DistributionLeaf`,
-                argtypes: [],
-                arguments: [userAddr, distribution.amount.toString(10)],
-              },
-              distribution.proof.map(item => `0x${item}`)
-            ]
-          }
+          distrAddr,
+          distrs.map(distribution => (
+            {
+              constructor: "Pair",
+              argtypes: ["Pair Uint32 Uint128", "List ByStr32"],
+              arguments: [
+                {
+                  constructor: "Pair",
+                  argtypes: ["Uint32", "Uint128"],
+                  arguments: [
+                    distribution.epochNumber.toString(),
+                    distribution.amount.toString(10),
+                  ],
+                },
+                distribution.proof.map(item => `0x${item}`),
+              ]
+            }
+          ))
         ]
       }
     ))

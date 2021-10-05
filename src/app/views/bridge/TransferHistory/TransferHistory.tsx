@@ -311,6 +311,10 @@ const TransferHistory = (props: any) => {
         dispatch(actions.Bridge.setPreviewBridgeTx(undefined));
     }
 
+    const getLogoToken = (tx: BridgeTx) => {
+        return bridgeableTokenFinder(tx.srcChain === Blockchain.Zilliqa ? tx.srcToken : tx.dstToken, Blockchain.Zilliqa);
+    }
+
     return (
         <BridgeCard {...rest} className={cls(classes.root, className)}>
             {!previewTx && (
@@ -408,8 +412,8 @@ const TransferHistory = (props: any) => {
                                         </TableCell>
                                         <TableCell align="center">
                                             <Text className={classes.transferAmount}>
-                                                {toHumanNumber(tx.inputAmount, 2)}
-                                                <CurrencyLogo className={classes.currencyLogo} address={bridgeableTokenFinder(tx.srcToken, tx.srcChain)?.address} />
+                                                {toHumanNumber(tx.inputAmount)}
+                                                <CurrencyLogo className={classes.currencyLogo} address={getLogoToken(tx)?.address} />
                                             </Text>
                                         </TableCell>
                                         <TableCell align="center">

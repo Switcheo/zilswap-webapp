@@ -8,8 +8,8 @@ import { actions } from "app/store";
 import { ChainInitAction } from "app/store/blockchain/actions";
 import { BridgeWalletAction, WalletAction, WalletActionTypes } from "app/store/wallet/actions";
 import { Transaction, TokenInfo } from "app/store/types";
-import { RPCEndpoints, ZIL_ADDRESS } from "app/utils/constants";
-import { connectWalletZilPay, ConnectedWallet, WalletConnectType } from "core/wallet";
+import { BRIDGEABLE_WRAPPED_DENOMS, RPCEndpoints, BoltXNetworkMap, ZIL_ADDRESS } from "app/utils/constants";
+import { connectWalletZilPay, connectWalletBoltX, ConnectedWallet, WalletConnectType } from "core/wallet";
 import { ZILO_DATA } from "core/zilo/constants";
 import { toBech32Address, ZilswapConnector } from "core/zilswap";
 import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
@@ -23,6 +23,8 @@ import { Network } from "zilswap-sdk/lib/constants";
 import { Blockchain } from "tradehub-api-js";
 import { SimpleMap } from "app/utils";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
+import { getConnectedBoltX } from "core/utilities/boltx";
+import { StatsActionTypes } from "app/store/stats/actions";
 
 const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
   if (!wallet) return null;
@@ -32,6 +34,7 @@ const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
       return wallet.addressInfo.privateKey
     case WalletConnectType.Zeeves:
     case WalletConnectType.ZilPay:
+    case WalletConnectType.BoltX:
       return wallet.provider;
     case WalletConnectType.Moonlet:
       throw new Error("moonlet support under development");
@@ -71,11 +74,49 @@ const zilPayObserver = (zilPay: any) => {
   })
 }
 
+const boltXObserver = (boltX: any) => {
+
+  return eventChannel<ConnectedWallet>(emitter => {
+    const accountSubscription = async (account: any) => {
+      if (account) {
+        logger(`BoltX account changed to: ${account.bech32}`)
+        const walletResult = await connectWalletBoltX(boltX);
+        if (walletResult?.wallet) {
+          emitter(walletResult.wallet)
+        }
+      } else {
+        logger(`BoltX disconnected`)
+        put(actions.Blockchain.initialize({ wallet: null, network: BoltXNetworkMap[boltX.zilliqa.wallet.net] }));
+      }
+    };
+
+    const networkSubscription = async (net: string) => {
+      logger(`BoltX network changed to: ${net}`)
+      const walletResult = await connectWalletBoltX(boltX);
+      if (walletResult?.wallet) {
+        emitter(walletResult.wallet)
+      }
+    };
+
+    const { ACCOUNT_CHANGED, NETWORK_CHANGED } = boltX.zilliqa.wallet.events;
+    boltX.zilliqa.wallet.on(ACCOUNT_CHANGED, accountSubscription);
+    boltX.zilliqa.wallet.on(NETWORK_CHANGED, networkSubscription);
+    logger('registered boltX observer')
+
+    return () => {
+      logger('deregistered boltX observer')
+      boltX.zilliqa.wallet.off(ACCOUNT_CHANGED, accountSubscription);
+      boltX.zilliqa.wallet.off(NETWORK_CHANGED, networkSubscription);
+    }
+  })
+
+}
+
 const web3Observer = (wallet: ConnectedBridgeWallet) => {
   return eventChannel<ConnectedBridgeWallet>(emitter => {
     const provider = wallet.provider
     provider.on("accountsChanged", (accounts: string[]) => {
-      if(accounts.length > 0) {
+      if (accounts.length > 0) {
         emitter({
           provider: provider,
           address: accounts[0],
@@ -194,6 +235,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     const { observingTxs } = getTransactions(yield select());
     const { network: prevNetwork } = getBlockchain(yield select());
 
+    logger('init chain zilswap sdk')
     sdk = new Zilswap(network, providerOrKey ?? undefined, { rpcEndpoint: RPCEndpoints[network] });
     logger('zilswap sdk initialized')
 
@@ -207,6 +249,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     }
     ZilswapConnector.setSDK(sdk)
 
+    logger('init chain load tokens')
     // load tokens
     const appState: AppState = yield call([sdk, sdk.getAppState]);
     const zilswapTokens = appState.tokens
@@ -235,9 +278,9 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     const mappings: WrapperMappingsResult = yield call(fetchJSON, `https://${host}/coin/wrapper_mappings`)
     const data: TradeHubTokensResult = yield call(fetchJSON, `https://${host}/coin/tokens`)
     const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
+    const bridgeableDenoms = BRIDGEABLE_WRAPPED_DENOMS[network];
     Object.entries(mappings.result).forEach(([wrappedDenom, sourceDenom]) => {
-      // TODO: update whitelist (this is devnet only)
-      if (!["zil5.e", "zwap5.e", "eth5.z", "dai5.z"].includes(wrappedDenom)) {
+      if (!bridgeableDenoms.includes(wrappedDenom)) {
         return;
       }
 
@@ -254,13 +297,32 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
       addMapping(result, sourceToken, wrappedToken, sourceToken.blockchain)
     })
 
+    logger('init chain set tokens')
     yield put(actions.Bridge.setTokens(result))
     yield put(actions.Token.init({ tokens }));
     yield put(actions.Wallet.update({ wallet }))
     if (network !== prevNetwork) yield put(actions.Blockchain.setNetwork(network))
 
-    // preventing teardown due to zap api error
+    yield put(actions.Stats.reloadPoolTx());
+
+    logger('init chain refetch state')
+    yield put(actions.Token.refetchState());
+    yield put(actions.Blockchain.initialized());
+  } catch (err) {
+    console.error(err)
+    sdk = yield call(teardown, sdk)
+  } finally {
+    yield put(actions.Layout.removeBackgroundLoading('INIT_CHAIN'))
+  }
+  return sdk
+}
+
+function* watchReloadPoolTx() {
+  while (true) {
     try {
+      yield take(StatsActionTypes.RELOAD_POOL_TX)
+      const { wallet } = getWallet(yield select());
+      const { network } = getBlockchain(yield select());
       if (wallet) {
         const result: PoolTransactionResult = yield call(ZAPStats.getPoolTransactions, {
           network: network,
@@ -283,16 +345,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
       // set to empty transactions when zap api failed
       yield put(actions.Transaction.init({ transactions: [] }))
     }
-
-    yield put(actions.Token.refetchState());
-    yield put(actions.Blockchain.initialized());
-  } catch (err) {
-    console.error(err)
-    sdk = yield call(teardown, sdk)
-  } finally {
-    yield put(actions.Layout.removeBackgroundLoading('INIT_CHAIN'))
   }
-  return sdk
 }
 
 function* teardown(sdk: Zilswap | null) {
@@ -353,6 +406,38 @@ function* watchZilPay() {
   }
 }
 
+function* watchBoltX() {
+  let chan
+  while (true) {
+    try {
+      const action: WalletAction = yield take(WalletActionTypes.WALLET_UPDATE)
+      if (action.payload.wallet?.type === WalletConnectType.BoltX) {
+        logger('starting to watch boltx')
+        const boltX = (yield call(getConnectedBoltX)) as unknown as any;
+        chan = (yield call(boltXObserver, boltX)) as EventChannel<ConnectedWallet>;
+        break
+      }
+    } catch (e) {
+      console.warn('Watch BoltX failed, will automatically retry on reconnect. Error:')
+      console.warn(e)
+    }
+  }
+  try {
+    while (true) {
+      const newWallet = (yield take(chan)) as ConnectedWallet
+      const { wallet: oldWallet } = getWallet(yield select())
+      if (oldWallet?.type !== WalletConnectType.BoltX) continue
+      if (newWallet.addressInfo.bech32 === oldWallet?.addressInfo.bech32 &&
+        newWallet.network === oldWallet.network) continue
+      yield put(actions.Blockchain.initialize({ wallet: newWallet, network: newWallet.network }))
+    }
+  } finally {
+    if (yield cancelled()) {
+      chan.close()
+    }
+  }
+}
+
 function* watchWeb3() {
   let chan
   while (true) {
@@ -363,13 +448,13 @@ function* watchWeb3() {
         chan = (yield call(web3Observer, action.payload.wallet)) as EventChannel<ConnectedBridgeWallet>;
         break
       }
-    } catch(e) {
+    } catch (e) {
       console.warn('Watch web3 failed, will automatically retry to reconnect. Error:')
       console.warn(e)
     }
   }
   try {
-    while(true) {
+    while (true) {
       const newWallet = (yield take(chan)) as ConnectedBridgeWallet
       yield put(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: newWallet }))
     }
@@ -383,7 +468,9 @@ function* watchWeb3() {
 export default function* blockchainSaga() {
   logger("init blockchain saga");
   yield fork(watchInitialize);
+  yield fork(watchReloadPoolTx);
   yield fork(watchZilPay);
+  yield fork(watchBoltX);
   yield fork(watchWeb3)
   yield put(actions.Blockchain.ready())
 }

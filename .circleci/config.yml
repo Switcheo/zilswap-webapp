@@ -75,8 +75,11 @@ jobs:
               aws s3 sync build s3://zilswap-ui-staging/ --delete
               aws cloudfront create-invalidation --distribution-id="E4QZBREBNL47S" --paths=/*
             elif [ "${CIRCLE_BRANCH}" = "master" ]; then
-              aws s3 sync build s3://zilswap-ui/ --delete
+              aws s3 sync build s3://zilswap-ui/production --delete
               aws cloudfront create-invalidation --distribution-id="ESU80N8RF88HZ" --paths=/*
+            elif [ "${CIRCLE_BRANCH}" = "develop" ]; then
+              aws s3 sync build s3://zilswap-ui/develop --delete
+              aws cloudfront create-invalidation --distribution-id="E2E0YSY2VDFHFV" --paths=/*
             fi
 
       - run:
@@ -102,6 +105,7 @@ workflows:
               only:
                 - master
                 - staging
+                - develop
       - deploy:
           context: org-switcheo
           requires:

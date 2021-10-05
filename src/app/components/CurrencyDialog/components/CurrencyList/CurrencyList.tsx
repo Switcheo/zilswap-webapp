@@ -7,6 +7,7 @@ import { BridgeState, RootState, TokenInfo, TokenState, WalletState } from "app/
 import { AppTheme } from "app/theme/types";
 import { useMoneyFormatter } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
+import { formatSymbol } from "app/utils/currencies";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import React from "react";
@@ -52,6 +53,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   addRemoveFont: {
     fontSize: "10px",
     textDecoration: "underline",
+  },
+  tokenName: {
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    maxWidth: 125,
   },
 }));
 
@@ -119,11 +126,11 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
           <ContrastBox className={classes.currencyBox}>
             <CurrencyLogo className={classes.currencyLogo} currency={token.registered && token.symbol} address={getLogoAddress(token)} />
             <Box display="flex" flexDirection="column">
-              <Typography variant="h3">{token.symbol}</Typography>
+              <Typography variant="h3">{formatSymbol(token)}</Typography>
 
               <Box display="flex" flexDirection="row">
                 {!!token.name && (
-                  <Typography color="textSecondary" variant="body2">{token.name}</Typography>
+                  <Typography className={classes.tokenName} color="textSecondary" variant="body2">{token.name}</Typography>
                 )}
                 {!token.registered && (
                   <Typography className={classes.addRemoveFont} onClick={(e) => onAddRemove(e, token)}>
@@ -136,7 +143,7 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
               {!!walletState.wallet && (
                 <Typography align="right" variant="h6" component="div">
                   {moneyFormat(getTokenBalance(token), {
-                    symbol: token.symbol,
+                    symbol: formatSymbol(token),
                     maxFractionDigits: showContribution ? 5 : token.decimals,
                     compression: token.decimals,
                     showCurrency: true,

@@ -409,8 +409,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }));
   };
   const onOutCurrencyChange = (token: TokenInfo) => {
-    if (swapFormState.inToken === token) return;
-    if (swapFormState.outToken === token) return;
+    if (swapFormState.inToken?.address === token.address) return;
+    if (swapFormState.outToken?.address === token.address) return;
     let { inToken } = swapFormState;
 
     if (!token.isZil && !inToken) {
@@ -431,8 +431,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }));
   };
   const onInCurrencyChange = (token: TokenInfo) => {
-    if (swapFormState.outToken === token) return;
-    if (swapFormState.inToken === token) return;
+    if (swapFormState.outToken?.address === token.address) return;
+    if (swapFormState.inToken?.address === token.address) return;
     let { outToken } = swapFormState;
 
     if (!token.isZil && !outToken) {
@@ -638,7 +638,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
                   )}
                   <Text className={classes.warningText}>
                     <WarningRounded color="inherit" />  Do not send tokens directly to an exchange address as it may result in failure to receive your fund.
-                </Text>
+                  </Text>
                 </>
               )}
             </Box>

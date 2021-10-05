@@ -20,7 +20,7 @@ const navigationConfig: NavigationOptions[] = [{
     title: "ZilBridge",
     href: "/bridge",
     icon: "Bridge",
-    badge: "COMING SOON",
+    badge: "NOW LIVE",
   }, {
     title: "ZILO",
     href: "/zilo",

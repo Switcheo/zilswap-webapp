@@ -1,4 +1,3 @@
-import { map, active } from "./currencies";
 import BigNumber from "bignumber.js";
 import { toHumanNumber } from "./strings/strings";
 
@@ -25,11 +24,8 @@ const formatter = (inputNumber: BigNumber | number | string = 0, opts: MoneyForm
     decPlaces = maxFractionDigits || 0;
 
   if (currency && !compression) {
-    const defaultCurrency = active();
-    const currencies = map();
-    const currencyData = currencies[currency] || currencies[defaultCurrency];
-    compression = currencyData.compression;
-    symbol = currencyData.symbol;
+    compression = 2;
+    symbol = "USD";
   }
   number = number.shiftedBy(-compression);
 

@@ -4,14 +4,15 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { CurrencyLogo } from "app/components";
 import CurrencyDialog from "app/components/CurrencyDialog";
 import { RootState, TokenInfo, WalletState } from "app/store/types";
+import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useMoneyFormatter } from "app/utils";
+import { formatSymbol } from "app/utils/currencies";
+import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { CurrencyDialogProps, CurrencyListType } from "../CurrencyDialog/CurrencyDialog";
-import { AppTheme } from "app/theme/types";
-import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -252,7 +253,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
                   <Button disableRipple className={classes.currencyButton} onClick={() => setShowCurrencyDialog(true)}>
                     <Box display="flex" alignItems="center">
                       {token && <CurrencyLogo currency={token.registered && token.symbol} blockchain={token?.blockchain} address={token.address} className={classes.currencyLogo} />}
-                      <Typography variant="button" className={classes.currencyText}>{token?.symbol || "Select Token"}</Typography>
+                      <Typography variant="button" className={classes.currencyText}>{formatSymbol(token) ?? "Select Token"}</Typography>
                     </Box>
                     <ExpandMoreIcon className={classes.expandIcon} />
                   </Button>

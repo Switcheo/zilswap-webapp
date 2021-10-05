@@ -1,11 +1,10 @@
-import { Box, Button, makeStyles, Popover, Radio } from '@material-ui/core';
-import { AppTheme } from 'app/theme/types';
-import { hexToRGBA } from 'app/utils';
-import React, { useState } from 'react';
-import cls from "classnames";
+import React, { useState } from "react";
+import { Box, Button, makeStyles, Popover } from "@material-ui/core";
+import { AppTheme } from "app/theme/types";
 import { Text } from "app/components";
-import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
+import { ReactComponent as SortIcon } from "./sort.svg";
+import { hexToRGBA } from "app/utils";
+import cls from "classnames";
 
 const useStyles = makeStyles((theme: AppTheme) =>({
   button: {
@@ -15,17 +14,19 @@ const useStyles = makeStyles((theme: AppTheme) =>({
     color: theme.palette.type === "dark" ? "white" : "",
     fontSize: 14,
     justifyContent: "flex-start",
-    padding: "10px 24px",
+    padding: "12px",
     borderRadius: "12px",
     display: "flex",
     alignItems: "center",
-    position: "relative"
+    justifyItems: "center",
+    position: "relative",
+    marginLeft: 10
   },
   inactive: {
     borderRadius: "12px"
   },
   active: {
-    borderColor: "#26D4FF",
+    borderColor: theme.palette.primary.dark,
     borderStyle: "solid",
     borderWidth: 1,
   },
@@ -33,7 +34,7 @@ const useStyles = makeStyles((theme: AppTheme) =>({
     "& .MuiPaper-root": {
       backgroundColor: theme.palette.type === "dark" ? "#223139" : "D4FFF2",
       width: '100%',
-      maxWidth: 300,
+      maxWidth: 260,
       borderRadius: "12px",
       borderWidth: "1px",
       borderStyle: "solid",
@@ -45,10 +46,7 @@ const useStyles = makeStyles((theme: AppTheme) =>({
   popoverContainer: {
     maxHeight: 340,
     overflowY: "scroll",
-    paddingTop: 2,
-    paddingBottom: 6,
-    marginTop: 8,
-    marginRight: 8,
+    padding: "16px 24px",
     "&::-webkit-scrollbar": {
       width: "0.4rem"
     },
@@ -84,13 +82,13 @@ const useStyles = makeStyles((theme: AppTheme) =>({
     fontWeight: 'bolder',
     fontFamily: 'Avenir Next',
     color: theme.palette.type === "dark" ? "white" : "black",
+    textTransform: "uppercase"
   },
   filterOption: {
     fontSize: 16,
     fontWeight: 'bolder',
     fontFamily: 'Avenir Next',
-    paddingTop: 2,
-    paddingBottom: 2,
+    padding: "8px 0",
     color: theme.palette.type === "dark" ? "white" : "",
     display: "flex",
     alignItems: "center"
@@ -100,14 +98,9 @@ const useStyles = makeStyles((theme: AppTheme) =>({
   }
 }))
 
-interface Props {
-  label: string
-  currentValue: string
-  options: any[]
-}
-
-const TextFilter = (props: Props) => {
+const SortFilter = () => {
   const classes = useStyles();
+
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -121,12 +114,8 @@ const TextFilter = (props: Props) => {
   return (
     <>
       <Button onClick={handleClick} className={anchorEl === null ? cls(classes.button, classes.inactive) : cls(classes.button, classes.active)}>
-        <Box display="flex" flexDirection="column" flexGrow={1} alignItems="start">
-          <div className={classes.filterLabel}>{props.label}</div>
-          <div className={classes.filterValue}>{props.currentValue}</div>
-        </Box>
-        <Box display="flex" alignItems="center" justifyContent="center">
-          <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.2016 13.1737L14.2879 16.0874C13.8491 16.5262 13.1404 16.5262 12.7016 16.0874L9.78787 13.1737C9.07912 12.4649 9.58537 11.2499 10.5866 11.2499L16.4141 11.2499C17.4154 11.2499 17.9104 12.4649 17.2016 13.1737Z" fill="#DEFFFF"/></svg>
+        <Box display="flex" alignItems="center" justifyContent="center" width="100%" height="100%">
+          <SortIcon />
         </Box>
       </Button>
       <Popover
@@ -135,30 +124,34 @@ const TextFilter = (props: Props) => {
         onClose={handleClose}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'center',
+          horizontal: 'right',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'center',
+          horizontal: 'right',
         }}
         className={classes.popover}
       >
         <Box paddingX="24px" className={classes.popoverContainer}>
-          {props.options.map(option => (
-            <Box className={classes.filterOption}>
-              <Radio
-                className={classes.radioButton}
-                checkedIcon={<CheckedIcon />}
-                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                disableRipple
-              />
-              <Text className={classes.filterValue}>{option.value} {option.detail && <span className={classes.filterOptionDetail}>{option.detail}</span>}</Text>
-            </Box>
-          ))}
+          <Box className={classes.filterOption}>
+            <Text className={classes.filterValue}>Price High - Low</Text>
+          </Box>
+          <Box className={classes.filterOption}>
+            <Text className={classes.filterValue}>Price Low - High</Text>
+          </Box>
+          <Box className={classes.filterOption}>
+            <Text className={classes.filterValue}>Rarity</Text>
+          </Box>
+          <Box className={classes.filterOption}>
+            <Text className={classes.filterValue}>Most Loved</Text>
+          </Box>
+          <Box className={classes.filterOption}>
+            <Text className={classes.filterValue}>Most Viewed</Text>
+          </Box>
         </Box>
       </Popover>
     </>
   )
 }
 
-export default TextFilter
+export default SortFilter

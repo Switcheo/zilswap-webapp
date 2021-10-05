@@ -17,7 +17,7 @@ export function updateForm(payload: Partial<BridgeFormState>) {
   }
 }
 
-export function addBridgeTx(payload: BridgeTx[]) {
+export function addBridgeTx(payload: Partial<BridgeTx>[]) {
   return {
     type: BridgeActionTypes.ADD_BRIDGE_TXS,
     payload

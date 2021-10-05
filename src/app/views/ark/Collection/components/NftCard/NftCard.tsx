@@ -19,6 +19,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ReactComponent as VerifiedBadge } from "../../verified-badge.svg";
 import { Nft } from "app/store/marketplace/types";
+import { toBech32Address } from "core/zilswap";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -139,11 +140,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 export interface Props extends CardProps {
   token: Nft;
-  collectionId: string;
+  collectionAddress: string;
 }
 
 const NftCard: React.FC<Props> = (props: Props) => {
-  const { className, token, collectionId, ...rest } = props;
+  const { className, token, collectionAddress, ...rest } = props;
   const classes = useStyles();
   const [liked, setLiked] = useState<boolean>(false);
 
@@ -176,7 +177,7 @@ const NftCard: React.FC<Props> = (props: Props) => {
         </Box>
         <CardActionArea
           component={Link}
-          to={`/ark/collections/${collectionId}/${token.token_id}`}
+          to={`/ark/collections/${toBech32Address(collectionAddress)}/${token.token_id}`}
         >
           <CardMedia
             className={classes.image}
