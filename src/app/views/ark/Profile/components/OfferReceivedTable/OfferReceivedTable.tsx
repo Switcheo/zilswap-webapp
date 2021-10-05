@@ -11,6 +11,7 @@ import { BidRow } from "../ArkCollapsibleRow/ArkCollapsibleRow";
 import { Asset } from "app/store/types";
 import dayjs from "dayjs";
 import { ArkPaginator } from "app/components";
+import ActiveBidToggle from "../ActiveBidToggle";
 
 interface Props extends BoxProps {
 }
@@ -106,6 +107,7 @@ const OfferReceivedTable: React.FC<Props> = (props: Props) => {
 
   return (
     <Box className={cls(classes.root, className)}>
+      <ActiveBidToggle totalCount={TEMP_DATA.length} header="Bids Received" />
       {!isXs && (
         <TableContainer   {...rest} >
           <Table>

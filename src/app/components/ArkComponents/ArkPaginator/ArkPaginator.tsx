@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   }
 }));
 
-const SampleComponent: React.FC<Props> = (props: Props) => {
+const ArkPaginator: React.FC<Props> = (props: Props) => {
   const { totalItem, itemPerPage, onPageChange, className, ...rest } = props;
   const classes = useStyles();
   const maxPages = Math.ceil(totalItem / itemPerPage);
@@ -102,4 +102,4 @@ const SampleComponent: React.FC<Props> = (props: Props) => {
   );
 };
 
-export default SampleComponent;
+export default ArkPaginator;

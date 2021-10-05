@@ -9,6 +9,7 @@ import cls from "classnames";
 import dayjs from "dayjs";
 import React from "react";
 import ArkCollapsibleRow from "../ArkCollapsibleRow";
+import ActiveBidToggle from "../ActiveBidToggle";
 import { BidRow } from "../ArkCollapsibleRow/ArkCollapsibleRow";
 import { ArkPaginator } from "app/components";
 
@@ -106,6 +107,7 @@ const OfferTable: React.FC<Props> = (props: Props) => {
 
   return (
     <Box className={cls(classes.root, className)}>
+      <ActiveBidToggle header="Bids Made" totalCount={TEMP_DATA.length} />
       {!isXs && (
         <TableContainer   {...rest} >
           <Table>
