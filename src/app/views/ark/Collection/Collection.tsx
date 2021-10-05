@@ -75,7 +75,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "24px",
     color: theme.palette.primary.light,
     maxWidth: "750px",
-    marginTop: theme.spacing(2),
+    marginTop: theme.spacing(3.5),
     textAlign: "center",
   },
   socialLinkGroup: {
