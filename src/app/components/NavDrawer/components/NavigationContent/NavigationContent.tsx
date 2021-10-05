@@ -1,10 +1,4 @@
-import {
-  Button,
-  Collapse,
-  List,
-  ListItem,
-  ListItemText,
-} from "@material-ui/core";
+import { Button, Collapse, List, ListItem, ListItemText } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
@@ -17,6 +11,7 @@ import { NavLink as RouterLink } from "react-router-dom";
 import { NavigationPageOptions } from "../../types";
 import * as IconModule from "../icons";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
+import { useRouter } from "app/utils";
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1 }}>
@@ -97,12 +92,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       color: theme.palette.type === "dark" ? "#FFDF6B" : "",
     },
   },
+  inactive: {
+    padding: theme.spacing(2, 0),
+    justifyContent: "center",
+  },
+  inactiveIcon: {
+    "& path": {
+      fill: theme.palette.text?.primary,
+    },
+  }
 }));
 
 type NavigationContentProps = {
   navigation: NavigationPageOptions;
   secondary?: boolean;
   onClose?: any;
+  showDrawer?: boolean;
 };
 
 const Icons = IconModule as unknown as { [key: string]: React.FC };
@@ -110,11 +115,13 @@ const Icons = IconModule as unknown as { [key: string]: React.FC };
 const NavigationContent: React.FC<NavigationContentProps> = (
   props: NavigationContentProps
 ) => {
-  const { navigation, secondary, onClose } = props;
+  const { navigation, secondary, onClose, showDrawer } = props;
   const classes = useStyles();
   const [expand, setExpand] = useState<any>(null);
   const [widgetOpen, setWidgetOpen] = useState(false);
   const Icon = navigation.icon ? Icons[navigation.icon] : InboxIcon;
+  const router = useRouter();
+  const location = router.location;
 
   const initWidget = (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setWidgetOpen(true);
@@ -144,6 +151,38 @@ const NavigationContent: React.FC<NavigationContentProps> = (
     );
   };
 
+  const selected = () => {
+    if (navigation.href === location.pathname) return true;
+    if (InternalRouteMap[location.pathname] === navigation.href)
+      return true;
+  }
+
+  if (!showDrawer) return (
+    <>
+      <ListItem
+        className={classes.listItem}
+        disableGutters
+        button
+        disabled={navigation.disabled}
+      >
+        <Button
+          className={cls(
+            {
+              [classes.highlightTitle]: navigation.highlight,
+              [classes.secondaryFont]: secondary,
+            },
+            classes.buttonLeaf,
+            classes.inactive,
+            navigation.purchase && classes.buyZil,
+            selected() && classes.buttonLeafActive
+          )}
+        >
+          <Icon width="20px" className={classes.inactiveIcon} />{""}
+        </Button>
+      </ListItem>
+    </>
+  )
+
   return (
     <>
       {navigation.external && navigation.href && (
@@ -154,7 +193,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (
                 [classes.highlightTitle]: navigation.highlight,
                 [classes.secondaryFont]: secondary,
               },
-              classes.buttonLeaf
+              classes.buttonLeaf,
             )}
             href={navigation.href}
             target="_blank"
@@ -196,6 +235,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (
                       key={index}
                       navigation={item}
                       secondary={true}
+                      showDrawer={showDrawer}
                     />
                   )
                 )}
