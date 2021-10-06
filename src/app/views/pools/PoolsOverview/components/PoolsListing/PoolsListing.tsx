@@ -76,14 +76,18 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
         const lhsValues = tokenState.values[lhs.address];
         const rhsValues = tokenState.values[rhs.address];
 
+        const lhsTVL = lhsValues?.poolLiquidity ?? BIG_ZERO;
+        const rhsTVL = rhsValues?.poolLiquidity ?? BIG_ZERO;
+
+        const core = ['ZWAP', 'gZIL', 'XSGD']
+        if (core.includes(lhs.symbol) || core.includes(rhs.symbol))
+          return rhsTVL.comparedTo(lhsTVL);
+
         const lhsRewardValue = lhsValues ? lhsValues.rewardsPerSecond.dividedBy(lhsValues.poolLiquidity) : BIG_ZERO;
         const rhsRewardValue = rhsValues ? rhsValues.rewardsPerSecond.dividedBy(rhsValues.poolLiquidity) : BIG_ZERO;
 
         if (!lhsRewardValue.eq(rhsRewardValue))
           return rhsRewardValue.comparedTo(lhsRewardValue);
-
-        const lhsTVL = lhsValues?.poolLiquidity ?? BIG_ZERO;
-        const rhsTVL = rhsValues?.poolLiquidity ?? BIG_ZERO;
 
         return rhsTVL.comparedTo(lhsTVL);
       })
