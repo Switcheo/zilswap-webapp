@@ -231,6 +231,7 @@ const AttributesFilter = (props: Props) => {
           horizontal: 'left',
         }}
         className={classes.popover}
+        keepMounted={true}
       >
         <Box paddingX="24px" className={classes.popoverContainer}>
           <Box display="flex">
@@ -290,7 +291,6 @@ const AttributesFilter = (props: Props) => {
                           icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
                           disableRipple
                         />
-                        <Box className={classes.attributeIcon}></Box>
                         <Text className={classes.attributeLabel} flexGrow="1">{value}</Text>
                         <Text className={classes.attributeMeta}>2.5K <Text className={classes.attributeMetaDetail}>(10%)</Text></Text>
                         <Text className={classes.attributeMeta}>{trait.values[value]} <Text className={classes.attributeMetaDetail}>(5%)</Text></Text>
