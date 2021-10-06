@@ -111,13 +111,13 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             </Box>
 
           </ArkBanner>
-          <ArkTab setCurrentTab={(value) => setCurrentTab(value)} currentTab={currentTab} tabHeaders={["Collected", "Onsale", "Liked", "Offers Made", "Offers Received"]} />
+          <ArkTab setCurrentTab={(value) => setCurrentTab(value)} currentTab={currentTab} tabHeaders={["Collected", "Onsale", "Liked", "Bids Made", "Bids Received"]} />
           {wallet && (
             <>
-              {(currentTab === "Offers Made") && (
+              {(currentTab === "Bids Made") && (
                 <OfferTable />
               )}
-              {(currentTab === "Offers Received") && (
+              {(currentTab === "Bids Received") && (
                 <OfferReceivedTable />
               )}
             </>

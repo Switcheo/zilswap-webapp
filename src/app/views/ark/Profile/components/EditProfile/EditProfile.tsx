@@ -5,7 +5,7 @@ import cls from "classnames";
 import React, { useState } from "react";
 import { ArkInput, FancyButton } from "app/components";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import { ReactComponent as UploadSVG } from "./upload.svg";
+import { ReactComponent as UploadSVG } from "../assets/upload.svg";
 
 interface Props extends BoxProps {
   onBack: () => void

@@ -1,39 +1,18 @@
 import { Avatar, Box, BoxProps, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { Nft } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { SimpleMap } from "app/utils";
-import BigNumber from "bignumber.js";
 import cls from "classnames";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import React, { Fragment, useState } from "react";
-import { ReactComponent as DownArrow } from "./down-arrow.svg";
-import { ReactComponent as UpArrow } from "./up-arrow.svg";
+import { Bids } from "../bidtype";
+import { ReactComponent as DownArrow } from "../assets/down-arrow.svg";
+import { ReactComponent as UpArrow } from "../assets/up-arrow.svg";
 
 // TODO
 // format row props
 interface Props extends BoxProps {
-  baseRow: BidRow,
-  extraRows?: BidRow[]
-}
-
-export interface BidRow {
-  bid_id: number,
-  bidAmount: BigNumber;
-  bidCurrency: string;
-  nft: Nft;
-  usdPrice: BigNumber;
-  bidAverage: string;
-  user: any;
-  bidTime: Dayjs;
-  expiration: Dayjs;
-  status: string;
-  actions?: SimpleMap<RowAction>
-}
-
-export type RowAction = {
-  label: string,
-  action?: (bidded?: BidRow) => void
+  baseRow: Bids,
+  extraRows?: Bids[]
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -123,7 +102,7 @@ const isNotLast = (current: number, maxLength: number) => {
   return true;
 }
 
-const SampleComponent: React.FC<Props> = (props: Props) => {
+const ArkCollapsibleRow: React.FC<Props> = (props: Props) => {
   const { baseRow, extraRows } = props;
   const [expand, setExpand] = useState(false);
   const classes = useStyles();
@@ -148,7 +127,6 @@ const SampleComponent: React.FC<Props> = (props: Props) => {
         <TableCell align="center" className={cls(classes.bodyCell, expand && classes.withBorder)}>
           <Box>
             <Typography>{dayjs(baseRow.expiration).format("MMM, DD, YYYY")}</Typography>
-            <Typography className={baseRow.status === "active" ? classes.activeGreen : classes.expiredRed}>{baseRow.status}</Typography>
           </Box>
         </TableCell>
         <TableCell align="center" className={cls(classes.actionCell, classes.lastCell, expand && classes.withBorder)}>
@@ -166,12 +144,15 @@ const SampleComponent: React.FC<Props> = (props: Props) => {
               )}
             </>
           )}
-          {baseRow.status !== "active" && (
-            <Typography className={baseRow.status === "active" ? classes.activeGreen : classes.expiredRed}>{baseRow.status}</Typography>
+          {(baseRow.status.toLocaleLowerCase() === "expired" || baseRow.status.toLocaleLowerCase() === "rejected") && (
+            <Typography className={classes.expiredRed}>{baseRow.status}</Typography>
+          )}
+          {baseRow.status.toLocaleLowerCase() === "purchased" && (
+            <Typography className={classes.activeGreen}>{baseRow.status}</Typography>
           )}
         </TableCell>
       </TableRow>
-      {expand && extraRows?.map((row: BidRow, index: number) => (
+      {expand && extraRows?.map((row: Bids, index: number) => (
         <TableRow className={classes.slideAnimation}>
           <TableCell align="left" className={classes.bodyCell}>
           </TableCell>
@@ -183,11 +164,10 @@ const SampleComponent: React.FC<Props> = (props: Props) => {
           <TableCell align="center" className={cls(classes.bodyCell, isNotLast(index, extraRows.length) && classes.withBorder)}>
             <Box>
               <Typography>{dayjs(baseRow.expiration).format("MMM, DD, YYYY")}</Typography>
-              <Typography className={row.status === "active" ? classes.activeGreen : classes.expiredRed}>{row.status}</Typography>
             </Box>
           </TableCell>
           <TableCell align="center" className={cls(classes.actionCell, isNotLast(index, extraRows.length) && classes.withBorder)}>
-            {row.status === "active" && (
+            {row.status.toLocaleLowerCase() === "active" && (
               <>
                 {row.actions?.accept.action && (
                   <IconButton onClick={() => row.actions?.accept.action ? row.actions?.accept.action(row) : null} className={classes.iconButton}>
@@ -201,8 +181,11 @@ const SampleComponent: React.FC<Props> = (props: Props) => {
                 )}
               </>
             )}
-            {row.status !== "active" && (
-              <Typography className={row.status === "active" ? classes.activeGreen : classes.expiredRed}>{row.status}</Typography>
+            {(row.status.toLocaleLowerCase() === "expired" || row.status.toLocaleLowerCase() === "rejected") && (
+              <Typography className={classes.expiredRed}>{row.status}</Typography>
+            )}
+            {row.status.toLocaleLowerCase() === "purchased" && (
+              <Typography className={classes.activeGreen}>{row.status}</Typography>
             )}
           </TableCell>
         </TableRow>
@@ -226,4 +209,4 @@ const SampleComponent: React.FC<Props> = (props: Props) => {
   );
 };
 
-export default SampleComponent;
+export default ArkCollapsibleRow;
