@@ -1,17 +1,19 @@
 import {
-  Box, BoxProps, Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, useMediaQuery, useTheme
+  Box, BoxProps, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, useMediaQuery, useTheme
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { ArkPaginator } from "app/components";
+import { Asset } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import React from "react";
-import ArkCollapsibleRow from "../ArkCollapsibleRow";
-import { BidRow } from "../ArkCollapsibleRow/ArkCollapsibleRow";
-import { Asset } from "app/store/types";
 import dayjs from "dayjs";
-import { ArkPaginator } from "app/components";
+import React, { useState } from "react";
 import ActiveBidToggle from "../ActiveBidToggle";
+import ArkCollapsibleRow from "../ArkCollapsibleRow";
+import BidsCard from "../BidsCard";
+import BidsDialog from "../BidsDialog";
+import { Bids } from "../bidtype";
 
 interface Props extends BoxProps {
 }
@@ -53,7 +55,7 @@ interface HeadersProp {
 const HEADERS: HeadersProp[] = [
   { align: 'left', value: "Item" }, { align: "right", value: "Bids" },
   { align: "right", value: "USD Price" }, { align: "center", value: "Offer Score" },
-  { align: "center", value: "To" }, { align: "center", value: "Offered on" },
+  { align: "center", value: "Buyer" }, { align: "center", value: "Offered on" },
   { align: "center", value: "Expiration" }, { align: "center", value: "Action" },
 ]
 
@@ -70,16 +72,17 @@ const OfferReceivedTable: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down("xs"));
+  const [bid, setBid] = useState<Bids | undefined>(undefined);
 
-  const acceptBid = () => {
-
+  const acceptBid = (newBid?: Bids) => {
+    setBid(newBid);
   }
 
   const declineBid = () => {
-
+    setBid(undefined);
   }
 
-  const TEMP_DATA: BidRow[] = [
+  const TEMP_DATA: Bids[] = [
     {
       bid_id: 1, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { token_id: 1234, asset: TEMP_ASSET },
       usdPrice: new BigNumber(100), bidAverage: "lower than average", user: { name: "Tom" }, bidTime: dayjs("12/07/21"),
@@ -93,7 +96,7 @@ const OfferReceivedTable: React.FC<Props> = (props: Props) => {
       actions: { accept: { label: "Accept", action: acceptBid }, decline: { label: "Decline", action: declineBid } }
     },
     {
-      bid_id: 3, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { token_id: 1234, asset: TEMP_ASSET },
+      bid_id: 3, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { token_id: 1234, asset: TEMP_ASSET, name: "THE BEAR" },
       usdPrice: new BigNumber(100), bidAverage: "lower than average", user: { name: "Tom" }, bidTime: dayjs("12/07/21"),
       expiration: dayjs("12/07/21"), status: "expired",
     },
@@ -127,11 +130,14 @@ const OfferReceivedTable: React.FC<Props> = (props: Props) => {
         </TableContainer>
       )}
       {isXs && (
-        <Card>
-
-        </Card>
+        <>
+          {TEMP_DATA.map((data) => (
+            <BidsCard isBuyer={true} baseCard={data} extraCards={TEMP_DATA} />
+          ))}
+        </>
       )}
       <ArkPaginator itemPerPage={5} totalItem={TEMP_DATA.length} />
+      {bid && <BidsDialog showDialog={!!bid} onCloseDialog={() => setBid(undefined)} bid={bid} isOffer={true} />}
     </Box>
   );
 };
