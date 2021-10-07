@@ -47,7 +47,7 @@ function* loadNftList() {
       for (const valueOption of Object.values(values)) {
         if (!valueOption.selected)
           shouldIgnoreTrait = false;
-        else 
+        else
           selectedValues.push(valueOption.value);
       }
 
@@ -76,8 +76,8 @@ function* loadNftList() {
 function* loadProfile() {
   try {
     yield put(actions.Layout.addBackgroundLoading("loadProfile", "LOAD_PROFILE"));
-    const { wallet } = getWallet(yield select());
-    if (!wallet) throw new Error("invalid wallet");
+    // const { wallet } = getWallet(yield select());
+    // if (!wallet) throw new Error("invalid wallet");
     // const userProfile = (yield call(getProfile, wallet.addressInfo.byte20)) as unknown as any;
 
   } catch (error) {
