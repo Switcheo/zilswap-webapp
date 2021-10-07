@@ -1,18 +1,16 @@
 import { Box, Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
-import {
-  ArkBanner,
-  ArkBreadcrumb,
-  SocialLinkGroup,
-  Text,
-} from "app/components";
+import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text } from "app/components";
 import ARKFilterBar from "app/components/ARKFilterBar";
 import ArkPage from "app/layouts/ArkPage";
-import { Nft } from "app/store/marketplace/types";
+import { actions } from "app/store";
+import { CollectionFilter, Nft } from "app/store/marketplace/types";
+import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { fromBech32Address } from "core/zilswap";
 import React, { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { NftCard } from "./components";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
@@ -119,10 +117,12 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
+  const dispatch = useDispatch();
+  const filter = useSelector<RootState, CollectionFilter>((state) => state.marketplace.filter);
+  const tokens = useSelector<RootState, Nft[]>((state) => state.marketplace.tokens);
 
   // fetch nfts in collection (to use store instead)
   const [collection, setCollection] = useState<any>({});
-  const [tokens, setTokens] = useState<Nft[]>([]);
 
   const { bech32Address, hexAddress } = useMemo(() => {
     if (!match.params?.collection) {
@@ -130,10 +130,15 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       console.log("no collection param");
       return {};
     }
+
     let collectionAddress = match.params.collection;
     if (collectionAddress?.startsWith("zil1")) {
+
+      if (filter.collectionAddress !== collectionAddress)
+        dispatch(actions.MarketPlace.updateFilter({ collectionAddress }))
+
       return {
-        bech32Address: collection,
+        bech32Address: collectionAddress,
         hexAddress: fromBech32Address(collectionAddress)?.toLowerCase(),
       };
     } else {
@@ -162,20 +167,6 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     getCollection();
     // eslint-disable-next-line
   }, [hexAddress]);
-
-  useEffect(() => {
-    if (Object.keys(collection).length) getTokens();
-    // eslint-disable-next-line
-  }, [collection]);
-
-  // get tokens
-  const getTokens = async () => {
-    const response = await fetch(
-      `https://api-ark.zilswap.org/nft/token/list?collection=${collection.address}`
-    );
-    const data = await response.json();
-    setTokens(data.result.entries);
-  };
 
   const breadcrumbs = [
     { path: "/ark/collections", value: "Collections" },

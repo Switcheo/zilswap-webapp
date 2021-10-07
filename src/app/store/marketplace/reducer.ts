@@ -15,7 +15,7 @@ const savedAccessToken = loadSavedAccessToken()
 
 const initial_state: MarketPlaceState = {
   collections: {},
-  tokens: {},
+  tokens: [],
   oAuth: savedAccessToken,
   filter: {
     sale_type: {
@@ -48,12 +48,19 @@ const reducer = (state: MarketPlaceState = initial_state, action: any) => {
     case MarketPlaceActionTypes.UPDATE_TOKENS:
       return {
         ...state,
-        tokens: payload,
+        tokens: payload.entries,
+        filter: {
+          ...state.filter,
+          ...payload.meta,
+        },
       }
     case MarketPlaceActionTypes.UPDATE_FILTER:
       return {
         ...state,
-        filter: payload
+        filter: {
+          ...state.filter,
+          ...payload,
+        }
       }
     default:
       return state;

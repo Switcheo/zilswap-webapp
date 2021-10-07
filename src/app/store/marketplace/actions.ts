@@ -1,6 +1,5 @@
-import { SimpleMap } from "app/utils"
-import { Nft, OAuth } from "./types"
 import { CollectionFilter } from "../types"
+import { Nft, OAuth, PaginatedList } from "./types"
 
 export const MarketPlaceActionTypes = {
   INITIALIZE: "INITIALIZE",
@@ -11,6 +10,8 @@ export const MarketPlaceActionTypes = {
   REFRESH_ACCESS_TOKEN: "REFRESH_ACCESS_TOKEN",
   UPDATE_COLLECTION: "UPDATE_COLLECTION",
   UPDATE_FILTER: "UPDATE_FILTER",
+  
+  RELOAD_TOKEN_LIST: "RELOAD_TOKEN_LIST",
 }
 
 export function initialize() {
@@ -36,14 +37,14 @@ export function updateAccessToken(payload: OAuth) {
   }
 }
 
-export function updateFilter(payload: CollectionFilter) {
+export function updateFilter(payload: Partial<CollectionFilter>) {
   return {
     type: MarketPlaceActionTypes.UPDATE_FILTER,
     payload
   }
 }
 
-export function updateTokens(payload: SimpleMap<Nft>) {
+export function updateTokens(payload: PaginatedList<Nft>) {
   return {
     type: MarketPlaceActionTypes.UPDATE_TOKENS,
     payload

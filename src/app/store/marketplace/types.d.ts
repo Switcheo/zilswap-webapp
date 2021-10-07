@@ -2,7 +2,7 @@ import { SimpleMap } from "app/utils";
 
 export interface MarketPlaceState {
   collections: SimpleMap<Collection>;
-  tokens: SimpleMap<Nft>;
+  tokens: [];
   filter: CollectionFilter;
   profile?: Profile;
   oAuth?: OAuth;
@@ -87,9 +87,22 @@ export interface OAuth {
   token_type: string;
 }
 
+export interface PaginatedList<T> {
+  entries: T[];
+  meta: PaginationInfo;
+}
+
+export interface PaginationInfo {
+  offset: number;
+  count: number;
+  limit: number;
+}
+
 export interface CollectionFilter {
   sale_type: SaleType;
+  collectionAddress?: string;
   traits: {[id: string]: TraitType};
+  pagination?: PaginationInfo;
 }
 
 export interface SaleType {
