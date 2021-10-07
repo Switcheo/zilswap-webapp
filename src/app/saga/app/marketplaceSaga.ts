@@ -1,6 +1,6 @@
 import { actions } from "app/store";
 import { fork, take, call, put, select } from "redux-saga/effects";
-import { logger, arkLogin } from "core/utilities";
+import { logger, ArkClient } from "core/utilities";
 import store from "app/store";
 import { getWallet } from "../selectors";
 
@@ -9,7 +9,7 @@ function* initialize() {
     yield put(actions.Layout.addBackgroundLoading("initMarketplace", "INIT_MARKETPLACE"));
     const { wallet } = getWallet(yield select());
     if (!wallet) throw new Error("invalid wallet");
-    const authResult = (yield call(arkLogin, wallet)) as unknown as any;
+    const authResult = (yield call(ArkClient.arkLogin, wallet)) as unknown as any;
     yield put(actions.MarketPlace.updateAccessToken(authResult.result))
   } catch (error) {
     console.error("initialize failed, Error:")

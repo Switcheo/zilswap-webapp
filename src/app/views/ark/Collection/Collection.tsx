@@ -120,7 +120,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const [tokens, setTokens] = useState<Nft[]>([]);
 
   const { bech32Address, hexAddress } = useMemo(() => {
-    if (!match.params.collection) {
+    if (!match.params?.collection) {
       history.push("/ark/collections");
       console.log("no collection param")
       return {}
@@ -136,7 +136,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       return {}
     }
     // eslint-disable-next-line
-  }, [match.params.collection]);
+  }, [match.params?.collection]);
 
   // get collection data
   useEffect(() => {
@@ -145,7 +145,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     const getCollection = async () => {
       const response = await fetch("https://api-ark.zilswap.org/nft/collection/list");
       const data = await response.json();
-      const collection = data.result.models.find((collection: any) => collection.address === hexAddress);
+      const collection = data.result.entries.find((collection: any) => collection.address === hexAddress);
       if (collection)
         setCollection(collection);
       else
@@ -168,7 +168,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       `https://api-ark.zilswap.org/nft/token/list?collection=${collection.address}`
     );
     const data = await response.json();
-    setTokens(data.result.models);
+    setTokens(data.result.entries);
   };
 
   const breadcrumbs = [

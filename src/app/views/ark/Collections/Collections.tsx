@@ -87,7 +87,7 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       "https://api-ark.zilswap.org/nft/collection/list"
     );
     const data = await response.json();
-    setCollections(data.result.models);
+    setCollections(data.result.entries);
   };
 
   return (

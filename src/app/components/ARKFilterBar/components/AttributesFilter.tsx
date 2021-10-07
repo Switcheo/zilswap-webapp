@@ -227,7 +227,7 @@ const AttributesFilter = (props: Props) => {
     const data = await response.json();
 
     var newTraits: {[id: string]: TraitType} = {}
-    data.result.models.forEach((model: any) => {
+    data.result.entries.forEach((model: any) => {
       var values: {[id: string]: TraitValue} = {}
 
       Object.keys(model.values).forEach(value => {

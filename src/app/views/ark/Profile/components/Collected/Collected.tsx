@@ -5,7 +5,7 @@ import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAddressTokens } from "core/utilities";
+import { ArkClient } from "core/utilities";
 import { SimpleMap, useAsyncTask } from "app/utils";
 
 import { NftCard } from "app/views/ark/Collection/components";
@@ -45,13 +45,13 @@ const Collected: React.FC<Props> = (props: Props) => {
 
   const loadTokens = () => {
     runLoadTokens(async () => {
-      const { result: { models } } = await getAddressTokens(address);
+      const { result: { entries } } = await ArkClient.listTokens({ owner: address });
       const nfts: SimpleMap<Nft> = {};
-      models.forEach((model: Nft) => {
+      entries.forEach((model: Nft) => {
         nfts[model.tokenId] = model;
       });
 
-      setTokens(models);
+      setTokens(entries);
       dispatch(actions.MarketPlace.updateTokens(nfts))
     })
   }
