@@ -3,20 +3,18 @@ import { makeStyles } from "@material-ui/core/styles";
 import { hexToRGBA } from "app/utils";
 import cls from "classnames";
 import React from "react";
-// import { ReactComponent as MediumIcon } from "./social-icons/medium.svg";
-// import { ReactComponent as MailIcon } from "./social-icons/mail.svg";
 import { ReactComponent as Discord } from "./social-icons/discord.svg";
 import { ReactComponent as TwitterIcon } from "./social-icons/twitter.svg";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
     flexDirection: "row",
     paddingLeft: theme.spacing(2),
     "& a": {
       minWidth: 0,
-      padding: theme.spacing(.75),
-      margin: theme.spacing(0, .5),
+      padding: theme.spacing(0.75),
+      margin: theme.spacing(0, 0.5),
       "& svg": {
         width: 20,
         height: 20,
@@ -24,28 +22,36 @@ const useStyles = makeStyles(theme => ({
         "& path": {
           transition: "fill .2s ease-in-out",
           fill: `rgba${hexToRGBA(theme.palette.text.primary, 0.5)}`,
-        }
+        },
       },
     },
   },
+  compact: {
+    display: "none",
+  },
 }));
-const SocialLinkGroup: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
-  const { children, className, ...rest } = props;
+
+export interface SocialLinkGroupProps
+  extends React.HTMLAttributes<HTMLFormElement> {
+  compact?: boolean;
+}
+
+const SocialLinkGroup: React.FC<SocialLinkGroupProps> = (
+  props: SocialLinkGroupProps
+) => {
+  const { children, className, compact, ...rest } = props;
   const classes = useStyles();
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <Button href="https://twitter.com/ZilSwap">
         <TwitterIcon />
       </Button>
-      <Button href="http://discord.gg/ESVqQ3qtvk">
+      <Button
+        href="http://discord.gg/ESVqQ3qtvk"
+        className={cls({ [classes.compact]: compact })}
+      >
         <Discord />
       </Button>
-      {/* <Button href="https://medium.com/Switcheo">
-        <MediumIcon />
-      </Button>
-      <Button href="https://support@switcheo.network">
-        <MailIcon />
-      </Button> */}
     </Box>
   );
 };

@@ -1,7 +1,7 @@
 import { Box, Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Text } from "app/components";
-import ARKPage from "app/layouts/ARKPage";
+import ArkPage from "app/layouts/ArkPage";
 import { AppTheme } from "app/theme/types";
 import React, { useEffect, useState } from "react";
 import { NftCard } from "./components";
@@ -124,18 +124,18 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { bech32Address, hexAddress } = useMemo(() => {
     if (!match.params.collection) {
       history.push("/ark/collections");
-      console.log("no collection param")
-      return {}
+      console.log("no collection param");
+      return {};
     }
     let collectionAddress = match.params.collection;
     if (collectionAddress?.startsWith("zil1")) {
       return {
         bech32Address: collection,
         hexAddress: fromBech32Address(collectionAddress)?.toLowerCase(),
-      }
+      };
     } else {
       history.push(`/ark/collections/${toBech32Address(collectionAddress)}`);
-      return {}
+      return {};
     }
     // eslint-disable-next-line
   }, [match.params.collection]);
@@ -145,13 +145,15 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     if (!hexAddress) return;
 
     const getCollection = async () => {
-      const response = await fetch("https://api-ark.zilswap.org/nft/collection/list");
+      const response = await fetch(
+        "https://api-ark.zilswap.org/nft/collection/list"
+      );
       const data = await response.json();
-      const collection = data.result.models.find((collection: any) => collection.address === hexAddress);
-      if (collection)
-        setCollection(collection);
-      else
-        history.push("/ark/collections");
+      const collection = data.result.models.find(
+        (collection: any) => collection.address === hexAddress
+      );
+      if (collection) setCollection(collection);
+      else history.push("/ark/collections");
     };
 
     getCollection();
@@ -162,7 +164,6 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     if (Object.keys(collection).length) getTokens();
     // eslint-disable-next-line
   }, [collection]);
-
 
   // get tokens
   const getTokens = async () => {
@@ -182,7 +183,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   ];
 
   return (
-    <ARKPage {...rest}>
+    <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
         <ArkBreadcrumb linkPath={breadcrumbs} />
 
@@ -249,14 +250,17 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             {tokens.map((token, i) => {
               return (
                 <Grid item key={i} xs={12} md={3} className={classes.gridItem}>
-                  <NftCard token={token} collectionAddress={collection?.address} />
+                  <NftCard
+                    token={token}
+                    collectionAddress={collection?.address}
+                  />
                 </Grid>
               );
             })}
           </Grid>
         </ArkBanner>
       </Container>
-    </ARKPage>
+    </ArkPage>
   );
 };
 

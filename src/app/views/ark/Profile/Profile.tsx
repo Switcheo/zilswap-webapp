@@ -8,9 +8,8 @@ import { truncate } from "app/utils";
 import { ReactComponent as EditIcon } from "./edit-icon.svg";
 import { EditProfile, OfferTable, OfferReceivedTable } from "./components";
 import cls from "classnames";
-import ARKPage from "app/layouts/ARKPage";
+import ArkPage from "app/layouts/ArkPage";
 import React, { useState } from "react";
-
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -36,14 +35,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minWidth: 320,
     textAlign: "center",
     color: "#DEFFFF",
-    opacity: '0.5'
+    opacity: "0.5",
   },
   editIcon: {
-    paddingTop: "4px"
+    paddingTop: "4px",
   },
   editable: {
-    cursor: "pointer"
-  }
+    cursor: "pointer",
+  },
 }));
 
 const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
@@ -51,40 +50,59 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 ) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
-  const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
+  const { wallet } = useSelector<RootState, WalletState>(
+    (state) => state.wallet
+  );
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
   const [description] = useState<string | null>(null);
   const [showEdit, setShowEdit] = useState(false);
   const [currentTab, setCurrentTab] = useState("Collected");
 
   return (
-    <ARKPage {...rest}>
+    <ArkPage {...rest}>
       {!showEdit && (
         <Container className={classes.root} maxWidth="lg">
-          <ArkBanner >
-            <Typography variant="h2">Unnamed <EditIcon onClick={() => setShowEdit(true)} className={cls(classes.editIcon, classes.editable)} /></Typography>
-
+          <ArkBanner>
+            <Typography variant="h2">
+              Unnamed{" "}
+              <EditIcon
+                onClick={() => setShowEdit(true)}
+                className={cls(classes.editIcon, classes.editable)}
+              />
+            </Typography>
 
             {wallet?.addressInfo && (
               <Box className={classes.addrBox}>
-                <Typography variant="body1">{truncate(wallet!.addressInfo.bech32, 5, isXs ? 2 : 5)}</Typography>
+                <Typography variant="body1">
+                  {truncate(wallet!.addressInfo.bech32, 5, isXs ? 2 : 5)}
+                </Typography>
               </Box>
             )}
 
             <Box className={classes.descriptionBox} padding={3}>
               {!description && (
-                <Typography onClick={() => setShowEdit(true)} className={cls(classes.editable)}><u>Add a bio</u></Typography>
+                <Typography
+                  onClick={() => setShowEdit(true)}
+                  className={cls(classes.editable)}
+                >
+                  <u>Add a bio</u>
+                </Typography>
               )}
             </Box>
-
           </ArkBanner>
-          <ArkTab setCurrentTab={(value) => setCurrentTab(value)} currentTab={currentTab} tabHeaders={["Collected", "Onsale", "Liked", "Offers Made", "Offers Received"]} />
-          {(currentTab === "Offers Made") && (
-            <OfferTable />
-          )}
-          {(currentTab === "Offers Received") && (
-            <OfferReceivedTable />
-          )}
+          <ArkTab
+            setCurrentTab={(value) => setCurrentTab(value)}
+            currentTab={currentTab}
+            tabHeaders={[
+              "Collected",
+              "Onsale",
+              "Liked",
+              "Offers Made",
+              "Offers Received",
+            ]}
+          />
+          {currentTab === "Offers Made" && <OfferTable />}
+          {currentTab === "Offers Received" && <OfferReceivedTable />}
         </Container>
       )}
       {showEdit && (
@@ -92,7 +110,7 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           <EditProfile onBack={() => setShowEdit(false)} />
         </Container>
       )}
-    </ARKPage >
+    </ArkPage>
   );
 };
 

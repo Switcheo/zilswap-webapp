@@ -1,6 +1,6 @@
 import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
-import { NavDrawer, TopBar } from "app/components";
+import { NavDrawer, ArkTopBar } from "app/components";
 import ConnectWalletButton from "app/components/ConnectWalletButton";
 import { AppTheme } from "app/theme/types";
 import React, { Suspense, useState, useEffect } from "react";
@@ -31,10 +31,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("sm")]: {
       display: "block",
     },
+    [theme.breakpoints.up("sm")]: {
+      paddingLeft: theme.spacing(8),
+    },
   },
 }));
 
-const ARKLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
+const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
 ) => {
   const { route } = props;
@@ -62,7 +65,7 @@ const ARKLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   // to change according to new ARK layout
   return (
     <Box className={classes.root}>
-      <TopBar onToggleDrawer={onToggleDrawer} />
+      <ArkTopBar onToggleDrawer={onToggleDrawer} />
       <main className={classes.content}>
         <DevInfoBadge />
         <Suspense fallback={<LinearProgress />}>
@@ -79,4 +82,4 @@ const ARKLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   );
 };
 
-export default ARKLayout;
+export default ArkLayout;

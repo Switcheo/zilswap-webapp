@@ -12,6 +12,7 @@ export const LayoutActionTypes = {
   SHOW_TRANSFER_CONFIRMATION: "SHOW_TRANSFER_CONFIRMATION",
   TOGGLE_SHOW_MNEMONIC: "TOGGLE_SHOW_MNEMONIC",
   TOGGLE_SHOW_RESUME_TRANSFER: "TOGGLE_SHOW_RESUME_TRANSFER",
+  TOGGLE_EXPAND_NAV_DRAWER: "TOGGLE_EXPAND_NAV_DRAWER",
 
   ADD_BACKGROUND_LOADING: "ADD_BACKGROUND_LOADING",
   REMOVE_BACKGROUND_LOADING: "REMOVE_BACKGROUND_LOADING",
@@ -50,6 +51,12 @@ export function toggleShowMnemonic(override?: OpenCloseState) {
 export function toggleShowResumeTransfer(override?: OpenCloseState) {
   return {
     type: LayoutActionTypes.TOGGLE_SHOW_RESUME_TRANSFER,
+    override,
+  }
+};
+export function toggleExpandNavDrawer(override?: OpenCloseState) {
+  return {
+    type: LayoutActionTypes.TOGGLE_EXPAND_NAV_DRAWER,
     override,
   }
 };

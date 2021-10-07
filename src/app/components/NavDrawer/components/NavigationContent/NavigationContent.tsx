@@ -1,4 +1,11 @@
-import { Button, Collapse, List, ListItem, ListItemText } from "@material-ui/core";
+import {
+  Button,
+  Box,
+  Collapse,
+  List,
+  ListItem,
+  ListItemText,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
@@ -12,6 +19,7 @@ import { NavigationPageOptions } from "../../types";
 import * as IconModule from "../icons";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
 import { useRouter } from "app/utils";
+import { Text } from "app/components";
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1 }}>
@@ -45,6 +53,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 0,
     color: theme.palette.text?.primary,
     alignItems: "flex-end",
+    height: 48,
   },
   buttonLeafActive: {
     boxShadow:
@@ -92,15 +101,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       color: theme.palette.type === "dark" ? "#FFDF6B" : "",
     },
   },
+  buyZilText: {
+    color: theme.palette.type === "dark" ? "#FFDF6B" : "",
+    fontSize: 10,
+  },
   inactive: {
     padding: theme.spacing(2, 0),
     justifyContent: "center",
+    alignItems: "center",
   },
   inactiveIcon: {
     "& path": {
       fill: theme.palette.text?.primary,
     },
-  }
+  },
 }));
 
 type NavigationContentProps = {
@@ -153,35 +167,49 @@ const NavigationContent: React.FC<NavigationContentProps> = (
 
   const selected = () => {
     if (navigation.href === location.pathname) return true;
-    if (InternalRouteMap[location.pathname] === navigation.href)
-      return true;
-  }
+    if (InternalRouteMap[location.pathname] === navigation.href) return true;
+  };
 
-  if (!showDrawer) return (
-    <>
-      <ListItem
-        className={classes.listItem}
-        disableGutters
-        button
-        disabled={navigation.disabled}
-      >
-        <Button
-          className={cls(
-            {
-              [classes.highlightTitle]: navigation.highlight,
-              [classes.secondaryFont]: secondary,
-            },
-            classes.buttonLeaf,
-            classes.inactive,
-            navigation.purchase && classes.buyZil,
-            selected() && classes.buttonLeafActive
-          )}
+  if (!showDrawer)
+    return (
+      <>
+        <ListItem
+          className={classes.listItem}
+          disableGutters
+          button
+          disabled={navigation.disabled}
         >
-          <Icon width="20px" className={classes.inactiveIcon} />{""}
-        </Button>
-      </ListItem>
-    </>
-  )
+          <Button
+            className={cls(
+              {
+                [classes.highlightTitle]: navigation.highlight,
+                [classes.secondaryFont]: secondary,
+              },
+              classes.buttonLeaf,
+              classes.inactive,
+              navigation.purchase && classes.buyZil,
+              selected() && classes.buttonLeafActive
+            )}
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Icon width="20px" className={classes.inactiveIcon} />
+              {navigation.purchase ? (
+                <Text className={classes.buyZilText} variant="h6">
+                  {navigation.title}
+                </Text>
+              ) : (
+                ""
+              )}
+            </Box>
+          </Button>
+        </ListItem>
+      </>
+    );
 
   return (
     <>
@@ -193,7 +221,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (
                 [classes.highlightTitle]: navigation.highlight,
                 [classes.secondaryFont]: secondary,
               },
-              classes.buttonLeaf,
+              classes.buttonLeaf
             )}
             href={navigation.href}
             target="_blank"

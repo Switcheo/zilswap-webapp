@@ -1,4 +1,9 @@
-import { FormControlLabel, FormGroup, Switch, IconButton } from "@material-ui/core";
+import {
+  FormControlLabel,
+  FormGroup,
+  Switch,
+  IconButton,
+} from "@material-ui/core";
 import DarkIcon from "@material-ui/icons/Brightness2Rounded";
 import LightIcon from "@material-ui/icons/Brightness4Rounded";
 import { makeStyles } from "@material-ui/styles";
@@ -14,7 +19,7 @@ import { ThemeSwitchProps } from "./types";
 const THEME_TOGGLE_SELECTED = "light";
 
 interface ToggleSwitchProps extends ThemeSwitchProps {
-  singleButton?: boolean;
+  compact?: boolean;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -43,16 +48,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color:
       theme.palette.type === "dark"
         ? `rgba${hexToRGBA("#DEFFFF", 0.5)}`
-        : "#003340",
+        : `rgba${hexToRGBA("#003340", 0.5)}`,
   },
   icon: {
     fontSize: "1.4rem",
     verticalAlign: "middle",
   },
+  compactIcon: {
+    paddingBottom: "18px",
+  },
 }));
 
 const ThemeSwitch: React.FC<ToggleSwitchProps> = (props: ToggleSwitchProps) => {
-  const { className, forceDark, singleButton, ...rest } = props;
+  const { className, forceDark, compact, ...rest } = props;
   const classes = useStyles(props);
 
   const themeType = useSelector<RootState, string>(
@@ -65,17 +73,15 @@ const ThemeSwitch: React.FC<ToggleSwitchProps> = (props: ToggleSwitchProps) => {
     dispatch(actions.Preference.update({ theme }));
   };
 
-  if (singleButton) return (
-    <IconButton onClick={() => onToggleTheme()}>
-      {themeType === "dark"
-        ?
-        <LightIcon className={clsx(classes.label, classes.icon, className)} />
-        :
-        <DarkIcon className={clsx(classes.label, classes.icon, className)} />}
+  return compact ? (
+    <IconButton onClick={() => onToggleTheme()} className={classes.compactIcon}>
+      {themeType === "dark" ? (
+        <DarkIcon className={clsx(classes.label, className)} />
+      ) : (
+        <LightIcon className={clsx(classes.label, className)} />
+      )}
     </IconButton>
-  )
-
-  return (
+  ) : (
     <FormGroup row>
       <FormControlLabel
         control={

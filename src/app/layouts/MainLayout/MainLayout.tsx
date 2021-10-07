@@ -25,6 +25,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("sm")]: {
       display: "block",
     },
+    [theme.breakpoints.up("sm")]: {
+      paddingLeft: theme.spacing(8),
+    },
   },
 }));
 
