@@ -58,7 +58,7 @@ const makeTxFilter = (statuses: Status[]) => {
 }
 
 function* watchDepositConfirmation() {
-  const getFilteredTx = makeTxFilter([Status.DepositTxStarted, Status.DepositTxConfirmed]);
+  const getFilteredTx = makeTxFilter([Status.NotStarted, Status.DepositTxStarted, Status.DepositTxConfirmed]);
   while (true) {
     try {
       // watch and update relevant txs
@@ -82,6 +82,10 @@ function* watchDepositConfirmation() {
             const depositTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'deposit' && transfer.blockchain === tx.srcChain);
 
             if (depositTransfer?.status === 'success') {
+              if (!tx.sourceTxHash) {
+                tx.sourceTxHash = depositTransfer.transaction_hash;
+              }
+
               tx.depositTxConfirmedAt = dayjs();
               updatedTxs[tx.sourceTxHash!] = tx;
 
