@@ -3,8 +3,8 @@ import { AppTheme } from 'app/theme/types';
 import { hexToRGBA } from 'app/utils';
 import React, { useState, useEffect } from 'react';
 import cls from "classnames";
-import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
+import { ReactComponent as CheckedIcon } from "./checked.svg";
+import { ReactComponent as UncheckedIcon } from "./unchecked.svg";
 import { useDispatch, useSelector } from 'react-redux';
 import { MarketPlaceState, RootState, SaleType } from 'app/store/types';
 import { updateFilter } from 'app/store/marketplace/actions';
@@ -191,7 +191,7 @@ const SaleTypeFilter = () => {
             <FormControlLabel className={classes.filterValue} value="fixed_price" control={<Checkbox
                 className={classes.radioButton}
                 checkedIcon={<CheckedIcon />}
-                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                icon={<UncheckedIcon />}
                 checked={saleType.fixed_price}
                 onChange={handleChange}
                 disableRipple
@@ -201,7 +201,7 @@ const SaleTypeFilter = () => {
             <FormControlLabel className={classes.filterValue} value="timed_auction" control={<Checkbox
               className={classes.radioButton}
               checkedIcon={<CheckedIcon />}
-              icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+              icon={<UncheckedIcon />}
               checked={saleType.timed_auction}
               onChange={handleChange}
               disableRipple

@@ -22,12 +22,16 @@ export interface Nft {
 export type TraitType = {
   trait: string;
   collection?: Collection;
+  values: {[id: string]: TraitValue};
 }
+
 export interface TraitValue {
   value: string;
   count: number;
   trait_type?: TraitType;
+  selected: boolean;
 }
+
 export interface Collection {
   name: string;
   description: string;
@@ -39,6 +43,7 @@ export interface Collection {
   twitter_url: string;
   instagram_url: string;
 }
+
 export interface Asset {
   type: string;
   mime_type: string;
@@ -69,6 +74,7 @@ export interface BiddedNft {
 
 export interface CollectionFilter {
   sale_type: SaleType;
+  traits: {[id: string]: TraitType};
 }
 
 export interface SaleType {

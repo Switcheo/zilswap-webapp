@@ -8,7 +8,8 @@ const initial_state: MarketPlaceState = {
     sale_type: {
       fixed_price: true,
       timed_auction: true
-    }
+    },
+    traits: {},
   },
   profile: {
     ownedNft: {}

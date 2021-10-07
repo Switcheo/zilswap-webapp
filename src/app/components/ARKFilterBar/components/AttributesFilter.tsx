@@ -1,11 +1,15 @@
-import { Box, Button, makeStyles, OutlinedInput, Popover, Radio } from '@material-ui/core';
+import { Box, Button, Checkbox, FormControlLabel, makeStyles, OutlinedInput, Popover } from '@material-ui/core';
 import { AppTheme } from 'app/theme/types';
 import { hexToRGBA } from 'app/utils';
 import React, { useState, useEffect } from 'react';
 import cls from "classnames";
 import { Text } from "app/components";
-import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
+import { ReactComponent as CheckedIcon } from "./checked.svg";
+import { ReactComponent as UncheckedIcon } from "./unchecked.svg";
+import { ReactComponent as IndeterminateIcon } from "./indeterminate.svg";
+import {MarketPlaceState, RootState, TraitType, TraitValue } from 'app/store/types';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateFilter } from 'app/store/marketplace/actions';
 
 const useStyles = makeStyles((theme: AppTheme) =>({
   button: {
@@ -90,6 +94,10 @@ const useStyles = makeStyles((theme: AppTheme) =>({
     fontSize: 12,
     paddingLeft: 20
   },
+  filterCategory: {
+    display: "flex",
+    marginBottom: 3,
+  },
   filterCategoryLabel: {
     fontSize: 18,
     fontWeight: 'bolder',
@@ -122,7 +130,12 @@ const useStyles = makeStyles((theme: AppTheme) =>({
     background: "none",
     border: "none",
     outline: "none",
-    cursor: "pointer"
+    cursor: "pointer",
+    width: "100%",
+    margin: 0,
+    "& .MuiFormControlLabel-label": {
+      flexGrow: 1,
+    }
   },
   filterOptionDetail: {
     fontWeight: 'normal'
@@ -146,9 +159,21 @@ const useStyles = makeStyles((theme: AppTheme) =>({
     flexGrow: 0,
     flexShrink: 0
   },
+  attribute: {
+    display: "flex",
+    alignContent: "center"
+  },
   attributeLabel: {
     color: theme.palette.type === "dark" ? "white" : "",
     fontSize: 13,
+  },
+  attributeValue: {
+    width: "100%",
+    display: "inline-flex",
+    margin: 0,
+    "& .MuiFormControlLabel-label": {
+      flexGrow: 1,
+    }
   },
   attributeMeta: {
     width: 60,
@@ -180,13 +205,17 @@ interface Props {
 }
 
 const AttributesFilter = (props: Props) => {
+  const marketPlaceState = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
+  const dispatch = useDispatch();
+
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [traits, setTraits] = useState<any[]>([])
+  const [traits, setTraits] = useState<{[id: string]: TraitType}>({})
   const [search, setSearch] = useState<string>("");
+  
 
   useEffect(() => {
-    if(!props.collectionAddress && traits.length === 0) return
+    if(!props.collectionAddress && Object.keys(traits).length === 0) return
     getTraits()
     // eslint-disable-next-line
   }, [props.collectionAddress])
@@ -196,7 +225,26 @@ const AttributesFilter = (props: Props) => {
       `https://api-ark.zilswap.org/nft/collection/${props.collectionAddress}/traits`
     );
     const data = await response.json();
-    setTraits(data.result.models)
+
+    var newTraits: {[id: string]: TraitType} = {}
+    data.result.models.forEach((model: any) => {
+      var values: {[id: string]: TraitValue} = {}
+
+      Object.keys(model.values).forEach(value => {
+        values[value] = {
+          value: value,
+          count: +model.values[value],
+          selected: true
+        };
+      });
+
+      newTraits[model.trait] = {
+        trait: model.trait,
+        values: values
+      }
+    });
+
+    setTraits(newTraits)
   }
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -206,6 +254,30 @@ const AttributesFilter = (props: Props) => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const handleChange = (trait: string, value: string) => {
+    setTraits(prevTraits => ({
+      ...prevTraits,
+      [trait]: {
+        ...prevTraits[trait],
+        values: {
+          ...prevTraits[trait].values,
+          [value]: {
+            ...prevTraits[trait].values[value],
+            selected: !prevTraits[trait].values[value].selected
+          }
+        }
+      }
+    }))
+  }
+
+  useEffect(() => {
+    dispatch(updateFilter({
+      ...marketPlaceState.filter,
+      traits: traits
+    }))
+    // eslint-disable-next-line
+  }, [traits])
 
   return (
     <>
@@ -244,20 +316,31 @@ const AttributesFilter = (props: Props) => {
                 <button className={classes.filterSelectButton}>Reset Filter</button>
               </Box>
 
-              {traits.map(trait => (
-                <button className={classes.filterOption}>
-                  <Radio
+              {Object.values(traits).map(trait => {
+                const values = Object.values(trait.values)
+                const selectedCount = values.filter(value => value.selected).length
+                return (
+                  <FormControlLabel key={trait.trait} className={classes.filterOption} value={trait.trait} control={<Checkbox
                     className={classes.radioButton}
-                    checkedIcon={<CheckedIcon />}
-                    icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                    disableRipple
+                      checkedIcon={<CheckedIcon />}
+                      icon={<UncheckedIcon />}
+                      indeterminateIcon={<IndeterminateIcon />}
+                      checked={selectedCount === values.length}
+                      indeterminate={selectedCount !== values.length && selectedCount !== 0}
+                      // onChange={handleChange}
+                      disableRipple
+                    />} 
+                    label={<>
+                      <Text className={classes.filterCategoryLabel}>{trait.trait}</Text>
+                      {values.filter(value => !value.selected).length === 0 ? (
+                        <Text className={classes.filterValueSubText}>All</Text>
+                      ) : (
+                        <Text className={classes.filterValueSubText}>{selectedCount} of {values.length} selected</Text>
+                      )}
+                    </>}
                   />
-                  <Box>
-                    <Text className={classes.filterCategoryLabel}>{trait.trait}</Text>
-                    <Text className={classes.filterValueSubText}>2 of 10 selected</Text>
-                  </Box>
-                </button>
-              ))}
+                )
+            })}
 
             </Box>
             <Box flexGrow="1">
@@ -270,34 +353,57 @@ const AttributesFilter = (props: Props) => {
                 onChange={(e) => setSearch(e.target.value)}
               />
               <Box className={classes.scrollableTraits}>
-                {traits.map(trait => (
-                  <Box marginBottom={3}>
-                    <Box display="flex" marginBottom={1}>
-                      <Radio
+                {Object.values(traits).map(trait => {
+                  const values = Object.values(trait.values)
+                  const selectedCount = values.filter(value => value.selected).length
+
+                  return (
+                    <Box key={trait.trait} marginBottom={3}>
+                      <FormControlLabel className={classes.filterOption} value={trait.trait} control={<Checkbox
                         className={classes.radioButton}
-                        checkedIcon={<CheckedIcon />}
-                        icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                        disableRipple
-                      />
-                      <Text flexGrow="1" className={classes.filterCategoryLabel}>{trait.trait}</Text>
-                      <Text className={classes.attributeMeta}>Att. Rarity</Text>
-                      <Text className={classes.attributeMeta}>Match</Text>
-                    </Box>
-                    {Object.keys(trait.values).map((value: string) => (
-                      <Box display="flex" alignItems="center" marginBottom={1} marginLeft={3}>
-                        <Radio
-                          className={classes.radioButton}
                           checkedIcon={<CheckedIcon />}
-                          icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                          icon={<UncheckedIcon />}
+                          indeterminateIcon={<IndeterminateIcon />}
+                          checked={selectedCount === values.length}
+                          indeterminate={selectedCount !== values.length && selectedCount !== 0}
+                          // onChange={handleChange}
                           disableRipple
-                        />
-                        <Text className={classes.attributeLabel} flexGrow="1">{value}</Text>
-                        <Text className={classes.attributeMeta}>2.5K <Text className={classes.attributeMetaDetail}>(10%)</Text></Text>
-                        <Text className={classes.attributeMeta}>{trait.values[value]} <Text className={classes.attributeMetaDetail}>(5%)</Text></Text>
-                      </Box>
-                    ))}
-                  </Box>
-                ))}
+                        />} 
+                        label={
+                          <span className={classes.filterCategory}>
+                            <Text flexGrow="1" className={classes.filterCategoryLabel}>{trait.trait}</Text>
+                            <Text className={classes.attributeMeta}>Att. Rarity</Text>
+                            <Text className={classes.attributeMeta}>Match</Text>
+                          </span>
+                        }
+                      />
+                      
+                      {Object.values(trait.values).map(value => {
+                        return (
+                          <Box key={value.value} marginBottom={1} marginLeft={3}>
+                            <FormControlLabel className={classes.attributeValue} value={value.value} control={<Checkbox
+                              className={classes.radioButton}
+                                checkedIcon={<CheckedIcon />}
+                                icon={<UncheckedIcon />}
+                                indeterminateIcon={<IndeterminateIcon />}
+                                checked={value.selected}
+                                onChange={() => handleChange(trait.trait, value.value)}
+                                disableRipple
+                              />} 
+                              label={
+                                <span className={classes.attribute}>
+                                  <Text className={classes.attributeLabel} flexGrow="1">{value.value}</Text>
+                                  <Text className={classes.attributeMeta}>2.5K <Text className={classes.attributeMetaDetail}>(10%)</Text></Text>
+                                  <Text className={classes.attributeMeta}>{value.count} <Text className={classes.attributeMetaDetail}>(5%)</Text></Text>
+                                </span>
+                              }
+                            />
+                          </Box>
+                        )                        
+                      })}
+                    </Box>
+                  )
+                })}
               </Box>
             </Box>
           </Box>
