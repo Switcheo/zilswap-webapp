@@ -11,6 +11,7 @@ const initial_state: LayoutState = {
   showTransferConfirmation: false,
   showMnemonicDialog: false,
   showResumeTransferDialog: false,
+  expandNavDrawer: false,
   liquidityEarnHidden: false,
   notification: undefined,
   showPoolType: "add",
@@ -65,6 +66,11 @@ const reducer = (state: LayoutState = initial_state, action: any) => {
       return {
         ...state,
         showResumeTransferDialog: !action.override ? !state.showResumeTransferDialog : action.override === "open",
+      };
+    case LayoutActionTypes.TOGGLE_EXPAND_NAV_DRAWER:
+      return {
+        ...state,
+        expandNavDrawer: !action.override ? !state.expandNavDrawer : action.override === "open",
       };
     case LayoutActionTypes.HIDE_LIQUIDITY_EARN:
       return {

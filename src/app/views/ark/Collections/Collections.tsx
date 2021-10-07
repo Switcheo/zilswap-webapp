@@ -11,7 +11,7 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { Text } from "app/components";
-import ARKPage from "app/layouts/ARKPage";
+import ArkPage from "app/layouts/ArkPage";
 import { AppTheme } from "app/theme/types";
 import React, { useEffect, useState } from "react";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
@@ -91,9 +91,8 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   };
 
   return (
-    <ARKPage {...rest}>
+    <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
-
         <OutlinedInput
           placeholder="What are you looking for..."
           value={search}
@@ -144,7 +143,9 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         {collections.map((collection) => {
           console.log("collection: ", collection);
           return (
-            <Link to={`/ark/collections/${toBech32Address(collection.address)}`}>
+            <Link
+              to={`/ark/collections/${toBech32Address(collection.address)}`}
+            >
               <Text marginTop={2} variant="h1">
                 {collection.name}
               </Text>
@@ -152,7 +153,7 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           );
         })}
       </Container>
-    </ARKPage>
+    </ArkPage>
   );
 };
 

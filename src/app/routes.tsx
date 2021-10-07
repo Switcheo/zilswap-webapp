@@ -2,7 +2,7 @@ import React, { lazy } from "react";
 import { RouteConfig } from "react-router-config";
 import { Redirect } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
-import ARKLayout from "./layouts/ARKLayout";
+import ArkLayout from "./layouts/ArkLayout";
 
 const routes: RouteConfig[] = [
   {
@@ -45,7 +45,7 @@ const routes: RouteConfig[] = [
   },
   {
     path: "/ark",
-    component: ARKLayout,
+    component: ArkLayout,
     routes: [
       {
         path: "/ark/collections",

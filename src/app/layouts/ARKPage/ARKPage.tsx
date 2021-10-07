@@ -1,5 +1,4 @@
 import { Box, makeStyles } from "@material-ui/core";
-import ARKNavBar from "app/components/ARKNavBar";
 import { AppTheme } from "app/theme/types";
 import React from "react";
 
@@ -22,12 +21,7 @@ const ArkPage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { children } = props;
   const classes = useStyles();
 
-  return (
-    <Box className={classes.root}>
-      <ARKNavBar />
-      {children}
-    </Box>
-  );
+  return <Box className={classes.root}>{children}</Box>;
 };
 
 export default ArkPage;

@@ -1,17 +1,27 @@
-import { Container, Typography, Box, useMediaQuery, Tooltip } from "@material-ui/core";
+import {
+  Box,
+  Container,
+  Tooltip,
+  Typography,
+  useMediaQuery,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
-import { ArkTab, ArkBanner } from "app/components";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState, WalletState } from "app/store/types";
-import { truncate } from "app/utils";
-import { ReactComponent as EditIcon } from "./edit-icon.svg";
-import { EditProfile, OfferTable, OfferReceivedTable, Collected } from "./components";
-import cls from "classnames";
-import ARKPage from "app/layouts/ARKPage";
-import React, { useState, useEffect } from "react";
-import { FancyButton } from "app/components";
+import { ArkBanner, ArkTab, FancyButton } from "app/components";
+import ArkPage from "app/layouts/ArkPage";
 import { actions } from "app/store";
+import { RootState, WalletState } from "app/store/types";
+import { AppTheme } from "app/theme/types";
+import { truncate } from "app/utils";
+import cls from "classnames";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  Collected,
+  EditProfile,
+  OfferReceivedTable,
+  OfferTable,
+} from "./components";
+import { ReactComponent as EditIcon } from "./edit-icon.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -38,13 +48,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minWidth: 320,
     textAlign: "center",
     color: "#DEFFFF",
-    opacity: '0.5'
+    opacity: "0.5",
   },
   editIcon: {
-    paddingTop: "4px"
+    paddingTop: "4px",
   },
   editable: {
-    cursor: "pointer"
+    cursor: "pointer",
   },
   button: {
     padding: "16px",
@@ -61,18 +71,22 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 ) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
-  const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
+  const { wallet } = useSelector<RootState, WalletState>(
+    (state) => state.wallet
+  );
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
   const [description] = useState<string | null>(null);
   const [showEdit, setShowEdit] = useState(false);
   const [currentTab, setCurrentTab] = useState("Collected");
-  const [addrText, setAddrText] = useState(truncate(wallet?.addressInfo.bech32, 5, isXs ? 2 : 5))
+  const [addrText, setAddrText] = useState(
+    truncate(wallet?.addressInfo.bech32, 5, isXs ? 2 : 5)
+  );
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (wallet?.addressInfo)
       setAddrText(truncate(wallet?.addressInfo.bech32, 5, isXs ? 2 : 5));
-  }, [wallet?.addressInfo, isXs])
+  }, [wallet?.addressInfo, isXs]);
 
   const onConnectWallet = () => {
     dispatch(actions.Layout.toggleShowWallet());
@@ -83,18 +97,27 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     setAddrText("Copied");
     setTimeout(() => {
       setAddrText(truncate(wallet?.addressInfo.bech32, 5, isXs ? 2 : 5));
-    }, 3000)
-  }
+    }, 3000);
+  };
 
   return (
-    <ARKPage {...rest}>
+    <ArkPage {...rest}>
       {!showEdit && (
         <Container className={classes.root} maxWidth="lg">
-          <ArkBanner >
-            <Typography variant="h2">Unnamed <EditIcon onClick={() => setShowEdit(true)} className={cls(classes.editIcon, classes.editable)} /></Typography>
+          <ArkBanner>
+            <Typography variant="h2">
+              Unnamed{" "}
+              <EditIcon
+                onClick={() => setShowEdit(true)}
+                className={cls(classes.editIcon, classes.editable)}
+              />
+            </Typography>
             {wallet?.addressInfo && (
               <Tooltip title="Copy address" placement="top" arrow>
-                <Box onClick={() => copyAddr(wallet!.addressInfo.bech32)} className={classes.addrBox}>
+                <Box
+                  onClick={() => copyAddr(wallet!.addressInfo.bech32)}
+                  className={classes.addrBox}
+                >
                   <Typography variant="body1">{addrText}</Typography>
                 </Box>
               </Tooltip>
@@ -102,32 +125,54 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
             <Box className={classes.descriptionBox} padding={3}>
               {!description && (
-                <Typography onClick={() => setShowEdit(true)} className={cls(classes.editable)}><u>Add a bio</u></Typography>
+                <Typography
+                  onClick={() => setShowEdit(true)}
+                  className={cls(classes.editable)}
+                >
+                  <u>Add a bio</u>
+                </Typography>
               )}
             </Box>
-
           </ArkBanner>
-          <ArkTab setCurrentTab={(value) => setCurrentTab(value)} currentTab={currentTab} tabHeaders={["Collected", "Onsale", "Liked", "Bids Made", "Bids Received"]} />
+          <ArkTab
+            setCurrentTab={(value) => setCurrentTab(value)}
+            currentTab={currentTab}
+            tabHeaders={[
+              "Collected",
+              "Onsale",
+              "Liked",
+              "Bids Made",
+              "Bids Received",
+            ]}
+          />
           {wallet && (
             <>
               {currentTab === "Collected" && (
                 <Collected address={wallet.addressInfo.byte20} />
               )}
-              {(currentTab === "Bids Made") && (
-                <OfferTable />
-              )}
-              {(currentTab === "Bids Received") && (
-                <OfferReceivedTable />
-              )}
+              {currentTab === "Bids Made" && <OfferTable />}
+              {currentTab === "Bids Received" && <OfferReceivedTable />}
             </>
           )}
           {!wallet && (
             <Box mt={12} display="flex" justifyContent="center">
-              <Box display="flex" flexDirection="column" textAlign="center"  >
-                <Typography className={classes.connectionText} variant="h1">Your wallet is not connected.</Typography>
-                <Typography className={classes.connectionText} variant="body1">Please connect your wallet to view this page.</Typography>
+              <Box display="flex" flexDirection="column" textAlign="center">
+                <Typography className={classes.connectionText} variant="h1">
+                  Your wallet is not connected.
+                </Typography>
+                <Typography className={classes.connectionText} variant="body1">
+                  Please connect your wallet to view this page.
+                </Typography>
 
-                <FancyButton fullWidth onClick={() => onConnectWallet()} className={classes.button} variant="contained" color="primary" >Connect Wallet</FancyButton>
+                <FancyButton
+                  fullWidth
+                  onClick={() => onConnectWallet()}
+                  className={classes.button}
+                  variant="contained"
+                  color="primary"
+                >
+                  Connect Wallet
+                </FancyButton>
               </Box>
             </Box>
           )}
@@ -138,7 +183,7 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           <EditProfile onBack={() => setShowEdit(false)} />
         </Container>
       )}
-    </ARKPage >
+    </ArkPage>
   );
 };
 

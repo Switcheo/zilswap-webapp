@@ -1,6 +1,6 @@
 import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
-import { NavDrawer, TopBar } from "app/components";
+import { ArkNavDrawer, NavDrawer, ArkTopBar } from "app/components";
 import ConnectWalletButton from "app/components/ConnectWalletButton";
 import { AppTheme } from "app/theme/types";
 import React, { Suspense, useState, useEffect } from "react";
@@ -10,7 +10,12 @@ import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
 import { DevInfoBadge } from "../MainLayout/components";
 import { actions } from "app/store";
-import { BlockchainState, MarketPlaceState, RootState, WalletState } from "app/store/types";
+import {
+  BlockchainState,
+  MarketPlaceState,
+  RootState,
+  WalletState,
+} from "app/store/types";
 import dayjs from "dayjs";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -32,18 +37,28 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("sm")]: {
       display: "block",
     },
+    [theme.breakpoints.up("sm")]: {
+      paddingLeft: theme.spacing(8),
+    },
   },
 }));
 
-const ARKLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
+const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
 ) => {
   const { route } = props;
   const classes = useStyles();
-  const [showDrawer, setShowDrawer] = useState(false);
-  const blockchainState = useSelector<RootState, BlockchainState>((state) => state.blockchain);
-  const walletState = useSelector<RootState, WalletState>((state) => state.wallet);
-  const marketplaceState = useSelector<RootState, MarketPlaceState>((state) => state.marketplace);
+  const [showDrawer, setShowDrawer] = useState<boolean>(false);
+  const [showArkDrawer, setShowArkDrawer] = useState<boolean>(false);
+  const blockchainState = useSelector<RootState, BlockchainState>(
+    (state) => state.blockchain
+  );
+  const walletState = useSelector<RootState, WalletState>(
+    (state) => state.wallet
+  );
+  const marketplaceState = useSelector<RootState, MarketPlaceState>(
+    (state) => state.marketplace
+  );
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -63,10 +78,18 @@ const ARKLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     setShowDrawer(typeof override === "boolean" ? override : !showDrawer);
   };
 
+  const onToggleArkDrawer = (override?: boolean) => {
+    setShowArkDrawer(typeof override === "boolean" ? override : !showArkDrawer);
+  };
+
   // to change according to new ARK layout
   return (
     <Box className={classes.root}>
-      <TopBar onToggleDrawer={onToggleDrawer} />
+      <ArkTopBar
+        onToggleDrawer={onToggleDrawer}
+        onToggleArkDrawer={onToggleArkDrawer}
+      />
+      <NavDrawer onClose={() => onToggleDrawer(false)} open={showDrawer} />
       <main className={classes.content}>
         <DevInfoBadge />
         <Suspense fallback={<LinearProgress />}>
@@ -78,9 +101,12 @@ const ARKLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       </Hidden>
       <WalletDialog />
       <TransactionDialog />
-      <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />
+      <ArkNavDrawer
+        open={showArkDrawer}
+        onClose={() => onToggleArkDrawer(false)}
+      />
     </Box>
   );
 };
 
-export default ARKLayout;
+export default ArkLayout;

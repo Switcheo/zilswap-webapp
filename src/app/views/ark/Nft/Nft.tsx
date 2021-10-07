@@ -12,7 +12,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArkBreadcrumb } from "app/components";
-import ARKPage from "app/layouts/ARKPage";
+import ArkPage from "app/layouts/ArkPage";
 import { AppTheme } from "app/theme/types";
 import React from "react";
 import { ReactComponent as VerifiedBadge } from "../Collection/verified-badge.svg";
@@ -171,7 +171,7 @@ const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   ];
 
   return (
-    <ARKPage {...rest}>
+    <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
         <ArkBreadcrumb linkPath={breadcrumbs} />
 
@@ -274,7 +274,7 @@ const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           {/* Price History */}
         </Box>
       </Container>
-    </ARKPage>
+    </ArkPage>
   );
 };
 
