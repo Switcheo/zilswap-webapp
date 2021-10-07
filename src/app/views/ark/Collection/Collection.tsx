@@ -167,7 +167,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   // get tokens
   const getTokens = async () => {
     const response = await fetch(
-      `https://api-ark.zilswap.org/nft/token/list?collection=${collection.id}`
+      `https://api-ark.zilswap.org/nft/token/list?collection=${collection.address}`
     );
     const data = await response.json();
     setTokens(data.result.models);
