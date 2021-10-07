@@ -1,11 +1,4 @@
-import {
-  Box,
-  Button,
-  Drawer,
-  DrawerProps,
-  List,
-  useMediaQuery,
-} from "@material-ui/core";
+import { Box, Button, Drawer, DrawerProps, List, useMediaQuery } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { CurrencyLogo, Text } from "app/components";
 import { actions } from "app/store";

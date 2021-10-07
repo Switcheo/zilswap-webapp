@@ -1,6 +1,6 @@
 import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
-import { ArkNavDrawer, NavDrawer, ArkTopBar } from "app/components";
+import { NavDrawer, ArkNavDrawer, ArkTopBar } from "app/components";
 import ConnectWalletButton from "app/components/ConnectWalletButton";
 import { AppTheme } from "app/theme/types";
 import React, { Suspense, useState, useEffect } from "react";
@@ -10,12 +10,7 @@ import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
 import { DevInfoBadge } from "../MainLayout/components";
 import { actions } from "app/store";
-import {
-  BlockchainState,
-  MarketPlaceState,
-  RootState,
-  WalletState,
-} from "app/store/types";
+import { BlockchainState, MarketPlaceState, RootState, WalletState } from "app/store/types";
 import dayjs from "dayjs";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
