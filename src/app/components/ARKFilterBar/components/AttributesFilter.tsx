@@ -271,6 +271,23 @@ const AttributesFilter = (props: Props) => {
     }))
   }
 
+  const handleCategoryChange = (trait: string) => {
+    setTraits(prevTraits => {
+      var updatedTrait = prevTraits[trait]
+      const hasSelected = Object.values(updatedTrait.values).filter(value => value.selected).length > 0
+      Object.values(updatedTrait.values).forEach(value => {
+        updatedTrait.values[value.value].selected = !hasSelected
+      })
+      return ({
+          ...prevTraits,
+          [trait]: {
+            ...updatedTrait
+          }
+        })
+      }
+    )
+  }
+
   useEffect(() => {
     dispatch(updateFilter({
       ...marketPlaceState.filter,
@@ -327,7 +344,7 @@ const AttributesFilter = (props: Props) => {
                       indeterminateIcon={<IndeterminateIcon />}
                       checked={selectedCount === values.length}
                       indeterminate={selectedCount !== values.length && selectedCount !== 0}
-                      // onChange={handleChange}
+                      onChange={() => handleCategoryChange(trait.trait)}
                       disableRipple
                     />} 
                     label={<>
@@ -366,7 +383,7 @@ const AttributesFilter = (props: Props) => {
                           indeterminateIcon={<IndeterminateIcon />}
                           checked={selectedCount === values.length}
                           indeterminate={selectedCount !== values.length && selectedCount !== 0}
-                          // onChange={handleChange}
+                          onChange={() => handleCategoryChange(trait.trait)}
                           disableRipple
                         />} 
                         label={
