@@ -5,7 +5,7 @@ import { LocalStorageKeys } from "app/utils/constants";
 const loadSavedAccessToken = () => {
   try {
     let saved = localStorage.getItem(LocalStorageKeys.ArkAccessToken)
-    if (saved) return JSON.parse(saved);
+    return JSON.parse(saved!);
   } catch (error) {
     return undefined;
   }
@@ -16,8 +16,15 @@ const savedAccessToken = loadSavedAccessToken()
 const initial_state: MarketPlaceState = {
   collections: {},
   tokens: {},
-  filter: {},
-  oAuth: savedAccessToken
+  oAuth: savedAccessToken,
+  filter: {
+    sale_type: {
+      fixed_price: true,
+      timed_auction: true
+    },
+    traits: {},
+  },
+  profile: undefined,
 }
 
 const reducer = (state: MarketPlaceState = initial_state, action: any) => {
@@ -42,6 +49,11 @@ const reducer = (state: MarketPlaceState = initial_state, action: any) => {
       return {
         ...state,
         tokens: payload,
+      }
+    case MarketPlaceActionTypes.UPDATE_FILTER:
+      return {
+        ...state,
+        filter: payload
       }
     default:
       return state;

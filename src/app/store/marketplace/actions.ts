@@ -1,5 +1,6 @@
 import { SimpleMap } from "app/utils"
 import { Nft, OAuth } from "./types"
+import { CollectionFilter } from "../types"
 
 export const MarketPlaceActionTypes = {
   INITIALIZE: "INITIALIZE",
@@ -32,6 +33,12 @@ export function updateProfile(payload: {}) {
 export function updateAccessToken(payload: OAuth) {
   return {
     type: MarketPlaceActionTypes.UPDATE_ACCESS_TOKEN,
+  }
+}
+
+export function updateFilter(payload: CollectionFilter) {
+  return {
+    type: MarketPlaceActionTypes.UPDATE_FILTER,
     payload
   }
 }
