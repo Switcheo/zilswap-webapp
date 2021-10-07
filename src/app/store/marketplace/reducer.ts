@@ -4,7 +4,12 @@ import { MarketPlaceState } from "./types";
 const initial_state: MarketPlaceState = {
   collections: {},
   tokens: {},
-  filter: {},
+  filter: {
+    sale_type: {
+      fixed_price: true,
+      timed_auction: true
+    }
+  },
   profile: {
     ownedNft: {}
   },
@@ -20,6 +25,11 @@ const reducer = (state: MarketPlaceState = initial_state, action: any) => {
           ...state.profile,
           ...payload,
         }
+      }
+    case MarketPlaceActionTypes.UPDATE_FILTER:
+      return {
+        ...state,
+        filter: payload
       }
     default:
       return state;

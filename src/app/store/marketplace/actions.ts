@@ -1,3 +1,5 @@
+import { CollectionFilter } from "../types"
+
 export const MarketPlaceActionTypes = {
   INITIALIZE: "INITIALIZE",
   LOAD_PROFILE: "LOAD_PROFILE",
@@ -18,6 +20,13 @@ export function loadProfile() {
 export function updateProfile(payload: {}) {
   return {
     type: MarketPlaceActionTypes.UPDATE_PROFILE,
+    payload
+  }
+}
+
+export function updateFilter(payload: CollectionFilter) {
+  return {
+    type: MarketPlaceActionTypes.UPDATE_FILTER,
     payload
   }
 }

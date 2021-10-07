@@ -4,7 +4,7 @@ import BigNumber from "bignumber.js";
 export interface MarketPlaceState {
   collections: SimpleMap<Collection>;
   tokens: SimpleMap<Nft>;
-  filter: {};
+  filter: CollectionFilter;
   profile?: Profile;
 }
 
@@ -65,4 +65,13 @@ export interface Profile {
 
 export interface BiddedNft {
   nft: Nft;
+}
+
+export interface CollectionFilter {
+  sale_type: SaleType;
+}
+
+export interface SaleType {
+  fixed_price: boolean;
+  timed_auction: boolean;
 }
