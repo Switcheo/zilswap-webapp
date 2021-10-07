@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Grid,
-  Hidden,
   IconButton,
   Toolbar,
   Typography,
@@ -11,6 +10,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ConnectWalletButton from "app/components/ConnectWalletButton";
+import { ReactComponent as Logo } from "app/components/NavDrawer/logo2.svg";
 import { ReactComponent as MenuIcon } from "app/components/TopBar/menu.svg";
 import RewardsInfoButton from "app/layouts/RewardsInfoButton";
 import { AppTheme } from "app/theme/types";
@@ -96,16 +96,21 @@ const useStyles = makeStyles((theme) => ({
     "-webkit-text-stroke-color": "rgba(107, 225, 255, 0.2)",
     "-webkit-text-stroke-width": "1px",
   },
+  menuIcon: {
+    padding: theme.spacing(0, 2),
+  },
 }));
 
 export interface ArkTopBarProps {
   onToggleDrawer: (override?: boolean) => void;
+  onToggleArkDrawer: (override?: boolean) => void;
 }
 
 const ArkTopBar: React.FC<
   ArkTopBarProps & React.HTMLAttributes<HTMLDivElement>
 > = (props: any) => {
-  const { children, className, onToggleDrawer, ...rest } = props;
+  const { children, className, onToggleDrawer, onToggleArkDrawer, ...rest } =
+    props;
   const classes = useStyles();
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
   const router = useRouter();
@@ -124,7 +129,7 @@ const ArkTopBar: React.FC<
             <Box flex={1}>
               <div className={classes.drawerHeader}>
                 <IconButton onClick={onToggleDrawer}>
-                  <MenuIcon />
+                  <Logo />
                 </IconButton>
               </div>
             </Box>
@@ -184,10 +189,18 @@ const ArkTopBar: React.FC<
           justifyContent="flex-end"
           alignItems="center"
         >
-          <RewardsInfoButton />
-          <Hidden xsDown>
-            <ConnectWalletButton />
-          </Hidden>
+          {!isXs ? (
+            <Fragment>
+              <RewardsInfoButton />
+              <ConnectWalletButton />
+            </Fragment>
+          ) : (
+            <div className={classes.menuIcon}>
+              <IconButton onClick={onToggleArkDrawer}>
+                <MenuIcon />
+              </IconButton>
+            </div>
+          )}
         </Box>
       </Toolbar>
     </AppBar>

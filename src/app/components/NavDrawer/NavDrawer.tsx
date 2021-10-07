@@ -92,7 +92,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignItems: "center",
     padding: "4px 22px",
     justifyContent: "flex-start",
-    minHeight: "49px",
+    minHeight: "48px",
     backgroundColor: theme.palette.toolbar.main,
   },
   price: {
