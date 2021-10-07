@@ -6,3 +6,4 @@ export const getWallet = (state: RootState) => state.wallet
 export const getRewards = (state: RootState) => state.rewards
 export const getTokens = (state: RootState) => state.token
 export const getBridge = (state: RootState) => state.bridge
+export const getMarketplace = (state: RootState) => state.marketplace

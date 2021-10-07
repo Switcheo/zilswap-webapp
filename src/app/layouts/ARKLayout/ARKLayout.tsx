@@ -10,7 +10,8 @@ import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
 import { DevInfoBadge } from "../MainLayout/components";
 import { actions } from "app/store";
-import { BlockchainState, RootState, WalletState } from "app/store/types";
+import { BlockchainState, MarketPlaceState, RootState, WalletState } from "app/store/types";
+import dayjs from "dayjs";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -43,17 +44,20 @@ const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { route } = props;
   const classes = useStyles();
   const [showDrawer, setShowDrawer] = useState(false);
-  const blockchainState = useSelector<RootState, BlockchainState>(
-    (state) => state.blockchain
-  );
-  const walletState = useSelector<RootState, WalletState>(
-    (state) => state.wallet
-  );
+  const blockchainState = useSelector<RootState, BlockchainState>((state) => state.blockchain);
+  const walletState = useSelector<RootState, WalletState>((state) => state.wallet);
+  const marketplaceState = useSelector<RootState, MarketPlaceState>((state) => state.marketplace);
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (blockchainState.ready && walletState.wallet?.addressInfo.bech32) {
-      dispatch(actions.MarketPlace.loadProfile());
+      const { oAuth } = marketplaceState;
+      if (oAuth && dayjs(oAuth.expires_at * 1000).isBefore(dayjs())) {
+        dispatch(actions.MarketPlace.initialize());
+      } else if (!oAuth) {
+        dispatch(actions.MarketPlace.initialize());
+      } else {
+      }
     }
     // eslint-disable-next-line
   }, [blockchainState.ready, walletState.wallet?.addressInfo.bech32]);

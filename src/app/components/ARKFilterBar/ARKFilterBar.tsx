@@ -1,7 +1,7 @@
 import { Box, makeStyles } from '@material-ui/core';
 import { AppTheme } from 'app/theme/types';
 import React from 'react';
-import TextFilter from './components/TextFilter';
+import SaleTypeFilter from './components/SaleTypeFilter';
 import AttributesFilter from './components/AttributesFilter';
 import SortFilter from './components/SortFilter';
 import SearchFilter from './components/SearchFilter';
@@ -27,23 +27,12 @@ interface Props {
 const ARKFilterBar = (props: Props) => {
   const classes = useStyles();
 
-  // https://api-ark.zilswap.org/nft/collection/1ea41c92-ef33-4f4b-9578-a4b86934e135/traits
-
   return (
     <Box className={classes.root} marginTop={2}>
       <Box className={classes.grid}>
         <SearchFilter />
 
-        <TextFilter
-          label="Sale Type"
-          currentValue="ALL"
-          options={[
-            {value: "FIXED"},
-            {value: "AUCTION"},
-            {value: "OFFER"},
-            {value: "NOT FOR SALE"}
-          ]}
-        />
+        <SaleTypeFilter />
 
         <AttributesFilter collectionAddress={props.collectionAddress} />
       </Box>

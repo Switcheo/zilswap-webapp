@@ -1,13 +1,20 @@
 import {
-  Box, BoxProps, TableContainer, Table, TableBody, TableCell,
-  TableRow, TableHead, IconButton, Typography, MenuItem, ListItemIcon,
-  Avatar,
+  Box, BoxProps, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, useMediaQuery, useTheme
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { ArkPaginator } from "app/components";
+import { Asset } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import React from "react";
+import dayjs from "dayjs";
+import React, { useState } from "react";
+import ActiveBidToggle from "../ActiveBidToggle";
+import ArkCollapsibleRow from "../ArkCollapsibleRow";
+import BidsCard from "../BidsCard";
+import BidsDialog from "../BidsDialog";
+import { Bids } from "../bidtype";
 
 interface Props extends BoxProps {
 }
@@ -49,61 +56,90 @@ interface HeadersProp {
 const HEADERS: HeadersProp[] = [
   { align: 'left', value: "Item" }, { align: "right", value: "Bids" },
   { align: "right", value: "USD Price" }, { align: "center", value: "Offer Score" },
-  { align: "center", value: "To" }, { align: "center", value: "Offered on" }, { align: "center", value: "Expiration" },
-  { align: "center", value: "Status" }, { align: "center", value: "Action" },
+  { align: "center", value: "Seller" }, { align: "center", value: "Offered on" }, { align: "center", value: "Expiration" },
+  { align: "center", value: "Action" },
 ]
 
-const TEMP_DATA = [
-  { bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { id: 1234 }, usdPrice: new BigNumber(100), score: "lower than average", nftOwner: { name: "Jerry" }, offeredOn: "", expiration: "12/07/21", status: "active" },
-  { bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { id: 1234 }, usdPrice: new BigNumber(100), score: "lower than average", nftOwner: { name: "Jerry" }, offeredOn: "", expiration: "12/07/21", status: "active" },
-  { bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { id: 1234 }, usdPrice: new BigNumber(100), score: "lower than average", nftOwner: { name: "Jerry" }, offeredOn: "", expiration: "12/07/21", status: "active" },
-  { bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { id: 1234 }, usdPrice: new BigNumber(100), score: "lower than average", nftOwner: { name: "Jerry" }, offeredOn: "", expiration: "12/07/21", status: "active" },
-]
-const TEMP_BEAR_AVATAR_URL = "https://pbs.twimg.com/profile_images/1432977604563193858/z01O7Sey_400x400.jpg";
+const TEMP_ASSET: Asset = {
+  type: "image",
+  filename: "",
+  url: "",
+  mimeType: "",
+}
 
 const OfferTable: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down("xs"));
+  const [bid, setBid] = useState<Bids | undefined>(undefined);
+
+  const acceptBid = (newBid?: Bids) => {
+    setBid(newBid);
+  }
+
+  const cancelBid = () => {
+    setBid(undefined);
+  }
+
+  const TEMP_DATA: Bids[] = [
+    {
+      bidId: 1, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { tokenId: 1234, asset: TEMP_ASSET },
+      usdPrice: new BigNumber(100), bidAverage: "lower than average", user: { name: "Tom" }, bidTime: dayjs("12/07/21"),
+      expiration: dayjs("12/07/21"), status: "active",
+      actions: { accept: { label: "Accept", action: acceptBid }, decline: { label: "Decline", action: cancelBid } }
+    },
+    {
+      bidId: 2, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { tokenId: 1234, asset: TEMP_ASSET },
+      usdPrice: new BigNumber(100), bidAverage: "lower than average", user: { name: "Tom" }, bidTime: dayjs("12/07/21"),
+      expiration: dayjs("12/07/21"), status: "active",
+      actions: { accept: { label: "Accept", action: acceptBid }, decline: { label: "Decline", action: cancelBid } }
+    },
+    {
+      bidId: 3, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { tokenId: 1234, asset: TEMP_ASSET },
+      usdPrice: new BigNumber(100), bidAverage: "lower than average", user: { name: "Tom" }, bidTime: dayjs("12/07/21"),
+      expiration: dayjs("12/07/21"), status: "active",
+      actions: { accept: { label: "Accept", action: acceptBid }, decline: { label: "Decline", action: cancelBid } }
+    },
+    {
+      bidId: 4, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { tokenId: 1234, asset: TEMP_ASSET },
+      usdPrice: new BigNumber(100), bidAverage: "lower than average", user: { name: "Tom" }, bidTime: dayjs("12/07/21"),
+      expiration: dayjs("12/07/21"), status: "active",
+      actions: { accept: { label: "Accept", action: acceptBid }, decline: { label: "Decline", action: cancelBid } }
+    },
+  ]
 
   return (
     <Box className={cls(classes.root, className)}>
-      <TableContainer   {...rest} >
-        <Table>
-          <TableHead>
-            <TableRow>
-              {HEADERS.map((header, index) => (
-                <TableCell align={header.align} className={classes.headCell} key={`offers-${index}`}>{header.value}</TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {TEMP_DATA.map((data) => (
+      <ActiveBidToggle header="Bids Made" totalCount={TEMP_DATA.length} />
+      {!isXs && (
+        <TableContainer   {...rest} >
+          <Table>
+            <TableHead>
               <TableRow>
-                <TableCell align="left" className={classes.bodyCell}>
-                  <MenuItem className={classes.bearItem} button={false}>
-                    <ListItemIcon>
-                      <Avatar alt="Remy Sharp" src={TEMP_BEAR_AVATAR_URL} />
-                    </ListItemIcon>
-                    <Typography>  {data.nft.id}</Typography>
-                  </MenuItem>
-                </TableCell>
-                <TableCell align="right" className={classes.bodyCell}>{data.bidCurrency}</TableCell>
-                <TableCell align="right" className={classes.bodyCell}>{data.usdPrice.toString()}</TableCell>
-                <TableCell align="center" className={classes.bodyCell}>{data.score}</TableCell>
-                <TableCell align="center" className={classes.bodyCell}>{data.nftOwner.name}</TableCell>
-                <TableCell align="center" className={classes.bodyCell}>{data.offeredOn}</TableCell>
-                <TableCell align="center" className={classes.bodyCell}>{data.expiration}</TableCell>
-                <TableCell align="center" className={classes.bodyCell}>{data.status}</TableCell>
-                <TableCell align="center" className={classes.bodyCell}>
-                  <IconButton className={classes.iconButton}>
-                    <Typography className={classes.buttonText}>Cancel</Typography>
-                  </IconButton>
-                </TableCell>
+                {HEADERS.map((header, index) => (
+                  <TableCell align={header.align} className={classes.headCell} key={`offers-${index}`}>{header.value}</TableCell>
+                ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {TEMP_DATA.map((data) => (
+                <ArkCollapsibleRow baseRow={data} />
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+      {isXs && (
+        <>
+          {TEMP_DATA.map((data) => (
+            <BidsCard isBuyer={true} baseCard={data} />
+          ))}
+        </>
+      )}
+      <ArkPaginator itemPerPage={2} totalItem={TEMP_DATA.length} />
+
+      {bid && <BidsDialog showDialog={!!bid} onCloseDialog={() => setBid(undefined)} bid={bid} isOffer={true} />}
     </Box>
   );
 };

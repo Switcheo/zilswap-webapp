@@ -1,18 +1,21 @@
 import { Box, Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { Text } from "app/components";
+import { toBech32Address } from "@zilliqa-js/crypto";
+import {
+  ArkBanner,
+  ArkBreadcrumb,
+  SocialLinkGroup,
+  Text,
+} from "app/components";
+import ARKFilterBar from "app/components/ARKFilterBar";
 import ArkPage from "app/layouts/ArkPage";
+import { Nft } from "app/store/marketplace/types";
 import { AppTheme } from "app/theme/types";
-import React, { useEffect, useState } from "react";
+import { fromBech32Address } from "core/zilswap";
+import React, { useEffect, useMemo, useState } from "react";
+import { useHistory } from "react-router-dom";
 import { NftCard } from "./components";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
-import { ArkBanner, SocialLinkGroup, ArkBreadcrumb } from "app/components";
-import { useHistory } from "react-router-dom";
-import { Nft } from "app/store/marketplace/types";
-import { toBech32Address } from "@zilliqa-js/crypto";
-import { useMemo } from "react";
-import { fromBech32Address } from "core/zilswap";
-import ARKFilterBar from "app/components/ARKFilterBar";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -168,7 +171,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   // get tokens
   const getTokens = async () => {
     const response = await fetch(
-      `https://api-ark.zilswap.org/nft/token/list?collection=${collection.id}`
+      `https://api-ark.zilswap.org/nft/token/list?collection=${collection.address}`
     );
     const data = await response.json();
     setTokens(data.result.models);

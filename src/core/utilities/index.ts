@@ -5,3 +5,4 @@ export * from "./butler";
 export * from "./zap-stats";
 export * from "./zilstream";
 export * from "./bridge";
+export * from "./ark";
