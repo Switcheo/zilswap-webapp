@@ -116,7 +116,7 @@ const ArkCollapsibleRow: React.FC<Props> = (props: Props) => {
             <ListItemIcon>
               <Avatar alt="Remy Sharp" src={baseRow.nft.asset?.url} />
             </ListItemIcon>
-            <Typography>  {baseRow.nft.token_id}</Typography>
+            <Typography>  {baseRow.nft.tokenId}</Typography>
           </MenuItem>
         </TableCell>
         <TableCell align="right" className={cls(classes.bodyCell, expand && classes.withBorder)}>{baseRow.bidCurrency}</TableCell>

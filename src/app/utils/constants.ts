@@ -25,6 +25,7 @@ export const LocalStorageKeys = {
   PendingClaimedTxs: "zilswap:pending-claimed-txs",
   SwapSlippageExpiry: "zilswap:swap-slippage-expiry",
   BridgeTxs: 'zilswap:bridge-txs',
+  ArkAccessToken: 'zilswap:ark-access-token',
 };
 
 export const PlaceholderStrings = {

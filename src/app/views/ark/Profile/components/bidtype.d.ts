@@ -4,7 +4,7 @@ import BigNumber from "bignumber.js";
 import { Nft } from "app/store/types";
 
 export interface Bids {
-  bid_id: number,
+  bidId: number,
   bidAmount: BigNumber;
   bidCurrency: string;
   nft: Nft;

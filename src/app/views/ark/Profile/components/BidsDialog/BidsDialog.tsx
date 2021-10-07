@@ -78,7 +78,7 @@ const BidsDialog: React.FC<Props> = (props: Props) => {
               <ListItemIcon>
                 <Avatar alt="Remy Sharp" src={bid.nft.asset?.url} />
               </ListItemIcon>
-              <Typography>  {bid.nft.token_id}</Typography>
+              <Typography>  {bid.nft.tokenId}</Typography>
             </MenuItem>
             <Box mt={1} display="flex" justifyContent="space-between">
               <Typography className={classes.header}>Bid Average</Typography>

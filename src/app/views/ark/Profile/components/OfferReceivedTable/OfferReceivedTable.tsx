@@ -63,7 +63,7 @@ const TEMP_ASSET: Asset = {
   type: "image",
   filename: "",
   url: "",
-  mime_type: "",
+  mimeType: "",
 }
 
 
@@ -84,24 +84,24 @@ const OfferReceivedTable: React.FC<Props> = (props: Props) => {
 
   const TEMP_DATA: Bids[] = [
     {
-      bid_id: 1, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { token_id: 1234, asset: TEMP_ASSET },
+      bidId: 1, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { tokenId: 1234, asset: TEMP_ASSET },
       usdPrice: new BigNumber(100), bidAverage: "lower than average", user: { name: "Tom" }, bidTime: dayjs("12/07/21"),
       expiration: dayjs("12/07/21"), status: "active",
       actions: { accept: { label: "Accept", action: acceptBid }, decline: { label: "Decline", action: declineBid } }
     },
     {
-      bid_id: 2, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { token_id: 1234, asset: TEMP_ASSET },
+      bidId: 2, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { tokenId: 1234, asset: TEMP_ASSET },
       usdPrice: new BigNumber(100), bidAverage: "lower than average", user: { name: "Tom" }, bidTime: dayjs("12/07/21"),
       expiration: dayjs("12/07/21"), status: "active",
       actions: { accept: { label: "Accept", action: acceptBid }, decline: { label: "Decline", action: declineBid } }
     },
     {
-      bid_id: 3, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { token_id: 1234, asset: TEMP_ASSET, name: "THE BEAR" },
+      bidId: 3, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { tokenId: 1234, asset: TEMP_ASSET, name: "THE BEAR" },
       usdPrice: new BigNumber(100), bidAverage: "lower than average", user: { name: "Tom" }, bidTime: dayjs("12/07/21"),
       expiration: dayjs("12/07/21"), status: "expired",
     },
     {
-      bid_id: 4, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { token_id: 1234, asset: TEMP_ASSET },
+      bidId: 4, bidAmount: new BigNumber(100), bidCurrency: "zil", nft: { tokenId: 1234, asset: TEMP_ASSET },
       usdPrice: new BigNumber(100), bidAverage: "lower than average", user: { name: "Tom" }, bidTime: dayjs("12/07/21"),
       expiration: dayjs("12/07/21"), status: "active",
       actions: { accept: { label: "Accept", action: acceptBid }, decline: { label: "Decline", action: declineBid } }

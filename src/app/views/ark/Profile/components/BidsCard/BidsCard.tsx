@@ -13,7 +13,7 @@ import { Bids, RowAction } from "../bidtype";
 
 interface Props extends CardProps {
   baseCard: Bids,
-  extraCards: Bids[],
+  extraCards?: Bids[],
   isBuyer: boolean,
 }
 
@@ -140,7 +140,7 @@ const BidsCard: React.FC<Props> = (props: Props) => {
               <Avatar alt="Remy Sharp" src={baseCard.nft.asset?.url} />
             </ListItemIcon>
             <Box>
-              <Typography>  {baseCard.nft.token_id}</Typography>
+              <Typography>  {baseCard.nft.tokenId}</Typography>
               <Typography>  {baseCard.nft.name}</Typography>
             </Box>
           </Box>
@@ -151,7 +151,7 @@ const BidsCard: React.FC<Props> = (props: Props) => {
         {getAction(baseCard, baseCard.actions)}
       </CardContent>
       <Collapse in={expand}>
-        {extraCards.map((extra) => (
+        {extraCards && extraCards.map((extra) => (
           <>
             <Box paddingLeft={2} paddingRight={2}>
               <Box className={classes.topBorder}></Box>
@@ -161,7 +161,7 @@ const BidsCard: React.FC<Props> = (props: Props) => {
                 <ListItemIcon>
                   <Avatar alt="Remy Sharp" src={extra.nft.asset?.url} />
                 </ListItemIcon>
-                <Typography>  {extra.nft.token_id}</Typography>
+                <Typography>  {extra.nft.tokenId}</Typography>
               </MenuItem>
               {getBidAverage(extra.bidAverage)}
               {getUserText(extra.user.name)}

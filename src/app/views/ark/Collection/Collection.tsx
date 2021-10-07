@@ -1,18 +1,16 @@
 import { Box, Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { Text } from "app/components";
+import { toBech32Address } from "@zilliqa-js/crypto";
+import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text } from "app/components";
+import ARKFilterBar from "app/components/ARKFilterBar";
 import ARKPage from "app/layouts/ARKPage";
+import { Nft } from "app/store/marketplace/types";
 import { AppTheme } from "app/theme/types";
-import React, { useEffect, useState } from "react";
+import { fromBech32Address } from "core/zilswap";
+import React, { useEffect, useMemo, useState } from "react";
+import { useHistory } from "react-router-dom";
 import { NftCard } from "./components";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
-import { ArkBanner, SocialLinkGroup, ArkBreadcrumb } from "app/components";
-import { useHistory } from "react-router-dom";
-import { Nft } from "app/store/marketplace/types";
-import { toBech32Address } from "@zilliqa-js/crypto";
-import { useMemo } from "react";
-import { fromBech32Address } from "core/zilswap";
-import ARKFilterBar from "app/components/ARKFilterBar";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

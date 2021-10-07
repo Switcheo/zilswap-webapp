@@ -6,17 +6,20 @@ export interface MarketPlaceState {
   tokens: SimpleMap<Nft>;
   filter: {};
   profile?: Profile;
+  oAuth?: OAuth;
+  receivedBids?: any;
+  bidded?: any;
 }
 
 export interface Nft {
   name?: string;
-  token_id: number;
+  tokenId: number;
   description?: string;
   metadata?: string;
   asset?: Asset;
   owner?: MarketplaceUser;
   collection?: Collection;
-  trait_values?: TraitValue[];
+  traitValues?: TraitValue[];
 }
 
 export type TraitType = {
@@ -26,25 +29,25 @@ export type TraitType = {
 export interface TraitValue {
   value: string;
   count: number;
-  trait_type?: TraitType;
+  traitType?: TraitType;
 }
 export interface Collection {
   name: string;
   description: string;
   address: string;
-  verified_at: string;
-  website_url: string;
-  discord_url: string;
-  telegram_url: string;
-  twitter_url: string;
-  instagram_url: string;
+  verifiedAt: string;
+  websiteUrl: string;
+  discordUrl: string;
+  telegramUrl: string;
+  twitterUrl: string;
+  instagramUrl: string;
 }
 export interface Asset {
   type: string;
-  mime_type: string;
+  mimeType: string;
   filename: string;
   url: string;
-  content_length?: number;
+  contentLength?: number;
 }
 
 export type MarketplaceUser = {
@@ -53,16 +56,29 @@ export type MarketplaceUser = {
 }
 
 export interface NftAttribute {
-  trait_type: string;
+  traitType: string;
   value: string;
   rarity: number;
 }
 
 export interface Profile {
-  ownedNft: SimpleMap<Nft>;
-  biddedNft?: SimpleMap<BiddedNft>;
+  id: string;
+  username?: string;
+  address: string;
+  bio?: string;
+  twitterHandle?: string;
+  instagramHandle?: string;
+  websiteUrl?: string;
 }
 
 export interface BiddedNft {
   nft: Nft;
+}
+
+export interface OAuth {
+  access_token: string;
+  expires_at: number;
+  expires_in: number;
+  refresh_token: string;
+  token_type: string;
 }

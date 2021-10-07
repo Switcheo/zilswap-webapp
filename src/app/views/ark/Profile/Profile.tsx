@@ -6,13 +6,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, WalletState } from "app/store/types";
 import { truncate } from "app/utils";
 import { ReactComponent as EditIcon } from "./edit-icon.svg";
-import { EditProfile, OfferTable, OfferReceivedTable } from "./components";
+import { EditProfile, OfferTable, OfferReceivedTable, Collected } from "./components";
 import cls from "classnames";
 import ARKPage from "app/layouts/ARKPage";
 import React, { useState, useEffect } from "react";
 import { FancyButton } from "app/components";
 import { actions } from "app/store";
-
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -83,7 +82,6 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     navigator.clipboard.writeText(text);
     setAddrText("Copied");
     setTimeout(() => {
-
       setAddrText(truncate(wallet?.addressInfo.bech32, 5, isXs ? 2 : 5));
     }, 3000)
   }
@@ -94,8 +92,6 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         <Container className={classes.root} maxWidth="lg">
           <ArkBanner >
             <Typography variant="h2">Unnamed <EditIcon onClick={() => setShowEdit(true)} className={cls(classes.editIcon, classes.editable)} /></Typography>
-
-
             {wallet?.addressInfo && (
               <Tooltip title="Copy address" placement="top" arrow>
                 <Box onClick={() => copyAddr(wallet!.addressInfo.bech32)} className={classes.addrBox}>
@@ -114,6 +110,9 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           <ArkTab setCurrentTab={(value) => setCurrentTab(value)} currentTab={currentTab} tabHeaders={["Collected", "Onsale", "Liked", "Bids Made", "Bids Received"]} />
           {wallet && (
             <>
+              {currentTab === "Collected" && (
+                <Collected address={wallet.addressInfo.byte20} />
+              )}
               {(currentTab === "Bids Made") && (
                 <OfferTable />
               )}
