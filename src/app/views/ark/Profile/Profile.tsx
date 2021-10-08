@@ -3,23 +3,25 @@ import {
   Container,
   Tooltip,
   Typography,
-  useMediaQuery,
+  useMediaQuery
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { ArkBanner, ArkTab, FancyButton } from "app/components";
+import { toBech32Address } from "@zilliqa-js/crypto";
+import { ArkBanner, ArkTab } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
-import { actions } from "app/store";
-import { RootState, WalletState } from "app/store/types";
+import { MarketPlaceState, Profile as ProfileType, RootState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { truncate } from "app/utils";
+import { truncate, useAsyncTask, useNetwork } from "app/utils";
 import cls from "classnames";
+import { ArkClient } from "core/utilities";
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import {
   Collected,
   EditProfile,
   OfferReceivedTable,
-  OfferTable,
+  OfferTable
 } from "./components";
 import { ReactComponent as EditIcon } from "./edit-icon.svg";
 
@@ -74,23 +76,57 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { wallet } = useSelector<RootState, WalletState>(
     (state) => state.wallet
   );
+  const { profile: storeProfile } = useSelector<RootState, MarketPlaceState>(
+    (state) => state.marketplace
+  );
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
-  const [description] = useState<string | null>(null);
   const [showEdit, setShowEdit] = useState(false);
   const [currentTab, setCurrentTab] = useState("Collected");
-  const [addrText, setAddrText] = useState(
-    truncate(wallet?.addressInfo.bech32, 5, isXs ? 2 : 5)
-  );
-  const dispatch = useDispatch();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const address = queryParams.get("address");
+  const [viewProfile, setViewProfile] = useState<ProfileType | null>(null);
+  const [addrText, setAddrText] = useState<string | undefined>(undefined);
+  const [profileIsOwner, setProfileIsOwner] = useState(false);
+  const network = useNetwork();
+  const [runQueryProfile] = useAsyncTask("queryProfile");
 
   useEffect(() => {
-    if (wallet?.addressInfo)
-      setAddrText(truncate(wallet?.addressInfo.bech32, 5, isXs ? 2 : 5));
-  }, [wallet?.addressInfo, isXs]);
+    checkProfile();
+    // eslint-disable-next-line
+  }, []);
 
-  const onConnectWallet = () => {
-    dispatch(actions.Layout.toggleShowWallet());
-  };
+  useEffect(() => {
+    if (storeProfile?.address || !wallet?.addressInfo.bech32) {
+      checkProfile();
+    }
+
+    // eslint-disable-next-line
+  }, [storeProfile, wallet?.addressInfo.bech32])
+
+  const checkProfile = () => {
+    if (((storeProfile?.address && !address) || (storeProfile?.address && storeProfile?.address === address)) && wallet?.addressInfo.bech32) {
+      setViewProfile(storeProfile);
+      setProfileIsOwner(true);
+      setAddrText(truncate(toBech32Address(storeProfile?.address), 5, isXs ? 2 : 5))
+    } else {
+      if (address) {
+        getProfile(address);
+      } else {
+        setViewProfile(null);
+      }
+      setProfileIsOwner(false);
+    }
+  }
+
+  const getProfile = (address: string) => {
+    runQueryProfile(async () => {
+      const arkClient = new ArkClient(network);
+      const { result: { model } } = await arkClient.getProfile(address);
+      setViewProfile(model);
+      setAddrText(truncate(toBech32Address(model?.address), 5, isXs ? 2 : 5))
+    })
+  }
 
   const copyAddr = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -100,22 +136,29 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     }, 3000);
   };
 
+  let tabHeaders = ["Collected", "For Sale", "Liked"];
+  if (profileIsOwner) tabHeaders = tabHeaders.concat(["Bids Made", "Bids Received",])
+
   return (
     <ArkPage {...rest}>
       {!showEdit && (
         <Container className={classes.root} maxWidth="lg">
           <ArkBanner>
-            <Typography variant="h2">
-              Unnamed{" "}
-              <EditIcon
-                onClick={() => setShowEdit(true)}
-                className={cls(classes.editIcon, classes.editable)}
-              />
-            </Typography>
-            {wallet?.addressInfo && (
+            {viewProfile && (
+              <Typography variant="h2">
+                {viewProfile.username || "Unnamed"}{" "}
+                {profileIsOwner && (
+                  <EditIcon
+                    onClick={() => setShowEdit(true)}
+                    className={cls(classes.editIcon, classes.editable)}
+                  />
+                )}
+              </Typography>
+            )}
+            {viewProfile && (
               <Tooltip title="Copy address" placement="top" arrow>
                 <Box
-                  onClick={() => copyAddr(wallet!.addressInfo.bech32)}
+                  onClick={() => copyAddr(viewProfile.address)}
                   className={classes.addrBox}
                 >
                   <Typography variant="body1">{addrText}</Typography>
@@ -123,38 +166,37 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               </Tooltip>
             )}
 
-            <Box className={classes.descriptionBox} padding={3}>
-              {!description && (
-                <Typography
-                  onClick={() => setShowEdit(true)}
-                  className={cls(classes.editable)}
-                >
-                  <u>Add a bio</u>
-                </Typography>
-              )}
-            </Box>
+            {viewProfile && (
+              <Box className={classes.descriptionBox} padding={3}>
+                {!viewProfile.bio && (
+                  <Typography
+                    onClick={() => profileIsOwner && setShowEdit(true)}
+                    className={cls(classes.editable)}
+                  >
+                    <u>Add a bio</u>
+                  </Typography>
+                )}
+                {viewProfile.bio && (
+                  <Typography>{viewProfile.bio}</Typography>
+                )}
+              </Box>
+            )}
           </ArkBanner>
           <ArkTab
             setCurrentTab={(value) => setCurrentTab(value)}
             currentTab={currentTab}
-            tabHeaders={[
-              "Collected",
-              "Onsale",
-              "Liked",
-              "Bids Made",
-              "Bids Received",
-            ]}
+            tabHeaders={tabHeaders}
           />
-          {wallet && (
+          {viewProfile && (
             <>
               {currentTab === "Collected" && (
-                <Collected address={wallet.addressInfo.byte20} />
+                <Collected address={viewProfile?.address} />
               )}
-              {currentTab === "Bids Made" && <OfferTable />}
-              {currentTab === "Bids Received" && <OfferReceivedTable />}
+              {(currentTab === "Bids Made") && profileIsOwner && <OfferTable />}
+              {(currentTab === "Bids Received") && profileIsOwner && <OfferReceivedTable />}
             </>
           )}
-          {!wallet && (
+          {(!wallet && !address) && (
             <Box mt={12} display="flex" justifyContent="center">
               <Box display="flex" flexDirection="column" textAlign="center">
                 <Typography className={classes.connectionText} variant="h1">
@@ -163,16 +205,6 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                 <Typography className={classes.connectionText} variant="body1">
                   Please connect your wallet to view this page.
                 </Typography>
-
-                <FancyButton
-                  fullWidth
-                  onClick={() => onConnectWallet()}
-                  className={classes.button}
-                  variant="contained"
-                  color="primary"
-                >
-                  Connect Wallet
-                </FancyButton>
               </Box>
             </Box>
           )}
@@ -180,7 +212,7 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       )}
       {showEdit && (
         <Container className={classes.root} maxWidth="lg">
-          <EditProfile onBack={() => setShowEdit(false)} />
+          <EditProfile wallet={wallet} profile={storeProfile} onBack={() => setShowEdit(false)} />
         </Container>
       )}
     </ArkPage>
