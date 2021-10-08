@@ -17,6 +17,9 @@ import React, { useEffect, useState } from "react";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
 import { Link } from "react-router-dom";
 import { toBech32Address } from "@zilliqa-js/crypto";
+import { ArkClient } from "core/utilities";
+import { useSelector } from "react-redux";
+import { getBlockchain } from "app/saga/selectors";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -72,6 +75,7 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 ) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
+  const { network } = useSelector(getBlockchain);
   const [search, setSearch] = useState<string>("");
   const [searchFilter, setSearchFilter] = useState<string>("");
 
@@ -83,11 +87,9 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   }, []);
 
   const getCollections = async () => {
-    const response = await fetch(
-      "https://api-ark.zilswap.org/nft/collection/list"
-    );
-    const data = await response.json();
-    setCollections(data.result.entries);
+    const arkClient = new ArkClient(network);
+    const result = await arkClient.listCollection();
+    setCollections(result.result.entries);
   };
 
   return (
@@ -141,7 +143,6 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
         {/* List of collections here */}
         {collections.map((collection) => {
-          console.log("collection: ", collection);
           return (
             <Link
               to={`/ark/collections/${toBech32Address(collection.address)}`}
