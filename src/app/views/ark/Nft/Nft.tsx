@@ -155,7 +155,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
   const { network } = useSelector(getBlockchain);
   const { wallet } = useSelector(getWallet);
   const [nftToken, setNftToken] = useState<Nft | null>(null);
-  const [runGetNftToken, loading] = useAsyncTask("getNftToken");
+  const [runGetNftToken] = useAsyncTask("getNftToken");
   const collectionId = match.params.collection;
   const tokenId = match.params.id;
 
@@ -168,7 +168,9 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
 
       setNftToken(result.result.model);
     })
-  }, [collectionId, tokenId]);
+
+    // eslint-disable-next-line
+  }, [collectionId, tokenId, network]);
 
 
   const isOwnToken = useMemo(() => {

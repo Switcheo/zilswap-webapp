@@ -8,7 +8,7 @@ import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ArkClient } from "core/utilities";
+import { ArkClient, logger } from "core/utilities";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
@@ -53,8 +53,8 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         publicKey,
         signature, 
 
-        address,
         collectionAddress: address,
+        address: wallet.addressInfo.byte20.toLowerCase(),
         tokenId: id,
         side: "Buy",
         expiry: 100,
@@ -62,7 +62,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         price,
       });
 
-      console.log(result);
+      logger("post trade", result);
     });
   };
 

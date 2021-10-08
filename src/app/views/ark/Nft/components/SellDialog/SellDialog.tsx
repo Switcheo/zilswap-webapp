@@ -8,8 +8,7 @@ import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ArkClient } from "core/utilities";
-import { fromBech32Address } from "core/zilswap";
+import { ArkClient, logger } from "core/utilities";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
@@ -37,17 +36,21 @@ const SellDialog: React.FC<Props> = (props: Props) => {
     if (!wallet?.provider || !match.params?.collection || !match.params?.id) return;
     runConfirmSell(async () => {
       const { collection: address, id } = match.params
+
+      const priceAmount = new BigNumber(10000);
+      const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
+
       const arkClient = new ArkClient(network);
-      const msg = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
+      const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
         side: "Sell",
         token: { address, id, },
-        price: { amount: new BigNumber(10000), address: ZIL_HASH },
-        feeAmount: new BigNumber(250),
+        price: { amount: priceAmount, address: ZIL_HASH },
+        feeAmount,
         expiry: 100,
         nonce: 0,
       }))
 
-      const { signature, publicKey } = (await wallet.provider!.wallet.sign(msg as any)) as any
+      const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
 
       const result = await arkClient.postTrade({
         publicKey,
@@ -60,12 +63,12 @@ const SellDialog: React.FC<Props> = (props: Props) => {
         expiry: 100,
         nonce: 0,
         price: {
-          amount: new BigNumber(10000),
+          amount: priceAmount,
           address: ZIL_HASH,
         },
       });
 
-      console.log(result);
+      logger("post trade", result);
     });
   };
 

@@ -47,6 +47,8 @@ export interface ListQueryParams {
 }
 
 export class ArkClient {
+  public static FEE_BPS = 250;
+
   private http: HTTP<typeof apiPaths>;
 
   constructor(
@@ -172,6 +174,8 @@ export class ArkClient {
    */
   arkChequeHash = (params: ArkClient.ArkChequeParams): string => {
     const { side, token, price, feeAmount, expiry, nonce } = params
+    if (token.address.startsWith("zil1"))
+      token.address = fromBech32Address(token.address);
     const brokerAddress = fromBech32Address(ARK_CONTRACTS[this.network]).toLowerCase()
     let buffer = strToHex(brokerAddress.replace('0x', ''))
     buffer += sha256(strToHex(`${brokerAddress}.${side}`))
@@ -212,7 +216,8 @@ const serializeUint256 = (val: BigNumber | string): string => {
 }
 
 const serializeUint = (val: BigNumber | string | number, size: number): string => {
-  return "0".repeat(size).concat(new BigNumber(val.toString()).toString(16)).slice(-16);
+  const hexLength = size * 2;
+  return "0".repeat(hexLength).concat(new BigNumber(val.toString()).toString(16)).slice(-hexLength);
 }
 
 const strToHex = (str: string): string => {

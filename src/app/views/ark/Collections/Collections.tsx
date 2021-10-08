@@ -1,13 +1,4 @@
-import {
-  Container,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
-  InputAdornment,
-  OutlinedInput,
-  Radio,
-  RadioGroup,
-} from "@material-ui/core";
+import { Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Radio, RadioGroup } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { Text } from "app/components";
@@ -83,14 +74,14 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const [collections, setCollections] = useState<any[]>([]);
 
   useEffect(() => {
+    const getCollections = async () => {
+      const arkClient = new ArkClient(network);
+      const result = await arkClient.listCollection();
+      setCollections(result.result.entries);
+    };
+  
     getCollections();
-  }, []);
-
-  const getCollections = async () => {
-    const arkClient = new ArkClient(network);
-    const result = await arkClient.listCollection();
-    setCollections(result.result.entries);
-  };
+  }, [network]);
 
   return (
     <ArkPage {...rest}>
