@@ -38,13 +38,15 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       const { collection: address, id } = match.params
       const arkClient = new ArkClient(network);
       const price = { amount: new BigNumber(10000), address: ZIL_HASH };
+      const nonce = ~~(Math.random() * 100000);
+      const expiry = 100; // blocks
       const msg = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
         side: "Buy",
         price,
         token: { address, id, },
         feeAmount: new BigNumber(250),
-        expiry: 100,
-        nonce: 0,
+        expiry,
+        nonce,
       }))
 
       const { signature, public_key: publicKey } = (await wallet.provider!.wallet.sign(msg as any)) as any
@@ -57,8 +59,8 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         address: wallet.addressInfo.byte20.toLowerCase(),
         tokenId: id,
         side: "Buy",
-        expiry: 100,
-        nonce: 0,
+        expiry,
+        nonce,
         price,
       });
 
@@ -72,7 +74,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         {error && (
           <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
         )}
-        <FancyButton walletRequired loading={loading} variant="contained" onClick={onConfirm}>
+        <FancyButton walletRequired loading={loading} variant="contained" color="primary" onClick={onConfirm}>
           Confirm Purchase
         </FancyButton>
       </DialogContent>
