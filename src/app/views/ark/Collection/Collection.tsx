@@ -1,7 +1,12 @@
 import { Box, Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
-import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text } from "app/components";
+import {
+  ArkBanner,
+  ArkBreadcrumb,
+  SocialLinkGroup,
+  Text,
+} from "app/components";
 import ARKFilterBar from "app/components/ARKFilterBar";
 import ArkPage from "app/layouts/ArkPage";
 import { actions } from "app/store";
@@ -118,8 +123,12 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const classes = useStyles();
   const history = useHistory();
   const dispatch = useDispatch();
-  const filter = useSelector<RootState, CollectionFilter>((state) => state.marketplace.filter);
-  const tokens = useSelector<RootState, Nft[]>((state) => state.marketplace.tokens);
+  const filter = useSelector<RootState, CollectionFilter>(
+    (state) => state.marketplace.filter
+  );
+  const tokens = useSelector<RootState, Nft[]>(
+    (state) => state.marketplace.tokens
+  );
 
   // fetch nfts in collection (to use store instead)
   const [collection, setCollection] = useState<any>({});
@@ -133,9 +142,8 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
     let collectionAddress = match.params.collection;
     if (collectionAddress?.startsWith("zil1")) {
-
       if (filter.collectionAddress !== collectionAddress)
-        dispatch(actions.MarketPlace.updateFilter({ collectionAddress }))
+        dispatch(actions.MarketPlace.updateFilter({ collectionAddress }));
 
       return {
         bech32Address: collectionAddress,
@@ -157,11 +165,11 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         "https://api-ark.zilswap.org/nft/collection/list"
       );
       const data = await response.json();
-      const collection = data.result.entries.find((collection: any) => collection.address === hexAddress);
-      if (collection)
-        setCollection(collection);
-      else
-        history.push("/ark/collections");
+      const collection = data.result.entries.find(
+        (collection: any) => collection.address === hexAddress
+      );
+      if (collection) setCollection(collection);
+      else history.push("/ark/collections");
     };
 
     getCollection();

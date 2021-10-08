@@ -31,8 +31,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     position: "relative",
   },
   borderBox: {
-    border: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "rgba(0, 51, 64, 0.5)"
-      }`,
+    border: `1px solid ${
+      theme.palette.type === "dark" ? "#29475A" : "rgba(0, 51, 64, 0.5)"
+    }`,
     borderRadius: 10,
     // border: "1px solid transparent",
     // backgroundImage:
@@ -176,7 +177,7 @@ const NftCard: React.FC<Props> = (props: Props) => {
         </Box>
         <CardActionArea
           component={Link}
-          to={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
+          to={`/ark/collections/${collectionAddress}/${token.tokenId}`}
         >
           <CardMedia
             className={classes.image}
