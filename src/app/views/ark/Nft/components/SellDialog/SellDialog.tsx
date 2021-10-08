@@ -42,7 +42,7 @@ const SellDialog: React.FC<Props> = (props: Props) => {
       const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
 
       const arkClient = new ArkClient(network);
-      const nonce = ~~(Math.random() * 100000);
+      const nonce = ~~(Math.random() * 4294967295); // uint32 max 4294967295
       const expiry = 100; // blocks
       const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
         side: "Sell",
