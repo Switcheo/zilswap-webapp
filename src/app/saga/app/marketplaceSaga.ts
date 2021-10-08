@@ -1,31 +1,8 @@
-import store, { actions } from "app/store";
+import { actions } from "app/store";
 import { ArkClient, logger } from "core/utilities";
 import { call, fork, put, select, take, takeLatest } from "redux-saga/effects";
 import { SimpleMap } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { getBlockchain, getMarketplace, getWallet } from "../selectors";
-
-function* initialize() {
-  try {
-    // yield put(actions.Layout.addBackgroundLoading("initMarketplace", "INIT_MARKETPLACE"));
-    // const { wallet } = getWallet(yield select());
-    // const { network } = getBlockchain(yield select());
-    // if (!wallet) throw new Error("invalid wallet");
-    throw new Error("too many login requests");
-    // const hostname = window.location.hostname;
-    // const arkClient = new ArkClient(network); // TODO: refactor client into redux
-    // const authResult = (yield call(arkClient.arkLogin, wallet, hostname)) as unknown as any;
-    // yield put(actions.MarketPlace.updateAccessToken(authResult.result))
-  } catch (error) {
-    console.error("initialize failed, Error:")
-    console.error(error)
-    setTimeout(() => {
-      store.dispatch(actions.MarketPlace.initialize());
-    }, 10000)
-  } finally {
-    yield put(actions.Layout.removeBackgroundLoading("INIT_MARKETPLACE"));
-    yield put(actions.MarketPlace.loadProfile());
-  }
-}
 
 function* loadNftList() {
   try {
@@ -106,17 +83,9 @@ function* watchProfileLoad() {
   }
 }
 
-function* watchInitialize() {
-  while (true) {
-    yield take(actions.MarketPlace.MarketPlaceActionTypes.INITIALIZE);
-    yield call(initialize);
-  }
-}
-
 
 export default function* marketPlaceSaga() {
   logger("init marketplace saga");
-  yield fork(watchInitialize);
   yield fork(watchProfileLoad);
   yield fork(watchLoadNftList);
 }

@@ -158,7 +158,7 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             {viewProfile && (
               <Tooltip title="Copy address" placement="top" arrow>
                 <Box
-                  onClick={() => copyAddr(viewProfile.address)}
+                  onClick={() => copyAddr(toBech32Address(viewProfile.address))}
                   className={classes.addrBox}
                 >
                   <Typography variant="body1">{addrText}</Typography>
