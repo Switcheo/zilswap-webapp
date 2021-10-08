@@ -2,12 +2,18 @@ import { Box, Button, Container, Table, TableBody, TableCell, TableContainer, Ta
 import { makeStyles } from "@material-ui/core/styles";
 import { ArkBreadcrumb } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
+import { getBlockchain, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
+import { Nft } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import React from "react";
-import { useDispatch } from "react-redux";
+import { useAsyncTask } from "app/utils";
+import { ArkClient } from "core/utilities";
+import { fromBech32Address } from "core/zilswap";
+import React, { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { ReactComponent as VerifiedBadge } from "../Collection/verified-badge.svg";
-import { BuyDialog } from "./components";
+import { BuyDialog, SellDialog } from "./components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -142,14 +148,34 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
+  const { network } = useSelector(getBlockchain);
+  const { wallet } = useSelector(getWallet);
+  const [nftToken, setNftToken] = useState<Nft | null>(null);
+  const [runGetNftToken] = useAsyncTask("getNftToken");
   const collectionId = match.params.collection;
   const tokenId = match.params.id;
 
   // fetch nft data, if none redirect back to collections / show not found view
+  useEffect(() => {
+    runGetNftToken(async () => {
+      const arkClient = new ArkClient(network);
+      const address = fromBech32Address(collectionId).toLowerCase()
+      const result = await arkClient.getNftToken(address, tokenId);
+
+      setNftToken(result.result.model);
+    })
+
+    // eslint-disable-next-line
+  }, [collectionId, tokenId, network]);
+
+
+  const isOwnToken = useMemo(() => {
+    return nftToken?.user?.address && wallet?.addressInfo.byte20?.toLowerCase() === nftToken?.user?.address;
+  }, [nftToken, wallet?.addressInfo]);
 
   const breadcrumbs = [
     { path: "/ark/collections", value: "Collections" },
@@ -162,6 +188,10 @@ const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       value: `#${tokenId}`,
     },
   ];
+
+  const onSell = () => {
+    dispatch(actions.Layout.toggleShowSellNftDialog("open"))
+  };
 
   const onBuy = () => {
     dispatch(actions.Layout.toggleShowBuyNftDialog("open"))
@@ -186,9 +216,17 @@ const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
             <Box display="flex" mt={2} gridGap={20}>
               {/* Buy button */}
-              <Button className={classes.buyButton} disableRipple onClick={onBuy}>
-                Buy Now
-              </Button>
+              {isOwnToken && (
+                <Button className={classes.buyButton} disableRipple onClick={onSell}>
+                  Sell
+                </Button>
+              )}
+
+              {!isOwnToken && (
+                <Button className={classes.buyButton} disableRipple onClick={onBuy}>
+                  Buy Now
+                </Button>
+              )}
 
               {/* Bid button */}
               <Button className={classes.bidButton} disableRipple>
@@ -272,8 +310,9 @@ const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         </Box>
       </Container>
       <BuyDialog />
+      <SellDialog />
     </ArkPage>
   );
 };
 
-export default Nft;
+export default NftView;

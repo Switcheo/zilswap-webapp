@@ -12,6 +12,7 @@ const initial_state: LayoutState = {
   showMnemonicDialog: false,
   showResumeTransferDialog: false,
   showBuyNftDialog: false,
+  showSellNftDialog: false,
   expandNavDrawer: false,
   liquidityEarnHidden: false,
   notification: undefined,
@@ -72,6 +73,11 @@ const reducer = (state: LayoutState = initial_state, action: any): LayoutState =
       return {
         ...state,
         showBuyNftDialog: !action.override ? !state.showBuyNftDialog : action.override === "open",
+      };
+    case LayoutActionTypes.TOGGLE_SHOW_SELL_NFT:
+      return {
+        ...state,
+        showSellNftDialog: !action.override ? !state.showSellNftDialog : action.override === "open",
       };
     case LayoutActionTypes.TOGGLE_EXPAND_NAV_DRAWER:
       return {

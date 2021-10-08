@@ -16,7 +16,7 @@ export interface Nft {
   description?: string;
   metadata?: string;
   asset?: Asset;
-  owner?: MarketplaceUser;
+  user?: MarketplaceUser;
   collection?: Collection;
   traitValues?: TraitValue[];
 }

@@ -7,12 +7,14 @@ import { Text } from "app/components";
 import { ReactComponent as CheckedIcon } from "./checked.svg";
 import { ReactComponent as UncheckedIcon } from "./unchecked.svg";
 import { ReactComponent as IndeterminateIcon } from "./indeterminate.svg";
-import {MarketPlaceState, RootState, TraitType, TraitValue } from 'app/store/types';
+import { MarketPlaceState, RootState, TraitType, TraitValue } from 'app/store/types';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateFilter } from 'app/store/marketplace/actions';
 import pickBy from "lodash/pickBy";
+import { getBlockchain } from 'app/saga/selectors';
+import { ArkClient } from 'core/utilities';
 
-const useStyles = makeStyles((theme: AppTheme) =>({
+const useStyles = makeStyles((theme: AppTheme) => ({
   button: {
     borderStyle: 'solid',
     borderWidth: 1,
@@ -240,6 +242,7 @@ interface Props {
 
 const AttributesFilter = (props: Props) => {
   const marketPlaceState = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
+  const { network } = useSelector(getBlockchain);
   const dispatch = useDispatch();
 
   const classes = useStyles();
@@ -249,20 +252,18 @@ const AttributesFilter = (props: Props) => {
   const [search, setSearch] = useState<string>("");
 
   useEffect(() => {
-    if(!props.collectionAddress && Object.keys(traits).length === 0) return
+    if (!props.collectionAddress && Object.keys(traits).length === 0) return
     getTraits()
     // eslint-disable-next-line
   }, [props.collectionAddress])
 
   const getTraits = async () => {
-    const response = await fetch(
-      `https://api-ark.zilswap.org/nft/collection/${props.collectionAddress}/traits`
-    );
-    const data = await response.json();
+    const arkClient = new ArkClient(network);
+    const data = await arkClient.getCollectionTraits(props.collectionAddress);
 
-    var newTraits: {[id: string]: TraitType} = {}
+    var newTraits: { [id: string]: TraitType } = {}
     data.result.entries.forEach((model: any) => {
-      var values: {[id: string]: TraitValue} = {}
+      var values: { [id: string]: TraitValue } = {}
 
       Object.keys(model.values).forEach(value => {
         values[value] = {
@@ -392,7 +393,7 @@ const AttributesFilter = (props: Props) => {
           <div className={classes.filterValue}>{selectedValues}</div>
         </Box>
         <Box display="flex" alignItems="center" justifyContent="center">
-          <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.2016 13.1737L14.2879 16.0874C13.8491 16.5262 13.1404 16.5262 12.7016 16.0874L9.78787 13.1737C9.07912 12.4649 9.58537 11.2499 10.5866 11.2499L16.4141 11.2499C17.4154 11.2499 17.9104 12.4649 17.2016 13.1737Z" fill="#DEFFFF"/></svg>
+          <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.2016 13.1737L14.2879 16.0874C13.8491 16.5262 13.1404 16.5262 12.7016 16.0874L9.78787 13.1737C9.07912 12.4649 9.58537 11.2499 10.5866 11.2499L16.4141 11.2499C17.4154 11.2499 17.9104 12.4649 17.2016 13.1737Z" fill="#DEFFFF" /></svg>
         </Box>
       </Button>
       <Popover
@@ -428,7 +429,7 @@ const AttributesFilter = (props: Props) => {
                     <Text className={classes.filterValueSubText}>{selectedCount} of {values.length} selected</Text>
                   </a>
                 )
-            })}
+              })}
 
             </Box>
             <Box flexGrow="1">
@@ -455,13 +456,13 @@ const AttributesFilter = (props: Props) => {
                           <Box key={value.value} marginBottom={1}>
                             <FormControlLabel className={classes.attributeValue} value={value.value} control={<Checkbox
                               className={classes.radioButton}
-                                checkedIcon={<CheckedIcon />}
-                                icon={<UncheckedIcon />}
-                                indeterminateIcon={<IndeterminateIcon />}
-                                checked={value.selected}
-                                onChange={() => handleChange(trait.trait, value.value)}
-                                disableRipple
-                              />} 
+                              checkedIcon={<CheckedIcon />}
+                              icon={<UncheckedIcon />}
+                              indeterminateIcon={<IndeterminateIcon />}
+                              checked={value.selected}
+                              onChange={() => handleChange(trait.trait, value.value)}
+                              disableRipple
+                            />}
                               label={
                                 <span className={classes.attribute}>
                                   <Text className={classes.attributeLabel} flexGrow="1">{value.value}</Text>
@@ -471,7 +472,7 @@ const AttributesFilter = (props: Props) => {
                               }
                             />
                           </Box>
-                        )                        
+                        )
                       })}
                     </Box>
                   )

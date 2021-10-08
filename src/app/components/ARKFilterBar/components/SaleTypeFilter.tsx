@@ -139,7 +139,6 @@ const SaleTypeFilter = () => {
   }
 
   useEffect(() => {
-    console.log("sale type changed")
     dispatch(updateFilter({
       ...marketPlaceState.filter,
       sale_type: saleType
