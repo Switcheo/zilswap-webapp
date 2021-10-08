@@ -1,21 +1,13 @@
-import {
-  Box,
-  Button,
-  Container,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@material-ui/core";
+import { Box, Button, Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArkBreadcrumb } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
+import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
 import React from "react";
+import { useDispatch } from "react-redux";
 import { ReactComponent as VerifiedBadge } from "../Collection/verified-badge.svg";
+import { BuyDialog } from "./components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -153,6 +145,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
+  const dispatch = useDispatch();
   const collectionId = match.params.collection;
   const tokenId = match.params.id;
 
@@ -169,6 +162,10 @@ const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       value: `#${tokenId}`,
     },
   ];
+
+  const onBuy = () => {
+    dispatch(actions.Layout.toggleShowBuyNftDialog("open"))
+  };
 
   return (
     <ArkPage {...rest}>
@@ -189,7 +186,7 @@ const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
             <Box display="flex" mt={2} gridGap={20}>
               {/* Buy button */}
-              <Button className={classes.buyButton} disableRipple>
+              <Button className={classes.buyButton} disableRipple onClick={onBuy}>
                 Buy Now
               </Button>
 
@@ -274,6 +271,7 @@ const Nft: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           {/* Price History */}
         </Box>
       </Container>
+      <BuyDialog />
     </ArkPage>
   );
 };

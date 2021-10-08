@@ -21,6 +21,7 @@ export interface LayoutState {
   showTransferConfirmation: boolean;
   showMnemonicDialog: boolean;
   showResumeTransferDialog: boolean;
+  showBuyNftDialog: boolean;
   expandNavDrawer: boolean;
   liquidityEarnHidden: boolean;
   showPoolType: PoolType;

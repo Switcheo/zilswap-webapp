@@ -8,11 +8,6 @@ interface Props extends BoxProps {
 
 }
 
-const useStyles = makeStyles((theme: AppTheme) => ({
-  root: {
-  },
-}));
-
 const SampleComponent: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
@@ -23,5 +18,10 @@ const SampleComponent: React.FC<Props> = (props: Props) => {
     </Box>
   );
 };
+
+const useStyles = makeStyles((theme: AppTheme) => ({
+  root: {
+  },
+}));
 
 export default SampleComponent;
