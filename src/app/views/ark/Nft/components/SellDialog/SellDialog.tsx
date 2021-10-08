@@ -38,16 +38,19 @@ const SellDialog: React.FC<Props> = (props: Props) => {
       const { collection: address, id } = match.params
 
       const priceAmount = new BigNumber(10000);
+      const price = { amount: priceAmount, address: ZIL_HASH };
       const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
 
       const arkClient = new ArkClient(network);
+      const nonce = ~~(Math.random() * 100000);
+      const expiry = 100; // blocks
       const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
         side: "Sell",
         token: { address, id, },
-        price: { amount: priceAmount, address: ZIL_HASH },
+        price,
         feeAmount,
-        expiry: 100,
-        nonce: 0,
+        expiry,
+        nonce,
       }))
 
       const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
@@ -60,12 +63,9 @@ const SellDialog: React.FC<Props> = (props: Props) => {
         address: wallet.addressInfo.byte20.toLowerCase(),
         tokenId: id,
         side: "Sell",
-        expiry: 100,
-        nonce: 0,
-        price: {
-          amount: priceAmount,
-          address: ZIL_HASH,
-        },
+        expiry,
+        nonce,
+        price,
       });
 
       logger("post trade", result);
@@ -78,7 +78,7 @@ const SellDialog: React.FC<Props> = (props: Props) => {
         {error && (
           <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
         )}
-        <FancyButton walletRequired loading={loading} variant="contained" onClick={onConfirm}>
+        <FancyButton walletRequired loading={loading} variant="contained" color="primary" onClick={onConfirm}>
           Confirm Sell
         </FancyButton>
       </DialogContent>
