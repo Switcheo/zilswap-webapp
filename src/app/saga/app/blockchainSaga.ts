@@ -274,7 +274,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     }, {} as SimpleMap<TokenInfo>)
 
     // load wrapper mappings and eth tokens by fetching bridge list from tradehub
-    const host = network === Network.MainNet ? 'tradescan.switcheo.org' : 'dev-tradescan.switcheo.org'
+    const host = network === Network.MainNet ? 'tradescan.switcheo.org' : 'tradescan.switcheo.org'
     const mappings: WrapperMappingsResult = yield call(fetchJSON, `https://${host}/coin/wrapper_mappings`)
     const data: TradeHubTokensResult = yield call(fetchJSON, `https://${host}/coin/tokens`)
     const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }

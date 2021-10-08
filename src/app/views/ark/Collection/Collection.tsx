@@ -9,10 +9,12 @@ import {
 } from "app/components";
 import ARKFilterBar from "app/components/ARKFilterBar";
 import ArkPage from "app/layouts/ArkPage";
+import { getBlockchain } from "app/saga/selectors";
 import { actions } from "app/store";
 import { CollectionFilter, Nft } from "app/store/marketplace/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
+import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -121,6 +123,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 ) => {
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
+  const { network } = useSelector(getBlockchain);
   const history = useHistory();
   const dispatch = useDispatch();
   const filter = useSelector<RootState, CollectionFilter>(
@@ -136,7 +139,6 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { bech32Address, hexAddress } = useMemo(() => {
     if (!match.params?.collection) {
       history.push("/ark/collections");
-      console.log("no collection param");
       return {};
     }
 
@@ -161,10 +163,8 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     if (!hexAddress) return;
 
     const getCollection = async () => {
-      const response = await fetch(
-        "https://api-ark.zilswap.org/nft/collection/list"
-      );
-      const data = await response.json();
+      const arkClient = new ArkClient(network);
+      const data = await arkClient.listCollection();
       const collection = data.result.entries.find(
         (collection: any) => collection.address === hexAddress
       );
@@ -249,16 +249,23 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
           {/* NFTs in collection */}
           <Grid container spacing={2} className={classes.nftContainer}>
-            {tokens.map((token, i) => {
-              return (
-                <Grid item key={i} xs={12} md={3} className={classes.gridItem}>
-                  <NftCard
-                    token={token}
-                    collectionAddress={collection?.address}
-                  />
-                </Grid>
-              );
-            })}
+            {collection &&
+              tokens.map((token, i) => {
+                return (
+                  <Grid
+                    item
+                    key={i}
+                    xs={12}
+                    md={3}
+                    className={classes.gridItem}
+                  >
+                    <NftCard
+                      token={token}
+                      collectionAddress={collection?.address}
+                    />
+                  </Grid>
+                );
+              })}
           </Grid>
         </ArkBanner>
       </Container>

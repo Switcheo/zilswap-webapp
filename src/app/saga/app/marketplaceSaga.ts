@@ -6,14 +6,15 @@ import { getBlockchain, getMarketplace, getWallet } from "../selectors";
 
 function* initialize() {
   try {
-    yield put(actions.Layout.addBackgroundLoading("initMarketplace", "INIT_MARKETPLACE"));
-    const { wallet } = getWallet(yield select());
-    const { network } = getBlockchain(yield select());
-    if (!wallet) throw new Error("invalid wallet");
-    const hostname = window.location.hostname;
-    const arkClient = new ArkClient(network); // TODO: refactor client into redux
-    const authResult = (yield call(arkClient.arkLogin, wallet, hostname)) as unknown as any;
-    yield put(actions.MarketPlace.updateAccessToken(authResult.result))
+    // yield put(actions.Layout.addBackgroundLoading("initMarketplace", "INIT_MARKETPLACE"));
+    // const { wallet } = getWallet(yield select());
+    // const { network } = getBlockchain(yield select());
+    // if (!wallet) throw new Error("invalid wallet");
+    throw new Error("too many login requests");
+    // const hostname = window.location.hostname;
+    // const arkClient = new ArkClient(network); // TODO: refactor client into redux
+    // const authResult = (yield call(arkClient.arkLogin, wallet, hostname)) as unknown as any;
+    // yield put(actions.MarketPlace.updateAccessToken(authResult.result))
   } catch (error) {
     console.error("initialize failed, Error:")
     console.error(error)

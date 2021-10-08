@@ -13,14 +13,18 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import { ArkBreadcrumb } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
+import { getBlockchain, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
+import { Nft } from "app/store/types";
 import { AppTheme } from "app/theme/types";
+import { useAsyncTask } from "app/utils";
+import { ArkClient } from "core/utilities";
+import { fromBech32Address } from "core/zilswap";
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { ReactComponent as VerifiedBadge } from "../Collection/verified-badge.svg";
-import { BuyDialog } from "./components";
-import { Nft } from "app/store/marketplace/types";
-import { useHistory } from "react-router-dom";
+import { BuyDialog, SellDialog } from "./components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -155,38 +159,40 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const NftPage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
+const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
 ) => {
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
-  const history = useHistory();
-  const [token, setToken] = useState<Nft | null>(null);
+  const { network } = useSelector(getBlockchain);
+  const { wallet } = useSelector(getWallet);
+  const [nftToken, setNftToken] = useState<Nft | null>(null);
+  const [runGetNftToken] = useAsyncTask("getNftToken");
   const collectionAddress = match.params.collection;
   const tokenId = match.params.id;
 
   // fetch nft data, if none redirect back to collections / show not found view
   useEffect(() => {
-    const getToken = async () => {
-      const response = await fetch(
-        `https://api-ark.zilswap.org/nft/collection/${collectionAddress}/${tokenId}/detail`
-      );
+    runGetNftToken(async () => {
+      const arkClient = new ArkClient(network);
+      const address = fromBech32Address(collectionAddress).toLowerCase();
+      const result = await arkClient.getNftToken(address, tokenId);
 
-      if (!response.ok) {
-        history.push(`/ark/collections/${collectionAddress}`);
-        return;
-      }
+      console.log("result: ", result);
 
-      const data = await response.json();
-      const token = data.result.model;
+      setNftToken(result.result.model);
+    });
 
-      setToken(token);
-    };
-
-    getToken();
     // eslint-disable-next-line
-  }, []);
+  }, [collectionAddress, tokenId, network]);
+
+  const isOwnToken = useMemo(() => {
+    return (
+      nftToken?.user?.address &&
+      wallet?.addressInfo.byte20?.toLowerCase() === nftToken?.user?.address
+    );
+  }, [nftToken, wallet?.addressInfo]);
 
   const breadcrumbs = [
     { path: "/ark/collections", value: "Collections" },
@@ -199,6 +205,10 @@ const NftPage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       value: `#${tokenId}`,
     },
   ];
+
+  const onSell = () => {
+    dispatch(actions.Layout.toggleShowSellNftDialog("open"));
+  };
 
   const onBuy = () => {
     dispatch(actions.Layout.toggleShowBuyNftDialog("open"));
@@ -214,7 +224,8 @@ const NftPage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           <Box className={classes.mainInfoBox}>
             {/* Collection name */}
             <Typography className={classes.collectionName}>
-              {token?.name} <VerifiedBadge className={classes.verifiedBadge} />
+              {nftToken?.name}{" "}
+              <VerifiedBadge className={classes.verifiedBadge} />
             </Typography>
 
             {/* Token id */}
@@ -222,13 +233,25 @@ const NftPage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
             <Box display="flex" mt={2} gridGap={20}>
               {/* Buy button */}
-              <Button
-                className={classes.buyButton}
-                disableRipple
-                onClick={onBuy}
-              >
-                Buy Now
-              </Button>
+              {isOwnToken && (
+                <Button
+                  className={classes.buyButton}
+                  disableRipple
+                  onClick={onSell}
+                >
+                  Sell
+                </Button>
+              )}
+
+              {!isOwnToken && (
+                <Button
+                  className={classes.buyButton}
+                  disableRipple
+                  onClick={onBuy}
+                >
+                  Buy Now
+                </Button>
+              )}
 
               {/* Bid button */}
               <Button className={classes.bidButton} disableRipple>
@@ -311,9 +334,10 @@ const NftPage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           {/* Price History */}
         </Box>
       </Container>
-      <BuyDialog token={token!} collectionAddress={collectionAddress} />
+      <BuyDialog token={nftToken!} collectionAddress={collectionAddress} />
+      <SellDialog />
     </ArkPage>
   );
 };
 
-export default NftPage;
+export default NftView;

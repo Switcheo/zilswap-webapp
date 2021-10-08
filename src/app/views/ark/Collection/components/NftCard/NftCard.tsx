@@ -177,7 +177,9 @@ const NftCard: React.FC<Props> = (props: Props) => {
         </Box>
         <CardActionArea
           component={Link}
-          to={`/ark/collections/${collectionAddress}/${token.tokenId}`}
+          to={`/ark/collections/${toBech32Address(collectionAddress)}/${
+            token.tokenId
+          }`}
         >
           <CardMedia
             className={classes.image}
