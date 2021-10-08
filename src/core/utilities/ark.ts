@@ -172,32 +172,14 @@ export class ArkClient {
    */
   arkChequeHash = (params: ArkClient.ArkChequeParams): string => {
     const { side, token, price, feeAmount, expiry, nonce } = params
-    if (token.address.startsWith("zil1"))
-      token.address = fromBech32Address(token.address);
     const brokerAddress = fromBech32Address(ARK_CONTRACTS[this.network]).toLowerCase()
-    let buffer = ""
-    let thisHex = strToHex(brokerAddress.replace('0x', ''))
-    buffer += thisHex
-    console.log(thisHex)
-    thisHex = sha256(strToHex(`${brokerAddress}.${side}`))
-    buffer += thisHex
-    console.log(thisHex)
-    thisHex = sha256(serializeNFT(brokerAddress, token))
-    buffer += thisHex
-    console.log(thisHex)
-    thisHex = sha256(serializePrice(brokerAddress, price))
-    buffer += thisHex
-    console.log(thisHex)
-    console.log("fee", feeAmount.toString(10), serializeUint128(side === 'Buy' ? 0 : feeAmount))
-    thisHex = sha256(serializeUint128(side === 'Buy' ? 0 : feeAmount))
-    buffer += thisHex
-    console.log(thisHex)
-    thisHex = sha256(strToHex(expiry.toString())) // BNum is serialized as a String
-    buffer += thisHex
-    console.log(thisHex)
-    thisHex = sha256(serializeUint128(nonce))
-    console.log(thisHex)
-    console.log("buffer", buffer);
+    let buffer = strToHex(brokerAddress.replace('0x', ''))
+    buffer += sha256(strToHex(`${brokerAddress}.${side}`))
+    buffer += sha256(serializeNFT(brokerAddress, token))
+    buffer += sha256(serializePrice(brokerAddress, price))
+    buffer += sha256(serializeUint128(side === 'Buy' ? 0 : feeAmount))
+    buffer += sha256(strToHex(expiry.toString())) // BNum is serialized as a String
+    buffer += sha256(serializeUint128(nonce))
     return sha256(buffer)
   }
 }
@@ -206,7 +188,6 @@ const serializeNFT = (brokerAddress: string, token: { id: string, address: strin
   let buffer = strToHex(`${brokerAddress}.NFT`)
   buffer += token.address.replace('0x', '').toLowerCase()
   buffer += serializeUint256(token.id)
-  console.log("serializeNFT", buffer)
   return buffer
 }
 
@@ -231,8 +212,7 @@ const serializeUint256 = (val: BigNumber | string): string => {
 }
 
 const serializeUint = (val: BigNumber | string | number, size: number): string => {
-  const hexLength = size * 2;
-  return "0".repeat(hexLength).concat(new BigNumber(val.toString()).toString(16)).slice(-hexLength);
+  return "0".repeat(size).concat(new BigNumber(val.toString()).toString(16)).slice(-16);
 }
 
 const strToHex = (str: string): string => {
