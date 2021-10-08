@@ -68,6 +68,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
+const isCopiable = (addr: string) => {
+  try {
+    return !!toBech32Address(addr);
+  } catch (error) {
+    return false
+  }
+}
+
 const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
 ) => {
@@ -92,7 +100,7 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   let address = RawAddress;
 
   // set all to bech32 format for easily reference
-  if (address && !address.startsWith("zil1")) address = toBech32Address(address);
+  if (address && !address.startsWith("zil1") && isCopiable(address)) address = toBech32Address(address);
 
 
   useEffect(() => {
@@ -143,29 +151,28 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   let tabHeaders = ["Collected", "For Sale", "Liked"];
   if (profileIsOwner) tabHeaders = tabHeaders.concat(["Bids Made", "Bids Received",])
 
+
   return (
     <ArkPage {...rest}>
       {!showEdit && (
         <Container className={classes.root} maxWidth="lg">
           <ArkBanner>
-            {viewProfile && (
-              <Typography variant="h2">
-                {viewProfile.username || "Unnamed"}{" "}
-                {profileIsOwner && (
-                  <EditIcon
-                    onClick={() => setShowEdit(true)}
-                    className={cls(classes.editIcon, classes.editable)}
-                  />
-                )}
-              </Typography>
-            )}
-            {viewProfile && (
+            <Typography variant="h2">
+              {viewProfile?.username || "Unnamed"}{" "}
+              {profileIsOwner && (
+                <EditIcon
+                  onClick={() => setShowEdit(true)}
+                  className={cls(classes.editIcon, classes.editable)}
+                />
+              )}
+            </Typography>
+            {(address || viewProfile?.address) && (
               <Tooltip title="Copy address" placement="top" arrow>
                 <Box
-                  onClick={() => copyAddr(toBech32Address(viewProfile.address))}
+                  onClick={() => copyAddr(isCopiable(viewProfile?.address || address) ? toBech32Address(viewProfile?.address || address) : address)}
                   className={classes.addrBox}
                 >
-                  <Typography variant="body1">{addrText}</Typography>
+                  <Typography variant="body1">{addrText || address}</Typography>
                 </Box>
               </Tooltip>
             )}
