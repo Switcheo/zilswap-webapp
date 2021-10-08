@@ -16,7 +16,6 @@ import cls from "classnames";
 import { ArkClient } from "core/utilities";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
 import {
   Collected,
   EditProfile,
@@ -24,6 +23,7 @@ import {
   OfferTable
 } from "./components";
 import { ReactComponent as EditIcon } from "./edit-icon.svg";
+import { useRouteMatch } from "react-router";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -82,14 +82,18 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
   const [showEdit, setShowEdit] = useState(false);
   const [currentTab, setCurrentTab] = useState("Collected");
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const address = queryParams.get("address");
+  const { params: { address: RawAddress } } = useRouteMatch<{ address: string }>();
   const [viewProfile, setViewProfile] = useState<ProfileType | null>(null);
   const [addrText, setAddrText] = useState<string | undefined>(undefined);
   const [profileIsOwner, setProfileIsOwner] = useState(false);
   const network = useNetwork();
   const [runQueryProfile] = useAsyncTask("queryProfile");
+
+  let address = RawAddress;
+
+  // set all to bech32 format for easily reference
+  if (address && !address.startsWith("zil1")) address = toBech32Address(address);
+
 
   useEffect(() => {
     checkProfile();
@@ -105,13 +109,13 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   }, [storeProfile, wallet?.addressInfo.bech32])
 
   const checkProfile = () => {
-    if (((storeProfile?.address && !address) || (storeProfile?.address && storeProfile?.address === address)) && wallet?.addressInfo.bech32) {
+    if (((storeProfile?.address && !address) || (storeProfile?.address && toBech32Address(storeProfile?.address) === address)) && wallet?.addressInfo.bech32) {
       setViewProfile(storeProfile);
       setProfileIsOwner(true);
       setAddrText(truncate(toBech32Address(storeProfile?.address), 5, isXs ? 2 : 5))
     } else {
       if (address) {
-        getProfile(address);
+        getProfile(RawAddress);
       } else {
         setViewProfile(null);
       }
