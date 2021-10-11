@@ -1,5 +1,5 @@
 import { CollectionFilter } from "../types"
-import { Nft, OAuth, PaginatedList } from "./types"
+import { Nft, OAuth, PaginatedList, Profile } from "./types"
 
 export const MarketPlaceActionTypes = {
   INITIALIZE: "INITIALIZE",
@@ -10,7 +10,7 @@ export const MarketPlaceActionTypes = {
   REFRESH_ACCESS_TOKEN: "REFRESH_ACCESS_TOKEN",
   UPDATE_COLLECTION: "UPDATE_COLLECTION",
   UPDATE_FILTER: "UPDATE_FILTER",
-  
+
   RELOAD_TOKEN_LIST: "RELOAD_TOKEN_LIST",
 }
 
@@ -24,7 +24,7 @@ export function refreshAccessToken() {
   return { type: MarketPlaceActionTypes.REFRESH_ACCESS_TOKEN }
 }
 
-export function updateProfile(payload: {}) {
+export function updateProfile(payload: Profile) {
   return {
     type: MarketPlaceActionTypes.UPDATE_PROFILE,
     payload
@@ -34,6 +34,7 @@ export function updateProfile(payload: {}) {
 export function updateAccessToken(payload: OAuth) {
   return {
     type: MarketPlaceActionTypes.UPDATE_ACCESS_TOKEN,
+    payload
   }
 }
 

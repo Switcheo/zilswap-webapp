@@ -10,8 +10,7 @@ import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
 import { DevInfoBadge } from "../MainLayout/components";
 import { actions } from "app/store";
-import { BlockchainState, MarketPlaceState, RootState, WalletState } from "app/store/types";
-import dayjs from "dayjs";
+import { BlockchainState, RootState, WalletState } from "app/store/types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -51,20 +50,11 @@ const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const walletState = useSelector<RootState, WalletState>(
     (state) => state.wallet
   );
-  const marketplaceState = useSelector<RootState, MarketPlaceState>(
-    (state) => state.marketplace
-  );
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (blockchainState.ready && walletState.wallet?.addressInfo.bech32) {
-      const { oAuth } = marketplaceState;
-      if (oAuth && dayjs(oAuth.expires_at * 1000).isBefore(dayjs())) {
-        dispatch(actions.MarketPlace.initialize());
-      } else if (!oAuth) {
-        dispatch(actions.MarketPlace.initialize());
-      } else {
-      }
+      dispatch(actions.MarketPlace.loadProfile());
     }
     // eslint-disable-next-line
   }, [blockchainState.ready, walletState.wallet?.addressInfo.bech32]);
