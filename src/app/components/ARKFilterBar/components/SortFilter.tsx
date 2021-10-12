@@ -112,6 +112,10 @@ const useStyles = makeStyles((theme: AppTheme) =>({
     fill: "#DEFFFF",
     fillOpacity: 0.5
   },
+  sortIconMenu: {
+    fill: "#DEFFFF",
+    fillOpacity: 1
+  },
   sortIconSelected: {
     fill: theme.palette.primary.dark,
     fillOpacity: 1
@@ -204,7 +208,9 @@ const SortFilter = () => {
   return (
     <>
       <Button onClick={handleClick} className={anchorEl === null ? cls(classes.button, classes.inactive) : cls(classes.button, classes.active)}>
-        <Box display="flex" alignItems="center" justifyContent="center" width="100%" height="100%" className={classes.sortIcon}>
+        <Box display="flex" alignItems="center" justifyContent="center" width="100%" height="100%" className={cls(classes.sortIconMenu, {
+          [classes.sortIconSelected]: anchorEl !== null
+        })}>
           {iconForType(sortBy)}
         </Box>
       </Button>
