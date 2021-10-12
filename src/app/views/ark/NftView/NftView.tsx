@@ -39,9 +39,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 12,
     border: "1px solid #29475A",
     background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
+    marginRight: "70px",
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(4, 5),
       width: "100%",
+      marginRight: 0,
     },
   },
   collectionName: {

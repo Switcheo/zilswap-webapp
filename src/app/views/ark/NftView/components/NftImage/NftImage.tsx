@@ -1,5 +1,6 @@
 import {
-  Box, Card, CardHeader, CardMedia, CardProps, IconButton, SvgIcon, Typography
+  Box, Card, CardHeader, CardMedia, CardProps, IconButton,
+  SvgIcon, Typography, CardContent
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import UnlikedIcon from "@material-ui/icons/FavoriteBorderRounded";
@@ -20,42 +21,48 @@ const NftImage: React.FC<Props> = (props: Props) => {
   const [liked, setLiked] = useState<boolean>(false);
 
   return (
-    <Card {...rest} className={cls(classes.root, className)}>
-      <CardHeader
-        className={classes.cardHeader}
-        title={
-          <Box display="flex" alignItems="center">
-            <Typography className={classes.likes}>20K</Typography>
-            <IconButton
-              onClick={() => setLiked(!liked)}
-              className={classes.likeIconButton}
-              disableRipple
-            >
-              <SvgIcon
-                component={liked ? LikedIcon : UnlikedIcon}
-                className={classes.likeButton}
-              />
-            </IconButton>
-          </Box>
-        } />
+    <Box  {...rest} className={cls(classes.root, className)}>
+      <Card className={classes.card}>
+        <CardHeader
+          className={classes.cardHeader}
+          title={
+            <Box display="flex" alignItems="center">
+              <Typography className={classes.likes}>20K</Typography>
+              <IconButton
+                onClick={() => setLiked(!liked)}
+                className={classes.likeIconButton}
+                disableRipple
+              >
+                <SvgIcon
+                  component={liked ? LikedIcon : UnlikedIcon}
+                  className={classes.likeButton}
+                />
+              </IconButton>
+            </Box>
+          } />
 
-      <CardMedia
-        alt={nftAsset?.filename || "Token Image"}
-        component="img"
-        image={nftAsset?.url || undefined}
-        className={classes.media}
-      />
-      <Box display="flex" flexDirection="row" justifyContent="center" alignItems="center">
+        <CardContent className={classes.cardContent}>
+          <CardMedia
+            alt={nftAsset?.filename || "Token Image"}
+            component="img"
+            image={nftAsset?.url || undefined}
+            className={classes.media}
+          />
+        </CardContent>
+      </Card>
+      <Box display="flex" flexDirection="row" justifyContent="flex-start" alignItems="center">
         <Typography>Share</Typography><SocialLinkGroup />
       </Box>
-    </Card>
+    </Box>
   );
 };
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     position: "relative",
-    overflow: "visible",
+    maxWidth: 308,
+  },
+  card: {
     background: "rgba(76, 175, 80, 0.0)",
   },
   cardHeader: {
@@ -63,22 +70,24 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderTopLeftRadius: "12px",
     borderTopRightRadius: "12px",
     "&.MuiCardHeader-root": {
-      padding: "8px 16px 8px 16px"
+      padding: "6px 16px 6px 16px"
     }
   },
   cardContent: {
-
+    padding: 0,
+    borderBottomLeftRadius: "12px",
+    borderBottomRightRadius: "12px",
   },
   cardAction: {
 
   },
   media: {
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
+    width: "calc(100% + 16px)",
+    height: "calc(100% + 16px)",
     objectFit: "cover",
-    maxWidth: "300px",
+    backgroundPositionX: "center",
+    transform: "translate(-8px)",
+    overflow: "hidden",
   },
   likes: {
     color: theme.palette.label,
