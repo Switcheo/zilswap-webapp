@@ -86,6 +86,8 @@ export interface Asset {
   filename: string;
   url: string;
   contentLength?: number;
+  id?: string;
+  host?: string
 }
 
 export type MarketplaceUser = {

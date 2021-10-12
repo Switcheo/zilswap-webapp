@@ -12,7 +12,7 @@ import { useAsyncTask } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import { ReactComponent as VerifiedBadge } from "../Collection/verified-badge.svg";
-import { BidDialog, BuyDialog, SellDialog } from "./components";
+import { BidDialog, BuyDialog, SellDialog, NftImage } from "./components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -33,6 +33,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   mainInfoBox: {
     display: "flex",
+    width: "100%",
     flexDirection: "column",
     padding: theme.spacing(8, 10),
     borderRadius: 12,
@@ -145,11 +146,25 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       color: "#DEFFFF",
     },
   },
+  bearImage: {
+    alignSelf: "center",
+    right: "-70px",
+    position: "relative",
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
+
+      right: "0",
+    }
+  },
+  imageInfoContainer: {
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
+    }
+  }
 }));
 
-const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
-  props: any
-) => {
+
+const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -159,6 +174,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const [runGetNFTDetails] = useAsyncTask("runGetNFTDetails");
   const [bids, setBids] = useState<Cheque[]>([]);
   const [runGetBids] = useAsyncTask("getBids");
+  const [nftToken, setNftToken] = useState<Nft | null>(null);
   const collectionId = match.params.collection;
   const tokenId = match.params.id;
 
@@ -169,6 +185,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       const address = fromBech32Address(collectionId).toLowerCase()
       const result = await arkClient.getNftToken(address, tokenId);
       setToken(result.result.model);
+      const { result: { model: { collection, tokenId: newId } } } = result;
     })
     runGetBids(async () => {
       const address = fromBech32Address(collectionId).toLowerCase()
@@ -214,7 +231,8 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         <ArkBreadcrumb linkPath={breadcrumbs} />
 
         {/* Nft image and main info */}
-        <Box display="flex" mt={3} justifyContent="flex-end">
+        <Box display="flex" mt={3} justifyContent="center" className={classes.imageInfoContainer}>
+          <NftImage className={classes.bearImage} nftAsset={nftToken?.asset} />
           <Box className={classes.mainInfoBox}>
             {/* Collection name */}
             <Typography className={classes.collectionName}>
@@ -267,11 +285,6 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         </Box>
 
         {/* Other info and price history */}
-        <Box display="flex" mt={3}>
-          {/* Other Info */}
-
-          {/* Price History */}
-        </Box>
       </Container>
       {token && (
         <Fragment>
