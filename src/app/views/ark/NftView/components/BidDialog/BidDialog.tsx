@@ -5,34 +5,36 @@ import {
   DialogContent,
   DialogProps,
   FormControlLabel,
-  Link,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
-import LaunchIcon from "@material-ui/icons/Launch";
-import { CurrencyLogo, DialogModal, FancyButton, Text } from "app/components";
+import { CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
-import { RootState } from "app/store/types";
+import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { truncate, useAsyncTask } from "app/utils";
-import { ZIL_ADDRESS } from "app/utils/constants";
+import { useAsyncTask } from "app/utils";
+import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import { NftCard } from "app/views/ark/Collection/components";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
+import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { fromBech32Address } from "core/zilswap";
 import React, { Fragment, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { ReactComponent as ChainLinkIcon } from "./chainlink.svg";
-import { SocialLinkGroup } from "app/components/ArkComponents";
+import { ReactComponent as ChainLinkIcon } from "../BuyDialog/chainlink.svg";
 
 interface Props extends Partial<DialogProps> {
   token: Nft;
   collectionAddress: string;
 }
 
-const BuyDialog: React.FC<Props> = (props: Props) => {
+const initialFormState = {
+  bidAmount: "0",
+};
+
+const BidDialog: React.FC<Props> = (props: Props) => {
   const { children, className, collectionAddress, token, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -40,9 +42,14 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
   const [runConfirmPurchase, loading, error] = useAsyncTask("confirmPurchase");
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
+  const [formState, setFormState] =
+    useState<typeof initialFormState>(initialFormState);
+  const tokenState = useSelector<RootState, TokenState>((store) => store.token);
+
+  let bidToken = tokenState.tokens[ZIL_ADDRESS];
 
   const open = useSelector<RootState, boolean>(
-    (state) => state.layout.showBuyNftDialog
+    (state) => state.layout.showBidNftDialog
   );
 
   const onConfirm = () => {
@@ -55,31 +62,47 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
 
   const onCloseDialog = () => {
     if (loading) return;
-    dispatch(actions.Layout.toggleShowBuyNftDialog("close"));
+    dispatch(actions.Layout.toggleShowBidNftDialog("close"));
     setAcceptTerms(false);
     setCompletedPurchase(false);
   };
 
   const onViewCollection = () => {
-    dispatch(actions.Layout.toggleShowBuyNftDialog("close"));
+    dispatch(actions.Layout.toggleShowBidNftDialog("close"));
     history.push("/ark/profile");
   };
 
-  const dialogHeader = loading
-    ? ""
-    : completedPurchase
-    ? "You now own"
-    : "Confirm Purchase";
+  const onCurrencyChange = (token: TokenInfo) => {
+    bidToken = token;
+  };
+
+  const onBidAmountChange = (rawAmount: string = "0") => {
+    let bidAmount = new BigNumber(rawAmount).decimalPlaces(
+      bidToken?.decimals ?? 0
+    );
+    if (bidAmount.isNaN() || bidAmount.isNegative() || !bidAmount.isFinite())
+      bidAmount = BIG_ZERO;
+
+    setFormState({
+      ...formState,
+      bidAmount: rawAmount,
+    });
+  };
+
+  const onEndEditBidAmount = () => {
+    setFormState({
+      ...formState,
+      bidAmount: formState.bidAmount.toString(),
+    });
+  };
 
   return (
     <DialogModal
-      header={dialogHeader}
+      header="Place a Bid"
       {...rest}
       open={open}
       onClose={onCloseDialog}
       className={cls(classes.root, className)}
-      hideCloseButton={loading}
-      titlePadding={!!loading}
     >
       <DialogContent className={cls(classes.dialogContent)}>
         {error && (
@@ -94,49 +117,14 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
           dialog={true}
         />
 
-        {/* Price Box */}
-        <Box className={classes.priceBox}>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Text className={classes.priceText}>
-              {completedPurchase ? "Bid Price" : "Fixed Price"}
-            </Text>
-            <Box display="flex" alignItems="center">
-              <Text className={classes.price}>100</Text>
-              <CurrencyLogo
-                currency={"ZIL"}
-                address={ZIL_ADDRESS}
-                className={classes.currencyLogo}
-              />
-            </Box>
-          </Box>
-
-          {completedPurchase && (
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mt={0.5}
-            >
-              <Text className={classes.txText}>Transaction Hash</Text>
-              <Text>
-                <Link
-                  className={classes.link}
-                  underline="hover"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  href={"hello"}
-                >
-                  {truncate("0x27f12shdj", 5, 5)}
-                  <LaunchIcon className={cls(classes.icon, classes.linkIcon)} />
-                </Link>
-              </Text>
-            </Box>
-          )}
-        </Box>
+        <CurrencyInput
+          label="Place Your Bid"
+          token={bidToken ?? null}
+          amount={formState.bidAmount}
+          onEditorBlur={onEndEditBidAmount}
+          onAmountChange={onBidAmountChange}
+          onCurrencyChange={onCurrencyChange}
+        />
 
         {!(loading || completedPurchase) && (
           <Fragment>
@@ -170,29 +158,21 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
               disabled={!acceptTerms}
               walletRequired
             >
-              Confirm Purchase
+              Place Bid
             </FancyButton>
           </Fragment>
         )}
 
         {completedPurchase && (
-          <Box className={classes.completedBox}>
-            <FancyButton
-              className={classes.actionButton}
-              variant="contained"
-              color="primary"
-              onClick={onViewCollection}
-              walletRequired
-              fullWidth
-            >
-              View Collection
-            </FancyButton>
-
-            <Box display="flex" flexDirection="column" alignItems="center">
-              <Text className={classes.shareText}>Share</Text>
-              <SocialLinkGroup />
-            </Box>
-          </Box>
+          <FancyButton
+            className={classes.collectionButton}
+            variant="contained"
+            color="primary"
+            onClick={onViewCollection}
+            walletRequired
+          >
+            View Collection
+          </FancyButton>
         )}
 
         {/* to clean up */}
@@ -258,6 +238,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   actionButton: {
     height: 46,
   },
+  collectionButton: {
+    height: 46,
+    marginTop: theme.spacing(1),
+  },
   nftCard: {
     maxWidth: "none",
   },
@@ -318,14 +302,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "24px",
     marginTop: theme.spacing(0.5),
   },
-  completedBox: {
-    marginTop: theme.spacing(1.5),
-  },
-  shareText: {
-    color: theme.palette.label,
-    marginTop: theme.spacing(1.5),
-    marginBottom: theme.spacing(1),
-  },
 }));
 
-export default BuyDialog;
+export default BidDialog;

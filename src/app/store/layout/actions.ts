@@ -13,6 +13,7 @@ export const LayoutActionTypes = {
   TOGGLE_SHOW_MNEMONIC: "TOGGLE_SHOW_MNEMONIC",
   TOGGLE_SHOW_RESUME_TRANSFER: "TOGGLE_SHOW_RESUME_TRANSFER",
   TOGGLE_SHOW_BUY_NFT: "TOGGLE_SHOW_BUY_NFT",
+  TOGGLE_SHOW_BID_NFT: "TOGGLE_SHOW_BID_NFT",
   TOGGLE_SHOW_SELL_NFT: "TOGGLE_SHOW_SELL_NFT",
   TOGGLE_EXPAND_NAV_DRAWER: "TOGGLE_EXPAND_NAV_DRAWER",
 
@@ -59,6 +60,12 @@ export function toggleShowResumeTransfer(override?: OpenCloseState) {
 export function toggleShowBuyNftDialog(override?: OpenCloseState) {
   return {
     type: LayoutActionTypes.TOGGLE_SHOW_BUY_NFT,
+    override,
+  }
+};
+export function toggleShowBidNftDialog(override?: OpenCloseState) {
+  return {
+    type: LayoutActionTypes.TOGGLE_SHOW_BID_NFT,
     override,
   }
 };

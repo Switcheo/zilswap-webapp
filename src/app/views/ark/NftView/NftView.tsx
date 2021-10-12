@@ -20,11 +20,10 @@ import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
-import React, { useEffect, useState } from "react";
-import { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ReactComponent as VerifiedBadge } from "../Collection/verified-badge.svg";
-import { BuyDialog, SellDialog } from "./components";
+import { BidDialog, BuyDialog, SellDialog } from "./components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -214,6 +213,10 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     dispatch(actions.Layout.toggleShowBuyNftDialog("open"));
   };
 
+  const onBid = () => {
+    dispatch(actions.Layout.toggleShowBidNftDialog("open"));
+  };
+
   return (
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
@@ -254,7 +257,11 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               )}
 
               {/* Bid button */}
-              <Button className={classes.bidButton} disableRipple>
+              <Button
+                className={classes.bidButton}
+                onClick={onBid}
+                disableRipple
+              >
                 Place a Bid
               </Button>
             </Box>
@@ -335,6 +342,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         </Box>
       </Container>
       <BuyDialog token={nftToken!} collectionAddress={collectionAddress} />
+      <BidDialog token={nftToken!} collectionAddress={collectionAddress} />
       <SellDialog />
     </ArkPage>
   );
