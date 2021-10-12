@@ -5,14 +5,13 @@ import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
-import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, MnemonicDialog, Text } from "app/components";
 import { ReactComponent as StraightLine } from "app/components/ConfirmTransfer/straight-line.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { BridgeTx } from "app/store/bridge/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useBridgeableTokenFinder, useNetwork, trimValue } from "app/utils";
+import { hexToRGBA, truncate, useBridgeableTokenFinder, useNetwork, trimValue, truncateAddress } from "app/utils";
 import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL } from "app/utils/constants";
 import { ReactComponent as EthereumLogo } from "app/views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "app/views/main/Bridge/wavy-line.svg";
@@ -367,7 +366,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
     if (!address) return "";
     switch (chain) {
       case Blockchain.Zilliqa:
-        return truncate(toBech32Address(address), 5, 4);
+        return truncateAddress(address);
       default:
         return truncate(address, 5, 4);
     }

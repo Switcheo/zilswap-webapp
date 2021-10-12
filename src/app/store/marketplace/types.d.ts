@@ -10,6 +10,29 @@ export interface MarketPlaceState {
   bidded?: any;
 }
 
+export interface Cheque {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  initiatorDisplayName: string;
+  initiatorAddress: string;
+  brokerAddress: string;
+  side: 'buy' | 'sell';
+  feeAmount: string;
+  publicKey: string;
+  nonce: number;
+  expiry: number;
+  token: Pick<Nft, 'tokenId', 'collection', 'asset'>,
+  price: {
+    amount: string;
+    address: string;
+  },
+  initiator?: Profile
+  cancelTransactionHash: string | null,
+  matchTransactionHash: string | null,
+  status: 'Active' | 'Expired' | 'Cancelled' | 'Accepted'
+}
+
 export interface Nft {
   name?: string;
   tokenId: number;

@@ -1,6 +1,8 @@
+import { toBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
-import { BIG_ONE, BIG_ZERO } from "../constants";
+import { truncate } from ".";
+import { BIG_ONE, BIG_ZERO } from "./constants";
 
 const BILLION = BIG_ONE.shiftedBy(9);
 const MILLION = BIG_ONE.shiftedBy(6);
@@ -41,6 +43,14 @@ export const toHumanNumber = (input?: string | BigNumber | number, dp: number = 
 
   return `${value.shiftedBy(-9).decimalPlaces(dp).toFormat()}B`
 };
+
+export const truncateAddress = (input: string, forSmallScreen: boolean = false) => {
+  let i = input
+  if (input.startsWith("0x")) {
+    i = toBech32Address(input)
+  }
+  return truncate(i, 5, forSmallScreen ? 2 : 5)
+}
 
 export const formatZWAPLabel = (input: BigNumber) => {
   const amount = input.shiftedBy(-12);

@@ -1,6 +1,6 @@
 import { SimpleMap } from "app/utils";
 import { LocalStorageKeys } from "app/utils/constants";
-import { bnOrZero, DataCoder } from "app/utils/strings/strings";
+import { bnOrZero, DataCoder } from "app/utils";
 import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
 import dayjs from "dayjs";

@@ -10,7 +10,7 @@ import { AmountLabel, ContrastBox, KeyValueDisplay, PoolLogo, Text } from "app/c
 import { PotentialRewards, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
-import { toHumanNumber } from "app/utils/strings/strings";
+import { toHumanNumber } from "app/utils";
 import { useValueCalculators, useNetwork } from "app/utils";
 import { EMPTY_USD_VALUE } from "app/store/token/reducer";
 

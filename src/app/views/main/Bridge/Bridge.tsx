@@ -9,7 +9,7 @@ import { actions } from "app/store";
 import { BridgeFormState, BridgeState } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, netZilToTradeHub, strings, useAsyncTask, useNetwork, useTokenFinder } from "app/utils";
+import { bnOrZero, hexToRGBA, netZilToTradeHub, useAsyncTask, useNetwork, useTokenFinder } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
@@ -489,7 +489,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       return false;
     if (bridgeFormState.transferAmount.isZero())
       return false;
-    if (fromToken && bridgeFormState.transferAmount.isGreaterThan(strings.bnOrZero(fromToken.balance).shiftedBy(-fromToken.decimals)))
+    if (fromToken && bridgeFormState.transferAmount.isGreaterThan(bnOrZero(fromToken.balance).shiftedBy(-fromToken.decimals)))
       return false;
 
     return true
@@ -518,7 +518,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const onSelectMax = async () => {
     if (!fromToken || !sdk) return;
 
-    let balance = strings.bnOrZero(fromToken.balance);
+    let balance = bnOrZero(fromToken.balance);
     const asset = sdk.token.tokens[bridgeToken?.denom ?? ""];
 
     if (!asset) return;

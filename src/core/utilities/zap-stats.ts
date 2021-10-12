@@ -1,4 +1,4 @@
-import { bnOrZero } from "app/utils/strings/strings";
+import { bnOrZero } from "app/utils";
 import BigNumber from "bignumber.js";
 import dayjs, { Dayjs } from "dayjs";
 import { Network } from "zilswap-sdk/lib/constants";

@@ -5,4 +5,5 @@ export { default as ArkTab } from "./ArkTab";
 export { default as ArkTopBar } from "./ArkTopBar";
 export { default as ArkNavDrawer } from "./ArkNavDrawer";
 export { default as ArkBreadcrumb } from "./ArkBreadcrumb";
+export { default as ArkBidsTable } from "./ArkBidsTable";
 export { default as SocialLinkGroup } from "./SocialLinkGroup";

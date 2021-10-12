@@ -7,7 +7,7 @@ export { default as isUrl } from "./isUrl";
 export { default as multiLineFormat } from "./multiLineFormat";
 export * from "./network";
 export { default as snakeToTitle } from "./snakeToTitle";
-export { default as strings } from "./strings";
+export * from "./strings";
 export { default as trimValue } from "./trimValue";
 export { default as truncate } from "./truncate";
 export * from "./types";

@@ -1,4 +1,4 @@
-import { bnOrZero } from "app/utils/strings/strings";
+import { bnOrZero } from "app/utils";
 import BigNumber from "bignumber.js";
 import { HTTP } from "./http";
 
@@ -26,7 +26,7 @@ export class CoinGecko {
 
 	/**
 	 * Static function to query Contract Events from CoinGecko given a contact address and event name.
-	 * 
+	 *
 	 * @param address address to query.
 	 * @param network mainnet | testnet - defaults to `testnet`
 	 * @param event event types to query.

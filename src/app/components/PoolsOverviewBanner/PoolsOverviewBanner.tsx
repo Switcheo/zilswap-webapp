@@ -5,7 +5,7 @@ import { RewardsState, RootState, StatsState, TokenState } from "app/store/types
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
-import { bnOrZero, toHumanNumber } from "app/utils/strings/strings";
+import { bnOrZero, toHumanNumber } from "app/utils";
 import cls from "classnames";
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";

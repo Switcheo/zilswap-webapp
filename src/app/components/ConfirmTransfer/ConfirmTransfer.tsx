@@ -9,6 +9,7 @@ import { BridgeableToken, BridgeFormState, BridgeState, BridgeTx } from "app/sto
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, netZilToTradeHub, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
+import { truncateAddress } from "app/utils";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
@@ -554,7 +555,7 @@ const ConfirmTransfer = (props: any) => {
     if (!address) return "";
     switch (chain) {
       case Blockchain.Zilliqa:
-        return truncate(toBech32Address(address), 5, 4);
+        return truncateAddress(address);
       default:
         return truncate(address, 5, 4);
     }

@@ -30,6 +30,7 @@ const apiPaths = {
   "collection/traits": "/nft/collection/:address/traits",
   "collection/token/detail": "/nft/collection/:address/:tokenId/detail",
   "token/list": "/nft/token/list",
+  "trade/list": "/nft/trade/list",
   "trade/post": "/nft/trade/:address/:tokenId",
   "user/list": "/user/list",
   "user/detail": "/user/:address/detail",
@@ -100,6 +101,12 @@ export class ArkClient {
 
   getNftToken = async (address: string, tokenId: string) => {
     const url = this.http.path("collection/token/detail", { address, tokenId });
+    const result = await this.http.get({ url });
+    return result.json();
+  }
+
+  getNftCheques = async (collectionAddress: string, tokenId: string) => {
+    const url = this.http.path("trade/list", {}, { collectionAddress, tokenId });
     const result = await this.http.get({ url });
     return result.json();
   }
