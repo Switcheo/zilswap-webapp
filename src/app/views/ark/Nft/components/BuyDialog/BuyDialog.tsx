@@ -9,6 +9,7 @@ import { useAsyncTask } from "app/utils";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ArkClient, logger } from "core/utilities";
+import { ZilswapConnector } from "core/zilswap";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
@@ -39,7 +40,8 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       const arkClient = new ArkClient(network);
       const price = { amount: new BigNumber(10000), address: ZIL_HASH };
       const nonce = ~~(Math.random() * 4294967295); // uint32 max 4294967295
-      const expiry = 100; // blocks
+      const currentBlock = ZilswapConnector.getCurrentBlock();
+      const expiry = currentBlock + 100; // blocks
       const msg = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
         side: "Buy",
         price,
@@ -53,7 +55,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
 
       const result = await arkClient.postTrade({
         publicKey,
-        signature, 
+        signature,
 
         collectionAddress: address,
         address: wallet.addressInfo.byte20.toLowerCase(),
