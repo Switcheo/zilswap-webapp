@@ -1,5 +1,6 @@
-import { Profile } from "app/store/types";
 import BigNumber from "bignumber.js";
+import { OAuth, Profile } from "app/store/types";
+import { SimpleMap } from "app/utils";
 import { HTTP } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
 import { fromBech32Address } from "core/zilswap";
@@ -7,8 +8,7 @@ import crypto from "crypto";
 import dayjs from "dayjs";
 import { Network, ZIL_HASH } from "zilswap-sdk/lib/constants";
 
-
-const ARK_ENDPOINTS: { [key in Network]: string } = {
+const ARK_ENDPOINTS: SimpleMap<string> = {
   [Network.MainNet]: "https://api-ark.zilswap.org",
   [Network.TestNet]: "https://test-api-ark.zilswap.org",
 } as const;
@@ -124,9 +124,10 @@ export class ArkClient {
     return result.json();
   }
 
-  updateProfile = async (address: string, data: Profile) => {
+  updateProfile = async (address: string, data: Omit<Profile, "id" | "address">, oAuth: OAuth) => {
+    const headers = { "authorization": "Bearer " + oAuth.access_token };
     const url = this.http.path("user/update", { address })
-    const result = await this.http.post({ url, data });
+    const result = await this.http.post({ url, data, headers });
     return result.json();
   };
 

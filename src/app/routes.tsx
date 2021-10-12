@@ -68,6 +68,11 @@ const routes: RouteConfig[] = [
         component: lazy(() => import("./views/ark/Profile")),
       },
       {
+        path: "/ark/profile/:address",
+        exact: true,
+        component: lazy(() => import("./views/ark/Profile")),
+      },
+      {
         component: () => <Redirect to="/ark/collections"></Redirect>,
       },
     ],

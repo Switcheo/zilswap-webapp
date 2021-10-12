@@ -134,7 +134,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   );
 
   // fetch nfts in collection (to use store instead)
-  const [collection, setCollection] = useState<any>({});
+  const [collection, setCollection] = useState<any>();
 
   const { bech32Address, hexAddress } = useMemo(() => {
     if (!match.params?.collection) {
@@ -176,13 +176,16 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     // eslint-disable-next-line
   }, [hexAddress]);
 
+  if (!collection) return null;
+
   const breadcrumbs = [
     { path: "/ark/collections", value: "Collections" },
     {
       path: `/ark/collections/${bech32Address}`,
-      value: collection.name,
+      value: collection?.name,
     },
   ];
+
 
   return (
     <ArkPage {...rest}>
@@ -249,23 +252,14 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
           {/* NFTs in collection */}
           <Grid container spacing={2} className={classes.nftContainer}>
-            {collection &&
-              tokens.map((token, i) => {
-                return (
-                  <Grid
-                    item
-                    key={i}
-                    xs={12}
-                    md={3}
-                    className={classes.gridItem}
-                  >
-                    <NftCard
-                      token={token}
-                      collectionAddress={collection?.address}
-                    />
-                  </Grid>
-                );
-              })}
+            {collection && tokens.map((token) => (
+              <Grid item key={token.tokenId} xs={12} md={3} className={classes.gridItem}>
+                <NftCard
+                  token={token}
+                  collectionAddress={collection.address}
+                />
+              </Grid>
+            ))}
           </Grid>
         </ArkBanner>
       </Container>
