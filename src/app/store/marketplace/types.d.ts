@@ -1,3 +1,4 @@
+import { SortBy } from "app/components/ARKFilterBar/components/SortFilter";
 import { SimpleMap } from "app/utils";
 
 export interface MarketPlaceState {
@@ -104,6 +105,7 @@ export interface CollectionFilter {
   collectionAddress?: string;
   traits: { [id: string]: TraitType };
   pagination?: PaginationInfo;
+  sortBy: SortBy;
 }
 
 export interface SaleType {

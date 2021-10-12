@@ -1,6 +1,7 @@
 import { MarketPlaceActionTypes } from "./actions";
 import { MarketPlaceState } from "./types";
 import { LocalStorageKeys } from "app/utils/constants";
+import { SortBy } from "app/components/ARKFilterBar/components/SortFilter";
 
 const loadSavedAccessToken = () => {
   try {
@@ -23,6 +24,7 @@ const initial_state: MarketPlaceState = {
       timed_auction: true
     },
     traits: {},
+    sortBy: SortBy.PriceDescending
   },
   profile: undefined,
 }
