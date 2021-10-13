@@ -49,11 +49,11 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         nonce,
       }))
 
-      const { signature, public_key: publicKey } = (await wallet.provider!.wallet.sign(msg as any)) as any
+      const { signature, publicKey } = (await wallet.provider!.wallet.sign(msg as any)) as any
 
       const result = await arkClient.postTrade({
         publicKey,
-        signature, 
+        signature,
 
         collectionAddress: address,
         address: wallet.addressInfo.byte20.toLowerCase(),
