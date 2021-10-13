@@ -1,5 +1,5 @@
-import { TokenInfo } from "app/store/types";
 import BigNumber from "bignumber.js";
+import { TokenInfo } from "app/store/types";
 import { BIG_ZERO, ZIL_ADDRESS } from "./constants";
 
 export const valueCalculators = {

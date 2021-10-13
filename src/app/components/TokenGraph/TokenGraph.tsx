@@ -1,16 +1,16 @@
+import React, { useEffect, useRef, useState } from "react";
 import { Box, BoxProps, Button, ButtonGroup, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Skeleton } from "@material-ui/lab";
-import { RootState, TokenInfo, TokenState } from "app/store/types";
-import { AppTheme } from "app/theme/types";
-import { useAsyncTask } from "app/utils";
-import { ZIL_ADDRESS } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { getZilStreamTokenRates, TimeFilter, ZilStreamRates } from "core/utilities";
-import { createChart, CrosshairMode, IChartApi, ISeriesApi, Time, UTCTimestamp } from "lightweight-charts";
-import React, { useEffect, useRef, useState } from "react";
+import { CrosshairMode, IChartApi, ISeriesApi, Time, UTCTimestamp, createChart } from "lightweight-charts";
 import { useSelector } from "react-redux";
+import { TimeFilter, ZilStreamRates, getZilStreamTokenRates } from "core/utilities";
+import { ZIL_ADDRESS } from "app/utils/constants";
+import { useAsyncTask } from "app/utils";
+import { AppTheme } from "app/theme/types";
+import { RootState, TokenInfo, TokenState } from "app/store/types";
 
 interface Props extends BoxProps {
   inToken?: TokenInfo,

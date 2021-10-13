@@ -1,9 +1,9 @@
+import React, { useState } from "react";
 import { CircularProgress, InputAdornment, TextField, TextFieldProps } from "@material-ui/core";
 import { SearchOutlined } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React, { useState } from "react";
+import { AppTheme } from "app/theme/types";
 
 type Props = Omit<Omit<TextFieldProps, "onChange">, "variant"> & {
   onSearch: (query: string | undefined) => void;

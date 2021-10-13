@@ -1,8 +1,8 @@
-import { Box, IconButton, BoxProps } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
-import cls from "classnames";
 import React from "react";
+import { Box, BoxProps, IconButton } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { AppTheme } from "app/theme/types";
 import { ReactComponent as CancelLogo } from "./cancel_logo.svg";
 
 export interface NotificationBoxProps extends BoxProps {

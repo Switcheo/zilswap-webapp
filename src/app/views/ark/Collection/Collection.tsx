@@ -1,6 +1,11 @@
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
+import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
+import { ArkClient } from "core/utilities";
+import { fromBech32Address } from "core/zilswap";
 import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text } from "app/components";
 import ARKFilterBar from "app/components/ARKFilterBar";
 import ArkPage from "app/layouts/ArkPage";
@@ -9,11 +14,6 @@ import { actions } from "app/store";
 import { CollectionFilter, Nft } from "app/store/marketplace/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { ArkClient } from "core/utilities";
-import { fromBech32Address } from "core/zilswap";
-import React, { useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
 import { NftCard } from "./components";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 

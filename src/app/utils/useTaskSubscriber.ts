@@ -1,6 +1,6 @@
-import { LoadingTasks, RootState } from "app/store/types";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { LoadingTasks, RootState } from "app/store/types";
 
 const useTaskSubscriber = (...tasks: string[]) => {
   const loadingTasks = useSelector<RootState, LoadingTasks>(store => store.layout.loadingTasks);

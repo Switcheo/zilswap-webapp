@@ -1,10 +1,10 @@
+import React from "react";
 import { Avatar, Box, BoxProps, Card, CardContent, Checkbox, FormControlLabel, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
 import { DialogModal, FancyButton } from "app/components";
 import { Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import cls from "classnames";
-import React from "react";
 import { ReactComponent as Checked } from "../assets/checked.svg";
 import { ReactComponent as UnChecked } from "../assets/uncheck.svg";
 

@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Box, BoxProps, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, useMediaQuery, useTheme
@@ -6,7 +7,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { ArkPaginator } from "app/components";
 import { Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import React from "react";
 import BidCard from "./BidCard";
 import BidRow from "./BidRow";
 

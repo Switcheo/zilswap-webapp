@@ -1,13 +1,13 @@
-import { SimpleMap } from "app/utils";
-import { LocalStorageKeys } from "app/utils/constants";
-import { bnOrZero, DataCoder } from "app/utils";
 import BigNumber from "bignumber.js";
-import { logger } from "core/utilities";
 import dayjs from "dayjs";
 import { Blockchain } from "tradehub-api-js";
 import { Network } from "zilswap-sdk/lib/constants";
+import { logger } from "core/utilities";
+import { DataCoder, bnOrZero } from "app/utils";
+import { LocalStorageKeys } from "app/utils/constants";
+import { SimpleMap } from "app/utils";
 import { BridgeActionTypes } from "./actions";
-import { BridgeableTokenMapping, BridgeState, BridgeTx } from "./types";
+import { BridgeState, BridgeTx, BridgeableTokenMapping } from "./types";
 
 export const BridgeTxEncoder: DataCoder<BridgeTx> = {
   encode: (tx: BridgeTx): object => {

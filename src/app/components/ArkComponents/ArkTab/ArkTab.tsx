@@ -1,8 +1,8 @@
+import React, { useState } from "react";
 import { Box, BoxProps, Tab, Tabs } from "@material-ui/core";
 import { makeStyles, styled } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React, { useState } from "react";
+import { AppTheme } from "app/theme/types";
 
 interface Props extends BoxProps {
   tabTitle?: string;

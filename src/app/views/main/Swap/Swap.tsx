@@ -1,4 +1,5 @@
-import { Box, Button, IconButton, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import React, { useEffect, useState } from "react";
+import { Box, Button, IconButton, InputLabel, OutlinedInput, Typography, makeStyles } from "@material-ui/core";
 import { WarningRounded } from "@material-ui/icons";
 import AddIcon from "@material-ui/icons/Add";
 import AutorenewIcon from '@material-ui/icons/Autorenew';
@@ -6,6 +7,13 @@ import BrightnessLowIcon from '@material-ui/icons/BrightnessLowRounded';
 import RemoveIcon from "@material-ui/icons/RemoveRounded";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { validation as ZilValidation } from "@zilliqa-js/util";
+import BigNumber from "bignumber.js";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router";
+import { CONTRACTS } from "zilswap-sdk/lib/constants";
+import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
+import { ZilswapConnector, toBasisPoints } from "core/zilswap";
 import { CurrencyInput, FancyButton, Notifications, ProportionSelect, ShowAdvanced, Text } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
@@ -13,14 +21,6 @@ import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, Token
 import { AppTheme } from "app/theme/types";
 import { bnOrZero, useAsyncTask, useBlacklistAddress, useNetwork, useSearchParam, useToaster } from "app/utils";
 import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_ADDRESS } from "app/utils/constants";
-import BigNumber from "bignumber.js";
-import cls from "classnames";
-import { toBasisPoints, ZilswapConnector } from "core/zilswap";
-import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLocation } from "react-router";
-import { CONTRACTS } from "zilswap-sdk/lib/constants";
 import SwapDetail from "./components/SwapDetail";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
 

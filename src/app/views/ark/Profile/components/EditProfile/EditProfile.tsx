@@ -1,19 +1,19 @@
-import { Box, BoxProps, Typography, IconButton, TextField } from "@material-ui/core";
+import React, { useEffect, useState } from "react";
+import { Box, BoxProps, IconButton, TextField, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React, { useState, useEffect } from "react";
-import { ArkInput, FancyButton } from "app/components";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import { ReactComponent as UploadSVG } from "../assets/upload.svg";
-import { MarketPlaceState, OAuth, Profile, RootState } from "app/store/types";
-import { ConnectedWallet } from "core/wallet";
-import { useAsyncTask, useNetwork, useToaster, useTaskSubscriber } from "app/utils";
-import { EmailRegex } from "app/utils/constants";
-import { ArkClient } from "core/utilities";
 import { useDispatch, useSelector } from "react-redux";
 import dayjs from "dayjs";
+import { ConnectedWallet } from "core/wallet";
+import { ArkClient } from "core/utilities";
+import { EmailRegex } from "app/utils/constants";
+import { useAsyncTask, useNetwork, useTaskSubscriber, useToaster } from "app/utils";
+import { MarketPlaceState, OAuth, Profile, RootState } from "app/store/types";
+import { ArkInput, FancyButton } from "app/components";
+import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
+import { ReactComponent as UploadSVG } from "../assets/upload.svg";
 
 interface Props extends BoxProps {
   onBack: () => void;

@@ -1,6 +1,10 @@
+import React, { useEffect, useState } from "react";
 import { Box, Button, InputAdornment, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import BigNumber from "bignumber.js";
+import cls from "classnames";
+import { useSelector } from "react-redux";
 import { CurrencyLogo } from "app/components";
 import CurrencyDialog from "app/components/CurrencyDialog";
 import { RootState, TokenInfo, WalletState } from "app/store/types";
@@ -8,10 +12,6 @@ import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useMoneyFormatter } from "app/utils";
 import { formatSymbol } from "app/utils/currencies";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
-import BigNumber from "bignumber.js";
-import cls from "classnames";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { CurrencyDialogProps, CurrencyListType } from "../CurrencyDialog/CurrencyDialog";
 
 const useStyles = makeStyles((theme: AppTheme) => ({

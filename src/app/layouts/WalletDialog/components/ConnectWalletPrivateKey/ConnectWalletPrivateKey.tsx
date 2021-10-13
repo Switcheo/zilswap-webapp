@@ -1,16 +1,16 @@
+import React, { useState } from "react";
 import { Box, Button, DialogContent, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import cls from "classnames";
+import { connectWalletPrivateKey } from "core/wallet";
+import { ConnectWalletResult } from "core/wallet/ConnectedWallet";
 import { ContrastBox, FancyButton } from "app/components";
 import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useNetwork, useTaskSubscriber } from "app/utils";
 import { LoadingKeys } from "app/utils/constants";
-import { connectWalletPrivateKey } from "core/wallet";
-import { ConnectWalletResult } from "core/wallet/ConnectedWallet";
 import { ConnectWalletManagerViewProps } from "../../types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({

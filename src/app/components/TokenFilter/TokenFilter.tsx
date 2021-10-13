@@ -1,13 +1,13 @@
-import { Box, Button, Checkbox, makeStyles, Popover } from "@material-ui/core";
-import { RootState, TokenInfo, TokenState } from "app/store/types";
-import { hexToRGBA } from "app/utils";
 import React from "react";
 import { useState } from "react";
-import { useSelector } from "react-redux";
-import { AppTheme } from "app/theme/types";
-import cls from "classnames";
 import { useEffect } from "react";
 import { useMemo } from "react";
+import { Box, Button, Checkbox, Popover, makeStyles } from "@material-ui/core";
+import { useSelector } from "react-redux";
+import cls from "classnames";
+import { RootState, TokenInfo, TokenState } from "app/store/types";
+import { hexToRGBA } from "app/utils";
+import { AppTheme } from "app/theme/types";
 
 const useStyles = makeStyles((theme: AppTheme) =>({
   button: {

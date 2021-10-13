@@ -1,17 +1,17 @@
+import React from "react";
 import { Box, Button, Chip, Typography, useMediaQuery } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import { ConnectedWallet } from "core/wallet";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { hexToRGBA, useTaskSubscriber } from "app/utils";
-import cls from "classnames";
-import { ConnectedWallet } from "core/wallet";
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import LoadableArea from "../LoadableArea";
 import { LoadingKeys } from "app/utils/constants";
 import { AppTheme } from "app/theme/types";
-import { ReactComponent as DotIcon } from "./dot.svg";
 import { truncateAddress } from "app/utils";
+import LoadableArea from "../LoadableArea";
+import { ReactComponent as DotIcon } from "./dot.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

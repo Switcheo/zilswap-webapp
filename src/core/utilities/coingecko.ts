@@ -1,5 +1,5 @@
-import { bnOrZero } from "app/utils";
 import BigNumber from "bignumber.js";
+import { bnOrZero } from "app/utils";
 import { HTTP } from "./http";
 
 export const PATH_PREFIX = "https://api.coingecko.com/api/v3";

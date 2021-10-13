@@ -1,21 +1,21 @@
 import { Transaction } from "@zilliqa-js/account";
 import { Zilliqa } from "@zilliqa-js/zilliqa";
-import { actions } from "app/store";
-import { ethers, Transaction as EthTransaction } from "ethers";
-import { BridgeableToken, BridgeableTokenMapping, BridgeTx, RootState } from "app/store/types";
-import { netZilToTradeHub, SimpleMap, bnOrZero } from "app/utils";
-import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL, PollIntervals } from "app/utils/constants";
-import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
+import { Transaction as EthTransaction, ethers } from "ethers";
 import BigNumber from "bignumber.js";
-import { Bridge, logger } from "core/utilities";
-import { FeesData } from "core/utilities/bridge";
 import dayjs from "dayjs";
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK, TradeHubTx } from "tradehub-api-js";
 import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
-import { getBlockchain, getBridge } from '../selectors';
+import { FeesData } from "core/utilities/bridge";
+import { Bridge, logger } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
+import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
+import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL, PollIntervals } from "app/utils/constants";
+import { SimpleMap, bnOrZero, netZilToTradeHub } from "app/utils";
+import { BridgeTx, BridgeableToken, BridgeableTokenMapping, RootState } from "app/store/types";
+import { actions } from "app/store";
+import { getBlockchain, getBridge } from '../selectors';
 
 export enum Status {
   NotStarted,

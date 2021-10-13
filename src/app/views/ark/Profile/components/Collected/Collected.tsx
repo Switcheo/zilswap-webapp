@@ -1,14 +1,14 @@
+import React, { useEffect, useState } from "react";
 import { Box, BoxProps, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import { ArkClient } from "core/utilities";
 import { actions } from "app/store";
 import { BlockchainState, Nft, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
 import { NftCard } from "app/views/ark/Collection/components";
-import cls from "classnames";
-import { ArkClient } from "core/utilities";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 
 interface Props extends BoxProps {
   address: string

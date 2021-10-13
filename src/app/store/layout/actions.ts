@@ -1,4 +1,4 @@
-import { OpenCloseState, PoolType, FormNotification } from "./types";
+import { FormNotification, OpenCloseState, PoolType } from "./types";
 
 export const LayoutActionTypes = {
   TOGGLE_SHOW_WALLET: "TOGGLE_SHOW_WALLET",

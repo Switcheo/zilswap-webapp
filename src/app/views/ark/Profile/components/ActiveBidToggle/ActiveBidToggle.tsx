@@ -1,8 +1,8 @@
-import { Box, BoxProps, Switch, Typography, FormControlLabel, useMediaQuery } from "@material-ui/core";
-import { makeStyles, withStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
-import cls from "classnames";
 import React from "react";
+import { Box, BoxProps, FormControlLabel, Switch, Typography, useMediaQuery } from "@material-ui/core";
+import { makeStyles, withStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { AppTheme } from "app/theme/types";
 
 interface Props extends BoxProps {
   totalCount?: number,

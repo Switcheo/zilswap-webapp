@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import {
   Box,
   Button,
@@ -6,17 +7,16 @@ import {
   MenuItem,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { actions } from "app/store";
-import { RootState, WalletState } from "app/store/types";
-import { AppTheme } from "app/theme/types";
-import { useAsyncTask, useTaskSubscriber, useNetwork } from "app/utils";
-import { LoadingKeys } from "app/utils/constants";
 import cls from "classnames";
-import { WalletConnectType } from "core/wallet";
-import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Network } from "zilswap-sdk/lib/constants";
 import { TypographyOptions } from "@material-ui/core/styles/createTypography";
+import { WalletConnectType } from "core/wallet";
+import { actions } from "app/store";
+import { RootState, WalletState } from "app/store/types";
+import { AppTheme } from "app/theme/types";
+import { useAsyncTask, useNetwork, useTaskSubscriber } from "app/utils";
+import { LoadingKeys } from "app/utils/constants";
 
 export interface NetworkToggleProps
   extends React.HTMLAttributes<HTMLFormElement> {

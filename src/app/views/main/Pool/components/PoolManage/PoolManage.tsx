@@ -1,5 +1,9 @@
+import React from "react";
 import { Box, BoxProps, Button, CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { ContrastBox, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
@@ -7,10 +11,6 @@ import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useTaskSubscriber } from "app/utils";
 import { LoadingKeys } from "app/utils/constants";
-import cls from "classnames";
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import { PoolInfoDropdown } from "./components";
 
 interface Props extends BoxProps {

@@ -1,20 +1,20 @@
+import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
+import BigNumber from "bignumber.js";
+import clsx from "clsx";
+import { useDispatch, useSelector } from "react-redux";
+import { CONTRACTS } from "zilswap-sdk/lib/constants";
+import { ZilswapConnector, toBasisPoints } from "core/zilswap";
 import { CurrencyInput, FancyButton, ProportionSelect } from "app/components";
 import { actions } from "app/store";
 import { PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { bnOrZero, useAsyncTask, useNetwork, useToaster } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
-import BigNumber from "bignumber.js";
-import clsx from "clsx";
-import { toBasisPoints, ZilswapConnector } from "core/zilswap";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { CONTRACTS } from "zilswap-sdk/lib/constants";
+import { AppTheme } from "app/theme/types";
 import PoolDetail from "../PoolDetail";
 import PoolIcon from "../PoolIcon";
-import { AppTheme } from "app/theme/types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

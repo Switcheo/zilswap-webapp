@@ -1,6 +1,6 @@
 import { SimplePaletteColorOptions, ThemeOptions } from "@material-ui/core";
 import { Breakpoints } from "@material-ui/core/styles/createBreakpoints";
-import { PaletteOptions, TypeBackground, TypeAction } from "@material-ui/core/styles/createPalette";
+import { PaletteOptions, TypeAction, TypeBackground } from "@material-ui/core/styles/createPalette";
 import { Spacing } from "@material-ui/core/styles/createSpacing";
 
 export type AppTypeBackground = {

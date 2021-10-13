@@ -1,18 +1,18 @@
-import { Box, Button, Checkbox, FormControlLabel, makeStyles, OutlinedInput, Popover } from '@material-ui/core';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Box, Button, Checkbox, FormControlLabel, OutlinedInput, Popover, makeStyles } from '@material-ui/core';
+import cls from "classnames";
+import { useDispatch, useSelector } from 'react-redux';
+import pickBy from "lodash/pickBy";
+import { ArkClient } from 'core/utilities';
 import { AppTheme } from 'app/theme/types';
 import { hexToRGBA } from 'app/utils';
-import React, { useState, useEffect, useMemo } from 'react';
-import cls from "classnames";
 import { Text } from "app/components";
-import { ReactComponent as CheckedIcon } from "./checked.svg";
-import { ReactComponent as UncheckedIcon } from "./unchecked.svg";
-import { ReactComponent as IndeterminateIcon } from "./indeterminate.svg";
 import { MarketPlaceState, RootState, TraitType, TraitValue } from 'app/store/types';
-import { useDispatch, useSelector } from 'react-redux';
 import { updateFilter } from 'app/store/marketplace/actions';
-import pickBy from "lodash/pickBy";
 import { getBlockchain } from 'app/saga/selectors';
-import { ArkClient } from 'core/utilities';
+import { ReactComponent as IndeterminateIcon } from "./indeterminate.svg";
+import { ReactComponent as UncheckedIcon } from "./unchecked.svg";
+import { ReactComponent as CheckedIcon } from "./checked.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   button: {

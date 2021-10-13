@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { Box, Button, makeStyles, Popover } from "@material-ui/core";
-import { AppTheme } from "app/theme/types";
-import { Text } from "app/components";
-import { ReactComponent as Checkmark } from "./checkmark.svg";
-import { hexToRGBA } from "app/utils";
+import React, { useEffect, useState } from "react";
+import { Box, Button, Popover, makeStyles } from "@material-ui/core";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
+import { AppTheme } from "app/theme/types";
+import { Text } from "app/components";
+import { hexToRGBA } from "app/utils";
 import { MarketPlaceState, RootState } from "app/store/types";
 import { updateFilter } from "app/store/marketplace/actions";
+import { ReactComponent as Checkmark } from "./checkmark.svg";
 
 export enum SortBy {
   PriceDescending,

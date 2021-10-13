@@ -1,3 +1,4 @@
+import React, { Fragment } from "react";
 import {
   AppBar,
   Box,
@@ -9,15 +10,14 @@ import {
   useMediaQuery,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { Link } from "react-router-dom";
 import ConnectWalletButton from "app/components/ConnectWalletButton";
 import { ReactComponent as Logo } from "app/components/NavDrawer/logo2.svg";
 import { ReactComponent as MenuIcon } from "app/components/TopBar/menu.svg";
 import RewardsInfoButton from "app/layouts/RewardsInfoButton";
 import { AppTheme } from "app/theme/types";
 import { useRouter } from "app/utils";
-import cls from "classnames";
-import React, { Fragment } from "react";
-import { Link } from "react-router-dom";
 import { ReactComponent as ArkBrand } from "./ark.svg";
 
 const useStyles = makeStyles((theme) => ({

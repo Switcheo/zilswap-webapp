@@ -1,6 +1,6 @@
-import { Box, makeStyles, Typography } from '@material-ui/core';
-import { extractBoxProps, PartialBoxProps } from "app/utils";
 import React from "react";
+import { Box, Typography, makeStyles } from '@material-ui/core';
+import { PartialBoxProps, extractBoxProps } from "app/utils";
 
 interface Props extends PartialBoxProps {
   progress: number

@@ -1,12 +1,12 @@
-import { Box, Button, Grid, IconButton, makeStyles, Tooltip } from "@material-ui/core";
+import React, { useState } from "react";
+import { Box, Button, Grid, IconButton, Tooltip, makeStyles } from "@material-ui/core";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
+import cls from "classnames";
 import { Text } from 'app/components';
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA } from "app/utils";
-import cls from "classnames";
-import React, { useState } from "react";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {

@@ -1,30 +1,30 @@
 
-import { channel, Channel, eventChannel, EventChannel } from "redux-saga";
-import { fork, call, put, select, take, takeEvery, cancelled } from "redux-saga/effects";
+import { Channel, EventChannel, channel, eventChannel } from "redux-saga";
+import { call, cancelled, fork, put, select, take, takeEvery } from "redux-saga/effects";
 import { AppState, ObservedTx, TxReceipt, TxStatus, Zilswap } from "zilswap-sdk";
 import { ZiloAppState } from "zilswap-sdk/lib/zilo"
 
-import { actions } from "app/store";
-import { ChainInitAction } from "app/store/blockchain/actions";
-import { BridgeWalletAction, WalletAction, WalletActionTypes } from "app/store/wallet/actions";
-import { Transaction, TokenInfo } from "app/store/types";
-import { BRIDGEABLE_WRAPPED_DENOMS, RPCEndpoints, BoltXNetworkMap, ZIL_ADDRESS } from "app/utils/constants";
-import { connectWalletZilPay, connectWalletBoltX, ConnectedWallet, WalletConnectType } from "core/wallet";
+import { Network } from "zilswap-sdk/lib/constants";
+import { Blockchain } from "tradehub-api-js";
+import { ConnectedWallet, WalletConnectType, connectWalletBoltX, connectWalletZilPay } from "core/wallet";
 import { ZILO_DATA } from "core/zilo/constants";
-import { toBech32Address, ZilswapConnector } from "core/zilswap";
+import { ZilswapConnector, toBech32Address } from "core/zilswap";
 import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import { logger } from "core/utilities";
 import { getConnectedZilPay } from "core/utilities/zilpay";
 import { PoolTransaction, PoolTransactionResult, ZAPStats } from "core/utilities/zap-stats";
-import { getBlockchain, getWallet, getTransactions } from '../selectors'
-import { detachedToast } from "app/utils/useToaster";
-import { BridgeableToken } from "app/store/bridge/types";
-import { Network } from "zilswap-sdk/lib/constants";
-import { Blockchain } from "tradehub-api-js";
-import { SimpleMap } from "app/utils";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { getConnectedBoltX } from "core/utilities/boltx";
+import { SimpleMap } from "app/utils";
+import { BridgeableToken } from "app/store/bridge/types";
+import { detachedToast } from "app/utils/useToaster";
+import { BRIDGEABLE_WRAPPED_DENOMS, BoltXNetworkMap, RPCEndpoints, ZIL_ADDRESS } from "app/utils/constants";
+import { TokenInfo, Transaction } from "app/store/types";
+import { BridgeWalletAction, WalletAction, WalletActionTypes } from "app/store/wallet/actions";
+import { ChainInitAction } from "app/store/blockchain/actions";
+import { actions } from "app/store";
 import { StatsActionTypes } from "app/store/stats/actions";
+import { getBlockchain, getTransactions, getWallet } from '../selectors'
 
 const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
   if (!wallet) return null;

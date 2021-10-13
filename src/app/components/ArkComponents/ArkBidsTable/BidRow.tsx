@@ -1,13 +1,13 @@
+import React, { Fragment, useState } from "react";
 import { Avatar, Box, BoxProps, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
-import { Cheque } from "app/store/types";
 import cls from "classnames";
 import dayjs from "dayjs";
-import React, { Fragment, useState } from "react";
+import { AppTheme } from "app/theme/types";
+import { Cheque } from "app/store/types";
+import { truncateAddress } from "app/utils";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
 import { ReactComponent as UpArrow } from "./assets/up-arrow.svg";
-import { truncateAddress } from "app/utils";
 
 // TODO
 // format row props

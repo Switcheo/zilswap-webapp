@@ -1,8 +1,8 @@
-import { BoxProps, InputBase, FormControl, InputLabel, FormHelperText } from "@material-ui/core";
-import { makeStyles, withStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
 import React from "react";
+import { BoxProps, FormControl, FormHelperText, InputBase, InputLabel } from "@material-ui/core";
+import { makeStyles, withStyles } from "@material-ui/core/styles";
 import cls from "classnames"
+import { AppTheme } from "app/theme/types";
 
 interface Props extends BoxProps {
   label: string;

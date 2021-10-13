@@ -1,8 +1,8 @@
+import React from "react";
 import { Box, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { ReactComponent as TwitterIcon } from "app/components/SocialLinkGroup/social-icons/twitter.svg";
 import cls from "classnames";
-import React from "react";
+import { ReactComponent as TwitterIcon } from "app/components/SocialLinkGroup/social-icons/twitter.svg";
 import { ReactComponent as DiscordIcon } from "./social-icons/discord.svg";
 import { ReactComponent as GlobeIcon } from "./social-icons/globe.svg";
 import { ReactComponent as TelegramIcon } from "./social-icons/telegram.svg";

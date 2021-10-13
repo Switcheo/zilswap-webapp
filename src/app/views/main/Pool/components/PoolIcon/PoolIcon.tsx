@@ -1,10 +1,10 @@
+import React from "react";
 import { Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import React from "react";
+import { AppTheme } from "app/theme/types";
 import { ReactComponent as SvgMinus } from "./minus_pool.svg";
 import { ReactComponent as SvgPlus } from "./plus_pool.svg";
-import { AppTheme } from "app/theme/types";
 
 export interface PoolIconProps extends React.HTMLAttributes<HTMLDivElement> {
   type: "plus" | "minus";

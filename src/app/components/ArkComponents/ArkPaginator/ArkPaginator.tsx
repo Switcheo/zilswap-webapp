@@ -1,9 +1,9 @@
+import React from "react";
 import { Box, BoxProps, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { usePagination, UsePaginationItem, UsePaginationResult } from "@material-ui/lab";
-import { AppTheme } from "app/theme/types";
+import { UsePaginationItem, UsePaginationResult, usePagination } from "@material-ui/lab";
 import cls from "classnames";
-import React from "react";
+import { AppTheme } from "app/theme/types";
 import { ReactComponent as ArrowLeft } from "./arrow-left.svg";
 import { ReactComponent as ArrowRight } from "./arrow-right.svg";
 

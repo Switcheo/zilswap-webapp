@@ -1,8 +1,8 @@
+import React from "react";
 import { Box, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { hexToRGBA } from "app/utils";
 import cls from "classnames";
-import React from "react";
+import { hexToRGBA } from "app/utils";
 import { ReactComponent as Discord } from "./social-icons/discord.svg";
 import { ReactComponent as TwitterIcon } from "./social-icons/twitter.svg";
 

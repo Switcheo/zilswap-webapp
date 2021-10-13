@@ -1,15 +1,15 @@
-import { Box, Button, DialogContent, InputLabel, Typography, Link } from "@material-ui/core";
+import React, { useEffect } from "react";
+import { Box, Button, DialogContent, InputLabel, Link, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import cls from "classnames";
+import { ConnectWalletResult, connectWalletZilPay } from "core/wallet";
 import { ContrastBox, FancyButton } from "app/components";
 import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useTaskSubscriber } from "app/utils";
 import { LoadingKeys } from "app/utils/constants";
-import { ConnectWalletResult, connectWalletZilPay } from "core/wallet";
 import { ConnectWalletManagerViewProps } from "../../types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({

@@ -1,16 +1,16 @@
+import React, { useEffect, useState } from "react";
 import { Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Radio, RadioGroup } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
-import { Text } from "app/components";
-import ArkPage from "app/layouts/ArkPage";
-import { AppTheme } from "app/theme/types";
-import React, { useEffect, useState } from "react";
-import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
 import { Link } from "react-router-dom";
 import { toBech32Address } from "@zilliqa-js/crypto";
-import { ArkClient } from "core/utilities";
 import { useSelector } from "react-redux";
+import { ArkClient } from "core/utilities";
+import { AppTheme } from "app/theme/types";
+import ArkPage from "app/layouts/ArkPage";
+import { Text } from "app/components";
 import { getBlockchain } from "app/saga/selectors";
+import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

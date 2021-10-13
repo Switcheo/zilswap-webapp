@@ -1,8 +1,8 @@
 import { toBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
-import { truncate } from ".";
 import { BIG_ONE, BIG_ZERO } from "./constants";
+import { truncate } from ".";
 
 const BILLION = BIG_ONE.shiftedBy(9);
 const MILLION = BIG_ONE.shiftedBy(6);

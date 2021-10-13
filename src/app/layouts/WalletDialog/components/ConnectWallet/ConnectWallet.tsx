@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Box,
   DialogContent,
@@ -7,12 +8,11 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import WarningOutlinedIcon from "@material-ui/icons/WarningOutlined";
+import cls from "classnames";
+import { ConnectOptionType } from "core/wallet";
 import { NotificationBox } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { useSearchParam } from "app/utils";
-import cls from "classnames";
-import { ConnectOptionType } from "core/wallet";
-import React from "react";
 import { ReactComponent as BoltXIcon } from "./boltx.svg";
 import { ConnectWalletOption } from "./components";
 import { ReactComponent as PrivateKeyIconDark } from "./private-key-dark.svg";

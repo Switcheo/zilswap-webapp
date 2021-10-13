@@ -1,5 +1,5 @@
-import { useSnackbar, WithSnackbarProps } from 'notistack'
 import React from 'react'
+import { WithSnackbarProps, useSnackbar } from 'notistack'
 
 interface IProps {
   setUseSnackbarRef: (showSnackbar: WithSnackbarProps) => void

@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import DayJsUtils from "@date-io/dayjs";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
@@ -6,17 +7,16 @@ import { create } from "jss";
 import jssCompose from "jss-plugin-compose";
 import jssExtend from "jss-plugin-extend";
 import { createBrowserHistory } from "history";
-import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { renderRoutes } from "react-router-config";
 import { Router } from "react-router-dom";
 import { AppButler, isDebug } from "core/utilities";
-import { GoogleAnalytics, ScrollReset, NotificationBar } from "./components";
+import { SnackbarUtilsConfigurator } from "app/utils/useToaster";
+import { GoogleAnalytics, NotificationBar, ScrollReset } from "./components";
 import routes from "./routes";
 import { startSagas } from "./saga";
 import { RootState } from "./store/types";
 import { darkTheme, lightTheme } from "./theme";
-import { SnackbarUtilsConfigurator } from "app/utils/useToaster";
 
 import "zeeves-auth-sdk-js";
 

@@ -1,10 +1,10 @@
+import React, { Suspense, useState } from "react";
 import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
+import { renderRoutes } from "react-router-config";
 import { NavDrawer, TopBar } from "app/components";
 import ConnectWalletButton from "app/components/ConnectWalletButton";
 import { AppTheme } from "app/theme/types";
-import React, { Suspense, useState } from "react";
-import { renderRoutes } from "react-router-config";
 import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
 import { DevInfoBadge } from "./components";

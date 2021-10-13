@@ -1,6 +1,6 @@
 
 import { colors } from '@material-ui/core';
-import { zilliqa, switcheo } from "./colors";
+import { switcheo, zilliqa } from "./colors";
 
 const TEXT_COLORS = {
   primary: "#DEFFFF",

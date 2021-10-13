@@ -1,10 +1,10 @@
+import React from "react";
 import { Button, ButtonGroup, ButtonGroupProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
 import { actions } from "app/store";
 import { PoolType, RootState } from "app/store/types";
-import cls from "classnames";
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
 
 const useStyles = makeStyles(theme => ({
   root: {

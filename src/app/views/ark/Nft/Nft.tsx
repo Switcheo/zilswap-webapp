@@ -1,17 +1,17 @@
+import React, { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Box, Button, Container, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { useDispatch, useSelector } from "react-redux";
+import { ArkClient } from "core/utilities";
+import { fromBech32Address } from "core/zilswap";
 import { ArkBidsTable, ArkBreadcrumb } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
-import { Nft, Cheque } from "app/store/types";
+import { Cheque, Nft } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
-import { ArkClient } from "core/utilities";
-import { fromBech32Address } from "core/zilswap";
-import React, { useEffect, useState } from "react";
-import { useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { ReactComponent as VerifiedBadge } from "../Collection/verified-badge.svg";
 import { BuyDialog, SellDialog } from "./components";
 

@@ -1,19 +1,19 @@
+import React from "react";
 import { DialogContent, DialogProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { DialogModal, FancyButton, Text } from "app/components";
-import { getBlockchain, getWallet } from "app/saga/selectors";
-import { actions } from "app/store";
-import { RootState } from "app/store/types";
-import { AppTheme } from "app/theme/types";
-import { useAsyncTask } from "app/utils";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { ArkClient, logger } from "core/utilities";
-import { ZilswapConnector } from "core/zilswap";
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { ZIL_HASH } from "zilswap-sdk/lib/constants";
+import { ZilswapConnector } from "core/zilswap";
+import { ArkClient, logger } from "core/utilities";
+import { useAsyncTask } from "app/utils";
+import { AppTheme } from "app/theme/types";
+import { RootState } from "app/store/types";
+import { actions } from "app/store";
+import { getBlockchain, getWallet } from "app/saga/selectors";
+import { DialogModal, FancyButton, Text } from "app/components";
 
 interface Props extends Partial<DialogProps> {
 }

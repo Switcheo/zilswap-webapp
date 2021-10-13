@@ -1,7 +1,7 @@
 import { SimpleMap } from "app/utils";
 import {
-  PoolRewards, PotentialRewards,
-  DistributionWithStatus, DistributorWithTimings
+  DistributionWithStatus, DistributorWithTimings,
+  PoolRewards, PotentialRewards
 } from "./types";
 
 export const RewardsActionTypes = {

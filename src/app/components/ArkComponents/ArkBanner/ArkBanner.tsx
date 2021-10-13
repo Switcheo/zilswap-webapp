@@ -1,15 +1,15 @@
+import React from "react";
 import {
-  Box,
-  BoxProps,
   Avatar,
   Badge,
+  Box,
+  BoxProps,
   Card,
   CardMedia,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React from "react";
+import { AppTheme } from "app/theme/types";
 
 interface Props extends BoxProps {
   badgeContent?: React.Component | JSX.Element;

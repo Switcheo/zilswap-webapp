@@ -2,20 +2,20 @@
 import BigNumber from "bignumber.js";
 import { Network } from "zilswap-sdk/lib/constants";
 import { Task } from "redux-saga";
-import { all, call, put, fork, select, race, delay, take, cancel } from "redux-saga/effects";
+import { all, call, cancel, delay, fork, put, race, select, take } from "redux-saga/effects";
 
-import { actions } from "app/store";
-import { TokenInfo } from "app/store/types";
-import { bnOrZero, SimpleMap } from "app/utils";
+import { Blockchain } from "tradehub-api-js";
 import { logger } from "core/utilities";
 import {
-  balanceBatchRequest, BatchRequestType, sendBatchRequest,
-  tokenAllowancesBatchRequest, tokenBalanceBatchRequest, ZilswapConnector
+  BatchRequestType, ZilswapConnector, balanceBatchRequest,
+  sendBatchRequest, tokenAllowancesBatchRequest, tokenBalanceBatchRequest
 } from "core/zilswap";
-import { getWallet, getTokens, getBlockchain } from "../selectors";
-import { PollIntervals, ETH_ADDRESS } from "app/utils/constants";
-import { Blockchain } from "tradehub-api-js";
 import { ETHBalances } from "core/ethereum";
+import { actions } from "app/store";
+import { TokenInfo } from "app/store/types";
+import { SimpleMap, bnOrZero } from "app/utils";
+import { ETH_ADDRESS, PollIntervals } from "app/utils/constants";
+import { getBlockchain, getTokens, getWallet } from "../selectors";
 
 const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string | null) => {
   const updates: SimpleMap<TokenInfo> = {};

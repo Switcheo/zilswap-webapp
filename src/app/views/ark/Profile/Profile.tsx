@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -7,24 +8,23 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
+import cls from "classnames";
+import { useSelector } from "react-redux";
+import { useRouteMatch } from "react-router";
+import { ArkClient } from "core/utilities";
 import { ArkBanner, ArkTab } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { MarketPlaceState, Profile as ProfileType, RootState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useNetwork } from "app/utils";
-import cls from "classnames";
-import { ArkClient } from "core/utilities";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { truncateAddress } from "app/utils";
 import {
-  Collected,
-  EditProfile,
   BidsMade,
-  BidsReceived
+  BidsReceived,
+  Collected,
+  EditProfile
 } from "./components";
 import { ReactComponent as EditIcon } from "./edit-icon.svg";
-import { useRouteMatch } from "react-router";
-import { truncateAddress } from "app/utils";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

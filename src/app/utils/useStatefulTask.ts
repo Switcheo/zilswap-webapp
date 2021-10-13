@@ -1,6 +1,6 @@
+import { useDispatch } from "react-redux";
 import actions from "app/store/actions";
 import { uuidv4 } from "app/utils";
-import { useDispatch } from "react-redux";
 
 const useStatefulTask = <T>() => {
   const dispatch = useDispatch();

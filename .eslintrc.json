@@ -1,12 +1,27 @@
 {
   "extends": "react-app",
+  "plugins": [
+    "import"
+  ],
   "rules": {
-    "sort-imports": ["error", {
-      "ignoreCase": false,
-      "ignoreDeclarationSort": false,
-      "ignoreMemberSort": false,
-      "memberSyntaxSortOrder": ["none", "all", "multiple", "single"],
-      "allowSeparatedGroups": true
+    "import/order": ["warn", {
+      "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "object"],
+      "pathGroups": [
+        {
+          "pattern": "react",
+          "group": "builtin",
+          "position": "after"
+        },
+        {
+          "pattern": "app/**",
+          "group": "internal"
+        },
+        {
+          "pattern": "core/**",
+          "group": "internal"
+        }
+      ],
+      "pathGroupsExcludedImportTypes": ["builtin"]
     }]
   }
 }

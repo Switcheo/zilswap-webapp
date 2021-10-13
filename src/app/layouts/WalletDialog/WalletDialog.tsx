@@ -1,3 +1,4 @@
+import React, { Fragment, useEffect, useState } from "react";
 import {
   DialogContent,
   InputLabel,
@@ -5,13 +6,12 @@ import {
   useTheme,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
 import { DialogModal } from "app/components";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { WalletState } from "app/store/wallet/types";
-import cls from "classnames";
-import React, { Fragment, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import {
   ConnectOptionType,
   WalletConnectType,

@@ -1,15 +1,15 @@
+import React, { useEffect, useState } from "react";
 import { Box, BoxProps, Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import dayjs from "dayjs";
+import { useSelector } from "react-redux";
 import { StatsCard, Text } from "app/components";
 import { RewardsState, RootState, StatsState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import { bnOrZero, toHumanNumber } from "app/utils";
-import cls from "classnames";
-import dayjs from "dayjs";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 
 interface Props extends BoxProps { }
 

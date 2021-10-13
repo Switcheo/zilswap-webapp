@@ -1,8 +1,8 @@
-import { HTTP } from "./http";
 import dayjs from "dayjs";
 import BigNumber from "bignumber.js";
-import { bnOrZero } from "app/utils";
 import { Network } from "zilswap-sdk/lib/constants";
+import { bnOrZero } from "app/utils";
+import { HTTP } from "./http";
 
 const FEE_PATHS = {
   getFee: "/fees",

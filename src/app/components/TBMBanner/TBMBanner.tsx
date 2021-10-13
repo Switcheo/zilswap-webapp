@@ -1,6 +1,6 @@
+import React from 'react';
 import { Box, makeStyles } from '@material-ui/core';
 import { AppTheme } from 'app/theme/types';
-import React from 'react';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   banner: {

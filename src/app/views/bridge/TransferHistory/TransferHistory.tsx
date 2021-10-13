@@ -1,7 +1,12 @@
-import { Box, Button, Chip, makeStyles, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
+import React, { Fragment } from "react";
+import { Box, Button, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, makeStyles } from "@material-ui/core";
 import AddIcon from '@material-ui/icons/AddRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import RefreshIcon from '@material-ui/icons/RefreshRounded';
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { Blockchain } from "tradehub-api-js";
 import { CurrencyLogo, HelpInfo, ResumeTransferDialog, RevealMnemonic, Text } from 'app/components';
 import BridgeCard from "app/layouts/BridgeCard";
 import { actions } from "app/store";
@@ -10,11 +15,6 @@ import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useBridgeableTokenFinder } from "app/utils";
 import { toHumanNumber } from "app/utils";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
-import cls from "classnames";
-import React, { Fragment } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import { Blockchain } from "tradehub-api-js";
 import { ReactComponent as EthereumLogo } from "../../main/Bridge/ethereum-logo.svg";
 import { ReactComponent as ZilliqaLogo } from "../../main/Bridge/zilliqa-logo.svg";
 

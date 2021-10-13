@@ -1,16 +1,16 @@
-import { makeStyles } from "@material-ui/core";
-import { DialogModal } from "app/components";
-import { actions } from "app/store";
-import { RootState } from "app/store/types";
-import { AppTheme } from "app/theme/types";
-import { useNetwork } from "app/utils";
-import cls from "classnames";
-import { ConnectedWallet, WalletConnectType } from "core/wallet";
-import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import React, { useMemo } from "react";
+import { makeStyles } from "@material-ui/core";
+import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { Network } from "zilswap-sdk/lib/constants";
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
+import { ConnectedWallet, WalletConnectType } from "core/wallet";
+import { useNetwork } from "app/utils";
+import { AppTheme } from "app/theme/types";
+import { RootState } from "app/store/types";
+import { actions } from "app/store";
+import { DialogModal } from "app/components";
 import NetworkSwitchBox from "./NetworkSwitchBox";
 
 const useStyles = makeStyles((theme: AppTheme) => ({

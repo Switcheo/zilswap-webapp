@@ -1,11 +1,11 @@
 import { fromBech32Address } from "@zilliqa-js/crypto";
-import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import { ObservedTx, Pool, TokenDetails, Zilswap } from "zilswap-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 
 import { logger } from "core/utilities";
 import { ConnectedWallet,  } from "core/wallet/ConnectedWallet";
+import { BIG_ZERO } from "app/utils/constants";
 
 export interface ConnectProps {
   wallet: ConnectedWallet;

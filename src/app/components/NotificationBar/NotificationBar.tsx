@@ -1,8 +1,8 @@
+import React, { useRef } from "react";
 import { BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
-import React, { useRef } from "react";
 import { SnackbarProvider } from "notistack";
+import { AppTheme } from "app/theme/types";
 import { NotificationItem } from "./components";
 
 interface Props extends BoxProps {

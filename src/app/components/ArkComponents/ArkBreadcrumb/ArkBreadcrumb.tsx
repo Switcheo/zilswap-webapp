@@ -1,8 +1,8 @@
+import React from "react";
 import { BoxProps, Breadcrumbs, SvgIcon } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
-import React from "react";
 import { Link } from "react-router-dom";
+import { AppTheme } from "app/theme/types";
 
 export type typeCrumbData = {
   value: string;

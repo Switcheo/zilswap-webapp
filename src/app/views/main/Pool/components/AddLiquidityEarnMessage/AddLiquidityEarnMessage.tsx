@@ -1,12 +1,12 @@
+import React from "react";
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
 import { NotificationBox } from "app/components";
 import { actions } from "app/store";
 import { LayoutState, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import cls from "classnames";
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { ReactComponent as Icon } from "./receive_money.svg";
 
 export interface AddLiquidityEarnMessageProps extends React.HTMLAttributes<HTMLDivElement> {

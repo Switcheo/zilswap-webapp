@@ -1,13 +1,13 @@
-import { Box, Button, Checkbox, FormControlLabel, makeStyles, Popover } from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { Box, Button, Checkbox, FormControlLabel, Popover, makeStyles } from '@material-ui/core';
+import cls from "classnames";
+import { useDispatch, useSelector } from 'react-redux';
 import { AppTheme } from 'app/theme/types';
 import { hexToRGBA } from 'app/utils';
-import React, { useState, useEffect } from 'react';
-import cls from "classnames";
-import { ReactComponent as CheckedIcon } from "./checked.svg";
-import { ReactComponent as UncheckedIcon } from "./unchecked.svg";
-import { useDispatch, useSelector } from 'react-redux';
 import { MarketPlaceState, RootState, SaleType } from 'app/store/types';
 import { updateFilter } from 'app/store/marketplace/actions';
+import { ReactComponent as UncheckedIcon } from "./unchecked.svg";
+import { ReactComponent as CheckedIcon } from "./checked.svg";
 
 const useStyles = makeStyles((theme: AppTheme) =>({
   button: {

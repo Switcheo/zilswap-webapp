@@ -1,19 +1,19 @@
+import React from "react";
 import {
   FormControlLabel,
   FormGroup,
-  Switch,
   IconButton,
+  Switch,
 } from "@material-ui/core";
 import DarkIcon from "@material-ui/icons/Brightness2Rounded";
 import LightIcon from "@material-ui/icons/Brightness4Rounded";
 import { makeStyles } from "@material-ui/styles";
+import clsx from "clsx";
+import { useDispatch, useSelector } from "react-redux";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA } from "app/utils";
-import clsx from "clsx";
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { ThemeSwitchProps } from "./types";
 
 const THEME_TOGGLE_SELECTED = "light";

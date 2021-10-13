@@ -1,9 +1,9 @@
+import React from "react";
 import { Box, BoxProps, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { CheckCircleOutlineRounded, ErrorOutlineRounded } from "@material-ui/icons";
-import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React from "react";
+import { AppTheme } from "app/theme/types";
 
 interface Props extends BoxProps {
   error?: boolean;

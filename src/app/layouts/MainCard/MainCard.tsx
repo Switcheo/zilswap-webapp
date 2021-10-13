@@ -1,5 +1,16 @@
+import React, {
+  Fragment,
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Box, Button, Paper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { PaperProps } from "material-ui";
+import { useDispatch, useSelector } from "react-redux";
+import { NavLink as RouterLink, useRouteMatch } from "react-router-dom";
 import { TokenGraph } from "app/components";
 import { actions } from "app/store";
 import {
@@ -10,17 +21,6 @@ import {
   TransactionState,
 } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import cls from "classnames";
-import { PaperProps } from "material-ui";
-import React, {
-  forwardRef,
-  Fragment,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { NavLink as RouterLink, useRouteMatch } from "react-router-dom";
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1, flexBasis: 1 }}>

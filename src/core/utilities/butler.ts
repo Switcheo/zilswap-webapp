@@ -1,11 +1,11 @@
 
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { connectWalletBoltX, connectWalletPrivateKey, connectWalletZeeves, connectWalletZilPay } from "core/wallet";
 import { actions } from "app/store";
 import { BlockchainState, RootState } from "app/store/types";
 import { useAsyncTask, useNetwork } from "app/utils";
 import { LocalStorageKeys } from "app/utils/constants";
-import { connectWalletBoltX, connectWalletPrivateKey, connectWalletZeeves, connectWalletZilPay } from "core/wallet";
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { logger } from "./logger";
 import { getConnectedZeeves } from "./zeeves";
 import { getConnectedZilPay } from "./zilpay";

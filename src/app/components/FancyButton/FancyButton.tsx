@@ -1,13 +1,13 @@
+import React from "react";
 import { Box, Button, ButtonProps, CircularProgress, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { actions } from "app/store";
-import { RootState, WalletState } from "app/store/types";
-import { useTaskSubscriber, useNetwork } from "app/utils";
-import { LoadingKeys } from "app/utils/constants";
 import cls from "classnames";
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Network } from "zilswap-sdk/lib/constants";
+import { actions } from "app/store";
+import { RootState, WalletState } from "app/store/types";
+import { useNetwork, useTaskSubscriber } from "app/utils";
+import { LoadingKeys } from "app/utils/constants";
 
 export interface FancyButtonProps extends ButtonProps {
   loading?: boolean;

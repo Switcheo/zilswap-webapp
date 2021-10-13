@@ -1,15 +1,15 @@
+import React, { useState } from "react";
 import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { useSelector } from "react-redux";
+import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizRounded';
+import { ZilswapConnector } from "core/zilswap";
 import { HelpInfo, KeyValueDisplay } from "app/components";
 import { RootState, SwapFormState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useMoneyFormatter } from "app/utils";
 import { BIG_ONE, BIG_ZERO } from "app/utils/constants";
-import cls from "classnames";
-import { ZilswapConnector } from "core/zilswap";
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizRounded';
 
 
 export interface SwapDetailProps extends BoxProps {

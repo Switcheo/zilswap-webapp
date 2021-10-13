@@ -1,27 +1,27 @@
-import { Box, Button, CircularProgress, Grid, makeStyles, OutlinedInput } from "@material-ui/core";
+import React, { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
+import { Box, Button, CircularProgress, Grid, OutlinedInput, makeStyles } from "@material-ui/core";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
 import CheckCircleIcon from "@material-ui/icons/CheckCircleOutlineRounded";
 import RefreshIcon from '@material-ui/icons/RefreshRounded';
-import { ConnectETHPopper, Text } from 'app/components';
-import { actions } from "app/store";
-import { BridgeableTokenMapping, BridgeState, BridgeTx } from "app/store/bridge/types";
-import { RootState } from "app/store/types";
-import { AppTheme } from "app/theme/types";
-import { hexToRGBA, netZilToTradeHub, useAsyncTask, useNetwork } from "app/utils";
-import { ConnectButton } from "app/views/main/Bridge/components";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
-import { providerOptions } from "core/ethereum";
-import { Bridge } from "core/utilities";
-import { ConnectedWallet } from "core/wallet";
-import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import dayjs from "dayjs";
 import { ethers } from "ethers";
-import React, { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
+import { ConnectedWallet } from "core/wallet";
+import { Bridge } from "core/utilities";
+import { providerOptions } from "core/ethereum";
+import { ConnectButton } from "app/views/main/Bridge/components";
+import { hexToRGBA, netZilToTradeHub, useAsyncTask, useNetwork } from "app/utils";
+import { AppTheme } from "app/theme/types";
+import { RootState } from "app/store/types";
+import { BridgeState, BridgeTx, BridgeableTokenMapping } from "app/store/bridge/types";
+import { actions } from "app/store";
+import { ConnectETHPopper, Text } from 'app/components';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {

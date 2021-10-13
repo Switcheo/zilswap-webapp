@@ -1,6 +1,10 @@
+import React, { useMemo, useState } from "react";
 import { Box, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import { ConnectedWallet, WalletConnectType } from "core/wallet";
 import { FancyButton } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
@@ -8,10 +12,6 @@ import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { hexToRGBA, truncate, useNetwork, useTaskSubscriber } from "app/utils";
 import { LoadingKeys } from "app/utils/constants";
-import cls from "classnames";
-import { ConnectedWallet, WalletConnectType } from "core/wallet";
-import React, { useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 
 const useStyles = makeStyles(theme => ({
   root: {

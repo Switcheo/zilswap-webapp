@@ -1,17 +1,17 @@
+import React, { useState } from "react";
 import { Box, BoxProps, Button, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowDropDownRounded, ArrowDropUpRounded } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import cls from "classnames";
-import React, { useState } from "react";
-import { actions } from "app/store";
 import { useDispatch, useSelector } from "react-redux";
+import { actions } from "app/store";
 import { AmountLabel, ContrastBox, KeyValueDisplay, PoolLogo, Text } from "app/components";
 import { PotentialRewards, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import { toHumanNumber } from "app/utils";
-import { useValueCalculators, useNetwork } from "app/utils";
+import { useNetwork, useValueCalculators } from "app/utils";
 import { EMPTY_USD_VALUE } from "app/store/token/reducer";
 
 interface Props extends BoxProps {

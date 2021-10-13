@@ -1,6 +1,6 @@
+import React from 'react';
 import { Box, makeStyles } from '@material-ui/core';
 import { AppTheme } from 'app/theme/types';
-import React from 'react';
 import SaleTypeFilter from './components/SaleTypeFilter';
 import AttributesFilter from './components/AttributesFilter';
 import SortFilter from './components/SortFilter';

@@ -1,9 +1,9 @@
+import React from "react";
 import { Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
-import { RootState } from "app/store/types";
 import cls from "classnames";
-import React from "react";
 import { useSelector } from "react-redux";
+import { RootState } from "app/store/types";
 import { ReactComponent as BrandSVG } from "./brand.svg";
 
 const useStyles = makeStyles(theme => ({

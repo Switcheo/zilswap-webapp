@@ -1,11 +1,11 @@
+import React from "react";
 import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import BigNumber from "bignumber.js";
+import cls from "classnames";
 import { AppTheme } from "app/theme/types";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import { toHumanNumber } from "app/utils";
-import BigNumber from "bignumber.js";
-import cls from "classnames";
-import React from "react";
 import CurrencyLogo from "../CurrencyLogo";
 import Text from "../Text";
 

@@ -1,26 +1,26 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, CircularProgress, IconButton, Link, makeStyles, Step, StepConnector, StepLabel, Stepper, withStyles } from "@material-ui/core";
+import React, { Fragment, useMemo, useState } from "react";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, CircularProgress, IconButton, Link, Step, StepConnector, StepLabel, Stepper, makeStyles, withStyles } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
+import cls from "classnames";
+import { useDispatch } from "react-redux";
+import { Blockchain } from "tradehub-api-js";
+import { Network } from "zilswap-sdk/lib/constants";
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, MnemonicDialog, Text } from "app/components";
 import { ReactComponent as StraightLine } from "app/components/ConfirmTransfer/straight-line.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { BridgeTx } from "app/store/bridge/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate, useBridgeableTokenFinder, useNetwork, trimValue, truncateAddress } from "app/utils";
+import { hexToRGBA, trimValue, truncate, truncateAddress, useBridgeableTokenFinder, useNetwork } from "app/utils";
 import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL } from "app/utils/constants";
 import { ReactComponent as EthereumLogo } from "app/views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "app/views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "app/views/main/Bridge/zilliqa-logo.svg";
-import cls from "classnames";
-import React, { Fragment, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
-import { Blockchain } from "tradehub-api-js";
-import { Network } from "zilswap-sdk/lib/constants";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

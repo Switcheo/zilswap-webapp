@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   Box,
   Card,
@@ -6,20 +7,19 @@ import {
   CardMedia,
   CardProps,
   IconButton,
-  makeStyles,
   SvgIcon,
   Typography,
+  makeStyles,
 } from "@material-ui/core";
 import UnlikedIcon from "@material-ui/icons/FavoriteBorderRounded";
 import LikedIcon from "@material-ui/icons/FavoriteRounded";
 import DotIcon from "@material-ui/icons/FiberManualRecordRounded";
-import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ReactComponent as VerifiedBadge } from "../../verified-badge.svg";
-import { Nft } from "app/store/marketplace/types";
 import { toBech32Address } from "core/zilswap";
+import { Nft } from "app/store/marketplace/types";
+import { AppTheme } from "app/theme/types";
+import { ReactComponent as VerifiedBadge } from "../../verified-badge.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

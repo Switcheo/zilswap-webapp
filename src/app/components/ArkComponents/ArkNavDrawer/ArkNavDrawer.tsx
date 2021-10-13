@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Box,
   Button,
@@ -9,13 +10,12 @@ import {
   makeStyles,
 } from "@material-ui/core";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForwardRounded";
+import cls from "classnames";
+import { Link } from "react-router-dom";
 import { Text } from "app/components";
 import { ReactComponent as ArkBrand } from "app/components/ArkComponents/ArkTopBar/ark.svg";
 import { AppTheme } from "app/theme/types";
 import { useRouter } from "app/utils";
-import cls from "classnames";
-import React from "react";
-import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

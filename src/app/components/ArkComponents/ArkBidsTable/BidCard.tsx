@@ -1,11 +1,11 @@
-import { Avatar, Box, CardProps, Card, CardContent, Chip, Collapse, IconButton, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
+import React, { useState } from "react";
+import { Avatar, Box, Card, CardContent, CardProps, Chip, Collapse, IconButton, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import dayjs from "dayjs";
 import { FancyButton } from "app/components";
 import { Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import cls from "classnames";
-import dayjs from "dayjs";
-import React, { useState } from "react";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
 import { ReactComponent as UpArrow } from "./assets/up-arrow.svg";
 

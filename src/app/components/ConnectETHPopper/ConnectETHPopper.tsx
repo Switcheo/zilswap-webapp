@@ -1,7 +1,7 @@
+import React from "react";
 import { ClickAwayListener, FormControl, MenuItem, Paper, Popper, PopperProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
-import React from "react";
 
 export interface ConnectETHPopperProps extends PopperProps {
   onClickaway: () => void,

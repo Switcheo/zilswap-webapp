@@ -1,7 +1,7 @@
-import { actions } from "app/store";
-import { ArkClient, logger } from "core/utilities";
 import { call, fork, put, select, take, takeLatest } from "redux-saga/effects";
 import { SimpleMap } from "tradehub-api-js/build/main/lib/tradehub/utils";
+import { ArkClient, logger } from "core/utilities";
+import { actions } from "app/store";
 import { getBlockchain, getMarketplace, getWallet } from "../selectors";
 
 function* loadNftList() {

@@ -1,15 +1,15 @@
+import React, { Fragment } from "react";
+import { useEffect } from "react";
 import { Box, BoxProps, Button, makeStyles } from "@material-ui/core";
 import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernetRounded';
+import cls from "classnames";
+import { useDispatch } from "react-redux";
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { Text } from 'app/components';
 import { ReactComponent as DotIcon } from "app/components/ConnectWalletButton/dot.svg";
 import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA } from "app/utils";
-import cls from "classnames";
-import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
-import React, { Fragment } from "react";
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {

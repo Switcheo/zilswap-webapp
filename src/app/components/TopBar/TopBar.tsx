@@ -1,3 +1,4 @@
+import React, { Fragment, useMemo } from "react";
 import {
   AppBar,
   Box,
@@ -8,12 +9,11 @@ import {
   useMediaQuery,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { Link, useLocation } from "react-router-dom";
 import { Brand } from "app/components/TopBar/components";
 import RewardsInfoButton from "app/layouts/RewardsInfoButton";
 import { AppTheme } from "app/theme/types";
-import cls from "classnames";
-import React, { Fragment, useMemo } from "react";
-import { Link, useLocation } from "react-router-dom";
 import ConnectWalletButton from "../ConnectWalletButton";
 import { ReactComponent as MenuIcon } from "./menu.svg";
 import { TopBarProps } from "./types";

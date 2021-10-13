@@ -1,19 +1,19 @@
 
-import { Box, CircularProgress, DialogContent, DialogProps, makeStyles, OutlinedInput, InputAdornment, IconButton } from "@material-ui/core";
+import React, { useEffect, useState } from "react";
+import { Box, CircularProgress, DialogContent, DialogProps, IconButton, InputAdornment, OutlinedInput, makeStyles } from "@material-ui/core";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
+import BigNumber from "bignumber.js";
+import clsx from "clsx";
+import { useDispatch, useSelector } from "react-redux";
+import { Blockchain } from "tradehub-api-js";
+import CloseIcon from "@material-ui/icons/CloseOutlined";
 import { DialogModal } from "app/components";
 import { BridgeState } from "app/store/bridge/types";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { hexToRGBA, useTaskSubscriber } from "app/utils";
 import { BIG_ZERO, LoadingKeys } from "app/utils/constants";
-import BigNumber from "bignumber.js";
-import clsx from "clsx";
-import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Blockchain } from "tradehub-api-js";
-import { CurrencyList } from "./components";
 import { actions } from "app/store";
-import CloseIcon from "@material-ui/icons/CloseOutlined";
+import { CurrencyList } from "./components";
 
 const useStyles = makeStyles(theme => ({
   root: {

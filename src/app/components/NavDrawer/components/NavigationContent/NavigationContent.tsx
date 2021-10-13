@@ -1,6 +1,7 @@
+import React, { forwardRef, useState } from "react";
 import {
-  Button,
   Box,
+  Button,
   Collapse,
   List,
   ListItem,
@@ -10,16 +11,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
 import transakSDK from "@transak/transak-sdk";
-import { AppTheme } from "app/theme/types";
-import { TRANSAK_API_KEY } from "app/utils/constants";
 import cls from "classnames";
-import React, { forwardRef, useState } from "react";
 import { NavLink as RouterLink } from "react-router-dom";
-import { NavigationPageOptions } from "../../types";
-import * as IconModule from "../icons";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
+import { TRANSAK_API_KEY } from "app/utils/constants";
+import { AppTheme } from "app/theme/types";
 import { useRouter } from "app/utils";
 import { Text } from "app/components";
+import * as IconModule from "../icons";
+import { NavigationPageOptions } from "../../types";
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1 }}>

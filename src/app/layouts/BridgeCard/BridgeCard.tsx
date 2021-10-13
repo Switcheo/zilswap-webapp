@@ -1,9 +1,9 @@
+import React, { forwardRef } from 'react';
 import { Box, Button, makeStyles } from '@material-ui/core';
-import { AppTheme } from 'app/theme/types';
 import cls from "classnames";
 import { PaperProps } from 'material-ui';
-import React, { forwardRef } from 'react';
 import { NavLink as RouterLink } from "react-router-dom";
+import { AppTheme } from 'app/theme/types';
 
 const CustomRouterLink = forwardRef((props: any, ref: any) => (
   <div ref={ref} style={{ flexGrow: 1, flexBasis: 1 }} >

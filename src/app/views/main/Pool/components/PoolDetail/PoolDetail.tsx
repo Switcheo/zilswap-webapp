@@ -1,16 +1,16 @@
+import React, { useState } from "react";
 import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import BigNumber from "bignumber.js";
+import cls from "classnames";
+import { useSelector } from "react-redux";
+import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizRounded';
 import { HelpInfo, KeyValueDisplay, PotentialRewardInfo } from "app/components";
 import { LayoutState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useMoneyFormatter } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
-import BigNumber from "bignumber.js";
-import cls from "classnames";
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizRounded';
 
 export interface PoolDetailProps extends BoxProps {
   token?: TokenInfo;

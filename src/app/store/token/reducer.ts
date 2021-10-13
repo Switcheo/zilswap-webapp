@@ -1,10 +1,10 @@
 import { BIG_ZERO, LocalStorageKeys } from "app/utils/constants";
 import { TokenActionTypes } from "./actions";
 import {
-  TokenState, TokenAddProps, TokenInitProps,
-  TokenUpdateProps, TokenUpdateAllProps,
+  TokenAddProps, TokenInfo, TokenInitProps,
+  TokenState, TokenUSDValues,
+  TokenUpdateAllProps, TokenUpdateProps,
   UpdatePriceProps, UpdateUSDValuesProps,
-  TokenUSDValues, TokenInfo,
 } from "./types";
 
 const savedTokenStrs = localStorage.getItem(LocalStorageKeys.UserTokenList) || "[]";

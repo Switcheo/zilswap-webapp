@@ -1,16 +1,16 @@
+import React, { Suspense, useEffect, useState } from "react";
 import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
-import { NavDrawer, ArkNavDrawer, ArkTopBar } from "app/components";
-import ConnectWalletButton from "app/components/ConnectWalletButton";
-import { AppTheme } from "app/theme/types";
-import React, { Suspense, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { renderRoutes } from "react-router-config";
+import { ArkNavDrawer, ArkTopBar, NavDrawer } from "app/components";
+import ConnectWalletButton from "app/components/ConnectWalletButton";
+import { AppTheme } from "app/theme/types";
+import { actions } from "app/store";
+import { BlockchainState, RootState, WalletState } from "app/store/types";
 import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
 import { DevInfoBadge } from "../MainLayout/components";
-import { actions } from "app/store";
-import { BlockchainState, RootState, WalletState } from "app/store/types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

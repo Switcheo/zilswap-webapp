@@ -1,6 +1,6 @@
-import { Box, makeStyles, OutlinedInput } from '@material-ui/core';
-import { AppTheme } from 'app/theme/types';
 import React, { useState } from 'react';
+import { Box, OutlinedInput, makeStyles } from '@material-ui/core';
+import { AppTheme } from 'app/theme/types';
 
 const useStyles = makeStyles((theme: AppTheme) =>({
   root: {

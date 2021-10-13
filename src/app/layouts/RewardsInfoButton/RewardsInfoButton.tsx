@@ -1,3 +1,4 @@
+import React, { Fragment, useMemo, useRef, useState } from "react";
 import { Accordion, AccordionDetails, AccordionSummary, Backdrop, Box, BoxProps, Button, Card, Checkbox, CircularProgress, ClickAwayListener, Divider, FormControlLabel, IconButton, Link, Popper, Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
@@ -5,21 +6,20 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import CheckBoxIcon from "@material-ui/icons/CheckBoxRounded";
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBoxRounded";
+import BigNumber from "bignumber.js";
+import cls from "classnames";
+import dayjs from "dayjs";
+import groupBy from "lodash/groupBy";
+import { useDispatch, useSelector } from "react-redux";
+import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
+import { claimMulti } from "core/rewards";
 import { CurrencyLogo, HelpInfo, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { DistributionWithStatus, DistributorWithTimings, RewardsState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useAsyncTask, useNetwork, useTokenFinder, useValueCalculators, formatZWAPLabel } from "app/utils";
+import { formatZWAPLabel, hexToRGBA, useAsyncTask, useNetwork, useTokenFinder, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
-import BigNumber from "bignumber.js";
-import cls from "classnames";
-import { claimMulti } from "core/rewards";
-import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
-import dayjs from "dayjs";
-import groupBy from "lodash/groupBy";
-import React, { Fragment, useMemo, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { ReactComponent as IconSVG } from './icon.svg';
 
 interface Props extends BoxProps {

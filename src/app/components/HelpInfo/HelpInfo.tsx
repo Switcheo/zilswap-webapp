@@ -1,8 +1,8 @@
+import React from "react";
 import { Tooltip, TooltipProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React from "react";
+import { AppTheme } from "app/theme/types";
 import { ReactComponent as TooltipSVG } from "./tooltip.svg";
 
 interface Props extends Omit<TooltipProps, "children"> {
