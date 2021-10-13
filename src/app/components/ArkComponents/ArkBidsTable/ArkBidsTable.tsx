@@ -6,9 +6,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import { ArkPaginator } from "app/components";
 import { Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import React, { useState } from "react";
-import BidRow from "./BidRow";
+import React from "react";
 import BidCard from "./BidCard";
+import BidRow from "./BidRow";
 
 const ITEMS_PER_PAGE = 2
 
@@ -65,7 +65,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down("xs"));
-  const [bid, setBid] = useState<Cheque | undefined>(undefined);
+  // const [bid, setBid] = useState<Cheque | undefined>(undefined);
 
   // const acceptBid = (newBid?: Cheque) => {
   //   setBid(newBid);
