@@ -19,17 +19,14 @@ interface Props extends BoxProps {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
-  iconButton: {
-    color: "#DEFFFF",
-    borderRadius: "12px",
-    background: "rgba(222, 255, 255, 0.1)",
-    marginRight: 8,
-  },
-  buttonText: {
-    color: "#DEFFFF",
-    opacity: "100%",
+  text: {
+    fontFamily: 'Avenir Next',
+    fontWeight: 600,
+    fontSize: 15,
+    letterSpacing: '0.1px',
   },
   bodyCell: {
+    extend: 'text',
     padding: "8px 16px",
     maxWidth: 200,
     margin: 0,
@@ -43,7 +40,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     border: "none",
     backgroundColor: "#0A2530",
   },
-  bearItem: {
+  buttonText: {
+    color: "#DEFFFF",
+    opacity: "100%",
+  },
+  iconButton: {
+    color: "#DEFFFF",
+    borderRadius: "12px",
+    background: "rgba(222, 255, 255, 0.1)",
+    marginRight: 8,
+  },
+  item: {
     padding: "0",
     maxWidth: 200,
     margin: 0
@@ -113,11 +120,11 @@ const Row: React.FC<Props> = (props: Props) => {
             <TableCell align="left" className={cls(classes.bodyCell, classes.firstCell)}>
               {
                 index === 0 &&
-                <MenuItem className={classes.bearItem} button={false}>
+                <MenuItem className={classes.item} button={false}>
                   <ListItemIcon>
                     <Avatar alt="Remy Sharp" src={bid.token.assetId} />
                   </ListItemIcon>
-                  <Typography>#{bid.token.tokenId}</Typography>
+                  #{bid.token.tokenId}
                 </MenuItem>
               }
             </TableCell>
@@ -125,11 +132,7 @@ const Row: React.FC<Props> = (props: Props) => {
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}></TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>{bid.initiator?.username || truncateAddress(bid.initiatorAddress)}</TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>{dayjs(bid.createdAt).format("D MMM YYYY")}</TableCell>
-            <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>
-              <Box>
-                <Typography>{dayjs(bid.expiry).format("MMM, DD, YYYY")}</Typography>
-              </Box>
-            </TableCell>
+            <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>{dayjs(bid.expiry).format("MMM, DD, YYYY")}</TableCell>
             <TableCell align="center" className={cls(classes.actionCell, classes.lastCell, { [classes.withBorder]: expand })}>
               {bid.cancelTransactionHash === null && bid.matchTransactionHash === null && (
                 <>

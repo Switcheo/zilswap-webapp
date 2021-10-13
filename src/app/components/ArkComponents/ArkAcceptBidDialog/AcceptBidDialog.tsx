@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   activeGreen: {
     color: "#00FFB0",
   },
-  bearItem: {
+  item: {
     padding: "0",
     maxWidth: 200,
     margin: 0
@@ -74,7 +74,7 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
       >
         <Card className={classes.card}>
           <CardContent>
-            <MenuItem className={classes.bearItem} button={false}>
+            <MenuItem className={classes.item} button={false}>
               <ListItemIcon>
                 <Avatar alt="Remy Sharp" src={bid.token.assetId} />
               </ListItemIcon>

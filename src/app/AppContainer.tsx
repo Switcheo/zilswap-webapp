@@ -1,13 +1,16 @@
 import DayJsUtils from "@date-io/dayjs";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
-import { ThemeProvider } from "@material-ui/styles";
-import { AppButler, isDebug } from "core/utilities";
+import { StylesProvider, ThemeProvider, jssPreset } from "@material-ui/styles";
+import { create } from "jss";
+import jssCompose from "jss-plugin-compose";
+import jssExtend from "jss-plugin-extend";
 import { createBrowserHistory } from "history";
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { renderRoutes } from "react-router-config";
 import { Router } from "react-router-dom";
+import { AppButler, isDebug } from "core/utilities";
 import { GoogleAnalytics, ScrollReset, NotificationBar } from "./components";
 import routes from "./routes";
 import { startSagas } from "./saga";
@@ -27,6 +30,9 @@ const themes: any = {
   dark: darkTheme,
   light: lightTheme,
 };
+const jss = create({
+  plugins: [...jssPreset().plugins, jssCompose(), jssExtend()],
+});
 
 const AppContainer: React.FC = () => {
 
@@ -38,20 +44,22 @@ const AppContainer: React.FC = () => {
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
-      <NotificationBar>
-        <SnackbarUtilsConfigurator />
-        <AppButler />
-        <CssBaseline />
-        <MuiPickersUtilsProvider utils={DayJsUtils}>
-          <Router history={history}>
-            <ScrollReset />
-            <GoogleAnalytics />
-            {renderRoutes(routes)}
-          </Router>
-        </MuiPickersUtilsProvider>
-      </NotificationBar>
-    </ThemeProvider>
+    <StylesProvider jss={jss}>
+      <ThemeProvider theme={theme}>
+        <NotificationBar>
+          <SnackbarUtilsConfigurator />
+          <AppButler />
+          <CssBaseline />
+          <MuiPickersUtilsProvider utils={DayJsUtils}>
+            <Router history={history}>
+              <ScrollReset />
+              <GoogleAnalytics />
+              {renderRoutes(routes)}
+            </Router>
+          </MuiPickersUtilsProvider>
+        </NotificationBar>
+      </ThemeProvider>
+    </StylesProvider>
   );
 };
 

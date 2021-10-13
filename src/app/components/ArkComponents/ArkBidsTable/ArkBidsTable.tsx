@@ -1,5 +1,5 @@
 import {
-  BoxProps, Table, TableBody, TableCell,
+  Box, BoxProps, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, useMediaQuery, useTheme
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -19,12 +19,16 @@ interface Props extends BoxProps {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     width: '100%',
-    marginTop: theme.spacing(2)
-  }, container: {
+    marginTop: theme.spacing(2),
   },
-  headCell: {
+  headerCell: {
+    color: 'rgba(255, 255, 255, 0.5)',
     borderBottom: "1px solid #29475A",
     padding: "8px 16px",
+    fontFamily: 'Avenir Next',
+    fontWeight: 600,
+    fontSize: 13,
+    letterSpacing: '0.2px',
   },
   iconButton: {
     color: "#DEFFFF",
@@ -39,9 +43,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderBottom: "1px solid #29475A",
     padding: "8px 16px",
   },
-  bearItem: {
-    padding: "0",
-  }
 }));
 
 type CellAligns = "right" | "left" | "inherit" | "center" | "justify" | undefined;
@@ -61,7 +62,7 @@ const HEADERS: HeadersProp[] = [
 ]
 
 const ArkBidsTable: React.FC<Props> = (props: Props) => {
-  const { children, className, bids, ...rest } = props;
+  const { bids } = props;
   const classes = useStyles();
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down("xs"));
@@ -75,7 +76,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
   //   setBid(undefined);
   // }
 
-  return (<>
+  return <Box className={classes.root}>
     {
       isXs ?
       <>
@@ -84,14 +85,14 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
         ))}
       </>
       :
-      <TableContainer {...rest}>
+      <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
               {HEADERS.map((header, index) => (
                 <TableCell
                   key={`offers-${index}`}
-                  className={classes.headCell}
+                  className={classes.headerCell}
                   align={header.align}
                 >
                   {header.value}
@@ -109,7 +110,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
     }
     <ArkPaginator itemPerPage={ITEMS_PER_PAGE} totalItem={bids.length} />
     {/* {bid && <BidsDialog showDialog={!!bid} onCloseDialog={() => setBid(undefined)} bid={bid} isOffer={true} />} */}
-  </>)
+  </Box>
 };
 
 export default ArkBidsTable;

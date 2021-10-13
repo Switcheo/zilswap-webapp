@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     background: "rgba(222, 255, 255, 0.1)",
     marginBottom: theme.spacing(2),
   },
-  bearItem: {
+  item: {
     padding: "0",
     maxWidth: 200,
     margin: 0
@@ -73,7 +73,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
   const getCardContent = (bid: Cheque, isInitial: boolean) => {
     return (
       <CardContent>
-        <MenuItem className={classes.bearItem} button={false}>
+        <MenuItem className={classes.item} button={false}>
           <Box display="flex" flexDirection="row" justifyContent="center" alignItems="center">
             <ListItemIcon>
               <Avatar alt="Remy Sharp" src={bid.token.assetId} />
