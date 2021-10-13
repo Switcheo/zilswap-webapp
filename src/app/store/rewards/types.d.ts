@@ -1,5 +1,4 @@
 import BigNumber from "bignumber.js";
-import { Dayjs } from "dayjs";
 import { Distribution, Distributor, SwapVolume } from "core/utilities";
 import { SimpleMap } from "app/utils";
 import { TokenInfo } from "../token/types";
