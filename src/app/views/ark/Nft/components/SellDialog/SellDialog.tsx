@@ -9,6 +9,7 @@ import { useAsyncTask } from "app/utils";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ArkClient, logger } from "core/utilities";
+import { ZilswapConnector } from "core/zilswap";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
@@ -43,7 +44,8 @@ const SellDialog: React.FC<Props> = (props: Props) => {
 
       const arkClient = new ArkClient(network);
       const nonce = ~~(Math.random() * 4294967295); // uint32 max 4294967295
-      const expiry = 100; // blocks
+      const currentBlock = ZilswapConnector.getCurrentBlock();
+      const expiry = currentBlock + 100; // blocks
       const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
         side: "Sell",
         token: { address, id, },
