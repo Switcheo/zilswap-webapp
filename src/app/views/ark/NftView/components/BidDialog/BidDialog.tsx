@@ -4,7 +4,7 @@ import {
   Checkbox,
   DialogContent,
   DialogProps,
-  FormControlLabel,
+  FormControlLabel
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
@@ -14,7 +14,7 @@ import { Nft } from "app/store/marketplace/types";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
-import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
+import { ZIL_ADDRESS } from "app/utils/constants";
 import { NftCard } from "app/views/ark/Collection/components";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import BigNumber from "bignumber.js";
@@ -32,6 +32,7 @@ interface Props extends Partial<DialogProps> {
 
 const initialFormState = {
   bidAmount: "0",
+  acceptTerms: false,
 };
 
 const BidDialog: React.FC<Props> = (props: Props) => {
@@ -40,13 +41,14 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const [runConfirmPurchase, loading, error] = useAsyncTask("confirmPurchase");
-  const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
   const [formState, setFormState] =
     useState<typeof initialFormState>(initialFormState);
   const tokenState = useSelector<RootState, TokenState>((store) => store.token);
 
-  let bidToken = tokenState.tokens[ZIL_ADDRESS];
+  const [bidToken, setBidToken] = useState<TokenInfo>(
+    tokenState.tokens[ZIL_ADDRESS]
+  );
 
   const open = useSelector<RootState, boolean>(
     (state) => state.layout.showBidNftDialog
@@ -63,7 +65,10 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const onCloseDialog = () => {
     if (loading) return;
     dispatch(actions.Layout.toggleShowBidNftDialog("close"));
-    setAcceptTerms(false);
+    setFormState({
+      bidAmount: "0",
+      acceptTerms: false,
+    });
     setCompletedPurchase(false);
   };
 
@@ -73,16 +78,10 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   };
 
   const onCurrencyChange = (token: TokenInfo) => {
-    bidToken = token;
+    setBidToken(token);
   };
 
   const onBidAmountChange = (rawAmount: string = "0") => {
-    let bidAmount = new BigNumber(rawAmount).decimalPlaces(
-      bidToken?.decimals ?? 0
-    );
-    if (bidAmount.isNaN() || bidAmount.isNegative() || !bidAmount.isFinite())
-      bidAmount = BIG_ZERO;
-
     setFormState({
       ...formState,
       bidAmount: rawAmount,
@@ -90,10 +89,14 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   };
 
   const onEndEditBidAmount = () => {
-    setFormState({
-      ...formState,
-      bidAmount: formState.bidAmount.toString(),
-    });
+    let bidAmount = new BigNumber(formState.bidAmount).decimalPlaces(
+      bidToken?.decimals ?? 0
+    );
+    if (bidAmount.isNaN() || bidAmount.isNegative() || !bidAmount.isFinite())
+      setFormState({
+        ...formState,
+        bidAmount: "0",
+      });
   };
 
   return (
@@ -136,8 +139,13 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                     className={classes.radioButton}
                     checkedIcon={<CheckedIcon />}
                     icon={<UncheckedIcon fontSize="small" />}
-                    checked={acceptTerms}
-                    onChange={() => setAcceptTerms(!acceptTerms)}
+                    checked={formState.acceptTerms}
+                    onChange={() =>
+                      setFormState({
+                        ...formState,
+                        acceptTerms: !formState.acceptTerms,
+                      })
+                    }
                     disableRipple
                   />
                 }
@@ -155,7 +163,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
               variant="contained"
               color="primary"
               onClick={onConfirm}
-              disabled={!acceptTerms}
+              disabled={!formState.acceptTerms}
               walletRequired
             >
               Place Bid
