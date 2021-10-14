@@ -1,16 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Box, makeStyles } from '@material-ui/core';
-import dayjs, { Dayjs } from "dayjs";
 import { useSelector } from 'react-redux';
 import { Link } from "react-router-dom";
-import { ZilswapConnector } from "core/zilswap";
 import { ZILO_DATA } from 'core/zilo/constants';
 import { ILOCard, SampleILOCard, Text } from "app/components";
 import TokenILOCard from "app/components/TokenILOCard";
 import ILOPage from 'app/layouts/ILOPage';
 import { RootState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useNetwork } from "app/utils";
+import { useNetwork, useBlockTime } from "app/utils";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   container: {
@@ -36,29 +34,9 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const classes = useStyles();
   const network = useNetwork();
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-
-  const [currentBlock, setCurrentBlock] = useState<number>(0)
-  const [blockTime, setBlockTime] = useState<Dayjs>(dayjs())
-  const [currentTime, setCurrentTime] = useState<Dayjs>(dayjs())
-
+  const [blockTime, currentBlock, currentTime] = useBlockTime();
   const ziloData = useMemo(() => ZILO_DATA[network!].filter(x => currentTime.isBefore(x.showUntil)), [network, currentTime])
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      try {
-        const newBlock = ZilswapConnector.getCurrentBlock()
-        if (newBlock !== currentBlock) {
-          setCurrentBlock(newBlock)
-          setBlockTime(dayjs())
-        }
-      } catch (e) {
-        console.warn('Failed to get current block. Will try again in 1s. Error:')
-        console.warn(e)
-      }
-      setCurrentTime(dayjs())
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [network, currentBlock])
 
   useEffect(() => {
     // need to listen to wallet state

@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }))
 
-const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+const PastView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
 
   const classes = useStyles();
@@ -92,4 +92,4 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   )
 }
 
-export default CurrentView
+export default PastView

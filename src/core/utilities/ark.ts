@@ -6,7 +6,7 @@ import { HTTP } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
 import { fromBech32Address } from "core/zilswap";
 import { SimpleMap } from "app/utils";
-import { OAuth, Profile } from "app/store/types";
+import { Cheque, OAuth, Profile } from "app/store/types";
 
 const ARK_ENDPOINTS: SimpleMap<string> = {
   [Network.MainNet]: "https://api-ark.zilswap.org",
@@ -240,7 +240,6 @@ const sha256 = (byteHexString: string): string => {
 }
 
 export namespace ArkClient {
-
   export interface PostTradeParams {
     side: 'Buy' | 'Sell';
     tokenId: string;
@@ -271,5 +270,11 @@ export namespace ArkClient {
   }
   export interface ListCollectionParams extends ListQueryParams {
   }
+}
 
+export const getChequeStatus = (cheque: Cheque, currentBlock: number): 'Active' | 'Expired' | 'Cancelled' | 'Accepted' => {
+  if (cheque.cancelTransactionHash) return 'Cancelled'
+  if (cheque.matchTransactionHash) return 'Accepted'
+  if (cheque.expiry <= currentBlock) return 'Expired'
+  return 'Active'
 }

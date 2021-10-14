@@ -31,7 +31,7 @@ const themes: any = {
   light: lightTheme,
 };
 const jss = create({
-  plugins: [...jssPreset().plugins, jssCompose(), jssExtend()],
+  plugins: [jssExtend(), jssCompose(), ...jssPreset().plugins],
 });
 
 const AppContainer: React.FC = () => {

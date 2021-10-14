@@ -1,19 +1,25 @@
 import React, { Fragment, useState } from "react";
 import { Avatar, Box, BoxProps, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { toBech32Address } from "@zilliqa-js/zilliqa";
 import cls from "classnames";
-import dayjs from "dayjs";
+import BigNumber from "bignumber.js"
+import dayjs, { Dayjs } from "dayjs";
+import { useSelector } from "react-redux";
 import { AppTheme } from "app/theme/types";
 import { Cheque } from "app/store/types";
-import { truncateAddress } from "app/utils";
+import { truncateAddress, useValueCalculators } from "app/utils";
+import { RootState, TokenState } from "app/store/types";
+import { getChequeStatus } from "core/utilities/ark"
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
 import { ReactComponent as UpArrow } from "./assets/up-arrow.svg";
 
-// TODO
-// format row props
 interface Props extends BoxProps {
-  bid: Cheque,
+  showItem: boolean
+  bid: Cheque
   relatedBids?: Cheque[]
+  blockTime: Dayjs
+  currentBlock: number
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -24,6 +30,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 600,
     fontSize: 15,
     letterSpacing: '0.1px',
+  },
+  amount: {
+    fontWeight: 800,
   },
   bodyCell: {
     extend: 'text',
@@ -51,6 +60,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginRight: 8,
   },
   item: {
+    extend: 'text',
     padding: "0",
     maxWidth: 200,
     margin: 0
@@ -99,40 +109,61 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: "12px"
   },
   green: {
+    extend: 'text',
     color: "#00FFB0",
   },
   red: {
+    extend: 'text',
     color: "#FF5252",
   }
 }));
 
 const Row: React.FC<Props> = (props: Props) => {
-  const { bid: baseBid, relatedBids = [] } = props;
+  const { bid: baseBid, relatedBids = [], currentBlock, blockTime, showItem } = props;
   const [expand, setExpand] = useState(false);
   const classes = useStyles();
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const valueCalculators = useValueCalculators();
 
   return (
     <Fragment>
       <Box mt={1}></Box>
       {
-        (expand ? [baseBid].concat(...relatedBids) : [baseBid]).map((bid: Cheque, index: number) => (
-          <TableRow className={cls({ [classes.firstRow]: index === 0, [classes.slideAnimation]: index > 0 })}>
-            <TableCell align="left" className={cls(classes.bodyCell, classes.firstCell)}>
-              {
-                index === 0 &&
-                <MenuItem className={classes.item} button={false}>
-                  <ListItemIcon>
-                    <Avatar alt="Remy Sharp" src={bid.token.assetId} />
-                  </ListItemIcon>
-                  #{bid.token.tokenId}
-                </MenuItem>
-              }
+        (expand ? [baseBid].concat(...relatedBids) : [baseBid]).map((bid: Cheque, index: number) => {
+          const status = getChequeStatus(bid, currentBlock)
+          const expiryTime = blockTime.add(15 * (bid.expiry - currentBlock), 'seconds')
+          const priceToken = tokenState.tokens[toBech32Address(bid.price.address)]
+          const priceAmount = new BigNumber(bid.price.amount).shiftedBy(-priceToken.decimals)
+          const usdValue = valueCalculators.amount(tokenState.prices, priceToken, new BigNumber(bid.price.amount));
+
+          return <TableRow className={cls({ [classes.firstRow]: index === 0, [classes.slideAnimation]: index > 0 })}>
+            {
+              showItem &&
+              <TableCell align="left" className={cls(classes.bodyCell, classes.firstCell)}>
+                {
+                  index === 0 &&
+                  <MenuItem className={classes.item} button={false}>
+                    <ListItemIcon><Avatar alt="Remy Sharp" src={bid.token.asset.url} /></ListItemIcon>
+                    #{bid.token.tokenId}
+                  </MenuItem>
+                }
+              </TableCell>
+            }
+            <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>
+              {dayjs(bid.createdAt).format("D MMM YYYY")}
             </TableCell>
-            <TableCell align="right" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>{bid.price.amount} ZIL ($xxx)</TableCell>
-            <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}></TableCell>
-            <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>{bid.initiator?.username || truncateAddress(bid.initiatorAddress)}</TableCell>
-            <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>{dayjs(bid.createdAt).format("D MMM YYYY")}</TableCell>
-            <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>{dayjs(bid.expiry).format("MMM, DD, YYYY")}</TableCell>
+            <TableCell align="right" className={cls(classes.bodyCell, { [classes.withBorder]: expand, [classes.firstCell]: !showItem })}>
+                <strong className={classes.amount}>
+                  {priceAmount.toFormat(priceAmount.gte(1) ? 2 : priceToken.decimals)}
+                </strong> {priceToken.symbol} (${usdValue.toFormat(2)})
+            </TableCell>
+            <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>NYI</TableCell>
+            <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>
+              {bid.initiator?.username || truncateAddress(bid.initiatorAddress)}
+            </TableCell>
+            <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>
+              {expiryTime.format("D MMM YYYY")}
+            </TableCell>
             <TableCell align="center" className={cls(classes.actionCell, classes.lastCell, { [classes.withBorder]: expand })}>
               {bid.cancelTransactionHash === null && bid.matchTransactionHash === null && (
                 <>
@@ -146,15 +177,15 @@ const Row: React.FC<Props> = (props: Props) => {
               )}
               <Typography
                 className={cls({
-                  [classes.green]: bid.status === 'Active',
-                  [classes.red]: bid.status === 'Expired' || bid.status === 'Cancelled'
+                  [classes.green]: status === 'Active',
+                  [classes.red]: status === 'Expired' || status === 'Cancelled'
                 })}
               >
-                {bid.status}
+                {status}
               </Typography>
             </TableCell>
           </TableRow>
-        ))
+        })
       }
       <TableRow className={classes.lastRow}>
         <TableCell className={classes.expandCell} colSpan={8}>

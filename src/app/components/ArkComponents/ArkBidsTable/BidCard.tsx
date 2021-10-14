@@ -1,18 +1,26 @@
 import React, { useState } from "react";
-import { Avatar, Box, Card, CardContent, CardProps, Chip, Collapse, IconButton, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
+import { Avatar, Box, Card, CardContent, CardProps, Collapse, IconButton, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { toBech32Address } from "@zilliqa-js/zilliqa";
 import cls from "classnames";
-import dayjs from "dayjs";
+import BigNumber from "bignumber.js"
+import dayjs, { Dayjs } from "dayjs";
+import { useSelector } from "react-redux";
 import { FancyButton } from "app/components";
 import { Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
+import { getChequeStatus } from "core/utilities/ark"
+import { RootState, TokenState } from "app/store/types";
+import { truncateAddress, useValueCalculators } from "app/utils";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
 import { ReactComponent as UpArrow } from "./assets/up-arrow.svg";
 
 interface Props extends CardProps {
-  bid: Cheque,
-  relatedBids?: Cheque[],
-  isBuyer: boolean,
+  showItem: boolean
+  bid: Cheque
+  relatedBids?: Cheque[]
+  blockTime: Dayjs
+  currentBlock: number
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -24,6 +32,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: "0",
     maxWidth: 200,
     margin: 0
+  },
+  amount: {
+    fontWeight: 800,
   },
   dateText: {
     display: "flex",
@@ -66,53 +77,69 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const BidCard: React.FC<Props> = (props: Props) => {
-  const { isBuyer, bid, relatedBids, children, className, ...rest } = props;
+  const { bid, relatedBids, currentBlock, blockTime, showItem } = props;
   const classes = useStyles();
   const [expand, setExpand] = useState(false);
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const valueCalculators = useValueCalculators();
 
   const getCardContent = (bid: Cheque, isInitial: boolean) => {
+    const status = getChequeStatus(bid, currentBlock)
+    const expiryTime = blockTime.add(15 * (bid.expiry - currentBlock), 'seconds')
+    const priceToken = tokenState.tokens[toBech32Address(bid.price.address)]
+    const priceAmount = new BigNumber(bid.price.amount).shiftedBy(-priceToken.decimals)
+    const usdValue = valueCalculators.amount(tokenState.prices, priceToken, new BigNumber(bid.price.amount))
+
     return (
       <CardContent>
-        <MenuItem className={classes.item} button={false}>
-          <Box display="flex" flexDirection="row" justifyContent="center" alignItems="center">
-            <ListItemIcon>
-              <Avatar alt="Remy Sharp" src={bid.token.assetId} />
-            </ListItemIcon>
-            {
-              isInitial &&
-              <Box>
-                <Typography>{bid.token.tokenId}</Typography>
-                <Typography>{bid.token.collectionAddress}</Typography>
-              </Box>
-            }
-          </Box>
-        </MenuItem>
+        {
+          showItem &&
+          <MenuItem className={classes.item} button={false}>
+            <Box display="flex" flexDirection="row" justifyContent="center" alignItems="center">
+              <ListItemIcon>
+                <Avatar alt="Remy Sharp" src={bid.token.asset.url} />
+              </ListItemIcon>
+              {
+                isInitial &&
+                <Box>
+                  <Typography>#{bid.token.tokenId}</Typography>
+                </Box>
+              }
+            </Box>
+          </MenuItem>
+        }
         <Box mt={1} display="flex" justifyContent="space-between">
-          <Typography className={classes.header}>Offer Strength</Typography>
-          <Typography></Typography>
+          <Typography className={classes.header}>Date</Typography>
+          <Typography>{dayjs(bid.createdAt).format("D MMM YYYY")}</Typography>
         </Box>
         <Box mt={1} display="flex" justifyContent="space-between">
-          <Typography className={classes.header}>{isBuyer ? "Buyer" : "Seller"}</Typography>
-          <Typography>{bid.initiatorAddress}</Typography>
+          <Typography className={classes.header}>Amount</Typography>
+          <Typography>
+            <strong className={classes.amount}>
+              {priceAmount.toFormat(priceAmount.gte(1) ? 2 : priceToken.decimals)}
+            </strong> {priceToken.symbol} (${usdValue.toFormat(2)})
+          </Typography>
+        </Box>
+        <Box mt={1} display="flex" justifyContent="space-between">
+          <Typography className={classes.header}>Versus Floor</Typography>
+          <Typography>NYI</Typography>
+        </Box>
+        <Box mt={1} display="flex" justifyContent="space-between">
+          <Typography className={classes.header}>{bid.side === 'buy' ? "Buyer" : "Seller"}</Typography>
+          <Typography>{bid.initiator?.username || truncateAddress(bid.initiatorAddress)}</Typography>
         </Box>
         <Box mt={1} display="flex" justifyContent="space-between">
           <Typography className={classes.header}>Expiration</Typography>
-          <Typography className={classes.dateText}>{dayjs(bid.expiry).format("DD MMM YYYY, HH:mm:ss")}&nbsp;
-            <Typography
-              className={(bid.status === 'Expired' || bid.status === 'Cancelled') ? classes.red : classes.green}
-            >{bid.status}</Typography>
+          <Typography className={classes.dateText}>{expiryTime.format("D MMM YYYY HH:mm:ss")}</Typography>
+        </Box>
+        <Box mt={1} display="flex" justifyContent="space-between">
+          <Typography className={classes.header}>Status</Typography>
+          <Typography className={(status === 'Expired' || status === 'Cancelled') ? classes.red : classes.green}>
+            {status}
           </Typography>
         </Box>
         {
-          bid.status === 'Expired' || bid.status === 'Cancelled' ?
-          <Box mt={1} display="flex" justifyContent="flex-end">
-            <Chip
-              className={classes.red}
-              size="small" label={bid.status} variant="outlined"
-            />
-          </Box>
-          :
-          <Box mt={2} display="flex" justifyContent="center">
+          status === 'Active' && <Box mt={2} display="flex" justifyContent="center">
             <Box flexGrow={1}>
               <FancyButton variant="contained" fullWidth onClick={() => null} className={classes.actionButton}>
                 <Typography className={classes.buttonText}>Accept</Typography>
@@ -125,7 +152,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Card className={cls(classes.root, className)} {...rest}>
+    <Card className={cls(classes.root)}>
         {getCardContent(bid, true)}
       <Collapse in={expand}>
         {relatedBids?.map((bids) => (

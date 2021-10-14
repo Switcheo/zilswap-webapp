@@ -15,7 +15,6 @@ export interface Cheque {
   id: string;
   createdAt: string;
   updatedAt: string;
-  initiatorDisplayName: string;
   initiatorAddress: string;
   brokerAddress: string;
   side: 'buy' | 'sell';
@@ -23,15 +22,20 @@ export interface Cheque {
   publicKey: string;
   nonce: number;
   expiry: number;
-  token: Pick<Nft, 'tokenId', 'collection', 'asset'>,
+  token: Pick<Nft, 'tokenId', 'collection', 'asset'>;
+  asset: Asset;
   price: {
     amount: string;
     address: string;
   },
-  initiator?: Profile
-  cancelTransactionHash: string | null,
-  matchTransactionHash: string | null,
-  status: 'Active' | 'Expired' | 'Cancelled' | 'Accepted'
+  collection: {
+    name: string;
+    address: string;
+  }
+  owner: Profile | null;
+  initiator: Profile | null;
+  cancelTransactionHash: string | null;
+  matchTransactionHash: string | null;
 }
 
 export interface Nft {

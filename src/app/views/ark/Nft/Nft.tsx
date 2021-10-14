@@ -243,12 +243,11 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
           </Box>
         </Box>
 
-        {/* TOOO: refactor into OngoingBidsBox */}
         {/* Ongoing bids */}
         <Box className={classes.bidsBox}>
           <Typography className={classes.bidsHeader}>Ongoing Bids</Typography>
 
-          <ArkBidsTable bids={bids} />
+          <ArkBidsTable bids={bids} showItem={false} />
         </Box>
 
         {/* Other info and price history */}

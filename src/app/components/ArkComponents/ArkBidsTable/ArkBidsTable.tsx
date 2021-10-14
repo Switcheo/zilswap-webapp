@@ -7,6 +7,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { ArkPaginator } from "app/components";
 import { Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
+import { useBlockTime } from "app/utils";
 import BidCard from "./BidCard";
 import BidRow from "./BidRow";
 
@@ -14,6 +15,7 @@ const ITEMS_PER_PAGE = 2
 
 interface Props extends BoxProps {
   bids: Cheque[]
+  showItem?: boolean
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -51,21 +53,24 @@ interface HeadersProp {
   value: string;
 }
 
+const ITEM_HEADER: HeadersProp = { align: 'left', value: "Item" };
 const HEADERS: HeadersProp[] = [
-  { align: 'left', value: "Item" },
+  { align: "center", value: "Date" },
   { align: "right", value: "Price" },
   { align: "center", value: "Versus Floor" },
   { align: "center", value: "Bidder" },
-  { align: "center", value: "Offered" },
   { align: "center", value: "Expires" },
   { align: "center", value: "Actions" },
 ]
 
 const ArkBidsTable: React.FC<Props> = (props: Props) => {
-  const { bids } = props;
+  const { bids, showItem = true } = props;
   const classes = useStyles();
   const theme = useTheme();
-  const isXs = useMediaQuery(theme.breakpoints.down("xs"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const [blockTime, currentBlock] = useBlockTime();
+
   // const [bid, setBid] = useState<Cheque | undefined>(undefined);
 
   // const acceptBid = (newBid?: Cheque) => {
@@ -76,12 +81,14 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
   //   setBid(undefined);
   // }
 
+  if (currentBlock === 0) return null // TODO: use loading gif instead
+
   return <Box className={classes.root}>
     {
-      isXs ?
+      isMobile ?
       <>
         {bids.map((data) => (
-          <BidCard isBuyer={data.side === 'buy'} bid={data} />
+          <BidCard bid={data} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} />
         ))}
       </>
       :
@@ -89,7 +96,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
         <Table>
           <TableHead>
             <TableRow>
-              {HEADERS.map((header, index) => (
+              {(showItem ? [ITEM_HEADER, ...HEADERS] : HEADERS).map((header, index) => (
                 <TableCell
                   key={`offers-${index}`}
                   className={classes.headerCell}
@@ -102,7 +109,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
           </TableHead>
           <TableBody>
             {bids.map((data) => (
-              <BidRow bid={data} />
+              <BidRow bid={data} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} />
             ))}
           </TableBody>
         </Table>
