@@ -181,7 +181,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   }, [collectionId, tokenId, network]);
 
   const isOwnToken = useMemo(() => {
-    return token?.user?.address && wallet?.addressInfo.byte20?.toLowerCase() === token?.user?.address;
+    return token?.owner?.address && wallet?.addressInfo.byte20?.toLowerCase() === token?.owner?.address;
   }, [token, wallet?.addressInfo]);
 
   const breadcrumbs = [

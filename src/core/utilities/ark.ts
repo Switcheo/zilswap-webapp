@@ -245,7 +245,7 @@ export namespace ArkClient {
     tokenId: string;
     price: { amount: BigNumber, address: string };
     expiry: number;
-    nonce: number;
+    nonce: BigNumber;
     address: string;
     collectionAddress: string;
     publicKey: string;
@@ -258,7 +258,7 @@ export namespace ArkClient {
     price: { amount: BigNumber, address: string };
     feeAmount: BigNumber;
     expiry: number;
-    nonce: number;
+    nonce: BigNumber;
   }
   export interface ListTokenParams extends ListQueryParams {
     owner?: string;

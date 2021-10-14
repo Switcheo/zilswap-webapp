@@ -44,9 +44,12 @@ export interface Nft {
   description?: string;
   metadata?: string;
   asset?: Asset;
-  user?: MarketplaceUser;
+  owner?: MarketplaceUser;
   collection?: Collection;
   traitValues?: TraitValue[];
+
+  bestAsk: null | Omit<Cheque, "token", "collection">;
+  bestBid: null | Omit<Cheque, "token", "collection">;
 }
 
 export type TraitType = {

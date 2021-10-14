@@ -11,6 +11,136 @@ import { AppTheme } from "app/theme/types";
 import { toBech32Address } from "core/zilswap";
 import { ReactComponent as VerifiedBadge } from "../../verified-badge.svg";
 
+export interface Props extends CardProps {
+  token: Nft;
+  collectionAddress: string;
+  dialog?: boolean;
+  // tx href
+}
+
+const NftCard: React.FC<Props> = (props: Props) => {
+  const { className, token, collectionAddress, dialog, ...rest } = props;
+  const classes = useStyles();
+  const [liked, setLiked] = useState<boolean>(false);
+
+  return (
+    <Card {...rest} className={cls(classes.root, className)}>
+      <Box className={classes.borderBox}>
+        {!dialog && (
+          <Box className={classes.cardHeader}>
+            {/* to accept as props */}
+            <Box display="flex" flexDirection="column" justifyContent="center">
+              <Typography className={classes.bid}>
+                <DotIcon className={classes.dotIcon} /> BID LIVE 10:00:26 Left
+              </Typography>
+              <Typography className={classes.lastOffer}>
+                Last Offer 200,000 ZIL
+              </Typography>
+            </Box>
+            <Box display="flex" alignItems="center">
+              <Typography className={classes.likes}>100K</Typography>
+              <IconButton
+                onClick={() => setLiked(!liked)}
+                className={classes.likeIconButton}
+                disableRipple
+              >
+                <SvgIcon
+                  component={liked ? LikedIcon : UnlikedIcon}
+                  className={classes.likeButton}
+                />
+              </IconButton>
+            </Box>
+          </Box>
+        )}
+        <CardActionArea
+          component={RouterLink}
+          to={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
+        >
+          <CardMedia
+            className={classes.image}
+            component="img"
+            alt="NFT image"
+            height="308"
+            image={token.asset?.url}
+          />
+        </CardActionArea>
+      </Box>
+      <CardContent className={classes.cardContent}>
+        <Box className={classes.bodyBox}>
+          {!dialog ? (
+            <Fragment>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                {/* to truncate if too long? */}
+                <Typography className={classes.title}>
+                  {token.name}
+                  <VerifiedBadge className={classes.verifiedBadge} />
+                </Typography>
+                <Typography className={classes.title}>1M ZIL</Typography>
+              </Box>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                mt={0.5}
+              >
+                <Typography className={classes.body}>
+                  #{token.tokenId}
+                </Typography>
+                <Typography className={classes.body}>~$100,000</Typography>
+              </Box>
+            </Fragment>
+          ) : (
+            <Fragment>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Typography className={classes.dialogTitle}>
+                  #{token.tokenId}
+                </Typography>
+                <Link
+                  className={classes.link}
+                  underline="hover"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  href={"/"}
+                >
+                  <Typography>
+                    View on explorer
+                    <LaunchIcon className={classes.linkIcon} />
+                  </Typography>
+                </Link>
+              </Box>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                mt={0.5}
+              >
+                <Typography className={classes.dialogBody}>
+                  {token.name}
+                  <VerifiedBadge className={classes.verifiedBadge} />
+                </Typography>
+              </Box>
+            </Fragment>
+          )}
+        </Box>
+
+        {/* TODO: refactor and take in a rarity as prop */}
+        {/* Rarity indicator */}
+        <Box className={classes.rarityBackground}>
+          <Box className={classes.rarityBar} />
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};
+
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     width: "100%",
@@ -157,137 +287,5 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "16px",
   },
 }));
-
-export interface Props extends CardProps {
-  token: Nft;
-  collectionAddress: string;
-  dialog?: boolean;
-  // tx href
-}
-
-const NftCard: React.FC<Props> = (props: Props) => {
-  const { className, token, collectionAddress, dialog, ...rest } = props;
-  const classes = useStyles();
-  const [liked, setLiked] = useState<boolean>(false);
-
-  return (
-    <Card {...rest} className={cls(classes.root, className)}>
-      <Box className={classes.borderBox}>
-        {!dialog && (
-          <Box className={classes.cardHeader}>
-            {/* to accept as props */}
-            <Box display="flex" flexDirection="column" justifyContent="center">
-              <Typography className={classes.bid}>
-                <DotIcon className={classes.dotIcon} /> BID LIVE 10:00:26 Left
-              </Typography>
-              <Typography className={classes.lastOffer}>
-                Last Offer 200,000 ZIL
-              </Typography>
-            </Box>
-            <Box display="flex" alignItems="center">
-              <Typography className={classes.likes}>100K</Typography>
-              <IconButton
-                onClick={() => setLiked(!liked)}
-                className={classes.likeIconButton}
-                disableRipple
-              >
-                <SvgIcon
-                  component={liked ? LikedIcon : UnlikedIcon}
-                  className={classes.likeButton}
-                />
-              </IconButton>
-            </Box>
-          </Box>
-        )}
-        <CardActionArea
-          component={RouterLink}
-          to={`/ark/collections/${toBech32Address(collectionAddress)}/${
-            token.tokenId
-          }`}
-        >
-          <CardMedia
-            className={classes.image}
-            component="img"
-            alt="NFT image"
-            height="308"
-            image={token.asset?.url}
-          />
-        </CardActionArea>
-      </Box>
-      <CardContent className={classes.cardContent}>
-        <Box className={classes.bodyBox}>
-          {!dialog ? (
-            <Fragment>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                {/* to truncate if too long? */}
-                <Typography className={classes.title}>
-                  {token.name}
-                  <VerifiedBadge className={classes.verifiedBadge} />
-                </Typography>
-                <Typography className={classes.title}>1M ZIL</Typography>
-              </Box>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                mt={0.5}
-              >
-                <Typography className={classes.body}>
-                  #{token.tokenId}
-                </Typography>
-                <Typography className={classes.body}>~$100,000</Typography>
-              </Box>
-            </Fragment>
-          ) : (
-            <Fragment>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Typography className={classes.dialogTitle}>
-                  #{token.tokenId}
-                </Typography>
-                <Link
-                  className={classes.link}
-                  underline="hover"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  href={"hello"}
-                >
-                  <Typography>
-                    View on explorer
-                    <LaunchIcon className={classes.linkIcon} />
-                  </Typography>
-                </Link>
-              </Box>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                mt={0.5}
-              >
-                <Typography className={classes.dialogBody}>
-                  {token.name}
-                  <VerifiedBadge className={classes.verifiedBadge} />
-                </Typography>
-              </Box>
-            </Fragment>
-          )}
-        </Box>
-
-        {/* TODO: refactor and take in a rarity as prop */}
-        {/* Rarity indicator */}
-        <Box className={classes.rarityBackground}>
-          <Box className={classes.rarityBar} />
-        </Box>
-      </CardContent>
-    </Card>
-  );
-};
 
 export default NftCard;

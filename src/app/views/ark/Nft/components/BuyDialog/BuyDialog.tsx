@@ -39,7 +39,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       const { collection: address, id } = match.params
       const arkClient = new ArkClient(network);
       const price = { amount: new BigNumber(10000), address: ZIL_HASH };
-      const nonce = ~~(Math.random() * 4294967295); // uint32 max 4294967295
+      const nonce = new BigNumber(Math.random()).times(4294967295).decimalPlaces(0); // uint32 max 4294967295
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 100; // blocks
       const msg = arkClient.arkMessage("Execute", arkClient.arkChequeHash({

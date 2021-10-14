@@ -1,13 +1,5 @@
 import React, { Fragment, useState } from "react";
-import {
-  Backdrop,
-  Box,
-  Checkbox,
-  DialogContent,
-  DialogProps,
-  FormControlLabel,
-  Link,
-} from "@material-ui/core";
+import { Backdrop, Box, Checkbox, DialogContent, DialogProps, FormControlLabel, Link } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import LaunchIcon from "@material-ui/icons/Launch";
@@ -65,6 +57,8 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
     history.push("/ark/profile");
   };
 
+  console.log("token", token)
+
   const dialogHeader = loading
     ? ""
     : completedPurchase
@@ -80,6 +74,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       className={cls(classes.root, className)}
       hideCloseButton={loading}
       titlePadding={!!loading}
+      
     >
       <DialogContent className={cls(classes.dialogContent)}>
         {error && (
