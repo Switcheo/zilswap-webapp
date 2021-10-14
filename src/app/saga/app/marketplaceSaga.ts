@@ -100,6 +100,7 @@ function* watchLoadNftList() {
   yield takeLatest([
     actions.MarketPlace.MarketPlaceActionTypes.RELOAD_TOKEN_LIST,
     actions.MarketPlace.MarketPlaceActionTypes.UPDATE_FILTER,
+    actions.Wallet.WalletActionTypes.WALLET_UPDATE,
   ], loadNftList);
 }
 

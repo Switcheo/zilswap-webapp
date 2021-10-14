@@ -32,6 +32,7 @@ const apiPaths = {
   "collection/search": "/nft/collection/:address/search",
   "collection/traits": "/nft/collection/:address/traits",
   "collection/token/detail": "/nft/collection/:address/:tokenId/detail",
+  "token/favourite": "/nft/collection/:address/:tokenId/favourite",
   "token/list": "/nft/token/list",
   "trade/list": "/nft/trade/list",
   "trade/post": "/nft/trade/:address/:tokenId",
@@ -137,8 +138,8 @@ export class ArkClient {
     return output;
   }
 
-  getNftCheques = async (collectionAddress: string, tokenId: string) => {
-    const url = this.http.path("trade/list", {}, { collectionAddress, tokenId });
+  getNftCheques = async (params: ArkClient.GetNftChequeParams) => {
+    const url = this.http.path("trade/list", {}, params);
     const result = await this.http.get({ url });
     const output = await result.json();
     await this.checkError(output);
@@ -226,6 +227,23 @@ export class ArkClient {
     const headers = { Authorization: "Bearer " + access_token };
     const url = this.http.path("user/image/notify", { address }, { type: "profile" });
     const result = await this.http.post({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+  postFavourite = async (address: string, tokenId: number, access_token: string) => {
+    const headers = { "authorization": "Bearer " + access_token };
+    const url = this.http.path("token/favourite", { address, tokenId });
+    const result = await this.http.post({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  removeFavourite = async (address: string, tokenId: number, access_token: string) => {
+    const headers = { "authorization": "Bearer " + access_token };
+    const url = this.http.path("token/favourite", { address, tokenId });
+    const result = await this.http.del({ url, headers });
     const output = await result.json();
     await this.checkError(output);
     return output;
@@ -525,6 +543,11 @@ export namespace ArkClient {
     sortDir?: string;
   }
   export interface ListCollectionParams extends ListQueryParams {
+  }
+  export interface GetNftChequeParams {
+    collectionAddress: string,
+    tokenId: string,
+    side?: string,
   }
 }
 

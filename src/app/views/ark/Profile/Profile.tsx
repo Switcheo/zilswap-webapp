@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   addrBox: {
     padding: "8px 24px",
     borderRadius: "12px",
-    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#6BE1FF40",
+    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1),
     opacity: 0.9,

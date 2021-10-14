@@ -64,7 +64,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("xs")]: {
       maxWidth: "none",
     },
-    paddingTop: theme.spacing(4)
   },
   card: {
     background: "rgba(76, 175, 80, 0.0)",
