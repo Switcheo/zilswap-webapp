@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     width: "100%",
     flexDirection: "column",
-    padding: theme.spacing(8, 10),
+    padding: theme.spacing(8, 10, 8, 14),
     borderRadius: 12,
     border: "1px solid #29475A",
     background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
@@ -152,14 +152,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignSelf: "center",
     right: "-70px",
     position: "relative",
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down("xs")]: {
       flexDirection: "column",
 
       right: "0",
     }
   },
   imageInfoContainer: {
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down("xs")]: {
       flexDirection: "column",
     }
   }
@@ -176,7 +176,6 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
   const [runGetNFTDetails] = useAsyncTask("runGetNFTDetails");
   const [bids, setBids] = useState<Cheque[]>([]);
   const [runGetBids] = useAsyncTask("getBids");
-  const [nftToken, setNftToken] = useState<Nft | null>(null);
   const collectionId = match.params.collection;
   const tokenId = match.params.id;
 
@@ -187,7 +186,6 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
       const address = fromBech32Address(collectionId).toLowerCase()
       const result = await arkClient.getNftToken(address, tokenId);
       setToken(result.result.model);
-      const { result: { model: { collection, tokenId: newId } } } = result;
     })
     runGetBids(async () => {
       const address = fromBech32Address(collectionId).toLowerCase()
@@ -234,7 +232,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
 
         {/* Nft image and main info */}
         <Box display="flex" mt={3} justifyContent="center" className={classes.imageInfoContainer}>
-          <NftImage className={classes.bearImage} nftAsset={nftToken?.asset} />
+          <NftImage className={classes.bearImage} nftAsset={token?.asset} />
           <Box className={classes.mainInfoBox}>
             {/* Collection name */}
             <Typography className={classes.collectionName}>

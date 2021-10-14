@@ -61,6 +61,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     position: "relative",
     maxWidth: 308,
+    [theme.breakpoints.down("xs")]: {
+      maxWidth: "none",
+    },
+    paddingTop: theme.spacing(4)
   },
   card: {
     background: "rgba(76, 175, 80, 0.0)",
@@ -77,16 +81,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: 0,
     borderBottomLeftRadius: "12px",
     borderBottomRightRadius: "12px",
-  },
-  cardAction: {
-
+    "&.MuiCardContent-root:last-child": {
+      padding: 0,
+    }
   },
   media: {
-    width: "calc(100% + 16px)",
-    height: "calc(100% + 16px)",
+    width: "calc(100% + 20px)",
+    height: "calc(100% + 20px)",
     objectFit: "cover",
     backgroundPositionX: "center",
-    transform: "translate(-8px)",
+    transform: "translate(-10px)",
     overflow: "hidden",
   },
   likes: {
