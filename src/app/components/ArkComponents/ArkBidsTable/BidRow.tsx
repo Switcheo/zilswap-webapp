@@ -41,6 +41,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     margin: 0,
     border: "none",
     backgroundColor: "#0A2530",
+    color: theme.palette.primary.contrastText
   },
   actionCell: {
     padding: "8px 0px",

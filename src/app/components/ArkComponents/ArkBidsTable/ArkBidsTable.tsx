@@ -24,13 +24,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginTop: theme.spacing(2),
   },
   headerCell: {
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
     borderBottom: "1px solid #29475A",
     padding: "8px 16px",
     fontFamily: 'Avenir Next',
     fontWeight: 600,
     fontSize: 13,
     letterSpacing: '0.2px',
+    opacity: 0.5
   },
   iconButton: {
     color: "#DEFFFF",
@@ -86,34 +87,34 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
   return <Box className={classes.root}>
     {
       isMobile ?
-      <>
-        {bids.map((data) => (
-          <BidCard bid={data} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} />
-        ))}
-      </>
-      :
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              {(showItem ? [ITEM_HEADER, ...HEADERS] : HEADERS).map((header, index) => (
-                <TableCell
-                  key={`offers-${index}`}
-                  className={classes.headerCell}
-                  align={header.align}
-                >
-                  {header.value}
-                </TableCell>
+        <>
+          {bids.map((data) => (
+            <BidCard bid={data} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} />
+          ))}
+        </>
+        :
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {(showItem ? [ITEM_HEADER, ...HEADERS] : HEADERS).map((header, index) => (
+                  <TableCell
+                    key={`offers-${index}`}
+                    className={classes.headerCell}
+                    align={header.align}
+                  >
+                    {header.value}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {bids.map((data) => (
+                <BidRow bid={data} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} />
               ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {bids.map((data) => (
-              <BidRow bid={data} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableBody>
+          </Table>
+        </TableContainer>
     }
     <ArkPaginator itemPerPage={ITEMS_PER_PAGE} totalItem={bids.length} />
     {/* {bid && <BidsDialog showDialog={!!bid} onCloseDialog={() => setBid(undefined)} bid={bid} isOffer={true} />} */}
