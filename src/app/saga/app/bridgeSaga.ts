@@ -3,9 +3,8 @@ import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { actions } from "app/store";
 import { ethers, Transaction as EthTransaction } from "ethers";
 import { BridgeableToken, BridgeableTokenMapping, BridgeTx, RootState } from "app/store/types";
-import { netZilToTradeHub, SimpleMap } from "app/utils";
+import { netZilToTradeHub, SimpleMap, bnOrZero } from "app/utils";
 import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL, PollIntervals } from "app/utils/constants";
-import { bnOrZero } from "app/utils/strings/strings";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import BigNumber from "bignumber.js";
 import { Bridge, logger } from "core/utilities";
@@ -220,7 +219,7 @@ function* watchWithdrawConfirmation() {
             logger("bridge saga", "confirmed tx withdraw", tx.withdrawTxHash);
           }
 
-          // possible extension: validate tx on dest chain 
+          // possible extension: validate tx on dest chain
           // tx.destinationTxConfirmedAt = dstChainTx.blocktime
         } catch (error) {
           console.error('process withdraw tx error');

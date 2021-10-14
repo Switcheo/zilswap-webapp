@@ -21,7 +21,7 @@ import { ILOState } from 'zilswap-sdk/lib/constants';
 import { ObservedTx } from 'zilswap-sdk';
 import { AppTheme } from 'app/theme/types';
 import cls from "classnames";
-import { toHumanNumber } from 'app/utils/strings/strings';
+import { toHumanNumber } from 'app/utils';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

@@ -1,11 +1,10 @@
 import { Box, Button, ButtonProps, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { toBech32Address } from "@zilliqa-js/crypto";
 import { FancyButton, Text } from "app/components";
 import { ReactComponent as DotIcon } from "app/components/ConnectWalletButton/dot.svg";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, truncate } from "app/utils";
+import { hexToRGBA, truncate, truncateAddress } from "app/utils";
 import cls from "classnames";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import React, { useMemo } from "react";
@@ -83,7 +82,7 @@ const ConnectButton: React.FC<Props> = (props: Props) => {
       if (!address) return "";
       switch (chain) {
         case Blockchain.Zilliqa:
-          return truncate(toBech32Address(address), 5, 4);
+          return truncateAddress(address);
         default:
           return truncate(address, 5, 4);
       }

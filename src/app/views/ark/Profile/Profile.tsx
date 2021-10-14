@@ -11,7 +11,7 @@ import { ArkBanner, ArkTab } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { MarketPlaceState, Profile as ProfileType, RootState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { truncate, useAsyncTask, useNetwork } from "app/utils";
+import { useAsyncTask, useNetwork } from "app/utils";
 import cls from "classnames";
 import { ArkClient } from "core/utilities";
 import React, { useEffect, useState } from "react";
@@ -19,11 +19,12 @@ import { useSelector } from "react-redux";
 import {
   Collected,
   EditProfile,
-  OfferReceivedTable,
-  OfferTable
+  BidsMade,
+  BidsReceived
 } from "./components";
 import { ReactComponent as EditIcon } from "./edit-icon.svg";
 import { useRouteMatch } from "react-router";
+import { truncateAddress } from "app/utils";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -120,7 +121,7 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     if (((storeProfile?.address && !address) || (storeProfile?.address && toBech32Address(storeProfile?.address) === address)) && wallet?.addressInfo.bech32) {
       setViewProfile(storeProfile);
       setProfileIsOwner(true);
-      setAddrText(truncate(toBech32Address(storeProfile?.address), 5, isXs ? 2 : 5))
+      setAddrText(truncateAddress(storeProfile?.address, isXs))
     } else {
       if (address) {
         getProfile(RawAddress);
@@ -136,7 +137,7 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       const arkClient = new ArkClient(network);
       const { result: { model } } = await arkClient.getProfile(address);
       setViewProfile(model);
-      setAddrText(truncate(toBech32Address(model?.address), 5, isXs ? 2 : 5))
+      setAddrText(truncateAddress(model?.address, isXs))
     })
   }
 
@@ -144,7 +145,7 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     navigator.clipboard.writeText(text);
     setAddrText("Copied");
     setTimeout(() => {
-      setAddrText(truncate(wallet?.addressInfo.bech32, 5, isXs ? 2 : 5));
+      setAddrText(truncateAddress(wallet?.addressInfo.bech32 || '', isXs));
     }, 3000);
   };
 
@@ -203,8 +204,8 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               {currentTab === "Collected" && (
                 <Collected address={viewProfile?.address} />
               )}
-              {(currentTab === "Bids Made") && profileIsOwner && <OfferTable />}
-              {(currentTab === "Bids Received") && profileIsOwner && <OfferReceivedTable />}
+              {(currentTab === "Bids Made") && profileIsOwner && <BidsMade />}
+              {(currentTab === "Bids Received") && profileIsOwner && <BidsReceived />}
             </>
           )}
           {(!wallet && !address) && (

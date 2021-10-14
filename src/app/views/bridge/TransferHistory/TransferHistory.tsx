@@ -8,7 +8,7 @@ import { actions } from "app/store";
 import { BridgeState, BridgeTx, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useBridgeableTokenFinder } from "app/utils";
-import { toHumanNumber } from "app/utils/strings/strings";
+import { toHumanNumber } from "app/utils";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
 import cls from "classnames";
 import React, { Fragment } from "react";
@@ -435,7 +435,7 @@ const TransferHistory = (props: any) => {
                                 ))}
                             </TableBody>
                         </Table>
-                        
+
                         {!bridgeTxs.length && (
                             <Typography align="center" variant="body2" className={classes.noTransaction}>No transactions found.</Typography>
                         )}

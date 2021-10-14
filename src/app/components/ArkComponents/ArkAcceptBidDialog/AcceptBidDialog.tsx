@@ -1,17 +1,17 @@
 import { Avatar, Box, BoxProps, Card, CardContent, Checkbox, FormControlLabel, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { DialogModal, FancyButton } from "app/components";
+import { Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import cls from "classnames";
 import React from "react";
-import { Bids } from "../bidtype";
 import { ReactComponent as Checked } from "../assets/checked.svg";
 import { ReactComponent as UnChecked } from "../assets/uncheck.svg";
 
 interface Props extends BoxProps {
   showDialog: boolean;
   onCloseDialog: () => void;
-  bid: Bids;
+  bid: Cheque;
   isOffer: boolean;
 }
 
@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   }
 }));
 
-const BidsDialog: React.FC<Props> = (props: Props) => {
+const AcceptBidDialog: React.FC<Props> = (props: Props) => {
   const { bid, isOffer, showDialog, onCloseDialog, children, className, ...rest } = props;
   const classes = useStyles();
 
@@ -76,24 +76,24 @@ const BidsDialog: React.FC<Props> = (props: Props) => {
           <CardContent>
             <MenuItem className={classes.bearItem} button={false}>
               <ListItemIcon>
-                <Avatar alt="Remy Sharp" src={bid.nft.asset?.url} />
+                <Avatar alt="Remy Sharp" src={bid.token.assetId} />
               </ListItemIcon>
-              <Typography>  {bid.nft.tokenId}</Typography>
+              <Typography>{bid.token.tokenId}</Typography>
             </MenuItem>
             <Box mt={1} display="flex" justifyContent="space-between">
-              <Typography className={classes.header}>Bid Average</Typography>
-              <Typography>{bid.bidAverage}</Typography>
+              <Typography className={classes.header}>Amount</Typography>
+              <Typography>{bid.price.amount}</Typography>
             </Box>
             <Box mt={1} display="flex" justifyContent="space-between">
               <Typography className={classes.header}>{isOffer ? "Buyer" : "Seller"}</Typography>
-              <Typography>{bid.user.name}</Typography>
+              <Typography>{bid.initiatorAddress}</Typography>
             </Box>
             <Box mt={1} display="flex" justifyContent="space-between">
               <Typography className={classes.header}>Expiration</Typography>
-              <Typography className={classes.dateText}>{bid.expiration.format("DD MMM YYYY, HH:mm:ss")}&nbsp;
+              <Typography className={classes.dateText}>{bid.expiry}&nbsp;
                 <Typography
                   className={classes.activeGreen}
-                >{bid.status}</Typography>
+                >Status</Typography>
               </Typography>
             </Box>
           </CardContent>
@@ -107,14 +107,14 @@ const BidsDialog: React.FC<Props> = (props: Props) => {
           }
         />
         <FancyButton variant="contained" color="primary" className={classes.button}>Accept Bid</FancyButton>
-        <FancyButton
+        {/* <FancyButton
           variant="contained" fullWidth onClick={() => bid.actions?.decline.action ? bid.actions?.decline.action(bid) : null}
           className={cls(classes.button, classes.backButton)}>
           <Typography className={classes.buttonText}>{bid.actions?.decline.label}</Typography>
-        </FancyButton>
+        </FancyButton> */}
       </Box>
     </DialogModal>
   );
 };
 
-export default BidsDialog;
+export default AcceptBidDialog;

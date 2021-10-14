@@ -1,7 +1,7 @@
 import { Box, Button, Checkbox, FormControlLabel, makeStyles, OutlinedInput, Popover } from '@material-ui/core';
 import { AppTheme } from 'app/theme/types';
 import { hexToRGBA } from 'app/utils';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import cls from "classnames";
 import { Text } from "app/components";
 import { ReactComponent as CheckedIcon } from "./checked.svg";
@@ -10,6 +10,7 @@ import { ReactComponent as IndeterminateIcon } from "./indeterminate.svg";
 import { MarketPlaceState, RootState, TraitType, TraitValue } from 'app/store/types';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateFilter } from 'app/store/marketplace/actions';
+import pickBy from "lodash/pickBy";
 import { getBlockchain } from 'app/saga/selectors';
 import { ArkClient } from 'core/utilities';
 
@@ -56,6 +57,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginRight: 8,
   },
   categories: {
+    marginTop: 10,
     paddingRight: 16,
     marginRight: 16,
     width: 210,
@@ -98,7 +100,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   filterCategory: {
     display: "flex",
-    marginBottom: 3,
+    marginBottom: 8,
+  },
+  filterCategoryButton: {
+    display: "block",
+    marginBottom: 12
   },
   filterCategoryLabel: {
     fontSize: 18,
@@ -113,7 +119,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     opacity: 0.5
   },
   filterValue: {
+    height: 18,
     fontSize: 16,
+    overflow: "hidden",
     fontWeight: 'bolder',
     fontFamily: 'Avenir Next',
     color: theme.palette.type === "dark" ? "white" : "",
@@ -123,6 +131,31 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     opacity: 0.5,
     marginTop: 2,
     textAlign: "left"
+  },
+  filterSelectedValue: {
+    display: "flex",
+    alignItems: "start",
+    justifyContent: "start"
+  },
+  filterSelectedValueCategory: {
+    display: "inline-block",
+    marginRight: 4,
+  },
+  filterSelectedValueValue: {
+    display: "inline-block",
+    marginRight: 2,
+    opacity: 0.5,
+    "&:not(:last-child)": {
+      "&:after": {
+        content: '", "'
+      }
+    }
+  },
+  filterSelectedValueContainer: {
+    textAlign: "left",
+    "&:not(:first-child)": {
+      marginLeft: 4
+    }
   },
   filterOption: {
     paddingTop: 6,
@@ -149,7 +182,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.type === "dark" ? "white" : "",
     fontSize: 12,
     opacity: 0.5,
-    fontWeight: "bold"
+    fontWeight: "bold",
+    cursor: "pointer"
   },
   attributeIcon: {
     display: "inline-block",
@@ -213,9 +247,9 @@ const AttributesFilter = (props: Props) => {
 
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [traits, setTraits] = useState<{ [id: string]: TraitType }>({})
+  const [traits, setTraits] = useState<{[id: string]: TraitType}>({})
+  const [filteredTraits, setFilteredTraits] = useState<{[id: string]: TraitType}>({})
   const [search, setSearch] = useState<string>("");
-
 
   useEffect(() => {
     if (!props.collectionAddress && Object.keys(traits).length === 0) return
@@ -235,7 +269,7 @@ const AttributesFilter = (props: Props) => {
         values[value] = {
           value: value,
           count: +model.values[value],
-          selected: true
+          selected: false
         };
       });
 
@@ -272,18 +306,15 @@ const AttributesFilter = (props: Props) => {
     }))
   }
 
-  const handleCategoryChange = (trait: string) => {
+  const reset = () => {
     setTraits(prevTraits => {
-      var updatedTrait = prevTraits[trait]
-      const hasSelected = Object.values(updatedTrait.values).filter(value => value.selected).length > 0
-      Object.values(updatedTrait.values).forEach(value => {
-        updatedTrait.values[value.value].selected = !hasSelected
+      Object.values(prevTraits).forEach(trait => {
+        Object.values(prevTraits[trait.trait].values).forEach(value => {
+          prevTraits[trait.trait].values[value.value].selected = false
+        })
       })
       return ({
         ...prevTraits,
-        [trait]: {
-          ...updatedTrait
-        }
       })
     }
     )
@@ -297,12 +328,69 @@ const AttributesFilter = (props: Props) => {
     // eslint-disable-next-line
   }, [traits])
 
+  useEffect(() => {
+    // Check for empty search case
+    if(search === "") {
+      setFilteredTraits(traits)
+      return
+    }
+
+    var updatedTraits: {[id: string]: TraitType} = {...traits}
+    Object.keys(updatedTraits).forEach(trait => {
+      updatedTraits[trait] = traits[trait]
+
+      const result = pickBy(updatedTraits[trait].values, function(value, key) {
+        return value.value.toLowerCase().includes(search.toLowerCase())
+      })
+      
+      updatedTraits[trait].values = result
+    })
+  
+    setFilteredTraits(updatedTraits)
+  }, [search, traits])
+
+  const selectedValues = useMemo(() => {
+    var totalSelectCount = 0
+    return (
+      <>
+        <div className={classes.filterSelectedValue}>
+          {Object.values(traits).map(trait => {
+            const result = pickBy(traits[trait.trait].values, function(value, key) {
+              return value.selected
+            })
+            const selectedCount = Object.keys(result).length
+            totalSelectCount += selectedCount
+            return (
+              <span key={trait.trait} className={classes.filterSelectedValueContainer}>
+                {selectedCount > 0 &&
+                  <>
+                    <span className={classes.filterSelectedValueCategory}>{trait.trait}:</span>
+                    <span>
+                      {Object.values(result).map(value => (
+                        <span className={classes.filterSelectedValueValue}>{value.value}</span>
+                      ))}
+                    </span>
+                  </>
+                }
+              </span>
+            )
+          })}
+        </div>
+
+        {totalSelectCount === 0 &&
+          <span>ALL</span>
+        }
+      </>
+    )
+    // eslint-disable-next-line
+  }, [traits])
+
   return (
     <>
       <Button onClick={handleClick} className={anchorEl === null ? cls(classes.button, classes.inactive) : cls(classes.button, classes.active)}>
         <Box display="flex" flexDirection="column" flexGrow={1} alignItems="start">
           <div className={classes.filterLabel}>Attributes</div>
-          <div className={classes.filterValue}>ALL</div>
+          <div className={classes.filterValue}>{selectedValues}</div>
         </Box>
         <Box display="flex" alignItems="center" justifyContent="center">
           <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.2016 13.1737L14.2879 16.0874C13.8491 16.5262 13.1404 16.5262 12.7016 16.0874L9.78787 13.1737C9.07912 12.4649 9.58537 11.2499 10.5866 11.2499L16.4141 11.2499C17.4154 11.2499 17.9104 12.4649 17.2016 13.1737Z" fill="#DEFFFF" /></svg>
@@ -326,37 +414,20 @@ const AttributesFilter = (props: Props) => {
         <Box paddingX="24px" className={classes.popoverContainer}>
           <Box display="flex">
             <Box className={classes.categories}>
-              <Text className={classes.filterValue}>CATEGORIES</Text>
-              <Box display="flex" paddingY={1}>
-                <Box flexGrow="1">
-                  <button className={classes.filterSelectButton}>Select All</button>
-                </Box>
-                <button className={classes.filterSelectButton}>Reset Filter</button>
+              <Text className={classes.filterCategoryLabel}>CATEGORIES</Text>
+              <Box display="flex" paddingY={1} marginBottom={1}
+              >
+                <button className={classes.filterSelectButton} onClick={() => reset()}>Reset Filter</button>
               </Box>
 
-              {Object.values(traits).map(trait => {
+              {Object.values(filteredTraits).map(trait => {
                 const values = Object.values(trait.values)
                 const selectedCount = values.filter(value => value.selected).length
                 return (
-                  <FormControlLabel key={trait.trait} className={classes.filterOption} value={trait.trait} control={<Checkbox
-                    className={classes.radioButton}
-                    checkedIcon={<CheckedIcon />}
-                    icon={<UncheckedIcon />}
-                    indeterminateIcon={<IndeterminateIcon />}
-                    checked={selectedCount === values.length}
-                    indeterminate={selectedCount !== values.length && selectedCount !== 0}
-                    onChange={() => handleCategoryChange(trait.trait)}
-                    disableRipple
-                  />}
-                    label={<>
-                      <Text className={classes.filterCategoryLabel}>{trait.trait}</Text>
-                      {values.filter(value => !value.selected).length === 0 ? (
-                        <Text className={classes.filterValueSubText}>All</Text>
-                      ) : (
-                        <Text className={classes.filterValueSubText}>{selectedCount} of {values.length} selected</Text>
-                      )}
-                    </>}
-                  />
+                  <a key={trait.trait} href={`#${trait.trait}`} className={classes.filterCategoryButton}>
+                    <Text className={classes.filterCategoryLabel}>{trait.trait}</Text>
+                    <Text className={classes.filterValueSubText}>{selectedCount} of {values.length} selected</Text>
+                  </a>
                 )
               })}
 
@@ -371,34 +442,18 @@ const AttributesFilter = (props: Props) => {
                 onChange={(e) => setSearch(e.target.value)}
               />
               <Box className={classes.scrollableTraits}>
-                {Object.values(traits).map(trait => {
-                  const values = Object.values(trait.values)
-                  const selectedCount = values.filter(value => value.selected).length
-
+                {Object.values(filteredTraits).map(trait => {
                   return (
-                    <Box key={trait.trait} marginBottom={3}>
-                      <FormControlLabel className={classes.filterOption} value={trait.trait} control={<Checkbox
-                        className={classes.radioButton}
-                        checkedIcon={<CheckedIcon />}
-                        icon={<UncheckedIcon />}
-                        indeterminateIcon={<IndeterminateIcon />}
-                        checked={selectedCount === values.length}
-                        indeterminate={selectedCount !== values.length && selectedCount !== 0}
-                        onChange={() => handleCategoryChange(trait.trait)}
-                        disableRipple
-                      />}
-                        label={
-                          <span className={classes.filterCategory}>
-                            <Text flexGrow="1" className={classes.filterCategoryLabel}>{trait.trait}</Text>
-                            <Text className={classes.attributeMeta}>Att. Rarity</Text>
-                            <Text className={classes.attributeMeta}>Match</Text>
-                          </span>
-                        }
-                      />
-
+                    <Box id={trait.trait} key={trait.trait} marginBottom={3}>
+                      <span className={classes.filterCategory}>
+                        <Text flexGrow="1" className={classes.filterCategoryLabel}>{trait.trait}</Text>
+                        <Text className={classes.attributeMeta}>Att. Rarity</Text>
+                        <Text className={classes.attributeMeta}>Match</Text>
+                      </span>
+                      
                       {Object.values(trait.values).map(value => {
                         return (
-                          <Box key={value.value} marginBottom={1} marginLeft={3}>
+                          <Box key={value.value} marginBottom={1}>
                             <FormControlLabel className={classes.attributeValue} value={value.value} control={<Checkbox
                               className={classes.radioButton}
                               checkedIcon={<CheckedIcon />}

@@ -6,7 +6,7 @@ import { all, call, put, fork, select, race, delay, take, cancel } from "redux-s
 
 import { actions } from "app/store";
 import { TokenInfo } from "app/store/types";
-import { SimpleMap, strings } from "app/utils";
+import { bnOrZero, SimpleMap } from "app/utils";
 import { logger } from "core/utilities";
 import {
   balanceBatchRequest, BatchRequestType, sendBatchRequest,
@@ -100,7 +100,7 @@ const fetchZilTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
 
       switch (request.type) {
         case BatchRequestType.Balance: {
-          let balance: BigNumber | undefined = strings.bnOrZero(result.balance);
+          let balance: BigNumber | undefined = bnOrZero(result.balance);
 
           const tokenInfo: Partial<TokenInfo> = {
             ...updates[token.address],
@@ -122,7 +122,7 @@ const fetchZilTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
             initialized: true,
             symbol: tokenDetails?.symbol ?? token.symbol,
             pool: tokenPool ?? undefined,
-            balance: result ? strings.bnOrZero(result.balances[address]) : token.balance,
+            balance: result ? bnOrZero(result.balances[address]) : token.balance,
           };
 
           updates[token.address] = { ...updates[token.address], ...tokenInfo };

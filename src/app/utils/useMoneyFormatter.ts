@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { toHumanNumber } from "./strings/strings";
+import { toHumanNumber } from ".";
 
 export type MoneyFormatterOptions = {
   currency?: any;

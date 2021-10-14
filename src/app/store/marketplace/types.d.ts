@@ -1,3 +1,4 @@
+import { SortBy } from "app/components/ARKFilterBar/components/SortFilter";
 import { SimpleMap } from "app/utils";
 
 export interface MarketPlaceState {
@@ -8,6 +9,29 @@ export interface MarketPlaceState {
   oAuth?: OAuth;
   receivedBids?: any;
   bidded?: any;
+}
+
+export interface Cheque {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  initiatorDisplayName: string;
+  initiatorAddress: string;
+  brokerAddress: string;
+  side: 'buy' | 'sell';
+  feeAmount: string;
+  publicKey: string;
+  nonce: number;
+  expiry: number;
+  token: Pick<Nft, 'tokenId', 'collection', 'asset'>,
+  price: {
+    amount: string;
+    address: string;
+  },
+  initiator?: Profile
+  cancelTransactionHash: string | null,
+  matchTransactionHash: string | null,
+  status: 'Active' | 'Expired' | 'Cancelled' | 'Accepted'
 }
 
 export interface Nft {
@@ -104,6 +128,7 @@ export interface CollectionFilter {
   collectionAddress?: string;
   traits: { [id: string]: TraitType };
   pagination?: PaginationInfo;
+  sortBy: SortBy;
 }
 
 export interface SaleType {

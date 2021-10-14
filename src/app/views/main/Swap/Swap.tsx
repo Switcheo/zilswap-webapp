@@ -11,7 +11,7 @@ import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { strings, useAsyncTask, useBlacklistAddress, useNetwork, useSearchParam, useToaster } from "app/utils";
+import { bnOrZero, useAsyncTask, useBlacklistAddress, useNetwork, useSearchParam, useToaster } from "app/utils";
 import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_ADDRESS } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -289,7 +289,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     const { inToken } = swapFormState;
     if (!inToken) return;
 
-    const balance = strings.bnOrZero(inToken.balance);
+    const balance = bnOrZero(inToken.balance);
     const intendedAmount = balance.times(percentage).decimalPlaces(0);
     const netGasAmount = inToken.isZil ? ZilswapConnector.adjustedForGas(intendedAmount, balance) : intendedAmount;
     onInAmountChange(netGasAmount.shiftedBy(-inToken.decimals).toString());
@@ -472,7 +472,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       if (amount.isNaN() || !amount.isFinite())
         throw new Error("Invalid input amount");
 
-      const balance: BigNumber = strings.bnOrZero(inToken.balance)
+      const balance: BigNumber = bnOrZero(inToken.balance)
 
       if (inAmount.shiftedBy(inToken.decimals).gt(balance)) {
         throw new Error(`Insufficient ${inToken.symbol} balance.`)
@@ -554,7 +554,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     const zilswapContractAddress = CONTRACTS[network];
     const byte20ContractAddress = fromBech32Address(zilswapContractAddress).toLowerCase();
     const unitlessInAmount = swapFormState.inAmount.shiftedBy(swapFormState.inToken!.decimals);
-    showTxApprove = strings.bnOrZero(inToken?.allowances?.[byte20ContractAddress]).comparedTo(unitlessInAmount) < 0;
+    showTxApprove = bnOrZero(inToken?.allowances?.[byte20ContractAddress]).comparedTo(unitlessInAmount) < 0;
   }
 
   const toggleAdvanceSetting = () => {

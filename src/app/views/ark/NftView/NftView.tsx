@@ -1,21 +1,10 @@
-import {
-  Box,
-  Button,
-  Container,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@material-ui/core";
+import { Box, Button, Container, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { ArkBreadcrumb } from "app/components";
+import { ArkBidsTable, ArkBreadcrumb } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
-import { Nft } from "app/store/types";
+import { Nft, Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
 import { ArkClient } from "core/utilities";
@@ -166,41 +155,43 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const dispatch = useDispatch();
   const { network } = useSelector(getBlockchain);
   const { wallet } = useSelector(getWallet);
-  const [nftToken, setNftToken] = useState<Nft | null>(null);
-  const [runGetNftToken] = useAsyncTask("getNftToken");
-  const collectionAddress = match.params.collection;
+  const [token, setToken] = useState<Nft | null>(null);
+  const [runGetNFTDetails] = useAsyncTask("runGetNFTDetails");
+  const [bids, setBids] = useState<Cheque[]>([]);
+  const [runGetBids] = useAsyncTask("getBids");
+  const collectionId = match.params.collection;
   const tokenId = match.params.id;
 
   // fetch nft data, if none redirect back to collections / show not found view
   useEffect(() => {
-    runGetNftToken(async () => {
-      const arkClient = new ArkClient(network);
-      const address = fromBech32Address(collectionAddress).toLowerCase();
+    const arkClient = new ArkClient(network);
+    runGetNFTDetails(async () => {
+      const address = fromBech32Address(collectionId).toLowerCase()
       const result = await arkClient.getNftToken(address, tokenId);
+      setToken(result.result.model);
+    })
+    runGetBids(async () => {
+      const address = fromBech32Address(collectionId).toLowerCase()
+      const result = await arkClient.getNftCheques(address, tokenId);
 
-      console.log("result: ", result);
-
-      setNftToken(result.result.model);
-    });
+      setBids(result.result.entries);
+    })
 
     // eslint-disable-next-line
-  }, [collectionAddress, tokenId, network]);
+  }, [collectionId, tokenId, network]);
 
   const isOwnToken = useMemo(() => {
-    return (
-      nftToken?.user?.address &&
-      wallet?.addressInfo.byte20?.toLowerCase() === nftToken?.user?.address
-    );
-  }, [nftToken, wallet?.addressInfo]);
+    return token?.user?.address && wallet?.addressInfo.byte20?.toLowerCase() === token?.user?.address;
+  }, [token, wallet?.addressInfo]);
 
   const breadcrumbs = [
     { path: "/ark/collections", value: "Collections" },
     {
-      path: `/ark/collections/${collectionAddress}`,
+      path: `/ark/collections/${collectionId}`,
       value: "The Bear Market",
     },
     {
-      path: `/ark/collections/${collectionAddress}/${tokenId}`,
+      path: `/ark/collections/${collectionId}/${tokenId}`,
       value: `#${tokenId}`,
     },
   ];
@@ -227,7 +218,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           <Box className={classes.mainInfoBox}>
             {/* Collection name */}
             <Typography className={classes.collectionName}>
-              {nftToken?.name}{" "}
+              {token?.name}{" "}
               <VerifiedBadge className={classes.verifiedBadge} />
             </Typography>
 
@@ -273,65 +264,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         <Box className={classes.bidsBox}>
           <Typography className={classes.bidsHeader}>Ongoing Bids</Typography>
 
-          <TableContainer className={classes.tableContainer}>
-            <Table>
-              <TableHead className={classes.tableHead}>
-                <TableRow>
-                  <TableCell align="right">
-                    <Typography>Amount</Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography>Approx USD Value</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography>Bidder</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography>Bid Time</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography>Expiry Time</Typography>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow className={classes.tableRow}>
-                  <TableCell component="th" scope="row" align="right">
-                    <Typography>1.0 ZWAP</Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography>$1,000</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography>BabyBear</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography>20 Sep 2021, 00:10:00</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography>21 Sep 2021, 00:10:00</Typography>
-                  </TableCell>
-                </TableRow>
-                <TableRow className={classes.tableRow}>
-                  <TableCell component="th" scope="row" align="right">
-                    <Typography>1.0 ZWAP</Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography>$1,000</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography>BabyBear</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography>20 Sep 2021, 00:10:00</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography>21 Sep 2021, 00:10:00</Typography>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <ArkBidsTable bids={bids} />
         </Box>
 
         {/* Other info and price history */}
@@ -341,8 +274,8 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           {/* Price History */}
         </Box>
       </Container>
-      <BuyDialog token={nftToken!} collectionAddress={collectionAddress} />
-      <BidDialog token={nftToken!} collectionAddress={collectionAddress} />
+      <BuyDialog token={token!} collectionAddress={collectionId} />
+      <BidDialog token={token!} collectionAddress={collectionId} />
       <SellDialog />
     </ArkPage>
   );
