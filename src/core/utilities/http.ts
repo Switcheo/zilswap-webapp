@@ -117,4 +117,17 @@ export class HTTP<PathSpecs> {
 			body: (options.data),
 		});
 	};
+
+	/**
+	 * Executes HTTP PUT request with fetch
+	 */
+	put = (options: any) => {
+		return fetch(options.url, {
+			method: "PUT",
+			headers: {
+				...options.headers
+			},
+			body: (options.data),
+		})
+	}
 };
