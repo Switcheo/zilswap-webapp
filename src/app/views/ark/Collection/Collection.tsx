@@ -4,8 +4,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { ArkClient } from "core/utilities";
-import { fromBech32Address } from "core/zilswap";
 import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text } from "app/components";
 import ARKFilterBar from "app/components/ARKFilterBar";
 import ArkPage from "app/layouts/ArkPage";
@@ -14,6 +12,8 @@ import { actions } from "app/store";
 import { CollectionFilter, Nft } from "app/store/marketplace/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
+import { ArkClient } from "core/utilities";
+import { fromBech32Address } from "core/zilswap";
 import { NftCard } from "./components";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 
@@ -121,8 +121,12 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { network } = useSelector(getBlockchain);
   const history = useHistory();
   const dispatch = useDispatch();
-  const filter = useSelector<RootState, CollectionFilter>((state) => state.marketplace.filter);
-  const tokens = useSelector<RootState, Nft[]>((state) => state.marketplace.tokens);
+  const filter = useSelector<RootState, CollectionFilter>(
+    (state) => state.marketplace.filter
+  );
+  const tokens = useSelector<RootState, Nft[]>(
+    (state) => state.marketplace.tokens
+  );
 
   // fetch nfts in collection (to use store instead)
   const [collection, setCollection] = useState<any>();
@@ -135,9 +139,8 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
     let collectionAddress = match.params.collection;
     if (collectionAddress?.startsWith("zil1")) {
-
       if (filter.collectionAddress !== collectionAddress)
-        dispatch(actions.MarketPlace.updateFilter({ collectionAddress }))
+        dispatch(actions.MarketPlace.updateFilter({ collectionAddress }));
 
       return {
         bech32Address: collectionAddress,
@@ -157,11 +160,11 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     const getCollection = async () => {
       const arkClient = new ArkClient(network);
       const data = await arkClient.listCollection();
-      const collection = data.result.entries.find((collection: any) => collection.address === hexAddress);
-      if (collection)
-        setCollection(collection);
-      else
-        history.push("/ark/collections");
+      const collection = data.result.entries.find(
+        (collection: any) => collection.address === hexAddress
+      );
+      if (collection) setCollection(collection);
+      else history.push("/ark/collections");
     };
 
     getCollection();

@@ -6,11 +6,12 @@ import cls from "classnames";
 
 export interface DialogModalProps extends DialogProps {
   header?: string;
-};
+  hideCloseButton?: boolean;
+  titlePadding?: boolean;
+}
 
-const useStyles = makeStyles(theme => ({
-  root: {
-  },
+const useStyles = makeStyles((theme) => ({
+  root: {},
   closeButton: {
     position: "absolute",
     right: theme.spacing(1),
@@ -19,19 +20,32 @@ const useStyles = makeStyles(theme => ({
   },
   dialogTitle: {
     backgroundColor: theme.palette.background.default,
-    borderTop: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRadius: "12px 12px 0 0"
-  }
+    borderTop:
+      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderLeft:
+      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderRight:
+      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderRadius: "12px 12px 0 0",
+  },
+  titlePadding: {
+    padding: `${theme.spacing(5.5, 3)}!important`,
+  },
 }));
 const DialogModal: React.FC<DialogModalProps> = (props: DialogModalProps) => {
-  const { children, className, header, onClose, ...rest } = props;
+  const {
+    children,
+    className,
+    header,
+    hideCloseButton,
+    onClose,
+    titlePadding,
+    ...rest
+  } = props;
   const classes = useStyles();
 
   const onCloseButton = (e: any) => {
-    if (typeof onClose === "function")
-      onClose(e, "backdropClick");
+    if (typeof onClose === "function") onClose(e, "backdropClick");
   };
 
   return (
@@ -42,12 +56,24 @@ const DialogModal: React.FC<DialogModalProps> = (props: DialogModalProps) => {
       BackdropComponent={Backdrop}
       BackdropProps={{ timeout: 500 }}
       {...rest}
-      className={cls(classes.root, className)} >
-      <DialogTitle disableTypography className={classes.dialogTitle}>
+      className={cls(classes.root, className)}
+    >
+      <DialogTitle
+        disableTypography
+        className={cls(classes.dialogTitle, {
+          [classes.titlePadding]: titlePadding,
+        })}
+      >
         <Typography variant="h3">{header}</Typography>
-        <IconButton aria-label="close" className={classes.closeButton} onClick={onCloseButton}>
-          <CloseIcon />
-        </IconButton>
+        {!hideCloseButton && (
+          <IconButton
+            aria-label="close"
+            className={classes.closeButton}
+            onClick={onCloseButton}
+          >
+            <CloseIcon />
+          </IconButton>
+        )}
       </DialogTitle>
       {children}
     </Dialog>

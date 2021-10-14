@@ -1,10 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, Button, Container, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from "react-redux";
-import { ArkClient } from "core/utilities";
-import { fromBech32Address } from "core/zilswap";
 import { ArkBidsTable, ArkBreadcrumb } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet } from "app/saga/selectors";
@@ -12,8 +9,10 @@ import { actions } from "app/store";
 import { Cheque, Nft } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
+import { ArkClient } from "core/utilities";
+import { fromBech32Address } from "core/zilswap";
 import { ReactComponent as VerifiedBadge } from "../Collection/verified-badge.svg";
-import { BuyDialog, SellDialog } from "./components";
+import { BidDialog, BuyDialog, SellDialog } from "./components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -148,7 +147,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
+  props: any
+) => {
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -179,7 +180,6 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     // eslint-disable-next-line
   }, [collectionId, tokenId, network]);
 
-
   const isOwnToken = useMemo(() => {
     return token?.user?.address && wallet?.addressInfo.byte20?.toLowerCase() === token?.user?.address;
   }, [token, wallet?.addressInfo]);
@@ -197,11 +197,15 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
   ];
 
   const onSell = () => {
-    dispatch(actions.Layout.toggleShowSellNftDialog("open"))
+    dispatch(actions.Layout.toggleShowSellNftDialog("open"));
   };
 
   const onBuy = () => {
-    dispatch(actions.Layout.toggleShowBuyNftDialog("open"))
+    dispatch(actions.Layout.toggleShowBuyNftDialog("open"));
+  };
+
+  const onBid = () => {
+    dispatch(actions.Layout.toggleShowBidNftDialog("open"));
   };
 
   return (
@@ -214,7 +218,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
           <Box className={classes.mainInfoBox}>
             {/* Collection name */}
             <Typography className={classes.collectionName}>
-              the bear market{" "}
+              {token?.name}{" "}
               <VerifiedBadge className={classes.verifiedBadge} />
             </Typography>
 
@@ -224,19 +228,31 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
             <Box display="flex" mt={2} gridGap={20}>
               {/* Buy button */}
               {isOwnToken && (
-                <Button className={classes.buyButton} disableRipple onClick={onSell}>
+                <Button
+                  className={classes.buyButton}
+                  disableRipple
+                  onClick={onSell}
+                >
                   Sell
                 </Button>
               )}
 
               {!isOwnToken && (
-                <Button className={classes.buyButton} disableRipple onClick={onBuy}>
+                <Button
+                  className={classes.buyButton}
+                  disableRipple
+                  onClick={onBuy}
+                >
                   Buy Now
                 </Button>
               )}
 
               {/* Bid button */}
-              <Button className={classes.bidButton} disableRipple>
+              <Button
+                className={classes.bidButton}
+                onClick={onBid}
+                disableRipple
+              >
                 Place a Bid
               </Button>
             </Box>
@@ -257,7 +273,8 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
           {/* Price History */}
         </Box>
       </Container>
-      <BuyDialog />
+      <BuyDialog token={token!} collectionAddress={collectionId} />
+      <BidDialog token={token!} collectionAddress={collectionId} />
       <SellDialog />
     </ArkPage>
   );
