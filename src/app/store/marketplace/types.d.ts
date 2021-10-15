@@ -11,7 +11,7 @@ export interface MarketPlaceState {
   bidded?: any;
 }
 
-export interface Cheque {
+export interface SimpleCheque {
   id: string;
   createdAt: string;
   updatedAt: string;
@@ -22,20 +22,23 @@ export interface Cheque {
   publicKey: string;
   nonce: number;
   expiry: number;
-  token: Pick<Nft, 'tokenId', 'collection', 'asset'>;
   asset: Asset;
   price: {
     amount: string;
     address: string;
   },
+  cancelTransactionHash: string | null;
+  matchTransactionHash: string | null;
+};
+
+export interface Cheque extends SimpleCheque {
+  token: Pick<Nft, 'tokenId', 'collection', 'asset'>;
   collection: {
     name: string;
     address: string;
   }
   owner: Profile | null;
   initiator: Profile | null;
-  cancelTransactionHash: string | null;
-  matchTransactionHash: string | null;
 }
 
 export interface Nft {
@@ -48,8 +51,8 @@ export interface Nft {
   collection?: Collection;
   traitValues?: TraitValue[];
 
-  bestAsk: null | Omit<Cheque, "token", "collection">;
-  bestBid: null | Omit<Cheque, "token", "collection">;
+  bestAsk: null | SimpleCheque;
+  bestBid: null | SimpleCheque;
 }
 
 export type TraitType = {

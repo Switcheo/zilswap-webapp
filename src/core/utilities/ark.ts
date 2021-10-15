@@ -58,6 +58,20 @@ export class ArkClient {
     this.http = getHttpClient(network);
   }
 
+  checkError = async (result: any) => {
+    console.log("result", result)
+    if (result.error) {
+      const message = [];
+      if (result.error?.code)
+        message.push(`[${result.error.code}]`);
+      if (result.error?.type)
+        message.push(`${result.error.type}:`);
+      message.push(result.error.message ?? "unknown error");
+
+      throw new Error(message.join(" "));
+    }
+  }
+
   arkLogin = async (wallet: ConnectedWallet, hostname: string) => {
     const timestamp = dayjs().format("YYYY/MM/DD HH:mm:ss +0");
     const bech32Address = wallet.addressInfo.bech32;
@@ -74,7 +88,9 @@ export class ArkClient {
 
     const url = this.http.path("oauth");
     const result = await this.http.post({ url, data });
-    return result.json();
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
   }
 
   refreshToken = async (refresh_token: string) => {
@@ -85,42 +101,56 @@ export class ArkClient {
 
     const url = this.http.path("oauth");
     const result = await this.http.post({ url, data });
-    return result.json();
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
   }
   listCollection = async (params?: ArkClient.ListCollectionParams) => {
     const url = this.http.path("collection/list", null, params);
     const result = await this.http.get({ url });
-    return result.json();
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
   }
 
   getCollectionTraits = async (address: string) => {
     const url = this.http.path("collection/traits", { address });
     const result = await this.http.get({ url });
-    return result.json();
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
   }
 
   getNftToken = async (address: string, tokenId: string) => {
     const url = this.http.path("collection/token/detail", { address, tokenId });
     const result = await this.http.get({ url });
-    return result.json();
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
   }
 
   getNftCheques = async (collectionAddress: string, tokenId: string) => {
     const url = this.http.path("trade/list", {}, { collectionAddress, tokenId });
     const result = await this.http.get({ url });
-    return result.json();
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
   }
 
   getProfile = async (address?: string) => {
     const url = this.http.path("user/detail", { address });
     const result = await this.http.get({ url });
-    return result.json();
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
   }
 
   listTokens = async (params?: ArkClient.ListTokenParams) => {
     const url = this.http.path("token/list", null, params);
     const result = await this.http.get({ url });
-    return result.json();
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
   }
 
   searchCollection = async (address: string, params?: ArkClient.SearchCollectionParams) => {
@@ -128,14 +158,18 @@ export class ArkClient {
       address = fromBech32Address(address).toLowerCase();
     const url = this.http.path("collection/search", { address }, params);
     const result = await this.http.get({ url });
-    return result.json();
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
   }
 
   updateProfile = async (address: string, data: Omit<Profile, "id" | "address">, oAuth: OAuth) => {
     const headers = { "authorization": "Bearer " + oAuth.access_token };
     const url = this.http.path("user/update", { address })
     const result = await this.http.post({ url, data, headers });
-    return result.json();
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
   };
 
   postTrade = async (params: ArkClient.PostTradeParams) => {
@@ -160,7 +194,9 @@ export class ArkClient {
 
     const url = this.http.path("trade/post", routeParam)
     const result = await this.http.post({ url, data });
-    return result.json();
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
   };
 
   /* ARK utils */

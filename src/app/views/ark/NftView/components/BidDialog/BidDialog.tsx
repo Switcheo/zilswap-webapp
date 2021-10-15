@@ -1,28 +1,25 @@
 import React, { Fragment, useState } from "react";
-import {
-  Backdrop,
-  Box,
-  Checkbox,
-  DialogContent,
-  DialogProps,
-  FormControlLabel
-} from "@material-ui/core";
+import { Backdrop, Box, Checkbox, DialogContent, DialogProps, FormControlLabel } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
+import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
+import { bnOrZero } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
+import { getBlockchain, getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
-import { RootState, TokenInfo, TokenState } from "app/store/types";
+import { RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import { NftCard } from "app/views/ark/Collection/components";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
-import { fromBech32Address } from "core/zilswap";
+import { ArkClient, logger } from "core/utilities";
+import { fromBech32Address, ZilswapConnector } from "core/zilswap";
 import { ReactComponent as ChainLinkIcon } from "../BuyDialog/chainlink.svg";
 
 interface Props extends Partial<DialogProps> {
@@ -40,25 +37,56 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const history = useHistory();
+  const { network } = useSelector(getBlockchain);
+  const { wallet } = useSelector(getWallet);
+  const tokenState = useSelector(getTokens);
+  const open = useSelector<RootState, boolean>((state) => state.layout.showBidNftDialog);
   const [runConfirmPurchase, loading, error] = useAsyncTask("confirmPurchase");
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
-  const [formState, setFormState] =
-    useState<typeof initialFormState>(initialFormState);
-  const tokenState = useSelector<RootState, TokenState>((store) => store.token);
-
-  const [bidToken, setBidToken] = useState<TokenInfo>(
-    tokenState.tokens[ZIL_ADDRESS]
-  );
-
-  const open = useSelector<RootState, boolean>(
-    (state) => state.layout.showBidNftDialog
-  );
+  const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
+  const [bidToken, setBidToken] = useState<TokenInfo>(tokenState.tokens[ZIL_ADDRESS]);
+  const match = useRouteMatch<{ id: string, collection: string }>();
 
   const onConfirm = () => {
+    if (!wallet) return;
     runConfirmPurchase(async () => {
-      await new Promise((res) => setTimeout(res, 3000));
+      const { collection: address, id } = match.params
 
-      setCompletedPurchase(true);
+      if (!bidToken) return; // TODO: handle token not found
+
+      const priceAmount = bnOrZero(formState.bidAmount).shiftedBy(bidToken.decimals);
+      const price = { amount: priceAmount, address: fromBech32Address(bidToken.address) };
+      const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
+
+      const arkClient = new ArkClient(network);
+      const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0); // int32 max 2147483647
+      const currentBlock = ZilswapConnector.getCurrentBlock();
+      const expiry = currentBlock + 300; // blocks
+      const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
+        side: "Buy",
+        token: { address, id, },
+        price,
+        feeAmount,
+        expiry,
+        nonce,
+      }))
+
+      const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
+
+      const result = await arkClient.postTrade({
+        publicKey,
+        signature,
+
+        collectionAddress: address,
+        address: wallet.addressInfo.byte20.toLowerCase(),
+        tokenId: id,
+        side: "Buy",
+        expiry,
+        nonce,
+        price,
+      });
+
+      logger("post trade", result);
     });
   };
 
@@ -108,10 +136,6 @@ const BidDialog: React.FC<Props> = (props: Props) => {
       className={cls(classes.root, className)}
     >
       <DialogContent className={cls(classes.dialogContent)}>
-        {error && (
-          <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
-        )}
-
         {/* Nft card */}
         <NftCard
           className={classes.nftCard}
@@ -156,6 +180,10 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                 }
               />
             </Box>
+
+            {error && (
+              <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
+            )}
 
             <FancyButton
               className={classes.actionButton}

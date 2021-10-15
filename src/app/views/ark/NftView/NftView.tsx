@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { Box, Button, Container, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from "react-redux";
@@ -237,7 +237,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                 </Button>
               )}
 
-              {!isOwnToken && (
+              {!isOwnToken && token?.bestAsk && (
                 <Button
                   className={classes.buyButton}
                   disableRipple
@@ -273,9 +273,13 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           {/* Price History */}
         </Box>
       </Container>
-      <BuyDialog token={token!} collectionAddress={collectionId} />
-      <BidDialog token={token!} collectionAddress={collectionId} />
-      <SellDialog />
+      {token && (
+        <Fragment>
+          <BuyDialog token={token} collectionAddress={collectionId} />
+          <BidDialog token={token} collectionAddress={collectionId} />
+          <SellDialog />
+        </Fragment>
+      )}
     </ArkPage>
   );
 };

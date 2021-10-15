@@ -1,22 +1,26 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useMemo, useState } from "react";
 import { Backdrop, Box, Checkbox, DialogContent, DialogProps, FormControlLabel, Link } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import LaunchIcon from "@material-ui/icons/Launch";
+import { toBech32Address } from "@zilliqa-js/zilliqa";
+import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
+import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
 import { CurrencyLogo, DialogModal, FancyButton, Text } from "app/components";
+import { SocialLinkGroup } from "app/components/ArkComponents";
+import { getBlockchain, getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { truncate, useAsyncTask } from "app/utils";
-import { ZIL_ADDRESS } from "app/utils/constants";
+import { bnOrZero, truncate, useAsyncTask } from "app/utils";
 import { NftCard } from "app/views/ark/Collection/components";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
-import { fromBech32Address } from "core/zilswap";
-import { SocialLinkGroup } from "app/components/ArkComponents";
+import { ArkClient, logger } from "core/utilities";
+import { fromBech32Address, ZilswapConnector } from "core/zilswap";
 import { ReactComponent as ChainLinkIcon } from "./chainlink.svg";
 
 interface Props extends Partial<DialogProps> {
@@ -27,21 +31,73 @@ interface Props extends Partial<DialogProps> {
 const BuyDialog: React.FC<Props> = (props: Props) => {
   const { children, className, collectionAddress, token, ...rest } = props;
   const classes = useStyles();
+  const { network } = useSelector(getBlockchain);
+  const tokenState = useSelector(getTokens);
+  const { wallet } = useSelector(getWallet);
+  const open = useSelector<RootState, boolean>((state) => state.layout.showBuyNftDialog);
   const dispatch = useDispatch();
   const history = useHistory();
   const [runConfirmPurchase, loading, error] = useAsyncTask("confirmPurchase");
+  const match = useRouteMatch<{ id: string, collection: string }>();
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
 
-  const open = useSelector<RootState, boolean>(
-    (state) => state.layout.showBuyNftDialog
-  );
+  const bestAsk = token.bestAsk;
+
+  const {
+    priceToken,
+    priceHuman,
+  } = useMemo(() => {
+    if (!bestAsk) return {};
+    const priceToken = tokenState.tokens[toBech32Address(bestAsk.price.address)];
+    const priceHuman = bnOrZero(bestAsk.price.amount).shiftedBy(-(priceToken?.decimals ?? 0));
+
+    return {
+      priceToken,
+      priceHuman,
+    }
+  }, [bestAsk, tokenState.tokens])
 
   const onConfirm = () => {
+    if (!wallet?.provider || !match.params?.collection || !match.params?.id || !bestAsk) return;
     runConfirmPurchase(async () => {
-      await new Promise((res) => setTimeout(res, 3000));
+      const { collection: address, id } = match.params
 
-      setCompletedPurchase(true);
+      if (!priceToken) return; // TODO: handle token not found
+
+      const priceAmount = new BigNumber(bestAsk.price.amount);
+      const price = { amount: priceAmount, address: fromBech32Address(priceToken.address) };
+      const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
+
+      const arkClient = new ArkClient(network);
+      const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0); // int32 max 2147483647
+      const currentBlock = ZilswapConnector.getCurrentBlock();
+      const expiry = currentBlock + 300; // blocks
+      const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
+        side: "Buy",
+        token: { address, id, },
+        price,
+        feeAmount,
+        expiry,
+        nonce,
+      }))
+
+      const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
+
+      const result = await arkClient.postTrade({
+        publicKey,
+        signature,
+
+        collectionAddress: address,
+        address: wallet.addressInfo.byte20.toLowerCase(),
+        tokenId: id,
+        side: "Buy",
+        expiry,
+        nonce,
+        price,
+      });
+
+      logger("post trade", result);
     });
   };
 
@@ -62,8 +118,8 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
   const dialogHeader = loading
     ? ""
     : completedPurchase
-    ? "You now own"
-    : "Confirm Purchase";
+      ? "You now own"
+      : "Confirm Purchase";
 
   return (
     <DialogModal
@@ -74,13 +130,9 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       className={cls(classes.root, className)}
       hideCloseButton={loading}
       titlePadding={!!loading}
-      
+
     >
       <DialogContent className={cls(classes.dialogContent)}>
-        {error && (
-          <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
-        )}
-
         {/* Nft card */}
         <NftCard
           className={classes.nftCard}
@@ -99,14 +151,18 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
             <Text className={classes.priceText}>
               {completedPurchase ? "Bid Price" : "Fixed Price"}
             </Text>
-            <Box display="flex" alignItems="center">
-              <Text className={classes.price}>100</Text>
-              <CurrencyLogo
-                currency={"ZIL"}
-                address={ZIL_ADDRESS}
-                className={classes.currencyLogo}
-              />
-            </Box>
+            {priceToken && (
+              <Box display="flex" alignItems="center">
+                <Text className={classes.price}>
+                  {priceHuman?.toString(10)}
+                </Text>
+                <CurrencyLogo
+                  currency={priceToken?.symbol}
+                  address={priceToken.address}
+                  className={classes.currencyLogo}
+                />
+              </Box>
+            )}
           </Box>
 
           {completedPurchase && (
@@ -155,6 +211,10 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
                 }
               />
             </Box>
+
+            {error && (
+              <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
+            )}
 
             <FancyButton
               className={classes.actionButton}
