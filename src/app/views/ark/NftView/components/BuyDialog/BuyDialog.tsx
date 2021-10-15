@@ -113,8 +113,6 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
     history.push("/ark/profile");
   };
 
-  console.log("token", token)
-
   const dialogHeader = loading
     ? ""
     : completedPurchase

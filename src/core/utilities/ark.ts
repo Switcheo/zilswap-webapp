@@ -59,7 +59,6 @@ export class ArkClient {
   }
 
   checkError = async (result: any) => {
-    console.log("result", result)
     if (result.error) {
       const message = [];
       if (result.error?.code)
