@@ -39,6 +39,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   dateText: {
     display: "flex",
     flexDirection: "row",
+    color: theme.palette.primary.contrastText,
   },
   actionButton: {
     color: "#DEFFFF",
@@ -72,7 +73,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: "8px, 16px",
   },
   header: {
+    color: theme.palette.primary.contrastText,
     opacity: 0.5,
+  },
+  text: {
+    color: theme.palette.primary.contrastText,
   }
 }));
 
@@ -153,7 +158,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
 
   return (
     <Card className={cls(classes.root)}>
-        {getCardContent(bid, true)}
+      {getCardContent(bid, true)}
       <Collapse in={expand}>
         {relatedBids?.map((bids) => (
           <>

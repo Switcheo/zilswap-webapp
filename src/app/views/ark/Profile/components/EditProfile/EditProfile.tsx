@@ -1,19 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Box, BoxProps, IconButton, TextField, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { useDispatch, useSelector } from "react-redux";
 import dayjs from "dayjs";
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { ConnectedWallet } from "core/wallet";
 import { ArkClient } from "core/utilities";
-import { EmailRegex } from "app/utils/constants";
-import { useAsyncTask, useNetwork, useTaskSubscriber, useToaster } from "app/utils";
+import { EmailRegex, AlphaNumericRegex } from "app/utils/constants";
+import { useAsyncTask, useNetwork, useToaster, useTaskSubscriber } from "app/utils";
 import { MarketPlaceState, OAuth, Profile, RootState } from "app/store/types";
 import { ArkInput, FancyButton } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
-import { ReactComponent as UploadSVG } from "../assets/upload.svg";
 
 interface Props extends BoxProps {
   onBack: () => void;
@@ -29,7 +28,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignItems: "center",
   },
   container: {
-    maxWidth: "500px",
+    maxWidth: "680px",
     display: "row",
   },
   content: {
@@ -49,7 +48,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px"
   },
   backButton: {
-    color: "#DEFFFF",
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     opacity: "50%",
     borderRadius: "12px",
     paddingLeft: 0,
@@ -58,9 +57,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginLeft: theme.spacing(2)
   },
   profileImage: {
-    height: 130,
-    width: 130,
-    border: "5px solid #0D1B24",
+    height: 110,
+    width: 110,
+    border: `5px solid #0D1B24`,
     borderRadius: "50%",
     backgroundColor: "#DEFFFF",
   },
@@ -74,10 +73,26 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   uploadBox: {
     cursor: "pointer",
     maxHeight: 200,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
   },
   connectionText: {
     margin: theme.spacing(1),
   },
+  labelButton: {
+    borderRadius: 8,
+    padding: "8px 16px",
+    maxWidth: 80,
+    alignSelf: "center",
+    marginTop: theme.spacing(1),
+    backgroundColor: theme.palette.action?.active,
+    color: theme.palette.primary.contrastText,
+    cursor: "pointer",
+    "&:hover": {
+      opacity: 0.5,
+    }
+  }
 }));
 
 const EditProfile: React.FC<Props> = (props: Props) => {
@@ -86,7 +101,9 @@ const EditProfile: React.FC<Props> = (props: Props) => {
   const network = useNetwork();
   const marketplaceState = useSelector<RootState, MarketPlaceState>((state) => state.marketplace);
   const [profileImage, setProfileImage] = useState<string | ArrayBuffer | null>(null);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [runUpdateProfile, isLoading] = useAsyncTask("updateProfile");
+  const [runUploadImage] = useAsyncTask("uploadImage");
   const [errors, setErrors] = useState({
     username: "",
     bio: "",
@@ -106,6 +123,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
   const toaster = useToaster(false)
   const dispatch = useDispatch();
   const [loadingProfile] = useTaskSubscriber("loadProfile");
+  const inputRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (profile) {
@@ -125,18 +143,21 @@ const EditProfile: React.FC<Props> = (props: Props) => {
     switch (type) {
       case "username":
         if (input.length > 50) return "max 50 characters";
+        if (!AlphaNumericRegex.test(input)) return "Please ensure username is alphanumeric"
         return ""
       case "bio":
         if (input.length > 10) return "max 250 characters";
         return ""
       case "twitterHandle":
         if (input.length > 15) return "max 15 characters";
+        if (!AlphaNumericRegex.test(input)) return "Please ensure twitter handle is alphanumeric"
         return ""
       case "email":
         if (input.length > 320) return "max 320 characters";
         return ""
       case "instagramHandle":
         if (input.length > 30) return "max 30 characters";
+        if (!AlphaNumericRegex.test(input)) return "Please ensure instagram handle is alphanumeric"
         return ""
       case "websiteUrl":
         if (input.length > 253) return "max 253 characters";
@@ -160,11 +181,14 @@ const EditProfile: React.FC<Props> = (props: Props) => {
 
   const onImageUpload = (event: any) => {
     const files = event.target.files;
-    if (!files[0]) return;
+    if (!files[0]) {
+      return setProfileImage(null);
+    }
     const reader = new FileReader();
 
     reader.onloadend = () => {
       setProfileImage(reader.result);
+      setUploadFile(files[0]);
     }
 
     reader.readAsDataURL(files[0]);
@@ -188,19 +212,23 @@ const EditProfile: React.FC<Props> = (props: Props) => {
       const arkClient = new ArkClient(network);
       const { oAuth } = marketplaceState;
       let checkedOAuth: OAuth | undefined = oAuth;
+
       if (!oAuth?.access_token || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
         const { result } = await arkClient.arkLogin(wallet!, window.location.hostname);
         dispatch(actions.MarketPlace.updateAccessToken(result));
         checkedOAuth = result;
       }
-
-      const result = await arkClient.updateProfile(profile!.address, filteredData, checkedOAuth!);
-      if (!result.error) {
-        toaster("Profile updated");
-        dispatch(actions.MarketPlace.loadProfile());
-      } else {
-        toaster("Error updating profile");
+      if (profileImage && uploadFile) await imageUpload();
+      if (hasChange()) {
+        const result = await arkClient.updateProfile(profile!.address, filteredData, checkedOAuth!);
+        if (!result.error) {
+          toaster("Profile updated");
+          dispatch(actions.MarketPlace.loadProfile());
+        } else {
+          toaster("Error updating profile");
+        }
       }
+      toaster("Image updated");
     });
   }
 
@@ -221,6 +249,26 @@ const EditProfile: React.FC<Props> = (props: Props) => {
     return change;
   }
 
+  const imageUpload = () => {
+    runUploadImage(async () => {
+      if (!uploadFile) return;
+      const arkClient = new ArkClient(network);
+      const { oAuth } = marketplaceState;
+      let checkedOAuth: OAuth | undefined = oAuth;
+      if (!oAuth?.access_token || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
+        const { result } = await arkClient.arkLogin(wallet!, window.location.hostname);
+        dispatch(actions.MarketPlace.updateAccessToken(result));
+        checkedOAuth = result;
+      }
+      const requestResult = await arkClient.requestImageUploadUrl(profile!.address, checkedOAuth!.access_token);
+
+      const blobData = new Blob([uploadFile], { type: uploadFile.type });
+
+      await arkClient.putImageUpload(requestResult.result.uploadUrl, blobData, uploadFile);
+      await arkClient.notifyUpload(profile!.address, oAuth!.access_token);
+    })
+  }
+
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <Box className={classes.container}>
@@ -232,20 +280,17 @@ const EditProfile: React.FC<Props> = (props: Props) => {
         </Box>
         {wallet && (
           <Box className={classes.content}>
-            <Box display="flex" justifyContent="center" padding={4}>
+            <Box display="flex" justifyContent="center" paddingLeft={10} paddingRight={10}>
               <label htmlFor="ark-profile-image" className={classes.uploadBox}>
-                {profileImage && (<img alt="" className={classes.profileImage} src={profileImage ? profileImage.toString() : ""} />)}
-                {!profileImage && (<div className={classes.profileImage} />)}
-                <Box mt={2} display="flex" flexDirection="row" justifyContent="center" alignItems="center">
-                  <Typography className={classes.uploadText}>Upload</Typography>
-
-                  <UploadSVG />
-                </Box>
+                {(profileImage || profile?.profileImage?.url) && (<img alt="" className={classes.profileImage} src={profileImage?.toString() || profile?.profileImage?.url || ""} />)}
+                {!profileImage && !profile?.profileImage?.url && (<div className={classes.profileImage} />)}
+                <label htmlFor="ark-profile-image" className={classes.labelButton}>Select</label>
               </label>
               <TextField
                 className={classes.uploadInput}
                 id="ark-profile-image"
                 type="file"
+                ref={inputRef}
                 inputProps={{ accept: "image/x-png,image/jpeg" }}
                 onChange={onImageUpload}
               />
@@ -257,7 +302,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
               <ArkInput placeholder="We'll hit you up with updates!" error={errors.email} value={inputValues.email} label="Email" onValueChange={(value) => updateInputs("email")(value)} />
               <ArkInput placeholder="Do it for the gram" error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram" onValueChange={(value) => updateInputs("instagramHandle")(value)} />
               <ArkInput placeholder="Might be useful, especially if you're an artist" error={errors.websiteUrl} value={inputValues.websiteUrl} label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)} />
-              <FancyButton loading={isLoading || loadingProfile} onClick={onUpdateProfile} disabled={hasError() || !hasChange()} fullWidth className={classes.profileButton} variant="contained" color="primary">
+              <FancyButton loading={isLoading || loadingProfile} onClick={onUpdateProfile} disabled={hasError() || (!hasChange() && !profileImage)} fullWidth className={classes.profileButton} variant="contained" color="primary">
                 Save Profile
               </FancyButton>
             </Box>

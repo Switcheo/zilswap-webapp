@@ -108,6 +108,9 @@ export interface Profile {
   instagramHandle?: string;
   websiteUrl?: string;
   email?: string;
+  profileImage?: {
+    url: string;
+  }
 }
 
 export interface BiddedNft {

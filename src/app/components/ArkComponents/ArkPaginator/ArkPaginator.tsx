@@ -3,9 +3,9 @@ import { Box, BoxProps, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { UsePaginationItem, UsePaginationResult, usePagination } from "@material-ui/lab";
 import cls from "classnames";
+import ArrowLeft from "@material-ui/icons/ArrowBack";
+import ArrowRight from "@material-ui/icons/ArrowForward";
 import { AppTheme } from "app/theme/types";
-import { ReactComponent as ArrowLeft } from "./arrow-left.svg";
-import { ReactComponent as ArrowRight } from "./arrow-right.svg";
 
 interface Props extends BoxProps {
   totalItem: number,
@@ -21,7 +21,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   clickable: {
     cursor: "pointer",
-    fontSize: 20,
     "&:hover": {
       opacity: 0.6,
       backgroundColor: "#aaaaaa",
@@ -29,7 +28,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "&:not(:last-child)": {
       marginRight: theme.spacing(1),
-    }
+    },
+    fontFamily: "Avenir Next LT Pro",
+    fontSize: 16,
+    fontStyle: "normal",
+    fontWeight: "bold",
   },
   pageText: {
     padding: 8,
@@ -40,7 +43,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   selected: {
     textDecoration: "underline",
     color: theme.palette.primary.dark
-  }
+  },
 }));
 
 const ArkPaginator: React.FC<Props> = (props: Props) => {

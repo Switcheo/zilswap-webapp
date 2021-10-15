@@ -20,7 +20,7 @@ const BootstrapInput = withStyles((theme) => ({
   },
   input: {
     borderRadius: 12,
-    backgroundColor: "#0D1B24",
+    backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#DEFFFF",
     position: 'relative',
     border: '1px solid #29475A',
     fontSize: 12,
@@ -28,7 +28,7 @@ const BootstrapInput = withStyles((theme) => ({
     padding: '10px 12px',
     transition: theme.transitions.create(['border-color', 'box-shadow']),
     '&:focus': {
-      borderColor: "#FFFFFF",
+      borderColor: theme.palette.action.selected,
     },
   },
 
@@ -36,11 +36,12 @@ const BootstrapInput = withStyles((theme) => ({
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    marginTop: theme.spacing(1)
+    marginTop: theme.spacing(1),
   },
   label: {
-    fontSize: "12px",
-    color: "#DEFFFF"
+    fontSize: "14px",
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    fontFamily: "Avenir Next LT Pro",
   },
   error: {
     border: '1px solid #FF5252',
@@ -55,7 +56,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   helperText: {
     color: "#FF5252",
-    fontSize: "10px",
+    fontSize: 10,
+    margin: 0
   },
   hiddenText: {
     visibility: "hidden"
@@ -68,11 +70,11 @@ const ArkInput: React.FC<Props> = (props: Props) => {
 
   return (
     <FormControl fullWidth className={classes.root}>
-      <InputLabel shrink focused={false} className={cls(classes.label, error && classes.errorText)}>
-        {label}
+      <InputLabel shrink focused={false} className={cls({ [classes.label]: true, [classes.errorText]: error })}>
+        {label.toLocaleUpperCase()}
       </InputLabel>
       <BootstrapInput  {...rest} inputProps={{ className: error ? classes.error : "", }} multiline={multiline} value={value} onChange={(e) => onValueChange(e.target.value)} fullWidth defaultValue="react-bootstrap" />
-      <FormHelperText className={cls(classes.helperText, !error && classes.hiddenText)} >{error ? error : "12"}</FormHelperText>
+      <FormHelperText className={cls({ [classes.helperText]: true, [classes.hiddenText]: !error })} >{error ? error : ""}</FormHelperText>
     </FormControl>
   );
 };

@@ -4,7 +4,7 @@ import {
   Container,
   Tooltip,
   Typography,
-  useMediaQuery
+  useMediaQuery, useTheme
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   addrBox: {
     padding: "8px 24px",
     borderRadius: "12px",
-    backgroundColor: "rgba(222, 255, 255, 0.1)",
+    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#6BE1FF40",
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1),
     opacity: 0.9,
@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     filter: "drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))",
     minWidth: 320,
     textAlign: "center",
-    color: "#DEFFFF",
+    color: theme.palette.text?.primary,
     opacity: "0.5",
   },
   editIcon: {
@@ -97,6 +97,7 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const [profileIsOwner, setProfileIsOwner] = useState(false);
   const network = useNetwork();
   const [runQueryProfile] = useAsyncTask("queryProfile");
+  const theme = useTheme();
 
   let address = RawAddress;
 
@@ -115,7 +116,7 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     }
 
     // eslint-disable-next-line
-  }, [storeProfile, wallet?.addressInfo.bech32])
+  }, [storeProfile, wallet])
 
   const checkProfile = () => {
     if (((storeProfile?.address && !address) || (storeProfile?.address && toBech32Address(storeProfile?.address) === address)) && wallet?.addressInfo.bech32) {
@@ -157,12 +158,13 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     <ArkPage {...rest}>
       {!showEdit && (
         <Container className={classes.root} maxWidth="lg">
-          <ArkBanner>
+          <ArkBanner avatarImage={viewProfile?.profileImage?.url}>
             <Typography variant="h2">
               {viewProfile?.username || "Unnamed"}{" "}
               {profileIsOwner && (
                 <EditIcon
                   onClick={() => setShowEdit(true)}
+                  fill={theme.palette.type === "dark" ? undefined : "#0D1B24"}
                   className={cls(classes.editIcon, classes.editable)}
                 />
               )}

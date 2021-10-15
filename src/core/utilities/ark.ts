@@ -35,6 +35,8 @@ const apiPaths = {
   "user/list": "/user/list",
   "user/detail": "/user/:address/detail",
   "user/update": "/user/:address/update",
+  "user/image/request": "/user/:address/upload/request",
+  "user/image/notify": "/user/:address/upload/notify"
 };
 
 const getHttpClient = (network: Network) => {
@@ -197,6 +199,30 @@ export class ArkClient {
     await this.checkError(output);
     return output;
   };
+
+  requestImageUploadUrl = async (address: string, access_token: string) => {
+    const headers = { Authorization: "Bearer " + access_token };
+    const url = this.http.path("user/image/request", { address }, { type: "profile" });
+    const result = await this.http.get({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  putImageUpload = async (url: string, data: Blob, file: File) => {
+    // const headers = { "Content-Length": file.size, "Content-Type": file.type, 'Access-Control-Allow-Origin': '*' }
+    await this.http.put({ url, data });
+    return
+  }
+
+  notifyUpload = async (address: string, access_token: string) => {
+    const headers = { Authorization: "Bearer " + access_token };
+    const url = this.http.path("user/image/notify", { address }, { type: "profile" });
+    const result = await this.http.post({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
 
   /* ARK utils */
 

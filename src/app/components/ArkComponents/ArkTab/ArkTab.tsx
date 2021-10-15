@@ -14,14 +14,14 @@ interface Props extends BoxProps {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     alignSelf: "center",
-    borderBottom: "1px solid #29475A",
+    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     alignContent: "center",
     alignItems: "center"
   },
   tabButton: {
-    color: "#DEFFFF",
+    color: theme.palette.tab.active,
     '&.Mui-selected': {
-      color: "#DEFFFF",
+      color: theme.palette.tab.selected,
     }
   },
 }));
@@ -41,7 +41,7 @@ const BaseTabs = styled((props) => (
   },
   '& .MuiTabs-indicatorSpan': {
     width: '100%',
-    backgroundColor: '#DEFFFF',
+    backgroundColor: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
   },
   '& .MuiTabs-flexContainer': {
     justifyContent: "center",
@@ -59,9 +59,9 @@ const BaseTab = styled((props) => <Tab disableRipple {...props} />)(({ theme }) 
   },
   fontWeight: theme.typography.fontWeightRegular,
   marginRight: theme.spacing(1),
-  color: '#DEFFFF',
+  color: theme.palette.text.primary,
+  opacity: 0.5,
   '&:hover': {
-    color: '#DEFFFF',
     opacity: 1,
   },
 }));
