@@ -39,13 +39,16 @@ const PotentialRewardInfo: React.FC<Props> = (props: Props) => {
     if (!weeklyRewards) return rewards;
 
     for (const reward of weeklyRewards) {
+      const timePast = Math.max(0, dayjs().diff(dayjs.unix(reward.currentEpochStart), "second"))
       const timeLeft = Math.max(0, dayjs.unix(reward.currentEpochEnd).diff(dayjs(), "second"))
       const timeWeight = timeLeft / 3600
       const zilReserveHuman = token.pool.zilReserve.shiftedBy(-12);
       // userPoolTokens = totalTokens * (addZil / totalZil)
-      const userPoolTokens = zilReserveHuman.isZero() ? BIG_ZERO : (token.pool.totalContribution.times(addZilAmount.div(zilReserveHuman)));
-      const newWeightedLiquidity = userPoolTokens.times(timeWeight);
-      const rewardsShare = newWeightedLiquidity.div(reward.weightedLiquidity.plus(newWeightedLiquidity));
+      const userPoolTokens = zilReserveHuman.isZero() ? BIG_ZERO :
+        (token.pool.totalContribution.times(addZilAmount.div(zilReserveHuman)));
+      const userWeightedLiquidity = userPoolTokens.times(timeWeight);
+      const poolWeightedLiquidity = reward.weightedLiquidity.dividedBy(timePast).times(timePast + timeLeft)
+      const rewardsShare = userWeightedLiquidity.div(poolWeightedLiquidity.plus(userWeightedLiquidity));
       const potentialRewards = reward.amountPerEpoch.shiftedBy(-reward.rewardToken.decimals).times(rewardsShare).decimalPlaces(5);
 
       rewards.push({
@@ -61,7 +64,7 @@ const PotentialRewardInfo: React.FC<Props> = (props: Props) => {
   return (<React.Fragment>
     {
       potentialRewards.map(reward =>
-        <KeyValueDisplay
+        <KeyValueDisplay mb={1}
           kkey={(
             <span>
               Est. Rewards From {reward.name}
