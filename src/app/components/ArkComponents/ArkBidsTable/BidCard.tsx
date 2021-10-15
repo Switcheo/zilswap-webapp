@@ -92,6 +92,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
     const status = getChequeStatus(bid, currentBlock)
     const expiryTime = blockTime.add(15 * (bid.expiry - currentBlock), 'seconds')
     const priceToken = tokenState.tokens[toBech32Address(bid.price.address)]
+    if (!priceToken) return null
     const priceAmount = new BigNumber(bid.price.amount).shiftedBy(-priceToken.decimals)
     const usdValue = valueCalculators.amount(tokenState.prices, priceToken, new BigNumber(bid.price.amount))
 
