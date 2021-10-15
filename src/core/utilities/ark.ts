@@ -205,7 +205,9 @@ export class ArkClient {
     const headers = { Authorization: "Bearer " + access_token };
     const url = this.http.path("user/image/request", { address }, { type: "profile" });
     const result = await this.http.get({ url, headers });
-    return result.json();
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
   }
 
   putImageUpload = async (url: string, data: Blob, file: File) => {
@@ -218,7 +220,9 @@ export class ArkClient {
     const headers = { Authorization: "Bearer " + access_token };
     const url = this.http.path("user/image/notify", { address }, { type: "profile" });
     const result = await this.http.post({ url, headers });
-    return result.json();
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
   }
 
   /* ARK utils */

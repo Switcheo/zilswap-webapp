@@ -116,7 +116,7 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     }
 
     // eslint-disable-next-line
-  }, [storeProfile, wallet?.addressInfo.bech32])
+  }, [storeProfile, wallet])
 
   const checkProfile = () => {
     if (((storeProfile?.address && !address) || (storeProfile?.address && toBech32Address(storeProfile?.address) === address)) && wallet?.addressInfo.bech32) {
@@ -158,7 +158,7 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     <ArkPage {...rest}>
       {!showEdit && (
         <Container className={classes.root} maxWidth="lg">
-          <ArkBanner>
+          <ArkBanner avatarImage={viewProfile?.profileImage?.url}>
             <Typography variant="h2">
               {viewProfile?.username || "Unnamed"}{" "}
               {profileIsOwner && (

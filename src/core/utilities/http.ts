@@ -127,7 +127,7 @@ export class HTTP<PathSpecs> {
 			headers: {
 				...options.headers
 			},
-			body: (options.data),
+			body: options.data,
 		})
 	}
 };
