@@ -1,12 +1,15 @@
 import React, { Fragment, useEffect, useMemo, useState } from "react";
-import { Box, Button, Container, Typography, MenuItem, ListItemIcon, Avatar, Badge, useMediaQuery } from "@material-ui/core";
+import { Box, Container, Typography, MenuItem, ListItemIcon, Avatar, Badge, useMediaQuery } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from "react-redux";
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import cls from "classnames";
+import BigNumber from "bignumber.js";
 import { ArkBidsTable, ArkBreadcrumb, ArkTab, CurrencyLogo, FancyButton } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
-import { Cheque, Nft, Profile, TraitValue } from "app/store/types";
+import { Cheque, Nft, Profile, TokenInfo, TraitValue } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
@@ -16,10 +19,6 @@ import { ReactComponent as VerifiedBadge } from "../Collection/verified-badge.sv
 import { ReactComponent as ZapSVG } from "./components/assets/zap.svg";
 import { ReactComponent as EllipseSVG } from "./components/assets/ellipse.svg";
 import { BuyDialog, BidDialog, SellDialog, NftImage, TraitTable } from "./components";
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import cls from "classnames";
-import BigNumber from "bignumber.js";
-import { async } from "validate.js";
 
 const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, match, ...rest } = props;
@@ -39,7 +38,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
   const [traits, setTraits] = useState<TraitValue[]>([])
   const [tokenPrice, setTokenPrice] = useState<BigNumber | null>(null);
   const [tokenAmount, setTokenAmount] = useState<BigNumber | null>(null);
-  const [purchaseCurrency, setPurchaseCurrency] = useState<string>();
+  const [purchaseCurrency, setPurchaseCurrency] = useState<TokenInfo>();
 
   const collectionId = match.params.collection;
   const tokenId = match.params.id;
@@ -78,7 +77,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
       const askPrice = token.bestAsk.price.amount
       setTokenPrice(new BigNumber(askPrice).div(placement).times(prices[tok.address]))
       setTokenAmount(new BigNumber(askPrice).div(placement));
-      setPurchaseCurrency(tok.symbol)
+      setPurchaseCurrency(tok)
     }
     // eslint-disable-next-line
   }, [tokens, token])
@@ -138,14 +137,14 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
                   <Box className={classes.labelInfo}>
                     <Typography variant="body1">ZAPs</Typography>&nbsp;<InfoOutlinedIcon className={classes.infoIcon} />
                   </Box>
-                  <Typography className={classes.zapScore} variant="h3">{token?.statistics?.favourites} <ZapSVG className={classes.zapLogo} /></Typography>
+                  <Typography className={classes.zapScore} variant="h3">{token?.statistics?.favourites || 0} <ZapSVG className={classes.zapLogo} /></Typography>
                   <Typography className={classes.infoBottom}>Like it? ZAP it!</Typography>
                 </Box>
               </Box>
               <Box display="flex" className={classes.xsColumn}>
                 <Box flexGrow={1} display="flex" flexDirection="column" className={classes.saleInfoContainer}>
                   <Typography variant="body1" className={cls(classes.saleHeader, classes.halfOpacity)}>Price&nbsp;&nbsp;<Typography variant="body1">${tokenPrice ? tokenPrice.toFixed(11).toString() : "-"}</Typography></Typography>
-                  <Typography variant="h2" className={classes.price}>{tokenAmount ? tokenAmount.toString() : "-"}{(tokenAmount && purchaseCurrency) ? <CurrencyLogo currency={purchaseCurrency} /> : ""}</Typography>
+                  <Typography variant="h2" className={classes.price}>{tokenAmount ? tokenAmount.toString() : "-"}{(tokenAmount && purchaseCurrency) ? <CurrencyLogo address={purchaseCurrency.address} currency={purchaseCurrency.symbol} /> : ""}</Typography>
                   <Typography variant="body1" className={classes.saleHeader}><Typography className={classes.halfOpacity}>Last:</Typography>&nbsp;150,320&nbsp;<Typography className={classes.halfOpacity}>ZIL Expires in 1 day</Typography></Typography>
                   <Typography variant="body1" className={classes.saleHeader}><Typography className={classes.halfOpacity}>Best:</Typography>&nbsp;150,320&nbsp;<Typography className={classes.halfOpacity}>ZIL Expires in 1 hr</Typography></Typography>
                 </Box>
@@ -202,6 +201,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
           </Box>
         </Box>
 
+        {/* About info and trait table */}
         <Box mt={4} display="flex" className={classes.smColumn}>
           <Box display="flex" flexDirection="column" className={classes.aboutContainer}>
             <Typography variant="h1">About</Typography>
@@ -246,6 +246,8 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
           </Box>
         </Box>
 
+
+        {/*Ark tabs */}
         <ArkTab setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids", "Price History", "Event History"]} />
 
         <Box className={classes.bidsBox}>
@@ -296,10 +298,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: theme.spacing(8),
     borderRadius: 12,
     border: "1px solid #29475A",
+    marginRight: theme.spacing(20),
     background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
     [theme.breakpoints.down("sm")]: {
       padding: theme.spacing(2, 3),
       width: "100%",
+      marginRight: theme.spacing(16),
+    },
+    [theme.breakpoints.down("xs")]: {
+      marginRight: 0,
     },
   },
   collectionName: {
@@ -462,6 +469,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "#00FFB0",
     fontFamily: "Avenir Next LT Pro",
     display: "flex",
+    marginTop: theme.spacing(.5)
   },
   buttonContainer: {
     width: theme.spacing(16),
@@ -498,6 +506,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "#7B61FF",
     fontFamily: "Avenir Next LT Pro",
     fontWeight: 900,
+    textAlign: "center",
   },
   expiryDate: {
     display: "flex",
