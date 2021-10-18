@@ -84,20 +84,22 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
 
       const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
 
-      const result = await arkClient.postTrade({
+      const buyCheque: ArkClient.ExecuteBuyCheque = {
+        side: "buy",
+        expiry,
+        nonce: nonce.toString(10),
         publicKey,
         signature,
+      }
 
-        collectionAddress: address,
-        address: wallet.addressInfo.byte20.toLowerCase(),
+      const execTradeResult = await arkClient.executeTrade({
+        buyCheque,
+        sellCheque: bestAsk,
+        nftAddress: address,
         tokenId: id,
-        side: "Buy",
-        expiry,
-        nonce,
-        price,
-      });
+      }, ZilswapConnector.getSDK());
 
-      logger("post trade", result);
+      logger("exec trade result", execTradeResult)
     });
   };
 

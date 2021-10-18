@@ -1,12 +1,15 @@
 import crypto from "crypto";
+import { BN, bytes, Long } from '@zilliqa-js/util';
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
+import { Zilswap } from "zilswap-sdk";
 import { Network, ZIL_HASH } from "zilswap-sdk/lib/constants";
-import { HTTP } from "core/utilities";
+import { Cheque, OAuth, Profile, SimpleCheque } from "app/store/types";
+import { SimpleMap } from "app/utils";
+import { HTTP, logger } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
 import { fromBech32Address } from "core/zilswap";
-import { SimpleMap } from "app/utils";
-import { Cheque, OAuth, Profile } from "app/store/types";
+import { CHAIN_IDS, MSG_VERSION } from "../zilswap/constants";
 
 const ARK_ENDPOINTS: SimpleMap<string> = {
   [Network.MainNet]: "https://api-ark.zilswap.org",
@@ -18,7 +21,7 @@ const LOCALHOST_ENDPOINT = "http://localhost:8181";
 
 export const ARK_CONTRACTS: { [key in Network]: string } = {
   [Network.MainNet]: '',
-  [Network.TestNet]: 'zil1vf968mkk2372whae5ncd6w2h39p4nnqx2ut666',
+  [Network.TestNet]: 'zil10sy6x5y2sss0kv8pxmccek5e38e7pxm93qzs3c',
 }
 
 const apiPaths = {
@@ -52,12 +55,14 @@ export interface ListQueryParams {
 export class ArkClient {
   public static FEE_BPS = 250;
 
+  private contractAddress: string;
   private http: HTTP<typeof apiPaths>;
 
   constructor(
     public readonly network: Network,
   ) {
     this.http = getHttpClient(network);
+    this.contractAddress = fromBech32Address(ARK_CONTRACTS[network]).toLowerCase();
   }
 
   checkError = async (result: any) => {
@@ -246,7 +251,7 @@ export class ArkClient {
     if (token.address.startsWith("zil1"))
       token.address = fromBech32Address(token.address);
     const brokerAddress = fromBech32Address(ARK_CONTRACTS[this.network]).toLowerCase()
-    let buffer = strToHex(brokerAddress.replace('0x', ''))
+    let buffer = serializeValue(brokerAddress)
     buffer += sha256(strToHex(`${brokerAddress}.${side}`))
     buffer += sha256(serializeNFT(brokerAddress, token))
     buffer += sha256(serializePrice(brokerAddress, price))
@@ -255,33 +260,236 @@ export class ArkClient {
     buffer += sha256(serializeUint128(nonce))
     return sha256(buffer)
   }
+
+  getBrokerContractAddress() {
+    return this.contractAddress;
+  }
+
+  // TODO: Refactor zilswap SDK as instance member;
+  async approveAllowanceIfRequired(tokenAddress: string, ownerAddress: string, zilswap: Zilswap) {
+    const response = await zilswap.zilliqa.blockchain.getSmartContractSubState(tokenAddress, "operator_approvals");
+    const approvalState = response.result.operator_approvals;
+
+    const userApprovals = approvalState?.[ownerAddress.toLowerCase()];
+    logger("ark contract approvals", ownerAddress, this.contractAddress, userApprovals);
+    if (userApprovals[this.contractAddress]) return null;
+
+    return await this.approveAllowance(tokenAddress, zilswap);
+  }
+
+  // TODO: Refactor zilswap SDK as instance member;
+  async approveAllowance(tokenAddress: string, zilswap: Zilswap) {
+    const args = [{
+      vname: "to",
+      type: "ByStr20",
+      value: this.contractAddress,
+    }];
+
+    const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
+    const callParams = {
+      amount: new BN("0"),
+      gasPrice: new BN(minGasPrice),
+      gasLimit: Long.fromNumber(20000),
+      version: bytes.pack(CHAIN_IDS[this.network], MSG_VERSION),
+    };
+
+    const result = await zilswap.callContract(
+      zilswap.getContract(tokenAddress),
+      "SetApprovalForAll",
+      args as any,
+      callParams,
+      true,
+    );
+
+    return result;
+  }
+
+  // TODO: Refactor zilswap SDK as instance member;
+  async executeTrade(executeParams: ArkClient.ExecuteTradeParams, zilswap: Zilswap) {
+    const { nftAddress, tokenId, sellCheque, buyCheque } = executeParams;
+    const { address: priceTokenAddress, amount: priceAmount } = sellCheque.price;
+
+    const args = [{
+      vname: "token",
+      type: `${this.contractAddress}.NFT`,
+      value: this.toAdtNft(nftAddress, tokenId),
+    }, {
+      vname: "price",
+      type: `${this.contractAddress}.Coins`,
+      value: this.toAdtPrice(priceTokenAddress, priceAmount),
+    }, {
+      vname: "fee_amount",
+      type: "Uint128",
+      value: sellCheque.feeAmount.toString(),
+    }, {
+      vname: 'sell_cheque',
+      type: `${this.contractAddress}.Cheque`,
+      value: this.toAdtCheque(sellCheque)
+    }, {
+      vname: 'buy_cheque',
+      type: `${this.contractAddress}.Cheque`,
+      value: this.toAdtCheque(buyCheque)
+    }];
+
+    const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
+    const callParams = {
+      amount: priceTokenAddress === ZIL_HASH ? new BN(priceAmount) : new BN(0),
+      gasPrice: new BN(minGasPrice),
+      gasLimit: Long.fromNumber(20000),
+      version: bytes.pack(CHAIN_IDS[this.network], MSG_VERSION),
+    };
+
+    const result = await zilswap.callContract(
+      zilswap.getContract(this.contractAddress),
+      "ExecuteTrade",
+      args as any,
+      callParams,
+      true,
+    );
+
+    return result;
+  }
+
+  /**
+   * 
+   * @param tokenAddress hex address of zrc1 contract starting with 0x
+   * @param tokenId token ID
+   */
+  toAdtNft(nftAddress: string, tokenId: string) {
+    if (nftAddress.startsWith("zil"))
+      nftAddress = fromBech32Address(nftAddress).toLowerCase();
+    return {
+      argtypes: [],
+      arguments: [nftAddress, tokenId],
+      constructor: `${this.contractAddress}.NFT`,
+      _serialization: {
+        numByteSize: { 1: 32 }
+      },
+    }
+  }
+
+  /**
+   * 
+   * @param tokenAddress hex address of zrc2 contract starting with 0x
+   * @returns 
+   */
+  toAdtToken(tokenAddress: string) {
+    if (tokenAddress.startsWith("zil"))
+      tokenAddress = fromBech32Address(tokenAddress).toLowerCase();
+
+    if (tokenAddress === ZIL_HASH)
+      return {
+        argtypes: [],
+        arguments: [],
+        constructor: `${this.contractAddress}.Zil`,
+      };
+
+    return {
+      argtypes: [],
+      arguments: [tokenAddress],
+      constructor: `${this.contractAddress}.Token`,
+    };
+  }
+
+  /**
+   * 
+   * @param tokenAddress hex address of zrc2 contract starting with 0x
+   * @param amountUnitless amount in unitless form
+   */
+  toAdtPrice(tokenAddress: string, amountUnitless: string) {
+    return {
+      argtypes: [],
+      arguments: [
+        this.toAdtToken(tokenAddress),
+        amountUnitless.toString(),
+      ],
+      constructor: `${this.contractAddress}.Coins`,
+    }
+  }
+
+  toAdtChequeSide(side: string) {
+    const _side = parseChequeSide(side);
+    return {
+      argtypes: [],
+      arguments: [],
+      constructor: `${this.contractAddress}.${_side}`,
+    };
+  }
+
+  toAdtCheque(cheque: ArkClient.ExecuteBuyCheque) {
+    return {
+      argtypes: [],
+      arguments: [
+        this.toAdtChequeSide(cheque.side),
+        cheque.expiry.toString(10),
+        cheque.nonce.toString(),
+        cheque.publicKey,
+        cheque.signature,
+      ],
+      constructor: `${this.contractAddress}.Cheque`,
+    }
+  }
+}
+
+const parseChequeSide = (side: string): "Sell" | "Buy" => {
+  switch (side?.trim().toLowerCase()) {
+    case "sell": return "Sell";
+    case "buy": return "Buy";
+    default: throw new Error(`unknown cheque side ${side}`);
+  }
+}
+
+const serializeValue = (val: any, numByteSize = 16) => {
+  if (val.arguments) {
+    return serializeADT(val)
+  } else if (val.startsWith('0x')) {
+    return val.replace('0x', '').toLowerCase()
+  } else if (!new BigNumber(val).isNaN()) {
+    return serializeUint(val, numByteSize);
+  } else {
+    return strToHex(val)
+  }
+}
+
+const serializeADT = (adt: any) => {
+  let buffer = strToHex(adt.constructor)
+  adt.arguments.forEach((arg: any, i: number) => {
+    const numByteSize = adt._serialization?.numByteSize?.[i]
+    buffer += serializeValue(arg, numByteSize)
+  })
+  return buffer
 }
 
 const serializeNFT = (brokerAddress: string, token: { id: string, address: string }): string => {
-  let buffer = strToHex(`${brokerAddress}.NFT`)
-  buffer += token.address.replace('0x', '').toLowerCase()
-  buffer += serializeUint256(token.id)
-  return buffer
+  return serializeValue({
+    constructor: `${brokerAddress}.NFT`,
+    arguments: [
+      token.address,
+      token.id,
+    ],
+    _serialization: {
+      numByteSize: { 1: 32 }
+    },
+  })
 }
 
 const serializePrice = (brokerAddress: string, price: { amount: BigNumber, address: string }): string => {
-  let buffer = strToHex(`${brokerAddress}.Coins`)
-  if (price.address === ZIL_HASH) {
-    buffer += strToHex(`${brokerAddress}.Zil`)
-  } else {
-    buffer += strToHex(`${brokerAddress}.Token`)
-    buffer += price.address.replace('0x', '').toLowerCase()
-  }
-  buffer += serializeUint128(price.amount)
-  return buffer
+  const isZil = price.address === ZIL_HASH;
+  return serializeValue({
+    arguments: [
+      {
+        argtypes: [],
+        arguments: isZil ? [] : [price.address],
+        constructor: isZil ? `${brokerAddress}.Zil` : `${brokerAddress}.Token`,
+      },
+      price.amount.toString(10)
+    ],
+    constructor: `0x7c09a3508a8420fb30e136f18cda9989f3e09b65.Coins`,
+  })
 }
 
 const serializeUint128 = (val: BigNumber | number): string => {
   return serializeUint(val, 16);
-}
-
-const serializeUint256 = (val: BigNumber | string): string => {
-  return serializeUint(val, 32);
 }
 
 const serializeUint = (val: BigNumber | string | number, size: number): string => {
@@ -313,6 +521,7 @@ export namespace ArkClient {
     signature: string;
   }
 
+  export type ExecuteBuyCheque = Pick<SimpleCheque, "side" | "expiry" | "publicKey" | "signature" | "nonce">;
   export interface ArkChequeParams {
     side: 'Buy' | 'Sell';
     token: { id: string, address: string };
@@ -321,6 +530,14 @@ export namespace ArkClient {
     expiry: number;
     nonce: BigNumber;
   }
+
+  export interface ExecuteTradeParams {
+    nftAddress: string;
+    tokenId: string;
+    sellCheque: SimpleCheque;
+    buyCheque: ExecuteBuyCheque;
+  }
+
   export interface ListTokenParams extends ListQueryParams {
     owner?: string;
     collection?: string;

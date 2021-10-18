@@ -20,9 +20,9 @@ export interface SimpleCheque {
   side: 'buy' | 'sell';
   feeAmount: string;
   publicKey: string;
-  nonce: number;
+  signature: string;
+  nonce: string;
   expiry: number;
-  asset: Asset;
   price: {
     amount: string;
     address: string;
