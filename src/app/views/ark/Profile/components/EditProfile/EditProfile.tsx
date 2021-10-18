@@ -13,6 +13,7 @@ import { MarketPlaceState, OAuth, Profile, RootState } from "app/store/types";
 import { ArkInput, FancyButton } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
+import ActiveBidToggle from "../ActiveBidToggle";
 
 interface Props extends BoxProps {
   onBack: () => void;
@@ -92,6 +93,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&:hover": {
       opacity: 0.5,
     }
+  },
+  social: {
+    fontSize: "16px",
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    fontFamily: "Avenir Next LT Pro",
+    fontWeight: "bold",
+    marginTop: theme.spacing(1)
   }
 }));
 
@@ -168,11 +176,17 @@ const EditProfile: React.FC<Props> = (props: Props) => {
 
   const updateInputs = (type: string) => {
     return (newInput: string) => {
-      const errorText = validateInput(type, newInput)
       setInputValues({
         ...inputValues,
         [type]: newInput
       })
+      if (!newInput) {
+        return setErrors({
+          ...errors, [type]: ""
+        })
+      }
+      const errorText = validateInput(type, newInput)
+
       setErrors({
         ...errors, [type]: errorText
       })
@@ -296,12 +310,38 @@ const EditProfile: React.FC<Props> = (props: Props) => {
               />
             </Box>
             <Box>
-              <ArkInput placeholder="Add a funky name" error={errors.username} value={inputValues.username} label="Display Name" onValueChange={(value) => updateInputs("username")(value)} />
-              <ArkInput placeholder="Write a lil' about yourself (or your collection!)" error={errors.bio} value={inputValues.bio} label="Bio" onValueChange={(value) => updateInputs("bio")(value)} multiline={true} />
-              <ArkInput placeholder="Add your Twitter handle so we know you're legit" error={errors.twitterHandle} value={inputValues.twitterHandle} label="Twitter" onValueChange={(value) => updateInputs("twitterHandle")(value)} />
-              <ArkInput placeholder="We'll hit you up with updates!" error={errors.email} value={inputValues.email} label="Email" onValueChange={(value) => updateInputs("email")(value)} />
-              <ArkInput placeholder="Do it for the gram" error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram" onValueChange={(value) => updateInputs("instagramHandle")(value)} />
-              <ArkInput placeholder="Might be useful, especially if you're an artist" error={errors.websiteUrl} value={inputValues.websiteUrl} label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)} />
+              <ArkInput
+                placeholder="coolname" error={errors.username} value={inputValues.username}
+                label="Display Name" onValueChange={(value) => updateInputs("username")(value)}
+                instruction="This is how other users identify you on ARK."
+              />
+              <ArkInput
+                placeholder="bearsarecute@mail.com" error={errors.email} value={inputValues.email}
+                label="Email" onValueChange={(value) => updateInputs("email")(value)}
+                instruction="We'll send you notifications on bid updates, price changes and more."
+              />
+              <ArkInput
+                placeholder="My spirit animal's a bear" error={errors.bio} value={inputValues.bio}
+                label="Bio" onValueChange={(value) => updateInputs("bio")(value)} multiline={true}
+                instruction="Write a little about yourself."
+              />
+
+              <Typography className={classes.social}>Socials</Typography>
+              <ArkInput
+                startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
+                error={errors.twitterHandle} value={inputValues.twitterHandle} label="Twitter"
+                onValueChange={(value) => updateInputs("twitterHandle")(value)}
+              />
+              <ArkInput
+                startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
+                error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram"
+                onValueChange={(value) => updateInputs("instagramHandle")(value)} />
+              <ArkInput
+                inline={true} placeholder="www.imannftartist.com" error={errors.websiteUrl} value={inputValues.websiteUrl}
+                label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
+              />
+
+              <ActiveBidToggle hideCount={true} overrideSm={true} header="EMAIL NOTIFICATIONS" />
               <FancyButton loading={isLoading || loadingProfile} onClick={onUpdateProfile} disabled={hasError() || (!hasChange() && !profileImage)} fullWidth className={classes.profileButton} variant="contained" color="primary">
                 Save Profile
               </FancyButton>

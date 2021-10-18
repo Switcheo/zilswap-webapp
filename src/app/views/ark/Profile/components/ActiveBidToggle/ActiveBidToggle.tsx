@@ -7,6 +7,9 @@ import { AppTheme } from "app/theme/types";
 interface Props extends BoxProps {
   totalCount?: number,
   header: string,
+  switchLabel?: string,
+  hideCount?: boolean,
+  overrideSm?: boolean,
 }
 
 const PurpleSwitch = withStyles({
@@ -44,9 +47,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: "16px 12px 16px 0px",
     display: "flex",
     flexDirection: 'row',
-    [theme.breakpoints.down("sm")]: {
-      flexDirection: "column",
-    }
+  },
+  smRoot: {
+    flexDirection: "column",
   },
   header: {
     display: "flex",
@@ -68,19 +71,24 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const ActiveBidToggle: React.FC<Props> = (props: Props) => {
-  const { header, totalCount = 0, children, className, ...rest } = props;
+  const {
+    switchLabel, hideCount = false, overrideSm = false,
+    header, totalCount = 0, children, className, ...rest
+  } = props;
   const classes = useStyles();
   const isSm = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("sm"));
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <Typography className={classes.header} variant="h1">{header}<Typography className={classes.count} variant="h1">({totalCount})</Typography></Typography>
+      <Typography className={cls(classes.root, { [classes.smRoot]: isSm && !overrideSm })} variant={overrideSm ? "h4" : "h1"}>{header}
+        {!hideCount && <Typography className={classes.count} variant="h1">({totalCount})</Typography>}
+      </Typography>
       <Box flexGrow={1} />
       <FormControlLabel
-        className={classes.formLabel}
+        className={overrideSm ? undefined : classes.formLabel}
         control={<PurpleSwitch />}
-        labelPlacement={isSm ? "end" : "start"}
-        label="Show active offers only&nbsp;"
+        labelPlacement={(isSm && !overrideSm) ? "end" : "start"}
+        label={switchLabel}
       />
     </Box>
   );

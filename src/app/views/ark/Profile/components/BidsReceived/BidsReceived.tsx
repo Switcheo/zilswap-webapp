@@ -24,7 +24,7 @@ const BidsReceived: React.FC<Props> = (props: Props) => {
 
   return (
     <Box className={cls(classes.root, className)}>
-      <ActiveBidToggle totalCount={1} header="Bids Received" />
+      <ActiveBidToggle switchLabel="Show active offers only&nbsp;" totalCount={1} header="Bids Received" />
       <ArkBidsTable bids={[]} />
     </Box>
   );
