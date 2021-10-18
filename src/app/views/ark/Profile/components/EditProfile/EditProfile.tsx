@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Box, BoxProps, IconButton, TextField, Typography } from "@material-ui/core";
+import { Box, BoxProps, Collapse, IconButton, TextField, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,7 +10,7 @@ import { ArkClient } from "core/utilities";
 import { EmailRegex, AlphaNumericRegex } from "app/utils/constants";
 import { useAsyncTask, useNetwork, useToaster, useTaskSubscriber } from "app/utils";
 import { MarketPlaceState, OAuth, Profile, RootState } from "app/store/types";
-import { ArkInput, FancyButton } from "app/components";
+import { ArkInput, FancyButton, ArkCheckbox } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
 import ActiveBidToggle from "../ActiveBidToggle";
@@ -20,88 +20,6 @@ interface Props extends BoxProps {
   profile?: Profile;
   wallet?: ConnectedWallet | null;
 }
-
-const useStyles = makeStyles((theme: AppTheme) => ({
-  root: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  container: {
-    maxWidth: "680px",
-    display: "row",
-  },
-  content: {
-    marginTop: theme.spacing(2),
-    display: "flex",
-    flexDirection: "row-reverse",
-    [theme.breakpoints.down("sm")]: {
-      flexDirection: "column",
-    }
-  },
-  profileButton: {
-    marginTop: theme.spacing(2),
-    padding: "16px",
-    marginBottom: 14,
-    minHeight: "50px",
-    width: "100%",
-    borderRadius: "12px"
-  },
-  backButton: {
-    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
-    opacity: "50%",
-    borderRadius: "12px",
-    paddingLeft: 0,
-  },
-  extraMargin: {
-    marginLeft: theme.spacing(2)
-  },
-  profileImage: {
-    height: 110,
-    width: 110,
-    border: `5px solid #0D1B24`,
-    borderRadius: "50%",
-    backgroundColor: "#DEFFFF",
-  },
-  uploadInput: {
-    display: "none",
-  },
-  uploadText: {
-    opacity: "50%",
-    fontSize: "14px",
-  },
-  uploadBox: {
-    cursor: "pointer",
-    maxHeight: 200,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-  },
-  connectionText: {
-    margin: theme.spacing(1),
-  },
-  labelButton: {
-    borderRadius: 8,
-    padding: "8px 16px",
-    maxWidth: 80,
-    alignSelf: "center",
-    marginTop: theme.spacing(1),
-    backgroundColor: theme.palette.action?.active,
-    color: theme.palette.primary.contrastText,
-    cursor: "pointer",
-    "&:hover": {
-      opacity: 0.5,
-    }
-  },
-  social: {
-    fontSize: "16px",
-    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
-    fontFamily: "Avenir Next LT Pro",
-    fontWeight: "bold",
-    marginTop: theme.spacing(1)
-  }
-}));
 
 const EditProfile: React.FC<Props> = (props: Props) => {
   const { wallet, profile, onBack, children, className, ...rest } = props;
@@ -128,6 +46,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
     instagramHandle: profile?.instagramHandle || "",
     websiteUrl: profile?.websiteUrl || "",
   })
+  const [enableEmailNotification, setEnableEmailNotification] = useState(false);
   const toaster = useToaster(false)
   const dispatch = useDispatch();
   const [loadingProfile] = useTaskSubscriber("loadProfile");
@@ -341,7 +260,31 @@ const EditProfile: React.FC<Props> = (props: Props) => {
                 label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
               />
 
-              <ActiveBidToggle hideCount={true} overrideSm={true} header="EMAIL NOTIFICATIONS" />
+              <ActiveBidToggle className={classes.switch} isChecked={enableEmailNotification} onChecked={(isChecked) => setEnableEmailNotification(isChecked)} hideCount={true} overrideSm={true} header="EMAIL NOTIFICATIONS" />
+
+              <Collapse in={enableEmailNotification}>
+                <Box display="flex" flexDirection="column">
+                  <ArkCheckbox className={classes.checkbox}
+                    lineHeader="Item Sold" lineFooter="When someone buys your item."
+                  />
+                  <ArkCheckbox className={classes.checkbox}
+                    lineHeader="Bid Activity" lineFooter="When someone bids on your item."
+                  />
+                  <ArkCheckbox className={classes.checkbox}
+                    lineHeader="Auction Expiration" lineFooter="When your auction expires."
+                  />
+                  <ArkCheckbox className={classes.checkbox}
+                    lineHeader="Successful Purchase" lineFooter="When you buy an item."
+                  />
+                  <ArkCheckbox className={classes.checkbox}
+                    lineHeader="Successful Bid" lineFooter="When you place a bid on an item."
+                  />
+                  <ArkCheckbox className={classes.checkbox}
+                    lineHeader="Outbid" lineFooter="When someone outbids you in an auction."
+                  />
+                </Box>
+              </Collapse>
+
               <FancyButton loading={isLoading || loadingProfile} onClick={onUpdateProfile} disabled={hasError() || (!hasChange() && !profileImage)} fullWidth className={classes.profileButton} variant="contained" color="primary">
                 Save Profile
               </FancyButton>
@@ -364,5 +307,94 @@ const EditProfile: React.FC<Props> = (props: Props) => {
     </Box>
   );
 };
+
+
+const useStyles = makeStyles((theme: AppTheme) => ({
+  root: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  container: {
+    maxWidth: "680px",
+    display: "row",
+  },
+  content: {
+    marginTop: theme.spacing(2),
+    display: "flex",
+    flexDirection: "row-reverse",
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
+    }
+  },
+  profileButton: {
+    marginTop: theme.spacing(2),
+    padding: "16px",
+    marginBottom: 14,
+    minHeight: "50px",
+    width: "100%",
+    borderRadius: "12px"
+  },
+  backButton: {
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    opacity: "50%",
+    borderRadius: "12px",
+    paddingLeft: 0,
+  },
+  extraMargin: {
+    marginLeft: theme.spacing(2)
+  },
+  profileImage: {
+    height: 110,
+    width: 110,
+    border: `5px solid #0D1B24`,
+    borderRadius: "50%",
+    backgroundColor: "#DEFFFF",
+  },
+  uploadInput: {
+    display: "none",
+  },
+  uploadText: {
+    opacity: "50%",
+    fontSize: "14px",
+  },
+  uploadBox: {
+    cursor: "pointer",
+    maxHeight: 200,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  connectionText: {
+    margin: theme.spacing(1),
+  },
+  labelButton: {
+    borderRadius: 8,
+    padding: "8px 16px",
+    maxWidth: 80,
+    alignSelf: "center",
+    marginTop: theme.spacing(1),
+    backgroundColor: theme.palette.action?.active,
+    color: theme.palette.primary.contrastText,
+    cursor: "pointer",
+    "&:hover": {
+      opacity: 0.5,
+    }
+  },
+  social: {
+    fontSize: "16px",
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    fontFamily: "Avenir Next LT Pro",
+    fontWeight: "bold",
+    marginTop: theme.spacing(1)
+  },
+  switch: {
+    paddingBottom: 0,
+  },
+  checkbox: {
+    marginBottom: theme.spacing(1),
+  }
+}));
 
 export default EditProfile;

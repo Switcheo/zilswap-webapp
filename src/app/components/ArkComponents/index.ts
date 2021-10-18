@@ -7,3 +7,4 @@ export { default as ArkNavDrawer } from "./ArkNavDrawer";
 export { default as ArkBreadcrumb } from "./ArkBreadcrumb";
 export { default as ArkBidsTable } from "./ArkBidsTable";
 export { default as SocialLinkGroup } from "./SocialLinkGroup";
+export { default as ArkCheckbox } from "./ArkCheckbox";
