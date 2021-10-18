@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Box, BoxProps, Collapse, IconButton, TextField, Typography } from "@material-ui/core";
+import { Box, BoxProps, Collapse, IconButton, TextField, Typography, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,6 +14,7 @@ import { ArkInput, FancyButton, ArkCheckbox } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
 import ActiveBidToggle from "../ActiveBidToggle";
+import { ImageDialog } from "./components";
 
 interface Props extends BoxProps {
   onBack: () => void;
@@ -51,6 +52,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch();
   const [loadingProfile] = useTaskSubscriber("loadProfile");
   const inputRef = useRef<HTMLDivElement | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -127,8 +129,12 @@ const EditProfile: React.FC<Props> = (props: Props) => {
     reader.readAsDataURL(files[0]);
   }
 
-  const onUpdateProfile = () => {
+  const onUpdateProfile = (queue?: boolean) => {
     runUpdateProfile(async () => {
+      if (!hasChange() && !profileImage) {
+        if (queue) onBack();
+        return;
+      }
       let filteredData: any = {};
       Object.keys(inputValues).forEach((key) => {
         if (inputValues[key] && (inputValues[key] !== (profile as any)[key])) {
@@ -160,6 +166,8 @@ const EditProfile: React.FC<Props> = (props: Props) => {
         } else {
           toaster("Error updating profile");
         }
+        if (queue) onBack();
+        return;
       }
       toaster("Image updated");
     });
@@ -214,10 +222,10 @@ const EditProfile: React.FC<Props> = (props: Props) => {
         {wallet && (
           <Box className={classes.content}>
             <Box display="flex" justifyContent="center" paddingLeft={10} paddingRight={10}>
-              <label htmlFor="ark-profile-image" className={classes.uploadBox}>
+              <label className={classes.uploadBox}>
                 {(profileImage || profile?.profileImage?.url) && (<img alt="" className={classes.profileImage} src={profileImage?.toString() || profile?.profileImage?.url || ""} />)}
                 {!profileImage && !profile?.profileImage?.url && (<div className={classes.profileImage} />)}
-                <label htmlFor="ark-profile-image" className={classes.labelButton}>Select</label>
+                <Button onClick={() => setOpenDialog(true)} className={classes.labelButton}>Select</Button>
               </label>
               <TextField
                 className={classes.uploadInput}
@@ -285,7 +293,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
                 </Box>
               </Collapse>
 
-              <FancyButton loading={isLoading || loadingProfile} onClick={onUpdateProfile} disabled={hasError() || (!hasChange() && !profileImage)} fullWidth className={classes.profileButton} variant="contained" color="primary">
+              <FancyButton loading={isLoading || loadingProfile} onClick={() => onUpdateProfile()} disabled={hasError() || (!hasChange() && !profileImage)} fullWidth className={classes.profileButton} variant="contained" color="primary">
                 Save Profile
               </FancyButton>
             </Box>
@@ -304,6 +312,11 @@ const EditProfile: React.FC<Props> = (props: Props) => {
           </Box>
         )}
       </Box>
+      <ImageDialog
+        onCloseDialog={() => setOpenDialog(false)}
+        onBack={onBack} open={openDialog}
+        onSave={onUpdateProfile}
+      />
     </Box>
   );
 };
