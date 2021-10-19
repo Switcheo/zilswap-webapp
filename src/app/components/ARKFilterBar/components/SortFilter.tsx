@@ -143,7 +143,7 @@ const SortFilter = () => {
   useEffect(() => {
     dispatch(updateFilter({
       ...marketPlaceState.filter,
-      sortBy: sortBy
+      sortBy
     }))
     handleClose()
     // eslint-disable-next-line
@@ -251,7 +251,7 @@ const SortFilter = () => {
               <Checkmark />
             }
           </Box>
-          <Box className={classes.filterOption} onClick={() => setSortBy(SortBy.RarityDescending)}>
+          {/* <Box className={classes.filterOption} onClick={() => setSortBy(SortBy.RarityDescending)}>
             <Box marginRight={1} className={cls(classes.sortIcon, {[classes.sortIconSelected]: sortBy === SortBy.RarityDescending})}>{iconForType(SortBy.RarityDescending)}</Box>
             <Box flexGrow={1}>
               <Text className={cls(classes.filterValue, {
@@ -272,7 +272,7 @@ const SortFilter = () => {
             {sortBy === SortBy.RarityAscending &&
               <Checkmark />
             }
-          </Box>
+          </Box> */}
           <Box className={classes.filterOption} onClick={() => setSortBy(SortBy.MostRecent)}>
             <Box marginRight={1} className={cls(classes.sortIcon, {[classes.sortIconSelected]: sortBy === SortBy.MostRecent})}>{iconForType(SortBy.MostRecent)}</Box>
             <Box flexGrow={1}>
@@ -295,7 +295,7 @@ const SortFilter = () => {
               <Checkmark />
             }
           </Box>
-          <Box className={classes.filterOption} onClick={() => setSortBy(SortBy.MostViewed)}>
+          {/* <Box className={classes.filterOption} onClick={() => setSortBy(SortBy.MostViewed)}>
             <Box marginRight={1} className={cls(classes.sortIcon, {[classes.sortIconSelected]: sortBy === SortBy.MostViewed})}>{iconForType(SortBy.MostViewed)}</Box>
             <Box flexGrow={1}>
               <Text className={cls(classes.filterValue, {
@@ -305,7 +305,7 @@ const SortFilter = () => {
             {sortBy === SortBy.MostViewed &&
               <Checkmark />
             }
-          </Box>
+          </Box> */}
         </Box>
       </Popover>
     </>

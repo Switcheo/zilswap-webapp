@@ -104,7 +104,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   filterCategoryButton: {
     display: "block",
-    marginBottom: 12
+    marginBottom: 14
   },
   filterCategoryLabel: {
     fontSize: 18,
@@ -116,7 +116,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   filterLabel: {
     fontSize: 12,
-    opacity: 0.5
+    opacity: 0.5,
+    lineHeight: '22px',
+    marginTop: -6,
   },
   filterValue: {
     height: 18,
@@ -129,11 +131,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   filterValueSubText: {
     fontSize: 12,
     opacity: 0.5,
-    marginTop: 2,
-    textAlign: "left"
+    marginTop: 3,
+    textAlign: "left",
+    "&.hasSelected": {
+      color: "#00FFB0",
+      opacity: 1,
+    },
   },
   filterSelectedValue: {
-    display: "flex",
+    textAlign: "left",
     alignItems: "start",
     justifyContent: "start"
   },
@@ -154,7 +160,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   filterSelectedValueContainer: {
     textAlign: "left",
     "&:not(:first-child)": {
-      marginLeft: 4
+      marginLeft: 6,
     }
   },
   filterOption: {
@@ -170,20 +176,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     margin: 0,
     "& .MuiFormControlLabel-label": {
       flexGrow: 1,
+    },
+    "& $filterValue": {
+      width: "100%",
     }
   },
   filterOptionDetail: {
     fontWeight: 'normal'
   },
-  filterSelectButton: {
+  filterResetButton: {
     background: "none",
     outline: "none",
     border: "none",
-    color: theme.palette.type === "dark" ? "white" : "",
-    fontSize: 12,
-    opacity: 0.5,
+    color: "#00FFB0",
+    opacity: 0.8,
+    fontSize: 11,
     fontWeight: "bold",
-    cursor: "pointer"
+    cursor: "pointer",
   },
   attributeIcon: {
     display: "inline-block",
@@ -238,6 +247,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 interface Props {
   collectionAddress: any
+}
+
+const abbreviateTraitValue = (traitValue: string) => {
+  if (traitValue.length < 8) return traitValue
+  const parts = traitValue.split(' ')
+  if (parts.length > 3) return parts[0].slice(0, 4) + ' ' + parts.slice(1).map(p => p.slice(0,1)).join("").slice(0, 9)
+  else return parts.map(p => p.slice(0, 4)).join(" ")
 }
 
 const AttributesFilter = (props: Props) => {
@@ -342,10 +358,10 @@ const AttributesFilter = (props: Props) => {
       const result = pickBy(updatedTraits[trait].values, function(value, key) {
         return value.value.toLowerCase().includes(search.toLowerCase())
       })
-      
+
       updatedTraits[trait].values = result
     })
-  
+
     setFilteredTraits(updatedTraits)
   }, [search, traits])
 
@@ -354,32 +370,26 @@ const AttributesFilter = (props: Props) => {
     return (
       <>
         <div className={classes.filterSelectedValue}>
-          {Object.values(traits).map(trait => {
-            const result = pickBy(traits[trait.trait].values, function(value, key) {
-              return value.selected
-            })
-            const selectedCount = Object.keys(result).length
+          {Object.values(traits).map(type => {
+            const selected = Object.values(type.values).filter(value => value.selected) as ReadonlyArray<TraitValue>
+            const selectedCount = Object.keys(selected).length
             totalSelectCount += selectedCount
-            return (
-              <span key={trait.trait} className={classes.filterSelectedValueContainer}>
-                {selectedCount > 0 &&
-                  <>
-                    <span className={classes.filterSelectedValueCategory}>{trait.trait}:</span>
-                    <span>
-                      {Object.values(result).map(value => (
-                        <span className={classes.filterSelectedValueValue}>{value.value}</span>
-                      ))}
-                    </span>
-                  </>
+            return selectedCount > 0 && (
+              <span key={type.trait} className={classes.filterSelectedValueContainer}>
+                <span className={classes.filterSelectedValueCategory}>{type.trait}:</span>
+                {
+                  selectedCount > 2 || totalSelectCount > 3 ?
+                  <span className={classes.filterSelectedValueValue}>{selectedCount}</span>
+                  :
+                  selected.map(selected => (<span className={classes.filterSelectedValueValue}>
+                    {abbreviateTraitValue(selected.value)}
+                  </span>))
                 }
               </span>
             )
           })}
+          {totalSelectCount === 0 && <span>ALL</span>}
         </div>
-
-        {totalSelectCount === 0 &&
-          <span>ALL</span>
-        }
       </>
     )
     // eslint-disable-next-line
@@ -415,9 +425,8 @@ const AttributesFilter = (props: Props) => {
           <Box display="flex">
             <Box className={classes.categories}>
               <Text className={classes.filterCategoryLabel}>CATEGORIES</Text>
-              <Box display="flex" paddingY={1} marginBottom={1}
-              >
-                <button className={classes.filterSelectButton} onClick={() => reset()}>Reset Filter</button>
+              <Box display="flex" paddingY={0.6} mb={2} mt={0}>
+                <button className={classes.filterResetButton} onClick={reset}>Reset Filters</button>
               </Box>
 
               {Object.values(filteredTraits).map(trait => {
@@ -426,7 +435,7 @@ const AttributesFilter = (props: Props) => {
                 return (
                   <a key={trait.trait} href={`#${trait.trait}`} className={classes.filterCategoryButton}>
                     <Text className={classes.filterCategoryLabel}>{trait.trait}</Text>
-                    <Text className={classes.filterValueSubText}>{selectedCount} of {values.length} selected</Text>
+                    <Text className={cls(classes.filterValueSubText, { hasSelected: selectedCount > 0 })}>{selectedCount} of {values.length} selected</Text>
                   </a>
                 )
               })}
@@ -450,7 +459,7 @@ const AttributesFilter = (props: Props) => {
                         <Text className={classes.attributeMeta}>Att. Rarity</Text>
                         <Text className={classes.attributeMeta}>Match</Text>
                       </span>
-                      
+
                       {Object.values(trait.values).map(value => {
                         return (
                           <Box key={value.value} marginBottom={1}>

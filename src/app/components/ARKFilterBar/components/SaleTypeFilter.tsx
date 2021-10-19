@@ -79,7 +79,9 @@ const useStyles = makeStyles((theme: AppTheme) =>({
   },
   filterLabel: {
     fontSize: 12,
-    opacity: 0.5
+    opacity: 0.5,
+    lineHeight: '22px',
+    marginTop: -6,
   },
   filterValue: {
     fontSize: 16,
@@ -100,7 +102,10 @@ const useStyles = makeStyles((theme: AppTheme) =>({
     paddingBottom: 2,
     color: theme.palette.type === "dark" ? "white" : "",
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
+    "& $filterValue": {
+      width: "100%",
+    }
   },
   filterOptionDetail: {
     fontWeight: 'normal'
@@ -152,19 +157,7 @@ const SaleTypeFilter = () => {
         <Box display="flex" flexDirection="column" flexGrow={1} alignItems="start">
           <div className={classes.filterLabel}>Sale Type</div>
           <div className={classes.filterValue}>
-            {Object.values(saleType).filter(value => value === false).length === 0 ? (
-              <>ALL</>
-            ) : (
-              <>
-                {saleType.fixed_price &&
-                  <>FIXED PRICE</>
-                }
-
-                {saleType.timed_auction &&
-                  <>TIMED AUCTION</>
-                }
-              </>
-            )}
+            {saleType.fixed_price ? 'BUY NOW' : 'ALL'}
           </div>
         </Box>
         <Box display="flex" alignItems="center" justifyContent="center">
@@ -194,9 +187,9 @@ const SaleTypeFilter = () => {
                 checked={saleType.fixed_price}
                 onChange={handleChange}
                 disableRipple
-              />} label="FIXED PRICE" />
+              />} label="BUY NOW" />
           </Box>
-          <Box className={classes.filterOption}>
+          {/* <Box className={classes.filterOption}>
             <FormControlLabel className={classes.filterValue} value="timed_auction" control={<Checkbox
               className={classes.radioButton}
               checkedIcon={<CheckedIcon />}
@@ -205,7 +198,7 @@ const SaleTypeFilter = () => {
               onChange={handleChange}
               disableRipple
             />} label="TIMED AUCTION" />
-          </Box>
+          </Box> */}
         </Box>
       </Popover>
     </>
