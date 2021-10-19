@@ -248,7 +248,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           {/* NFTs in collection */}
           <Grid container spacing={2} className={classes.nftContainer}>
             {collection && tokens.map((token) => (
-              <Grid item key={token.tokenId} xs={12} md={3} className={classes.gridItem}>
+              <Grid item key={token.tokenId} xs={12} lg={3} md={4} sm={6} className={classes.gridItem}>
                 <NftCard
                   token={token}
                   collectionAddress={collection.address}
