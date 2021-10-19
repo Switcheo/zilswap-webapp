@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import { SocialLinkGroup } from "app/components";
 import { Nft } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask } from "app/utils";
+import { toHumanNumber, useAsyncTask } from "app/utils";
 import { RootState, MarketPlaceState, OAuth, WalletState } from "app/store/types";
 import { ArkClient } from "core/utilities";
 import { actions } from "app/store";
@@ -20,10 +20,11 @@ import { actions } from "app/store";
 
 interface Props extends CardProps {
   token?: Nft | null,
+  onReload?: (bypass?: boolean) => void,
 }
 
 const NftImage: React.FC<Props> = (props: Props) => {
-  const { token, children, className, ...rest } = props;
+  const { onReload, token, children, className, ...rest } = props;
   const classes = useStyles();
   const [liked, setLiked] = useState<boolean>(false);
   const { oAuth } = useSelector<RootState, MarketPlaceState>((state) => state.marketplace);
@@ -53,6 +54,7 @@ const NftImage: React.FC<Props> = (props: Props) => {
         await arkClient.removeFavourite(token!.collection!.address, token.tokenId, newOAuth!.access_token);
       }
       setLiked(!liked);
+      if (onReload) onReload(true);
     })
   }
 
@@ -63,7 +65,7 @@ const NftImage: React.FC<Props> = (props: Props) => {
           className={classes.cardHeader}
           title={
             <Box display="flex" alignItems="center">
-              <Typography className={classes.likes}>20K</Typography>
+              <Typography className={classes.likes}>{toHumanNumber(token?.statistics?.favourites || 0)}</Typography>
               <IconButton
                 onClick={() => likeToken()}
                 className={classes.likeIconButton}

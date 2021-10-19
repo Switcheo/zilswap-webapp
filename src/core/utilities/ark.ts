@@ -130,8 +130,8 @@ export class ArkClient {
     return output;
   }
 
-  getNftToken = async (address: string, tokenId: string) => {
-    const url = this.http.path("collection/token/detail", { address, tokenId });
+  getNftToken = async (address: string, tokenId: string, viewer?: string) => {
+    const url = this.http.path("collection/token/detail", { address, tokenId }, { viewer });
     const result = await this.http.get({ url });
     const output = await result.json();
     await this.checkError(output);

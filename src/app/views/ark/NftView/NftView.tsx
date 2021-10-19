@@ -2,9 +2,10 @@ import React, { Fragment, useEffect, useState } from "react";
 import { Avatar, Badge, Box, Container, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { ArkBidsTable, ArkBreadcrumb, ArkTab } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
-import { getBlockchain } from "app/saga/selectors";
+import { getBlockchain, getWallet } from "app/saga/selectors";
 import { Cheque, Nft, Profile, TraitValue } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
@@ -17,6 +18,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
   const { network } = useSelector(getBlockchain);
+  const { wallet } = useSelector(getWallet);
   const [token, setToken] = useState<Nft>();
   const [runGetNFTDetails] = useAsyncTask("runGetNFTDetails");
   const [bids, setBids] = useState<Cheque[]>([]);
@@ -31,22 +33,9 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
 
   // fetch nft data, if none redirect back to collections / show not found view
   useEffect(() => {
-    const arkClient = new ArkClient(network);
-    runGetNFTDetails(async () => {
-      const address = fromBech32Address(collectionId).toLowerCase()
-      const { result } = await arkClient.getNftToken(address, tokenId);
-      setToken(result.model);
-      setTraits(result.model.traitValues);
-
-      const { model: { owner } } = result
-      if (owner) {
-        runGetOwner(async () => {
-          const ownerResult = await arkClient.getProfile(owner.address);
-          setOwner(ownerResult.result.model)
-        })
-      }
-    })
+    getNFTDetails()
     runGetBids(async () => {
+      const arkClient = new ArkClient(network);
       const collectionAddress = fromBech32Address(collectionId).toLowerCase()
       const result = await arkClient.getNftCheques({ collectionAddress, tokenId });
 
@@ -54,6 +43,32 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     })
     // eslint-disable-next-line
   }, [collectionId, tokenId, network]);
+
+  useEffect(() => {
+    if (wallet) {
+      getNFTDetails();
+    }
+    // eslint-disable-next-line
+  }, [wallet])
+
+  const getNFTDetails = (bypass?: boolean) => {
+    runGetNFTDetails(async () => {
+      const arkClient = new ArkClient(network);
+      const address = fromBech32Address(collectionId).toLowerCase()
+      const viewerAddress = wallet?.addressInfo.byte20.toLocaleLowerCase()
+      const { result } = await arkClient.getNftToken(address, tokenId, viewerAddress);
+      setToken(result.model);
+      setTraits(result.model.traitValues);
+
+      const { model: { owner } } = result
+      if (owner && !bypass) {
+        runGetOwner(async () => {
+          const ownerResult = await arkClient.getProfile(owner.address);
+          setOwner(ownerResult.result.model)
+        })
+      }
+    })
+  }
 
   const breadcrumbs = [
     { path: "/ark/collections", value: "Collections" },
@@ -74,7 +89,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
 
         {/* Nft image and main info */}
         <Box display="flex" mt={3} justifyContent="center" className={classes.imageInfoContainer}>
-          <NftImage className={classes.bearImage} token={token} />
+          <NftImage onReload={getNFTDetails} className={classes.bearImage} token={token} />
           <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} />
         </Box>
 
@@ -87,12 +102,12 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
             <Typography className={classes.aboutText}> Learn more at thebear.market.</Typography>
             <Box className={classes.xsColumn} mt={4} display="flex" justifyContent="center">
               <Box flexGrow={1}>
-                <MenuItem className={classes.aboutMenuItem} button={false}>
+                <MenuItem component={Link} to={`/ark/profile?address=${owner?.address}`} className={classes.aboutMenuItem} button={false}>
                   <ListItemIcon><Avatar className={classes.avatar} alt="owner" src={owner?.profileImage?.url || ""} /></ListItemIcon>
                   <Box marginLeft={1}>
                     <Typography>Owner</Typography>
                     <Typography variant="h3" className={classes.aboutNameText}>{owner?.username || "Unnamed"}</Typography>
-                    <Typography>Lvl 1</Typography>
+                    <Typography>{""}</Typography>
                   </Box>
                 </MenuItem>
               </Box>
