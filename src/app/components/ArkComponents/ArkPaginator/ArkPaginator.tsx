@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginRight: theme.spacing(1),
   },
   selected: {
-    textDecoration: "underline",
+    // textDecoration: "underline",
     color: theme.palette.primary.dark
   },
 }));

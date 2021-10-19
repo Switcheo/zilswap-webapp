@@ -2,6 +2,7 @@ import { call, fork, put, select, take, takeLatest } from "redux-saga/effects";
 import { SimpleMap } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { ArkClient, logger } from "core/utilities";
 import { actions } from "app/store";
+import { SortBy } from "app/store/marketplace/actions";
 import { getBlockchain, getMarketplace, getWallet } from "../selectors";
 
 function* loadNftList() {
@@ -10,6 +11,7 @@ function* loadNftList() {
     yield put(actions.Layout.addBackgroundLoading("reloadNftList", "RELOAD_NFT_LIST"));
     const { network } = getBlockchain(yield select());
     const { filter } = getMarketplace(yield select());
+    const { wallet } = getWallet(yield select());
     const collectionAddress = filter.collectionAddress;
     logger("load nft list", "filter", filter);
 
@@ -35,6 +37,31 @@ function* loadNftList() {
     const query: ArkClient.SearchCollectionParams = {
       q: JSON.stringify({ traits }),
     };
+    if (wallet) {
+      query.viewer = wallet.addressInfo.byte20
+    }
+    switch (filter.sortBy) {
+      case SortBy.PriceDescending: {
+        query.sort = 'price'
+        query.sortDir = 'desc'
+        break
+      }
+      case SortBy.PriceAscending: {
+        query.sort = 'price'
+        query.sortDir = 'asc'
+        break
+      }
+      case SortBy.MostRecent: {
+        query.sort = 'listedAt'
+        query.sortDir = 'desc'
+        break
+      }
+      case SortBy.MostLoved: {
+        query.sort = 'favouriteCount'
+        query.sortDir = 'desc'
+        break
+      }
+    }
 
     const arkClient = new ArkClient(network); // TODO: refactor client into redux
     const tokenResult = (yield call(arkClient.searchCollection, collectionAddress, query)) as unknown as any;
