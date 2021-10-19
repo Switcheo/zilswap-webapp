@@ -252,15 +252,17 @@ export class ArkClient {
     const { side, token, price, feeAmount, expiry, nonce } = params
     if (token.address.startsWith("zil1"))
       token.address = fromBech32Address(token.address);
-    const brokerAddress = this.brokerAddress
-    let buffer = serializeValue(brokerAddress)
-    buffer += sha256(strToHex(`${brokerAddress}.${side}`))
-    buffer += sha256(serializeNFT(brokerAddress, token))
-    buffer += sha256(serializePrice(brokerAddress, price))
-    buffer += sha256(serializeUint128(side === 'Buy' ? 0 : feeAmount))
-    buffer += sha256(strToHex(expiry.toString())) // BNum is serialized as a String
-    buffer += sha256(serializeUint128(nonce))
-    return sha256(buffer)
+    const brokerAddress = this.brokerAddress;
+    const buffer = [];
+    buffer.push(brokerAddress.replace("0x", "").toLowerCase())
+    buffer.push(sha256(strToHex(`${brokerAddress}.${side}`)))
+    buffer.push(sha256(serializeNFT(brokerAddress, token)))
+    buffer.push(sha256(serializePrice(brokerAddress, price)))
+    buffer.push(sha256(serializeUint128(side === 'Buy' ? 0 : feeAmount)))
+    buffer.push(sha256(strToHex(expiry.toString())))
+    buffer.push(sha256(serializeUint128(nonce)))
+    logger("ark cheque hashes", buffer);
+    return sha256(buffer.join(""))
   }
 
   getBrokerBrokerAddress() {
@@ -364,9 +366,6 @@ export class ArkClient {
       argtypes: [],
       arguments: [nftAddress, tokenId],
       constructor: `${this.brokerAddress}.NFT`,
-      _serialization: {
-        numByteSize: { 1: 32 }
-      },
     }
   }
 
@@ -441,57 +440,31 @@ const parseChequeSide = (side: string): "Sell" | "Buy" => {
   }
 }
 
-const serializeValue = (val: any, numByteSize = 16) => {
-  if (val.arguments) {
-    return serializeADT(val)
-  } else if (val.startsWith('0x')) {
-    return val.replace('0x', '').toLowerCase()
-  } else if (!new BigNumber(val).isNaN()) {
-    return serializeUint(val, numByteSize);
-  } else {
-    return strToHex(val)
-  }
-}
-
-const serializeADT = (adt: any) => {
-  let buffer = strToHex(adt.constructor)
-  adt.arguments.forEach((arg: any, i: number) => {
-    const numByteSize = adt._serialization?.numByteSize?.[i]
-    buffer += serializeValue(arg, numByteSize)
-  })
-  return buffer
-}
-
 const serializeNFT = (brokerAddress: string, token: { id: string, address: string }): string => {
-  return serializeValue({
-    constructor: `${brokerAddress}.NFT`,
-    arguments: [
-      token.address,
-      token.id,
-    ],
-    _serialization: {
-      numByteSize: { 1: 32 }
-    },
-  })
+  let buffer = strToHex(`${brokerAddress}.NFT`);
+  buffer += token.address.replace('0x', '').toLowerCase();
+  buffer += serializeUint256(token.id);
+  return buffer;
 }
 
 const serializePrice = (brokerAddress: string, price: { amount: BigNumber, address: string }): string => {
-  const isZil = price.address === ZIL_HASH;
-  return serializeValue({
-    arguments: [
-      {
-        argtypes: [],
-        arguments: isZil ? [] : [price.address],
-        constructor: isZil ? `${brokerAddress}.Zil` : `${brokerAddress}.Token`,
-      },
-      price.amount.toString(10)
-    ],
-    constructor: `${brokerAddress}.Coins`,
-  })
+  let buffer = strToHex(`${brokerAddress}.Coins`)
+  if (price.address === ZIL_HASH) {
+    buffer += strToHex(`${brokerAddress}.Zil`)
+  } else {
+    buffer += strToHex(`${brokerAddress}.Token`)
+    buffer += price.address.replace('0x', '').toLowerCase()
+  }
+  buffer += serializeUint128(price.amount)
+  return buffer;
 }
 
-const serializeUint128 = (val: BigNumber | number): string => {
+const serializeUint128 = (val: BigNumber | number | string): string => {
   return serializeUint(val, 16);
+}
+
+const serializeUint256 = (val: BigNumber | string): string => {
+  return serializeUint(val, 32);
 }
 
 const serializeUint = (val: BigNumber | string | number, size: number): string => {
@@ -516,7 +489,7 @@ export namespace ArkClient {
     tokenId: string;
     price: { amount: BigNumber, address: string };
     expiry: number;
-    nonce: BigNumber;
+    nonce: string;
     address: string;
     collectionAddress: string;
     publicKey: string;
@@ -530,7 +503,7 @@ export namespace ArkClient {
     price: { amount: BigNumber, address: string };
     feeAmount: BigNumber;
     expiry: number;
-    nonce: BigNumber;
+    nonce: string;
   }
 
   export interface ExecuteTradeParams {

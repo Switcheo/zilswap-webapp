@@ -49,7 +49,7 @@ const SellDialog: React.FC<Props> = (props: Props) => {
       const hexTokenAddress = fromBech32Address(address).toLowerCase();
       await arkClient.approveAllowanceIfRequired(hexTokenAddress, walletAddress, ZilswapConnector.getSDK());
 
-      const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0); // int32 max 2147483647
+      const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 300; // blocks
       const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({

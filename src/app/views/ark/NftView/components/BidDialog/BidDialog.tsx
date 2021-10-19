@@ -59,7 +59,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
       const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
 
       const arkClient = new ArkClient(network);
-      const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0); // int32 max 2147483647
+      const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 300; // blocks
       const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
