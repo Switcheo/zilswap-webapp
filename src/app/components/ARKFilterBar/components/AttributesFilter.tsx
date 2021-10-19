@@ -116,7 +116,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   filterLabel: {
     fontSize: 12,
-    opacity: 0.5,
+    opacity: 0.6,
     lineHeight: '22px',
     marginTop: -6,
   },
@@ -145,12 +145,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   filterSelectedValueCategory: {
     display: "inline-block",
+    opacity: 0.8,
     marginRight: 4,
   },
   filterSelectedValueValue: {
     display: "inline-block",
     marginRight: 2,
-    opacity: 0.5,
+    opacity: 1,
     "&:not(:last-child)": {
       "&:after": {
         content: '", "'
@@ -376,7 +377,7 @@ const AttributesFilter = (props: Props) => {
             totalSelectCount += selectedCount
             return selectedCount > 0 && (
               <span key={type.trait} className={classes.filterSelectedValueContainer}>
-                <span className={classes.filterSelectedValueCategory}>{type.trait}:</span>
+                <span className={classes.filterSelectedValueCategory}>{type.trait.toUpperCase()}:</span>
                 {
                   selectedCount > 2 || totalSelectCount > 3 ?
                   <span className={classes.filterSelectedValueValue}>{selectedCount}</span>

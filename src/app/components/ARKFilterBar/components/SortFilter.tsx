@@ -6,18 +6,8 @@ import { AppTheme } from "app/theme/types";
 import { Text } from "app/components";
 import { hexToRGBA } from "app/utils";
 import { MarketPlaceState, RootState } from "app/store/types";
-import { updateFilter } from "app/store/marketplace/actions";
+import { SortBy, updateFilter } from "app/store/marketplace/actions";
 import { ReactComponent as Checkmark } from "./checkmark.svg";
-
-export enum SortBy {
-  PriceDescending,
-  PriceAscending,
-  RarityDescending,
-  RarityAscending,
-  MostRecent,
-  MostLoved,
-  MostViewed
-}
 
 const useStyles = makeStyles((theme: AppTheme) =>({
   button: {
@@ -79,7 +69,7 @@ const useStyles = makeStyles((theme: AppTheme) =>({
   },
   filterLabel: {
     fontSize: 12,
-    opacity: 0.5
+    opacity: 0.6
   },
   filterValue: {
     fontSize: 16,

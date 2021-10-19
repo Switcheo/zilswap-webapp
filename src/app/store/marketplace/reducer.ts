@@ -1,6 +1,5 @@
 import { LocalStorageKeys } from "app/utils/constants";
-import { SortBy } from "app/components/ARKFilterBar/components/SortFilter";
-import { MarketPlaceActionTypes } from "./actions";
+import { SortBy, MarketPlaceActionTypes } from "./actions";
 import { MarketPlaceState } from "./types";
 
 const loadSavedAccessToken = () => {

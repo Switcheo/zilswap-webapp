@@ -1,5 +1,5 @@
-import { SortBy } from "app/components/ARKFilterBar/components/SortFilter";
 import { SimpleMap } from "app/utils";
+import { SortBy } from "./actions";
 
 export interface MarketPlaceState {
   collections: SimpleMap<Collection>;

@@ -1,6 +1,16 @@
 import { CollectionFilter } from "../types"
 import { Nft, OAuth, PaginatedList, Profile } from "./types"
 
+export enum SortBy {
+  PriceDescending,
+  PriceAscending,
+  RarityDescending,
+  RarityAscending,
+  MostRecent,
+  MostLoved,
+  MostViewed
+}
+
 export const MarketPlaceActionTypes = {
   INITIALIZE: "INITIALIZE",
   LOAD_PROFILE: "LOAD_PROFILE",

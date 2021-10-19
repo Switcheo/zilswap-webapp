@@ -79,7 +79,7 @@ const useStyles = makeStyles((theme: AppTheme) =>({
   },
   filterLabel: {
     fontSize: 12,
-    opacity: 0.5,
+    opacity: 0.6,
     lineHeight: '22px',
     marginTop: -6,
   },
