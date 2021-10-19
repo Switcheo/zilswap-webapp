@@ -90,7 +90,10 @@ const NftCard: React.FC<Props> = (props: Props) => {
                 <Typography className={classes.body}>
                   #{token.tokenId}
                 </Typography>
-                <Typography className={classes.body}>~$100,000</Typography>
+                <Box display="flex">
+                  <Typography className={classes.body}>owned by&nbsp;</Typography>
+                  <Typography className={classes.username}>{token.owner?.username || "Unnamed"}</Typography>
+                </Box>
               </Box>
             </Fragment>
           ) : (
@@ -288,6 +291,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "14px",
     lineHeight: "16px",
   },
+  username: {
+    fontSize: "12px",
+    fontWeight: 700,
+    color: "#6BE1FF",
+  }
 }));
 
 export default NftCard;
