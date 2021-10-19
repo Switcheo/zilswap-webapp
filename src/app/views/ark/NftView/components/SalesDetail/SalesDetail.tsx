@@ -10,7 +10,9 @@ import { getWallet, getTokens } from "app/saga/selectors";
 import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
 import { Nft, TokenInfo } from "app/store/types";
+import { useBlockTime } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
+import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { ReactComponent as ZapSVG } from "../assets/zap.svg";
 import { ReactComponent as EllipseSVG } from "../assets/ellipse.svg";
 
@@ -29,10 +31,34 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
   const [tokenPrice, setTokenPrice] = useState<BigNumber | null>(null);
   const [tokenAmount, setTokenAmount] = useState<BigNumber | null>(null);
   const [purchaseCurrency, setPurchaseCurrency] = useState<TokenInfo>();
+  const [blockTime, currentBlock, currentTime] = useBlockTime();
 
   const isOwnToken = useMemo(() => {
     return token?.owner?.address && wallet?.addressInfo.byte20?.toLowerCase() === token?.owner?.address;
   }, [token, wallet?.addressInfo]);
+
+  const expiry = useMemo(() => {
+    if (!token?.bestAsk) return undefined
+    const expiryTime = blockTime.add((token?.bestAsk?.expiry - currentBlock) / BLOCKS_PER_MINUTE, "minutes");
+    const daysleft = expiryTime.diff(currentTime, "days");
+    const hoursLeft = expiryTime.diff(currentTime, "hours");
+    const minsLeft = expiryTime.diff(currentTime, "minutes");
+    const secLeft = expiryTime.diff(currentTime, "seconds");
+    return { expiryTime, daysleft, hoursLeft, minsLeft, secLeft }
+    // eslint-disable-next-line
+  }, [blockTime, token?.bestAsk])
+
+  const bestBid = useMemo(() => {
+    if (!token?.bestBid) return undefined
+
+    const expiryTime = blockTime.add((token?.bestBid?.expiry - currentBlock) / BLOCKS_PER_MINUTE, "minutes");
+    const timeLeft = expiryTime.fromNow();
+    const bidToken = tokens[token?.bestBid?.price.address] || tokens[ZIL_ADDRESS]
+    const placement = new BigNumber(10).pow(bidToken.decimals)
+    const amount = new BigNumber(token?.bestBid?.price.amount).div(placement)
+    return { amount, timeLeft }
+    // eslint-disable-next-line
+  }, [blockTime, token?.bestBid, tokens])
 
   useEffect(() => {
     if (Object.keys(tokens).length && token && token.bestAsk) {
@@ -89,7 +115,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
             <Typography variant="body1" className={cls(classes.saleHeader, classes.halfOpacity)}>Price&nbsp;&nbsp;<Typography variant="body1">${tokenPrice ? tokenPrice.toFixed(11).toString() : "-"}</Typography></Typography>
             <Typography variant="h2" className={classes.price}>{tokenAmount ? tokenAmount.toString() : "-"}{(tokenAmount && purchaseCurrency) ? <CurrencyLogo address={purchaseCurrency.address} currency={purchaseCurrency.symbol} /> : ""}</Typography>
             <Typography variant="body1" className={classes.saleHeader}><Typography className={classes.halfOpacity}>Last:</Typography>&nbsp;150,320&nbsp;<Typography className={classes.halfOpacity}>ZIL Expires in 1 day</Typography></Typography>
-            <Typography variant="body1" className={classes.saleHeader}><Typography className={classes.halfOpacity}>Best:</Typography>&nbsp;150,320&nbsp;<Typography className={classes.halfOpacity}>ZIL Expires in 1 hr</Typography></Typography>
+            {bestBid?.amount && <Typography variant="body1" className={classes.saleHeader}><Typography className={classes.halfOpacity}>Best:</Typography>&nbsp;{bestBid?.amount}&nbsp;<Typography className={classes.halfOpacity}>ZIL {bestBid?.timeLeft || ""}</Typography></Typography>}
           </Box>
           {!isXs && (
             <Box display="flex" className={classes.buttonBox}>
@@ -110,12 +136,12 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
         <Box display="flex">
           <Box flexGrow={1} display="flex" flexDirection="column" className={classes.saleInfoBox}>
             <Typography variant="body1" className={cls(classes.saleHeader, classes.halfOpacity)}>Ends on</Typography>
-            <Typography variant="body1" className={classes.saleHeader}>2 Oct 2021, 3.00pm</Typography>
-            <Box mt={1} display="flex"><Typography className={classes.expiryDate}><EllipseSVG /> 01 D : 04 H : 04 M : 17 S</Typography> <Box flexGrow={1} /> </Box>
+            <Typography variant="body1" className={classes.saleHeader}>{expiry?.expiryTime?.format("D MMM YYYY, HH:mm A") || "-"}</Typography>
+            <Box mt={1} display="flex"><Typography className={classes.expiryDate}><EllipseSVG />{`${expiry?.daysleft || "-"} D : ${expiry?.hoursLeft || "-"}  H : ${expiry?.minsLeft || "-"}  M : ${expiry?.secLeft || "-"}  S`}</Typography> <Box flexGrow={1} /> </Box>
           </Box>
           {!isXs && (
             <Box display="flex" className={classes.buttonBox}>
-              <FancyButton className={classes.bidButton} disableRipple>
+              <FancyButton disabled={!token?.bestAsk} className={classes.bidButton} disableRipple>
                 Place a Bid
               </FancyButton>
             </Box>
@@ -134,7 +160,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
               </FancyButton>
             )}
             <Box mt={2} />
-            <FancyButton fullWidth className={classes.bidButton} disableRipple>
+            <FancyButton disabled={!token?.bestAsk} fullWidth className={classes.bidButton} disableRipple>
               Place a Bid
             </FancyButton>
           </Box>
