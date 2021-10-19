@@ -19,9 +19,9 @@ const ARK_ENDPOINTS: SimpleMap<string> = {
 const LOCALHOST_ENDPOINT = "http://localhost:8181";
 
 
-export const ARK_CONTRACTS: { [key in Network]: string } = {
-  [Network.MainNet]: '',
-  [Network.TestNet]: 'zil10sy6x5y2sss0kv8pxmccek5e38e7pxm93qzs3c',
+export const ARK_CONTRACTS: { [key in Network]: { broker: string, tokenProxy: string } } = {
+  [Network.MainNet]: { broker: '', tokenProxy: '' },
+  [Network.TestNet]: { broker: 'zil1sgf3zpgt6qeflg053pxjwx9s9pxclx3p7s06gp', tokenProxy: 'zil1zmult8jp8q7wjpvjfalnaaue8v72nlcau53qcu' },
 }
 
 const apiPaths = {
@@ -55,14 +55,16 @@ export interface ListQueryParams {
 export class ArkClient {
   public static FEE_BPS = 250;
 
-  private contractAddress: string;
+  public readonly brokerAddress: string;
+  public readonly tokenProxyAddress: string;
   private http: HTTP<typeof apiPaths>;
 
   constructor(
     public readonly network: Network,
   ) {
     this.http = getHttpClient(network);
-    this.contractAddress = fromBech32Address(ARK_CONTRACTS[network]).toLowerCase();
+    this.brokerAddress = fromBech32Address(ARK_CONTRACTS[network].broker).toLowerCase();
+    this.tokenProxyAddress = fromBech32Address(ARK_CONTRACTS[network].tokenProxy).toLowerCase();
   }
 
   checkError = async (result: any) => {
@@ -250,7 +252,7 @@ export class ArkClient {
     const { side, token, price, feeAmount, expiry, nonce } = params
     if (token.address.startsWith("zil1"))
       token.address = fromBech32Address(token.address);
-    const brokerAddress = fromBech32Address(ARK_CONTRACTS[this.network]).toLowerCase()
+    const brokerAddress = this.brokerAddress
     let buffer = serializeValue(brokerAddress)
     buffer += sha256(strToHex(`${brokerAddress}.${side}`))
     buffer += sha256(serializeNFT(brokerAddress, token))
@@ -261,8 +263,8 @@ export class ArkClient {
     return sha256(buffer)
   }
 
-  getBrokerContractAddress() {
-    return this.contractAddress;
+  getBrokerBrokerAddress() {
+    return this.brokerAddress;
   }
 
   // TODO: Refactor zilswap SDK as instance member;
@@ -271,8 +273,8 @@ export class ArkClient {
     const approvalState = response.result.operator_approvals;
 
     const userApprovals = approvalState?.[ownerAddress.toLowerCase()];
-    logger("ark contract approvals", ownerAddress, this.contractAddress, userApprovals);
-    if (userApprovals[this.contractAddress]) return null;
+    logger("ark contract approvals", ownerAddress, this.brokerAddress, userApprovals);
+    if (userApprovals[this.brokerAddress]) return null;
 
     return await this.approveAllowance(tokenAddress, zilswap);
   }
@@ -282,7 +284,7 @@ export class ArkClient {
     const args = [{
       vname: "to",
       type: "ByStr20",
-      value: this.contractAddress,
+      value: this.brokerAddress,
     }];
 
     const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
@@ -311,11 +313,11 @@ export class ArkClient {
 
     const args = [{
       vname: "token",
-      type: `${this.contractAddress}.NFT`,
+      type: `${this.brokerAddress}.NFT`,
       value: this.toAdtNft(nftAddress, tokenId),
     }, {
       vname: "price",
-      type: `${this.contractAddress}.Coins`,
+      type: `${this.brokerAddress}.Coins`,
       value: this.toAdtPrice(priceTokenAddress, priceAmount),
     }, {
       vname: "fee_amount",
@@ -323,11 +325,11 @@ export class ArkClient {
       value: sellCheque.feeAmount.toString(),
     }, {
       vname: 'sell_cheque',
-      type: `${this.contractAddress}.Cheque`,
+      type: `${this.brokerAddress}.Cheque`,
       value: this.toAdtCheque(sellCheque)
     }, {
       vname: 'buy_cheque',
-      type: `${this.contractAddress}.Cheque`,
+      type: `${this.brokerAddress}.Cheque`,
       value: this.toAdtCheque(buyCheque)
     }];
 
@@ -340,7 +342,7 @@ export class ArkClient {
     };
 
     const result = await zilswap.callContract(
-      zilswap.getContract(this.contractAddress),
+      zilswap.getContract(this.brokerAddress),
       "ExecuteTrade",
       args as any,
       callParams,
@@ -351,7 +353,7 @@ export class ArkClient {
   }
 
   /**
-   * 
+   *
    * @param tokenAddress hex address of zrc1 contract starting with 0x
    * @param tokenId token ID
    */
@@ -361,7 +363,7 @@ export class ArkClient {
     return {
       argtypes: [],
       arguments: [nftAddress, tokenId],
-      constructor: `${this.contractAddress}.NFT`,
+      constructor: `${this.brokerAddress}.NFT`,
       _serialization: {
         numByteSize: { 1: 32 }
       },
@@ -369,9 +371,9 @@ export class ArkClient {
   }
 
   /**
-   * 
+   *
    * @param tokenAddress hex address of zrc2 contract starting with 0x
-   * @returns 
+   * @returns
    */
   toAdtToken(tokenAddress: string) {
     if (tokenAddress.startsWith("zil"))
@@ -381,18 +383,18 @@ export class ArkClient {
       return {
         argtypes: [],
         arguments: [],
-        constructor: `${this.contractAddress}.Zil`,
+        constructor: `${this.brokerAddress}.Zil`,
       };
 
     return {
       argtypes: [],
       arguments: [tokenAddress],
-      constructor: `${this.contractAddress}.Token`,
+      constructor: `${this.brokerAddress}.Token`,
     };
   }
 
   /**
-   * 
+   *
    * @param tokenAddress hex address of zrc2 contract starting with 0x
    * @param amountUnitless amount in unitless form
    */
@@ -403,7 +405,7 @@ export class ArkClient {
         this.toAdtToken(tokenAddress),
         amountUnitless.toString(),
       ],
-      constructor: `${this.contractAddress}.Coins`,
+      constructor: `${this.brokerAddress}.Coins`,
     }
   }
 
@@ -412,7 +414,7 @@ export class ArkClient {
     return {
       argtypes: [],
       arguments: [],
-      constructor: `${this.contractAddress}.${_side}`,
+      constructor: `${this.brokerAddress}.${_side}`,
     };
   }
 
@@ -426,7 +428,7 @@ export class ArkClient {
         cheque.publicKey,
         cheque.signature,
       ],
-      constructor: `${this.contractAddress}.Cheque`,
+      constructor: `${this.brokerAddress}.Cheque`,
     }
   }
 }
@@ -484,7 +486,7 @@ const serializePrice = (brokerAddress: string, price: { amount: BigNumber, addre
       },
       price.amount.toString(10)
     ],
-    constructor: `0x7c09a3508a8420fb30e136f18cda9989f3e09b65.Coins`,
+    constructor: `${brokerAddress}.Coins`,
   })
 }
 
