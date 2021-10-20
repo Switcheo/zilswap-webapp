@@ -1,25 +1,53 @@
-import React, { Fragment, useState } from "react";
-import { Backdrop, Box, Checkbox, DialogContent, DialogProps, FormControlLabel } from "@material-ui/core";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Backdrop,
+  Box,
+  Checkbox,
+  ClickAwayListener,
+  DialogContent,
+  DialogProps,
+  Divider,
+  FormControlLabel,
+  MenuItem,
+  MenuList,
+  TextField,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDownRounded";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
-import BigNumber from "bignumber.js";
-import cls from "classnames";
-import { useDispatch, useSelector } from "react-redux";
-import { useRouteMatch } from "react-router";
-import { useHistory } from "react-router-dom";
-import { bnOrZero } from "tradehub-api-js/build/main/lib/tradehub/utils";
-import { CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
+import {
+  CurrencyInput,
+  DialogModal,
+  FancyButton,
+  HelpInfo,
+  Text,
+} from "app/components";
 import { getBlockchain, getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask } from "app/utils";
+import { hexToRGBA, useAsyncTask } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import { NftCard } from "app/views/ark/Collection/components";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
+import BigNumber from "bignumber.js";
+import cls from "classnames";
 import { ArkClient, logger } from "core/utilities";
-import { fromBech32Address, ZilswapConnector } from "core/zilswap";
+import {
+  fromBech32Address,
+  toBech32Address,
+  ZilswapConnector,
+} from "core/zilswap";
+import React, { Fragment, useMemo, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouteMatch } from "react-router";
+import { useHistory } from "react-router-dom";
+import { bnOrZero } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { ReactComponent as ChainLinkIcon } from "../BuyDialog/chainlink.svg";
 
 interface Props extends Partial<DialogProps> {
@@ -40,38 +68,77 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const { network } = useSelector(getBlockchain);
   const { wallet } = useSelector(getWallet);
   const tokenState = useSelector(getTokens);
-  const open = useSelector<RootState, boolean>((state) => state.layout.showBidNftDialog);
+  const open = useSelector<RootState, boolean>(
+    (state) => state.layout.showBidNftDialog
+  );
   const [runConfirmPurchase, loading, error] = useAsyncTask("confirmPurchase");
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
-  const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
-  const [bidToken, setBidToken] = useState<TokenInfo>(tokenState.tokens[ZIL_ADDRESS]);
-  const match = useRouteMatch<{ id: string, collection: string }>();
+  const [formState, setFormState] =
+    useState<typeof initialFormState>(initialFormState);
+  const [bidToken, setBidToken] = useState<TokenInfo>(
+    tokenState.tokens[ZIL_ADDRESS]
+  );
+  const [expiryDate, setExpiryDate] = useState<any>(null);
+  const [date, setDate] = useState<any>(new Date());
+  const match = useRouteMatch<{ id: string; collection: string }>();
+  const [expanded, setExpanded] = useState<boolean>(false);
+
+  const bestBid = token.bestBid;
+
+  const { priceToken, priceHuman } = useMemo(() => {
+    if (!bestBid) return {};
+    const priceToken =
+      tokenState.tokens[toBech32Address(bestBid.price.address)];
+    const priceHuman = bnOrZero(bestBid.price.amount).shiftedBy(
+      -(priceToken?.decimals ?? 0)
+    );
+
+    return {
+      priceToken,
+      priceHuman,
+    };
+  }, [bestBid, tokenState.tokens]);
 
   const onConfirm = () => {
     if (!wallet) return;
     runConfirmPurchase(async () => {
-      const { collection: address, id } = match.params
+      const { collection: address, id } = match.params;
 
       if (!bidToken) return; // TODO: handle token not found
 
-      const priceAmount = bnOrZero(formState.bidAmount).shiftedBy(bidToken.decimals);
-      const price = { amount: priceAmount, address: fromBech32Address(bidToken.address) };
-      const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
+      const priceAmount = bnOrZero(formState.bidAmount).shiftedBy(
+        bidToken.decimals
+      );
+      const price = {
+        amount: priceAmount,
+        address: fromBech32Address(bidToken.address),
+      };
+      const feeAmount = priceAmount
+        .times(ArkClient.FEE_BPS)
+        .dividedToIntegerBy(10000)
+        .plus(1);
 
       const arkClient = new ArkClient(network);
-      const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0); // int32 max 2147483647
+      const nonce = new BigNumber(Math.random())
+        .times(2147483647)
+        .decimalPlaces(0); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 300; // blocks
-      const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
-        side: "Buy",
-        token: { address, id, },
-        price,
-        feeAmount,
-        expiry,
-        nonce,
-      }))
+      const message = arkClient.arkMessage(
+        "Execute",
+        arkClient.arkChequeHash({
+          side: "Buy",
+          token: { address, id },
+          price,
+          feeAmount,
+          expiry,
+          nonce,
+        })
+      );
 
-      const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
+      const { signature, publicKey } = (await wallet.provider!.wallet.sign(
+        message as any
+      )) as any;
 
       const result = await arkClient.postTrade({
         publicKey,
@@ -146,12 +213,97 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
         <CurrencyInput
           label="Place Your Bid"
+          bid={true}
+          highestBid={priceHuman}
+          bidToken={priceToken}
           token={bidToken ?? null}
           amount={formState.bidAmount}
           onEditorBlur={onEndEditBidAmount}
           onAmountChange={onBidAmountChange}
           onCurrencyChange={onCurrencyChange}
         />
+
+        {/* Set expiry */}
+        <ClickAwayListener onClickAway={() => setExpanded(false)}>
+          <Accordion
+            expanded={expanded}
+            className={classes.expiryAccordion}
+            onChange={() => setExpanded(!expanded)}
+          >
+            <AccordionSummary
+              expandIcon={
+                <ArrowDropDownIcon
+                  className={classes.dropDownIcon}
+                  fontSize="large"
+                />
+              }
+            >
+              <Box
+                display="flex"
+                flexDirection="column"
+                className={classes.expiryTextBox}
+              >
+                <Text color="textSecondary">
+                  Set Estimated Expiry
+                  <HelpInfo
+                    className={classes.helpInfo}
+                    placement="top"
+                    title="The date and time you select here is an estimated conversion based on block time"
+                  />
+                </Text>
+                <Text className={classes.expiryDate}>
+                  20 Sep 2021, 13:00:00
+                </Text>
+                <Text color="textSecondary" className={classes.blockHeightText}>
+                  Block Height:{" "}
+                  <span className={classes.blockHeightColor}>12,345,678</span>
+                </Text>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails className={classes.accordionDetail}>
+              <Box className={classes.expiryBox}>
+                <MenuList>
+                  <MenuItem>~1 day</MenuItem>
+                  <MenuItem>~3 days</MenuItem>
+                  <MenuItem>~1 week</MenuItem>
+                  <MenuItem>Select a date</MenuItem>
+                </MenuList>
+                <Box display="flex" justifyContent="center">
+                  <DatePicker
+                    minDate={new Date()}
+                    className={classes.datePicker}
+                    selected={date}
+                    onChange={(date) => setDate(date)}
+                    fixedHeight
+                    inline
+                  />
+                </Box>
+
+                <Box style={{ padding: "12px 18px" }}>
+                  <Divider className={classes.divider} />
+
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mt={1.5}
+                  >
+                    <Text>Select Time</Text>
+                    <TextField
+                      defaultValue={date.toLocaleTimeString()}
+                      variant="outlined"
+                      type="time"
+                      inputProps={{
+                        step: 300,
+                      }}
+                      className={classes.timeInput}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+        </ClickAwayListener>
 
         {!(loading || completedPurchase) && (
           <Fragment>
@@ -182,7 +334,9 @@ const BidDialog: React.FC<Props> = (props: Props) => {
             </Box>
 
             {error && (
-              <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
+              <Text color="error">
+                Error: {error?.message ?? "Unknown error"}
+              </Text>
             )}
 
             <FancyButton
@@ -245,6 +399,27 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       "& .MuiSvgIcon-root": {
         fontSize: "1.8rem",
       },
+    },
+    "& .MuiAccordionSummary-root": {
+      backgroundColor: theme.palette.currencyInput,
+      border: "1px solid transparent",
+      "&:hover": {
+        borderColor: "#00FFB0",
+        "& .MuiSvgIcon-root": {
+          color: "#00FFB0",
+        },
+      },
+    },
+    "& .MuiAccordionSummary-root.Mui-expanded": {
+      borderRadius: 12,
+      marginBottom: theme.spacing(1.5),
+      borderColor: "#00FFB0",
+      "& .MuiSvgIcon-root": {
+        color: "#00FFB0",
+      },
+    },
+    "& .MuiOutlinedInput-root": {
+      border: "none",
     },
     position: "relative",
   },
@@ -337,6 +512,77 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "14px",
     lineHeight: "24px",
     marginTop: theme.spacing(0.5),
+  },
+  expiryAccordion: {
+    backgroundColor: "transparent",
+    marginTop: theme.spacing(1.5),
+    boxShadow: "none",
+    border: "1px solid transparent",
+  },
+  expiryBox: {
+    "& .MuiMenuItem-root": {
+      fontFamily: "'Raleway', sans-serif",
+      fontSize: "14px",
+      fontWeight: 700,
+    },
+    "& .MuiTypography-root": {
+      fontFamily: "'Raleway', sans-serif",
+      fontSize: "14px",
+      fontWeight: 900,
+    },
+  },
+  accordionDetail: {
+    display: "inherit",
+    padding: 0,
+    backgroundColor: theme.palette.type === "dark" ? "#183E47" : "#FFFFFF",
+    border: `1px solid rgba${
+      theme.palette.type === "dark"
+        ? hexToRGBA("#DEFFFF", 0.1)
+        : hexToRGBA("#003340", 0.2)
+    }`,
+    borderRadius: 12,
+  },
+  expiryTextBox: {
+    "& .MuiTypography-root": {
+      textAlign: "initial",
+    },
+  },
+  helpInfo: {
+    marginLeft: "4px",
+  },
+  dropDownIcon: {
+    color: theme.palette.primary.light,
+  },
+  blockHeightText: {
+    fontSize: "10px",
+    lineHeight: "12px",
+  },
+  blockHeightColor: {
+    color: theme.palette.text?.primary,
+  },
+  expiryDate: {
+    lineHeight: "24px",
+    fontFamily: "'Raleway', sans-serif",
+    fontSize: "16px",
+    fontWeight: 900,
+  },
+  datePicker: {},
+  divider: {
+    height: "2px",
+  },
+  timeInput: {
+    padding: 0,
+    "& .MuiOutlinedInput-input": {
+      fontSize: "14px",
+      padding: "6px 12px",
+      backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF",
+      borderRadius: 12,
+      border: `1px solid ${
+        theme.palette.type === "dark"
+          ? "#29475A"
+          : `rgba${hexToRGBA("#003340", 0.2)}`
+      }`,
+    },
   },
 }));
 
