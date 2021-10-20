@@ -4,12 +4,11 @@ import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text, ArkNFTCard } from "app/components";
-import ARKFilterBar from "app/components/ARKFilterBar";
+import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text, ArkNFTListing } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
 import { actions } from "app/store";
-import { CollectionFilter, Nft } from "app/store/marketplace/types";
+import { CollectionFilter } from "app/store/marketplace/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
@@ -122,9 +121,6 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const dispatch = useDispatch();
   const filter = useSelector<RootState, CollectionFilter>(
     (state) => state.marketplace.filter
-  );
-  const tokens = useSelector<RootState, Nft[]>(
-    (state) => state.marketplace.tokens
   );
 
   // fetch nfts in collection (to use store instead)
@@ -241,20 +237,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           {/* Description */}
           <Text className={classes.description}>{collection.description}</Text>
 
-          {/* Filters */}
-          <ARKFilterBar collectionAddress={collection.address} />
-
-          {/* NFTs in collection */}
-          <Grid container spacing={2} className={classes.nftContainer}>
-            {collection && tokens.map((token) => (
-              <Grid item key={token.tokenId} xs={12} lg={3} md={4} sm={6} className={classes.gridItem}>
-                <ArkNFTCard
-                  token={token}
-                  collectionAddress={collection.address}
-                />
-              </Grid>
-            ))}
-          </Grid>
+          <ArkNFTListing collectionAddress={collection.address} />
         </ArkBanner>
       </Container>
     </ArkPage>
