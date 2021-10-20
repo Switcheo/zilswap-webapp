@@ -75,16 +75,29 @@ export interface TraitValue {
   selected: boolean;
 }
 
+export interface CollectionPriceStat {
+  volume: string;
+  floorPrice: string;
+}
+
+export interface CollectionTokenStat {
+  holderCount: string;
+  tokenCount: string;
+}
+
 export interface Collection {
   name: string;
-  description: string;
+  description: string | null;
   address: string;
-  verifiedAt: string;
-  websiteUrl: string;
-  discordUrl: string;
-  telegramUrl: string;
-  twitterUrl: string;
-  instagramUrl: string;
+  verifiedAt: string | null;
+  websiteUrl: string | null;
+  discordUrl: string | null;
+  telegramUrl: string | null;
+  twitterUrl: string | null;
+  instagramUrl: string | null;
+
+  priceStat?: CollectionPriceStat;
+  tokenStat?: CollectionTokenStat;
 }
 
 export interface Asset {

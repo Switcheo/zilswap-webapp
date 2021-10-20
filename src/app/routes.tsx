@@ -55,7 +55,7 @@ const routes: RouteConfig[] = [
       {
         path: "/ark/collections/:collection",
         exact: true,
-        component: lazy(() => import("./views/ark/Collection")),
+        component: lazy(() => import("./views/ark/CollectionView")),
       },
       {
         path: "/ark/collections/:collection/:id",
