@@ -1,22 +1,30 @@
+import React, { Fragment, useMemo, useState } from "react";
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Backdrop,
   Box,
   Checkbox,
   ClickAwayListener,
   DialogContent,
   DialogProps,
-  Divider,
   FormControlLabel,
   MenuItem,
   MenuList,
-  TextField,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDownRounded";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
+import DoneIcon from "@material-ui/icons/DoneRounded";
+import BigNumber from "bignumber.js";
+import cls from "classnames";
+import dayjs from "dayjs";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouteMatch } from "react-router";
+import { useHistory } from "react-router-dom";
+import { bnOrZero } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import {
   CurrencyInput,
   DialogModal,
@@ -29,26 +37,13 @@ import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useAsyncTask } from "app/utils";
+import { hexToRGBA, useAsyncTask, useBlockTime } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import { NftCard } from "app/views/ark/Collection/components";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
-import BigNumber from "bignumber.js";
-import cls from "classnames";
 import { ArkClient, logger } from "core/utilities";
-import {
-  fromBech32Address,
-  toBech32Address,
-  ZilswapConnector,
-} from "core/zilswap";
-import React, { Fragment, useMemo, useState } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { useDispatch, useSelector } from "react-redux";
-import { useRouteMatch } from "react-router";
-import { useHistory } from "react-router-dom";
-import { bnOrZero } from "tradehub-api-js/build/main/lib/tradehub/utils";
-import { ReactComponent as ChainLinkIcon } from "../BuyDialog/chainlink.svg";
+import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
+import { fromBech32Address, toBech32Address } from "core/zilswap";
 
 interface Props extends Partial<DialogProps> {
   token: Nft;
@@ -59,6 +54,50 @@ const initialFormState = {
   bidAmount: "0",
   acceptTerms: false,
 };
+
+export type expiryOption = {
+  text: string;
+  value: number | undefined;
+  unit: string | undefined;
+};
+
+const EXPIRY_OPTIONS: expiryOption[] = [
+  {
+    text: "6 hours",
+    value: 6,
+    unit: "hours",
+  },
+  {
+    value: 1,
+    text: "1 day",
+    unit: "day",
+  },
+  {
+    value: 3,
+    text: "3 days",
+    unit: "day",
+  },
+  {
+    value: 1,
+    text: "1 week",
+    unit: "week",
+  },
+  {
+    value: 1,
+    text: "1 month",
+    unit: "month",
+  },
+  {
+    value: 3,
+    text: "3 months",
+    unit: "month",
+  },
+  {
+    value: undefined,
+    text: "Select a date",
+    unit: undefined,
+  },
+];
 
 const BidDialog: React.FC<Props> = (props: Props) => {
   const { children, className, collectionAddress, token, ...rest } = props;
@@ -79,11 +118,34 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     tokenState.tokens[ZIL_ADDRESS]
   );
   const [expiryDate, setExpiryDate] = useState<any>(null);
-  const [date, setDate] = useState<any>(new Date());
+  const [expiryOption, setExpiryOption] = useState<expiryOption>(
+    EXPIRY_OPTIONS[0]
+  );
   const match = useRouteMatch<{ id: string; collection: string }>();
   const [expanded, setExpanded] = useState<boolean>(false);
 
+  // eslint-disable-next-line
+  const [blockTime, currentBlock, currentTime] = useBlockTime();
+
   const bestBid = token.bestBid;
+
+  const { expiry, expiryTime } = useMemo(() => {
+    const currentTime = dayjs();
+    let expiryTime;
+
+    if (!!expiryOption.value) {
+      expiryTime = dayjs().add(expiryOption.value, expiryOption.unit as any);
+    } else {
+      expiryTime = dayjs(expiryDate);
+    }
+
+    const minutes = expiryTime.diff(currentTime, "minutes");
+    const blocks = minutes / BLOCKS_PER_MINUTE;
+
+    const expiry = currentBlock + blocks;
+
+    return { expiry, expiryTime };
+  }, [currentBlock, expiryOption, expiryDate]);
 
   const { priceToken, priceHuman } = useMemo(() => {
     if (!bestBid) return {};
@@ -123,8 +185,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         .times(2147483647)
         .decimalPlaces(0)
         .toString(10); // int32 max 2147483647
-      const currentBlock = ZilswapConnector.getCurrentBlock();
-      const expiry = currentBlock + 300; // blocks
+      const blockExpiry = Math.trunc(expiry);
       const message = arkClient.arkMessage(
         "Execute",
         arkClient.arkChequeHash({
@@ -132,7 +193,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
           token: { address, id },
           price,
           feeAmount,
-          expiry,
+          expiry: blockExpiry,
           nonce,
         })
       );
@@ -149,11 +210,12 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         address: wallet.addressInfo.byte20.toLowerCase(),
         tokenId: id,
         side: "Buy",
-        expiry,
+        expiry: blockExpiry,
         nonce,
         price,
       });
 
+      dispatch(actions.Layout.toggleShowBidNftDialog("close"));
       logger("post trade", result);
     });
   };
@@ -194,6 +256,20 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         bidAmount: "0",
       });
   };
+
+  const onChangeExpiry = (date: any) => {
+    setExpiryDate(date);
+    const option = EXPIRY_OPTIONS.filter(
+      (option) => option.text === "Select a date"
+    )[0];
+    setExpiryOption(option);
+  };
+
+  const isBidEnabled = useMemo(() => {
+    if (!formState.acceptTerms) return false;
+
+    return true;
+  }, [formState]);
 
   return (
     <DialogModal
@@ -253,60 +329,63 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                   />
                 </Text>
                 <Text className={classes.expiryDate}>
-                  20 Sep 2021, 13:00:00
+                  {/* {dayjs(expiryDate).format("D MMM YYYY")},{" "} */}
+                  {/* {dayjs(expiryTime, "HH:mm:ss").format("HH:mm:ss")} */}
+                  {dayjs(expiryTime).format("D MMM YYYY, HH:mm:ss")}
                 </Text>
                 <Text color="textSecondary" className={classes.blockHeightText}>
                   Block Height:{" "}
-                  <span className={classes.blockHeightColor}>12,345,678</span>
+                  <span className={classes.blockHeightColor}>
+                    {expiry.toFixed(0)}
+                  </span>
                 </Text>
               </Box>
             </AccordionSummary>
             <AccordionDetails className={classes.accordionDetail}>
               <Box className={classes.expiryBox}>
                 <MenuList>
-                  <MenuItem>~1 day</MenuItem>
-                  <MenuItem>~3 days</MenuItem>
-                  <MenuItem>~1 week</MenuItem>
-                  <MenuItem>Select a date</MenuItem>
+                  {EXPIRY_OPTIONS.map((option) => {
+                    return (
+                      <MenuItem
+                        onClick={() => setExpiryOption(option)}
+                        value={option.text}
+                        className={cls(classes.menuItem, {
+                          [classes.selected]: expiryOption === option,
+                        })}
+                      >
+                        <Box
+                          display="flex"
+                          justifyContent="space-between"
+                          alignItems="center"
+                          width={"100%"}
+                        >
+                          {option.text}
+                          {expiryOption === option && (
+                            <DoneIcon fontSize="small" />
+                          )}
+                        </Box>
+                      </MenuItem>
+                    );
+                  })}
                 </MenuList>
-                <Box display="flex" justifyContent="center">
-                  <DatePicker
-                    minDate={new Date()}
-                    className={classes.datePicker}
-                    selected={date}
-                    onChange={(date) => setDate(date)}
-                    fixedHeight
-                    inline
-                  />
-                </Box>
-
-                <Box style={{ padding: "12px 18px" }}>
-                  <Divider className={classes.divider} />
-
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    mt={1.5}
-                  >
-                    <Text>Select Time</Text>
-                    <TextField
-                      defaultValue={date.toLocaleTimeString()}
-                      variant="outlined"
-                      type="time"
-                      inputProps={{
-                        step: 300,
-                      }}
-                      className={classes.timeInput}
+                {expiryOption.text === "Select a date" && (
+                  <Box display="flex" justifyContent="center" mt={0.5} mb={2}>
+                    <DatePicker
+                      minDate={new Date()}
+                      className={classes.datePicker}
+                      selected={new Date()}
+                      onChange={(date) => onChangeExpiry(date)}
+                      fixedHeight
+                      inline
                     />
                   </Box>
-                </Box>
+                )}
               </Box>
             </AccordionDetails>
           </Accordion>
         </ClickAwayListener>
 
-        {!(loading || completedPurchase) && (
+        {!completedPurchase && (
           <Fragment>
             {/* Terms */}
             <Box className={classes.termsBox}>
@@ -346,7 +425,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
               variant="contained"
               color="primary"
               onClick={onConfirm}
-              disabled={!formState.acceptTerms}
+              disabled={!isBidEnabled}
               walletRequired
             >
               Place Bid
@@ -365,23 +444,6 @@ const BidDialog: React.FC<Props> = (props: Props) => {
             View Collection
           </FancyButton>
         )}
-
-        {/* to clean up */}
-        <Backdrop open={loading} className={classes.backdrop}>
-          <Box flex={1}>
-            <Text variant="h2" align="center" className={classes.loadingTitle}>
-              Purchase Processing
-            </Text>
-
-            <Text align="center" className={classes.loadingBody}>
-              Sit tight, it should be confirmed shortly.
-            </Text>
-          </Box>
-
-          <ChainLinkIcon />
-
-          <Box flex={1} />
-        </Backdrop>
       </DialogContent>
     </DialogModal>
   );
@@ -421,6 +483,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "& .MuiOutlinedInput-root": {
       border: "none",
+    },
+    "& .MuiAccordionSummary-content.Mui-expanded": {
+      margin: "12px 0",
     },
     position: "relative",
   },
@@ -568,22 +633,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 900,
   },
   datePicker: {},
-  divider: {
-    height: "2px",
+  menuItem: {
+    minHeight: "32px",
   },
-  timeInput: {
-    padding: 0,
-    "& .MuiOutlinedInput-input": {
-      fontSize: "14px",
-      padding: "6px 12px",
-      backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF",
-      borderRadius: 12,
-      border: `1px solid ${
-        theme.palette.type === "dark"
-          ? "#29475A"
-          : `rgba${hexToRGBA("#003340", 0.2)}`
-      }`,
-    },
+  selected: {
+    color: "#00FFB0",
   },
 }));
 
