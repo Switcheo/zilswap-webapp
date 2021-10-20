@@ -5,10 +5,10 @@ import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { ArkClient } from "core/utilities";
 import { actions } from "app/store";
+import { ArkNFTCard } from "app/components";
 import { BlockchainState, Nft, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
-import { NftCard } from "app/views/ark/Collection/components";
 
 interface Props extends BoxProps {
   address: string
@@ -57,7 +57,7 @@ const Collected: React.FC<Props> = (props: Props) => {
       <Grid container spacing={2} className={classes.nftContainer}>
         {tokens.length > 0 && tokens.map((token: Nft, i: number) => (
           <Grid item key={token.tokenId} xs={12} md={3} className={classes.gridItem}>
-            <NftCard token={token} collectionAddress={token.collection?.address || ""} />
+            <ArkNFTCard token={token} collectionAddress={token.collection?.address || ""} />
           </Grid>
         ))}
       </Grid>

@@ -1,8 +1,9 @@
 import React, { Fragment, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Box, Card, CardActionArea, CardContent, CardMedia, CardProps, IconButton, Link, makeStyles, SvgIcon, Typography } from "@material-ui/core";
-import UnlikedIcon from "@material-ui/icons/FavoriteBorderRounded";
-import LikedIcon from "@material-ui/icons/FavoriteRounded";
+import {
+  Box, Card, CardActionArea, CardContent, CardMedia,
+  CardProps, IconButton, Link, makeStyles, Typography
+} from "@material-ui/core";
 import DotIcon from "@material-ui/icons/FiberManualRecordRounded";
 import LaunchIcon from "@material-ui/icons/Launch";
 import cls from "classnames";
@@ -19,7 +20,9 @@ import { ZIL_ADDRESS } from "app/utils/constants";
 import { ArkClient } from "core/utilities";
 import { toBech32Address } from "core/zilswap";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
-import { ReactComponent as VerifiedBadge } from "../../verified-badge.svg";
+import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
+import { ReactComponent as ZappedSVG } from "./zapped.svg";
+import { ReactComponent as UnZapSVG } from "./unzap.svg";
 
 export interface Props extends CardProps {
   token: Nft;
@@ -28,7 +31,7 @@ export interface Props extends CardProps {
   // tx href
 }
 
-const NftCard: React.FC<Props> = (props: Props) => {
+const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const { className, token, collectionAddress, dialog, ...rest } = props;
   const classes = useStyles();
   const [liked, setLiked] = useState<boolean>(!!token.isFavourited);
@@ -116,10 +119,7 @@ const NftCard: React.FC<Props> = (props: Props) => {
                 className={classes.likeIconButton}
                 disableRipple
               >
-                <SvgIcon
-                  component={liked ? LikedIcon : UnlikedIcon}
-                  className={classes.likeButton}
-                />
+                {liked ? <ZappedSVG className={classes.likeButton} /> : <UnZapSVG className={classes.likeButton} />}
               </IconButton>
             </Box>
           </Box>
@@ -384,4 +384,4 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   }
 }));
 
-export default NftCard;
+export default ArkNFTCard;

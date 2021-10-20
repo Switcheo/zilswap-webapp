@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
 import { bnOrZero } from "tradehub-api-js/build/main/lib/tradehub/utils";
-import { CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
+import { CurrencyInput, DialogModal, FancyButton, Text, ArkNFTCard } from "app/components";
 import { getBlockchain, getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
@@ -16,7 +16,6 @@ import { RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
-import { NftCard } from "app/views/ark/Collection/components";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { ArkClient, logger } from "core/utilities";
 import { fromBech32Address, ZilswapConnector } from "core/zilswap";
@@ -137,7 +136,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     >
       <DialogContent className={cls(classes.dialogContent)}>
         {/* Nft card */}
-        <NftCard
+        <ArkNFTCard
           className={classes.nftCard}
           token={token}
           collectionAddress={fromBech32Address(collectionAddress)}

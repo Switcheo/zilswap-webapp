@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text } from "app/components";
+import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text, ArkNFTCard } from "app/components";
 import ARKFilterBar from "app/components/ARKFilterBar";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
@@ -14,7 +14,6 @@ import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
-import { NftCard } from "./components";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -249,7 +248,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           <Grid container spacing={2} className={classes.nftContainer}>
             {collection && tokens.map((token) => (
               <Grid item key={token.tokenId} xs={12} lg={3} md={4} sm={6} className={classes.gridItem}>
-                <NftCard
+                <ArkNFTCard
                   token={token}
                   collectionAddress={collection.address}
                 />
