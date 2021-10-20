@@ -38,7 +38,7 @@ function* loadNftList() {
       q: JSON.stringify({ traits }),
     };
     if (wallet) {
-      query.viewer = wallet.addressInfo.byte20
+      query.viewer = wallet.addressInfo.byte20.toLocaleLowerCase()
     }
     switch (filter.sortBy) {
       case SortBy.PriceDescending: {
