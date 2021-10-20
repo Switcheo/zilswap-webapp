@@ -202,11 +202,12 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           badgeContent={<VerifiedBadge className={classes.verifiedBadge} />}
           avatarImage={TEMP_BEAR_AVATAR_URL}
           bannerImage={TEMP_BANNER_URL}
-        >
-          <SocialLinkGroup className={classes.socialLinkGroup} />
+        />
+        <Box display="flex" flexDirection="column" alignItems="center">
+          <SocialLinkGroup collection={collection} className={classes.socialLinkGroup} />
 
           {/* TODO: hacky way for mobile view, to clean up */}
-          <SocialLinkGroup className={classes.socialLinkGroupMobile} />
+          <SocialLinkGroup collection={collection} className={classes.socialLinkGroupMobile} />
 
           {/* Collection name and creator  */}
           <Box display="flex" flexDirection="column" maxWidth={500}>
@@ -252,9 +253,9 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
           {/* Description */}
           <Text className={classes.description}>{collection.description}</Text>
+        </Box>
 
-          <ArkNFTListing filterPage="collection" collectionAddress={collection.address} />
-        </ArkBanner>
+        <ArkNFTListing filterPage="collection" collectionAddress={collection.address} />
       </Container>
     </ArkPage>
   );

@@ -244,7 +244,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
 
             <Box display="flex" flexDirection="column" alignItems="center">
               <Text className={classes.shareText}>Share</Text>
-              <SocialLinkGroup />
+              <SocialLinkGroup collection={token.collection} />
             </Box>
           </Box>
         )}
