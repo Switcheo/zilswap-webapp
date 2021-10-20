@@ -7,7 +7,7 @@ import { ArkClient } from 'core/utilities';
 import { AppTheme } from 'app/theme/types';
 import { hexToRGBA } from 'app/utils';
 import { Text } from "app/components";
-import { MarketPlaceState, RootState, TraitType, TraitValue } from 'app/store/types';
+import { TraitType, TraitValue } from 'app/store/types';
 import { updateFilter } from 'app/store/marketplace/actions';
 import { getBlockchain } from 'app/saga/selectors';
 import { ReactComponent as IndeterminateIcon } from "./indeterminate.svg";
@@ -260,7 +260,6 @@ const abbreviateTraitValue = (traitValue: string) => {
 
 const AttributesFilter = (props: Props) => {
   const { filterPage, collectionAddress } = props;
-  const marketPlaceState = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
   const { network } = useSelector(getBlockchain);
   const dispatch = useDispatch();
 
