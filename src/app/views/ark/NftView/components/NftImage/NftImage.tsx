@@ -11,11 +11,11 @@ import LikedIcon from "@material-ui/icons/FavoriteRounded";
 import dayjs from "dayjs";
 import { SocialLinkGroup } from "app/components";
 import { Nft } from "app/store/types";
+import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
 import { toHumanNumber, useAsyncTask } from "app/utils";
 import { RootState, MarketPlaceState, OAuth, WalletState } from "app/store/types";
 import { ArkClient } from "core/utilities";
-import { actions } from "app/store";
 
 
 interface Props extends CardProps {

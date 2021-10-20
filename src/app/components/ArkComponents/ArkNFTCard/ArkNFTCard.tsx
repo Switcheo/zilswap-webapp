@@ -1,15 +1,28 @@
-import React, { Fragment, useState } from "react";
-import { Box, Card, CardActionArea, CardContent, CardMedia, CardProps, IconButton, Link, makeStyles, SvgIcon, Typography } from "@material-ui/core";
-import UnlikedIcon from "@material-ui/icons/FavoriteBorderRounded";
-import LikedIcon from "@material-ui/icons/FavoriteRounded";
+import React, { Fragment, useState, useEffect, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  Box, Card, CardActionArea, CardContent, CardMedia,
+  CardProps, IconButton, Link, makeStyles, Typography
+} from "@material-ui/core";
 import DotIcon from "@material-ui/icons/FiberManualRecordRounded";
 import LaunchIcon from "@material-ui/icons/Launch";
 import cls from "classnames";
+import dayjs from "dayjs";
+import BigNumber from "bignumber.js";
 import { Link as RouterLink } from "react-router-dom";
 import { Nft } from "app/store/marketplace/types";
 import { AppTheme } from "app/theme/types";
+import { getWallet, getTokens } from "app/saga/selectors";
+import { RootState, MarketPlaceState, OAuth } from "app/store/types";
+import { actions } from "app/store";
+import { toHumanNumber, truncate, useAsyncTask, useBlockTime } from "app/utils";
+import { ZIL_ADDRESS } from "app/utils/constants";
+import { ArkClient } from "core/utilities";
 import { toBech32Address } from "core/zilswap";
-import { ReactComponent as VerifiedBadge } from "../../verified-badge.svg";
+import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
+import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
+import { ReactComponent as ZappedSVG } from "./zapped.svg";
+import { ReactComponent as UnZapSVG } from "./unzap.svg";
 
 export interface Props extends CardProps {
   token: Nft;
@@ -18,10 +31,68 @@ export interface Props extends CardProps {
   // tx href
 }
 
-const NftCard: React.FC<Props> = (props: Props) => {
+const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const { className, token, collectionAddress, dialog, ...rest } = props;
   const classes = useStyles();
-  const [liked, setLiked] = useState<boolean>(false);
+  const [liked, setLiked] = useState<boolean>(!!token.isFavourited);
+  const { oAuth, filter } = useSelector<RootState, MarketPlaceState>((state) => state.marketplace);
+  const { wallet } = useSelector(getWallet);
+  const { tokens } = useSelector(getTokens);
+  const [runLikeToken] = useAsyncTask("likeToken");
+  const dispatch = useDispatch();
+  const [blockTime, currentBlock, currentTime] = useBlockTime();
+
+
+  useEffect(() => {
+    if (token) setLiked(!!token.isFavourited);
+  }, [token])
+
+  const bestAsk = useMemo(() => {
+    if (!token?.bestAsk) return undefined;
+    const expiryTime = blockTime.add((token?.bestAsk?.expiry - currentBlock) / BLOCKS_PER_MINUTE, "minutes");
+    const hoursLeft = expiryTime.diff(currentTime, "hours");
+    const minsLeft = expiryTime.diff(currentTime, "minutes");
+    const secLeft = expiryTime.diff(currentTime, "seconds");
+
+
+    const askToken = tokens[token?.bestAsk?.price.address] || tokens[ZIL_ADDRESS];
+    const placement = new BigNumber(10).pow(askToken.decimals);
+    const amount = new BigNumber(token?.bestAsk?.price.amount).div(placement);
+    return { expiryTime, hoursLeft, minsLeft, secLeft, amount, askToken };
+    // eslint-disable-next-line
+  }, [blockTime, token.bestAsk, tokens])
+
+  const bestBid = useMemo(() => {
+    if (!token?.bestBid) return undefined;
+
+    const expiryTime = blockTime.add((token?.bestBid?.expiry - currentBlock) / BLOCKS_PER_MINUTE, "minutes");
+    const timeLeft = expiryTime.fromNow();
+    const bidToken = tokens[token?.bestBid?.price.address] || tokens[ZIL_ADDRESS];
+    const placement = new BigNumber(10).pow(bidToken.decimals);
+    const amount = new BigNumber(token?.bestBid?.price.amount).div(placement);
+    return { amount, timeLeft, bidToken };
+    // eslint-disable-next-line
+  }, [blockTime, token?.bestBid, tokens])
+
+  const likeToken = () => {
+    runLikeToken(async () => {
+      if (!wallet || !token) return;
+      let newOAuth: OAuth | undefined = oAuth;
+      const arkClient = new ArkClient(wallet!.network)
+      if (!newOAuth?.access_token || (newOAuth?.expires_at && dayjs(newOAuth.expires_at * 1000).isBefore(dayjs()))) {
+        const { result } = await arkClient.arkLogin(wallet!, window.location.hostname);
+        dispatch(actions.MarketPlace.updateAccessToken(result));
+        newOAuth = result;
+      }
+      if (!liked) {
+        await arkClient.postFavourite(token!.collection!.address, token.tokenId, newOAuth!.access_token);
+      } else {
+        await arkClient.removeFavourite(token!.collection!.address, token.tokenId, newOAuth!.access_token);
+      }
+      setLiked(!liked);
+      dispatch(actions.MarketPlace.updateFilter({ ...filter }));
+    })
+  }
 
   return (
     <Card {...rest} className={cls(classes.root, className)}>
@@ -30,24 +101,25 @@ const NftCard: React.FC<Props> = (props: Props) => {
           <Box className={classes.cardHeader}>
             {/* to accept as props */}
             <Box display="flex" flexDirection="column" justifyContent="center">
-              <Typography className={classes.bid}>
-                <DotIcon className={classes.dotIcon} /> BID LIVE 10:00:26 Left
-              </Typography>
-              <Typography className={classes.lastOffer}>
-                Last Offer 200,000 ZIL
-              </Typography>
+              {bestAsk && (
+                <Typography className={classes.bid}>
+                  <DotIcon className={classes.dotIcon} /> BID LIVE {bestAsk.hoursLeft}:{bestAsk.minsLeft}:{bestAsk.secLeft} Left
+                </Typography>
+              )}
+              {bestBid && (
+                <Typography className={classes.lastOffer}>
+                  Last Offer {toHumanNumber(bestBid.amount)} {bestBid.bidToken.symbol}
+                </Typography>
+              )}
             </Box>
             <Box display="flex" alignItems="center">
-              <Typography className={classes.likes}>100K</Typography>
+              <Typography className={classes.likes}>{toHumanNumber(token.statistics?.favourites)}</Typography>
               <IconButton
-                onClick={() => setLiked(!liked)}
+                onClick={() => likeToken()}
                 className={classes.likeIconButton}
                 disableRipple
               >
-                <SvgIcon
-                  component={liked ? LikedIcon : UnlikedIcon}
-                  className={classes.likeButton}
-                />
+                {liked ? <ZappedSVG className={classes.likeButton} /> : <UnZapSVG className={classes.likeButton} />}
               </IconButton>
             </Box>
           </Box>
@@ -79,7 +151,7 @@ const NftCard: React.FC<Props> = (props: Props) => {
                   {token.name}
                   <VerifiedBadge className={classes.verifiedBadge} />
                 </Typography>
-                <Typography className={classes.title}>1M ZIL</Typography>
+                {bestAsk && <Typography className={classes.title}>{bestAsk?.amount}{bestAsk?.askToken.symbol}</Typography>}
               </Box>
               <Box
                 display="flex"
@@ -90,7 +162,24 @@ const NftCard: React.FC<Props> = (props: Props) => {
                 <Typography className={classes.body}>
                   #{token.tokenId}
                 </Typography>
-                <Typography className={classes.body}>~$100,000</Typography>
+                <Box display="flex">
+                  <Typography className={classes.body}>owned by&nbsp;</Typography>
+                  <Link
+                    className={classes.link}
+                    underline="hover"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href={`/ark/profile?address=${token.owner?.address}`}
+                  >
+                    <Typography className={classes.username}>
+                      {(
+                        (token?.owner && token?.owner?.address?.length > 15)
+                          ? (truncate(token.owner?.username, 10))
+                          : token.owner?.username
+                      ) || "Unnamed"}
+                    </Typography>
+                  </Link>
+                </Box>
               </Box>
             </Fragment>
           ) : (
@@ -144,13 +233,16 @@ const NftCard: React.FC<Props> = (props: Props) => {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     width: "100%",
-    minWidth: "300px",
+    minWidth: "280px",
     borderRadius: 10,
     boxShadow: "none",
     backgroundColor: "transparent",
     position: "relative",
     "& .MuiCardContent-root:last-child": {
       paddingBottom: theme.spacing(1.5),
+    },
+    [theme.breakpoints.down("sm")]: {
+      minWidth: "240px",
     },
   },
   borderBox: {
@@ -285,6 +377,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "14px",
     lineHeight: "16px",
   },
+  username: {
+    fontSize: "12px",
+    fontWeight: 700,
+    color: "#6BE1FF",
+  }
 }));
 
-export default NftCard;
+export default ArkNFTCard;

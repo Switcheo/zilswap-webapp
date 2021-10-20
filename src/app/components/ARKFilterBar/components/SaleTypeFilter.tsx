@@ -9,7 +9,7 @@ import { updateFilter } from 'app/store/marketplace/actions';
 import { ReactComponent as UncheckedIcon } from "./unchecked.svg";
 import { ReactComponent as CheckedIcon } from "./checked.svg";
 
-const useStyles = makeStyles((theme: AppTheme) =>({
+const useStyles = makeStyles((theme: AppTheme) => ({
   button: {
     borderStyle: 'solid',
     borderWidth: 1,
@@ -112,7 +112,12 @@ const useStyles = makeStyles((theme: AppTheme) =>({
   }
 }))
 
-const SaleTypeFilter = () => {
+interface Props {
+  filterPage: "profile" | "collection";
+}
+
+const SaleTypeFilter = (props: Props) => {
+  const { filterPage } = props;
   const marketPlaceState = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
   const dispatch = useDispatch();
 
@@ -130,7 +135,7 @@ const SaleTypeFilter = () => {
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if(event.target.value === "fixed_price") {
+    if (event.target.value === "fixed_price") {
       setSaleType({
         ...saleType,
         fixed_price: !saleType.fixed_price
@@ -145,7 +150,8 @@ const SaleTypeFilter = () => {
 
   useEffect(() => {
     dispatch(updateFilter({
-      ...marketPlaceState.filter,
+      // ...marketPlaceState.filter,
+      filterPage,
       sale_type: saleType
     }))
     // eslint-disable-next-line
@@ -161,7 +167,7 @@ const SaleTypeFilter = () => {
           </div>
         </Box>
         <Box display="flex" alignItems="center" justifyContent="center">
-          <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.2016 13.1737L14.2879 16.0874C13.8491 16.5262 13.1404 16.5262 12.7016 16.0874L9.78787 13.1737C9.07912 12.4649 9.58537 11.2499 10.5866 11.2499L16.4141 11.2499C17.4154 11.2499 17.9104 12.4649 17.2016 13.1737Z" fill="#DEFFFF"/></svg>
+          <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.2016 13.1737L14.2879 16.0874C13.8491 16.5262 13.1404 16.5262 12.7016 16.0874L9.78787 13.1737C9.07912 12.4649 9.58537 11.2499 10.5866 11.2499L16.4141 11.2499C17.4154 11.2499 17.9104 12.4649 17.2016 13.1737Z" fill="#DEFFFF" /></svg>
         </Box>
       </Button>
       <Popover
@@ -181,13 +187,13 @@ const SaleTypeFilter = () => {
         <Box paddingX="24px" className={classes.popoverContainer}>
           <Box className={classes.filterOption}>
             <FormControlLabel className={classes.filterValue} value="fixed_price" control={<Checkbox
-                className={classes.radioButton}
-                checkedIcon={<CheckedIcon />}
-                icon={<UncheckedIcon />}
-                checked={saleType.fixed_price}
-                onChange={handleChange}
-                disableRipple
-              />} label="BUY NOW" />
+              className={classes.radioButton}
+              checkedIcon={<CheckedIcon />}
+              icon={<UncheckedIcon />}
+              checked={saleType.fixed_price}
+              onChange={handleChange}
+              disableRipple
+            />} label="BUY NOW" />
           </Box>
           {/* <Box className={classes.filterOption}>
             <FormControlLabel className={classes.filterValue} value="timed_auction" control={<Checkbox
