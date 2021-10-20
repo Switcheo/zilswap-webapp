@@ -1,28 +1,27 @@
-import React, { Fragment, useState, useEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import {
   Box, Card, CardActionArea, CardContent, CardMedia,
   CardProps, IconButton, Link, makeStyles, Typography
 } from "@material-ui/core";
-import DotIcon from "@material-ui/icons/FiberManualRecordRounded";
 import LaunchIcon from "@material-ui/icons/Launch";
+import BigNumber from "bignumber.js";
 import cls from "classnames";
 import dayjs from "dayjs";
-import BigNumber from "bignumber.js";
+import { useDispatch, useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
-import { Nft } from "app/store/marketplace/types";
-import { AppTheme } from "app/theme/types";
-import { getWallet, getTokens } from "app/saga/selectors";
-import { RootState, MarketPlaceState, OAuth } from "app/store/types";
+import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
+import { Nft } from "app/store/marketplace/types";
+import { MarketPlaceState, OAuth, RootState } from "app/store/types";
+import { AppTheme } from "app/theme/types";
 import { toHumanNumber, truncate, useAsyncTask, useBlockTime } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import { ArkClient } from "core/utilities";
-import { toBech32Address } from "core/zilswap";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
+import { toBech32Address } from "core/zilswap";
+import { ReactComponent as UnZapSVG } from "./unzap.svg";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 import { ReactComponent as ZappedSVG } from "./zapped.svg";
-import { ReactComponent as UnZapSVG } from "./unzap.svg";
 
 export interface Props extends CardProps {
   token: Nft;
@@ -54,8 +53,9 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     const minsLeft = expiryTime.diff(currentTime, "minutes");
     const secLeft = expiryTime.diff(currentTime, "seconds");
 
+    const askToken = tokens[token.bestAsk.price.address] || tokens[ZIL_ADDRESS];
+    if (!askToken) return undefined;
 
-    const askToken = tokens[token?.bestAsk?.price.address] || tokens[ZIL_ADDRESS];
     const placement = new BigNumber(10).pow(askToken.decimals);
     const amount = new BigNumber(token?.bestAsk?.price.amount).div(placement);
     return { expiryTime, hoursLeft, minsLeft, secLeft, amount, askToken };
@@ -68,6 +68,8 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     const expiryTime = blockTime.add((token?.bestBid?.expiry - currentBlock) / BLOCKS_PER_MINUTE, "minutes");
     const timeLeft = expiryTime.fromNow();
     const bidToken = tokens[token?.bestBid?.price.address] || tokens[ZIL_ADDRESS];
+    if (!bidToken) return undefined;
+
     const placement = new BigNumber(10).pow(bidToken.decimals);
     const amount = new BigNumber(token?.bestBid?.price.amount).div(placement);
     return { amount, timeLeft, bidToken };
@@ -101,11 +103,11 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
           <Box className={classes.cardHeader}>
             {/* to accept as props */}
             <Box display="flex" flexDirection="column" justifyContent="center">
-              {bestAsk && (
+              {/* {bestAsk && (
                 <Typography className={classes.bid}>
                   <DotIcon className={classes.dotIcon} /> BID LIVE {bestAsk.hoursLeft}:{bestAsk.minsLeft}:{bestAsk.secLeft} Left
                 </Typography>
-              )}
+              )} */}
               {bestBid && (
                 <Typography className={classes.lastOffer}>
                   Last Offer {toHumanNumber(bestBid.amount)} {bestBid.bidToken.symbol}
@@ -151,7 +153,11 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   {token.name}
                   <VerifiedBadge className={classes.verifiedBadge} />
                 </Typography>
-                {bestAsk && <Typography className={classes.title}>{bestAsk?.amount}{bestAsk?.askToken.symbol}</Typography>}
+                {bestAsk && (
+                  <Typography className={classes.title}>
+                    {toHumanNumber(bestAsk.amount)} {bestAsk.askToken.symbol}
+                  </Typography>
+                )}
               </Box>
               <Box
                 display="flex"
