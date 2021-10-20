@@ -5,10 +5,15 @@ export interface MarketPlaceState {
   collections: SimpleMap<Collection>;
   tokens: [];
   filter: CollectionFilter;
+  filters: {
+    collectionFilter: CollectionFilter;
+    profileFilter: CollectionFilter;
+  }
   profile?: Profile;
   oAuth?: OAuth;
   receivedBids?: any;
   bidded?: any;
+  profileTokens: Nft[];
 }
 
 export interface SimpleCheque {
@@ -70,16 +75,29 @@ export interface TraitValue {
   selected: boolean;
 }
 
+export interface CollectionPriceStat {
+  volume: string;
+  floorPrice: string;
+}
+
+export interface CollectionTokenStat {
+  holderCount: string;
+  tokenCount: string;
+}
+
 export interface Collection {
   name: string;
-  description: string;
+  description: string | null;
   address: string;
-  verifiedAt: string;
-  websiteUrl: string;
-  discordUrl: string;
-  telegramUrl: string;
-  twitterUrl: string;
-  instagramUrl: string;
+  verifiedAt: string | null;
+  websiteUrl: string | null;
+  discordUrl: string | null;
+  telegramUrl: string | null;
+  twitterUrl: string | null;
+  instagramUrl: string | null;
+
+  priceStat?: CollectionPriceStat;
+  tokenStat?: CollectionTokenStat;
 }
 
 export interface Asset {
@@ -135,9 +153,9 @@ export interface PaginatedList<T> {
 }
 
 export interface PaginationInfo {
-  offset: number;
-  count: number;
-  limit: number;
+  offset?: number;
+  count?: number;
+  limit?: number;
 }
 
 export interface CollectionFilter {
@@ -146,6 +164,8 @@ export interface CollectionFilter {
   traits: { [id: string]: TraitType };
   pagination?: PaginationInfo;
   sortBy: SortBy;
+  filterPage: "collection" | "profile";
+  owner?: string;
 }
 
 export interface SaleType {

@@ -9,7 +9,7 @@ import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
-import { CurrencyLogo, DialogModal, FancyButton, Text } from "app/components";
+import { CurrencyLogo, DialogModal, FancyButton, Text, ArkNFTCard } from "app/components";
 import { SocialLinkGroup } from "app/components/ArkComponents";
 import { getBlockchain, getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
@@ -17,7 +17,6 @@ import { Nft } from "app/store/marketplace/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { bnOrZero, truncate, useAsyncTask } from "app/utils";
-import { NftCard } from "app/views/ark/Collection/components";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { ArkClient, logger } from "core/utilities";
 import { fromBech32Address, ZilswapConnector } from "core/zilswap";
@@ -134,7 +133,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
     >
       <DialogContent className={cls(classes.dialogContent)}>
         {/* Nft card */}
-        <NftCard
+        <ArkNFTCard
           className={classes.nftCard}
           token={token}
           collectionAddress={fromBech32Address(collectionAddress)}
@@ -245,7 +244,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
 
             <Box display="flex" flexDirection="column" alignItems="center">
               <Text className={classes.shareText}>Share</Text>
-              <SocialLinkGroup />
+              <SocialLinkGroup collection={token.collection} />
             </Box>
           </Box>
         )}

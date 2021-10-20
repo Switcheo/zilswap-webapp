@@ -1,17 +1,5 @@
 import React, { Fragment, useMemo, useState } from "react";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Checkbox,
-  ClickAwayListener,
-  DialogContent,
-  DialogProps,
-  FormControlLabel,
-  MenuItem,
-  MenuList,
-} from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Checkbox, ClickAwayListener, DialogContent, DialogProps, FormControlLabel, MenuItem, MenuList } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDownRounded";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
@@ -25,13 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
 import { bnOrZero } from "tradehub-api-js/build/main/lib/tradehub/utils";
-import {
-  CurrencyInput,
-  DialogModal,
-  FancyButton,
-  HelpInfo,
-  Text,
-} from "app/components";
+import { CurrencyInput, DialogModal, FancyButton, HelpInfo, Text, ArkNFTCard } from "app/components";
 import { getBlockchain, getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
@@ -39,7 +21,6 @@ import { RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useBlockTime } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
-import { NftCard } from "app/views/ark/Collection/components";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { ArkClient, logger } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
@@ -281,7 +262,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     >
       <DialogContent className={cls(classes.dialogContent)}>
         {/* Nft card */}
-        <NftCard
+        <ArkNFTCard
           className={classes.nftCard}
           token={token}
           collectionAddress={fromBech32Address(collectionAddress)}

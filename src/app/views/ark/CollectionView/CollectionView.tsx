@@ -4,17 +4,16 @@ import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text } from "app/components";
-import ARKFilterBar from "app/components/ARKFilterBar";
+import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text, ArkNFTListing } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
 import { actions } from "app/store";
-import { CollectionFilter, Nft } from "app/store/marketplace/types";
-import { RootState } from "app/store/types";
+import { RootState, Collection, CollectionFilter } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
-import { NftCard } from "./components";
+import { bnOrZero, toHumanNumber } from "app/utils";
+import { ZIL_DECIMALS } from "app/utils/constants";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -113,7 +112,7 @@ const TEMP_BANNER_URL =
 const TEMP_BEAR_AVATAR_URL =
   "https://pbs.twimg.com/profile_images/1432977604563193858/z01O7Sey_400x400.jpg";
 
-const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
+const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
 ) => {
   const { children, className, match, ...rest } = props;
@@ -124,12 +123,9 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const filter = useSelector<RootState, CollectionFilter>(
     (state) => state.marketplace.filter
   );
-  const tokens = useSelector<RootState, Nft[]>(
-    (state) => state.marketplace.tokens
-  );
 
   // fetch nfts in collection (to use store instead)
-  const [collection, setCollection] = useState<any>();
+  const [collection, setCollection] = useState<Collection>();
 
   const { bech32Address, hexAddress } = useMemo(() => {
     if (!match.params?.collection) {
@@ -140,7 +136,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     let collectionAddress = match.params.collection;
     if (collectionAddress?.startsWith("zil1")) {
       if (filter.collectionAddress !== collectionAddress)
-        dispatch(actions.MarketPlace.updateFilter({ collectionAddress }));
+        dispatch(actions.MarketPlace.updateFilter({ collectionAddress, filterPage: "collection" }));
 
       return {
         bech32Address: collectionAddress,
@@ -153,6 +149,22 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     // eslint-disable-next-line
   }, [match.params?.collection]);
 
+  const { floorPrice, volume, holderCount, tokenCount } = useMemo(() => {
+    if (!collection) return {};
+
+    const floorPrice = bnOrZero(collection.priceStat?.floorPrice).shiftedBy(-ZIL_DECIMALS)
+    const volume = bnOrZero(collection.priceStat?.volume).shiftedBy(-ZIL_DECIMALS);
+    const holderCount = bnOrZero(collection.tokenStat?.holderCount);
+    const tokenCount = bnOrZero(collection.tokenStat?.tokenCount);
+
+    return {
+      floorPrice: floorPrice.gt(0) ? toHumanNumber(floorPrice) : undefined,
+      volume: volume.gt(0) ? toHumanNumber(volume) : undefined,
+      holderCount: holderCount.gt(0) ? holderCount.toString(10) : undefined,
+      tokenCount: tokenCount.gt(0) ? tokenCount.toString(10) : undefined,
+    }
+  }, [collection]);
+
   // get collection data
   useEffect(() => {
     if (!hexAddress) return;
@@ -161,7 +173,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       const arkClient = new ArkClient(network);
       const data = await arkClient.listCollection();
       const collection = data.result.entries.find(
-        (collection: any) => collection.address === hexAddress
+        (collection: Collection) => collection.address === hexAddress
       );
       if (collection) setCollection(collection);
       else history.push("/ark/collections");
@@ -181,7 +193,6 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     },
   ];
 
-
   return (
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
@@ -191,11 +202,12 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           badgeContent={<VerifiedBadge className={classes.verifiedBadge} />}
           avatarImage={TEMP_BEAR_AVATAR_URL}
           bannerImage={TEMP_BANNER_URL}
-        >
-          <SocialLinkGroup className={classes.socialLinkGroup} />
+        />
+        <Box display="flex" flexDirection="column" alignItems="center">
+          <SocialLinkGroup collection={collection} className={classes.socialLinkGroup} />
 
           {/* TODO: hacky way for mobile view, to clean up */}
-          <SocialLinkGroup className={classes.socialLinkGroupMobile} />
+          <SocialLinkGroup collection={collection} className={classes.socialLinkGroupMobile} />
 
           {/* Collection name and creator  */}
           <Box display="flex" flexDirection="column" maxWidth={500}>
@@ -212,14 +224,14 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             <Grid item xs={6} sm={3}>
               <Box className={classes.statsItem}>
                 <Text className={classes.statsHeader}>Collection Size</Text>
-                <Text className={classes.statsContent}>10,000</Text>
+                <Text className={classes.statsContent}>{tokenCount ?? "-"}</Text>
               </Box>
             </Grid>
 
             <Grid item xs={6} sm={3}>
               <Box className={classes.statsItem}>
                 <Text className={classes.statsHeader}>Number of Owners</Text>
-                <Text className={classes.statsContent}>8</Text>
+                <Text className={classes.statsContent}>{holderCount ?? "-"}</Text>
               </Box>
             </Grid>
 
@@ -227,39 +239,26 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             <Grid item xs={6} sm={3}>
               <Box className={classes.statsItem}>
                 <Text className={classes.statsHeader}>Floor Price</Text>
-                <Text className={classes.statsContent}>2,000 ZIL</Text>
+                <Text className={classes.statsContent}>{floorPrice ? `${floorPrice} ZIL` : "-"}</Text>
               </Box>
             </Grid>
 
             <Grid item xs={6} sm={3}>
               <Box className={classes.statsItem}>
                 <Text className={classes.statsHeader}>Volume Traded</Text>
-                <Text className={classes.statsContent}>1,000 ZIL</Text>
+                <Text className={classes.statsContent}>{volume ? `${volume} ZIL` : "-"}</Text>
               </Box>
             </Grid>
           </Grid>
 
           {/* Description */}
           <Text className={classes.description}>{collection.description}</Text>
+        </Box>
 
-          {/* Filters */}
-          <ARKFilterBar collectionAddress={collection.address} />
-
-          {/* NFTs in collection */}
-          <Grid container spacing={2} className={classes.nftContainer}>
-            {collection && tokens.map((token) => (
-              <Grid item key={token.tokenId} xs={12} md={3} className={classes.gridItem}>
-                <NftCard
-                  token={token}
-                  collectionAddress={collection.address}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        </ArkBanner>
+        <ArkNFTListing filterPage="collection" collectionAddress={collection.address} />
       </Container>
     </ArkPage>
   );
 };
 
-export default Collection;
+export default CollectionView;

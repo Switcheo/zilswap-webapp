@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, BoxProps, FormControlLabel, Switch, Typography, useMediaQuery } from "@material-ui/core";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import cls from "classnames";
@@ -7,7 +7,44 @@ import { AppTheme } from "app/theme/types";
 interface Props extends BoxProps {
   totalCount?: number,
   header: string,
+  switchLabel?: string,
+  hideCount?: boolean,
+  overrideSm?: boolean,
+  isChecked?: boolean,
+  onChecked?: (check: boolean) => void,
 }
+
+const ActiveBidToggle: React.FC<Props> = (props: Props) => {
+  const {
+    switchLabel, hideCount = false, overrideSm = false,
+    isChecked, onChecked, header, totalCount = 0, children, className, ...rest
+  } = props;
+  const classes = useStyles();
+  const isSm = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("sm"));
+  const [checked, setChecked] = useState(!!isChecked);
+
+  const handleChange = () => {
+    setChecked(!checked);
+    if (typeof onChecked === "function") {
+      onChecked(!checked)
+    }
+  }
+
+  return (
+    <Box {...rest} className={cls(classes.root, className)}>
+      <Typography className={cls(classes.root, { [classes.smRoot]: isSm && !overrideSm })} variant={overrideSm ? "h4" : "h1"}>{header}
+        {!hideCount && <Typography className={classes.count} variant="h1">({totalCount})</Typography>}
+      </Typography>
+      <Box flexGrow={1} />
+      <FormControlLabel
+        className={overrideSm ? undefined : classes.formLabel}
+        control={<PurpleSwitch onChange={() => handleChange()} checked={checked} />}
+        labelPlacement={(isSm && !overrideSm) ? "end" : "start"}
+        label={switchLabel}
+      />
+    </Box>
+  );
+};
 
 const PurpleSwitch = withStyles({
   root: {
@@ -44,9 +81,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: "16px 12px 16px 0px",
     display: "flex",
     flexDirection: 'row',
-    [theme.breakpoints.down("sm")]: {
-      flexDirection: "column",
-    }
+  },
+  smRoot: {
+    flexDirection: "column",
   },
   header: {
     display: "flex",
@@ -66,24 +103,5 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
   }
 }));
-
-const ActiveBidToggle: React.FC<Props> = (props: Props) => {
-  const { header, totalCount = 0, children, className, ...rest } = props;
-  const classes = useStyles();
-  const isSm = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("sm"));
-
-  return (
-    <Box {...rest} className={cls(classes.root, className)}>
-      <Typography className={classes.header} variant="h1">{header}<Typography className={classes.count} variant="h1">({totalCount})</Typography></Typography>
-      <Box flexGrow={1} />
-      <FormControlLabel
-        className={classes.formLabel}
-        control={<PurpleSwitch />}
-        labelPlacement={isSm ? "end" : "start"}
-        label="Show active offers only&nbsp;"
-      />
-    </Box>
-  );
-};
 
 export default ActiveBidToggle;

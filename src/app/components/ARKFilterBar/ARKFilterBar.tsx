@@ -6,7 +6,7 @@ import AttributesFilter from './components/AttributesFilter';
 import SortFilter from './components/SortFilter';
 import SearchFilter from './components/SearchFilter';
 
-const useStyles = makeStyles((theme: AppTheme) =>({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     display: "flex",
     width: "100%",
@@ -21,10 +21,12 @@ const useStyles = makeStyles((theme: AppTheme) =>({
 }))
 
 interface Props {
-  collectionAddress: any
+  collectionAddress: any;
+  filterPage: "profile" | "collection";
 }
 
 const ARKFilterBar = (props: Props) => {
+  const { filterPage, collectionAddress } = props;
   const classes = useStyles();
 
   return (
@@ -32,11 +34,11 @@ const ARKFilterBar = (props: Props) => {
       <Box className={classes.grid}>
         <SearchFilter />
 
-        <SaleTypeFilter />
+        <SaleTypeFilter filterPage={filterPage} />
 
-        <AttributesFilter collectionAddress={props.collectionAddress} />
+        <AttributesFilter filterPage={filterPage} collectionAddress={collectionAddress} />
       </Box>
-      <SortFilter />
+      <SortFilter filterPage={filterPage} />
     </Box>
   )
 }

@@ -1,7 +1,8 @@
 import React from "react";
-import { Box, Button } from "@material-ui/core";
+import { Box, BoxProps, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
+import { Collection } from "app/store/types";
 import { ReactComponent as TwitterIcon } from "app/components/SocialLinkGroup/social-icons/twitter.svg";
 import { ReactComponent as DiscordIcon } from "./social-icons/discord.svg";
 import { ReactComponent as GlobeIcon } from "./social-icons/globe.svg";
@@ -11,6 +12,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
     flexDirection: "row",
+    minHeight: theme.spacing(4),
     "& a": {
       minWidth: 0,
       padding: theme.spacing(0.75),
@@ -38,41 +40,57 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }));
-const SocialLinkGroup: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
-  props: any
-) => {
-  const { children, className, ...rest } = props;
+
+interface Props extends BoxProps {
+  collection?: Collection;
+}
+
+const SocialLinkGroup: React.FC<Props> = (props: Props) => {
+  const { children, className, collection, ...rest } = props;
   const classes = useStyles();
+
   return (
     // not mobile responsive yet
     <Box {...rest} className={cls(classes.root, className)}>
-      <Button
-        className={classes.fill}
-        href="https://twitter.com/ZilSwap"
-        target="_blank"
-        disableRipple
-      >
-        <TwitterIcon />
-      </Button>
-      <Button
-        className={classes.fill}
-        href="http://discord.gg/ESVqQ3qtvk"
-        target="_blank"
-        disableRipple
-      >
-        <DiscordIcon />
-      </Button>
-      <Button
-        className={classes.fill}
-        href="http://telegram.com"
-        target="_blank"
-        disableRipple
-      >
-        <TelegramIcon />
-      </Button>
-      <Button href="http://thebear.market" target="_blank" disableRipple>
-        <GlobeIcon className={classes.globeIcon} />
-      </Button>
+      {collection?.twitterUrl && (
+        <Button
+          className={classes.fill}
+          href={collection.twitterUrl}
+          target="_blank"
+          disableRipple
+        >
+          <TwitterIcon />
+        </Button>
+      )}
+      {collection?.discordUrl && (
+        <Button
+          className={classes.fill}
+          href={collection.discordUrl}
+          target="_blank"
+          disableRipple
+        >
+          <DiscordIcon />
+        </Button>
+      )}
+      {collection?.telegramUrl && (
+        <Button
+          className={classes.fill}
+          href={collection.telegramUrl}
+          target="_blank"
+          disableRipple
+        >
+          <TelegramIcon />
+        </Button>
+      )}
+      {collection?.websiteUrl && (
+        <Button
+          href={collection.websiteUrl}
+          target="_blank"
+          disableRipple
+        >
+          <GlobeIcon className={classes.globeIcon} />
+        </Button>
+      )}
     </Box>
   );
 };

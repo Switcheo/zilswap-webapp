@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Avatar,
-  Badge,
-  Box,
-  BoxProps,
-  Card,
-  CardMedia,
-} from "@material-ui/core";
+import { Avatar, Badge, Box, BoxProps, Card, CardMedia } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { AppTheme } from "app/theme/types";
@@ -54,7 +47,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 const ArkBanner: React.FC<Props> = (props: Props) => {
   const {
-    children,
     className,
     badgeContent,
     avatarImage,
@@ -99,7 +91,6 @@ const ArkBanner: React.FC<Props> = (props: Props) => {
             />
           </Wrapper>
         </Box>
-        {children}
       </Box>
     </Card>
   );
