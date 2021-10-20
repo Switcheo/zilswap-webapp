@@ -1,5 +1,5 @@
-import { SortBy } from "app/components/ARKFilterBar/components/SortFilter";
 import { SimpleMap } from "app/utils";
+import { SortBy } from "./actions";
 
 export interface MarketPlaceState {
   collections: SimpleMap<Collection>;
@@ -20,9 +20,9 @@ export interface SimpleCheque {
   side: 'buy' | 'sell';
   feeAmount: string;
   publicKey: string;
-  nonce: number;
+  signature: string;
+  nonce: string;
   expiry: number;
-  asset: Asset;
   price: {
     amount: string;
     address: string;
@@ -53,6 +53,8 @@ export interface Nft {
 
   bestAsk: null | SimpleCheque;
   bestBid: null | SimpleCheque;
+  isFavourited?: boolean;
+  statistics?: SimpleMap<string>
 }
 
 export type TraitType = {
@@ -86,6 +88,8 @@ export interface Asset {
   filename: string;
   url: string;
   contentLength?: number;
+  id?: string;
+  host?: string
 }
 
 export type MarketplaceUser = {

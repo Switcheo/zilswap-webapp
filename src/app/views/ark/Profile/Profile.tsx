@@ -10,7 +10,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import cls from "classnames";
 import { useSelector } from "react-redux";
-import { useRouteMatch } from "react-router";
 import { ArkClient } from "core/utilities";
 import { ArkBanner, ArkTab } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
@@ -35,7 +34,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   addrBox: {
     padding: "8px 24px",
     borderRadius: "12px",
-    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#6BE1FF40",
+    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1),
     opacity: 0.9,
@@ -91,12 +90,13 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
   const [showEdit, setShowEdit] = useState(false);
   const [currentTab, setCurrentTab] = useState("Collected");
-  const { params: { address: RawAddress } } = useRouteMatch<{ address: string }>();
   const [viewProfile, setViewProfile] = useState<ProfileType | null>(null);
   const [addrText, setAddrText] = useState<string | undefined>(undefined);
   const [profileIsOwner, setProfileIsOwner] = useState(false);
   const network = useNetwork();
   const [runQueryProfile] = useAsyncTask("queryProfile");
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const RawAddress = urlSearchParams.get('address');
   const theme = useTheme();
 
   let address = RawAddress;
@@ -119,12 +119,14 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   }, [storeProfile, wallet])
 
   const checkProfile = () => {
-    if (((storeProfile?.address && !address) || (storeProfile?.address && toBech32Address(storeProfile?.address) === address)) && wallet?.addressInfo.bech32) {
-      setViewProfile(storeProfile);
+    const haveProfileNoAddress = storeProfile?.address && !address;
+    const profileAddressEqAddress = storeProfile?.address && toBech32Address(storeProfile?.address) === address;
+    if ((haveProfileNoAddress || profileAddressEqAddress) && wallet?.addressInfo.bech32) {
+      setViewProfile(storeProfile!);
       setProfileIsOwner(true);
-      setAddrText(truncateAddress(storeProfile?.address, isXs))
+      setAddrText(truncateAddress(storeProfile!.address, isXs))
     } else {
-      if (address) {
+      if (RawAddress) {
         getProfile(RawAddress);
       } else {
         setViewProfile(null);
@@ -153,7 +155,6 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   let tabHeaders = ["Collected", "For Sale", "Liked"];
   if (profileIsOwner) tabHeaders = tabHeaders.concat(["Bids Made", "Bids Received",])
 
-
   return (
     <ArkPage {...rest}>
       {!showEdit && (
@@ -172,7 +173,11 @@ const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             {(address || viewProfile?.address) && (
               <Tooltip title="Copy address" placement="top" arrow>
                 <Box
-                  onClick={() => copyAddr(isCopiable(viewProfile?.address || address) ? toBech32Address(viewProfile?.address || address) : address)}
+                  onClick={() => copyAddr(
+                    isCopiable(viewProfile?.address || address || "")
+                      ? toBech32Address(viewProfile?.address || address || "")
+                      : (address || RawAddress || "")
+                  )}
                   className={classes.addrBox}
                 >
                   <Typography variant="body1">{addrText || address}</Typography>

@@ -155,9 +155,9 @@ const Row: React.FC<Props> = (props: Props) => {
               {dayjs(bid.createdAt).format("D MMM YYYY")}
             </TableCell>
             <TableCell align="right" className={cls(classes.bodyCell, { [classes.withBorder]: expand, [classes.firstCell]: !showItem })}>
-                <strong className={classes.amount}>
-                  {priceAmount.toFormat(priceAmount.gte(1) ? 2 : priceToken.decimals)}
-                </strong> {priceToken.symbol} (${usdValue.toFormat(2)})
+              <strong className={classes.amount}>
+                {priceAmount.toFormat(priceAmount.gte(1) ? 2 : priceToken.decimals)}
+              </strong> {priceToken.symbol} (${usdValue.toFormat(2)})
             </TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>NYI</TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>

@@ -121,7 +121,8 @@ const BidDialog: React.FC<Props> = (props: Props) => {
       const arkClient = new ArkClient(network);
       const nonce = new BigNumber(Math.random())
         .times(2147483647)
-        .decimalPlaces(0); // int32 max 2147483647
+        .decimalPlaces(0)
+        .toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 300; // blocks
       const message = arkClient.arkMessage(

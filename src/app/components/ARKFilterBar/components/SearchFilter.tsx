@@ -34,7 +34,7 @@ const SearchFilter = () => {
   return (
     <Box>
       <OutlinedInput
-        placeholder="Search by name"
+        placeholder="Search by ID"
         value={search}
         fullWidth
         classes={{ input: classes.inputText }}
