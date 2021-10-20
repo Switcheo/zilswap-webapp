@@ -2,12 +2,13 @@ import React from "react";
 import { Box, BoxProps, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import ARKFilterBar from "app/components/ARKFilterBar";
-import { ArkNFTCard } from "app/components";
+import { ArkNFTCard, ArkPaginator } from "app/components";
 import { getMarketplace } from "app/saga/selectors";
 import { AppTheme } from "app/theme/types";
 import { Nft } from "app/store/types";
+import { actions } from "app/store";
 
 interface Props extends BoxProps {
   collectionAddress?: string,
@@ -16,7 +17,13 @@ interface Props extends BoxProps {
 const ArkNFTListing: React.FC<Props> = (props: Props) => {
   const { collectionAddress, children, className, ...rest } = props;
   const classes = useStyles();
-  const { tokens } = useSelector(getMarketplace);
+  const { tokens, filter } = useSelector(getMarketplace);
+  const dispatch = useDispatch()
+
+  const handlePageChange = (page: number) => {
+    const offset = (page - 1) * (filter.pagination?.limit || 0)
+    dispatch(actions.MarketPlace.updateFilter({ pagination: { ...filter.pagination, offset } }));
+  }
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
@@ -31,6 +38,7 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
           </Grid>
         ))}
       </Grid>
+      {tokens.length && (<ArkPaginator itemPerPage={filter?.pagination?.limit || 0} totalItem={filter?.pagination?.count || 0} onPageChange={handlePageChange} />)}
     </Box>
   );
 };

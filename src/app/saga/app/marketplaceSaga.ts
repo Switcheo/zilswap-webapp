@@ -63,6 +63,11 @@ function* loadNftList() {
       }
     }
 
+    if (filter.pagination?.limit) query.limit = filter.pagination?.limit;
+    if (filter.pagination?.offset) query.offset = filter.pagination?.offset;
+
+    console.log({ filter }, filter.pagination?.limit, filter.pagination?.offset);
+
     const arkClient = new ArkClient(network); // TODO: refactor client into redux
     const tokenResult = (yield call(arkClient.searchCollection, collectionAddress, query)) as unknown as any;
 

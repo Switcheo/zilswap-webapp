@@ -9,6 +9,8 @@ export interface MarketPlaceState {
   oAuth?: OAuth;
   receivedBids?: any;
   bidded?: any;
+  profileFilter: CollectionFilter;
+  profileTokens: Nft[];
 }
 
 export interface SimpleCheque {
@@ -135,9 +137,9 @@ export interface PaginatedList<T> {
 }
 
 export interface PaginationInfo {
-  offset: number;
-  count: number;
-  limit: number;
+  offset?: number;
+  count?: number;
+  limit?: number;
 }
 
 export interface CollectionFilter {
