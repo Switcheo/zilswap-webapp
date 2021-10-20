@@ -82,7 +82,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "0 0 12px 12px",
     overflowY: "auto",
     padding: theme.spacing(2, 4, 5),
-    minWidth: 364
+    minWidth: 364,
+    [theme.breakpoints.down("sm")]: {
+      minWidth: 300,
+    },
   },
   labelButton: {
     display: "flex",
