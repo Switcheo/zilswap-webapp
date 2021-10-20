@@ -12,24 +12,27 @@ import { actions } from "app/store";
 
 interface Props extends BoxProps {
   collectionAddress?: string,
+  filterPage: "profile" | "collection",
 }
 
 const ArkNFTListing: React.FC<Props> = (props: Props) => {
-  const { collectionAddress, children, className, ...rest } = props;
+  const { filterPage, collectionAddress, children, className, ...rest } = props;
   const classes = useStyles();
-  const { tokens, filter } = useSelector(getMarketplace);
+  const { tokens, filter, profileTokens } = useSelector(getMarketplace);
   const dispatch = useDispatch()
 
   const handlePageChange = (page: number) => {
     const offset = (page - 1) * (filter.pagination?.limit || 0)
-    dispatch(actions.MarketPlace.updateFilter({ pagination: { ...filter.pagination, offset } }));
+    dispatch(actions.MarketPlace.updateFilter({ filterPage, pagination: { ...filter.pagination, offset } }));
   }
+
+  const useTokens = filterPage === "profile" ? profileTokens : tokens;
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <ARKFilterBar collectionAddress={collectionAddress} />
+      <ARKFilterBar filterPage={filterPage} collectionAddress={collectionAddress} />
       <Grid container spacing={2} className={classes.listingContainer}>
-        {tokens.map((token: Nft) => (
+        {useTokens.map((token: Nft) => (
           <Grid item key={token.tokenId} xs={12} lg={3} md={4} sm={6} className={classes.gridItem}>
             <ArkNFTCard
               token={token}
@@ -38,7 +41,7 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
           </Grid>
         ))}
       </Grid>
-      {tokens.length && (<ArkPaginator itemPerPage={filter?.pagination?.limit || 0} totalItem={filter?.pagination?.count || 0} onPageChange={handlePageChange} />)}
+      <ArkPaginator itemPerPage={filter?.pagination?.limit || 0} totalItem={filter?.pagination?.count || 0} onPageChange={handlePageChange} />
     </Box>
   );
 };

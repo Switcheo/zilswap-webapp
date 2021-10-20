@@ -90,7 +90,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
         await arkClient.removeFavourite(token!.collection!.address, token.tokenId, newOAuth!.access_token);
       }
       setLiked(!liked);
-      dispatch(actions.MarketPlace.updateFilter(filter));
+      dispatch(actions.MarketPlace.updateFilter({ ...filter }));
     })
   }
 

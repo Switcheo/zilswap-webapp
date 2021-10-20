@@ -539,7 +539,7 @@ export namespace ArkClient {
   export interface SearchCollectionParams extends ListQueryParams {
     q?: string;
     viewer?: string;
-    sort?: string;
+    sortBy?: string;
     sortDir?: string;
   }
   export interface ListCollectionParams extends ListQueryParams {

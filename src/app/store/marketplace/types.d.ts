@@ -5,11 +5,14 @@ export interface MarketPlaceState {
   collections: SimpleMap<Collection>;
   tokens: [];
   filter: CollectionFilter;
+  filters: {
+    collectionFilter: CollectionFilter;
+    profileFilter: CollectionFilter;
+  }
   profile?: Profile;
   oAuth?: OAuth;
   receivedBids?: any;
   bidded?: any;
-  profileFilter: CollectionFilter;
   profileTokens: Nft[];
 }
 
@@ -148,6 +151,8 @@ export interface CollectionFilter {
   traits: { [id: string]: TraitType };
   pagination?: PaginationInfo;
   sortBy: SortBy;
+  filterPage: "collection" | "profile";
+  owner?: string;
 }
 
 export interface SaleType {

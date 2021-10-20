@@ -135,7 +135,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     let collectionAddress = match.params.collection;
     if (collectionAddress?.startsWith("zil1")) {
       if (filter.collectionAddress !== collectionAddress)
-        dispatch(actions.MarketPlace.updateFilter({ collectionAddress }));
+        dispatch(actions.MarketPlace.updateFilter({ collectionAddress, filterPage: "collection" }));
 
       return {
         bech32Address: collectionAddress,
@@ -237,7 +237,7 @@ const Collection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           {/* Description */}
           <Text className={classes.description}>{collection.description}</Text>
 
-          <ArkNFTListing collectionAddress={collection.address} />
+          <ArkNFTListing filterPage="collection" collectionAddress={collection.address} />
         </ArkBanner>
       </Container>
     </ArkPage>

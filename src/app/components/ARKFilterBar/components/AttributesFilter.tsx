@@ -247,36 +247,38 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }))
 
 interface Props {
-  collectionAddress: any
+  collectionAddress: any,
+  filterPage: "profile" | "collection";
 }
 
 const abbreviateTraitValue = (traitValue: string) => {
   if (traitValue.length < 8) return traitValue
   const parts = traitValue.split(' ')
-  if (parts.length > 3) return parts[0].slice(0, 4) + ' ' + parts.slice(1).map(p => p.slice(0,1)).join("").slice(0, 9)
+  if (parts.length > 3) return parts[0].slice(0, 4) + ' ' + parts.slice(1).map(p => p.slice(0, 1)).join("").slice(0, 9)
   else return parts.map(p => p.slice(0, 4)).join(" ")
 }
 
 const AttributesFilter = (props: Props) => {
+  const { filterPage, collectionAddress } = props;
   const marketPlaceState = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
   const { network } = useSelector(getBlockchain);
   const dispatch = useDispatch();
 
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [traits, setTraits] = useState<{[id: string]: TraitType}>({})
-  const [filteredTraits, setFilteredTraits] = useState<{[id: string]: TraitType}>({})
+  const [traits, setTraits] = useState<{ [id: string]: TraitType }>({})
+  const [filteredTraits, setFilteredTraits] = useState<{ [id: string]: TraitType }>({})
   const [search, setSearch] = useState<string>("");
 
   useEffect(() => {
-    if (!props.collectionAddress && Object.keys(traits).length === 0) return
+    if (!collectionAddress && Object.keys(traits).length === 0) return
     getTraits()
     // eslint-disable-next-line
-  }, [props.collectionAddress])
+  }, [collectionAddress])
 
   const getTraits = async () => {
     const arkClient = new ArkClient(network);
-    const data = await arkClient.getCollectionTraits(props.collectionAddress);
+    const data = await arkClient.getCollectionTraits(collectionAddress);
 
     var newTraits: { [id: string]: TraitType } = {}
     data.result.entries.forEach((model: any) => {
@@ -339,7 +341,8 @@ const AttributesFilter = (props: Props) => {
 
   useEffect(() => {
     dispatch(updateFilter({
-      ...marketPlaceState.filter,
+      // ...marketPlaceState.filter,
+      filterPage,
       traits: traits
     }))
     // eslint-disable-next-line
@@ -347,16 +350,16 @@ const AttributesFilter = (props: Props) => {
 
   useEffect(() => {
     // Check for empty search case
-    if(search === "") {
+    if (search === "") {
       setFilteredTraits(traits)
       return
     }
 
-    var updatedTraits: {[id: string]: TraitType} = {...traits}
+    var updatedTraits: { [id: string]: TraitType } = { ...traits }
     Object.keys(updatedTraits).forEach(trait => {
       updatedTraits[trait] = traits[trait]
 
-      const result = pickBy(updatedTraits[trait].values, function(value, key) {
+      const result = pickBy(updatedTraits[trait].values, function (value, key) {
         return value.value.toLowerCase().includes(search.toLowerCase())
       })
 
@@ -380,11 +383,11 @@ const AttributesFilter = (props: Props) => {
                 <span className={classes.filterSelectedValueCategory}>{type.trait.toUpperCase()}:</span>
                 {
                   selectedCount > 2 || totalSelectCount > 3 ?
-                  <span className={classes.filterSelectedValueValue}>{selectedCount}</span>
-                  :
-                  selected.map(selected => (<span className={classes.filterSelectedValueValue}>
-                    {abbreviateTraitValue(selected.value)}
-                  </span>))
+                    <span className={classes.filterSelectedValueValue}>{selectedCount}</span>
+                    :
+                    selected.map(selected => (<span className={classes.filterSelectedValueValue}>
+                      {abbreviateTraitValue(selected.value)}
+                    </span>))
                 }
               </span>
             )

@@ -15,7 +15,6 @@ function* loadNftList() {
     const collectionAddress = filter.collectionAddress;
     logger("load nft list", "filter", filter);
 
-    if (!collectionAddress) return;
 
     const traits = {
       include: {} as SimpleMap<string[]>,
@@ -37,27 +36,25 @@ function* loadNftList() {
     const query: ArkClient.SearchCollectionParams = {
       q: JSON.stringify({ traits }),
     };
-    if (wallet) {
-      query.viewer = wallet.addressInfo.byte20.toLocaleLowerCase()
-    }
+
     switch (filter.sortBy) {
       case SortBy.PriceDescending: {
-        query.sort = 'price'
+        query.sortBy = 'price'
         query.sortDir = 'desc'
         break
       }
       case SortBy.PriceAscending: {
-        query.sort = 'price'
+        query.sortBy = 'price'
         query.sortDir = 'asc'
         break
       }
       case SortBy.MostRecent: {
-        query.sort = 'listedAt'
+        query.sortBy = 'listedAt'
         query.sortDir = 'desc'
         break
       }
       case SortBy.MostLoved: {
-        query.sort = 'favouriteCount'
+        query.sortBy = 'favouriteCount'
         query.sortDir = 'desc'
         break
       }
@@ -66,13 +63,26 @@ function* loadNftList() {
     if (filter.pagination?.limit) query.limit = filter.pagination?.limit;
     if (filter.pagination?.offset) query.offset = filter.pagination?.offset;
 
-    console.log({ filter }, filter.pagination?.limit, filter.pagination?.offset);
-
     const arkClient = new ArkClient(network); // TODO: refactor client into redux
-    const tokenResult = (yield call(arkClient.searchCollection, collectionAddress, query)) as unknown as any;
 
-    logger("load nft list", "result", tokenResult);
-    yield put(actions.MarketPlace.updateTokens(tokenResult.result));
+    if (filter.filterPage === "profile") {
+      if (!filter.owner) return;
+      const newQuery: ArkClient.ListTokenParams = { ...query, owner: filter.owner };
+
+      const tokenResult = (yield call(arkClient.listTokens, newQuery)) as unknown as any;
+
+      logger("load nft list", "result", tokenResult);
+      yield put(actions.MarketPlace.updateTokens(tokenResult.result));
+    } else {
+      if (!collectionAddress) return;
+      if (wallet) {
+        query.viewer = wallet.addressInfo.byte20.toLocaleLowerCase()
+      }
+      const tokenResult = (yield call(arkClient.searchCollection, collectionAddress, query)) as unknown as any;
+
+      logger("load nft list", "result", tokenResult);
+      yield put(actions.MarketPlace.updateTokens(tokenResult.result));
+    }
 
   } catch (error) {
     console.error("loading profile failed, Error:")
