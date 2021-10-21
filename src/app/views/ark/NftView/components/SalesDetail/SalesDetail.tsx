@@ -256,7 +256,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minHeight: theme.spacing(5),
     border: `1px solid #003340`,
     borderRadius: theme.spacing(1.5),
-    padding: theme.spacing(3),
+    padding: theme.spacing(3, 3.5),
     paddingBottom: theme.spacing(6),
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(2, 3),
