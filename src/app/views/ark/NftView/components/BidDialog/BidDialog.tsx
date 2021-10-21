@@ -246,6 +246,13 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     setExpiryOption(option);
   };
 
+  const onSelectOption = (option: expiryOption) => {
+    setExpiryOption(option);
+    if (option.text === "Select a date") {
+      setExpiryDate(new Date());
+    }
+  }
+
   const isBidEnabled = useMemo(() => {
     if (!formState.acceptTerms) return false;
 
@@ -310,8 +317,6 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                   />
                 </Text>
                 <Text className={classes.expiryDate}>
-                  {/* {dayjs(expiryDate).format("D MMM YYYY")},{" "} */}
-                  {/* {dayjs(expiryTime, "HH:mm:ss").format("HH:mm:ss")} */}
                   {dayjs(expiryTime).format("D MMM YYYY, HH:mm:ss")}
                 </Text>
                 <Text color="textSecondary" className={classes.blockHeightText}>
@@ -328,7 +333,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                   {EXPIRY_OPTIONS.map((option) => {
                     return (
                       <MenuItem
-                        onClick={() => setExpiryOption(option)}
+                        onClick={() => onSelectOption(option)}
                         value={option.text}
                         className={cls(classes.menuItem, {
                           [classes.selected]: expiryOption === option,
@@ -350,12 +355,13 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                   })}
                 </MenuList>
                 {expiryOption.text === "Select a date" && (
-                  <Box display="flex" justifyContent="center" mt={0.5} mb={2}>
+                  <Box mt={0.5} mb={2} pl={2} pr={2}>
                     <DatePicker
                       minDate={new Date()}
                       className={classes.datePicker}
                       selected={new Date()}
                       onChange={(date) => onChangeExpiry(date)}
+                      // highlightDates={[expiryDate]}
                       fixedHeight
                       inline
                     />
@@ -468,7 +474,63 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiAccordionSummary-content.Mui-expanded": {
       margin: "12px 0",
     },
-    position: "relative",
+    "& .react-datepicker": {
+      width: "100%",
+      borderRadius: 12,
+      backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF",
+      border: `1px solid ${theme.palette.type === "light" ? `rgba${hexToRGBA("#003340", 0.2)}` : "#29475A"}`
+    },
+    "& .react-datepicker__month-container": {
+      width: "100%"
+    },
+    "& .react-datepicker__header": {
+      backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF",
+      borderBottom: "none",
+      borderRadius: "12px!important"
+    },
+    "& .react-datepicker__current-month": {
+      fontFamily: "'Raleway', sans-serif",
+      fontWeight: 900,
+      color: theme.palette.text?.primary
+    },
+    "& .react-datepicker__day-names": {
+      display: "none",
+    },
+    "& .react-datepicker__day": {
+      borderRadius: "12px!important",
+      color: `rgba${theme.palette.type === "dark" ? hexToRGBA("#DEFFFF", 0.5) : hexToRGBA("003340", 0.6)}`,
+      "&:hover": {
+        backgroundColor: theme.palette.primary.light
+      },
+      "&:focus": {
+        outline: 0
+      },
+    },
+    "& .react-datepicker__day--disabled": {
+      color: "#A5B3BF",
+      textDecoration: "line-through",
+      "&:hover": {
+        backgroundColor: "transparent!important"
+      }
+    },
+    "& .react-datepicker__day--keyboard-selected": {
+      backgroundColor: "#00FFB0",
+      color: "#29475A",
+      "&:hover": {
+        backgroundColor: "#00FFB0!important",
+      }
+    },
+    "& .react-datepicker__day--selected": {
+      backgroundColor: "#FFFFFF",
+      color: "#29475A",
+      "&:hover": {
+        backgroundColor: "#FFFFFF",
+      }
+    },
+    "& .react-datepicker__week": {
+      display: "flex",
+      justifyContent: "space-around",
+    }
   },
   backdrop: {
     position: "absolute",
@@ -489,16 +551,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
     borderRadius: "0 0 12px 12px",
     padding: theme.spacing(0, 3, 2),
-    minWidth: 380,
-    maxWidth: 411,
     overflowY: "auto",
     "&::-webkit-scrollbar": {
-      width: "0.4rem"
+      width: "0.5rem"
     },
     "&::-webkit-scrollbar-thumb": {
       backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
       borderRadius: 12
     },
+    minWidth: 380,
+    maxWidth: 411,
   },
   actionButton: {
     height: 46,
@@ -602,6 +664,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   helpInfo: {
+    verticalAlign: "top",
     marginLeft: "4px",
   },
   dropDownIcon: {

@@ -88,18 +88,18 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
         <ArkBreadcrumb linkPath={breadcrumbs} />
 
         {/* Nft image and main info */}
-        <Box display="flex" mt={3} justifyContent="center" className={classes.imageInfoContainer}>
-          <NftImage onReload={getNFTDetails} className={classes.bearImage} token={token} />
+        <Container disableGutters maxWidth="md" className={classes.imageInfoContainer}>
+          <NftImage onReload={getNFTDetails} className={classes.nftImage} token={token} />
           <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} />
-        </Box>
+        </Container>
 
         {/* About info and trait table */}
         <Box mt={4} display="flex" className={classes.smColumn}>
           <Box display="flex" flexDirection="column" className={classes.aboutContainer}>
             <Typography variant="h1">About</Typography>
-            <Typography className={classes.aboutText}>Well we aren't just a bear market. We are The Bear Market. We know a couple of fudders who have been releasing bears into the unknown, and because of you guys we now have a shelter full of lost and lonely bears.</Typography>
-            <Typography className={classes.aboutText}> As much as we would love to care for all these unbearably cuddly bears, we simply can't keep up! Thus we've launched The Bear Market.</Typography>
-            <Typography className={classes.aboutText}> Learn more at thebear.market.</Typography>
+            <Typography className={classes.aboutText}>
+              {token?.collection?.description}
+            </Typography>
             <Box className={classes.xsColumn} mt={4} display="flex" justifyContent="center">
               <Box flexGrow={1}>
                 <MenuItem component={Link} to={`/ark/profile?address=${owner?.address}`} className={classes.aboutMenuItem} button={false}>
@@ -183,22 +183,31 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "-webkit-text-stroke-color": "rgba(107, 225, 255, 0.2)",
     "-webkit-text-stroke-width": "1px",
   },
-  mainInfoBox: {
+  imageInfoContainer: {
+    marginTop: theme.spacing(3),
     display: "flex",
-    width: "100%",
-    flexDirection: "column",
-    padding: theme.spacing(8),
-    borderRadius: 12,
-    border: "1px solid #29475A",
-    marginRight: theme.spacing(20),
-    background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
-    [theme.breakpoints.down("sm")]: {
-      padding: theme.spacing(2, 3),
-      width: "100%",
-      marginRight: theme.spacing(16),
-    },
     [theme.breakpoints.down("xs")]: {
-      marginRight: 0,
+      flexDirection: "column",
+    },
+  },
+  nftImage: {
+    maxWidth: 450,
+    paddingTop: theme.spacing(8),
+    position: "relative",
+    width: "50vw",
+    [theme.breakpoints.down("xs")]: {
+      padding: theme.spacing(0, 4),
+      maxWidth: "unset",
+      width: "100%",
+    },
+  },
+  mainInfoBox: {
+    flex: 1,
+    marginLeft: theme.spacing(-10),
+    paddingLeft: theme.spacing(10),
+    [theme.breakpoints.down("xs")]: {
+      marginLeft: theme.spacing(0),
+      paddingLeft: theme.spacing(0),
     },
   },
   verifiedBadge: {
@@ -225,28 +234,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontFamily: "'Raleway', sans-serif",
     fontWeight: 700,
     color: "#DEFFFF",
-  },
-  bearImage: {
-    paddingTop: theme.spacing(8),
-    right: -theme.spacing(16),
-    position: "relative",
-    [theme.breakpoints.down("sm")]: {
-      flexDirection: "column",
-      right: -theme.spacing(12),
-    },
-    [theme.breakpoints.down("xs")]: {
-      flexDirection: "column",
-      right: "0",
-      marginBottom: theme.spacing(1)
-    }
-  },
-  imageInfoContainer: {
-    [theme.breakpoints.down("sm")]: {
-      left: theme.spacing(4),
-    },
-    [theme.breakpoints.down("xs")]: {
-      flexDirection: "column",
-    }
   },
   halfOpacity: {
     opacity: 0.5,

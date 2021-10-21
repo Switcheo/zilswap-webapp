@@ -1,20 +1,17 @@
-import React, { useMemo, useEffect, useState } from "react";
-import { Box, BoxProps, Typography, useMediaQuery } from "@material-ui/core";
+import React, { useEffect, useMemo, useState } from "react";
+import { Box, BoxProps, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { useDispatch, useSelector } from "react-redux";
-import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
-import cls from "classnames";
 import BigNumber from "bignumber.js";
-import { CurrencyLogo, FancyButton } from "app/components";
-import { getWallet, getTokens } from "app/saga/selectors";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import { CurrencyLogo, FancyButton, Text, ZapIconButton } from "app/components";
+import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
-import { AppTheme } from "app/theme/types";
 import { Nft, TokenInfo } from "app/store/types";
-import { useBlockTime } from "app/utils";
+import { AppTheme } from "app/theme/types";
+import { bnOrZero, useValueCalculators } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
-import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
-import { ReactComponent as ZapSVG } from "../assets/zap.svg";
-import { ReactComponent as EllipseSVG } from "../assets/ellipse.svg";
+import { InfoBox } from "./components";
 
 interface Props extends BoxProps {
   token?: Nft;
@@ -25,13 +22,12 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
   const { token, tokenId, children, className, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
-  const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
   const { wallet } = useSelector(getWallet);
   const { tokens, prices } = useSelector(getTokens);
   const [tokenPrice, setTokenPrice] = useState<BigNumber | null>(null);
   const [tokenAmount, setTokenAmount] = useState<BigNumber | null>(null);
   const [purchaseCurrency, setPurchaseCurrency] = useState<TokenInfo>();
-  const [blockTime, currentBlock, currentTime] = useBlockTime();
+  const valueCalculator = useValueCalculators();
 
   const isOwnToken = useMemo(() => {
     return (
@@ -40,50 +36,25 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
     );
   }, [token, wallet?.addressInfo]);
 
-  const expiry = useMemo(() => {
-    if (!token?.bestAsk) return undefined;
-    const expiryTime = blockTime.add(
-      (token?.bestAsk?.expiry - currentBlock) / BLOCKS_PER_MINUTE,
-      "minutes"
-    );
-    const daysleft = expiryTime.diff(currentTime, "days");
-    const hoursLeft = expiryTime.diff(currentTime, "hours");
-    const minsLeft = expiryTime.diff(currentTime, "minutes");
-    const secLeft = expiryTime.diff(currentTime, "seconds");
-    return { expiryTime, daysleft, hoursLeft, minsLeft, secLeft };
-    // eslint-disable-next-line
-  }, [blockTime, token?.bestAsk]);
-
   const bestBid = useMemo(() => {
     if (!token?.bestBid) return undefined;
 
-    const expiryTime = blockTime.add(
-      (token?.bestBid?.expiry - currentBlock) / BLOCKS_PER_MINUTE,
-      "minutes"
-    );
-    const timeLeft = expiryTime.fromNow();
-    const bidToken =
-      tokens[token?.bestBid?.price.address] || tokens[ZIL_ADDRESS];
-    const placement = new BigNumber(10).pow(bidToken.decimals);
-    const amount = new BigNumber(token?.bestBid?.price.amount).div(placement);
-    return { amount, timeLeft };
-    // eslint-disable-next-line
-  }, [blockTime, token?.bestBid, tokens]);
+    const bidToken = tokens[token?.bestBid?.price.address] || tokens[ZIL_ADDRESS]
+    return bnOrZero(token?.bestBid?.price.amount).shiftedBy(-bidToken?.decimals ?? 0)
+  }, [token?.bestBid, tokens])
 
   useEffect(() => {
     if (Object.keys(tokens).length && token && token.bestAsk) {
-      const tok = tokens[token?.bestAsk?.price.address] || tokens[ZIL_ADDRESS];
+      const priceToken = tokens[token?.bestAsk?.price.address] || tokens[ZIL_ADDRESS];
 
-      const placement = new BigNumber(10).pow(tok.decimals);
-      const askPrice = token.bestAsk.price.amount;
-      setTokenPrice(
-        new BigNumber(askPrice).div(placement).times(prices[tok.address])
-      );
-      setTokenAmount(new BigNumber(askPrice).div(placement));
-      setPurchaseCurrency(tok);
+      const askPrice = bnOrZero(token.bestAsk.price.amount)
+      const usdPrice = valueCalculator.amount(prices, priceToken, askPrice);
+      setTokenPrice(usdPrice)
+      setTokenAmount(askPrice.shiftedBy(-priceToken.decimals));
+      setPurchaseCurrency(priceToken)
     }
-    // eslint-disable-next-line
-  }, [tokens, token]);
+  }, [tokens, token, valueCalculator, prices])
+
 
   const onSell = () => {
     dispatch(actions.Layout.toggleShowSellNftDialog("open"));
@@ -99,207 +70,106 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      {/* Collection name */}
-      <Typography className={classes.collectionName}>
-        {token?.collection?.name || ""}{" "}
-        {/* <VerifiedBadge className={classes.verifiedBadge} /> */}
-      </Typography>
+      <Box className={classes.container}>
+        {/* Collection name */}
+        <Typography className={classes.collectionName}>
+          {token?.collection?.name ?? ""}{" "}
+          {/* <VerifiedBadge className={classes.verifiedBadge} /> */}
+        </Typography>
 
-      {/* Token id */}
-      <Typography className={classes.id}>#{tokenId}</Typography>
+        {/* Token id */}
+        <Typography className={classes.id}>#{tokenId}</Typography>
 
-      <Box display="flex" flexDirection="column" gridGap={20}>
-        <Box
-          className={classes.scoreBox}
-          display="flex"
-          justifyContent="flex-end"
-        >
-          <Box
-            flexGrow={1}
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            className={classes.scoreLabel}
-          >
-            <Box className={classes.labelInfo}>
-              <Typography variant="body1">ARK Score</Typography>&nbsp;
-              <InfoOutlinedIcon className={classes.infoIcon} />
-            </Box>
-            <Typography className={classes.rarityLabel} variant="h3">
-              SUPAH RARE
-            </Typography>
-            <Typography className={classes.infoBottom}>Top 51.1%</Typography>
+        <Box display="flex" flexDirection="column">
+          <Box className={classes.infoBoxContainer}>
+            <InfoBox topLabel="ARK Score" bottomLabel="Top 51.1%" tooltip={""} flex={1}>
+              <Typography className={classes.rarityLabel} variant="h3">SUPAH RARE</Typography>
+            </InfoBox>
+
+            <InfoBox topLabel="ZAPs" bottomLabel="Like it? ZAP it!" tooltip={""}>
+              <Text className={classes.zapScore} variant="h3">
+                {token?.statistics?.favourites || 0}
+                {" "}
+                <ZapIconButton className={classes.zapLogo} token={token} />
+              </Text>
+            </InfoBox>
           </Box>
-          <Box
-            marginLeft={1}
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            className={classes.zapLabel}
-          >
-            <Box className={classes.labelInfo}>
-              <Typography variant="body1">ZAPs</Typography>&nbsp;
-              <InfoOutlinedIcon className={classes.infoIcon} />
-            </Box>
-            <Typography className={classes.zapScore} variant="h3">
-              {token?.statistics?.favourites || 0}{" "}
-              <ZapSVG className={classes.zapLogo} />
-            </Typography>
-            <Typography className={classes.infoBottom}>
-              Like it? ZAP it!
-            </Typography>
-          </Box>
-        </Box>
-        <Box display="flex" className={classes.xsColumn}>
-          <Box
-            flexGrow={1}
-            display="flex"
-            flexDirection="column"
-            className={classes.saleInfoBox}
-          >
-            <Typography
-              variant="body1"
-              className={cls(classes.saleHeader, classes.halfOpacity)}
-            >
-              Price&nbsp;&nbsp;
-              <Typography variant="body1">
-                ${tokenPrice ? tokenPrice.toFixed(11).toString() : "-"}
-              </Typography>
-            </Typography>
-            <Typography variant="h2" className={classes.price}>
-              {tokenAmount ? tokenAmount.toString() : "-"}
-              {tokenAmount && purchaseCurrency ? (
-                <CurrencyLogo
-                  address={purchaseCurrency.address}
-                  currency={purchaseCurrency.symbol}
-                />
-              ) : (
-                ""
-              )}
-            </Typography>
-            <Typography variant="body1" className={classes.saleHeader}>
-              <Typography className={classes.halfOpacity}>Last:</Typography>
-              &nbsp;150,320&nbsp;
-              <Typography className={classes.halfOpacity}>
-                ZIL Expires in 1 day
-              </Typography>
-            </Typography>
-            {bestBid?.amount && (
-              <Typography variant="body1" className={classes.saleHeader}>
-                <Typography className={classes.halfOpacity}>Best:</Typography>
-                &nbsp;{bestBid?.amount}&nbsp;
-                <Typography className={classes.halfOpacity}>
-                  ZIL {bestBid?.timeLeft || ""}
+          <Box className={classes.saleInfoContainer}>
+            {(token?.bestAsk || token?.bestBid) && (
+              <React.Fragment>
+                {/* this section is WIP */}
+                <Typography variant="body1" className={cls(classes.saleHeader, classes.halfOpacity)}>
+                  Price
                 </Typography>
-              </Typography>
+
+                <Typography variant="h2" className={classes.price}>
+                  {tokenAmount?.toString() ?? "-"}
+
+                  {(tokenAmount && purchaseCurrency) ? <CurrencyLogo address={purchaseCurrency.address} currency={purchaseCurrency.symbol} /> : ""}
+
+                  <Typography component="span" variant="body1">
+                    ${tokenPrice?.dp(11).toString() ?? "-"}
+                  </Typography>
+                </Typography>
+                <Typography variant="body1" className={classes.saleHeader}>
+                  <Typography component="span" className={classes.halfOpacity}>Last:</Typography>
+                  150,320
+                  <Typography component="span" className={classes.halfOpacity}>ZIL Expires in 1 day</Typography>
+                </Typography>
+                {!!bestBid && (
+                  <Typography variant="body1" className={classes.saleHeader}>
+                    <Typography className={classes.halfOpacity}>
+                      Best:
+                    </Typography>
+                    {" "}
+                    {bestBid.toString(10)}
+                    {" "}
+                    <Typography className={classes.halfOpacity}>
+                      ZIL
+                    </Typography>
+                  </Typography>
+                )}
+              </React.Fragment>
             )}
           </Box>
-          {!isXs && (
-            <Box display="flex" className={classes.buttonBox}>
-              {isOwnToken && (
-                <FancyButton
-                  className={classes.buyButton}
-                  disableRipple
-                  onClick={onSell}
-                >
-                  Sell
-                </FancyButton>
-              )}
-              {!isOwnToken && (
-                <FancyButton
-                  className={classes.buyButton}
-                  disableRipple
-                  onClick={onBuy}
-                >
-                  Buy Now
-                </FancyButton>
-              )}
-            </Box>
-          )}
-        </Box>
-
-        <Box display="flex">
-          <Box
-            flexGrow={1}
-            display="flex"
-            flexDirection="column"
-            className={classes.saleInfoBox}
-          >
-            <Typography
-              variant="body1"
-              className={cls(classes.saleHeader, classes.halfOpacity)}
-            >
-              Ends on
-            </Typography>
-            <Typography variant="body1" className={classes.saleHeader}>
-              {expiry?.expiryTime?.format("D MMM YYYY, HH:mm A") || "-"}
-            </Typography>
-            <Box mt={1} display="flex">
-              <Typography className={classes.expiryDate}>
-                <EllipseSVG />
-                {`${expiry?.daysleft || "-"} D : ${
-                  expiry?.hoursLeft || "-"
-                }  H : ${expiry?.minsLeft || "-"}  M : ${
-                  expiry?.secLeft || "-"
-                }  S`}
-              </Typography>{" "}
-              <Box flexGrow={1} />{" "}
-            </Box>
-          </Box>
-          {!isXs && (
-            <Box display="flex" className={classes.buttonBox}>
-              <FancyButton
-                // disabled={!token?.bestAsk}
-                className={classes.bidButton}
-                onClick={onBid}
-                disableRipple
-              >
-                Place a Bid
-              </FancyButton>
-            </Box>
-          )}
-        </Box>
-        {isXs && (
-          <Box display="flex" flexDirection="column">
+          <Box display="flex" className={classes.buttonBox}>
             {isOwnToken && (
-              <FancyButton
-                fullWidth
-                className={classes.buyButton}
-                disableRipple
-                onClick={onSell}
-              >
+              <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onSell}>
                 Sell
               </FancyButton>
             )}
-            {!isOwnToken && (
-              <FancyButton
-                fullWidth
-                className={classes.buyButton}
-                disableRipple
-                onClick={onBuy}
-              >
+            {!isOwnToken && token?.bestAsk && (
+              <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onBuy}>
                 Buy Now
               </FancyButton>
             )}
-            <Box mt={2} />
-            <FancyButton
-              disabled={!token?.bestAsk}
-              fullWidth
-              className={classes.bidButton}
-              onClick={onBid}
-              disableRipple
-            >
+            <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onBid}>
               Place a Bid
             </FancyButton>
           </Box>
-        )}
+        </Box>
       </Box>
     </Box>
   );
 };
 
 const useStyles = makeStyles((theme: AppTheme) => ({
-  root: {},
+  root: {
+    borderRadius: theme.spacing(1.5),
+    border: "1px solid #29475A",
+    boxShadow: "0px 4px 20px #002028",
+    background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
+  },
+  container: {
+    display: "flex",
+    width: "100%",
+    flexDirection: "column",
+    padding: theme.spacing(7.5),
+    paddingLeft: theme.spacing(5),
+    [theme.breakpoints.down("sm")]: {
+      padding: theme.spacing(2, 3),
+    },
+  },
   id: {
     fontFamily: "'Raleway', sans-serif",
     fontWeight: 700,
@@ -307,57 +177,34 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "45px",
     color: "#DEFFFF",
     marginTop: theme.spacing(0.5),
-    marginLeft: theme.spacing(12),
+  },
+  buttonBox: {
+    transform: "translateY(-50%)",
+    width: "100%",
+    padding: theme.spacing(0, 3.5),
     [theme.breakpoints.down("xs")]: {
-      marginLeft: 0,
+      flexDirection: "column",
     },
   },
+  button: {
+    flex: 1,
+    margin: theme.spacing(0, .5),
+  },
   bidButton: {
-    height: 56,
-    width: 180,
-    borderRadius: 12,
+    padding: theme.spacing(2.5, 4),
+    borderRadius: theme.spacing(1.5),
     border: "1px solid #29475A",
     backgroundColor: "#003340",
-    float: "right",
-    position: "absolute",
-    marginTop: theme.spacing(4),
     "& .MuiButton-label": {
       color: "#DEFFFF",
     },
-    "&:hover": {
-      backgroundColor: "rgba(222, 255, 255, 0.08)",
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: 150,
-    },
-    [theme.breakpoints.down("xs")]: {
-      marginTop: 0,
-      position: "relative",
-      float: "none",
-    },
   },
   buyButton: {
-    height: 56,
-    width: 180,
-    borderRadius: 12,
+    padding: theme.spacing(2.5, 4),
+    borderRadius: theme.spacing(1.5),
     backgroundColor: "#6BE1FF",
-    float: "right",
-    position: "absolute",
-    marginTop: theme.spacing(4),
     "& .MuiButton-label": {
       color: "#003340",
-    },
-    "&:hover": {
-      backgroundColor: "rgba(107, 225, 255, 0.8)",
-    },
-    [theme.breakpoints.down("sm")]: {
-      width: 150,
-    },
-    [theme.breakpoints.down("xs")]: {
-      marginTop: 0,
-      position: "inherit",
-      float: "none",
-      width: "100%",
     },
   },
   collectionName: {
@@ -367,26 +214,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "24px",
     color: "#DEFFFF",
     textTransform: "uppercase",
-    marginLeft: theme.spacing(12),
-    [theme.breakpoints.down("xs")]: {
-      marginLeft: 0,
+  },
+  infoBoxContainer: {
+    display: "flex",
+    marginRight: theme.spacing(-1),
+    marginBottom: theme.spacing(-2),
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
     },
   },
-  buttonBox: {
-    width: theme.spacing(16),
-    overflow: "visible",
-    direction: "rtl",
-    marginLeft: theme.spacing(1),
-    [theme.breakpoints.down("xs")]: {
-      direction: "inherit",
-      width: "100%",
-    },
-  },
-  saleInfoBox: {
+  saleInfoContainer: {
+    marginTop: theme.spacing(3),
+    minHeight: theme.spacing(5),
     border: `1px solid #003340`,
-    borderRadius: "12px",
-    padding: theme.spacing(3, 0, 3, 12),
-    whiteSpace: "nowrap",
+    borderRadius: theme.spacing(1.5),
+    padding: theme.spacing(3),
+    paddingBottom: theme.spacing(6),
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(2, 3),
     },
@@ -403,74 +246,25 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     marginTop: theme.spacing(0.5),
   },
-  scoreBox: {
-    marginLeft: theme.spacing(12),
-    [theme.breakpoints.down("xs")]: {
-      marginLeft: 0,
-    },
-  },
-  scoreLabel: {
-    padding: "8px 24px",
-    borderRadius: "12px",
-    backgroundColor:
-      theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-    width: "fit-content",
-  },
-  zapLabel: {
-    padding: "8px 24px",
-    borderRadius: "12px",
-    backgroundColor:
-      theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-    width: theme.spacing(16),
-  },
   zapScore: {
-    fontFamily: "Avenir Next LT Pro",
+    fontFamily: "Avenir Next",
     display: "flex",
+    alignItems: "center",
     justifyContent: "center",
   },
   zapLogo: {
     marginLeft: theme.spacing(1),
-  },
-  labelInfo: {
-    display: "flex",
-    alignItems: "center",
-  },
-  infoIcon: {
-    opacity: 0.5,
-    fontSize: 16,
-  },
-  infoBottom: {
-    opacity: 0.5,
-    display: "flex",
-    justifyContent: "center",
+    fontSize: 21,
   },
   rarityLabel: {
     color: "#7B61FF",
-    fontFamily: "Avenir Next LT Pro",
+    fontFamily: "Avenir Next",
     fontWeight: 900,
     textAlign: "center",
-  },
-  expiryDate: {
-    display: "flex",
-    flexShrink: 1,
-    alignItems: "center",
-    padding: theme.spacing(0.6, 1.8),
-    borderRadius: "12px",
-    backgroundColor: "#DEFFFF",
-    color: theme.palette.primary.main,
   },
   halfOpacity: {
     opacity: 0.5,
     color: theme.palette.primary.contrastText,
-  },
-  xsColumn: {
-    [theme.breakpoints.down("xs")]: {
-      flexDirection: "column",
-    },
   },
 }));
 

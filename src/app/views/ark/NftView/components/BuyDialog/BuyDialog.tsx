@@ -98,6 +98,10 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         tokenId: id,
       }, ZilswapConnector.getSDK());
 
+      setCompletedPurchase(true);
+
+      console.log("success: ", execTradeResult.isRejected());
+
       logger("exec trade result", execTradeResult)
     });
   };
