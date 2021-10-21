@@ -158,7 +158,6 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
         <Fragment>
           <BuyDialog token={token} collectionAddress={collectionId} />
           <BidDialog token={token} collectionAddress={collectionId} />
-          <SellDialog />
         </Fragment>
       )}
     </ArkPage >

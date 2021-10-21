@@ -1,5 +1,5 @@
-import React from "react";
-import { DialogContent, DialogProps } from "@material-ui/core";
+import React, { useState, useEffect } from "react";
+import { Box, DialogContent, DialogProps, FormHelperText, InputLabel, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/zilliqa";
 import BigNumber from "bignumber.js";
@@ -7,10 +7,10 @@ import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { ZIL_HASH } from "zilswap-sdk/lib/constants";
-import { DialogModal, FancyButton, Text } from "app/components";
+import { ArkInput, ArkNFTCard, DialogModal, FancyButton, Text } from "app/components";
 import { getBlockchain, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
-import { RootState } from "app/store/types";
+import { Nft, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
 import { ArkClient, logger } from "core/utilities";
@@ -27,8 +27,64 @@ const SellDialog: React.FC<Props> = (props: Props) => {
   const { wallet } = useSelector(getWallet);
   const match = useRouteMatch<{ id: string, collection: string }>();
   const [runConfirmSell, loading, error] = useAsyncTask("confirmSell");
+  const [runGetNFTDetails] = useAsyncTask("runGetNFTDetails");
+  const [token, setToken] = useState<Nft>();
+  const [errors, setErrors] = useState({
+    description: "",
+  })
+  const [inputValues, setInputValues] = useState<any>({
+    description: "",
+  });
+
+  const collectionId = match.params.collection;
+  const tokenId = match.params.id;
 
   const open = useSelector<RootState, boolean>(state => state.layout.showSellNftDialog);
+
+  useEffect(() => {
+    if (wallet) {
+      getNFTDetails();
+    }
+    // eslint-disable-next-line
+  }, [wallet])
+
+  const getNFTDetails = (bypass?: boolean) => {
+    runGetNFTDetails(async () => {
+      const arkClient = new ArkClient(network);
+      const address = fromBech32Address(collectionId).toLowerCase()
+      const viewerAddress = wallet?.addressInfo.byte20.toLocaleLowerCase()
+      const { result } = await arkClient.getNftToken(address, tokenId, viewerAddress);
+      setToken(result.model);
+    })
+  }
+
+  const updateInputs = (type: string) => {
+    return (newInput: string) => {
+      setInputValues({
+        ...inputValues,
+        [type]: newInput
+      })
+      if (!newInput) {
+        return setErrors({
+          ...errors, [type]: ""
+        })
+      }
+      const errorText = validateInput(type, newInput)
+
+      setErrors({
+        ...errors, [type]: errorText
+      })
+    }
+  }
+
+  const validateInput = (type: string, input: string) => {
+    switch (type) {
+      case "description":
+        if (input.length > 300) return "max 300 characters";
+        return ""
+      default: return "false";
+    }
+  }
 
   const onClose = () => {
     dispatch(actions.Layout.toggleShowSellNftDialog("close"));
@@ -81,21 +137,88 @@ const SellDialog: React.FC<Props> = (props: Props) => {
   };
 
   return (
-    <DialogModal header="Confirm Sell" onClose={onClose} {...rest} open={open} className={cls(classes.root, className)}>
-      <DialogContent>
-        {error && (
-          <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
-        )}
-        <FancyButton walletRequired loading={loading} variant="contained" color="primary" onClick={onConfirm}>
-          Confirm Sell
-        </FancyButton>
-      </DialogContent>
-    </DialogModal>
+    <Box className={cls(classes.root, className)}>
+      <Box className={classes.container}>
+        <Box justifyContent="flex-start">
+          <Typography variant="h1">Sell</Typography>
+        </Box>
+        <Box display="flex">
+          <Box flexGrow={1}>
+            <ArkInput
+              placeholder="eg. This NFT was owned by an NBA player" error={errors.description} value={inputValues.description}
+              label="Additional description" onValueChange={(value) => updateInputs("description")(value)} multiline={true}
+            />
+
+            <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
+              Sell type
+            </InputLabel>
+            <FormHelperText className={classes.instruction}>By default, all Fixed Price listings are set to open to bids.</FormHelperText>
+
+            {error && (
+              <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
+            )}
+            <FancyButton 
+              className={classes.actionButton}
+              loading={loading} 
+              variant="contained" 
+              color="primary" 
+              onClick={onConfirm}
+              walletRequired
+            >
+              Sell NFT
+            </FancyButton>
+          </Box>
+          <Box marginLeft={3}>
+            {token &&
+              <ArkNFTCard
+                className={classes.nftCard}
+                token={token}
+                collectionAddress={fromBech32Address(collectionId).toLowerCase()}
+                dialog={true}
+              />
+            }
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  container: {
+    maxWidth: "680px",
+    width: "100%",
+    display: "row",
+    paddingTop: 32
+  },
+  nftCard: {
+    maxWidth: "none",
+  },
+  label: {
+    fontSize: "16px",
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    fontWeight: "bold",
+    width: 150,
+    overflowX: "visible",
+    textTransform: "uppercase",
+    marginBottom: 1,
+  },
+  instruction: {
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    fontSize: 12,
+    margin: 0,
+    opacity: 0.5,
+    width: 400,
+  },
+  actionButton: {
+    height: 46,
+    marginTop: 24
   },
 }));
 
