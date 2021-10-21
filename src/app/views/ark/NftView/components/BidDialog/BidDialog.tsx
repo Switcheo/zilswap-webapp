@@ -492,6 +492,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minWidth: 380,
     maxWidth: 411,
     overflowY: "auto",
+    "&::-webkit-scrollbar": {
+      width: "0.4rem"
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
+      borderRadius: 12
+    },
   },
   actionButton: {
     height: 46,
