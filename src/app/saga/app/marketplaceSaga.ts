@@ -60,7 +60,13 @@ function* loadNftList() {
       }
     }
 
+    if (wallet) {
+      query.viewer = wallet.addressInfo.byte20.toLocaleLowerCase()
+    }
+
     if (filter.saleType.fixed_price) query.type = 'buyNow'
+
+    if (filter.search !== '') query.search = filter.search;
 
     if (filter.pagination?.limit) query.limit = filter.pagination?.limit;
     if (filter.pagination?.offset) query.offset = filter.pagination?.offset;

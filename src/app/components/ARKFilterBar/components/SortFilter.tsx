@@ -121,9 +121,12 @@ const SortFilter = () => {
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
+  };
+
+  const handleChange = (sort: SortBy) => {
     dispatch(updateFilter({ sortBy }))
     handleClose()
-  };
+  }
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -209,7 +212,7 @@ const SortFilter = () => {
         className={classes.popover}
       >
         <Box paddingX="24px" className={classes.popoverContainer}>
-          <Box className={classes.filterOption} onClick={() => setSortBy(SortBy.PriceDescending)}>
+          <Box className={classes.filterOption} onClick={() => handleChange(SortBy.PriceDescending)}>
             <Box marginRight={1} className={cls(classes.sortIcon, { [classes.sortIconSelected]: sortBy === SortBy.PriceDescending })}>{iconForType(SortBy.PriceDescending)}</Box>
             <Box flexGrow={1}>
               <Text className={cls(classes.filterValue, {
@@ -220,7 +223,7 @@ const SortFilter = () => {
               <Checkmark />
             }
           </Box>
-          <Box className={classes.filterOption} onClick={() => setSortBy(SortBy.PriceAscending)}>
+          <Box className={classes.filterOption} onClick={() => handleChange(SortBy.PriceAscending)}>
             <Box marginRight={1} className={cls(classes.sortIcon, { [classes.sortIconSelected]: sortBy === SortBy.PriceAscending })}>{iconForType(SortBy.PriceAscending)}</Box>
             <Box flexGrow={1}>
               <Text className={cls(classes.filterValue, {
@@ -231,7 +234,7 @@ const SortFilter = () => {
               <Checkmark />
             }
           </Box>
-          {/* <Box className={classes.filterOption} onClick={() => setSortBy(SortBy.RarityDescending)}>
+          {/* <Box className={classes.filterOption} onClick={() => handleChange(SortBy.RarityDescending)}>
             <Box marginRight={1} className={cls(classes.sortIcon, {[classes.sortIconSelected]: sortBy === SortBy.RarityDescending})}>{iconForType(SortBy.RarityDescending)}</Box>
             <Box flexGrow={1}>
               <Text className={cls(classes.filterValue, {
@@ -242,7 +245,7 @@ const SortFilter = () => {
               <Checkmark />
             }
           </Box>
-          <Box className={classes.filterOption} onClick={() => setSortBy(SortBy.RarityAscending)}>
+          <Box className={classes.filterOption} onClick={() => handleChange(SortBy.RarityAscending)}>
             <Box marginRight={1} className={cls(classes.sortIcon, {[classes.sortIconSelected]: sortBy === SortBy.RarityAscending})}>{iconForType(SortBy.RarityAscending)}</Box>
             <Box flexGrow={1}>
               <Text className={cls(classes.filterValue, {
@@ -253,7 +256,7 @@ const SortFilter = () => {
               <Checkmark />
             }
           </Box> */}
-          <Box className={classes.filterOption} onClick={() => setSortBy(SortBy.MostRecent)}>
+          <Box className={classes.filterOption} onClick={() => handleChange(SortBy.MostRecent)}>
             <Box marginRight={1} className={cls(classes.sortIcon, { [classes.sortIconSelected]: sortBy === SortBy.MostRecent })}>{iconForType(SortBy.MostRecent)}</Box>
             <Box flexGrow={1}>
               <Text className={cls(classes.filterValue, {
@@ -264,7 +267,7 @@ const SortFilter = () => {
               <Checkmark />
             }
           </Box>
-          <Box className={classes.filterOption} onClick={() => setSortBy(SortBy.MostLoved)}>
+          <Box className={classes.filterOption} onClick={() => handleChange(SortBy.MostLoved)}>
             <Box marginRight={1} className={cls(classes.sortIcon, { [classes.sortIconSelected]: sortBy === SortBy.MostLoved })}>{iconForType(SortBy.MostLoved)}</Box>
             <Box flexGrow={1}>
               <Text className={cls(classes.filterValue, {
@@ -275,7 +278,7 @@ const SortFilter = () => {
               <Checkmark />
             }
           </Box>
-          {/* <Box className={classes.filterOption} onClick={() => setSortBy(SortBy.MostViewed)}>
+          {/* <Box className={classes.filterOption} onClick={() => handleChange(SortBy.MostViewed)}>
             <Box marginRight={1} className={cls(classes.sortIcon, {[classes.sortIconSelected]: sortBy === SortBy.MostViewed})}>{iconForType(SortBy.MostViewed)}</Box>
             <Box flexGrow={1}>
               <Text className={cls(classes.filterValue, {

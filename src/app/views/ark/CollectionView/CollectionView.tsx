@@ -9,7 +9,7 @@ import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
 import { actions } from "app/store";
 import ARKFilterBar from "app/components/ARKFilterBar";
-import { RootState, Collection, CollectionFilter } from "app/store/types";
+import { Collection } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
