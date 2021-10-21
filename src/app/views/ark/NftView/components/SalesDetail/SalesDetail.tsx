@@ -9,9 +9,11 @@ import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, useValueCalculators } from "app/utils";
+import { bnOrZero, useValueCalculators, useBlockTime } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
+import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 import { InfoBox } from "./components";
+import dayjs from "dayjs";
 
 interface Props extends BoxProps {
   token?: Nft;
@@ -22,26 +24,30 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
   const { token, tokenId, children, className, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down("xs"));
   const { wallet } = useSelector(getWallet);
   const { tokens, prices } = useSelector(getTokens);
   const [tokenPrice, setTokenPrice] = useState<BigNumber | null>(null);
   const [tokenAmount, setTokenAmount] = useState<BigNumber | null>(null);
   const [purchaseCurrency, setPurchaseCurrency] = useState<TokenInfo>();
   const valueCalculator = useValueCalculators();
-  const theme = useTheme();
-  const isXs = useMediaQuery(theme.breakpoints.down("xs"));
+  const [blockTime, currentBlock, currentTime] = useBlockTime();
 
   const isOwnToken = useMemo(() => {
     return token?.owner?.address && wallet?.addressInfo.byte20?.toLowerCase() === token?.owner?.address;
   }, [token, wallet?.addressInfo]);
 
-
   const bestBid = useMemo(() => {
     if (!token?.bestBid || !Object.keys(tokens).length) return undefined
 
     const bidToken = tokens[token?.bestBid?.price.address] || tokens[ZIL_ADDRESS]
-    return bnOrZero(token?.bestBid?.price.amount).shiftedBy(-bidToken?.decimals ?? 0)
-  }, [token?.bestBid, tokens])
+    const blocksLeft = token.bestBid.expiry - currentBlock;
+    const expiryTime = currentTime.add(blocksLeft * BLOCKS_PER_MINUTE, "minutes");
+    const expireText = expiryTime.isAfter(dayjs()) ? `Expirys in ` + expiryTime.fromNow() : "Expired " + expiryTime.fromNow();
+
+    return { amount: bnOrZero(token?.bestBid?.price.amount).shiftedBy(-bidToken?.decimals ?? 0), timeLeft: expireText }
+  }, [token?.bestBid, tokens, blockTime])
 
   useEffect(() => {
     if (Object.keys(tokens).length && token && token.bestAsk) {
@@ -120,10 +126,11 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
                         <Typography className={classes.bestLastLabel}>
                           BEST
                         </Typography>
-                        {bestBid.toString(10)}
+                        {bestBid.amount.toString(10)}
                         &nbsp;
+                        ZIL
                         <Typography className={classes.halfOpacity}>
-                          ZIL
+                          {bestBid.timeLeft}
                         </Typography>
                       </Typography>
                       <Box mr={2} />
@@ -131,8 +138,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
                   )}
                   <Typography variant="body1" className={classes.saleHeader}>
                     <Typography component="span" className={classes.bestLastLabel}>LAST</Typography>
-                    150,320 &nbsp;
-                    <Typography component="span" className={classes.halfOpacity}>ZIL</Typography>
+                    150,320 &nbsp;ZIL
                   </Typography>
                 </Box>
               </React.Fragment>
