@@ -8,7 +8,7 @@ import { AppTheme } from "app/theme/types";
 interface Props extends Partial<DialogProps> {
   onCloseDialog?: () => void;
   onBack?: () => void;
-  onSave?: (queue?: boolean) => void;
+  onSave?: (goBack?: boolean) => void;
 }
 
 const ImageDialog: React.FC<Props> = (props: Props) => {

@@ -57,8 +57,8 @@ const BaseTab = styled((props) => <Tab disableRipple {...props} />)(({ theme }) 
   [theme.breakpoints.up('sm')]: {
     minWidth: 0,
   },
-  fontWeight: theme.typography.fontWeightRegular,
-  marginRight: theme.spacing(1),
+  fontWeight: 600,
+  marginRight: theme.spacing(3),
   color: theme.palette.text.primary,
   opacity: 0.5,
   '&:hover': {

@@ -44,7 +44,7 @@ export const toHumanNumber = (input?: string | BigNumber | number, dp: number = 
   return `${value.shiftedBy(-9).decimalPlaces(dp).toFormat()}B`
 };
 
-export const truncateAddress = (input: string, forSmallScreen: boolean = false) => {
+export const truncateAddress = (input: string, forSmallScreen: boolean = false): string => {
   let i = input
   if (input.startsWith("0x")) {
     i = toBech32Address(input)

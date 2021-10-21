@@ -108,7 +108,7 @@ const ArkInput: React.FC<Props> = (props: Props) => {
         <BootstrapInput
           startAdornment={startAdorment ? <InputAdornment className={cls({ [classes.focusAdornment]: onFocus && !error })} position="start">{startAdorment}</InputAdornment> : undefined}
           onFocus={() => setOnFocus(true)} onBlur={() => setOnFocus(false)} className={cls({ [classes.focussed]: onFocus && !error, [classes.multiline]: multiline, [classes.error]: error && !!value })}
-          multiline={multiline} value={value} onChange={(e) => onValueChange(e.target.value)} fullWidth defaultValue="react-bootstrap" {...rest} />
+          multiline={multiline} value={value} onChange={(e) => onValueChange(e.target.value)} fullWidth {...rest} />
         <FormHelperText className={cls({ [classes.errorText]: true })} >{error ? error : " "}</FormHelperText>
       </FormControl>
     </Box>

@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { ConnectedWallet } from "core/wallet";
 import { ArkClient } from "core/utilities";
-import { EmailRegex, AlphaNumericRegex } from "app/utils/constants";
+import { EMAIL_REGEX, USERNAME_REGEX } from "app/utils/constants";
 import { useAsyncTask, useNetwork, useToaster, useTaskSubscriber } from "app/utils";
 import { MarketPlaceState, OAuth, Profile, RootState } from "app/store/types";
 import { ArkInput, FancyButton, ArkCheckbox } from "app/components";
@@ -18,14 +18,24 @@ import { ImageDialog } from "./components";
 
 interface Props extends BoxProps {
   onBack: () => void;
-  profile?: Profile;
+  profile: Profile | null;
   wallet?: ConnectedWallet | null;
+}
+
+type ProfileInputs = {
+  email: string;
+  username: string;
+  bio: string;
+  websiteUrl: string;
+  twitterHandle: string;
+  instagramHandle: string;
 }
 
 const EditProfile: React.FC<Props> = (props: Props) => {
   const { wallet, profile, onBack, children, className, ...rest } = props;
   const classes = useStyles();
   const network = useNetwork();
+  const address = wallet?.addressInfo.byte20
   const marketplaceState = useSelector<RootState, MarketPlaceState>((state) => state.marketplace);
   const [profileImage, setProfileImage] = useState<string | ArrayBuffer | null>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -34,16 +44,16 @@ const EditProfile: React.FC<Props> = (props: Props) => {
   const [errors, setErrors] = useState({
     username: "",
     bio: "",
-    twitterHandle: "",
     email: "",
+    twitterHandle: "",
     instagramHandle: "",
     websiteUrl: "",
   })
-  const [inputValues, setInputValues] = useState<any>({
+  const [inputValues, setInputValues] = useState<ProfileInputs>({
     username: profile?.username || "",
     bio: profile?.bio || "",
-    twitterHandle: profile?.twitterHandle || "",
     email: profile?.email || "",
+    twitterHandle: profile?.twitterHandle || "",
     instagramHandle: profile?.instagramHandle || "",
     websiteUrl: profile?.websiteUrl || "",
   })
@@ -55,62 +65,62 @@ const EditProfile: React.FC<Props> = (props: Props) => {
   const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
-    if (profile) {
-      setInputValues({
-        username: profile?.username || "",
-        bio: profile?.bio || "",
-        twitterHandle: profile?.twitterHandle || "",
-        email: profile?.email || "",
-        instagramHandle: profile?.instagramHandle || "",
-        websiteUrl: profile?.websiteUrl || "",
-      })
-    }
-    // eslint-disable-next-line
+    if (!address) onBack()
+  }, [address, onBack])
+
+  useEffect(() => {
+    setInputValues({
+      username: profile?.username || "",
+      bio: profile?.bio || "",
+      email: profile?.email || "",
+      twitterHandle: profile?.twitterHandle || "",
+      instagramHandle: profile?.instagramHandle || "",
+      websiteUrl: profile?.websiteUrl || "",
+    })
   }, [profile])
 
   const validateInput = (type: string, input: string) => {
     switch (type) {
       case "username":
-        if (input.length > 50) return "max 50 characters";
-        if (!AlphaNumericRegex.test(input)) return "Please ensure username is alphanumeric"
+        if (input.length < 2) return "Minimum of 2 characters";
+        if (!USERNAME_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters"
         return ""
       case "bio":
-        if (input.length > 10) return "max 250 characters";
-        return ""
-      case "twitterHandle":
-        if (input.length > 15) return "max 15 characters";
-        if (!AlphaNumericRegex.test(input)) return "Please ensure twitter handle is alphanumeric"
+        if (input.length < 2) return "Minimum of 2 characters";
+        if (input.length > 160) return "Maximum of 160 characters";
         return ""
       case "email":
-        if (input.length > 320) return "max 320 characters";
+        if (input.length < 2) return "Minimum of 2 characters";
+        if (input.length > 320) return "Maximum of 320 characters";
+        if (!EMAIL_REGEX.test(input)) return "Email is invalid"
+        return ""
+      case "twitterHandle":
+        if (input.length < 2) return "Minimum of 2 characters";
+        if (input.length > 15) return "Maximum of 15 characters";
+        if (!USERNAME_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters"
         return ""
       case "instagramHandle":
-        if (input.length > 30) return "max 30 characters";
-        if (!AlphaNumericRegex.test(input)) return "Please ensure instagram handle is alphanumeric"
+        if (input.length < 2) return "Minimum of 2 characters";
+        if (input.length > 30) return "Maximum of 30 characters";
+        if (!USERNAME_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters"
         return ""
       case "websiteUrl":
-        if (input.length > 253) return "max 253 characters";
+        if (input.length < 2) return "Minimum of 2 characters";
+        if (input.length > 253) return "Maximum of 253 characters";
         return ""
-      default: return "false";
+      default: return "";
     }
   }
 
   const updateInputs = (type: string) => {
     return (newInput: string) => {
-      setInputValues({
-        ...inputValues,
-        [type]: newInput
-      })
-      if (!newInput) {
-        return setErrors({
-          ...errors, [type]: ""
-        })
+      setInputValues({ ...inputValues, [type]: newInput })
+      if (!newInput || newInput.length < 2) {
+        setErrors({ ...errors, [type]: "" })
+        return
       }
       const errorText = validateInput(type, newInput)
-
-      setErrors({
-        ...errors, [type]: errorText
-      })
+      setErrors({ ...errors, [type]: errorText })
     }
   }
 
@@ -129,61 +139,65 @@ const EditProfile: React.FC<Props> = (props: Props) => {
     reader.readAsDataURL(files[0]);
   }
 
-  const onUpdateProfile = (queue?: boolean) => {
+  const onUpdateProfile = (goBack?: boolean) => {
     runUpdateProfile(async () => {
       if (!hasChange() && !profileImage) {
-        if (queue) onBack();
+        if (goBack) onBack();
         return;
       }
+
+      let ok = true
       let filteredData: any = {};
-      Object.keys(inputValues).forEach((key) => {
-        if (inputValues[key] && (inputValues[key] !== (profile as any)[key])) {
-          filteredData[key] = inputValues[key];
-          if (key === "email" && !EmailRegex.test(inputValues[key])) {
-            setErrors({
-              ...errors, [key]: "invalid email"
-            })
+      Object.entries(inputValues).forEach(([key, value]) => {
+        if (value === '') return
+        if (!profile || (profile as any)[key] !== value) {
+          filteredData[key] = value;
+          const errorText = validateInput(key, value)
+          if (errorText !== "") {
+            console.log(key, value)
+            ok = false
+            setErrors({ ...errors, [key]: errorText })
           }
         }
       })
-      if (hasError()) return;
+      if (!ok) {
+        toaster("Invalid inputs")
+        return
+      }
 
       const arkClient = new ArkClient(network);
       const { oAuth } = marketplaceState;
       let checkedOAuth: OAuth | undefined = oAuth;
-
       if (!oAuth?.access_token || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
         const { result } = await arkClient.arkLogin(wallet!, window.location.hostname);
         dispatch(actions.MarketPlace.updateAccessToken(result));
         checkedOAuth = result;
       }
-      if (profileImage && uploadFile) await imageUpload();
-      if (hasChange()) {
-        const result = await arkClient.updateProfile(profile!.address, filteredData, checkedOAuth!);
-        if (!result.error) {
-          toaster("Profile updated");
-          dispatch(actions.MarketPlace.loadProfile());
-        } else {
-          toaster("Error updating profile");
-        }
-        if (queue) onBack();
-        return;
+      if (profileImage && uploadFile) {
+        imageUpload();
       }
-      toaster("Image updated");
+      if (hasChange()) {
+        try {
+          const result = await arkClient.updateProfile(address!, filteredData, checkedOAuth!);
+          if (result.error) {
+            toaster("Error updating profile");
+          } else {
+            toaster("Profile updated");
+            dispatch(actions.MarketPlace.loadProfile());
+            if (goBack) onBack();
+          }
+        } catch (err) {
+          toaster(err);
+        }
+      }
     });
   }
 
-  const hasError = () => {
-    return !!Object.values(errors).reduce((prev, curr) => prev + curr);
-  }
-
   const hasChange = () => {
+    if (!profile) return true
     let change = false
-    Object.keys(inputValues).forEach((key) => {
-      if (inputValues[key] === "" && !(profile as any)[key]) {
-
-      } else if (inputValues[key] !== (profile as any)[key]) {
-
+    Object.entries(inputValues).forEach(([key, value]) => {
+      if ((profile as any)[key] !== value) {
         change = true;
       }
     })
@@ -201,12 +215,13 @@ const EditProfile: React.FC<Props> = (props: Props) => {
         dispatch(actions.MarketPlace.updateAccessToken(result));
         checkedOAuth = result;
       }
-      const requestResult = await arkClient.requestImageUploadUrl(profile!.address, checkedOAuth!.access_token);
+      const requestResult = await arkClient.requestImageUploadUrl(address!, checkedOAuth!.access_token);
 
       const blobData = new Blob([uploadFile], { type: uploadFile.type });
 
       await arkClient.putImageUpload(requestResult.result.uploadUrl, blobData, uploadFile);
-      await arkClient.notifyUpload(profile!.address, oAuth!.access_token);
+      await arkClient.notifyUpload(address!, oAuth!.access_token);
+      toaster("Image updated");
     })
   }
 
@@ -238,12 +253,12 @@ const EditProfile: React.FC<Props> = (props: Props) => {
             </Box>
             <Box>
               <ArkInput
-                placeholder="coolname" error={errors.username} value={inputValues.username}
+                placeholder="BearCollector" error={errors.username} value={inputValues.username}
                 label="Display Name" onValueChange={(value) => updateInputs("username")(value)}
                 instruction="This is how other users identify you on ARK."
               />
               <ArkInput
-                placeholder="bearsarecute@mail.com" error={errors.email} value={inputValues.email}
+                placeholder="bearsarecute@example.com" error={errors.email} value={inputValues.email}
                 label="Email" onValueChange={(value) => updateInputs("email")(value)}
                 instruction="We'll send you notifications on bid updates, price changes and more."
               />
@@ -293,7 +308,15 @@ const EditProfile: React.FC<Props> = (props: Props) => {
                 </Box>
               </Collapse>
 
-              <FancyButton loading={isLoading || loadingProfile} onClick={() => onUpdateProfile()} disabled={hasError() || (!hasChange() && !profileImage)} fullWidth className={classes.profileButton} variant="contained" color="primary">
+              <FancyButton
+                fullWidth
+                variant="contained"
+                color="primary"
+                loading={isLoading || loadingProfile}
+                onClick={() => onUpdateProfile(false)}
+                disabled={!hasChange() && !profileImage}
+                className={classes.profileButton}
+              >
                 Save Profile
               </FancyButton>
             </Box>
@@ -313,8 +336,9 @@ const EditProfile: React.FC<Props> = (props: Props) => {
         )}
       </Box>
       <ImageDialog
+        open={openDialog}
         onCloseDialog={() => setOpenDialog(false)}
-        onBack={onBack} open={openDialog}
+        onBack={onBack}
         onSave={onUpdateProfile}
       />
     </Box>
