@@ -1,6 +1,11 @@
 import React, { Fragment, useEffect, useMemo, useState } from "react";
-import { Box, Card, CardActionArea, CardContent, CardProps, IconButton, Link, makeStyles, Typography } from "@material-ui/core";
+import {
+  Box, Card, CardActionArea, CardContent, CardMedia,
+  CardProps, IconButton, Link, makeStyles, Typography,
+  Popper, ClickAwayListener
+} from "@material-ui/core";
 import LaunchIcon from "@material-ui/icons/Launch";
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import dayjs from "dayjs";
@@ -12,7 +17,7 @@ import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { MarketPlaceState, OAuth, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { toHumanNumber, truncateAddress, useAsyncTask, useBlockTime, useNetwork } from "app/utils";
+import { toHumanNumber, truncateAddress, useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import { ArkClient } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
@@ -36,9 +41,15 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const { wallet } = useSelector(getWallet);
   const { tokens } = useSelector(getTokens);
   const [runLikeToken] = useAsyncTask("likeToken");
+  const [runUpdateProfileImage] = useAsyncTask("updateProfileImage", () => {
+    toaster("Error setting profile image")
+  });
   const dispatch = useDispatch();
   const [blockTime, currentBlock, currentTime] = useBlockTime();
   const network = useNetwork();
+  const [popAnchor, setPopAnchor] = useState(null);
+  const toaster = useToaster(false);
+  const isOwner = wallet?.addressInfo.byte20.toLocaleLowerCase() === token.owner?.address.toLocaleLowerCase();
 
   useEffect(() => {
     if (token) setLiked(!!token.isFavourited);
@@ -91,6 +102,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
       }
       setLiked(!liked);
       dispatch(actions.MarketPlace.updateFilter({ ...filter }));
+      toaster(`${!liked ? "Liked" : "Unliked"}`);
     })
   }
 
@@ -103,6 +115,37 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
       return `https://viewblock.io/zilliqa/address/${addr}?network=testnet`;
     }
   }, [network, collectionAddress]);
+  const setAsProfileImage = () => {
+    runUpdateProfileImage(async () => {
+      if (!token.asset?.url) {
+        toaster("Invalid image url");
+        return;
+      }
+
+      setPopAnchor(null);
+      const image = await fetch(token.asset.url, { method: "GET" })
+      const blobFile = await image.blob();
+      const arkClient = new ArkClient(wallet!.network)
+      let checkedOAuth: OAuth | undefined = oAuth;
+      if (!oAuth?.access_token || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
+        const { result } = await arkClient.arkLogin(wallet!, window.location.hostname);
+        dispatch(actions.MarketPlace.updateAccessToken(result));
+        checkedOAuth = result;
+      }
+      const address = wallet!.addressInfo.byte20.toLocaleLowerCase()
+      const requestResult = await arkClient.requestImageUploadUrl(address, checkedOAuth!.access_token);
+
+      await arkClient.putImageUpload(requestResult.result.uploadUrl, blobFile);
+      await arkClient.notifyUpload(address, checkedOAuth!.access_token);
+
+      toaster(`Set ${token.tokenId} as profile image`);
+      dispatch(actions.MarketPlace.updateFilter({}))
+    })
+  }
+
+  const handlePopClick = (event: React.BaseSyntheticEvent) => {
+    setPopAnchor(popAnchor ? null : event.currentTarget)
+  }
 
   return (
     <Card {...rest} className={cls(classes.root, className)}>
@@ -149,16 +192,13 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
               />
             </Box>
           </CardActionArea>
-        ) : (
-          <Box className={classes.imageContainer}>
-            <span className={classes.imageHeight} />
-            <img
-              className={classes.image}
-              alt={token?.asset?.filename || "Token Image"}
-              src={token?.asset?.url || undefined}
-            />
-          </Box>
-        )}
+        ) : <CardMedia
+          className={classes.dialogImage}
+          component="img"
+          alt="NFT image"
+          height="308"
+          image={token.asset?.url}
+        />}
       </Box>
       <CardContent className={classes.cardContent}>
         <Box className={classes.bodyBox}>
@@ -238,6 +278,27 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
               </Box>
             </Fragment>
           )}
+          <ClickAwayListener onClickAway={() => { console.log("close popper"); setPopAnchor(null) }}>
+            <Box>
+              <Box onClick={handlePopClick} display="flex" justifyContent="flex-end"><MoreHorizIcon /></Box>
+              <Popper className={classes.popper} open={!!popAnchor} anchorEl={popAnchor}>
+                <Link
+                  className={classes.popperText}
+                  underline="none"
+                  rel="tonftpage"
+                  href={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
+                >
+                  <Typography className={classes.popperText}>Sell Item</Typography>
+                </Link>
+                {isOwner && (
+                  <>
+                    <Box className={classes.divider} />
+                    <Typography onClick={setAsProfileImage} className={classes.popperText}>Set as profile picture</Typography>
+                  </>
+                )}
+              </Popper>
+            </Box>
+          </ClickAwayListener>
         </Box>
 
         {/* TODO: refactor and take in a rarity as prop */}
@@ -413,6 +474,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   cardActionArea: {
     borderRadius: 10,
     border: "none",
+  },
+  popper: {
+    backgroundColor: "#003340",
+    border: "2px solid #29475A",
+    padding: theme.spacing(1, 2),
+    borderRadius: 12,
+  },
+  divider: {
+    border: "1px solid #29475A",
+  },
+  popperText: {
+    color: theme.palette.primary.contrastText,
+    padding: theme.spacing(1, 0, 1),
+    cursor: "pointer",
+    "&:hover": {
+      color: "#6BE1FF",
+    }
   }
 }));
 

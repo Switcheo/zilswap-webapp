@@ -217,8 +217,7 @@ export class ArkClient {
     return output;
   }
 
-  putImageUpload = async (url: string, data: Blob, file: File) => {
-    // const headers = { "Content-Length": file.size, "Content-Type": file.type, 'Access-Control-Allow-Origin': '*' }
+  putImageUpload = async (url: string, data: Blob) => {
     await this.http.put({ url, data });
     return
   }
