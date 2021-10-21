@@ -1,19 +1,16 @@
 import React, { Fragment, useMemo, useState } from "react";
-import { Accordion, AccordionDetails, AccordionSummary, Box, Checkbox, ClickAwayListener, DialogContent, DialogProps, FormControlLabel, MenuItem, MenuList } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDownRounded";
-import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
-import DoneIcon from "@material-ui/icons/DoneRounded";
-import BigNumber from "bignumber.js";
-import cls from "classnames";
-import dayjs from "dayjs";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
 import { bnOrZero } from "tradehub-api-js/build/main/lib/tradehub/utils";
-import { CurrencyInput, DialogModal, FancyButton, HelpInfo, Text, ArkNFTCard } from "app/components";
+import BigNumber from "bignumber.js";
+import cls from "classnames";
+import dayjs from "dayjs";
+import { Box, Checkbox, DialogContent, DialogProps, FormControlLabel } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
+import { ArkExpiry, ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
 import { getBlockchain, getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
@@ -42,7 +39,7 @@ export type expiryOption = {
   unit: string | undefined;
 };
 
-const EXPIRY_OPTIONS: expiryOption[] = [
+const EXPIRY_OPTIONS = [
   {
     text: "6 hours",
     value: 6,
@@ -98,12 +95,11 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const [bidToken, setBidToken] = useState<TokenInfo>(
     tokenState.tokens[ZIL_ADDRESS]
   );
-  const [expiryDate, setExpiryDate] = useState<any>(null);
+  const [expiryDate, setExpiryDate] = useState<Date | null>(null);
   const [expiryOption, setExpiryOption] = useState<expiryOption>(
     EXPIRY_OPTIONS[0]
   );
   const match = useRouteMatch<{ id: string; collection: string }>();
-  const [expanded, setExpanded] = useState<boolean>(false);
 
   // eslint-disable-next-line
   const [blockTime, currentBlock, currentTime] = useBlockTime();
@@ -117,7 +113,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     if (!!expiryOption.value) {
       expiryTime = dayjs().add(expiryOption.value, expiryOption.unit as any);
     } else {
-      expiryTime = dayjs(expiryDate);
+      expiryTime = dayjs(expiryDate!!);
     }
 
     const minutes = expiryTime.diff(currentTime, "minutes");
@@ -238,21 +234,6 @@ const BidDialog: React.FC<Props> = (props: Props) => {
       });
   };
 
-  const onChangeExpiry = (date: any) => {
-    setExpiryDate(date);
-    const option = EXPIRY_OPTIONS.filter(
-      (option) => option.text === "Select a date"
-    )[0];
-    setExpiryOption(option);
-  };
-
-  const onSelectOption = (option: expiryOption) => {
-    setExpiryOption(option);
-    if (option.text === "Select a date") {
-      setExpiryDate(new Date());
-    }
-  }
-
   const isBidEnabled = useMemo(() => {
     if (!formState.acceptTerms) return false;
 
@@ -289,88 +270,14 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         />
 
         {/* Set expiry */}
-        <ClickAwayListener onClickAway={() => setExpanded(false)}>
-          <Accordion
-            expanded={expanded}
-            className={classes.expiryAccordion}
-            onChange={() => setExpanded(!expanded)}
-          >
-            <AccordionSummary
-              expandIcon={
-                <ArrowDropDownIcon
-                  className={classes.dropDownIcon}
-                  fontSize="large"
-                />
-              }
-            >
-              <Box
-                display="flex"
-                flexDirection="column"
-                className={classes.expiryTextBox}
-              >
-                <Text color="textSecondary">
-                  Set Estimated Expiry
-                  <HelpInfo
-                    className={classes.helpInfo}
-                    placement="top"
-                    title="The date and time you select here is an estimated conversion based on block time"
-                  />
-                </Text>
-                <Text className={classes.expiryDate}>
-                  {dayjs(expiryTime).format("D MMM YYYY, HH:mm:ss")}
-                </Text>
-                <Text color="textSecondary" className={classes.blockHeightText}>
-                  Block Height:{" "}
-                  <span className={classes.blockHeightColor}>
-                    {expiry.toFixed(0)}
-                  </span>
-                </Text>
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails className={classes.accordionDetail}>
-              <Box className={classes.expiryBox}>
-                <MenuList>
-                  {EXPIRY_OPTIONS.map((option) => {
-                    return (
-                      <MenuItem
-                        onClick={() => onSelectOption(option)}
-                        value={option.text}
-                        className={cls(classes.menuItem, {
-                          [classes.selected]: expiryOption === option,
-                        })}
-                      >
-                        <Box
-                          display="flex"
-                          justifyContent="space-between"
-                          alignItems="center"
-                          width={"100%"}
-                        >
-                          {option.text}
-                          {expiryOption === option && (
-                            <DoneIcon fontSize="small" />
-                          )}
-                        </Box>
-                      </MenuItem>
-                    );
-                  })}
-                </MenuList>
-                {expiryOption.text === "Select a date" && (
-                  <Box mt={0.5} mb={2} pl={2} pr={2}>
-                    <DatePicker
-                      minDate={new Date()}
-                      className={classes.datePicker}
-                      selected={new Date()}
-                      onChange={(date) => onChangeExpiry(date)}
-                      // highlightDates={[expiryDate]}
-                      fixedHeight
-                      inline
-                    />
-                  </Box>
-                )}
-              </Box>
-            </AccordionDetails>
-          </Accordion>
-        </ClickAwayListener>
+        <ArkExpiry 
+          expiryOptions={EXPIRY_OPTIONS} 
+          expiryOption={expiryOption} 
+          expiryTime={expiryTime} 
+          expiry={expiry} 
+          setExpiryDate={setExpiryDate} 
+          setExpiryOption={setExpiryOption}
+        />
 
         {!completedPurchase && (
           <Fragment>
@@ -450,87 +357,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         fontSize: "1.8rem",
       },
     },
-    "& .MuiAccordionSummary-root": {
-      backgroundColor: theme.palette.currencyInput,
-      border: "1px solid transparent",
-      "&:hover": {
-        borderColor: "#00FFB0",
-        "& .MuiSvgIcon-root": {
-          color: "#00FFB0",
-        },
-      },
-    },
-    "& .MuiAccordionSummary-root.Mui-expanded": {
-      borderRadius: 12,
-      marginBottom: theme.spacing(1.5),
-      borderColor: "#00FFB0",
-      "& .MuiSvgIcon-root": {
-        color: "#00FFB0",
-      },
-    },
     "& .MuiOutlinedInput-root": {
       border: "none",
     },
-    "& .MuiAccordionSummary-content.Mui-expanded": {
-      margin: "12px 0",
-    },
-    "& .react-datepicker": {
-      width: "100%",
-      borderRadius: 12,
-      backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF",
-      border: `1px solid ${theme.palette.type === "light" ? `rgba${hexToRGBA("#003340", 0.2)}` : "#29475A"}`
-    },
-    "& .react-datepicker__month-container": {
-      width: "100%"
-    },
-    "& .react-datepicker__header": {
-      backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF",
-      borderBottom: "none",
-      borderRadius: "12px!important"
-    },
-    "& .react-datepicker__current-month": {
-      fontFamily: "'Raleway', sans-serif",
-      fontWeight: 900,
-      color: theme.palette.text?.primary
-    },
-    "& .react-datepicker__day-names": {
-      display: "none",
-    },
-    "& .react-datepicker__day": {
-      borderRadius: "12px!important",
-      color: `rgba${theme.palette.type === "dark" ? hexToRGBA("#DEFFFF", 0.5) : hexToRGBA("003340", 0.6)}`,
-      "&:hover": {
-        backgroundColor: theme.palette.primary.light
-      },
-      "&:focus": {
-        outline: 0
-      },
-    },
-    "& .react-datepicker__day--disabled": {
-      color: "#A5B3BF",
-      textDecoration: "line-through",
-      "&:hover": {
-        backgroundColor: "transparent!important"
-      }
-    },
-    "& .react-datepicker__day--keyboard-selected": {
-      backgroundColor: "#00FFB0",
-      color: "#29475A",
-      "&:hover": {
-        backgroundColor: "#00FFB0!important",
-      }
-    },
-    "& .react-datepicker__day--selected": {
-      backgroundColor: "#FFFFFF",
-      color: "#29475A",
-      "&:hover": {
-        backgroundColor: "#FFFFFF",
-      }
-    },
-    "& .react-datepicker__week": {
-      display: "flex",
-      justifyContent: "space-around",
-    }
   },
   backdrop: {
     position: "absolute",
@@ -628,67 +457,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "14px",
     lineHeight: "24px",
     marginTop: theme.spacing(0.5),
-  },
-  expiryAccordion: {
-    backgroundColor: "transparent",
-    marginTop: theme.spacing(1.5),
-    boxShadow: "none",
-    border: "1px solid transparent",
-  },
-  expiryBox: {
-    "& .MuiMenuItem-root": {
-      fontFamily: "'Raleway', sans-serif",
-      fontSize: "14px",
-      fontWeight: 700,
-    },
-    "& .MuiTypography-root": {
-      fontFamily: "'Raleway', sans-serif",
-      fontSize: "14px",
-      fontWeight: 900,
-    },
-  },
-  accordionDetail: {
-    display: "inherit",
-    padding: 0,
-    backgroundColor: theme.palette.type === "dark" ? "#183E47" : "#FFFFFF",
-    border: `1px solid rgba${
-      theme.palette.type === "dark"
-        ? hexToRGBA("#DEFFFF", 0.1)
-        : hexToRGBA("#003340", 0.2)
-    }`,
-    borderRadius: 12,
-  },
-  expiryTextBox: {
-    "& .MuiTypography-root": {
-      textAlign: "initial",
-    },
-  },
-  helpInfo: {
-    verticalAlign: "top",
-    marginLeft: "4px",
-  },
-  dropDownIcon: {
-    color: theme.palette.primary.light,
-  },
-  blockHeightText: {
-    fontSize: "10px",
-    lineHeight: "12px",
-  },
-  blockHeightColor: {
-    color: theme.palette.text?.primary,
-  },
-  expiryDate: {
-    lineHeight: "24px",
-    fontFamily: "'Raleway', sans-serif",
-    fontSize: "16px",
-    fontWeight: 900,
-  },
-  datePicker: {},
-  menuItem: {
-    minHeight: "32px",
-  },
-  selected: {
-    color: "#00FFB0",
   },
 }));
 
