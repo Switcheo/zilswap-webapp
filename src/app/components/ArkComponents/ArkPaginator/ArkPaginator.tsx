@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&:not(:last-child)": {
       marginRight: theme.spacing(1),
     },
-    fontFamily: "Avenir Next LT Pro",
+    fontFamily: "'Raleway', sans-serif",
     fontSize: 16,
     fontStyle: "normal",
     fontWeight: "bold",

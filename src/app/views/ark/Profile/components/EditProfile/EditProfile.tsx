@@ -83,7 +83,8 @@ const EditProfile: React.FC<Props> = (props: Props) => {
     switch (type) {
       case "username":
         if (input.length < 2) return "Minimum of 2 characters";
-        if (!USERNAME_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters"
+        if (!USERNAME_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters";
+        if (input.length > 20) return "max 50 characters";
         return ""
       case "bio":
         if (input.length < 2) return "Minimum of 2 characters";
@@ -228,11 +229,11 @@ const EditProfile: React.FC<Props> = (props: Props) => {
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <Box className={classes.container}>
-        <Box justifyContent="flex-start">
+        <Box mb={3} justifyContent="flex-start">
           <IconButton onClick={() => onBack()} className={classes.backButton}>
             <ArrowBackIcon /><Typography className={classes.extraMargin}>Go Back</Typography>
           </IconButton>
-          <Typography variant="h1">Edit Profile</Typography>
+          <Typography className={classes.pageHeader}>Edit Profile</Typography>
         </Box>
         {wallet && (
           <Box className={classes.content}>
@@ -251,7 +252,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
                 onChange={onImageUpload}
               />
             </Box>
-            <Box>
+            <Box className={classes.formDetail}>
               <ArkInput
                 placeholder="BearCollector" error={errors.username} value={inputValues.username}
                 label="Display Name" onValueChange={(value) => updateInputs("username")(value)}
@@ -259,31 +260,14 @@ const EditProfile: React.FC<Props> = (props: Props) => {
               />
               <ArkInput
                 placeholder="bearsarecute@example.com" error={errors.email} value={inputValues.email}
-                label="Email" onValueChange={(value) => updateInputs("email")(value)}
+                label={
+                  <ActiveBidToggle className={classes.switch} isChecked={enableEmailNotification}
+                    onChecked={(isChecked) => setEnableEmailNotification(isChecked)} hideCount={true}
+                    overrideSm={true} header="EMAIL NOTIFICATIONS" />
+                }
+                onValueChange={(value) => updateInputs("email")(value)}
                 instruction="We'll send you notifications on bid updates, price changes and more."
               />
-              <ArkInput
-                placeholder="My spirit animal's a bear" error={errors.bio} value={inputValues.bio}
-                label="Bio" onValueChange={(value) => updateInputs("bio")(value)} multiline={true}
-                instruction="Write a little about yourself."
-              />
-
-              <Typography className={classes.social}>Socials</Typography>
-              <ArkInput
-                startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
-                error={errors.twitterHandle} value={inputValues.twitterHandle} label="Twitter"
-                onValueChange={(value) => updateInputs("twitterHandle")(value)}
-              />
-              <ArkInput
-                startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
-                error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram"
-                onValueChange={(value) => updateInputs("instagramHandle")(value)} />
-              <ArkInput
-                inline={true} placeholder="www.imannftartist.com" error={errors.websiteUrl} value={inputValues.websiteUrl}
-                label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
-              />
-
-              <ActiveBidToggle className={classes.switch} isChecked={enableEmailNotification} onChecked={(isChecked) => setEnableEmailNotification(isChecked)} hideCount={true} overrideSm={true} header="EMAIL NOTIFICATIONS" />
 
               <Collapse in={enableEmailNotification}>
                 <Box display="flex" flexDirection="column">
@@ -317,6 +301,26 @@ const EditProfile: React.FC<Props> = (props: Props) => {
                 disabled={!hasChange() && !profileImage}
                 className={classes.profileButton}
               >
+                <ArkInput
+                  placeholder="My spirit animal's a bear" error={errors.bio} value={inputValues.bio}
+                  label="BIO" onValueChange={(value) => updateInputs("bio")(value)} multiline={true}
+                  instruction="Write a little about yourself." wordLimit={160}
+                />
+
+                <Typography className={classes.social}>SOCIALS</Typography>
+                <ArkInput
+                  startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
+                  error={errors.twitterHandle} value={inputValues.twitterHandle} label="Twitter"
+                  onValueChange={(value) => updateInputs("twitterHandle")(value)}
+                />
+                <ArkInput
+                  startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
+                  error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram"
+                  onValueChange={(value) => updateInputs("instagramHandle")(value)} />
+                <ArkInput
+                  inline={true} placeholder="www.imannftartist.com" error={errors.websiteUrl} value={inputValues.websiteUrl}
+                  label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
+                />
                 Save Profile
               </FancyButton>
             </Box>
@@ -352,17 +356,26 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
+    fontFamily: "'Raleway', sans-serif",
   },
   container: {
     maxWidth: "680px",
     display: "row",
   },
   content: {
+    fontFamily: "'Raleway', sans-serif",
     marginTop: theme.spacing(2),
     display: "flex",
     flexDirection: "row-reverse",
     [theme.breakpoints.down("sm")]: {
       flexDirection: "column",
+    }
+  },
+  formDetail: {
+    minWidth: 400,
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
+      minWidth: 280,
     }
   },
   profileButton: {
@@ -371,21 +384,34 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: 14,
     minHeight: "50px",
     width: "100%",
-    borderRadius: "12px"
+    borderRadius: "12px",
+    backgroundColor: "#6BE1FF",
+    "& .MuiButton-label": {
+      color: "#003340",
+    },
+    "&:disabled": {
+      backgroundColor: "#6BE1FF88",
+      "& .MuiButton-label": {
+        color: "#00334088",
+      },
+    },
   },
   backButton: {
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     opacity: "50%",
     borderRadius: "12px",
     paddingLeft: 0,
+    fontFamily: "'Raleway', sans-serif",
+    marginBottom: theme.spacing(1),
   },
   extraMargin: {
-    marginLeft: theme.spacing(2)
+    marginLeft: theme.spacing(2),
+    fontFamily: "'Raleway', sans-serif",
   },
   profileImage: {
     height: 110,
     width: 110,
-    border: `5px solid #0D1B24`,
+    border: `5px solid ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"}`,
     borderRadius: "50%",
     backgroundColor: "#DEFFFF",
   },
@@ -395,6 +421,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   uploadText: {
     opacity: "50%",
     fontSize: "14px",
+    fontFamily: "'Raleway', sans-serif",
   },
   uploadBox: {
     cursor: "pointer",
@@ -405,6 +432,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   connectionText: {
     margin: theme.spacing(1),
+    fontFamily: "'Raleway', sans-serif",
   },
   labelButton: {
     borderRadius: 8,
@@ -412,25 +440,31 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     maxWidth: 80,
     alignSelf: "center",
     marginTop: theme.spacing(1),
-    backgroundColor: theme.palette.action?.active,
-    color: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.type === "dark" ? "#DEFFFF17" : "#6BE1FF33",
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
     cursor: "pointer",
     "&:hover": {
       opacity: 0.5,
     }
   },
   social: {
-    fontSize: "16px",
+    fontFamily: "'Raleway', sans-serif",
+    fontSize: "14px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
-    fontFamily: "Avenir Next LT Pro",
-    fontWeight: "bold",
+    fontWeight: 900,
     marginTop: theme.spacing(1)
   },
   switch: {
     paddingBottom: 0,
+    fontFamily: "'Raleway', sans-serif",
   },
   checkbox: {
     marginBottom: theme.spacing(1),
+  },
+  pageHeader: {
+    fontFamily: "'Raleway', sans-serif",
+    fontSize: 30,
+    fontWeight: 700,
   }
 }));
 

@@ -32,34 +32,36 @@ const ActiveBidToggle: React.FC<Props> = (props: Props) => {
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <Typography className={cls(classes.root, { [classes.smRoot]: isSm && !overrideSm })} variant={overrideSm ? "h4" : "h1"}>{header}
-        {!hideCount && <Typography className={classes.count} variant="h1">({totalCount})</Typography>}
+      <Typography className={cls(classes.root, { [classes.smRoot]: isSm && !overrideSm })}>{header}
+        {!hideCount && <Typography className={classes.count} >({totalCount})</Typography>}
       </Typography>
       <Box flexGrow={1} />
       <FormControlLabel
         className={overrideSm ? undefined : classes.formLabel}
         control={<PurpleSwitch onChange={() => handleChange()} checked={checked} />}
         labelPlacement={(isSm && !overrideSm) ? "end" : "start"}
-        label={switchLabel}
+        label={<Typography className={classes.switchLabel}>{switchLabel}</Typography>}
       />
     </Box>
   );
 };
 
-const PurpleSwitch = withStyles({
+const PurpleSwitch = withStyles((theme) => ({
   root: {
     width: 36,
     height: 20,
     padding: 0,
     display: 'flex',
-    marginRight: 8
+    marginRight: 8,
+    fontFamily: "'Raleway', sans-serif",
+    fontSize: "14px",
   },
   switchBase: {
     padding: 2,
     color: "#0D1B24",
     '&$checked': {
       transform: 'translateX(16px)',
-      color: "#00FFB0",
+      color: "#DEFFFF",
     },
   },
   thumb: {
@@ -68,28 +70,34 @@ const PurpleSwitch = withStyles({
     boxShadow: 'none',
   },
   track: {
-    border: `1px solid #0D1B24`,
     borderRadius: 10,
     opacity: 1,
-    backgroundColor: "#00FFB0"
+    backgroundColor: "#00FFB0",
+    '$checked$checked + &': {
+      backgroundColor: "#00FFB0",
+    },
   },
   checked: {},
-})(Switch);
+}))(Switch);
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    padding: "16px 12px 16px 0px",
+    padding: "4px 4px 0px 0px",
     display: "flex",
+    fontSize: "14px",
     flexDirection: 'row',
+    fontFamily: "'Raleway', sans-serif",
+    fontWeight: 900,
   },
   smRoot: {
+    fontSize: "14px",
     flexDirection: "column",
-  },
-  header: {
-    display: "flex",
-    flexDirection: "row",
+    fontFamily: "'Raleway', sans-serif",
+    fontWeight: 900,
   },
   formLabel: {
+    fontSize: "14px",
+    fontFamily: "'Raleway', sans-serif",
     [theme.breakpoints.down("sm")]: {
       justifyContent: "left",
       marginLeft: 0,
@@ -97,10 +105,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   count: {
+    fontSize: "14px",
     marginLeft: theme.spacing(1),
   },
-  switch: {
-
+  switchLabel: {
+    fontSize: "14px",
+    "& .MuiFormControlLabel": {
+      fontFamily: "'Raleway', sans-serif",
+    }
   }
 }));
 

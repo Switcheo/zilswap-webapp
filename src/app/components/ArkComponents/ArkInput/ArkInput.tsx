@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { BoxProps, FormControl, FormHelperText, InputAdornment, InputBase, InputLabel, Box } from "@material-ui/core";
+import React, { useState, Fragment } from "react";
+import { BoxProps, FormControl, FormHelperText, InputAdornment, InputBase, Box, Typography } from "@material-ui/core";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import cls from "classnames"
 import { AppTheme } from "app/theme/types";
 
 interface Props extends BoxProps {
-  label: string;
+  label: React.ReactNode;
   value: string;
   onValueChange: (value: string) => void;
   multiline?: boolean;
@@ -13,6 +13,7 @@ interface Props extends BoxProps {
   instruction?: string;
   startAdorment?: JSX.Element;
   inline?: boolean;
+  wordLimit?: number;
 }
 
 const BootstrapInput = withStyles((theme) => ({
@@ -21,7 +22,7 @@ const BootstrapInput = withStyles((theme) => ({
     backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#DEFFFF",
     border: '1px solid #29475A',
     'label + &': {
-      marginTop: theme.spacing(3),
+      marginTop: theme.spacing(3.5),
     },
     '&:focus': {
       borderColor: theme.palette.action.selected,
@@ -36,6 +37,37 @@ const BootstrapInput = withStyles((theme) => ({
   },
 }))(InputBase);
 
+const ArkInput: React.FC<Props> = (props: Props) => {
+  const { wordLimit, inline, startAdorment, instruction, error = "", label, multiline, value, onValueChange, className, ...rest } = props;
+  const classes = useStyles();
+  const [onFocus, setOnFocus] = useState(false)
+
+  return (
+    <Box className={classes.root}>
+      {inline && (<Typography className={classes.inlineLabel}>
+        {label}
+      </Typography>)}
+      <FormControl fullWidth className={cls({ [classes.inline]: inline })}>
+        {!inline && (
+          <Fragment>
+            {typeof label === "string" ? (<Typography className={classes.label}>{label}</Typography>) : label}
+            {instruction && (
+              <FormHelperText className={cls(classes.instruction, classes.extraMargin)}>{instruction}
+                {wordLimit && (<Typography className={cls(classes.wordLimit)}> {value.length || "0"}/{wordLimit}</Typography>)}
+              </FormHelperText>
+            )}
+          </Fragment>
+        )}
+        <BootstrapInput
+          startAdornment={startAdorment ? <InputAdornment className={cls({ [classes.focusAdornment]: onFocus && !error })} position="start">{startAdorment}</InputAdornment> : undefined}
+          onFocus={() => setOnFocus(true)} onBlur={() => setOnFocus(false)} className={cls({ [classes.focussed]: onFocus && !error, [classes.multiline]: multiline, [classes.error]: error && !!value })}
+          multiline={multiline} value={value} onChange={(e) => onValueChange(e.target.value)} fullWidth defaultValue="react-bootstrap" {...rest} />
+        <FormHelperText className={cls({ [classes.errorText]: true })} >{error ? error : " "}</FormHelperText>
+      </FormControl>
+    </Box >
+  );
+};
+
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     marginTop: theme.spacing(1),
@@ -44,12 +76,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignItems: "center"
   },
   label: {
-    fontSize: "16px",
+    fontSize: "14px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
-    fontFamily: "Avenir Next LT Pro",
-    fontWeight: "bold",
-    width: 150,
+    fontFamily: "'Raleway', sans-serif",
+    fontWeight: 900,
     overflowX: "visible",
+  },
+  inlineLabel: {
+    fontSize: "14px",
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    fontFamily: "'Raleway', sans-serif",
+    fontWeight: 900,
+    overflowX: "visible",
+    width: 100,
+    paddingBottom: theme.spacing(1.5),
   },
   error: {
     border: '1px solid #FF5252',
@@ -65,11 +105,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     margin: 0
   },
   instruction: {
-    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
-    fontSize: 12,
+    color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
+    fontFamily: 'Avenir Next',
+    fontWeight: 700,
+    fontSize: 10,
     margin: 0,
-    opacity: 0.5,
-    width: 400,
   },
   hiddenText: {
     visibility: "hidden"
@@ -82,37 +122,24 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minHeight: 50,
   },
   inline: {
-    display: "flex",
-    justifyContent: "space-between",
+    // display: "flex",
+    // justifyContent: "space-between",
   },
   focusAdornment: {
     color: theme.palette.action?.selected
-  }
+  },
+  extraMargin: {
+    marginBottom: theme.spacing(.5),
+  },
+  wordLimit: {
+    float: "right",
+    color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
+    fontFamily: 'Avenir Next',
+    fontWeight: 700,
+    fontSize: 10,
+  },
 }));
 
-const ArkInput: React.FC<Props> = (props: Props) => {
-  const { inline, startAdorment, instruction, error = "", label, multiline, value, onValueChange, className, ...rest } = props;
-  const classes = useStyles();
-  const [onFocus, setOnFocus] = useState(false)
 
-  return (
-    <Box className={classes.root}>
-      {inline && (<InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
-        {label.toLocaleUpperCase()}
-      </InputLabel>)}
-      <FormControl fullWidth className={cls({ [classes.inline]: inline })}>
-        {!inline && (<InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
-          {label.toLocaleUpperCase()}
-          {instruction && <FormHelperText className={classes.instruction} >{instruction}</FormHelperText>}
-        </InputLabel>)}
-        <BootstrapInput
-          startAdornment={startAdorment ? <InputAdornment className={cls({ [classes.focusAdornment]: onFocus && !error })} position="start">{startAdorment}</InputAdornment> : undefined}
-          onFocus={() => setOnFocus(true)} onBlur={() => setOnFocus(false)} className={cls({ [classes.focussed]: onFocus && !error, [classes.multiline]: multiline, [classes.error]: error && !!value })}
-          multiline={multiline} value={value} onChange={(e) => onValueChange(e.target.value)} fullWidth {...rest} />
-        <FormHelperText className={cls({ [classes.errorText]: true })} >{error ? error : " "}</FormHelperText>
-      </FormControl>
-    </Box>
-  );
-};
 
 export default ArkInput;

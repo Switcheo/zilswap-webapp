@@ -236,7 +236,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   price: {
     color: "#00FFB0",
-    fontFamily: "Avenir Next LT Pro",
+    fontFamily: "Avenir Next",
     display: "flex",
     marginTop: theme.spacing(.5)
   },
