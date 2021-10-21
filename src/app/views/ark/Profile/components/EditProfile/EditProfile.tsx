@@ -265,7 +265,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
                     onChecked={(isChecked) => setEnableEmailNotification(isChecked)} hideCount={true}
                     overrideSm={true} header="EMAIL NOTIFICATIONS" />
                 }
-                onValueChange={(value) => updateInputs("email")(value)}
+                onValueChange={(value) => updateInputs("email")(value)} hideInput={!enableEmailNotification}
                 instruction="We'll send you notifications on bid updates, price changes and more."
               />
 
@@ -292,6 +292,26 @@ const EditProfile: React.FC<Props> = (props: Props) => {
                 </Box>
               </Collapse>
 
+              <ArkInput
+                placeholder="My spirit animal's a bear" error={errors.bio} value={inputValues.bio}
+                label="BIO" onValueChange={(value) => updateInputs("bio")(value)} multiline={true}
+                instruction="Write a little about yourself." wordLimit={160}
+              />
+
+              <Typography className={classes.social}>SOCIALS</Typography>
+              <ArkInput
+                startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
+                error={errors.twitterHandle} value={inputValues.twitterHandle} label="Twitter"
+                onValueChange={(value) => updateInputs("twitterHandle")(value)}
+              />
+              <ArkInput
+                startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
+                error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram"
+                onValueChange={(value) => updateInputs("instagramHandle")(value)} />
+              <ArkInput
+                inline={true} placeholder="www.imannftartist.com" error={errors.websiteUrl} value={inputValues.websiteUrl}
+                label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
+              />
               <FancyButton
                 fullWidth
                 variant="contained"
@@ -301,26 +321,6 @@ const EditProfile: React.FC<Props> = (props: Props) => {
                 disabled={!hasChange() && !profileImage}
                 className={classes.profileButton}
               >
-                <ArkInput
-                  placeholder="My spirit animal's a bear" error={errors.bio} value={inputValues.bio}
-                  label="BIO" onValueChange={(value) => updateInputs("bio")(value)} multiline={true}
-                  instruction="Write a little about yourself." wordLimit={160}
-                />
-
-                <Typography className={classes.social}>SOCIALS</Typography>
-                <ArkInput
-                  startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
-                  error={errors.twitterHandle} value={inputValues.twitterHandle} label="Twitter"
-                  onValueChange={(value) => updateInputs("twitterHandle")(value)}
-                />
-                <ArkInput
-                  startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
-                  error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram"
-                  onValueChange={(value) => updateInputs("instagramHandle")(value)} />
-                <ArkInput
-                  inline={true} placeholder="www.imannftartist.com" error={errors.websiteUrl} value={inputValues.websiteUrl}
-                  label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
-                />
                 Save Profile
               </FancyButton>
             </Box>

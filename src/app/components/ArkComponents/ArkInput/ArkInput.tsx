@@ -14,6 +14,7 @@ interface Props extends BoxProps {
   startAdorment?: JSX.Element;
   inline?: boolean;
   wordLimit?: number;
+  hideInput?: boolean;
 }
 
 const BootstrapInput = withStyles((theme) => ({
@@ -38,7 +39,7 @@ const BootstrapInput = withStyles((theme) => ({
 }))(InputBase);
 
 const ArkInput: React.FC<Props> = (props: Props) => {
-  const { wordLimit, inline, startAdorment, instruction, error = "", label, multiline, value, onValueChange, className, ...rest } = props;
+  const { hideInput, wordLimit, inline, startAdorment, instruction, error = "", label, multiline, value, onValueChange, className, ...rest } = props;
   const classes = useStyles();
   const [onFocus, setOnFocus] = useState(false)
 
@@ -58,10 +59,12 @@ const ArkInput: React.FC<Props> = (props: Props) => {
             )}
           </Fragment>
         )}
-        <BootstrapInput
-          startAdornment={startAdorment ? <InputAdornment className={cls({ [classes.focusAdornment]: onFocus && !error })} position="start">{startAdorment}</InputAdornment> : undefined}
-          onFocus={() => setOnFocus(true)} onBlur={() => setOnFocus(false)} className={cls({ [classes.focussed]: onFocus && !error, [classes.multiline]: multiline, [classes.error]: error && !!value })}
-          multiline={multiline} value={value} onChange={(e) => onValueChange(e.target.value)} fullWidth defaultValue="react-bootstrap" {...rest} />
+        {!hideInput && (
+          <BootstrapInput
+            startAdornment={startAdorment ? <InputAdornment className={cls({ [classes.focusAdornment]: onFocus && !error })} position="start">{startAdorment}</InputAdornment> : undefined}
+            onFocus={() => setOnFocus(true)} onBlur={() => setOnFocus(false)} className={cls({ [classes.focussed]: onFocus && !error, [classes.multiline]: multiline, [classes.error]: error && !!value })}
+            multiline={multiline} value={value} onChange={(e) => onValueChange(e.target.value)} fullWidth defaultValue="react-bootstrap" {...rest} />
+        )}
         <FormHelperText className={cls({ [classes.errorText]: true })} >{error ? error : " "}</FormHelperText>
       </FormControl>
     </Box >
