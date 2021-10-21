@@ -3,6 +3,7 @@ import { Box, BoxProps, Typography, useMediaQuery, useTheme } from "@material-ui
 import { makeStyles } from "@material-ui/core/styles";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
+import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { CurrencyLogo, FancyButton, Text, ZapIconButton } from "app/components";
 import { getTokens, getWallet } from "app/saga/selectors";
@@ -13,7 +14,6 @@ import { bnOrZero, useValueCalculators, useBlockTime } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 import { InfoBox } from "./components";
-import dayjs from "dayjs";
 
 interface Props extends BoxProps {
   token?: Nft;
@@ -47,6 +47,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
     const expireText = expiryTime.isAfter(dayjs()) ? `Expirys in ` + expiryTime.fromNow() : "Expired " + expiryTime.fromNow();
 
     return { amount: bnOrZero(token?.bestBid?.price.amount).shiftedBy(-bidToken?.decimals ?? 0), timeLeft: expireText }
+    // eslint-disable-next-line
   }, [token?.bestBid, tokens, blockTime])
 
   useEffect(() => {
