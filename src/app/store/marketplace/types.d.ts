@@ -123,13 +123,13 @@ export interface NftAttribute {
 
 export interface Profile {
   id: string;
-  username?: string;
+  username: string | null;
   address: string;
-  bio?: string;
-  twitterHandle?: string;
-  instagramHandle?: string;
-  websiteUrl?: string;
-  email?: string;
+  bio: string | null;
+  twitterHandle: string | null;
+  instagramHandle: string | null;
+  websiteUrl: string | null;
+  email: string | null;
   profileImage?: {
     url: string;
   }

@@ -126,7 +126,7 @@ const ArkNavDrawer: React.FC<DrawerProps> = (props: any) => {
                 location.pathname === "/ark/collections",
             })}
           >
-            <Text variant="button">Collections</Text>
+            <Text variant="button">Discover</Text>
           </ListItem>
           <ListItem
             button
