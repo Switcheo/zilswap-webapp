@@ -140,7 +140,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           </Box>
           <Box display="flex" className={classes.buttonBox}>
             <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple>
-              Place a Bid
+              Place Bid
             </FancyButton>
             {isOwnToken && (
               <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onSell}>
@@ -193,7 +193,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: theme.spacing(0, 3),
     [theme.breakpoints.down("xs")]: {
       marginTop: theme.spacing(2),
-      flexDirection: "column",
       transform: "translateY(0%)",
       padding: theme.spacing(0),
     },
@@ -217,7 +216,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     [theme.breakpoints.down("xs")]: {
       display: "flex",
-      marginBottom: theme.spacing(1),
       width: "100%",
     },
   },
