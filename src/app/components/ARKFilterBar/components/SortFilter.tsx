@@ -116,7 +116,7 @@ const SortFilter = () => {
   const dispatch = useDispatch();
   const classes = useStyles();
   const marketPlaceState = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
-  const [sortBy, setSortBy] = useState<SortBy>(marketPlaceState.filter.sortBy)
+  const [sortBy] = useState<SortBy>(marketPlaceState.filter.sortBy)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
