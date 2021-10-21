@@ -186,6 +186,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "45px",
     color: "#DEFFFF",
     marginTop: theme.spacing(0.5),
+    [theme.breakpoints.down("sm")]: {
+      marginTop: theme.spacing(0),
+      marginBottom: theme.spacing(1),
+    },
   },
   buttonBox: {
     transform: "translateY(-50%)",
@@ -316,12 +320,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 10,
     fontWeight: "bold",
     marginRight: theme.spacing(1),
-    // [theme.breakpoints.down("xs")]: {
-    //   flexDirection: "column",
-    //   padding: theme.spacing(0),
-    //   backgroundColor: "#6be1ff00",
-    //   color: theme.palette.primary.contrastText
-    // },
+    [theme.breakpoints.down("xs")]: {
+      borderRadius: 14,
+      padding: theme.spacing(.8, 1.6),
+    },
   },
 
 }));
