@@ -36,6 +36,7 @@ const InternalRouteMap: any = {
   "/pool": "/swap",
   "/bridge": "/bridge",
   "/history": "/bridge",
+  "/ark/discover": "/ark",
   "/ark/collections": "/ark",
   "/ark/profile": "/ark",
 };
