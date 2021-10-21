@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Box, Button, Popover, makeStyles } from "@material-ui/core";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
@@ -112,38 +112,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   }
 }))
 
-interface Props {
-  filterPage: "profile" | "collection";
-}
-
-const SortFilter = (props: Props) => {
-  const { filterPage } = props;
-  const marketPlaceState = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
+const SortFilter = () => {
   const dispatch = useDispatch();
-
-  const [sortBy, setSortBy] = useState<SortBy>(marketPlaceState.filter.sortBy)
-
   const classes = useStyles();
-
+  const marketPlaceState = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
+  const [sortBy, setSortBy] = useState<SortBy>(marketPlaceState.filter.sortBy)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
+    dispatch(updateFilter({ sortBy }))
+    handleClose()
   };
 
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  useEffect(() => {
-    dispatch(updateFilter({
-      // ...marketPlaceState.filter,
-      filterPage,
-      sortBy
-    }))
-    handleClose()
-    // eslint-disable-next-line
-  }, [sortBy])
 
   const iconForType = (sortBy: SortBy): React.ReactNode => {
     if (sortBy === SortBy.PriceDescending) {

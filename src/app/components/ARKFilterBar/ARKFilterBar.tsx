@@ -21,12 +21,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }))
 
 interface Props {
-  collectionAddress: any;
-  filterPage: "profile" | "collection";
+  collectionAddress: string;
 }
 
 const ARKFilterBar = (props: Props) => {
-  const { filterPage, collectionAddress } = props;
+  const { collectionAddress } = props;
   const classes = useStyles();
 
   return (
@@ -34,11 +33,11 @@ const ARKFilterBar = (props: Props) => {
       <Box className={classes.grid}>
         <SearchFilter />
 
-        <SaleTypeFilter filterPage={filterPage} />
+        <SaleTypeFilter />
 
-        <AttributesFilter filterPage={filterPage} collectionAddress={collectionAddress} />
+        <AttributesFilter collectionAddress={collectionAddress} />
       </Box>
-      <SortFilter filterPage={filterPage} />
+      <SortFilter />
     </Box>
   )
 }

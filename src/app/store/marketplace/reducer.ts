@@ -1,4 +1,4 @@
-import { LocalStorageKeys, COLLECTION_NFT_PER_PAGE, PROFILE_NFT_PER_PAGE } from "app/utils/constants";
+import { LocalStorageKeys, COLLECTION_NFT_PER_PAGE } from "app/utils/constants";
 import { SortBy, MarketPlaceActionTypes } from "./actions";
 import { MarketPlaceState } from "./types";
 
@@ -18,49 +18,22 @@ const initial_state: MarketPlaceState = {
   tokens: [],
   oAuth: savedAccessToken,
   filter: {
-    sale_type: {
-      fixed_price: true,
-      timed_auction: true
+    saleType: {
+      fixed_price: false,
+      timed_auction: false,
     },
+    collectionAddress: null,
+    owner: null,
+    likedBy: null,
+    search: '',
     traits: {},
-    sortBy: SortBy.PriceDescending,
+    sortBy: SortBy.PriceAscending,
     pagination: {
       limit: COLLECTION_NFT_PER_PAGE
     },
-    filterPage: "collection"
-  },
-  filters: {
-    collectionFilter: {
-      sale_type: {
-        fixed_price: true,
-        timed_auction: true
-      },
-      traits: {},
-      sortBy: SortBy.PriceDescending,
-      pagination: {
-        limit: COLLECTION_NFT_PER_PAGE
-      },
-      filterPage: "collection"
-    },
-    profileFilter: {
-      sale_type: {
-        fixed_price: true,
-        timed_auction: true
-      },
-      traits: {},
-      sortBy: SortBy.PriceDescending,
-      pagination: {
-        limit: PROFILE_NFT_PER_PAGE
-      },
-      filterPage: "profile"
-    },
   },
   profile: undefined,
-  profileTokens: [],
 }
-
-
-
 
 const reducer = (state: MarketPlaceState = initial_state, action: any) => {
   const { payload, type } = action;
@@ -81,32 +54,9 @@ const reducer = (state: MarketPlaceState = initial_state, action: any) => {
         oAuth: payload,
       }
     case MarketPlaceActionTypes.UPDATE_TOKENS:
-      let allFilters = { ...state.filters };
-      if (state.filter.filterPage === "collection") {
-        allFilters = {
-          ...allFilters, collectionFilter: {
-            ...allFilters.collectionFilter,
-            pagination: {
-              ...allFilters.collectionFilter.pagination,
-              ...payload.meta,
-            }
-          }
-        }
-      } else {
-        allFilters = {
-          ...allFilters, profileFilter: {
-            ...allFilters.profileFilter,
-            pagination: {
-              ...allFilters.profileFilter.pagination,
-              ...payload.meta,
-            }
-          }
-        }
-      }
-
       return {
         ...state,
-        tokens: state.filter.filterPage === "collection" ? payload.entries : state.tokens,
+        tokens: payload.entries,
         filter: {
           ...state.filter,
           pagination: {
@@ -114,47 +64,15 @@ const reducer = (state: MarketPlaceState = initial_state, action: any) => {
             ...payload.meta,
           }
         },
-        filters: {
-          ...state.filters,
-          ...allFilters,
-        },
-        profileTokens: state.filter.filterPage === "profile" ? payload.entries : state.profileTokens
       }
     case MarketPlaceActionTypes.UPDATE_FILTER:
-      let filters = state.filters;
-
-      let toUpdate = {} as any;
-      if (payload.filterPage === "collection") {
-        toUpdate = { ...state.filters.collectionFilter, ...payload }
-        filters = {
-          ...filters,
-          collectionFilter: {
-            ...filters.collectionFilter,
-            ...payload
-          }
-        }
-      } else if (payload.filterPage === "profile") {
-        toUpdate = { ...state.filters.profileFilter, ...payload }
-        filters = {
-          ...filters,
-          profileFilter: {
-            ...filters.profileFilter,
-            ...payload
-          }
-        }
-      } else {
-        return { ...state }
-      }
-
       return {
         ...state,
+        tokens: [],
         filter: {
-          ...toUpdate,
+          ...state.filter,
+          ...payload,
         },
-        filters: {
-          ...state.filters,
-          ...filters
-        }
       }
     default:
       return state;

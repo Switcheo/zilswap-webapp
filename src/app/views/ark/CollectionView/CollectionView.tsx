@@ -8,6 +8,7 @@ import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text, ArkNFTListing } from "
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
 import { actions } from "app/store";
+import ARKFilterBar from "app/components/ARKFilterBar";
 import { RootState, Collection, CollectionFilter } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
@@ -120,9 +121,6 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { network } = useSelector(getBlockchain);
   const history = useHistory();
   const dispatch = useDispatch();
-  const filter = useSelector<RootState, CollectionFilter>(
-    (state) => state.marketplace.filter
-  );
 
   // fetch nfts in collection (to use store instead)
   const [collection, setCollection] = useState<Collection>();
@@ -135,8 +133,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
     let collectionAddress = match.params.collection;
     if (collectionAddress?.startsWith("zil1")) {
-      if (filter.collectionAddress !== collectionAddress)
-        dispatch(actions.MarketPlace.updateFilter({ collectionAddress, filterPage: "collection" }));
+      dispatch(actions.MarketPlace.updateFilter({ collectionAddress, likedBy: null, owner: null }));
 
       return {
         bech32Address: collectionAddress,
@@ -165,7 +162,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     }
   }, [collection]);
 
-  // get collection data
+  // get collection stat data
   useEffect(() => {
     if (!hexAddress) return;
 
@@ -255,7 +252,9 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           <Text className={classes.description}>{collection.description}</Text>
         </Box>
 
-        <ArkNFTListing filterPage="collection" collectionAddress={collection.address} />
+        <ArkNFTListing
+          filterComponent={<ARKFilterBar collectionAddress={collection.address} />}
+        />
       </Container>
     </ArkPage>
   );

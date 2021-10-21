@@ -533,11 +533,14 @@ export namespace ArkClient {
 
   export interface ListTokenParams extends ListQueryParams {
     owner?: string;
+    viewer?: string;
+    likedBy?: string;
     collection?: string;
   }
 
   export interface SearchCollectionParams extends ListQueryParams {
     q?: string;
+    type?: string;
     viewer?: string;
     sortBy?: string;
     sortDir?: string;
