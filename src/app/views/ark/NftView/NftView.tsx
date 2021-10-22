@@ -55,7 +55,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     runGetNFTDetails(async () => {
       const arkClient = new ArkClient(network);
       const address = fromBech32Address(collectionId).toLowerCase()
-      const viewerAddress = wallet?.addressInfo.byte20.toLocaleLowerCase()
+      const viewerAddress = wallet?.addressInfo.byte20.toLowerCase()
       const { result } = await arkClient.getNftToken(address, tokenId, viewerAddress);
       setToken(result.model);
       setTraits(result.model.traitValues);

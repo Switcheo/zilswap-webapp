@@ -61,7 +61,7 @@ function* loadNftList() {
     }
 
     if (wallet) {
-      query.viewer = wallet.addressInfo.byte20.toLocaleLowerCase()
+      query.viewer = wallet.addressInfo.byte20.toLowerCase()
     }
 
     if (filter.saleType.fixed_price) query.type = 'buyNow'
@@ -85,7 +85,7 @@ function* loadNftList() {
     } else {
       if (!collectionAddress) return;
       if (wallet) {
-        query.viewer = wallet.addressInfo.byte20.toLocaleLowerCase()
+        query.viewer = wallet.addressInfo.byte20.toLowerCase()
       }
       const tokenResult = (yield call(arkClient.searchCollection, collectionAddress, query)) as unknown as any;
 
