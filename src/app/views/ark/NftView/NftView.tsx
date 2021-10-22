@@ -12,7 +12,7 @@ import { useAsyncTask } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import { ReactComponent as VerifiedBadge } from "../CollectionView/verified-badge.svg";
-import { BidDialog, BuyDialog, NftImage, SalesDetail, SellDialog, TraitTable } from "./components";
+import { BidDialog, BuyDialog, CancelDialog, NftImage, SalesDetail, SellDialog, TraitTable } from "./components";
 
 const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, match, ...rest } = props;
@@ -158,6 +158,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
         <Fragment>
           <BuyDialog token={token} collectionAddress={collectionId} />
           <BidDialog token={token} collectionAddress={collectionId} />
+          <CancelDialog token={token} />
           <SellDialog />
         </Fragment>
       )}

@@ -80,6 +80,10 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
     dispatch(actions.Layout.toggleShowBidNftDialog("open"));
   };
 
+  const onCancel = () => {
+    dispatch(actions.Layout.toggleShowCancelSellNftDialog("open"));
+  };
+
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <Box className={classes.container}>
@@ -158,6 +162,11 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
             {!isOwnToken && (
               <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onBid}>
                 Place Bid
+              </FancyButton>
+            )}
+            {isOwnToken && token?.bestAsk && (
+              <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onCancel}>
+                Cancel Listing
               </FancyButton>
             )}
             {isOwnToken && (
