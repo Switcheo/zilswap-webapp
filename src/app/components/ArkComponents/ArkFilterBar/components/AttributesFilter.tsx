@@ -79,6 +79,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: 0,
     marginTop: -3,
     marginRight: 6,
+    '& svg > path': {
+      fill: theme.palette.text!.primary,
+    },
     "&:hover": {
       background: "transparent!important",
     },
@@ -126,7 +129,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginTop: 3,
     textAlign: "left",
     "&.hasSelected": {
-      color: "#00FFB0",
+      color: theme.palette.primary!.dark,
       opacity: 1,
     },
   },
@@ -181,7 +184,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     background: "none",
     outline: "none",
     border: "none",
-    color: "#00FFB0",
+    color: theme.palette.primary!.dark!,
     opacity: 0.8,
     fontSize: 11,
     fontWeight: "bold",

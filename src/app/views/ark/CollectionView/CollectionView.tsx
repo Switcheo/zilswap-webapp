@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   statsHeader: {
     fontSize: "12px",
     lineHeight: "14px",
-    color: theme.palette.primary.light,
+    color: theme.palette.text?.primary,
     whiteSpace: "nowrap",
   },
   statsContent: {
@@ -80,7 +80,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   description: {
     fontSize: "16px",
     lineHeight: "24px",
-    color: theme.palette.primary.light,
+    color: theme.palette.text?.primary,
     maxWidth: "750px",
     marginTop: theme.spacing(3.5),
     textAlign: "center",

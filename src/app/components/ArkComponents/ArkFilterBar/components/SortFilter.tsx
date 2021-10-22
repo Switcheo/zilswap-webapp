@@ -93,11 +93,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 'normal'
   },
   sortIcon: {
-    fill: "#DEFFFF",
+    fill: theme.palette.text!.primary!,
     fillOpacity: 0.5
   },
   sortIconMenu: {
-    fill: "#DEFFFF",
+    fill: theme.palette.text!.primary!,
     fillOpacity: 1
   },
   sortIconSelected: {

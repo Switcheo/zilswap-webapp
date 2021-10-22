@@ -201,127 +201,139 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
           height="308"
           image={token.asset?.url}
         />}
-      </Box>
-      <CardContent className={classes.cardContent}>
-        <Box className={classes.bodyBox}>
-          {!dialog ? (
-            <Fragment>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                {/* to truncate if too long? */}
-                <Typography className={classes.title}>
-                  {token.name}
-                  <VerifiedBadge className={classes.verifiedBadge} />
-                </Typography>
-                {bestAsk && (
+        <CardContent className={classes.cardContent}>
+          <Box className={classes.bodyBox}>
+            {!dialog ? (
+              <Fragment>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
+                  {/* to truncate if too long? */}
                   <Typography className={classes.title}>
-                    {toHumanNumber(bestAsk.amount)} {bestAsk.askToken.symbol}
+                    {token.name}
+                    <VerifiedBadge className={classes.verifiedBadge} />
                   </Typography>
-                )}
-              </Box>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                mt={0.5}
-              >
-                <Typography className={classes.body}>
-                  #{token.tokenId}
-                </Typography>
-                <Box display="flex">
-                  <Typography className={classes.body}>owned by&nbsp;</Typography>
+                  {bestAsk && (
+                    <Typography className={classes.title}>
+                      {toHumanNumber(bestAsk.amount)} {bestAsk.askToken.symbol}
+                    </Typography>
+                  )}
+                </Box>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  mt={0.5}
+                >
+                  <Typography className={classes.body}>
+                    #{token.tokenId}
+                  </Typography>
+                  <Box display="flex">
+                    <Typography className={classes.body}>owned by&nbsp;</Typography>
+                    <Link
+                      className={classes.link}
+                      href={`/ark/profile?address=${token.owner?.address}`}
+                    >
+                      <Typography className={classes.username}>
+                        {token.owner?.username || truncateAddress(token.owner?.address ?? "")}
+                      </Typography>
+                    </Link>
+                  </Box>
+                </Box>
+              </Fragment>
+            ) : (
+              <Fragment>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
+                  <Typography className={classes.dialogTitle}>
+                    #{token.tokenId}
+                  </Typography>
                   <Link
                     className={classes.link}
-                    href={`/ark/profile?address=${token.owner?.address}`}
+                    underline="hover"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href={explorerLink}
                   >
-                    <Typography className={classes.username}>
-                      {token.owner?.username || truncateAddress(token.owner?.address ?? "")}
+                    <Typography>
+                      View on explorer
+                      <LaunchIcon className={classes.linkIcon} />
                     </Typography>
                   </Link>
                 </Box>
-              </Box>
-            </Fragment>
-          ) : (
-            <Fragment>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Typography className={classes.dialogTitle}>
-                  #{token.tokenId}
-                </Typography>
-                <Link
-                  className={classes.link}
-                  underline="hover"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  href={explorerLink}
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  mt={0.5}
                 >
-                  <Typography>
-                    View on explorer
-                    <LaunchIcon className={classes.linkIcon} />
+                  <Typography className={classes.dialogBody}>
+                    {token.name}
+                    <VerifiedBadge className={classes.verifiedBadge} />
                   </Typography>
-                </Link>
+                </Box>
+              </Fragment>
+            )}
+            <ClickAwayListener onClickAway={() => { console.log("close popper"); setPopAnchor(null) }}>
+              <Box>
+                <Box onClick={handlePopClick} display="flex" justifyContent="flex-end"><MoreHorizIcon /></Box>
+                <Popper className={classes.popper} open={!!popAnchor} anchorEl={popAnchor}>
+                  <Link
+                    className={classes.popperText}
+                    underline="none"
+                    rel="tonftpage"
+                    href={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
+                  >
+                    <Typography className={classes.popperText}>Sell Item</Typography>
+                  </Link>
+                  {isOwner && (
+                    <>
+                      <Box className={classes.divider} />
+                      <Typography onClick={setAsProfileImage} className={classes.popperText}>Set as profile picture</Typography>
+                    </>
+                  )}
+                </Popper>
               </Box>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                mt={0.5}
-              >
-                <Typography className={classes.dialogBody}>
-                  {token.name}
-                  <VerifiedBadge className={classes.verifiedBadge} />
-                </Typography>
-              </Box>
-            </Fragment>
-          )}
-          <ClickAwayListener onClickAway={() => { console.log("close popper"); setPopAnchor(null) }}>
-            <Box>
-              <Box onClick={handlePopClick} display="flex" justifyContent="flex-end"><MoreHorizIcon /></Box>
-              <Popper className={classes.popper} open={!!popAnchor} anchorEl={popAnchor}>
-                <Link
-                  className={classes.popperText}
-                  underline="none"
-                  rel="tonftpage"
-                  href={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
-                >
-                  <Typography className={classes.popperText}>Sell Item</Typography>
-                </Link>
-                {isOwner && (
-                  <>
-                    <Box className={classes.divider} />
-                    <Typography onClick={setAsProfileImage} className={classes.popperText}>Set as profile picture</Typography>
-                  </>
-                )}
-              </Popper>
-            </Box>
-          </ClickAwayListener>
-        </Box>
+            </ClickAwayListener>
+          </Box>
 
-        {/* TODO: refactor and take in a rarity as prop */}
-        {/* Rarity indicator */}
-        <Box className={classes.rarityBackground}>
-          <Box className={classes.rarityBar} />
-        </Box>
-      </CardContent>
+          {/* TODO: refactor and take in a rarity as prop */}
+          {/* Rarity indicator */}
+          <Box className={classes.rarityBackground}>
+            <Box className={classes.rarityBar} />
+          </Box>
+        </CardContent>
+      </Box>
     </Card>
   );
 };
 
+const borderColor = (theme: AppTheme) => theme.palette.type === 'dark' ? '#29475A' : 'rgba(41, 71, 90, 0.15)'
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     width: "100%",
     minWidth: "280px",
-    borderRadius: 10,
+    borderRadius: '10px 10px 0 0',
     boxShadow: "none",
     backgroundColor: "transparent",
     position: "relative",
     overflow: "initial",
+    background: `linear-gradient(to top, transparent 0%, ${borderColor(theme)} 100%)`,
+    '&:before': {
+      content: '',
+      backgroundImage: `linear-gradient(to bottom, transparent 0%, ${borderColor(theme)} 100%)`,
+      top: -10,
+      left: -10,
+      bottom: -10,
+      right: -10,
+      position: 'absolute',
+      zIndex: -1,
+    },
     "& .MuiCardContent-root:last-child": {
       paddingBottom: theme.spacing(1.5),
     },
@@ -330,10 +342,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   borderBox: {
-    borderRadius: 10,
+    borderRadius: '10px 10px 0 0',
+    margin: '1px 1px 0 1px',
+    background: theme.palette.background.default,
   },
   imageContainer: {
-    borderRadius: theme.spacing(1.5),
+    borderRadius: '0px 0px 8px 8px',
     width: "100%",
     position: "relative",
   },
@@ -474,7 +488,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "#6BE1FF",
   },
   cardActionArea: {
-    borderRadius: 10,
+    borderRadius: 0,
     border: "none",
   },
   popper: {
