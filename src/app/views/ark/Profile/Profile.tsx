@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   badge: {
-    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    backgroundColor: theme.palette.background.contrast,
   },
   addressBox: {
     textAlign: 'center',
@@ -53,7 +53,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   bioBox: {
     width: 480,
-    border: "1px solid #29475A",
+    maxWidth: '90%',
+    border: theme.palette.border,
     boxSizing: "border-box",
     borderRadius: "12px",
     filter: "drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))",

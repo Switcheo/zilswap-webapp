@@ -13,9 +13,9 @@ import { truncate, useNetwork } from "app/utils";
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
         backgroundColor: theme.palette.background.default,
-        borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-        borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-        borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+        borderLeft: theme.palette.border,
+        borderRight: theme.palette.border,
+        borderBottom: theme.palette.border,
         borderRadius: "0 0 12px 12px",
         padding: theme.spacing(2, 8, 2),
         minWidth: 510,

@@ -220,7 +220,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexDirection: "column",
     marginTop: theme.spacing(3),
     borderRadius: 12,
-    border: "1px solid #29475A",
+    border: theme.palette.border,
     background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
     padding: theme.spacing(3, 5),
     [theme.breakpoints.down("sm")]: {
@@ -247,7 +247,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   aboutContainer: {
     maxWidth: 450,
-    border: "1px solid #29475A",
+    border: theme.palette.border,
     background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
     padding: theme.spacing(7, 6),
     borderRadius: 12,
@@ -259,7 +259,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   traitContainer: {
     display: "flex",
     minWidth: 400,
-    border: "1px solid #29475A",
+    border: theme.palette.border,
     background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
     padding: theme.spacing(4, 5),
     borderRadius: 12,

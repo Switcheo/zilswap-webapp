@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         ? "linear-gradient(#13222C, #002A34)"
         : "#F6FFFC",
     border:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     boxShadow: theme.palette.mainBoxShadow,
     borderRadius: CARD_BORDER_RADIUS,
     [theme.breakpoints.down("sm")]: {
@@ -97,20 +97,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderTopLeftRadius: CARD_BORDER_RADIUS,
     borderBottomLeftRadius: CARD_BORDER_RADIUS,
     border:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
   },
   tabNoBorder: {
     borderTopRightRadius: 0,
     borderBottomRightRadius: 0,
     border:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderWidth: "1px 1px 1px 0",
   },
   tabRight: {
     borderTopRightRadius: CARD_BORDER_RADIUS,
     borderBottomRightRadius: CARD_BORDER_RADIUS,
     border:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderWidth: "1px 1px 1px 0",
   },
   tabActive: {

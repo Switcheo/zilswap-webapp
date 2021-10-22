@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   headerCell: {
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
-    borderBottom: "1px solid #29475A",
+    borderBottom: theme.palette.border,
     padding: "8px 16px",
     fontFamily: 'Avenir Next',
     fontWeight: 600,
@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     opacity: "100%",
   },
   bodyCell: {
-    borderBottom: "1px solid #29475A",
+    borderBottom: theme.palette.border,
     padding: "8px 16px",
   },
 }));

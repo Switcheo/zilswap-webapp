@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px 12px 0 0",
     backgroundColor: theme.palette.type === "dark" ? "#13222C" : "#003340",
     color: theme.palette.tab.selected,
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     "&:hover": {
       backgroundColor: theme.palette.type === "dark" ? "" : `rgba${hexToRGBA("#003340", 0.8)}`
     }
@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px 12px 0 0",
     backgroundColor: theme.palette.type === "dark" ? "#13222C" : "#003340",
     color: theme.palette.tab.selected,
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     justifyContent: "space-between",
     "&:hover": {
       backgroundColor: theme.palette.type === "dark" ? "" : `rgba${hexToRGBA("#003340", 0.8)}`

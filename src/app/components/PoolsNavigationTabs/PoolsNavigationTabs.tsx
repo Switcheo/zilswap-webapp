@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   tab: {
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     "&:not(:first-child)": {
       borderRadius: "0 12px 12px 0",
       borderWidth: "1px 1px 1px 0",

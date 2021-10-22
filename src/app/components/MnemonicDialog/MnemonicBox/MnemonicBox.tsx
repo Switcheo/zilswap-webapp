@@ -11,9 +11,9 @@ import { hexToRGBA } from "app/utils";
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
         backgroundColor: theme.palette.background.default,
-        borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-        borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-        borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+        borderLeft: theme.palette.border,
+        borderRight: theme.palette.border,
+        borderBottom: theme.palette.border,
         borderRadius: "0 0 12px 12px",
         padding: theme.spacing(1, 7, 2),
         maxWidth: 510,
@@ -111,14 +111,14 @@ const MnemonicBox = (props: any) => {
                     {isHistory
                         ? <span>You may only use the following key phrase to recover <br/> your transfer if it failed in Stage 2.</span>
                         : <span>
-                            <strong>In the event you are not able to complete Stage 2 of your transfer</strong>, you may retrieve and resume your transfer by entering the following 
-                            unique transfer key phrase on your Transfer History page. 
-                            Do not ever reveal your key phrase to anyone. ZilSwap will not be held accountable and cannot help you 
+                            <strong>In the event you are not able to complete Stage 2 of your transfer</strong>, you may retrieve and resume your transfer by entering the following
+                            unique transfer key phrase on your Transfer History page.
+                            Do not ever reveal your key phrase to anyone. ZilSwap will not be held accountable and cannot help you
                             retrieve those funds once they are lost.
                         </span>
                     }
                 </Text>
-            </Box> 
+            </Box>
 
             <Box display="flex" justifyContent="center" mb={2.5}>
                 <Button

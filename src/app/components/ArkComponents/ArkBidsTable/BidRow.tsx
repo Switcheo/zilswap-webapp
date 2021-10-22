@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   withBorder: {
     '&:not(:last-child)': {
-      borderBottom: "1px solid #29475A",
+      borderBottom: theme.palette.border,
     }
   },
   slideAnimation: {

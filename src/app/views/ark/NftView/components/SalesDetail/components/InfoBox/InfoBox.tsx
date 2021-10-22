@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: theme.spacing(2),
     padding: theme.spacing(2, 3),
     borderRadius: theme.spacing(1.5),
-    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    backgroundColor: theme.palette.background.contrast,
   },
   content: {
     flex: 1,
