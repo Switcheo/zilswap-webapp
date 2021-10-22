@@ -293,7 +293,7 @@ export class ArkClient {
 
     const userApprovals = approvalState?.[ownerAddress.toLowerCase()];
     logger("ark contract approvals", ownerAddress, this.brokerAddress, userApprovals);
-    if (userApprovals[this.brokerAddress]) return null;
+    if (userApprovals?.[this.brokerAddress]) return null;
 
     return await this.approveAllowance(tokenAddress, zilswap);
   }
