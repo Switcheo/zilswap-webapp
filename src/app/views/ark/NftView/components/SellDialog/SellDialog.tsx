@@ -214,9 +214,9 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 <FormHelperText className={classes.instruction}>Transactions will be made automatically once the buyer hits "Confirm".</FormHelperText>
                 <Box marginTop={1}>
                   <CurrencyInput
-                    label="Buy Now Price"
                     token={inputValues.sellToken ?? null}
                     amount={inputValues.buyNowPrice}
+                    hideBalance
                     onEditorBlur={() => onEndEditPrice('buyNowPrice')}
                     onAmountChange={value => onPriceChange('buyNowPrice', value)}
                     onCurrencyChange={onCurrencyChange}
@@ -234,7 +234,6 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                   <FormHelperText className={classes.instruction}>Set a minimum bid XXXXXXXXX</FormHelperText>
                   <Box marginTop={1}>
                     <CurrencyInput
-                      label="Starting Price"
                       token={inputValues.sellToken ?? null}
                       amount={inputValues.buyNowPrice}
                       onEditorBlur={() => onEndEditPrice('startingPrice')}
