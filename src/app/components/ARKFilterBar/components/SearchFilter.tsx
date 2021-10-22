@@ -36,8 +36,8 @@ const SearchFilter = () => {
   const marketPlaceState = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
   const [search, setSearch] = useState<string>(marketPlaceState.filter.search)
 
-  const onSearchChange = (str: string) => {
-    setSearch(str)
+  const onSearchChange = (search: string) => {
+    setSearch(search)
     // TODO: debounce me
     dispatch(updateFilter({ search }))
   }

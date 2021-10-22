@@ -140,18 +140,14 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
 
 
         {/*Ark tabs */}
-        <ArkTab setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids", "Price History", "Event History"]} />
+        <ArkTab mt={3} setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids", "Price History", "Event History"]} />
 
         <Box className={classes.bidsBox}>
           {currentTab === "Bids" && (
             <ArkBidsTable bids={bids} />
           )}
-        </Box>
-
-        {/* Other info and price history */}
-        <Box display="flex" mt={3}>
-          {/* Other Info */}
           {/* Price History */}
+          {/* Event History */}
         </Box>
       </Container >
       {token && (
@@ -171,7 +167,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     [theme.breakpoints.down("xs")]: {
       padding: 0,
+      paddingBottom: theme.spacing(3),
     },
+    paddingBottom: '30vh',
   },
   breadcrumbs: {
     marginTop: theme.spacing(3),

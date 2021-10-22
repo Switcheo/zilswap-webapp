@@ -123,7 +123,8 @@ const SortFilter = () => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleChange = (sort: SortBy) => {
+  const handleChange = (sortBy: SortBy) => {
+    setSortBy(sortBy)
     dispatch(updateFilter({ sortBy }))
     handleClose()
   }

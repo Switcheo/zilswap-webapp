@@ -7,7 +7,7 @@ import BigNumber from "bignumber.js"
 import dayjs, { Dayjs } from "dayjs";
 import { useSelector } from "react-redux";
 import { FancyButton } from "app/components";
-import { Cheque } from "app/store/types";
+import { Cheque, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { getChequeStatus } from "core/utilities/ark"
 import { RootState, TokenState } from "app/store/types";
@@ -86,7 +86,17 @@ const BidCard: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const [expand, setExpand] = useState(false);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const valueCalculators = useValueCalculators();
+  const userAddress = walletState.wallet?.addressInfo.byte20.toLowerCase();
+
+  const cancelBid = (bid: Cheque) => {
+
+  }
+
+  const acceptBid = (bid: Cheque) => {
+
+  }
 
   const getCardContent = (bid: Cheque, isInitial: boolean) => {
     const status = getChequeStatus(bid, currentBlock)
@@ -144,10 +154,19 @@ const BidCard: React.FC<Props> = (props: Props) => {
             {status}
           </Typography>
         </Box>
-        {
-          status === 'Active' && <Box mt={2} display="flex" justifyContent="center">
+        {status === 'Active' && bid.initiatorAddress === userAddress &&
+          <Box mt={2} display="flex" justifyContent="center">
             <Box flexGrow={1}>
-              <FancyButton variant="contained" fullWidth onClick={() => null} className={classes.actionButton}>
+              <FancyButton variant="contained" fullWidth onClick={() => cancelBid(bid)} className={classes.actionButton}>
+                <Typography className={classes.buttonText}>Cancel</Typography>
+              </FancyButton>
+            </Box>
+          </Box>
+        }
+        {status === 'Active' && bid.token.owner === userAddress &&
+          <Box mt={2} display="flex" justifyContent="center">
+            <Box flexGrow={1}>
+              <FancyButton variant="contained" fullWidth onClick={() => acceptBid(bid)} className={classes.actionButton}>
                 <Typography className={classes.buttonText}>Accept</Typography>
               </FancyButton>
             </Box>

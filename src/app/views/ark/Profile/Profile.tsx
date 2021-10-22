@@ -20,7 +20,7 @@ import { truncateAddress } from "app/utils";
 import {
   BidsMade,
   BidsReceived,
-  Collected,
+  Nfts,
   EditProfile
 } from "./components";
 import { ReactComponent as EditIcon } from "./edit-icon.svg";
@@ -169,9 +169,23 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   };
 
   let tabHeaders = ["Collected", "For Sale", "Liked", "Bids Made"];
-  if (isConnectedUser) tabHeaders = tabHeaders.concat(["Bids Received",])
+  if (isConnectedUser) tabHeaders = tabHeaders.concat(["Bids Received"])
 
   if (!viewProfile && !isConnectedUser) return <ArkPage {...rest} /> // loading profile data
+
+  const currentTabBody = () => {
+    if (!address) return null
+    const hexAddress = fromBech32Address(address)
+
+    switch (currentTab) {
+      case 'Collected': return <Nfts address={hexAddress} filter='collected' />
+      case 'For Sale': return <Nfts address={hexAddress} filter='onSale' />
+      case 'Liked': return <Nfts address={hexAddress} filter='liked' />
+      case 'Bids Made': return <BidsMade address={hexAddress} />
+      case 'Bids Received': return isConnectedUser && <BidsReceived />
+      default: return null
+    }
+  }
 
   return (
     <ArkPage {...rest}>
@@ -227,22 +241,8 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             currentTab={currentTab}
             tabHeaders={tabHeaders}
           />
-          {address && (
-            <>
-              {currentTab === "Collected" && (
-                <Collected address={fromBech32Address(address)} onSaleOnly={false} />
-              )}
-              {currentTab === "For Sale" && (
-                <Collected address={fromBech32Address(address)} onSaleOnly={true} />
-              )}
-              {currentTab === "Liked" && (
-                <Collected address={fromBech32Address(address)} onSaleOnly={true} />
-              )}
-              {(currentTab === "Bids Made") && <BidsMade address={fromBech32Address(address)} />}
-              {(currentTab === "Bids Received") && isConnectedUser && <BidsReceived />}
-            </>
-          )}
-          {(!wallet && !address) && (
+          {
+            (!wallet && !address) ?
             <Box mt={12} display="flex" justifyContent="center">
               <Box display="flex" flexDirection="column" textAlign="center">
                 <Typography className={classes.connectionText} variant="h1">
@@ -253,7 +253,9 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                 </Typography>
               </Box>
             </Box>
-          )}
+            :
+            currentTabBody()
+          }
         </Container>
       )}
       {showEdit && (

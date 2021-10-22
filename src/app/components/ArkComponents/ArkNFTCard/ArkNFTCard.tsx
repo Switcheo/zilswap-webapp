@@ -193,9 +193,6 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   <Typography className={classes.body}>owned by&nbsp;</Typography>
                   <Link
                     className={classes.link}
-                    underline="hover"
-                    rel="noopener noreferrer"
-                    target="_blank"
                     href={`/ark/profile?address=${token.owner?.address}`}
                   >
                     <Typography className={classes.username}>
