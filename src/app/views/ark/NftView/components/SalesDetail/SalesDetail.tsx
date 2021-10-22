@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, BoxProps, Typography } from "@material-ui/core";
+import { Box, BoxProps, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
+import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toBech32Address } from "@zilliqa-js/crypto";
@@ -11,8 +12,9 @@ import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, useValueCalculators } from "app/utils";
+import { bnOrZero, useValueCalculators, useBlockTime } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
+import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 import { InfoBox } from "./components";
 
 interface Props extends BoxProps {
@@ -24,23 +26,36 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
   const { token, tokenId, children, className, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down("xs"));
   const { wallet } = useSelector(getWallet);
   const { tokens, prices } = useSelector(getTokens);
   const [tokenPrice, setTokenPrice] = useState<BigNumber | null>(null);
   const [tokenAmount, setTokenAmount] = useState<BigNumber | null>(null);
   const [purchaseCurrency, setPurchaseCurrency] = useState<TokenInfo>();
   const valueCalculator = useValueCalculators();
+  const [blockTime, currentBlock, currentTime] = useBlockTime();
 
   const isOwnToken = useMemo(() => {
-    return token?.owner?.address && wallet?.addressInfo.byte20?.toLowerCase() === token?.owner?.address;
+    return (
+      token?.owner?.address &&
+      wallet?.addressInfo.byte20?.toLowerCase() === token?.owner?.address
+    );
   }, [token, wallet?.addressInfo]);
 
   const bestBid = useMemo(() => {
-    if (!token?.bestBid) return undefined
+    if (!token?.bestBid) return undefined;
 
     const bidToken = tokens[token?.bestBid?.price.address] || tokens[ZIL_ADDRESS]
-    return bnOrZero(token?.bestBid?.price.amount).shiftedBy(-bidToken?.decimals ?? 0)
-  }, [token?.bestBid, tokens])
+    if (!bidToken) return undefined;
+
+    const blocksLeft = token.bestBid.expiry - currentBlock;
+    const expiryTime = currentTime.add(blocksLeft * BLOCKS_PER_MINUTE, "minutes");
+    const expireText = expiryTime.isAfter(dayjs()) ? `Expirys in ` + expiryTime.fromNow() : "Expired " + expiryTime.fromNow();
+
+    return { amount: bnOrZero(token?.bestBid?.price.amount).shiftedBy(-bidToken?.decimals ?? 0), timeLeft: expireText }
+    // eslint-disable-next-line
+  }, [token?.bestBid, tokens, blockTime])
 
   useEffect(() => {
     if (Object.keys(tokens).length && token && token.bestAsk) {
@@ -54,8 +69,21 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
     }
   }, [tokens, token, valueCalculator, prices])
 
+
+  const onSell = () => {
+    dispatch(actions.Layout.toggleShowSellNftDialog("open"));
+  };
+
   const onBuy = () => {
-    dispatch(actions.Layout.toggleShowBuyNftDialog("open"))
+    dispatch(actions.Layout.toggleShowBuyNftDialog("open"));
+  };
+
+  const onBid = () => {
+    dispatch(actions.Layout.toggleShowBidNftDialog("open"));
+  };
+
+  const onCancel = () => {
+    dispatch(actions.Layout.toggleShowCancelSellNftDialog("open"));
   };
 
   return (
@@ -88,43 +116,63 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
             {(token?.bestAsk || token?.bestBid) && (
               <React.Fragment>
                 {/* this section is WIP */}
-                <Typography variant="body1" className={cls(classes.saleHeader, classes.halfOpacity)}>
-                  Price
+                <Typography variant="h6" className={cls(classes.saleHeader, classes.halfOpacity)}>
+                  Price{isXs && (
+                    <Typography component="span" variant="body1" className={classes.halfOpacity}>
+                      &nbsp;${tokenPrice?.dp(11).toString() ?? "-"}
+                    </Typography>
+                  )}
                 </Typography>
 
-                <Typography variant="h2" className={classes.price}>
+                <Typography variant="h1" className={classes.price}>
                   {tokenAmount?.toString() ?? "-"}
 
                   {(tokenAmount && purchaseCurrency) ? <CurrencyLogo address={purchaseCurrency.address} currency={purchaseCurrency.symbol} /> : ""}
 
-                  <Typography component="span" variant="body1">
-                    ${tokenPrice?.dp(11).toString() ?? "-"}
-                  </Typography>
+                  {!isXs && (
+                    <Typography component="span" variant="body1" className={classes.halfOpacity}>
+                      ${tokenPrice?.dp(11).toString() ?? "-"}
+                    </Typography>
+                  )}
                 </Typography>
-                <Typography variant="body1" className={classes.saleHeader}>
-                  <Typography component="span" className={classes.halfOpacity}>Last:</Typography>
-                  150,320
-                  <Typography component="span" className={classes.halfOpacity}>ZIL Expires in 1 day</Typography>
-                </Typography>
-                {!!bestBid && (
+                <Box className={classes.bestLastBox}>
+                  {!!bestBid && (
+                    <>
+                      <Typography variant="body1" className={classes.saleHeader}>
+                        <Typography className={classes.bestLastLabel}>
+                          BEST
+                        </Typography>
+                        {bestBid.amount.toString(10)}
+                        &nbsp;
+                        ZIL
+                        <Typography className={classes.halfOpacity}>
+                          {bestBid.timeLeft}
+                        </Typography>
+                      </Typography>
+                      <Box mr={2} />
+                    </>
+                  )}
                   <Typography variant="body1" className={classes.saleHeader}>
-                    <Typography className={classes.halfOpacity}>
-                      Best:
-                    </Typography>
-                    {" "}
-                    {bestBid.toString(10)}
-                    {" "}
-                    <Typography className={classes.halfOpacity}>
-                      ZIL
-                    </Typography>
+                    <Typography component="span" className={classes.bestLastLabel}>LAST</Typography>
+                    150,320 &nbsp;ZIL
                   </Typography>
-                )}
+                </Box>
               </React.Fragment>
             )}
           </Box>
           <Box display="flex" className={classes.buttonBox}>
+            {!isOwnToken && (
+              <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onBid}>
+                Place Bid
+              </FancyButton>
+            )}
+            {isOwnToken && token?.bestAsk && (
+              <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onCancel}>
+                Cancel Listing
+              </FancyButton>
+            )}
             {isOwnToken && token?.collection && (
-              <Link to={`/ark/collections/${toBech32Address(token?.collection.address)}/${token?.tokenId}/sell`}>
+              <Link to={`/ark/collections/${toBech32Address(token.collection.address)}/${token.tokenId}/sell`}>
                 <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple>
                   Sell
                 </FancyButton>
@@ -135,13 +183,9 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
                 Buy Now
               </FancyButton>
             )}
-            <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple>
-              Place a Bid
-            </FancyButton>
           </Box>
         </Box>
       </Box>
-
     </Box>
   );
 };
@@ -161,6 +205,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     paddingLeft: theme.spacing(5),
     [theme.breakpoints.down("sm")]: {
       padding: theme.spacing(2, 3),
+      textAlign: "center",
+      width: "100%",
     },
   },
   id: {
@@ -170,13 +216,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "45px",
     color: "#DEFFFF",
     marginTop: theme.spacing(0.5),
+    [theme.breakpoints.down("sm")]: {
+      marginTop: theme.spacing(0),
+      marginBottom: theme.spacing(1),
+    },
   },
   buttonBox: {
     transform: "translateY(-50%)",
     width: "100%",
-    padding: theme.spacing(0, 3.5),
+    padding: theme.spacing(0, 3),
     [theme.breakpoints.down("xs")]: {
-      flexDirection: "column",
+      marginTop: theme.spacing(2),
+      transform: "translateY(0%)",
+      padding: theme.spacing(0),
     },
   },
   button: {
@@ -187,9 +239,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: theme.spacing(2.5, 4),
     borderRadius: theme.spacing(1.5),
     border: "1px solid #29475A",
-    backgroundColor: "#003340",
+    backgroundColor: "#FFDF6B",
     "& .MuiButton-label": {
-      color: "#DEFFFF",
+      color: "#003340",
+    },
+    "&:hover": {
+      "& .MuiButton-label": {
+        color: "#DEFFFF",
+      },
+    },
+    [theme.breakpoints.down("xs")]: {
+      display: "flex",
+      width: "100%",
     },
   },
   buyButton: {
@@ -199,6 +260,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiButton-label": {
       color: "#003340",
     },
+    "&:hover": {
+      border: "1px solid #29475A",
+      "& .MuiButton-label": {
+        color: "#DEFFFF",
+      },
+    }
   },
   collectionName: {
     fontFamily: "'Raleway', sans-serif",
@@ -217,14 +284,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   saleInfoContainer: {
+    display: "flex",
+    flexDirection: "column",
     marginTop: theme.spacing(3),
     minHeight: theme.spacing(5),
     border: `1px solid #003340`,
     borderRadius: theme.spacing(1.5),
-    padding: theme.spacing(3),
+    padding: theme.spacing(3, 3.5),
     paddingBottom: theme.spacing(6),
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(2, 3),
+      alignItems: "center"
     },
   },
   saleHeader: {
@@ -232,15 +302,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "row",
     marginTop: theme.spacing(1),
+    alignItems: "center",
+
   },
   price: {
     color: "#00FFB0",
-    fontFamily: "Avenir Next LT Pro",
+    fontWeight: "bold",
+    fontFamily: "Avenir Next",
     display: "flex",
-    marginTop: theme.spacing(.5)
+    marginTop: theme.spacing(0.5),
+    alignItems: "flex-end",
   },
   zapScore: {
-    fontFamily: "Avenir Next",
+    fontFamily: "'Raleway', sans-serif",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -254,11 +328,35 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontFamily: "Avenir Next",
     fontWeight: 900,
     textAlign: "center",
+    WebkitTextStroke: "4px #7B61FF33"
+
   },
   halfOpacity: {
     opacity: 0.5,
-    color: theme.palette.primary.contrastText
+    color: theme.palette.primary.contrastText,
   },
+  bestLastBox: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex--start",
+    [theme.breakpoints.down("xs")]: {
+      flexDirection: "column",
+    },
+  },
+  bestLastLabel: {
+    backgroundColor: "#6be1ff33",
+    fontFamily: "Avenir Next",
+    color: "#6BE1FF",
+    padding: theme.spacing(1, 2),
+    borderRadius: 10,
+    fontWeight: "bold",
+    marginRight: theme.spacing(1),
+    [theme.breakpoints.down("xs")]: {
+      borderRadius: 14,
+      padding: theme.spacing(.8, 1.6),
+    },
+  },
+
 }));
 
 export default SalesDetail;

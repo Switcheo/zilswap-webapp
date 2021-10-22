@@ -248,7 +248,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 interface Props {
   collectionAddress: any,
-  filterPage: "profile" | "collection";
 }
 
 const abbreviateTraitValue = (traitValue: string) => {
@@ -259,7 +258,7 @@ const abbreviateTraitValue = (traitValue: string) => {
 }
 
 const AttributesFilter = (props: Props) => {
-  const { filterPage, collectionAddress } = props;
+  const { collectionAddress } = props;
   const { network } = useSelector(getBlockchain);
   const dispatch = useDispatch();
 
@@ -339,11 +338,7 @@ const AttributesFilter = (props: Props) => {
   }
 
   useEffect(() => {
-    dispatch(updateFilter({
-      // ...marketPlaceState.filter,
-      filterPage,
-      traits: traits
-    }))
+    dispatch(updateFilter({ traits }))
     // eslint-disable-next-line
   }, [traits])
 

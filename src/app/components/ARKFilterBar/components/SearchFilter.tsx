@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Box, OutlinedInput, makeStyles } from '@material-ui/core';
+import { useDispatch, useSelector } from 'react-redux';
 import { AppTheme } from 'app/theme/types';
+import { RootState, MarketPlaceState } from 'app/store/types';
+import { updateFilter } from 'app/store/marketplace/actions';
 
 const useStyles = makeStyles((theme: AppTheme) =>({
   root: {
@@ -28,8 +31,16 @@ const useStyles = makeStyles((theme: AppTheme) =>({
 }))
 
 const SearchFilter = () => {
+  const dispatch = useDispatch();
   const classes = useStyles();
-  const [search, setSearch] = useState<string>("");
+  const marketPlaceState = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
+  const [search, setSearch] = useState<string>(marketPlaceState.filter.search)
+
+  const onSearchChange = (search: string) => {
+    setSearch(search)
+    // TODO: debounce me
+    dispatch(updateFilter({ search }))
+  }
 
   return (
     <Box>
@@ -39,7 +50,7 @@ const SearchFilter = () => {
         fullWidth
         classes={{ input: classes.inputText }}
         className={classes.input}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => onSearchChange(e.target.value)}
       />
     </Box>
   )

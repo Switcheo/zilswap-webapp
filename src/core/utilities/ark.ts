@@ -372,6 +372,43 @@ export class ArkClient {
     return result;
   }
 
+  // TODO: Refactor zilswap SDK as instance member;
+  async voidCheque(voidChequeParams: ArkClient.VoidChequeParams, zilswap: Zilswap) {
+    const { publicKey, signature, chequeHash } = voidChequeParams;
+
+    const args = [{
+      vname: "cheque_hash",
+      type: "ByStr32",
+      value: `0x${chequeHash}`,
+    }, {
+      vname: "pubkey",
+      type: "ByStr32",
+      value: `0x${publicKey}`,
+    }, {
+      vname: "signature",
+      type: "ByStr32",
+      value: `0x${signature}`,
+    }];
+
+    const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
+    const callParams = {
+      amount: new BN(0),
+      gasPrice: new BN(minGasPrice),
+      gasLimit: Long.fromNumber(20000),
+      version: bytes.pack(CHAIN_IDS[this.network], MSG_VERSION),
+    };
+
+    const result = await zilswap.callContract(
+      zilswap.getContract(this.brokerAddress),
+      "VoidCheque",
+      args as any,
+      callParams,
+      true,
+    );
+
+    return result;
+  }
+
   /**
    *
    * @param tokenAddress hex address of zrc1 contract starting with 0x
@@ -531,14 +568,25 @@ export namespace ArkClient {
     buyCheque: ExecuteBuyCheque;
   }
 
+  export interface VoidChequeParams {
+    chequeHash: String;
+    publicKey: string;
+    signature: string;
+  }
+
   export interface ListTokenParams extends ListQueryParams {
+    search?: string;
+    viewer?: string;
     owner?: string;
+    likedBy?: string;
     collection?: string;
   }
 
   export interface SearchCollectionParams extends ListQueryParams {
     q?: string;
+    search?: string;
     viewer?: string;
+    type?: string;
     sortBy?: string;
     sortDir?: string;
   }

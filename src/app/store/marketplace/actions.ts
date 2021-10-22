@@ -27,9 +27,11 @@ export const MarketPlaceActionTypes = {
 export function initialize() {
   return { type: MarketPlaceActionTypes.INITIALIZE }
 }
+
 export function loadProfile() {
   return { type: MarketPlaceActionTypes.LOAD_PROFILE }
 }
+
 export function refreshAccessToken() {
   return { type: MarketPlaceActionTypes.REFRESH_ACCESS_TOKEN }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Box, Button, Checkbox, FormControlLabel, Popover, makeStyles } from '@material-ui/core';
 import cls from "classnames";
 import { useDispatch, useSelector } from 'react-redux';
@@ -112,16 +112,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   }
 }))
 
-interface Props {
-  filterPage: "profile" | "collection";
-}
-
-const SaleTypeFilter = (props: Props) => {
-  const { filterPage } = props;
+const SaleTypeFilter = () => {
   const marketPlaceState = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
   const dispatch = useDispatch();
 
-  const [saleType, setSaleType] = useState<SaleType>(marketPlaceState.filter.sale_type)
+  const [saleType, setSaleType] = useState<SaleType>(marketPlaceState.filter.saleType)
 
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -135,27 +130,18 @@ const SaleTypeFilter = (props: Props) => {
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newSaleType = { ...saleType }
     if (event.target.value === "fixed_price") {
-      setSaleType({
-        ...saleType,
-        fixed_price: !saleType.fixed_price
-      })
+      newSaleType.fixed_price = !saleType.fixed_price
     } else {
-      setSaleType({
-        ...saleType,
-        timed_auction: !saleType.timed_auction
-      })
+      newSaleType.timed_auction = !saleType.timed_auction
     }
-  }
-
-  useEffect(() => {
+    setSaleType(newSaleType)
     dispatch(updateFilter({
-      // ...marketPlaceState.filter,
-      filterPage,
-      sale_type: saleType
+      ...marketPlaceState.filter,
+      saleType: newSaleType,
     }))
-    // eslint-disable-next-line
-  }, [saleType])
+  }
 
   return (
     <>

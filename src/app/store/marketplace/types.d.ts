@@ -3,17 +3,12 @@ import { SortBy } from "./actions";
 
 export interface MarketPlaceState {
   collections: SimpleMap<Collection>;
-  tokens: [];
+  tokens: ReadonlyArray<Nft>;
   filter: CollectionFilter;
-  filters: {
-    collectionFilter: CollectionFilter;
-    profileFilter: CollectionFilter;
-  }
   profile?: Profile;
   oAuth?: OAuth;
   receivedBids?: any;
   bidded?: any;
-  profileTokens: Nft[];
 }
 
 export interface SimpleCheque {
@@ -123,13 +118,13 @@ export interface NftAttribute {
 
 export interface Profile {
   id: string;
-  username?: string;
+  username: string | null;
   address: string;
-  bio?: string;
-  twitterHandle?: string;
-  instagramHandle?: string;
-  websiteUrl?: string;
-  email?: string;
+  bio: string | null;
+  twitterHandle: string | null;
+  instagramHandle: string | null;
+  websiteUrl: string | null;
+  email: string | null;
   profileImage?: {
     url: string;
   }
@@ -159,13 +154,14 @@ export interface PaginationInfo {
 }
 
 export interface CollectionFilter {
-  sale_type: SaleType;
-  collectionAddress?: string;
   traits: { [id: string]: TraitType };
-  pagination?: PaginationInfo;
   sortBy: SortBy;
-  filterPage: "collection" | "profile";
-  owner?: string;
+  saleType: SaleType;
+  search: string;
+  collectionAddress: string | null;
+  owner: string | null;
+  likedBy: string | null;
+  pagination?: PaginationInfo;
 }
 
 export interface SaleType {

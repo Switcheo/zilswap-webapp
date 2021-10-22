@@ -12,7 +12,7 @@ import { useAsyncTask } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import { ReactComponent as VerifiedBadge } from "../CollectionView/verified-badge.svg";
-import { BidDialog, BuyDialog, NftImage, SalesDetail, TraitTable } from "./components";
+import { BidDialog, BuyDialog, CancelDialog, NftImage, SalesDetail, TraitTable } from "./components";
 
 const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, match, ...rest } = props;
@@ -140,24 +140,21 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
 
 
         {/*Ark tabs */}
-        <ArkTab setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids", "Price History", "Event History"]} />
+        <ArkTab mt={3} setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids", "Price History", "Event History"]} />
 
         <Box className={classes.bidsBox}>
           {currentTab === "Bids" && (
             <ArkBidsTable bids={bids} />
           )}
-        </Box>
-
-        {/* Other info and price history */}
-        <Box display="flex" mt={3}>
-          {/* Other Info */}
           {/* Price History */}
+          {/* Event History */}
         </Box>
       </Container >
       {token && (
         <Fragment>
           <BuyDialog token={token} collectionAddress={collectionId} />
           <BidDialog token={token} collectionAddress={collectionId} />
+          <CancelDialog token={token} />
         </Fragment>
       )}
     </ArkPage >
@@ -169,7 +166,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     [theme.breakpoints.down("xs")]: {
       padding: 0,
+      paddingBottom: theme.spacing(3),
     },
+    paddingBottom: '30vh',
   },
   breadcrumbs: {
     marginTop: theme.spacing(3),

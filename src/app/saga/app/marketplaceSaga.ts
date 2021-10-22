@@ -60,14 +60,23 @@ function* loadNftList() {
       }
     }
 
+    if (wallet) {
+      query.viewer = wallet.addressInfo.byte20.toLocaleLowerCase()
+    }
+
+    if (filter.saleType.fixed_price) query.type = 'buyNow'
+
+    if (filter.search !== '') query.search = filter.search;
+
     if (filter.pagination?.limit) query.limit = filter.pagination?.limit;
     if (filter.pagination?.offset) query.offset = filter.pagination?.offset;
 
     const arkClient = new ArkClient(network); // TODO: refactor client into redux
 
-    if (filter.filterPage === "profile") {
-      if (!filter.owner) return;
-      const newQuery: ArkClient.ListTokenParams = { ...query, owner: filter.owner };
+    if (filter.owner || filter.likedBy) {
+      const newQuery: ArkClient.ListTokenParams = query
+      if (filter.owner) newQuery.owner = filter.owner;
+      if (filter.likedBy) newQuery.likedBy = filter.likedBy;
 
       const tokenResult = (yield call(arkClient.listTokens, newQuery)) as unknown as any;
 
@@ -80,7 +89,7 @@ function* loadNftList() {
       }
       const tokenResult = (yield call(arkClient.searchCollection, collectionAddress, query)) as unknown as any;
 
-      logger("load nft list", "result", tokenResult);
+      logger("load nft search", "result", tokenResult);
       yield put(actions.MarketPlace.updateTokens(tokenResult.result));
     }
 

@@ -79,6 +79,7 @@ const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         <DevInfoBadge />
         <Suspense fallback={<LinearProgress />}>
           {renderRoutes(route.routes)}
+          <Box marginBottom={30}/>
         </Suspense>
       </main>
       <Hidden smUp>

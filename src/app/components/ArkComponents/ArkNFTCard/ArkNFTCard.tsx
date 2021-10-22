@@ -1,20 +1,18 @@
 import React, { Fragment, useEffect, useMemo, useState } from "react";
-import {
-  Box, Card, CardActionArea, CardContent, CardMedia,
-  CardProps, IconButton, Link, makeStyles, Typography
-} from "@material-ui/core";
+import { Box, Card, CardActionArea, CardContent, CardProps, IconButton, Link, makeStyles, Typography } from "@material-ui/core";
 import LaunchIcon from "@material-ui/icons/Launch";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
+import { Network } from "zilswap-sdk/lib/constants";
 import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { MarketPlaceState, OAuth, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { toHumanNumber, truncate, useAsyncTask, useBlockTime } from "app/utils";
+import { toHumanNumber, truncateAddress, useAsyncTask, useBlockTime, useNetwork } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import { ArkClient } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
@@ -40,7 +38,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const [runLikeToken] = useAsyncTask("likeToken");
   const dispatch = useDispatch();
   const [blockTime, currentBlock, currentTime] = useBlockTime();
-
+  const network = useNetwork();
 
   useEffect(() => {
     if (token) setLiked(!!token.isFavourited);
@@ -77,6 +75,9 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   }, [blockTime, token?.bestBid, tokens])
 
   const likeToken = () => {
+    if (!wallet)
+      return dispatch(actions.Layout.toggleShowWallet("open"));
+
     runLikeToken(async () => {
       if (!wallet || !token) return;
       let newOAuth: OAuth | undefined = oAuth;
@@ -95,6 +96,16 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
       dispatch(actions.MarketPlace.updateFilter({ ...filter }));
     })
   }
+
+  const explorerLink = useMemo(() => {
+    const addr = toBech32Address(collectionAddress);
+
+    if (network === Network.MainNet) {
+      return `https://viewblock.io/zilliqa/address/${addr}`;
+    } else {
+      return `https://viewblock.io/zilliqa/address/${addr}?network=testnet`;
+    }
+  }, [network, collectionAddress]);
 
   return (
     <Card {...rest} className={cls(classes.root, className)}>
@@ -117,7 +128,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
             <Box display="flex" alignItems="center">
               <Typography className={classes.likes}>{toHumanNumber(token.statistics?.favourites)}</Typography>
               <IconButton
-                onClick={() => likeToken()}
+                onClick={likeToken}
                 className={classes.likeIconButton}
                 disableRipple
               >
@@ -126,18 +137,31 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
         )}
-        <CardActionArea
-          component={RouterLink}
-          to={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
-        >
-          <CardMedia
-            className={classes.image}
-            component="img"
-            alt="NFT image"
-            height="308"
-            image={token.asset?.url}
-          />
-        </CardActionArea>
+        {!dialog ? (
+          <CardActionArea
+            className={classes.cardActionArea}
+            component={RouterLink}
+            to={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
+          >
+            <Box className={classes.imageContainer}>
+              <span className={classes.imageHeight} />
+              <img
+                className={classes.image}
+                alt={token?.asset?.filename || "Token Image"}
+                src={token?.asset?.url || undefined}
+              />
+            </Box>
+          </CardActionArea>
+        ) : (
+          <Box className={classes.imageContainer}>
+            <span className={classes.imageHeight} />
+            <img
+              className={classes.image}
+              alt={token?.asset?.filename || "Token Image"}
+              src={token?.asset?.url || undefined}
+            />
+          </Box>
+        )}
       </Box>
       <CardContent className={classes.cardContent}>
         <Box className={classes.bodyBox}>
@@ -172,17 +196,10 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   <Typography className={classes.body}>owned by&nbsp;</Typography>
                   <Link
                     className={classes.link}
-                    underline="hover"
-                    rel="noopener noreferrer"
-                    target="_blank"
                     href={`/ark/profile?address=${token.owner?.address}`}
                   >
                     <Typography className={classes.username}>
-                      {(
-                        (token?.owner && token?.owner?.address?.length > 15)
-                          ? (truncate(token.owner?.username, 10))
-                          : token.owner?.username
-                      ) || "Unnamed"}
+                      {token.owner?.username || truncateAddress(token.owner?.address ?? "")}
                     </Typography>
                   </Link>
                 </Box>
@@ -203,7 +220,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   underline="hover"
                   rel="noopener noreferrer"
                   target="_blank"
-                  href={"/"}
+                  href={explorerLink}
                 >
                   <Typography>
                     View on explorer
@@ -244,6 +261,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     boxShadow: "none",
     backgroundColor: "transparent",
     position: "relative",
+    overflow: "initial",
     "& .MuiCardContent-root:last-child": {
       paddingBottom: theme.spacing(1.5),
     },
@@ -252,19 +270,27 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   borderBox: {
-    border: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "rgba(0, 51, 64, 0.5)"
-      }`,
     borderRadius: 10,
-    // border: "1px solid transparent",
-    // backgroundImage:
-    //   theme.palette.type === "dark"
-    //     ? "linear-gradient(transparent, transparent), linear-gradient(#29475A, #29475A)"
-    //     : "linear-gradient(transparent, transparent), linear-gradient(to right, green, gold)",
-    // backgroundOrigin: "border-box",
-    // backgroundClip: "content-box, border-box",
+  },
+  imageContainer: {
+    borderRadius: theme.spacing(1.5),
+    width: "100%",
+    position: "relative",
+  },
+  imageHeight: {
+    display: "block",
+    position: "relative",
+    paddingTop: "100%",
   },
   image: {
-    borderRadius: "0px 0px 10px 10px!important",
+    position: "absolute",
+    left: 0,
+    top: 0,
+    height: "100%",
+    width: "100%",
+  },
+  dialogImage: {
+    borderRadius: "10px"
   },
   tokenId: {
     color: "#511500",
@@ -326,7 +352,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "14px",
     lineHeight: "16px",
     color: theme.palette.text?.primary,
-    textTransform: "uppercase",
   },
   bodyBox: {
     padding: theme.spacing(0, 1.5),
@@ -387,6 +412,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "12px",
     fontWeight: 700,
     color: "#6BE1FF",
+  },
+  cardActionArea: {
+    borderRadius: 10,
+    border: "none",
   }
 }));
 
