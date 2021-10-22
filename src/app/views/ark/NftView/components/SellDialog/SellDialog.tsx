@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Box, FormHelperText, InputLabel, Typography } from "@material-ui/core";
+import { Box, FormHelperText, InputLabel, Typography, DialogContent } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/zilliqa";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useSelector } from "react-redux";
-import { useRouteMatch } from "react-router";
+import { useHistory, useRouteMatch } from "react-router";
 import { ZIL_HASH } from "zilswap-sdk/lib/constants";
-import { ArkInput, ArkNFTCard, CurrencyInput, FancyButton, Text } from "app/components";
+import { ArkInput, ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
 import { getBlockchain, getWallet, getTokens } from "app/saga/selectors";
 import { Nft, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask } from "app/utils";
+import { hexToRGBA, useAsyncTask } from "app/utils";
 import { ArkClient, logger } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { ZIL_ADDRESS } from "app/utils/constants";
-
+import { ReactComponent as Checkmark } from "./checkmark.svg";
 
 const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { className } = props;
@@ -38,6 +38,10 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     startingPrice: "0",
     reservePrice: "0",
   });
+  const [open, setOpen] = useState(false)
+  const [hasApproved, setHasApproved] = useState(false)
+  const [hasPosted, setHasPosted] = useState(false)
+  const history = useHistory()
 
   const collectionId = match.params.collection;
   const tokenId = match.params.id;
@@ -116,8 +120,14 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       })
   };
 
+  const onCloseDialog = () => {
+    if (loading) return;
+    setOpen(false);
+  };
+
   const onConfirm = () => {
     if (!wallet?.provider || !match.params?.collection || !match.params?.id) return;
+    setOpen(true)
     runConfirmSell(async () => {
       const { collection: address, id } = match.params
 
@@ -130,7 +140,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       const walletAddress = wallet.addressInfo.byte20.toLowerCase();
       const hexTokenAddress = fromBech32Address(address).toLowerCase();
       await arkClient.approveAllowanceIfRequired(hexTokenAddress, walletAddress, ZilswapConnector.getSDK());
-
+      setHasApproved(true)
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 300; // blocks
@@ -159,6 +169,8 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       });
 
       logger("post trade", result);
+      setHasPosted(true)
+      history.push(`/ark/collections/${collectionId}/${tokenId}`)
     });
   };
   
@@ -278,12 +290,14 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               <FormHelperText className={classes.instruction}>The following fees will be deducted once this NFT is sold.</FormHelperText>
               <Box display="flex" marginTop={1}>
                 <Typography className={classes.feeLabel}>Service Fee</Typography>
-                <Typography className={classes.feeValue}>2%</Typography>
+                <Typography className={classes.feeValue}>{ArkClient.FEE_BPS / 100}%</Typography>
               </Box>
-              <Box display="flex" marginTop={1}>
-                <Typography className={classes.feeLabel}>Royalties</Typography>
-                <Typography className={classes.feeValue}>2.5%</Typography>
-              </Box>
+              {token?.collection?.royaltyBps &&
+                <Box display="flex" marginTop={1}>
+                  <Typography className={classes.feeLabel}>Royalties</Typography>
+                  <Typography className={classes.feeValue}>{token.collection.royaltyBps / 100}%</Typography>
+                </Box>
+              }  
             </Box>
 
             {error && (
@@ -312,6 +326,53 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           </Box>
         </Box>
       </Box>
+
+      <DialogModal
+        open={open}
+        onClose={onCloseDialog}
+      >
+        <DialogContent className={classes.dialogContent}>
+          <Typography variant="h1">Complete Listing</Typography>
+          <Box display="flex" flexDirection="column" marginTop={5}>
+            <Box display="flex" alignItems="center" marginBottom={4} position="relative">
+              <Box className={cls(classes.stepBar, {
+                [classes.stepBarFirstStepCompleted]: hasApproved,
+                [classes.stepBarCompleted]: hasApproved && hasPosted
+              })}></Box>
+              <Box className={cls(classes.step, {
+                [classes.stepActive]: !hasApproved,
+                [classes.stepCompleted]: hasApproved
+              })}>
+                {hasApproved ? (
+                  <Checkmark />
+                ) : (
+                  <>1</>
+                )}
+              </Box>
+              <Box display="flex" flexDirection="column" alignItems="stretch">
+                <Text className={classes.stepLabel}>Approve Token</Text>
+                <Text>Approve once, and never again. This step approves the token for trading and involves a one-off gas fee.</Text>
+              </Box>
+            </Box>
+            <Box display="flex" alignItems="center">
+              <Box className={cls(classes.step, {
+                [classes.stepActive]: !hasPosted && hasApproved,
+                [classes.stepCompleted]: hasPosted
+              })}>
+                {hasPosted ? (
+                  <Checkmark />
+                ) : (
+                  <>2</>
+                )}
+              </Box>
+              <Box display="flex" flexDirection="column" alignItems="stretch">
+                <Text className={classes.stepLabel}>Confirm Listing</Text>
+                <Text>Approve once, and never again. This step approves the token for trading and involves a one-off gas fee.</Text>
+              </Box>
+            </Box>
+          </Box>
+        </DialogContent>
+      </DialogModal>
     </Box>
   );
 };
@@ -384,6 +445,75 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   feeValue: {
     fontWeight: "bold",
     fontSize: "14px"
+  },
+  dialogContent: {
+    backgroundColor: theme.palette.background.default,
+    borderLeft:
+      theme.palette.border,
+    borderRight:
+      theme.palette.border,
+    borderBottom:
+      theme.palette.border,
+    borderRadius: "0 0 12px 12px",
+    padding: theme.spacing(0, 4, 4),
+    minWidth: 380,
+    maxWidth: 411,
+    overflowY: "auto",
+    "&::-webkit-scrollbar-track": {
+      marginBottom: theme.spacing(1),
+    },
+    "&::-webkit-scrollbar": {
+      width: "0.5rem"
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
+      borderRight: "3px solid transparent",
+      backgroundClip: "padding-box"
+    },
+  },
+  dialogButton: {
+    height: 42,
+    marginTop: 6
+  },
+  step: {
+    width: 110,
+    height: 52,
+    borderRadius: 26,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#223139",
+    marginRight: 24,
+    position: "relative"
+  },
+  stepLabel: {
+    fontWeight: "bold",
+    fontSize: 14,
+    marginBottom: 2
+  },
+  stepActive: {
+    backgroundColor: "#6BE1FF",
+    color: "#003340"
+  },
+  stepCompleted: {
+    backgroundColor: "#00FFB0",
+    color: "#003340"
+  },
+  stepBar: {
+    position: "absolute",
+    top: 50,
+    left: 23,
+    height: 44,
+    width: 6,
+    backgroundColor: "#223139",
+    backgroundImage: "linear-gradient(#6BE1FF, #223139)",
+    zIndex: 0
+  },
+  stepBarFirstStepCompleted: {
+    backgroundImage: "linear-gradient(#00FFB0, #6BE1FF)",
+  },
+  stepBarCompleted: {
+    backgroundImage: "linear-gradient(#00FFB0, #00FFB0)",
   }
 }));
 
