@@ -126,7 +126,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   };
 
   const onConfirm = () => {
-    if (!wallet?.provider || !match.params?.collection || !match.params?.id || inputValues.buyNowPrice === "0") return;
+    if (!wallet?.provider || !match.params?.collection || !match.params?.id || !inputValues.sellToken ||  inputValues.buyNowPrice === "0") return;
     setOpen(true)
     runConfirmSell(async () => {
       const { collection: address, id } = match.params
