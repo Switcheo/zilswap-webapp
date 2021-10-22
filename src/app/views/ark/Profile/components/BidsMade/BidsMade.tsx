@@ -35,7 +35,7 @@ const BidsReceived: React.FC<Props> = (props: Props) => {
   useEffect(() => {
     runGetBids(async () => {
       const arkClient = new ArkClient(network);
-      const result = await arkClient.listNftCheques({ initiatorAddress: address, isActive: activeOnly ? 'true' : undefined });
+      const result = await arkClient.listNftCheques({ initiatorAddress: address, isActive: activeOnly ? 'true' : undefined, side: 'buy' });
 
       setBids(result.result.entries);
     })
