@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import {
-  Box, Card, CardActionArea, CardContent, CardMedia,
-  CardProps, ClickAwayListener, IconButton, Link, makeStyles, Popper, Typography
+  Box, Card, CardActionArea, CardContent, CardProps, 
+  ClickAwayListener, IconButton, Link, makeStyles, Popper, Typography
 } from "@material-ui/core";
 import LaunchIcon from "@material-ui/icons/Launch";
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
@@ -193,13 +193,14 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
               />
             </Box>
           </CardActionArea>
-        ) : <CardMedia
-          className={classes.dialogImage}
-          component="img"
-          alt="NFT image"
-          height="308"
-          image={token.asset?.url}
-        />}
+        ) : <Box className={classes.imageContainer}>
+            <span className={classes.imageHeight} />
+            <img
+              className={classes.image}
+              alt={token?.asset?.filename || "Token Image"}
+              src={token?.asset?.url || undefined}
+            />
+        </Box>}
         <CardContent className={classes.cardContent}>
           <Box className={classes.bodyBox}>
             {!dialog ? (

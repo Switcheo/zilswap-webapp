@@ -6,7 +6,6 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { useHistory, useRouteMatch } from "react-router";
-import { ZIL_HASH } from "zilswap-sdk/lib/constants";
 import { ArkInput, ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
 import { getBlockchain, getWallet, getTokens } from "app/saga/selectors";
 import { Nft, TokenInfo } from "app/store/types";
@@ -132,7 +131,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       const { collection: address, id } = match.params
 
       const priceAmount = new BigNumber(inputValues.buyNowPrice).shiftedBy(inputValues.sellToken.decimals);
-      const price = { amount: priceAmount, address: ZIL_HASH };
+      const price = { amount: priceAmount, address: fromBech32Address(inputValues.sellToken.address) };
       const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
 
       const arkClient = new ArkClient(network);
