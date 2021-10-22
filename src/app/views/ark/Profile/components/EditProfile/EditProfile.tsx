@@ -10,10 +10,9 @@ import { ArkClient } from "core/utilities";
 import { EMAIL_REGEX, USERNAME_REGEX } from "app/utils/constants";
 import { useAsyncTask, useNetwork, useToaster, useTaskSubscriber } from "app/utils";
 import { MarketPlaceState, OAuth, Profile, RootState } from "app/store/types";
-import { ArkInput, FancyButton, ArkCheckbox } from "app/components";
+import { ArkInput, ArkToggle, FancyButton, ArkCheckbox } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
-import ActiveBidToggle from "../ActiveBidToggle";
 import { ImageDialog } from "./components";
 
 interface Props extends BoxProps {
@@ -188,7 +187,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
             if (goBack) onBack();
           }
         } catch (err) {
-          toaster(err);
+          toaster(err as unknown as string);
         }
       }
     });
@@ -261,8 +260,8 @@ const EditProfile: React.FC<Props> = (props: Props) => {
               <ArkInput
                 placeholder="bearsarecute@example.com" error={errors.email} value={inputValues.email}
                 label={
-                  <ActiveBidToggle className={classes.switch} isChecked={enableEmailNotification}
-                    onChecked={(isChecked) => setEnableEmailNotification(isChecked)} hideCount={true}
+                  <ArkToggle className={classes.switch} initialIsChecked={enableEmailNotification}
+                    onCheck={(isChecked: boolean) => setEnableEmailNotification(isChecked)}
                     overrideSm={true} header="EMAIL NOTIFICATIONS" />
                 }
                 onValueChange={(value) => updateInputs("email")(value)} hideInput={!enableEmailNotification}

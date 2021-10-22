@@ -8,7 +8,7 @@ import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text, ArkNFTListing } from "
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
 import { actions } from "app/store";
-import ARKFilterBar from "app/components/ARKFilterBar";
+import ARKFilterBar from "app/components/ArkComponents/ArkFilterBar";
 import { Collection } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";

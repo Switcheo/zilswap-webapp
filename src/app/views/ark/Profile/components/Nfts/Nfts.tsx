@@ -2,9 +2,8 @@ import React, { useEffect } from "react";
 import { Box, BoxProps } from "@material-ui/core";
 import { useDispatch, useSelector } from "react-redux";
 import { actions } from "app/store";
-import { ArkNFTListing } from "app/components";
+import { ArkNFTListing, ArkSearchFilter } from "app/components";
 import { BlockchainState, RootState } from "app/store/types";
-import SearchFilter from "app/components/ARKFilterBar/components/SearchFilter";
 
 interface Props extends BoxProps {
   address: string,
@@ -35,7 +34,7 @@ const Nfts: React.FC<Props> = (props: Props) => {
     <Box className={className}>
       <ArkNFTListing filterComponent={
         <Box marginTop={2}>
-          <SearchFilter />
+          <ArkSearchFilter />
         </Box>
       } />
     </Box>

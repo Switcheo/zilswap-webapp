@@ -5,48 +5,54 @@ import cls from "classnames";
 import { AppTheme } from "app/theme/types";
 
 interface Props extends BoxProps {
-  totalCount?: number,
-  header: string,
-  switchLabel?: string,
-  hideCount?: boolean,
+  header?: string,
+  label?: string,
   overrideSm?: boolean,
-  isChecked?: boolean,
-  onChecked?: (check: boolean) => void,
+  initialIsChecked?: boolean,
+  onCheck?: (check: boolean) => void,
 }
 
-const ActiveBidToggle: React.FC<Props> = (props: Props) => {
+const ArkToggle: React.FC<Props> = (props: Props) => {
   const {
-    switchLabel, hideCount = false, overrideSm = false,
-    isChecked, onChecked, header, totalCount = 0, children, className, ...rest
+    overrideSm = false,
+    header,
+    label,
+    initialIsChecked,
+    onCheck,
+    children,
+    className,
+    ...rest
   } = props;
   const classes = useStyles();
   const isSm = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("sm"));
-  const [checked, setChecked] = useState(!!isChecked);
+  const [checked, setChecked] = useState(!!initialIsChecked);
 
   const handleChange = () => {
     setChecked(!checked);
-    if (typeof onChecked === "function") {
-      onChecked(!checked)
+    if (typeof onCheck === "function") {
+      onCheck(!checked)
     }
   }
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <Typography className={cls(classes.root, { [classes.smRoot]: isSm && !overrideSm })}>{header}
-        {!hideCount && <Typography className={classes.count} >({totalCount})</Typography>}
-      </Typography>
+      {
+        header && <Typography className={cls(classes.root, { [classes.smRoot]: isSm && !overrideSm })}>
+          {header}
+        </Typography>
+      }
       <Box flexGrow={1} />
       <FormControlLabel
         className={overrideSm ? undefined : classes.formLabel}
-        control={<PurpleSwitch onChange={() => handleChange()} checked={checked} />}
+        control={<GreenSwitch onChange={() => handleChange()} checked={checked} />}
         labelPlacement={(isSm && !overrideSm) ? "end" : "start"}
-        label={<Typography className={classes.switchLabel}>{switchLabel}</Typography>}
+        label={<Typography className={classes.switchLabel}>{label}</Typography>}
       />
     </Box>
   );
 };
 
-const PurpleSwitch = withStyles((theme) => ({
+const GreenSwitch = withStyles((theme) => ({
   root: {
     width: 36,
     height: 20,
@@ -58,10 +64,10 @@ const PurpleSwitch = withStyles((theme) => ({
   },
   switchBase: {
     padding: 2,
-    color: "#0D1B24",
+    color: "#DEFFFF",
     '&$checked': {
       transform: 'translateX(16px)',
-      color: "#DEFFFF",
+      color: "#0D1B24",
     },
   },
   thumb: {
@@ -71,9 +77,10 @@ const PurpleSwitch = withStyles((theme) => ({
   },
   track: {
     borderRadius: 10,
-    opacity: 1,
+    opacity: 0.5,
     backgroundColor: "#00FFB0",
     '$checked$checked + &': {
+      opacity: 1,
       backgroundColor: "#00FFB0",
     },
   },
@@ -116,4 +123,4 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   }
 }));
 
-export default ActiveBidToggle;
+export default ArkToggle;

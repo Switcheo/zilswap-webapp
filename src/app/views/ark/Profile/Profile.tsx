@@ -182,7 +182,7 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       case 'For Sale': return <Nfts address={hexAddress} filter='onSale' />
       case 'Liked': return <Nfts address={hexAddress} filter='liked' />
       case 'Bids Made': return <BidsMade address={hexAddress} />
-      case 'Bids Received': return isConnectedUser && <BidsReceived />
+      case 'Bids Received': return isConnectedUser && <BidsReceived address={hexAddress} />
       default: return null
     }
   }
