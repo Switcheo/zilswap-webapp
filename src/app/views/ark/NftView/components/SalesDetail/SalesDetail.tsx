@@ -155,9 +155,11 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
             )}
           </Box>
           <Box display="flex" className={classes.buttonBox}>
-            <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onBid}>
-              Place Bid
-            </FancyButton>
+            {!isOwnToken && (
+              <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onBid}>
+                Place Bid
+              </FancyButton>
+            )}
             {isOwnToken && (
               <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onSell}>
                 Sell

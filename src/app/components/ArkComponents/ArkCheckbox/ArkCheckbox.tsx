@@ -8,6 +8,8 @@ import cls from "classnames";
 import { AppTheme } from "app/theme/types";
 import { ReactComponent as Checked } from "./checked.svg";
 import { ReactComponent as UnChecked } from "./uncheck.svg";
+import { ReactComponent as CheckedLight } from "./checked-light.svg";
+import { ReactComponent as UnCheckedLight } from "./uncheck-light.svg";
 
 interface Props extends FormControlProps {
   lineHeader: string;
@@ -40,10 +42,11 @@ const ArkCheckbox: React.FC<Props> = (props: Props) => {
         control={<Checkbox
           onChange={() => handleCheck()} checked={checked}
           icon={
-            <UnChecked fill={theme.palette.type === "dark" ? undefined : "black"} className={classes.checkbox} />
+            theme.palette.type === "dark" ? <UnChecked className={classes.checkbox} /> : <UnCheckedLight className={classes.checkbox} />
+
           }
           checkedIcon={
-            <Checked fill={theme.palette.type === "dark" ? undefined : "black"} className={classes.checkbox} />
+            theme.palette.type === "dark" ? <Checked className={classes.checkbox} /> : <CheckedLight className={classes.checkbox} />
           }
         />}
       />
@@ -61,13 +64,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   header: {
     fontSize: 16,
+    fontWeight: 900,
+    fontFamily: "'Raleway', sans-serif",
   },
   footer: {
     fontSize: 12,
     opacity: 0.5,
+    fontFamily: "'Raleway', sans-serif",
   },
   checkbox: {
-    backgroundColor: theme.palette.type === "dark" ? undefined : "rgba(0, 51, 64, 0.7)",
     borderRadius: 3
   }
 }));
