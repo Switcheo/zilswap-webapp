@@ -349,7 +349,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "14px",
     lineHeight: "16px",
     color: theme.palette.text?.primary,
-    textTransform: "uppercase",
   },
   bodyBox: {
     padding: theme.spacing(0, 1.5),
