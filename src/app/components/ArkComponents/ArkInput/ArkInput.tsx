@@ -46,9 +46,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   label: {
     fontSize: "16px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
-    fontFamily: "Avenir Next LT Pro",
     fontWeight: "bold",
-    width: 150,
     overflowX: "visible",
   },
   error: {
