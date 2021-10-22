@@ -161,7 +161,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
   const bestBid = token.bestBid;
 
-  const { expiry, expiryTime } = useMemo(() => {
+  const { blockExpiry, expiryTime } = useMemo(() => {
     const currentTime = dayjs();
     let expiryTime;
 
@@ -172,11 +172,11 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     }
 
     const minutes = expiryTime.diff(currentTime, "minutes");
-    const blocks = minutes / BLOCKS_PER_MINUTE;
+    const blocks = minutes * BLOCKS_PER_MINUTE;
 
-    const expiry = currentBlock + blocks;
+    const blockExpiry = currentBlock + ~~blocks;
 
-    return { expiry, expiryTime };
+    return { blockExpiry, expiryTime };
   }, [currentBlock, expiryOption, expiryDate]);
 
   const { priceToken, priceHuman } = useMemo(() => {
@@ -220,7 +220,6 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         .times(2147483647)
         .decimalPlaces(0)
         .toString(10); // int32 max 2147483647
-      const blockExpiry = Math.trunc(expiry);
       const message = arkClient.arkMessage(
         "Execute",
         arkClient.arkChequeHash({
@@ -340,7 +339,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
             expiryOptions={EXPIRY_OPTIONS}
             expiryOption={expiryOption}
             expiryTime={expiryTime}
-            expiry={expiry}
+            expiry={blockExpiry}
             setExpiryDate={setExpiryDate}
             setExpiryOption={setExpiryOption}
           />

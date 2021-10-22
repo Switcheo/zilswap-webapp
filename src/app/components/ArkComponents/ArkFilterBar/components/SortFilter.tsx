@@ -11,10 +11,8 @@ import { ReactComponent as Checkmark } from "./checkmark.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   button: {
-    borderStyle: 'solid',
-    borderWidth: 1,
-    borderColor: "#29475A",
-    color: theme.palette.type === "dark" ? "white" : "",
+    border: theme.palette.border,
+    color: theme.palette.text?.primary,
     fontSize: 14,
     justifyContent: "flex-start",
     padding: "12px",
@@ -29,9 +27,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px"
   },
   active: {
-    borderColor: theme.palette.primary.dark,
-    borderStyle: "solid",
-    borderWidth: 1,
+    border: theme.palette.border,
   },
   popover: {
     "& .MuiPaper-root": {
@@ -39,9 +35,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       width: '100%',
       maxWidth: 260,
       borderRadius: "12px",
-      borderWidth: "1px",
-      borderStyle: "solid",
-      borderColor: theme.palette.type === "dark" ? "#29475A" : "#D4FFF2",
+      border: theme.palette.border,
       overflow: "hidden",
       marginTop: 8
     },
@@ -75,7 +69,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: 16,
     fontWeight: 'bolder',
     fontFamily: 'Avenir Next',
-    color: theme.palette.type === "dark" ? "white" : "black",
+    color: theme.palette.text!.primary,
     textTransform: "uppercase",
     flexGrow: 1
   },
@@ -87,7 +81,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 'bolder',
     fontFamily: 'Avenir Next',
     padding: "5px 14px",
-    color: theme.palette.type === "dark" ? "white" : "",
+    color: theme.palette.text!.primary,
     display: "flex",
     alignItems: "center",
     cursor: "pointer",
@@ -99,11 +93,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 'normal'
   },
   sortIcon: {
-    fill: "#DEFFFF",
+    fill: theme.palette.text!.primary!,
     fillOpacity: 0.5
   },
   sortIconMenu: {
-    fill: "#DEFFFF",
+    fill: theme.palette.text!.primary!,
     fillOpacity: 1
   },
   sortIconSelected: {
@@ -191,7 +185,7 @@ const SortFilter = () => {
 
   return (
     <>
-      <Button onClick={handleClick} className={anchorEl === null ? cls(classes.button, classes.inactive) : cls(classes.button, classes.active)}>
+      <Button onClick={handleClick} className={cls(classes.button, anchorEl == null ? classes.inactive : classes.active)}>
         <Box display="flex" alignItems="center" justifyContent="center" width="100%" height="100%" className={cls(classes.sortIconMenu, {
           [classes.sortIconSelected]: anchorEl !== null
         })}>

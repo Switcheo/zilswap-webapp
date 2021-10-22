@@ -3,16 +3,16 @@ import { Avatar, Badge, Box, Container, ListItemIcon, MenuItem, Typography } fro
 import { makeStyles } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ArkBidsTable, ArkBreadcrumb, ArkTab } from "app/components";
+import { ArkBidsTable, ArkBreadcrumb, ArkTab, ArkOwnerLabel } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet } from "app/saga/selectors";
-import { Cheque, Nft, Profile, TraitValue } from "app/store/types";
+import { Cheque, Nft, Profile } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import { ReactComponent as VerifiedBadge } from "../CollectionView/verified-badge.svg";
-import { BidDialog, BuyDialog, CancelDialog, NftImage, SalesDetail, SellDialog, TraitTable } from "./components";
+import { BidDialog, BuyDialog, CancelDialog, NftImage, SalesDetail, TraitTable } from "./components";
 
 const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, match, ...rest } = props;
@@ -26,7 +26,6 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
   const [owner, setOwner] = useState<Profile>();
   const [runGetOwner] = useAsyncTask("getOwner");
   const [currentTab, setCurrentTab] = useState("Bids");
-  const [traits, setTraits] = useState<TraitValue[]>([])
 
   const collectionId = match.params.collection;
   const tokenId = match.params.id;
@@ -55,10 +54,9 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     runGetNFTDetails(async () => {
       const arkClient = new ArkClient(network);
       const address = fromBech32Address(collectionId).toLowerCase()
-      const viewerAddress = wallet?.addressInfo.byte20.toLocaleLowerCase()
+      const viewerAddress = wallet?.addressInfo.byte20.toLowerCase()
       const { result } = await arkClient.getNftToken(address, tokenId, viewerAddress);
       setToken(result.model);
-      setTraits(result.model.traitValues);
 
       const { model: { owner } } = result
       if (owner && !bypass) {
@@ -101,12 +99,12 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
               {token?.collection?.description}
             </Typography>
             <Box className={classes.xsColumn} mt={4} display="flex" justifyContent="center">
-              <Box flexGrow={1}>
+              <Box flexGrow={1} marginRight={1}>
                 <MenuItem component={Link} to={`/ark/profile?address=${owner?.address}`} className={classes.aboutMenuItem} button={false}>
                   <ListItemIcon><Avatar className={classes.avatar} alt="owner" src={owner?.profileImage?.url || ""} /></ListItemIcon>
                   <Box marginLeft={1}>
                     <Typography>Owner</Typography>
-                    <Typography variant="h3" className={classes.aboutNameText}>{owner?.username || "Unnamed"}</Typography>
+                    <ArkOwnerLabel user={owner} />
                     <Typography>{""}</Typography>
                   </Box>
                 </MenuItem>
@@ -134,28 +132,25 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
             </Box>
           </Box>
           <Box flexGrow={1} flexDirection="column" className={classes.traitContainer}>
-            <TraitTable traits={traits} />
+            <TraitTable token={token} />
           </Box>
         </Box>
 
 
         {/*Ark tabs */}
-        <ArkTab mt={3} setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids", "Price History", "Event History"]} />
+        <ArkTab mt={3} setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids",/* "Price History", "Event History" */]} />
 
-        <Box className={classes.bidsBox}>
-          {currentTab === "Bids" && (
-            <ArkBidsTable bids={bids} />
-          )}
-          {/* Price History */}
-          {/* Event History */}
-        </Box>
+        {currentTab === "Bids" && (
+          <ArkBidsTable bids={bids} />
+        )}
+        {/* Price History */}
+        {/* Event History */}
       </Container >
       {token && (
         <Fragment>
           <BuyDialog token={token} collectionAddress={collectionId} />
           <BidDialog token={token} collectionAddress={collectionId} />
           <CancelDialog token={token} />
-          <SellDialog />
         </Fragment>
       )}
     </ArkPage >
@@ -214,18 +209,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: "22px",
     height: "22px",
     verticalAlign: "text-bottom",
-  },
-  bidsBox: {
-    display: "flex",
-    flexDirection: "column",
-    marginTop: theme.spacing(3),
-    borderRadius: 12,
-    border: theme.palette.border,
-    background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
-    padding: theme.spacing(3, 5),
-    [theme.breakpoints.down("sm")]: {
-      padding: theme.spacing(1, 2),
-    },
   },
   bidsHeader: {
     fontSize: "26px",

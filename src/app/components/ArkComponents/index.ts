@@ -11,6 +11,7 @@ export { default as ArkFilterBar } from "./ArkFilterBar";
 export { default as ArkPaginator } from "./ArkPaginator";
 export { default as ArkTab } from "./ArkTab";
 export { default as ArkToggle } from "./ArkToggle"
+export { default as ArkOwnerLabel } from "./ArkOwnerLabel";
 export { default as ArkSearchFilter } from "./ArkSearchFilter"
 export { default as ArkTopBar } from "./ArkTopBar";
 export { default as SocialLinkGroup } from "./SocialLinkGroup";

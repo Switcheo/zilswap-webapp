@@ -4,11 +4,12 @@ import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { Zilswap } from "zilswap-sdk";
 import { Network, ZIL_HASH } from "zilswap-sdk/lib/constants";
-import { Cheque, OAuth, Profile, SimpleCheque } from "app/store/types";
-import { SimpleMap } from "app/utils";
+import { Cheque, Collection, OAuth, Profile, SimpleCheque } from "app/store/types";
+import { bnOrZero, SimpleMap, toHumanNumber } from "app/utils";
 import { HTTP, logger } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
 import { fromBech32Address } from "core/zilswap";
+import { ZIL_DECIMALS } from "app/utils/constants";
 import { CHAIN_IDS, MSG_VERSION } from "../zilswap/constants";
 
 const ARK_ENDPOINTS: SimpleMap<string> = {
@@ -20,8 +21,8 @@ const LOCALHOST_ENDPOINT = "http://localhost:8181";
 
 
 export const ARK_CONTRACTS: { [key in Network]: { broker: string, tokenProxy: string } } = {
-  [Network.MainNet]: { broker: 'zil1sgf3zpgt6qeflg053pxjwx9s9pxclx3p7s06gp', tokenProxy: 'zil1zmult8jp8q7wjpvjfalnaaue8v72nlcau53qcu' },
-  [Network.TestNet]: { broker: 'zil1sgf3zpgt6qeflg053pxjwx9s9pxclx3p7s06gp', tokenProxy: 'zil1zmult8jp8q7wjpvjfalnaaue8v72nlcau53qcu' },
+  [Network.MainNet]: { broker: 'zil1d37dep5u0usu259kfuk403gph2r46wna8v9gst', tokenProxy: 'zil1sn7jq59z9emcn25dn0zlfs5x6zmhqfj2n2zzaf' },
+  [Network.TestNet]: { broker: 'zil1d37dep5u0usu259kfuk403gph2r46wna8v9gst', tokenProxy: 'zil1sn7jq59z9emcn25dn0zlfs5x6zmhqfj2n2zzaf' },
 }
 
 const apiPaths = {
@@ -217,8 +218,7 @@ export class ArkClient {
     return output;
   }
 
-  putImageUpload = async (url: string, data: Blob, file: File) => {
-    // const headers = { "Content-Length": file.size, "Content-Type": file.type, 'Access-Control-Allow-Origin': '*' }
+  putImageUpload = async (url: string, data: Blob) => {
     await this.http.put({ url, data });
     return
   }
@@ -294,7 +294,7 @@ export class ArkClient {
 
     const userApprovals = approvalState?.[ownerAddress.toLowerCase()];
     logger("ark contract approvals", ownerAddress, this.brokerAddress, userApprovals);
-    if (userApprovals[this.brokerAddress]) return null;
+    if (userApprovals?.[this.brokerAddress]) return null;
 
     return await this.approveAllowance(tokenAddress, zilswap);
   }
@@ -485,6 +485,21 @@ export class ArkClient {
       constructor: `${this.brokerAddress}.Cheque`,
     }
   }
+
+
+  static parseCollectionStats(collection: Collection) {
+    const floorPrice = bnOrZero(collection.priceStat?.floorPrice).shiftedBy(-ZIL_DECIMALS)
+    const volume = bnOrZero(collection.priceStat?.volume).shiftedBy(-ZIL_DECIMALS);
+    const holderCount = bnOrZero(collection.tokenStat?.holderCount);
+    const tokenCount = bnOrZero(collection.tokenStat?.tokenCount);
+
+    return {
+      floorPrice: floorPrice.gt(0) ? toHumanNumber(floorPrice) : undefined,
+      volume: volume.gt(0) ? toHumanNumber(volume) : undefined,
+      holderCount: holderCount.gt(0) ? holderCount.toString(10) : undefined,
+      tokenCount: tokenCount.gt(0) ? tokenCount.toString(10) : undefined,
+    }
+  }
 }
 
 const parseChequeSide = (side: string): "Sell" | "Buy" => {
@@ -552,6 +567,7 @@ export namespace ArkClient {
   }
 
   export type ExecuteBuyCheque = Pick<SimpleCheque, "side" | "expiry" | "publicKey" | "signature" | "nonce">;
+  export type ExecuteSellCheque = Pick<SimpleCheque, "side" | "expiry" | "publicKey" | "signature" | "nonce" | "price" | "feeAmount">;
   export interface ArkChequeParams {
     side: 'Buy' | 'Sell';
     token: { id: string, address: string };
@@ -561,12 +577,16 @@ export namespace ArkClient {
     nonce: string;
   }
 
-  export interface ExecuteTradeParams {
+  export type ExecuteTradeParams = {
     nftAddress: string;
     tokenId: string;
+  } & ({
     sellCheque: SimpleCheque;
     buyCheque: ExecuteBuyCheque;
-  }
+  } | {
+    sellCheque: ExecuteSellCheque;
+    buyCheque: SimpleCheque;
+  })
 
   export interface VoidChequeParams {
     chequeHash: String;

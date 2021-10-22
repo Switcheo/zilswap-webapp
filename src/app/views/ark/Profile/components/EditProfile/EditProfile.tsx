@@ -154,7 +154,6 @@ const EditProfile: React.FC<Props> = (props: Props) => {
           filteredData[key] = value;
           const errorText = validateInput(key, value)
           if (errorText !== "") {
-            console.log(key, value)
             ok = false
             setErrors({ ...errors, [key]: errorText })
           }
@@ -219,7 +218,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
 
       const blobData = new Blob([uploadFile], { type: uploadFile.type });
 
-      await arkClient.putImageUpload(requestResult.result.uploadUrl, blobData, uploadFile);
+      await arkClient.putImageUpload(requestResult.result.uploadUrl, blobData);
       await arkClient.notifyUpload(address!, oAuth!.access_token);
       toaster("Image updated");
     })

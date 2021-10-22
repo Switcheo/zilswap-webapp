@@ -5,6 +5,8 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router";
+import { toBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyLogo, FancyButton, Text, ZapIconButton } from "app/components";
 import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
@@ -23,6 +25,7 @@ interface Props extends BoxProps {
 const SalesDetail: React.FC<Props> = (props: Props) => {
   const { token, tokenId, children, className, ...rest } = props;
   const classes = useStyles();
+  const history = useHistory();
   const dispatch = useDispatch();
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down("xs"));
@@ -65,12 +68,12 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
       setTokenAmount(askPrice.shiftedBy(-priceToken.decimals));
       setPurchaseCurrency(priceToken)
     }
-  }, [tokens, token, valueCalculator, prices])
-
+  }, [tokens, token, valueCalculator, prices]);
 
   const onSell = () => {
-    dispatch(actions.Layout.toggleShowSellNftDialog("open"));
-  };
+    if (!token?.collection?.address) return;
+    history.push(`/ark/collections/${toBech32Address(token.collection.address)}/${token.tokenId}/sell`);
+  }
 
   const onBuy = () => {
     dispatch(actions.Layout.toggleShowBuyNftDialog("open"));
@@ -169,7 +172,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
                 Cancel Listing
               </FancyButton>
             )}
-            {isOwnToken && (
+            {isOwnToken && token?.collection && (
               <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onSell}>
                 Sell
               </FancyButton>

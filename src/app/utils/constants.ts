@@ -111,7 +111,7 @@ export class PollIntervals {
   public static BridgeTokenFee = 60000;
 }
 
-export const COLLECTION_NFT_PER_PAGE = 30;
+export const COLLECTION_NFT_PER_PAGE = 36;
 
 export const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 export const USERNAME_REGEX = /^[A-Za-z][A-Za-z0-9_]{1,19}$/

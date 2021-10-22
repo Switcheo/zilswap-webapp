@@ -9,6 +9,7 @@ export interface MarketPlaceState {
   oAuth?: OAuth;
   receivedBids?: any;
   bidded?: any;
+  collectionTraits: SimpleMap<CollectionTrait[]>;
 }
 
 export interface SimpleCheque {
@@ -90,6 +91,13 @@ export interface Collection {
   telegramUrl: string | null;
   twitterUrl: string | null;
   instagramUrl: string | null;
+  royaltyBps: string | null;
+  royaltyType: string | null;
+
+  ownerName: string | null;
+  royaltyBps: number | null;
+  royaltyType: string | null;
+
 
   priceStat?: CollectionPriceStat;
   tokenStat?: CollectionTokenStat;
@@ -106,7 +114,7 @@ export interface Asset {
 }
 
 export type MarketplaceUser = {
-  username?: string;
+  username: string | null;
   address: string;
 }
 
@@ -116,10 +124,8 @@ export interface NftAttribute {
   rarity: number;
 }
 
-export interface Profile {
+export interface Profile extends MarketplaceUser {
   id: string;
-  username: string | null;
-  address: string;
   bio: string | null;
   twitterHandle: string | null;
   instagramHandle: string | null;
@@ -167,4 +173,9 @@ export interface CollectionFilter {
 export interface SaleType {
   fixed_price: boolean;
   timed_auction: boolean;
+}
+
+export interface CollectionTrait {
+  trait: string;
+  values: SimpleMap<number>;
 }

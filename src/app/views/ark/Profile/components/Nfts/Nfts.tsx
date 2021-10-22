@@ -14,7 +14,7 @@ const Nfts: React.FC<Props> = (props: Props) => {
   const { address, filter, className } = props;
   const blockchainState = useSelector<RootState, BlockchainState>((state) => state.blockchain);
   const dispatch = useDispatch();
-  const addressFilter = address.toLocaleLowerCase();
+  const addressFilter = address.toLowerCase();
 
   useEffect(() => {
     dispatch(actions.MarketPlace.updateFilter({

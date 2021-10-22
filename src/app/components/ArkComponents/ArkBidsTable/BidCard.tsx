@@ -9,9 +9,10 @@ import { useSelector } from "react-redux";
 import { FancyButton } from "app/components";
 import { Cheque, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { getChequeStatus } from "core/utilities/ark"
+import { ArkClient, getChequeStatus, logger } from "core/utilities"
 import { RootState, TokenState } from "app/store/types";
-import { truncateAddress, useValueCalculators } from "app/utils";
+import { bnOrZero, truncateAddress, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
+import { ZilswapConnector } from "core/zilswap";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
 import { ReactComponent as UpArrow } from "./assets/up-arrow.svg";
 
@@ -84,18 +85,100 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const BidCard: React.FC<Props> = (props: Props) => {
   const { bid, relatedBids, currentBlock, blockTime, showItem } = props;
   const classes = useStyles();
+  const toaster = useToaster();
   const [expand, setExpand] = useState(false);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const valueCalculators = useValueCalculators();
+  const [runCancelBid, cancelLoading] = useAsyncTask(`cancelBid-${bid.id}`, e => toaster(e?.message));
+  const [runAcceptBid, acceptLoading] = useAsyncTask(`acceptBid-${bid.id}`, e => toaster(e?.message));
   const userAddress = walletState.wallet?.addressInfo.byte20.toLowerCase();
 
   const cancelBid = (bid: Cheque) => {
+    // TODO: refactor
+    runCancelBid(async () => {
+      if (!walletState.wallet) return;
+      const wallet = walletState.wallet;
 
+      const arkClient = new ArkClient(wallet.network);
+      const chequeHash = arkClient.arkChequeHash({
+        expiry: bid.expiry,
+        feeAmount: bnOrZero(bid.feeAmount),
+        nonce: bid.nonce,
+        price: {
+          address: bid.price.address,
+          amount: bnOrZero(bid.price.amount),
+        },
+        side: bid.side === "buy" ? "Buy" : "Sell",
+        token: {
+          address: bid.token?.collection?.address,
+          id: bid.token?.tokenId,
+        },
+      });
+
+      const message = await arkClient.arkMessage("Void", chequeHash);
+
+      const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
+
+      const voidChequeResult = await arkClient.voidCheque({
+        publicKey,
+        signature,
+        chequeHash,
+      }, ZilswapConnector.getSDK());
+
+      logger("void cheque result", voidChequeResult);
+    });
   }
 
   const acceptBid = (bid: Cheque) => {
+    // TODO: refactor
+    runAcceptBid(async () => {
+      if (!walletState.wallet) return;
+      const wallet = walletState.wallet;
+      const priceAmount = new BigNumber(bid.price.amount);
+      const price = { amount: priceAmount, address: bid.price.address };
+      const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
 
+      const arkClient = new ArkClient(wallet.network);
+      const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
+      const currentBlock = ZilswapConnector.getCurrentBlock();
+      const expiry = currentBlock + 300; // blocks
+      const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
+        side: "Buy",
+        token: {
+          address: bid.token?.collection?.address,
+          id: bid.token?.tokenId,
+        },
+        price,
+        feeAmount,
+        expiry,
+        nonce,
+      }))
+
+      const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
+
+      const sellCheque: ArkClient.ExecuteSellCheque = {
+        side: "sell",
+        expiry,
+        price: {
+          address: price.address,
+          amount: price.amount.toString(10),
+        },
+        feeAmount: feeAmount.toString(10),
+        nonce,
+        publicKey: `0x${publicKey}`,
+        signature: `0x${signature}`,
+      }
+
+      const execTradeResult = await arkClient.executeTrade({
+        buyCheque: bid,
+        sellCheque,
+        nftAddress: bid.token.collectionAddress,
+        tokenId: bid.token.tokenId,
+      }, ZilswapConnector.getSDK());
+
+      logger("exec trade result", execTradeResult)
+    });
   }
 
   const getCardContent = (bid: Cheque, isInitial: boolean) => {
@@ -157,7 +240,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
         {status === 'Active' && bid.initiatorAddress === userAddress &&
           <Box mt={2} display="flex" justifyContent="center">
             <Box flexGrow={1}>
-              <FancyButton variant="contained" fullWidth onClick={() => cancelBid(bid)} className={classes.actionButton}>
+              <FancyButton variant="contained" fullWidth loading={cancelLoading} onClick={() => cancelBid(bid)} className={classes.actionButton}>
                 <Typography className={classes.buttonText}>Cancel</Typography>
               </FancyButton>
             </Box>
@@ -166,7 +249,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
         {status === 'Active' && bid.token.owner === userAddress &&
           <Box mt={2} display="flex" justifyContent="center">
             <Box flexGrow={1}>
-              <FancyButton variant="contained" fullWidth onClick={() => acceptBid(bid)} className={classes.actionButton}>
+              <FancyButton variant="contained" fullWidth loading={acceptLoading} onClick={() => acceptBid(bid)} className={classes.actionButton}>
                 <Typography className={classes.buttonText}>Accept</Typography>
               </FancyButton>
             </Box>

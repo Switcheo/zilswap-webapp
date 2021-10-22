@@ -1,16 +1,21 @@
 import React, { Fragment, useState } from "react";
-import { Avatar, Box, BoxProps, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
+import { Avatar, Box, BoxProps, CircularProgress, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { Link } from "react-router-dom";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
 import cls from "classnames";
 import BigNumber from "bignumber.js"
 import dayjs, { Dayjs } from "dayjs";
 import { useSelector } from "react-redux";
+import { darken } from '@material-ui/core/styles';
 import { AppTheme } from "app/theme/types";
 import { Cheque, WalletState } from "app/store/types";
-import { truncateAddress, useValueCalculators } from "app/utils";
+import { bnOrZero, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
 import { RootState, TokenState } from "app/store/types";
 import { getChequeStatus } from "core/utilities/ark"
+import { ArkOwnerLabel } from "app/components";
+import { ZilswapConnector } from "core/zilswap";
+import { logger, ArkClient } from "core/utilities";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
 import { ReactComponent as UpArrow } from "./assets/up-arrow.svg";
 
@@ -25,6 +30,12 @@ interface Props extends BoxProps {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
+  link: {
+    color: '#6BE1FF',
+    '&:hover': {
+      color: darken('#6BE1FF', 0.1),
+    }
+  },
   text: {
     fontFamily: 'Avenir Next',
     fontWeight: 600,
@@ -34,30 +45,28 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   amount: {
     fontWeight: 800,
   },
-  bodyCell: {
-    extend: 'text',
-    padding: "8px 16px",
-    maxWidth: 200,
+  cell: {
+    background: theme.palette.type === "dark" ? "transparent" : "rgba(222, 255, 255, 0.5)",
+    color: theme.palette.text?.primary,
     margin: 0,
     border: "none",
-    backgroundColor: "#0A2530",
-    color: theme.palette.primary.contrastText
+    maxWidth: 200,
+  },
+  bodyCell: {
+    extend: ['text', 'cell'],
+    padding: "8px 16px",
   },
   actionCell: {
+    extend: 'cell',
     padding: "8px 0px",
-    maxWidth: 200,
-    margin: 0,
-    border: "none",
-    backgroundColor: "#0A2530",
   },
   buttonText: {
-    color: "#DEFFFF",
+    color: theme.palette.text?.primary,
     opacity: "100%",
   },
   iconButton: {
-    color: "#DEFFFF",
+    background: theme.palette.type === "dark" ? 'rgba(222, 255, 255, 0.1)' : 'rgba(107, 225, 255, 0.2)',
     borderRadius: "12px",
-    background: "rgba(222, 255, 255, 0.1)",
     marginRight: 8,
   },
   item: {
@@ -79,12 +88,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "100%": { transform: " translateY(0%)" }
   },
   expandCell: {
+    extend: 'cell',
     height: 10,
     padding: 0,
     textAlign: "center",
     color: "#FFFFFF",
     border: "none",
-    backgroundColor: "#0A2530",
     borderBottomLeftRadius: "12px",
     borderBottomRightRadius: "12px",
   },
@@ -94,14 +103,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   lastCell: {
     borderTopRightRadius: "12px",
   },
+  row: {
+    padding: 12,
+    background: theme.palette.type === "dark" ? "transparent" : "rgba(222, 255, 255, 0.5)",
+  },
   firstRow: {
     marginTop: theme.spacing(1),
-    padding: 12,
-
   },
   lastRow: {
     marginBottom: theme.spacing(1),
-    padding: 12,
   },
   arrowIcon: {
     padding: "4px 24px",
@@ -123,17 +133,99 @@ const Row: React.FC<Props> = (props: Props) => {
   const { bid: baseBid, relatedBids = [], currentBlock, blockTime, showItem } = props;
   const [expand, setExpand] = useState(false);
   const classes = useStyles();
+  const toaster = useToaster();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const valueCalculators = useValueCalculators();
+  const [runCancelBid, cancelLoading] = useAsyncTask(`cancelBid-${baseBid.id}`, e => toaster(e?.message));
+  const [runAcceptBid, acceptLoading] = useAsyncTask(`acceptBid-${baseBid.id}`, e => toaster(e?.message));
   const userAddress = walletState.wallet?.addressInfo.byte20.toLowerCase()
 
-  const cancelBid = () => {
+  const cancelBid = (bid: Cheque) => {
+    // TODO: refactor
+    runCancelBid(async () => {
+      if (!walletState.wallet) return;
+      const wallet = walletState.wallet;
 
+      const arkClient = new ArkClient(wallet.network);
+      const chequeHash = arkClient.arkChequeHash({
+        expiry: bid.expiry,
+        feeAmount: bnOrZero(bid.feeAmount),
+        nonce: bid.nonce,
+        price: {
+          address: bid.price.address,
+          amount: bnOrZero(bid.price.amount),
+        },
+        side: bid.side === "buy" ? "Buy" : "Sell",
+        token: {
+          address: bid.token?.collection?.address,
+          id: bid.token?.tokenId,
+        },
+      });
+
+      const message = await arkClient.arkMessage("Void", chequeHash);
+
+      const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
+
+      const voidChequeResult = await arkClient.voidCheque({
+        publicKey,
+        signature,
+        chequeHash,
+      }, ZilswapConnector.getSDK());
+
+      logger("void cheque result", voidChequeResult);
+    });
   }
 
-  const acceptBid = () => {
+  const acceptBid = (bid: Cheque) => {
+    // TODO: refactor
+    runAcceptBid(async () => {
+      if (!walletState.wallet) return;
+      const wallet = walletState.wallet;
+      const priceAmount = new BigNumber(bid.price.amount);
+      const price = { amount: priceAmount, address: bid.price.address };
+      const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
 
+      const arkClient = new ArkClient(wallet.network);
+      const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
+      const currentBlock = ZilswapConnector.getCurrentBlock();
+      const expiry = currentBlock + 300; // blocks
+      const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
+        side: "Buy",
+        token: {
+          address: bid.token?.collection?.address,
+          id: bid.token?.tokenId,
+        },
+        price,
+        feeAmount,
+        expiry,
+        nonce,
+      }))
+
+      const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
+
+      const sellCheque: ArkClient.ExecuteSellCheque = {
+        side: "sell",
+        expiry,
+        price: {
+          address: price.address,
+          amount: price.amount.toString(10),
+        },
+        feeAmount: feeAmount.toString(10),
+        nonce,
+        publicKey: `0x${publicKey}`,
+        signature: `0x${signature}`,
+      }
+
+      const execTradeResult = await arkClient.executeTrade({
+        buyCheque: bid,
+        sellCheque,
+        nftAddress: bid.token.collection.address,
+        tokenId: bid.token.tokenId,
+      }, ZilswapConnector.getSDK());
+
+      logger("exec trade result", execTradeResult)
+    });
   }
 
   return (
@@ -148,16 +240,18 @@ const Row: React.FC<Props> = (props: Props) => {
           const priceAmount = new BigNumber(bid.price.amount).shiftedBy(-priceToken.decimals)
           const usdValue = valueCalculators.amount(tokenState.prices, priceToken, new BigNumber(bid.price.amount));
 
-          return <TableRow className={cls({ [classes.firstRow]: index === 0, [classes.slideAnimation]: index > 0 })}>
+          return <TableRow className={cls(classes.row, { [classes.firstRow]: index === 0, [classes.slideAnimation]: index > 0 })}>
             {
               showItem &&
               <TableCell align="left" className={cls(classes.bodyCell, classes.firstCell)}>
                 {
                   index === 0 &&
-                  <MenuItem className={classes.item} button={false}>
-                    <ListItemIcon><Avatar alt="Remy Sharp" src={bid.token.asset.url} /></ListItemIcon>
-                    #{bid.token.tokenId}
-                  </MenuItem>
+                  <Link className={classes.link} to={`/ark/collections/${toBech32Address(bid.token.collection.address)}/${bid.token.tokenId}`}>
+                    <MenuItem className={classes.item} button={false}>
+                      <ListItemIcon><Avatar alt="Remy Sharp" src={bid.token.asset.url} /></ListItemIcon>
+                      #{bid.token.tokenId}
+                    </MenuItem>
+                  </Link>
                 }
               </TableCell>
             }
@@ -171,20 +265,30 @@ const Row: React.FC<Props> = (props: Props) => {
             </TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>NYI</TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>
-              {bid.initiator?.username || truncateAddress(bid.initiatorAddress)}
+              <ArkOwnerLabel user={bid.initiator} address={bid.initiatorAddress} />
             </TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>
               {expiryTime.format("D MMM YYYY")}
             </TableCell>
             <TableCell align="center" className={cls(classes.actionCell, classes.lastCell, { [classes.withBorder]: expand })}>
               {status === 'Active' && bid.initiatorAddress === userAddress &&
-                <IconButton onClick={() => cancelBid()} className={classes.iconButton}>
-                  <Typography className={classes.buttonText}>Cancel</Typography>
+                <IconButton onClick={() => cancelBid(bid)} className={classes.iconButton}>
+                  {cancelLoading && (
+                    <CircularProgress size={16} />
+                  )}
+                  {!cancelLoading && (
+                    <Typography className={classes.buttonText}>Cancel</Typography>
+                  )}
                 </IconButton>
               }
               {status === 'Active' && bid.token.owner === userAddress &&
-                <IconButton onClick={() => acceptBid()} className={classes.iconButton}>
-                  <Typography className={classes.buttonText}>Accept</Typography>
+                <IconButton onClick={() => acceptBid(bid)} className={classes.iconButton}>
+                  {acceptLoading && (
+                    <CircularProgress size={16} />
+                  )}
+                  {!acceptLoading && (
+                    <Typography className={classes.buttonText}>Accept</Typography>
+                  )}
                 </IconButton>
               }
               {(status !== 'Active' || (bid.token.owner !== userAddress && bid.initiatorAddress !== userAddress)) &&
@@ -201,20 +305,20 @@ const Row: React.FC<Props> = (props: Props) => {
           </TableRow>
         })
       }
-      <TableRow className={classes.lastRow}>
-        <TableCell className={classes.expandCell} colSpan={8}>
-          {relatedBids && relatedBids.length > 0 && (
-            <IconButton
-              aria-label="expand row"
-              size="medium"
-              onClick={() => setExpand(!expand)}
-              className={classes.arrowIcon}
-            >
-              {expand ? <UpArrow /> : <DownArrow />}
-            </IconButton>
-          )}
-        </TableCell>
-      </TableRow>
+      {relatedBids && relatedBids.length > 0 && (
+        <TableRow className={cls(classes.row, classes.lastRow)}>
+          <TableCell className={classes.expandCell} colSpan={8}>
+              <IconButton
+                aria-label="expand row"
+                size="medium"
+                onClick={() => setExpand(!expand)}
+                className={classes.arrowIcon}
+              >
+                {expand ? <UpArrow /> : <DownArrow />}
+              </IconButton>
+          </TableCell>
+        </TableRow>
+      )}
       <Box mb={1}></Box>
     </Fragment>
   );

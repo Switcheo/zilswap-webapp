@@ -1,4 +1,4 @@
-import { CollectionFilter } from "../types"
+import { CollectionFilter, CollectionTrait } from "../types"
 import { Nft, OAuth, PaginatedList, Profile } from "./types"
 
 export enum SortBy {
@@ -20,7 +20,7 @@ export const MarketPlaceActionTypes = {
   REFRESH_ACCESS_TOKEN: "REFRESH_ACCESS_TOKEN",
   UPDATE_COLLECTION: "UPDATE_COLLECTION",
   UPDATE_FILTER: "UPDATE_FILTER",
-
+  UPDATE_COLLECTION_TRAITS: "UPDATE_COLLECTION_TRAITS",
   RELOAD_TOKEN_LIST: "RELOAD_TOKEN_LIST",
 }
 
@@ -60,6 +60,19 @@ export function updateFilter(payload: Partial<CollectionFilter>) {
 export function updateTokens(payload: PaginatedList<Nft>) {
   return {
     type: MarketPlaceActionTypes.UPDATE_TOKENS,
+    payload
+  }
+}
+
+export function reloadTokenList() {
+  return {
+    type: MarketPlaceActionTypes.RELOAD_TOKEN_LIST,
+  }
+}
+
+export function updateCollectionTraits(payload: { address: string, traits: CollectionTrait[] }) {
+  return {
+    type: MarketPlaceActionTypes.UPDATE_COLLECTION_TRAITS,
     payload
   }
 }

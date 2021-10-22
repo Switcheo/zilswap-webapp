@@ -166,7 +166,7 @@ const ArkTopBar: React.FC<
                       location.pathname.indexOf("/ark/collections") === 0,
                   })}
                 >
-                  Collections
+                  Discover
                 </Typography>
               </Button>
               <Button

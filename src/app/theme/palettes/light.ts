@@ -2,7 +2,7 @@ import { colors } from '@material-ui/core';
 import { switcheo, zilliqa } from './colors';
 
 const TEXT_COLORS = {
-  primary: "#003340",
+  primary: "rgba(0, 51, 64, 0.8)", // made less harsh
   secondary: "rgba(0, 51, 64, 0.5)",
 };
 

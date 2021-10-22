@@ -33,6 +33,7 @@ const initial_state: MarketPlaceState = {
     },
   },
   profile: undefined,
+  collectionTraits: {},
 }
 
 const reducer = (state: MarketPlaceState = initial_state, action: any) => {
@@ -73,6 +74,14 @@ const reducer = (state: MarketPlaceState = initial_state, action: any) => {
           ...state.filter,
           ...payload,
         },
+      }
+    case MarketPlaceActionTypes.UPDATE_COLLECTION_TRAITS:
+      return {
+        ...state,
+        collectionTraits: {
+          ...state.collectionTraits,
+          [payload.address]: payload.traits,
+        }
       }
     default:
       return state;
