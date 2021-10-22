@@ -144,29 +144,19 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const isConnectedUser = hasParam ? connectedAddress === address : true
 
   useEffect(() => {
-    if (isConnectedUser) {
-      setViewProfile(connectedProfile!)
+    if (isConnectedUser && connectedProfile) {
+      setViewProfile(connectedProfile)
     } else if (address) {
       runQueryProfile(async () => {
         const arkClient = new ArkClient(network);
-        try {
-          const hexAddr = fromBech32Address(address!)
-          const { result: { model } } = await arkClient.getProfile(hexAddr);
-          setViewProfile(model);
-        } catch (err) {
-          console.error(err)
-        }
+
+        const hexAddr = fromBech32Address(address);
+        const { result: { model } } = await arkClient.getProfile(hexAddr);
+        setViewProfile(model);
       })
     }
     // eslint-disable-next-line
   }, [address, connectedProfile, network])
-
-  useEffect(() => {
-    if (connectedProfile && isConnectedUser) {
-      setViewProfile(connectedProfile);
-    }
-    // eslint-disable-next-line
-  }, [connectedProfile])
 
   const copyAddr = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -178,8 +168,6 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   let tabHeaders = ["Collected", "For Sale", "Liked", "Bids Made"];
   if (isConnectedUser) tabHeaders = tabHeaders.concat(["Bids Received"])
-
-  if (!viewProfile && !isConnectedUser) return <ArkPage {...rest} /> // loading profile data
 
   const currentTabBody = () => {
     if (!address) return null
