@@ -102,8 +102,8 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   );
   const match = useRouteMatch<{ id: string; collection: string }>();
 
-  // eslint-disable-next-line
-  const [blockTime, currentBlock, currentTime] = useBlockTime();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, currentBlock] = useBlockTime();
 
   const bestBid = token.bestBid;
 

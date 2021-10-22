@@ -8,26 +8,28 @@ import SearchFilter from "app/components/ARKFilterBar/components/SearchFilter";
 
 interface Props extends BoxProps {
   address: string,
-  onSaleOnly: boolean,
+  filter: 'collected' | 'onSale' | 'liked'
 }
 
-const Collected: React.FC<Props> = (props: Props) => {
-  const { address, onSaleOnly, className } = props;
+const Nfts: React.FC<Props> = (props: Props) => {
+  const { address, filter, className } = props;
   const blockchainState = useSelector<RootState, BlockchainState>((state) => state.blockchain);
   const dispatch = useDispatch();
+  const addressFilter = address.toLocaleLowerCase();
 
   useEffect(() => {
     dispatch(actions.MarketPlace.updateFilter({
       collectionAddress: undefined,
       traits: {},
       saleType: {
-        fixed_price: onSaleOnly,
+        fixed_price: filter === 'onSale',
         timed_auction: false,
       },
-      owner: address.toLocaleLowerCase()
+      likedBy: filter === 'liked' ? addressFilter : undefined,
+      owner: filter === 'collected' ? addressFilter : undefined,
     }));
     // eslint-disable-next-line
-  }, [blockchainState.ready, address])
+  }, [blockchainState.ready, address, filter])
 
   return (
     <Box className={className}>
@@ -40,4 +42,4 @@ const Collected: React.FC<Props> = (props: Props) => {
   );
 };
 
-export default Collected;
+export default Nfts;

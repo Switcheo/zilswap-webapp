@@ -1,8 +1,5 @@
 import React, { Fragment, useEffect, useMemo, useState } from "react";
-import {
-  Box, Card, CardActionArea, CardContent, CardMedia,
-  CardProps, IconButton, Link, makeStyles, Typography
-} from "@material-ui/core";
+import { Box, Card, CardActionArea, CardContent, CardProps, IconButton, Link, makeStyles, Typography } from "@material-ui/core";
 import LaunchIcon from "@material-ui/icons/Launch";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -15,7 +12,7 @@ import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { MarketPlaceState, OAuth, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { toHumanNumber, truncate, useAsyncTask, useBlockTime, useNetwork } from "app/utils";
+import { toHumanNumber, truncateAddress, useAsyncTask, useBlockTime, useNetwork } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import { ArkClient } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
@@ -139,26 +136,29 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
         )}
         {!dialog ? (
           <CardActionArea
-          className={classes.cardActionArea}
-          component={RouterLink}
-          to={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
+            className={classes.cardActionArea}
+            component={RouterLink}
+            to={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
           >
-            <CardMedia
-              className={classes.image}
-              component="img"
-              alt="NFT image"
-              height="308"
-              image={token.asset?.url}
-            />
+            <Box className={classes.imageContainer}>
+              <span className={classes.imageHeight} />
+              <img
+                className={classes.image}
+                alt={token?.asset?.filename || "Token Image"}
+                src={token?.asset?.url || undefined}
+              />
+            </Box>
           </CardActionArea>
-        ) : <CardMedia
-              className={classes.dialogImage}
-              component="img"
-              alt="NFT image"
-              height="308"
-              image={token.asset?.url}
-          />
-        }
+        ) : (
+          <Box className={classes.imageContainer}>
+            <span className={classes.imageHeight} />
+            <img
+              className={classes.image}
+              alt={token?.asset?.filename || "Token Image"}
+              src={token?.asset?.url || undefined}
+            />
+          </Box>
+        )}
       </Box>
       <CardContent className={classes.cardContent}>
         <Box className={classes.bodyBox}>
@@ -193,17 +193,10 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   <Typography className={classes.body}>owned by&nbsp;</Typography>
                   <Link
                     className={classes.link}
-                    underline="hover"
-                    rel="noopener noreferrer"
-                    target="_blank"
                     href={`/ark/profile?address=${token.owner?.address}`}
                   >
                     <Typography className={classes.username}>
-                      {(
-                        (token?.owner && token?.owner?.address?.length > 15)
-                          ? (truncate(token.owner?.username, 10))
-                          : token.owner?.username
-                      ) || "Unnamed"}
+                      {token.owner?.username || truncateAddress(token.owner?.address ?? "")}
                     </Typography>
                   </Link>
                 </Box>
@@ -274,12 +267,24 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   borderBox: {
-    border: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "rgba(0, 51, 64, 0.5)"
-      }`,
     borderRadius: 10,
   },
+  imageContainer: {
+    borderRadius: theme.spacing(1.5),
+    width: "100%",
+    position: "relative",
+  },
+  imageHeight: {
+    display: "block",
+    position: "relative",
+    paddingTop: "100%",
+  },
   image: {
-    borderRadius: "0px 0px 10px 10px!important",
+    position: "absolute",
+    left: 0,
+    top: 0,
+    height: "100%",
+    width: "100%",
   },
   dialogImage: {
     borderRadius: "10px"
@@ -344,7 +349,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "14px",
     lineHeight: "16px",
     color: theme.palette.text?.primary,
-    textTransform: "uppercase",
   },
   bodyBox: {
     padding: theme.spacing(0, 1.5),
@@ -407,7 +411,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "#6BE1FF",
   },
   cardActionArea: {
-    borderRadius: 10
+    borderRadius: 10,
+    border: "none",
   }
 }));
 
