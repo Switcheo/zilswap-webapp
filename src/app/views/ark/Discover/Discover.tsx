@@ -1,21 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import BigNumber from "bignumber.js";
 import { Link as RouterLink } from "react-router-dom";
-import { Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Typography, Box, CardMedia, CardActionArea, RadioGroup, Checkbox,
+import { Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Typography, Box, CardMedia, CardActionArea, Checkbox,
   TableContainer,  Table, TableBody, TableCell, TableHead, TableRow, Avatar
  } from "@material-ui/core";
-import { Autocomplete } from '@material-ui/lab'
-import { makeStyles } from "@material-ui/core/styles";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
-import { Link } from "react-router-dom";
-import { toBech32Address } from "@zilliqa-js/crypto"
+ import { makeStyles } from "@material-ui/core/styles";
+ import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
+// import { toBech32Address } from "@zilliqa-js/crypto"
 import cls from "classnames";
-import { useSelector } from "react-redux"
-import { ArkClient } from "core/utilities"
 import { AppTheme } from "app/theme/types"
 import ArkPage from "app/layouts/ArkPage"
-import { getBlockchain } from "app/saga/selectors";
 import { CurrencyLogo } from "app/components";
+
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg"
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg"
 
@@ -39,6 +35,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     paddingRight: "8px",
     marginTop: theme.spacing(2),
     borderColor: "rgba(222, 255, 255, 0.5)",
+    marginBottom: theme.spacing(5),
   },
   inputText: {
     fontSize: "16px!important",
@@ -61,9 +58,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fontWeight: 900,
     },
   },
-  radioGroup: {
-    flexWrap: "nowrap",
-  },
   radioButton: {
     padding: "6px",
     "&:hover": {
@@ -72,6 +66,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   titleDescription: {
     color: "#26D4FF",
+    marginBottom: "20px",
     "-webkit-text-stroke-color": "rgba(107, 225, 255, 0.2)",
     "-webkit-text-stroke-width": "1px",
   },
@@ -80,13 +75,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   headerCell: {
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
-    borderBottom: "1px solid #29475A",
-    padding: "8px 16px",
+    padding: "8px 0 0 0",
     fontFamily: 'Avenir Next',
     fontWeight: 600,
     fontSize: 13,
     letterSpacing: '0.2px',
-    opacity: 0.5
+    opacity: 0.5,
+    borderBottom: 'none',
   },
   tableRow: {
     animation: `$slideEffect 1000ms linear`,
@@ -96,7 +91,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   "@keyframes slideEffect": {
     "100%": { transform: " translateY(0%)" }
   },
-  // TODO: reduce this
+  // TODO: reduce bodyCell, percentCell and numberCell
   bodyCell: {
     extend: 'text',
     padding: "8px 16px",
@@ -176,23 +171,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   index: {
     margin: "0px 14px",
   },
-  collectionTitle: {
+  collectionName: {
     marginLeft: "14px",
   },
   isNegative: {
     color: theme.palette.error.main,
   },
-  popover: {
-    "& .MuiPaper-root": {
-      backgroundColor: theme.palette.type === "dark" ? "#223139" : "D4FFF2",
-      width: 605,
-      borderRadius: "12px",
-      borderWidth: "1px",
-      borderStyle: "solid",
-      borderColor: theme.palette.type === "dark" ? "#29475A" : "#D4FFF2",
-      overflow: "hidden",
-      marginTop: 8
-    },
+  topBarTitle: {
+    fontSize: "48px",
+    margin: "0 0 48px 0px",
   },
 }));
 
@@ -221,14 +208,12 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 ) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
-  const { network } = useSelector(getBlockchain);
   const [search, setSearch] = useState<string>("");
   const [searchFilter, setSearchFilter] = useState<SearchFilters>({
       profile: true,
       artist: true,
       collection: true,
   })
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const handleSearchFilter = (value: string) => {
     setSearchFilter(prevState => ({
@@ -236,35 +221,22 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       [value]: !prevState[value]
     }))
   }
-  const handleCloseSearch = () => {
-    setAnchorEl(null);
-  };
-
-  // fetch collections (to use store instead)
-  const [collections, setCollections] = useState<any[]>([]);
-
-  useEffect(() => {
-    const getCollections = async () => {
-      const arkClient = new ArkClient(network);
-      const result = await arkClient.listCollection();
-      setCollections(result.result.entries);
-    };
-  
-    getCollections();
-  }, [network]);
 
   return (
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
-        <Typography variant="h1">Featured</Typography>
-        <Typography className={classes.titleDescription} variant="h4">Top NFTs at a glance. Ranked by volume, price and assets.</Typography>
+        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+          <Typography className={classes.topBarTitle} variant="h1">Featured</Typography>
+          <Typography className={classes.titleDescription} variant="h4">Top NFTs at a glance. Ranked by volume, price, number of owners, and assets.</Typography>
+        </Box>
 
         <CardActionArea
           component={RouterLink}
         //   to={`/ark/collections/${toBech32Address("ab")}`}
-          to={`/ark/collections/abc`}
+          to={`/ark/collections/mocked`} // TODO: unmock it
         >
           <CardMedia
+            // TODO: unmock it
             className={classes.image}
             component="img"
             alt="NFT Collection"
@@ -308,37 +280,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             </InputAdornment>
           }
         />
-      {/* <Autocomplete
-          endAdornment={
-            <InputAdornment position="end">
-              <FormControl component="fieldset" className={classes.formControl}>
-                <FormLabel className={classes.formLabel}>By</FormLabel>
-                  {SEARCH_FILTERS.map((filter) => {
-                    return (
-                      <FormControlLabel
-                        className={classes.formControlLabel}
-                        value={filter}
-                        control={
-                          <Checkbox
-                            className={classes.radioButton}
-                            onChange={(e) => handleSearchFilter(filter)}
-                            checkedIcon={<CheckedIcon />}
-                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                            disableRipple
-                            checked={searchFilter[filter]}
-                            // checked={false}
-                          />
-                        }
-                        label={filter.toUpperCase()}
-                      />
-                    );
-                  })}
-              </FormControl>
-            </InputAdornment>
-          }
-      /> */}
-
-
+        {/* TODO: convert OutlinedInput to Autocomplete  */}
         <TableContainer>
           <Table className={classes.table}>
             <TableHead>
@@ -356,7 +298,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             </TableHead>
             <TableBody>
 
-              <TableRow className={classes.tableRow}>
+              <TableRow className={classes.tableRow} component={RouterLink} to={`/ark/collections/mocked`}>
                 <TableCell className={cls(classes.bodyCell, classes.firstCell)}>
                 <Box display="flex" alignItems="center">
                   <div className={classes.index}>1</div>
@@ -365,10 +307,15 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                     alt="Avatar Image"
                     src={TEMP_BEAR_AVATAR_URL}
                   />
-                  <div className={classes.collectionTitle}>
-                    The Bear Market
-                  </div>
-                  <VerifiedBadge className={classes.verifiedBadge} />
+                  <Box display="flex" flexDirection="column" className={classes.collectionName}>
+                    <Box display="flex">
+                      <div>
+                        The Bear Market
+                      </div>
+                      <VerifiedBadge className={classes.verifiedBadge} />
+                    </Box>
+                    <Typography>By Switcheo Labs</Typography>
+                  </Box>
                 </Box>
                 </TableCell>
                 <TableCell align="center" className={classes.bodyCell}>
@@ -402,34 +349,6 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                     10K
                 </TableCell>
               </TableRow>
-              <TableRow className={classes.tableRow}>
-                <TableCell align="center" className={classes.bodyCell}>
-                  1 The Bear Market
-                </TableCell>
-                <TableCell align="right" className={classes.bodyCell}>
-                    <strong className={classes.amount}>
-                      100
-                    </strong> ZIL
-                </TableCell>
-                <TableCell align="center" className={classes.bodyCell}>NYI</TableCell>
-                <TableCell align="center" className={classes.bodyCell}>
-                  sd
-                </TableCell>
-                <TableCell align="center" className={classes.bodyCell}>
-                  asd
-                </TableCell>
-                <TableCell align="center" className={classes.bodyCell}>
-                  <Typography>
-                    helop
-                  </Typography>
-                </TableCell>
-                <TableCell align="center" className={classes.bodyCell}>
-                  <Typography>
-                    10K
-                  </Typography>
-                </TableCell>
-              </TableRow>
-
             </TableBody>
           </Table>
         </TableContainer>
