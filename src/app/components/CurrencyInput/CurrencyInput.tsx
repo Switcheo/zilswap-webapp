@@ -39,6 +39,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   input: {
     textAlign: "left",
   },
+  inputRowNoLabel: {
+    "& .MuiInputBase-input": {
+      padding: "14px 18px 12px",
+    },
+    "& .MuiButtonBase-root": {
+      padding: "14px 18px 12px 5px"
+    }
+  },
   label: {
     position: "absolute",
     color: theme.palette.text?.primary,
@@ -166,7 +174,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 export interface CurrencyInputProps
   extends React.HTMLAttributes<HTMLFormElement> {
-  label: string;
+  label?: string;
   token: TokenInfo | null;
   amount: string;
   tokenList?: CurrencyListType;
@@ -316,10 +324,12 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
         </Fragment>
       )}
 
-      <InputLabel className={cls(classes.label, { [classes.bidLabel]: !!bid })}>
-        {label}
-      </InputLabel>
-
+      {label &&
+        <InputLabel className={cls(classes.label, { [classes.bidLabel]: !!bid })}>
+          {label}
+        </InputLabel>
+      }
+      
       {!hideBalance && (
         <Typography
           className={cls(classes.balance, { [classes.bidLabel]: !!bid })}
@@ -344,7 +354,9 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
       )}
 
       <OutlinedInput
-        className={classes.inputRow}
+        className={cls(classes.inputRow, {
+          [classes.inputRowNoLabel]: !label
+        })}
         placeholder={"0"}
         value={amount.toString()}
         onChange={onChange}
