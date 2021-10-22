@@ -3,10 +3,10 @@ import { Avatar, Badge, Box, Container, ListItemIcon, MenuItem, Typography } fro
 import { makeStyles } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ArkBidsTable, ArkBreadcrumb, ArkTab,ArkOwnerLabel } from "app/components";
+import { ArkBidsTable, ArkBreadcrumb, ArkTab, ArkOwnerLabel } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet } from "app/saga/selectors";
-import { Cheque, Nft, Profile, TraitValue } from "app/store/types";
+import { Cheque, Nft, Profile } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
 import { ArkClient } from "core/utilities";
@@ -26,7 +26,6 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
   const [owner, setOwner] = useState<Profile>();
   const [runGetOwner] = useAsyncTask("getOwner");
   const [currentTab, setCurrentTab] = useState("Bids");
-  const [traits, setTraits] = useState<TraitValue[]>([])
 
   const collectionId = match.params.collection;
   const tokenId = match.params.id;
@@ -58,7 +57,6 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
       const viewerAddress = wallet?.addressInfo.byte20.toLowerCase()
       const { result } = await arkClient.getNftToken(address, tokenId, viewerAddress);
       setToken(result.model);
-      setTraits(result.model.traitValues);
 
       const { model: { owner } } = result
       if (owner && !bypass) {
@@ -134,7 +132,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
             </Box>
           </Box>
           <Box flexGrow={1} flexDirection="column" className={classes.traitContainer}>
-            <TraitTable traits={traits} />
+            <TraitTable token={token} />
           </Box>
         </Box>
 

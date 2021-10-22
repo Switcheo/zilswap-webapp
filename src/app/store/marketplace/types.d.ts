@@ -9,6 +9,7 @@ export interface MarketPlaceState {
   oAuth?: OAuth;
   receivedBids?: any;
   bidded?: any;
+  collectionTraits: SimpleMap<CollectionTrait[]>;
 }
 
 export interface SimpleCheque {
@@ -165,4 +166,9 @@ export interface CollectionFilter {
 export interface SaleType {
   fixed_price: boolean;
   timed_auction: boolean;
+}
+
+export interface CollectionTrait {
+  trait: string;
+  values: SimpleMap<number>;
 }
