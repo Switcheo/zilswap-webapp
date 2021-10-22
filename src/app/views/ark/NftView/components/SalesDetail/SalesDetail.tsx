@@ -5,6 +5,8 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { toBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyLogo, FancyButton, Text, ZapIconButton } from "app/components";
 import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
@@ -169,10 +171,12 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
                 Cancel Listing
               </FancyButton>
             )}
-            {isOwnToken && (
-              <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onSell}>
-                Sell
-              </FancyButton>
+            {isOwnToken && token?.collection && (
+              <Link to={`/ark/collections/${toBech32Address(token.collection.address)}/${token.tokenId}/sell`}>
+                <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple>
+                  Sell
+                </FancyButton>
+              </Link>
             )}
             {!isOwnToken && token?.bestAsk && (
               <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onBuy}>
