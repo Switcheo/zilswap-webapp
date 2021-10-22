@@ -1,8 +1,7 @@
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import {
   Box, Card, CardActionArea, CardContent, CardMedia,
-  CardProps, IconButton, Link, makeStyles, Typography,
-  Popper, ClickAwayListener
+  CardProps, ClickAwayListener, IconButton, Link, makeStyles, Popper, Typography
 } from "@material-ui/core";
 import LaunchIcon from "@material-ui/icons/Launch";
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
@@ -12,12 +11,13 @@ import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
 import { Network } from "zilswap-sdk/lib/constants";
+import { ArkOwnerLabel } from "app/components";
 import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { MarketPlaceState, OAuth, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { toHumanNumber, truncateAddress, useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
+import { toHumanNumber, useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import { ArkClient } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
@@ -232,14 +232,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   </Typography>
                   <Box display="flex">
                     <Typography className={classes.body}>owned by&nbsp;</Typography>
-                    <Link
-                      className={classes.link}
-                      href={`/ark/profile?address=${token.owner?.address}`}
-                    >
-                      <Typography className={classes.username}>
-                        {token.owner?.username || truncateAddress(token.owner?.address ?? "")}
-                      </Typography>
-                    </Link>
+                    <ArkOwnerLabel user={token.owner} />
                   </Box>
                 </Box>
               </Fragment>
@@ -265,6 +258,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                       <LaunchIcon className={classes.linkIcon} />
                     </Typography>
                   </Link>
+                  <ArkOwnerLabel user={token.owner} />
                 </Box>
                 <Box
                   display="flex"
@@ -279,37 +273,52 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                 </Box>
               </Fragment>
             )}
-            <ClickAwayListener onClickAway={() => { console.log("close popper"); setPopAnchor(null) }}>
-              <Box>
-                <Box onClick={handlePopClick} display="flex" justifyContent="flex-end"><MoreHorizIcon /></Box>
-                <Popper className={classes.popper} open={!!popAnchor} anchorEl={popAnchor}>
-                  <Link
-                    className={classes.popperText}
-                    underline="none"
-                    rel="tonftpage"
-                    href={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
-                  >
-                    <Typography className={classes.popperText}>Sell Item</Typography>
-                  </Link>
-                  {isOwner && (
-                    <>
-                      <Box className={classes.divider} />
-                      <Typography onClick={setAsProfileImage} className={classes.popperText}>Set as profile picture</Typography>
-                    </>
-                  )}
-                </Popper>
-              </Box>
-            </ClickAwayListener>
-          </Box>
+
+            <Box display="flex">
+              <Box flex={1} />
+              <IconButton size="small" className={classes.extrasButton} onClick={handlePopClick}>
+                <MoreHorizIcon />
+              </IconButton>
+              {popAnchor && (
+                <ClickAwayListener onClickAway={() => setPopAnchor(null)}>
+                  <Popper className={classes.popper} open anchorEl={popAnchor} placement="bottom-end">
+                    <Link
+                      className={classes.popperText}
+                      underline="none"
+                      rel="tonftpage"
+                      href={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
+                    >
+                      <Typography className={classes.popperText}>View NFT</Typography>
+                    </Link>
+                    {isOwner && (
+                      <>
+                        <Box className={classes.divider} />
+                        <Link
+                          className={classes.popperText}
+                          underline="none"
+                          rel="tonftpage"
+                          href={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}/sell`}
+                        >
+                          <Typography className={classes.popperText}>Sell</Typography>
+                        </Link>
+                        <Box className={classes.divider} />
+                        <Typography onClick={setAsProfileImage} className={classes.popperText}>Set as profile picture</Typography>
+                      </>
+                    )}
+                  </Popper>
+                </ClickAwayListener>
+              )}
+            </Box>
+          </Box >
 
           {/* TODO: refactor and take in a rarity as prop */}
           {/* Rarity indicator */}
           <Box className={classes.rarityBackground}>
             <Box className={classes.rarityBar} />
           </Box>
-        </CardContent>
-      </Box>
-    </Card>
+        </CardContent >
+      </Box >
+    </Card >
   );
 };
 
@@ -339,6 +348,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     [theme.breakpoints.down("sm")]: {
       minWidth: "240px",
+    },
+  },
+  extrasButton: {
+    color: theme.palette.text?.primary,
+    alignSelf: "flex-end",
+    marginRight: -7,
+    opacity: 0.5,
+    fontSize: "12px",
+    cursor: "pointer",
+    "&:hover": {
+      opacity: 1,
+    },
+    "& svg": {
+      fontSize: 24,
     },
   },
   borderBox: {
@@ -445,7 +468,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: "rgba(107, 225, 255, 0.2)",
     borderRadius: 5,
     display: "flex",
-    marginTop: theme.spacing(1),
     padding: "3px",
   },
   rarityBar: {
@@ -486,6 +508,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "12px",
     fontWeight: 700,
     color: "#6BE1FF",
+    maxWidth: 100,
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    whiteSpace: "nowrap"
   },
   cardActionArea: {
     borderRadius: 0,

@@ -219,7 +219,9 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                   onClick={() => address && copyAddr(address)}
                   className={classes.addressBadge}
                 >
-                  <Typography variant="body1">{truncateAddress(address || '', isXs)}</Typography>
+                  <Typography variant="body1">
+                    {truncateAddress(address || '', isXs)}
+                  </Typography>
                 </Box>
               </Tooltip>
             ]}
@@ -251,18 +253,18 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           />
           {
             (!wallet && !address) ?
-            <Box mt={12} display="flex" justifyContent="center">
-              <Box display="flex" flexDirection="column" textAlign="center">
-                <Typography className={classes.connectionText} variant="h1">
-                  Your wallet is not connected.
-                </Typography>
-                <Typography className={classes.connectionText} variant="body1">
-                  Please connect your wallet to view this page.
-                </Typography>
+              <Box mt={12} display="flex" justifyContent="center">
+                <Box display="flex" flexDirection="column" textAlign="center">
+                  <Typography className={classes.connectionText} variant="h1">
+                    Your wallet is not connected.
+                  </Typography>
+                  <Typography className={classes.connectionText} variant="body1">
+                    Please connect your wallet to view this page.
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
-            :
-            currentTabBody()
+              :
+              currentTabBody()
           }
         </Container>
       )}

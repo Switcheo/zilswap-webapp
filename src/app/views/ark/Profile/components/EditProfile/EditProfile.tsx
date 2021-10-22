@@ -154,7 +154,6 @@ const EditProfile: React.FC<Props> = (props: Props) => {
           filteredData[key] = value;
           const errorText = validateInput(key, value)
           if (errorText !== "") {
-            console.log(key, value)
             ok = false
             setErrors({ ...errors, [key]: errorText })
           }

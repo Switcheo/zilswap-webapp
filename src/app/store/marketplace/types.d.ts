@@ -106,7 +106,7 @@ export interface Asset {
 }
 
 export type MarketplaceUser = {
-  username?: string;
+  username: string | null;
   address: string;
 }
 
@@ -116,10 +116,8 @@ export interface NftAttribute {
   rarity: number;
 }
 
-export interface Profile {
+export interface Profile extends MarketplaceUser {
   id: string;
-  username: string | null;
-  address: string;
   bio: string | null;
   twitterHandle: string | null;
   instagramHandle: string | null;

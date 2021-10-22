@@ -3,7 +3,7 @@ import { Avatar, Badge, Box, Container, ListItemIcon, MenuItem, Typography } fro
 import { makeStyles } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ArkBidsTable, ArkBreadcrumb, ArkTab } from "app/components";
+import { ArkBidsTable, ArkBreadcrumb, ArkTab,ArkOwnerLabel } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet } from "app/saga/selectors";
 import { Cheque, Nft, Profile, TraitValue } from "app/store/types";
@@ -101,12 +101,12 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
               {token?.collection?.description}
             </Typography>
             <Box className={classes.xsColumn} mt={4} display="flex" justifyContent="center">
-              <Box flexGrow={1}>
+              <Box flexGrow={1} marginRight={1}>
                 <MenuItem component={Link} to={`/ark/profile?address=${owner?.address}`} className={classes.aboutMenuItem} button={false}>
                   <ListItemIcon><Avatar className={classes.avatar} alt="owner" src={owner?.profileImage?.url || ""} /></ListItemIcon>
                   <Box marginLeft={1}>
                     <Typography>Owner</Typography>
-                    <Typography variant="h3" className={classes.aboutNameText}>{owner?.username || "Unnamed"}</Typography>
+                    <ArkOwnerLabel user={owner} />
                     <Typography>{""}</Typography>
                   </Box>
                 </MenuItem>

@@ -8,9 +8,10 @@ import dayjs, { Dayjs } from "dayjs";
 import { useSelector } from "react-redux";
 import { AppTheme } from "app/theme/types";
 import { Cheque, WalletState } from "app/store/types";
-import { truncateAddress, useValueCalculators } from "app/utils";
+import { useValueCalculators } from "app/utils";
 import { RootState, TokenState } from "app/store/types";
 import { getChequeStatus } from "core/utilities/ark"
+import { ArkOwnerLabel } from "app/components";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
 import { ReactComponent as UpArrow } from "./assets/up-arrow.svg";
 
@@ -171,7 +172,7 @@ const Row: React.FC<Props> = (props: Props) => {
             </TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>NYI</TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>
-              {bid.initiator?.username || truncateAddress(bid.initiatorAddress)}
+              <ArkOwnerLabel user={bid.initiator} address={bid.initiatorAddress} />
             </TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>
               {expiryTime.format("D MMM YYYY")}
