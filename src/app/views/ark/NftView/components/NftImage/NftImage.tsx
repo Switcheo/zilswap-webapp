@@ -2,7 +2,7 @@ import React from "react";
 import { Box, CardProps, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import { SocialLinkGroup } from "app/components";
+import { ArkSocialLinkGroup } from "app/components";
 import { Nft } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 
@@ -26,7 +26,7 @@ const NftImage: React.FC<Props> = (props: Props) => {
         />
       </Box>
       <Box display="flex" flexDirection="row" justifyContent="flex-start" alignItems="center">
-        <Typography>Share</Typography><SocialLinkGroup />
+        <Typography>Share</Typography><ArkSocialLinkGroup className={classes.socialLinkGroup} />
       </Box>
     </Box>
   );
@@ -53,6 +53,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     top: 0,
     height: "100%",
     width: "100%",
+  },
+  socialLinkGroup: {
+    marginLeft: theme.spacing(2),
   },
 }));
 

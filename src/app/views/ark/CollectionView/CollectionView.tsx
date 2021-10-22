@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text, ArkNFTListing } from "app/components";
+import { ArkBanner, ArkBreadcrumb, ArkSocialLinkGroup, Text, ArkNFTListing } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
 import { actions } from "app/store";
@@ -88,14 +88,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   socialLinkGroup: {
     alignSelf: "flex-end",
     marginTop: "-22px",
+    transform: "translateY(-40px)",
     [theme.breakpoints.down("xs")]: {
-      display: "none",
+      display: "none!important",
     },
   },
   socialLinkGroupMobile: {
     marginTop: theme.spacing(1),
     [theme.breakpoints.up("sm")]: {
-      display: "none",
+      display: "none!important",
     },
   },
   nftContainer: {
@@ -201,10 +202,10 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           bannerImage={TEMP_BANNER_URL}
         />
         <Box display="flex" flexDirection="column" alignItems="center">
-          <SocialLinkGroup collection={collection} className={classes.socialLinkGroup} />
+          <ArkSocialLinkGroup collection={collection} className={classes.socialLinkGroup} />
 
           {/* TODO: hacky way for mobile view, to clean up */}
-          <SocialLinkGroup collection={collection} className={classes.socialLinkGroupMobile} />
+          <ArkSocialLinkGroup collection={collection} className={classes.socialLinkGroupMobile} />
 
           {/* Collection name and creator  */}
           <Box display="flex" flexDirection="column" maxWidth={500}>
