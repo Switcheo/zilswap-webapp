@@ -16,10 +16,8 @@ import { ReactComponent as CheckedIcon } from "./checked.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   button: {
-    borderStyle: 'solid',
-    borderWidth: 1,
-    borderColor: "#29475A",
-    color: theme.palette.type === "dark" ? "white" : "",
+    border: theme.palette.border,
+    color: theme.palette.text!.primary,
     fontSize: 14,
     justifyContent: "flex-start",
     padding: "10px 24px",
@@ -32,18 +30,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px"
   },
   active: {
-    borderColor: theme.palette.primary.dark,
-    borderStyle: "solid",
-    borderWidth: 1,
+    border: theme.palette.border,
   },
   popover: {
     "& .MuiPaper-root": {
       backgroundColor: theme.palette.type === "dark" ? "#223139" : "D4FFF2",
       width: 605,
       borderRadius: "12px",
-      borderWidth: "1px",
-      borderStyle: "solid",
-      borderColor: theme.palette.type === "dark" ? "#29475A" : "#D4FFF2",
+      border: theme.palette.border,
       overflow: "hidden",
       marginTop: 8
     },
@@ -62,9 +56,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginRight: 16,
     width: 210,
     maxHeight: 352,
-    borderStyle: 'solid',
-    borderWidth: '0px 1px 0px 0px',
-    borderColor: "rgba(222, 255, 255, 0.1)",
+    borderRight: theme.palette.border,
   },
   scrollableTraits: {
     overflowY: "scroll",
@@ -110,7 +102,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: 18,
     fontWeight: 'bolder',
     fontFamily: 'Avenir Next',
-    color: theme.palette.type === "dark" ? "white" : "",
+    color: theme.palette.text!.primary,
     textTransform: "uppercase",
     textAlign: "left"
   },
@@ -126,7 +118,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     overflow: "hidden",
     fontWeight: 'bolder',
     fontFamily: 'Avenir Next',
-    color: theme.palette.type === "dark" ? "white" : "",
+    color: theme.palette.text!.primary,
   },
   filterValueSubText: {
     fontSize: 12,
@@ -238,7 +230,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   input: {
     paddingLeft: "8px",
     paddingRight: "8px",
-    borderColor: "rgba(222, 255, 255, 0.1)",
+    border: theme.palette.border,
   },
   inputText: {
     fontSize: "14px!important",

@@ -6,23 +6,10 @@ import { RootState, MarketPlaceState } from 'app/store/types';
 import { updateFilter } from 'app/store/marketplace/actions';
 
 const useStyles = makeStyles((theme: AppTheme) =>({
-  root: {
-    borderStyle: 'solid',
-    borderWidth: 1,
-    borderColor: "#29475A",
-    color: theme.palette.type === "dark" ? "white" : "",
-    fontSize: 14,
-    justifyContent: "flex-start",
-    padding: "10px 24px",
-    borderRadius: "12px",
-    display: "flex",
-    alignItems: "center",
-    position: "relative"
-  },
   input: {
     paddingLeft: "8px",
     paddingRight: "8px",
-    borderColor: "#29475A",
+    border: theme.palette.border,
   },
   inputText: {
     fontSize: "16px!important",

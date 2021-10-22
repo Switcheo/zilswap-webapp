@@ -11,10 +11,8 @@ import { ReactComponent as CheckedIcon } from "./checked.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   button: {
-    borderStyle: 'solid',
-    borderWidth: 1,
-    borderColor: "#29475A",
-    color: theme.palette.type === "dark" ? "white" : "",
+    border: theme.palette.border,
+    color: theme.palette.text?.primary,
     fontSize: 14,
     justifyContent: "flex-start",
     padding: "10px 24px",
@@ -27,9 +25,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px"
   },
   active: {
-    borderColor: theme.palette.primary.dark,
-    borderStyle: "solid",
-    borderWidth: 1,
+    border: theme.palette.border,
   },
   popover: {
     "& .MuiPaper-root": {
@@ -37,9 +33,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       width: '100%',
       maxWidth: 300,
       borderRadius: "12px",
-      borderWidth: "1px",
-      borderStyle: "solid",
-      borderColor: theme.palette.type === "dark" ? "#29475A" : "#D4FFF2",
+      border: theme.palette.border,
       overflow: "hidden",
       marginTop: 8
     },
@@ -87,7 +81,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: 16,
     fontWeight: 'bolder',
     fontFamily: 'Avenir Next',
-    color: theme.palette.type === "dark" ? "white" : "black",
+    color: theme.palette.text!.primary,
     "& .MuiFormControlLabel-label": {
       fontSize: 16,
       fontWeight: 'bolder',
@@ -100,7 +94,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontFamily: 'Avenir Next',
     paddingTop: 2,
     paddingBottom: 2,
-    color: theme.palette.type === "dark" ? "white" : "",
+    color: theme.palette.text!.primary,
     display: "flex",
     alignItems: "center",
     "& $filterValue": {
@@ -145,7 +139,7 @@ const SaleTypeFilter = () => {
 
   return (
     <>
-      <Button onClick={handleClick} className={anchorEl === null ? cls(classes.button, classes.inactive) : cls(classes.button, classes.active)}>
+      <Button onClick={handleClick} className={cls(classes.button, anchorEl == null ? classes.inactive : classes.active)}>
         <Box display="flex" flexDirection="column" flexGrow={1} alignItems="start">
           <div className={classes.filterLabel}>Sale Type</div>
           <div className={classes.filterValue}>
