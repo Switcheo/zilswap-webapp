@@ -369,11 +369,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   feeLabel: {
     fontWeight: "bold",
     flexGrow: 1,
-    fontSize: "16px"
+    fontSize: "14px"
   },
   feeValue: {
     fontWeight: "bold",
-    fontSize: "16px"
+    fontSize: "14px"
   }
 }));
 
