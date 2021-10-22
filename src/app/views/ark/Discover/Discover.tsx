@@ -7,7 +7,6 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
-import { ZIL_HASH } from "zilswap-sdk/lib/constants";
 import { CurrencyLogo } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
@@ -183,7 +182,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                         <strong className={classes.amount}>
                           {collectionStats.volume ?? "-"}
                         </strong>
-                        <CurrencyLogo currency={ZIL_HASH} className={classes.currencyLogo} />
+                        <CurrencyLogo currency="ZIL" className={classes.currencyLogo} />
                       </Box>
 
                     </TableCell>
@@ -192,7 +191,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                         <strong className={classes.amount}>
                           {collectionStats.floorPrice ?? "-"}
                         </strong>
-                        <CurrencyLogo currency={ZIL_HASH} className={classes.currencyLogo} />
+                        <CurrencyLogo currency="ZIL" className={classes.currencyLogo} />
                       </Box>
                     </TableCell>
                     <TableCell align="center" className={cls(classes.percentCell, { [classes.isNegative]: mockedDaily.isNegative() })}>
@@ -344,9 +343,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderSpacing: '0px 12px',
   },
   currencyLogo: {
-    marginRight: theme.spacing(1),
-    height: 20,
-    width: 20,
+    margin: theme.spacing(0, 1),
     "& svg": {
       display: "block",
     }

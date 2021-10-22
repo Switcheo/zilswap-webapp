@@ -55,7 +55,10 @@ const CurrencyLogo = (props: any) => {
   }, [blockchain, address, bridgeTokens.eth])
 
   if (network === Network.TestNet) {
-    tokenIconUrl = `https://dr297zt0qngbx.cloudfront.net/tokens/testnet/${logoAddress}`
+    if (currency === "ZIL")
+      tokenIconUrl = `https://meta.viewblock.io/ZIL/logo${urlSuffix}`
+    else
+      tokenIconUrl = `https://dr297zt0qngbx.cloudfront.net/tokens/testnet/${logoAddress}`
   } else {
     let tokenKey = currency === 'ZIL' ? '' : `.${logoAddress}`
     if (logoAddress?.startsWith("0x") && currency !== "ZIL")
