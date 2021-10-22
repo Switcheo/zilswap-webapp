@@ -60,12 +60,17 @@ const routes: RouteConfig[] = [
       {
         path: "/ark/collections/:collection",
         exact: true,
-        component: lazy(() => import("./views/ark/Collection")),
+        component: lazy(() => import("./views/ark/CollectionView")),
       },
       {
         path: "/ark/collections/:collection/:id",
         exact: true,
         component: lazy(() => import("./views/ark/NftView")),
+      },
+      {
+        path: "/ark/collections/:collection/:id/sell",
+        exact: true,
+        component: lazy(() => import("./views/ark/NftView/components/SellDialog")),
       },
       {
         path: "/ark/profile",

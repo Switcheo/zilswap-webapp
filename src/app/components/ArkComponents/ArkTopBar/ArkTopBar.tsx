@@ -18,7 +18,7 @@ import { ReactComponent as MenuIcon } from "app/components/TopBar/menu.svg";
 import RewardsInfoButton from "app/layouts/RewardsInfoButton";
 import { AppTheme } from "app/theme/types";
 import { useRouter } from "app/utils";
-import { ReactComponent as ArkBrand } from "./ark.svg";
+import ArkLogo from "./ark-logo.png";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -78,6 +78,7 @@ const useStyles = makeStyles((theme) => ({
   navLinkBox: {
     display: "flex",
     alignItems: "center",
+    marginLeft: theme.spacing(2)
   },
   navLinkButton: {
     "&:hover": {
@@ -99,6 +100,9 @@ const useStyles = makeStyles((theme) => ({
   menuIcon: {
     padding: theme.spacing(0, 2),
   },
+  logo: {
+    height: "28px",
+  }
 }));
 
 export interface ArkTopBarProps {
@@ -140,14 +144,14 @@ const ArkTopBar: React.FC<
                 className={classes.brandButton}
                 disableRipple
               >
-                <ArkBrand />
+                <img src={ArkLogo} alt="logo" className={classes.logo} />
               </Button>
             </Box>
           </Fragment>
         ) : (
           <Grid container>
             <Box className={classes.brandBox}>
-              <ArkBrand />
+              <img src={ArkLogo} alt="logo" className={classes.logo} />
             </Box>
             <Box className={classes.navLinkBox}>
               <Button

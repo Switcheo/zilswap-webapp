@@ -1,26 +1,28 @@
-import React, { Fragment, useState } from "react";
-import { Backdrop, Box, Checkbox, DialogContent, DialogProps, FormControlLabel } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
-import BigNumber from "bignumber.js";
-import cls from "classnames";
+import React, { Fragment, useMemo, useState } from "react";
+import "react-datepicker/dist/react-datepicker.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
 import { bnOrZero } from "tradehub-api-js/build/main/lib/tradehub/utils";
-import { CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
+import BigNumber from "bignumber.js";
+import cls from "classnames";
+import dayjs from "dayjs";
+import { Box, Checkbox, DialogContent, DialogProps, FormControlLabel } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
+import { ArkExpiry, ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
 import { getBlockchain, getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask } from "app/utils";
+import { hexToRGBA, useAsyncTask, useBlockTime } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
-import { NftCard } from "app/views/ark/Collection/components";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { ArkClient, logger } from "core/utilities";
-import { fromBech32Address, ZilswapConnector } from "core/zilswap";
-import { ReactComponent as ChainLinkIcon } from "../BuyDialog/chainlink.svg";
+import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
+import { fromBech32Address, toBech32Address } from "core/zilswap";
+import { ReactComponent as WarningIcon } from "../assets/warning.svg";
 
 interface Props extends Partial<DialogProps> {
   token: Nft;
@@ -32,6 +34,50 @@ const initialFormState = {
   acceptTerms: false,
 };
 
+export type expiryOption = {
+  text: string;
+  value: number | undefined;
+  unit: string | undefined;
+};
+
+const EXPIRY_OPTIONS = [
+  {
+    text: "6 hours",
+    value: 6,
+    unit: "hours",
+  },
+  {
+    value: 1,
+    text: "1 day",
+    unit: "day",
+  },
+  {
+    value: 3,
+    text: "3 days",
+    unit: "day",
+  },
+  {
+    value: 1,
+    text: "1 week",
+    unit: "week",
+  },
+  {
+    value: 1,
+    text: "1 month",
+    unit: "month",
+  },
+  {
+    value: 3,
+    text: "3 months",
+    unit: "month",
+  },
+  {
+    value: undefined,
+    text: "Select a date",
+    unit: undefined,
+  },
+];
+
 const BidDialog: React.FC<Props> = (props: Props) => {
   const { children, className, collectionAddress, token, ...rest } = props;
   const classes = useStyles();
@@ -40,38 +86,99 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const { network } = useSelector(getBlockchain);
   const { wallet } = useSelector(getWallet);
   const tokenState = useSelector(getTokens);
-  const open = useSelector<RootState, boolean>((state) => state.layout.showBidNftDialog);
+  const open = useSelector<RootState, boolean>(
+    (state) => state.layout.showBidNftDialog
+  );
   const [runConfirmPurchase, loading, error] = useAsyncTask("confirmPurchase");
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
-  const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
-  const [bidToken, setBidToken] = useState<TokenInfo>(tokenState.tokens[ZIL_ADDRESS]);
-  const match = useRouteMatch<{ id: string, collection: string }>();
+  const [formState, setFormState] =
+    useState<typeof initialFormState>(initialFormState);
+  const [bidToken, setBidToken] = useState<TokenInfo>(
+    tokenState.tokens[ZIL_ADDRESS]
+  );
+  const [expiryDate, setExpiryDate] = useState<Date | null>(null);
+  const [expiryOption, setExpiryOption] = useState<expiryOption>(
+    EXPIRY_OPTIONS[0]
+  );
+  const match = useRouteMatch<{ id: string; collection: string }>();
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, currentBlock] = useBlockTime();
+
+  const bestBid = token.bestBid;
+
+  const { expiry, expiryTime } = useMemo(() => {
+    const currentTime = dayjs();
+    let expiryTime;
+
+    if (!!expiryOption.value) {
+      expiryTime = dayjs().add(expiryOption.value, expiryOption.unit as any);
+    } else {
+      expiryTime = dayjs(expiryDate!!);
+    }
+
+    const minutes = expiryTime.diff(currentTime, "minutes");
+    const blocks = minutes / BLOCKS_PER_MINUTE;
+
+    const expiry = currentBlock + blocks;
+
+    return { expiry, expiryTime };
+  }, [currentBlock, expiryOption, expiryDate]);
+
+  const { priceToken, priceHuman } = useMemo(() => {
+    if (!bestBid) return {};
+    const priceToken =
+      tokenState.tokens[toBech32Address(bestBid.price.address)];
+    const priceHuman = bnOrZero(bestBid.price.amount).shiftedBy(
+      -(priceToken?.decimals ?? 0)
+    );
+
+    return {
+      priceToken,
+      priceHuman,
+    };
+  }, [bestBid, tokenState.tokens]);
 
   const onConfirm = () => {
     if (!wallet) return;
     runConfirmPurchase(async () => {
-      const { collection: address, id } = match.params
+      const { collection: address, id } = match.params;
 
       if (!bidToken) return; // TODO: handle token not found
 
-      const priceAmount = bnOrZero(formState.bidAmount).shiftedBy(bidToken.decimals);
-      const price = { amount: priceAmount, address: fromBech32Address(bidToken.address) };
-      const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
+      const priceAmount = bnOrZero(formState.bidAmount).shiftedBy(
+        bidToken.decimals
+      );
+      const price = {
+        amount: priceAmount,
+        address: fromBech32Address(bidToken.address),
+      };
+      const feeAmount = priceAmount
+        .times(ArkClient.FEE_BPS)
+        .dividedToIntegerBy(10000)
+        .plus(1);
 
       const arkClient = new ArkClient(network);
-      const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0); // int32 max 2147483647
-      const currentBlock = ZilswapConnector.getCurrentBlock();
-      const expiry = currentBlock + 300; // blocks
-      const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
-        side: "Buy",
-        token: { address, id, },
-        price,
-        feeAmount,
-        expiry,
-        nonce,
-      }))
+      const nonce = new BigNumber(Math.random())
+        .times(2147483647)
+        .decimalPlaces(0)
+        .toString(10); // int32 max 2147483647
+      const blockExpiry = Math.trunc(expiry);
+      const message = arkClient.arkMessage(
+        "Execute",
+        arkClient.arkChequeHash({
+          side: "Buy",
+          token: { address, id },
+          price,
+          feeAmount,
+          expiry: blockExpiry,
+          nonce,
+        })
+      );
 
-      const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
+      const { signature, publicKey } = (await wallet.provider!.wallet.sign(
+        message as any
+      )) as any;
 
       const result = await arkClient.postTrade({
         publicKey,
@@ -81,11 +188,12 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         address: wallet.addressInfo.byte20.toLowerCase(),
         tokenId: id,
         side: "Buy",
-        expiry,
+        expiry: blockExpiry,
         nonce,
         price,
       });
 
+      dispatch(actions.Layout.toggleShowBidNftDialog("close"));
       logger("post trade", result);
     });
   };
@@ -127,6 +235,19 @@ const BidDialog: React.FC<Props> = (props: Props) => {
       });
   };
 
+  const isBidEnabled = useMemo(() => {
+    if (!formState.acceptTerms) return false;
+
+    if (bnOrZero(formState.bidAmount).isLessThanOrEqualTo(0)) return false;
+
+    if (bnOrZero(formState.bidAmount).isGreaterThan(bnOrZero(bidToken.balance).shiftedBy(-bidToken.decimals)))
+      return false;
+
+    return true;
+
+    // eslint-disable-next-line
+  }, [formState, bidToken]);
+
   return (
     <DialogModal
       header="Place a Bid"
@@ -137,67 +258,87 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     >
       <DialogContent className={cls(classes.dialogContent)}>
         {/* Nft card */}
-        <NftCard
+        <ArkNFTCard
           className={classes.nftCard}
           token={token}
           collectionAddress={fromBech32Address(collectionAddress)}
           dialog={true}
         />
 
-        <CurrencyInput
-          label="Place Your Bid"
-          token={bidToken ?? null}
-          amount={formState.bidAmount}
-          onEditorBlur={onEndEditBidAmount}
-          onAmountChange={onBidAmountChange}
-          onCurrencyChange={onCurrencyChange}
-        />
+        <Box className={classes.bidContainer}>
+          <CurrencyInput
+            label="Place Your Bid"
+            bid={true}
+            highestBid={priceHuman}
+            bidToken={priceToken}
+            token={bidToken ?? null}
+            amount={formState.bidAmount}
+            onEditorBlur={onEndEditBidAmount}
+            onAmountChange={onBidAmountChange}
+            onCurrencyChange={onCurrencyChange}
+          />
 
-        {!(loading || completedPurchase) && (
-          <Fragment>
-            {/* Terms */}
-            <Box className={classes.termsBox}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    className={classes.radioButton}
-                    checkedIcon={<CheckedIcon />}
-                    icon={<UncheckedIcon fontSize="small" />}
-                    checked={formState.acceptTerms}
-                    onChange={() =>
-                      setFormState({
-                        ...formState,
-                        acceptTerms: !formState.acceptTerms,
-                      })
-                    }
-                    disableRipple
-                  />
-                }
-                label={
-                  <Text>
-                    By checking this box, I accept ARK's terms and conditions.
+          {/* Set expiry */}
+          <ArkExpiry
+            expiryOptions={EXPIRY_OPTIONS}
+            expiryOption={expiryOption}
+            expiryTime={expiryTime}
+            expiry={expiry}
+            setExpiryDate={setExpiryDate}
+            setExpiryOption={setExpiryOption}
+          />
+
+          {!completedPurchase && (
+            <Fragment>
+              {/* Terms */}
+              <Box className={classes.termsBox}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      className={classes.radioButton}
+                      checkedIcon={<CheckedIcon />}
+                      icon={<UncheckedIcon fontSize="small" />}
+                      checked={formState.acceptTerms}
+                      onChange={() =>
+                        setFormState({
+                          ...formState,
+                          acceptTerms: !formState.acceptTerms,
+                        })
+                      }
+                      disableRipple
+                    />
+                  }
+                  label={
+                    <Text>
+                      By checking this box, I accept ARK's terms and conditions.
+                    </Text>
+                  }
+                />
+              </Box>
+
+              <FancyButton
+                className={classes.actionButton}
+                loading={loading}
+                variant="contained"
+                color="primary"
+                onClick={onConfirm}
+                disabled={!isBidEnabled}
+                walletRequired
+              >
+                Place Bid
+              </FancyButton>
+
+              {error && (
+                <Box className={classes.errorBox}>
+                  <WarningIcon className={classes.warningIcon} />
+                  <Text color="error">
+                    Error: {error?.message ?? "Unknown error"}
                   </Text>
-                }
-              />
-            </Box>
-
-            {error && (
-              <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
-            )}
-
-            <FancyButton
-              className={classes.actionButton}
-              loading={loading}
-              variant="contained"
-              color="primary"
-              onClick={onConfirm}
-              disabled={!formState.acceptTerms}
-              walletRequired
-            >
-              Place Bid
-            </FancyButton>
-          </Fragment>
-        )}
+                </Box>
+              )}
+            </Fragment>
+          )}
+        </Box>
 
         {completedPurchase && (
           <FancyButton
@@ -210,23 +351,6 @@ const BidDialog: React.FC<Props> = (props: Props) => {
             View Collection
           </FancyButton>
         )}
-
-        {/* to clean up */}
-        <Backdrop open={loading} className={classes.backdrop}>
-          <Box flex={1}>
-            <Text variant="h2" align="center" className={classes.loadingTitle}>
-              Purchase Processing
-            </Text>
-
-            <Text align="center" className={classes.loadingBody}>
-              Sit tight, it should be confirmed shortly.
-            </Text>
-          </Box>
-
-          <ChainLinkIcon />
-
-          <Box flex={1} />
-        </Backdrop>
       </DialogContent>
     </DialogModal>
   );
@@ -246,7 +370,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         fontSize: "1.8rem",
       },
     },
-    position: "relative",
+    "& .MuiOutlinedInput-root": {
+      border: "none",
+    },
   },
   backdrop: {
     position: "absolute",
@@ -260,16 +386,37 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   dialogContent: {
     backgroundColor: theme.palette.background.default,
     borderLeft:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderRight:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderBottom:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderRadius: "0 0 12px 12px",
     padding: theme.spacing(0, 3, 2),
-    minWidth: 380,
-    maxWidth: 411,
     overflowY: "auto",
+    "&::-webkit-scrollbar-track": {
+      marginBottom: theme.spacing(1),
+    },
+    "&::-webkit-scrollbar": {
+      width: "0.5rem"
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
+      borderRight: "3px solid transparent",
+      backgroundClip: "padding-box"
+    },
+    display: "flex",
+    [theme.breakpoints.down('sm')]: {
+      flexDirection: "column",
+      minWidth: 380,
+      maxWidth: 411,
+    },
+  },
+  bidContainer: {
+    [theme.breakpoints.up('md')]: {
+      marginLeft: theme.spacing(2),
+      maxWidth: 420
+    }
   },
   actionButton: {
     height: 46,
@@ -280,6 +427,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   nftCard: {
     maxWidth: "none",
+    [theme.breakpoints.up('md')]: {
+      maxWidth: 360
+    }
   },
   radioButton: {
     padding: "6px",
@@ -288,7 +438,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   termsBox: {
-    marginBottom: theme.spacing(1),
+    display: "flex",
+    justifyContent: "center",
+    marginTop: theme.spacing(1.5),
+    marginBottom: theme.spacing(1.5),
     "& .MuiFormControlLabel-root": {
       marginLeft: "-8px",
       marginRight: 0,
@@ -338,6 +491,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "24px",
     marginTop: theme.spacing(0.5),
   },
+  errorBox: {
+    marginTop: theme.spacing(2),
+    minHeight: 46,
+    width: "100%",
+    border: "1px solid #FF5252",
+    backgroundColor: `rgba${hexToRGBA("#FF5252", 0.2)}`,
+    borderRadius: 12,
+    padding: theme.spacing(2, 3),
+    display: "flex",
+    alignItems: "center",
+  },
+  warningIcon: {
+    height: 24,
+    width: 24,
+    flex: "none",
+    marginRight: theme.spacing(1)
+  }
 }));
 
 export default BidDialog;

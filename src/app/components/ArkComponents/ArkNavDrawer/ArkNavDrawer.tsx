@@ -13,7 +13,7 @@ import ArrowForwardIcon from "@material-ui/icons/ArrowForwardRounded";
 import cls from "classnames";
 import { Link } from "react-router-dom";
 import { Text } from "app/components";
-import { ReactComponent as ArkBrand } from "app/components/ArkComponents/ArkTopBar/ark.svg";
+import ArkLogo from "app/components/ArkComponents/ArkTopBar/ark-logo.png";
 import { AppTheme } from "app/theme/types";
 import { useRouter } from "app/utils";
 
@@ -77,6 +77,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       color: "#6BE1FF",
     },
   },
+  logo: {
+    height: "28px"
+  }
 }));
 
 const ArkNavDrawer: React.FC<DrawerProps> = (props: any) => {
@@ -100,7 +103,7 @@ const ArkNavDrawer: React.FC<DrawerProps> = (props: any) => {
           className={classes.brandButton}
           disableRipple
         >
-          <ArkBrand />
+          <img src={ArkLogo} alt="logo" className={classes.logo} />
         </Button>
         <IconButton className={classes.closeButton} onClick={onClose}>
           <ArrowForwardIcon />
@@ -126,7 +129,7 @@ const ArkNavDrawer: React.FC<DrawerProps> = (props: any) => {
                 location.pathname === "/ark/collections",
             })}
           >
-            <Text variant="button">Collections</Text>
+            <Text variant="button">Discover</Text>
           </ListItem>
           <ListItem
             button

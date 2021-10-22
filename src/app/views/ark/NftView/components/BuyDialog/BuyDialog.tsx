@@ -9,18 +9,17 @@ import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
-import { CurrencyLogo, DialogModal, FancyButton, Text } from "app/components";
-import { SocialLinkGroup } from "app/components/ArkComponents";
+import { CurrencyLogo, DialogModal, FancyButton, Text, ArkNFTCard } from "app/components";
 import { getBlockchain, getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, truncate, useAsyncTask } from "app/utils";
-import { NftCard } from "app/views/ark/Collection/components";
+import { bnOrZero, hexToRGBA, truncate, useAsyncTask } from "app/utils";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { ArkClient, logger } from "core/utilities";
 import { fromBech32Address, ZilswapConnector } from "core/zilswap";
+import { ReactComponent as WarningIcon } from "../assets/warning.svg";
 import { ReactComponent as ChainLinkIcon } from "./chainlink.svg";
 
 interface Props extends Partial<DialogProps> {
@@ -70,7 +69,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
 
       const arkClient = new ArkClient(network);
-      const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0); // int32 max 2147483647
+      const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 300; // blocks
       const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
@@ -84,20 +83,22 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
 
       const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
 
-      const result = await arkClient.postTrade({
-        publicKey,
-        signature,
-
-        collectionAddress: address,
-        address: wallet.addressInfo.byte20.toLowerCase(),
-        tokenId: id,
-        side: "Buy",
+      const buyCheque: ArkClient.ExecuteBuyCheque = {
+        side: "buy",
         expiry,
         nonce,
-        price,
-      });
+        publicKey: `0x${publicKey}`,
+        signature: `0x${signature}`,
+      }
 
-      logger("post trade", result);
+      const execTradeResult = await arkClient.executeTrade({
+        buyCheque,
+        sellCheque: bestAsk,
+        nftAddress: address,
+        tokenId: id,
+      }, ZilswapConnector.getSDK());
+
+        logger("exec trade result", execTradeResult)
     });
   };
 
@@ -132,7 +133,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
     >
       <DialogContent className={cls(classes.dialogContent)}>
         {/* Nft card */}
-        <NftCard
+        <ArkNFTCard
           className={classes.nftCard}
           token={token}
           collectionAddress={fromBech32Address(collectionAddress)}
@@ -210,10 +211,6 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
               />
             </Box>
 
-            {error && (
-              <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
-            )}
-
             <FancyButton
               className={classes.actionButton}
               loading={loading}
@@ -225,6 +222,15 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
             >
               Confirm Purchase
             </FancyButton>
+
+            {error && (
+                <Box className={classes.errorBox}>
+                  <WarningIcon className={classes.warningIcon} />
+                  <Text color="error">
+                    Error: {error?.message ?? "Unknown error"}
+                  </Text>
+                </Box>
+              )}
           </Fragment>
         )}
 
@@ -241,10 +247,10 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
               View Collection
             </FancyButton>
 
-            <Box display="flex" flexDirection="column" alignItems="center">
+            {/* <Box display="flex" flexDirection="column" alignItems="center">
               <Text className={classes.shareText}>Share</Text>
-              <SocialLinkGroup />
-            </Box>
+              <SocialLinkGroup collection={token.collection} />
+            </Box> */}
           </Box>
         )}
 
@@ -297,16 +303,27 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   dialogContent: {
     backgroundColor: theme.palette.background.default,
     borderLeft:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderRight:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderBottom:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderRadius: "0 0 12px 12px",
     padding: theme.spacing(0, 3, 2),
     minWidth: 380,
     maxWidth: 411,
     overflowY: "auto",
+    "&::-webkit-scrollbar-track": {
+      marginBottom: theme.spacing(1),
+    },
+    "&::-webkit-scrollbar": {
+      width: "0.5rem"
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
+      borderRight: "3px solid transparent",
+      backgroundClip: "padding-box"
+    },
   },
   actionButton: {
     height: 46,
@@ -321,7 +338,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   termsBox: {
-    marginBottom: theme.spacing(1),
+    display: "flex",
+    justifyContent: "center",
+    marginTop: theme.spacing(1.5),
+    marginBottom: theme.spacing(1.5),
     "& .MuiFormControlLabel-root": {
       marginLeft: "-8px",
       marginRight: 0,
@@ -379,6 +399,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginTop: theme.spacing(1.5),
     marginBottom: theme.spacing(1),
   },
+  errorBox: {
+    marginTop: theme.spacing(2),
+    minHeight: 46,
+    width: "100%",
+    border: "1px solid #FF5252",
+    backgroundColor: `rgba${hexToRGBA("#FF5252", 0.2)}`,
+    borderRadius: 12,
+    padding: theme.spacing(2, 3),
+    display: "flex",
+    alignItems: "center",
+  },
+  warningIcon: {
+    height: 24,
+    width: 24,
+    flex: "none",
+    marginRight: theme.spacing(1)
+  }
 }));
 
 export default BuyDialog;

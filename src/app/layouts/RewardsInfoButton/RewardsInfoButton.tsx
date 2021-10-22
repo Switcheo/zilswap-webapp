@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: theme.spacing(3),
     boxShadow: theme.palette.mainBoxShadow,
     backgroundColor: theme.palette.background.default,
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF"
+    border: theme.palette.border
   },
   popper: {
     zIndex: 1102,

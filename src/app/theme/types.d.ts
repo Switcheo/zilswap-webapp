@@ -34,6 +34,8 @@ export interface AppPalette extends PaletteOptions {
   label: string;
   warning: SimplePaletteColorOptions;
   link: string;
+  border: string;
+  boderColor: string;
 }
 
 export interface AppTheme extends ThemeOptions {

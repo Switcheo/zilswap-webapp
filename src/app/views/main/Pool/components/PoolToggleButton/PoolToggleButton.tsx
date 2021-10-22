@@ -5,8 +5,9 @@ import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { actions } from "app/store";
 import { PoolType, RootState } from "app/store/types";
+import { AppTheme } from "app/theme/types";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   tab: {
@@ -23,12 +24,12 @@ const useStyles = makeStyles(theme => ({
     '&:not(:first-child)': {
       borderTopLeftRadius: 0,
       borderBottomLeftRadius: 0,
-      border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      border: theme.palette.border,
     },
     '&:not(:last-child)': {
       borderTopRightRadius: 0,
       borderBottomRightRadius: 0,
-      border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      border: theme.palette.border,
     },
   },
 }));

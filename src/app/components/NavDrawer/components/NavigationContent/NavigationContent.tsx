@@ -28,17 +28,10 @@ const CustomRouterLink = forwardRef((props: any, ref: any) => (
 ));
 
 const InternalRouteMap: any = {
-  "/pools/overview": "/pools",
-  "/pools/transactions": "/pools",
-  "/zilo/current": "/zilo",
-  "/zilo/past": "/zilo",
   "/swap": "/swap",
   "/pool": "/swap",
   "/bridge": "/bridge",
   "/history": "/bridge",
-  "/ark/discover": "/ark",
-  "/ark/collections": "/ark",
-  "/ark/profile": "/ark",
 };
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -136,7 +129,6 @@ const NavigationContent: React.FC<NavigationContentProps> = (
   const [widgetOpen, setWidgetOpen] = useState(false);
   const Icon = navigation.icon ? Icons[navigation.icon] : InboxIcon;
   const router = useRouter();
-  const location = router.location;
 
   const initWidget = (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setWidgetOpen(true);
@@ -165,11 +157,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (
       setWidgetOpen(false)
     );
   };
-
-  const selected = () => {
-    if (navigation.href === location.pathname) return true;
-    if (InternalRouteMap[location.pathname] === navigation.href) return true;
-  };
+  const selected = (match: any, location: any) => navigation.href ? (InternalRouteMap[location.pathname] || location.pathname).startsWith(navigation.href!) : false;
 
   if (!showDrawer)
     return (
@@ -185,11 +173,11 @@ const NavigationContent: React.FC<NavigationContentProps> = (
               {
                 [classes.highlightTitle]: navigation.highlight,
                 [classes.secondaryFont]: secondary,
+                [classes.buyZil]: navigation.purchase,
+                [classes.buttonLeafActive]: selected(router.match, router.location),
               },
               classes.buttonLeaf,
               classes.inactive,
-              navigation.purchase && classes.buyZil,
-              selected() && classes.buttonLeafActive
             )}
           >
             <Box
@@ -212,130 +200,129 @@ const NavigationContent: React.FC<NavigationContentProps> = (
       </>
     );
 
-  return (
-    <>
-      {navigation.external && navigation.href && (
-        <ListItem className={classes.listItem} disableGutters button>
-          <Button
-            className={cls(
-              {
-                [classes.highlightTitle]: navigation.highlight,
-                [classes.secondaryFont]: secondary,
-              },
-              classes.buttonLeaf
-            )}
-            href={navigation.href}
-            target="_blank"
-          >
-            <Icon width="20px" className={classes.icon} />
-            {navigation.title}
-          </Button>
-        </ListItem>
-      )}
-      {navigation.expand && (
-        <>
-          <ListItem
-            className={cls(
-              {
-                [classes.highlightTitle]: navigation.highlight,
-                [classes.secondaryFont]: secondary,
-              },
-              classes.buttonLeaf,
-              classes.listItem
-            )}
-            button
-            onClick={() =>
-              setExpand(navigation.title === expand ? null : navigation.title)
-            }
-          >
-            <Icon width="20px" className={classes.icon} />
-            <ListItemText
-              primary={navigation.title}
-              primaryTypographyProps={{ className: classes.mainFont }}
-            />
-            {expand === navigation.title ? <ArrowDropUp /> : <ArrowDropDown />}
-          </ListItem>
-          <Collapse in={expand === navigation.title}>
-            <List className={cls(classes.listItem, classes.expandedList)}>
-              {navigation.items &&
-                navigation.items.map(
-                  (item: NavigationPageOptions, index: number) => (
-                    <NavigationContent
-                      key={index}
-                      navigation={item}
-                      secondary={true}
-                      showDrawer={showDrawer}
-                    />
-                  )
-                )}
-            </List>
-          </Collapse>
-        </>
-      )}
-      {navigation.purchase && (
-        <ListItem className={classes.listItem} disableGutters button>
-          <Button
-            className={cls(
-              classes.buyZil,
-              {
-                [classes.highlightTitle]: navigation.highlight,
-                [classes.secondaryFont]: secondary,
-              },
-              classes.buttonLeaf
-            )}
-            onClick={(ev) => !widgetOpen && initWidget(ev)}
-          >
-            <Icon width="20px" className={classes.icon} />
-            {navigation.title}
-          </Button>
-        </ListItem>
-      )}
-      {!navigation.external && !navigation.expand && !navigation.purchase && (
-        <ListItem
-          className={classes.listItem}
-          disableGutters
-          button
-          disabled={navigation.disabled}
+  if (navigation.external && navigation.href) {
+    return (
+      <ListItem className={classes.listItem} disableGutters button>
+        <Button
+          className={cls(
+            {
+              [classes.highlightTitle]: navigation.highlight,
+              [classes.secondaryFont]: secondary,
+            },
+            classes.buttonLeaf
+          )}
+          href={navigation.href}
+          target="_blank"
         >
-          <Button
-            className={cls(
-              {
-                [classes.highlightTitle]: navigation.highlight,
-                [classes.secondaryFont]: secondary,
-              },
-              classes.buttonLeaf
+          <Icon width="20px" className={classes.icon} />
+          {navigation.title}
+        </Button>
+      </ListItem>
+    )
+  }
+
+  if (navigation.purchase) {
+    return (
+      <ListItem className={classes.listItem} disableGutters button>
+        <Button
+          className={cls(
+            classes.buyZil,
+            {
+              [classes.highlightTitle]: navigation.highlight,
+              [classes.secondaryFont]: secondary,
+            },
+            classes.buttonLeaf
+          )}
+          onClick={(ev) => !widgetOpen && initWidget(ev)}
+        >
+          <Icon width="20px" className={classes.icon} />
+          {navigation.title}
+        </Button>
+      </ListItem>
+    )
+  }
+
+  if (navigation.expand) {
+    return <>
+      <ListItem
+        className={cls(
+          {
+            [classes.highlightTitle]: navigation.highlight,
+            [classes.secondaryFont]: secondary,
+          },
+          classes.buttonLeaf,
+          classes.listItem
+        )}
+        button
+        onClick={() =>
+          setExpand(navigation.title === expand ? null : navigation.title)
+        }
+      >
+        <Icon width="20px" className={classes.icon} />
+        <ListItemText
+          primary={navigation.title}
+          primaryTypographyProps={{ className: classes.mainFont }}
+        />
+        {expand === navigation.title ? <ArrowDropUp /> : <ArrowDropDown />}
+      </ListItem>
+      <Collapse in={expand === navigation.title}>
+        <List className={cls(classes.listItem, classes.expandedList)}>
+          {navigation.items &&
+            navigation.items.map(
+              (item: NavigationPageOptions, index: number) => (
+                <NavigationContent
+                  key={index}
+                  navigation={item}
+                  secondary={true}
+                  showDrawer={showDrawer}
+                />
+              )
             )}
-            activeClassName={classes.buttonLeafActive}
-            isActive={(match: any, location: any) => {
-              if (navigation.href === location.pathname) return true;
-              if (InternalRouteMap[location.pathname] === navigation.href)
-                return true;
-            }}
-            component={CustomRouterLink}
-            to={navigation.disabled ? "/disabled-path" : navigation.href}
-            exact={false}
-          >
-            <Icon width="20px" className={classes.icon} />
-            {navigation.title === "Swap + Pool" ? (
-              <span>
-                Swap <span className={classes.textColoured}>+</span> Pool
-              </span>
-            ) : (
-              navigation.title
-            )}
-            {!!navigation.badge && (
-              <span
-                className={classes.textColoured}
-                style={{ fontSize: ".7em", marginLeft: "8px" }}
-              >
-                {navigation.badge}
-              </span>
-            )}
-          </Button>
-        </ListItem>
-      )}
+        </List>
+      </Collapse>
     </>
-  );
+  }
+
+  return (
+    <ListItem
+      className={classes.listItem}
+      disableGutters
+      button
+      disabled={navigation.disabled}
+    >
+      <Button
+        className={cls(
+          {
+            [classes.highlightTitle]: navigation.highlight,
+            [classes.secondaryFont]: secondary,
+          },
+          classes.buttonLeaf
+        )}
+        activeClassName={classes.buttonLeafActive}
+        isActive={selected}
+        component={CustomRouterLink}
+        to={navigation.disabled ? "/disabled-path" : navigation.href}
+        exact={false}
+      >
+        <Icon width="20px" className={classes.icon} />
+        {navigation.title === "Swap + Pool" ? (
+          <span>
+            Swap <span className={classes.textColoured}>+</span> Pool
+          </span>
+        ) : (
+          navigation.title
+        )}
+        {!!navigation.badge && (
+          <span
+            className={classes.textColoured}
+            style={{ fontSize: ".7em", marginLeft: "8px" }}
+          >
+            {navigation.badge}
+          </span>
+        )}
+      </Button>
+    </ListItem>
+  )
 };
 
 export default NavigationContent;

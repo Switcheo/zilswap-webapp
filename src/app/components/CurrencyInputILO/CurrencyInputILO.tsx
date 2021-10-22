@@ -8,13 +8,14 @@ import { CurrencyLogo, Text } from "app/components";
 import { RootState, TokenInfo, WalletState } from "app/store/types";
 import { useMoneyFormatter } from "app/utils";
 import { bnOrZero } from "app/utils";
+import { AppTheme } from "app/theme/types";
 import { CurrencyDialogProps } from "../CurrencyDialog/CurrencyDialog";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   box: {
-    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    backgroundColor: theme.palette.background!.contrast,
     border: "3px solid rgba(0, 255, 176, 0.2)",
     margin: "2px",
   },

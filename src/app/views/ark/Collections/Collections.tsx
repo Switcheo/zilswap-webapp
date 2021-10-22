@@ -79,7 +79,7 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       const result = await arkClient.listCollection();
       setCollections(result.result.entries);
     };
-  
+
     getCollections();
   }, [network]);
 
@@ -105,23 +105,22 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                   value={searchFilter}
                   onChange={(e) => setSearchFilter(e.target.value)}
                 >
-                  {SEARCH_FILTERS.map((filter) => {
-                    return (
-                      <FormControlLabel
-                        className={classes.formControlLabel}
-                        value={filter}
-                        control={
-                          <Radio
-                            className={classes.radioButton}
-                            checkedIcon={<CheckedIcon />}
-                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                            disableRipple
-                          />
-                        }
-                        label={filter.toUpperCase()}
-                      />
-                    );
-                  })}
+                  {SEARCH_FILTERS.map((filter, index) => (
+                    <FormControlLabel
+                      key={index}
+                      className={classes.formControlLabel}
+                      value={filter}
+                      control={
+                        <Radio
+                          className={classes.radioButton}
+                          checkedIcon={<CheckedIcon />}
+                          icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                          disableRipple
+                        />
+                      }
+                      label={filter.toUpperCase()}
+                    />
+                  ))}
                 </RadioGroup>
               </FormControl>
             </InputAdornment>
@@ -133,17 +132,13 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         </Text>
 
         {/* List of collections here */}
-        {collections.map((collection) => {
-          return (
-            <Link
-              to={`/ark/collections/${toBech32Address(collection.address)}`}
-            >
-              <Text marginTop={2} variant="h1">
-                {collection.name}
-              </Text>
-            </Link>
-          );
-        })}
+        {collections.map((collection) => (
+          <Link key={collection.address} to={`/ark/collections/${toBech32Address(collection.address)}`}>
+            <Text marginTop={2} variant="h1">
+              {collection.name}
+            </Text>
+          </Link>
+        ))}
       </Container>
     </ArkPage>
   );

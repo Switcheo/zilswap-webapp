@@ -4,24 +4,23 @@ import {
   Container,
   Tooltip,
   Typography,
-  useMediaQuery, useTheme
+  useMediaQuery,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { toBech32Address } from "@zilliqa-js/crypto";
+import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
 import cls from "classnames";
 import { useSelector } from "react-redux";
-import { useRouteMatch } from "react-router";
 import { ArkClient } from "core/utilities";
 import { ArkBanner, ArkTab } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
-import { MarketPlaceState, Profile as ProfileType, RootState, WalletState } from "app/store/types";
+import { MarketPlaceState, Profile, RootState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useNetwork } from "app/utils";
 import { truncateAddress } from "app/utils";
 import {
   BidsMade,
   BidsReceived,
-  Collected,
+  Nfts,
   EditProfile
 } from "./components";
 import { ReactComponent as EditIcon } from "./edit-icon.svg";
@@ -32,29 +31,61 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       padding: 0,
     },
   },
-  addrBox: {
-    padding: "8px 24px",
+  badge: {
+    backgroundColor: theme.palette.background.contrast,
+  },
+  addressBox: {
+    textAlign: 'center',
+    width: '100%',
+    marginTop: theme.spacing(0.5),
+  },
+  addressBadge: {
+    extend: 'badge',
     borderRadius: "12px",
-    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#6BE1FF40",
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-    opacity: 0.9,
+    padding: "8px 24px",
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
     alignSelf: "center",
     width: "fit-content",
     cursor: "pointer",
+    margin: 'auto',
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
   },
-  descriptionBox: {
-    border: "1px solid #003340",
+  bioBox: {
+    width: 480,
+    maxWidth: '90%',
+    border: theme.palette.border,
     boxSizing: "border-box",
     borderRadius: "12px",
     filter: "drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))",
-    minWidth: 320,
     textAlign: "center",
     color: theme.palette.text?.primary,
-    opacity: "0.5",
+    opacity: 0.8,
+    margin: 'auto',
+    marginTop: theme.spacing(3),
+  },
+  addBio: {
+    fontSize: 14,
   },
   editIcon: {
-    paddingTop: "4px",
+    display: 'inline-block',
+    lineHeight: 0,
+    marginLeft: 8,
+    marginRight: -31,
+    padding: 7,
+    borderRadius: 3,
+    '& > svg': {
+      width: 13,
+      height: 13,
+      fill: theme.palette.type === "dark" ? undefined : "#0D1B24",
+    },
+    '&:hover': {
+      extend: 'badge',
+      cursor: 'pointer',
+      '& > svg > path': {
+        stroke: "#00FFB0",
+      },
+    }
   },
   editable: {
     cursor: "pointer",
@@ -67,170 +98,181 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   connectionText: {
     margin: theme.spacing(1),
   },
+  tabs: {
+    marginTop: theme.spacing(5),
+  }
 }));
 
-const isCopiable = (addr: string) => {
+const normalizeAddress = (addr?: string | null) => {
   try {
-    return !!toBech32Address(addr);
+    if (!addr) {
+      return null
+    }
+    if (addr.startsWith('0x')) {
+      return toBech32Address(addr)
+    }
+    if (addr.startsWith('zil1') && !!fromBech32Address(addr)) {
+      return addr
+    }
+    return null
   } catch (error) {
-    return false
+    return null
   }
 }
 
-const Profile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
+const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
 ) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
-  const { wallet } = useSelector<RootState, WalletState>(
-    (state) => state.wallet
-  );
-  const { profile: storeProfile } = useSelector<RootState, MarketPlaceState>(
-    (state) => state.marketplace
-  );
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
+  const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
+  const { profile: connectedProfile } = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
   const [showEdit, setShowEdit] = useState(false);
   const [currentTab, setCurrentTab] = useState("Collected");
-  const { params: { address: RawAddress } } = useRouteMatch<{ address: string }>();
-  const [viewProfile, setViewProfile] = useState<ProfileType | null>(null);
-  const [addrText, setAddrText] = useState<string | undefined>(undefined);
-  const [profileIsOwner, setProfileIsOwner] = useState(false);
+  const [viewProfile, setViewProfile] = useState<Profile | null>(null);
+  const [tooltipText, setTooltipText] = useState<string>('Copy address');
   const network = useNetwork();
   const [runQueryProfile] = useAsyncTask("queryProfile");
-  const theme = useTheme();
 
-  let address = RawAddress;
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const paramAddress = normalizeAddress(urlSearchParams.get('address'))
+  const connectedAddress = normalizeAddress(wallet?.addressInfo.bech32)
 
-  // set all to bech32 format for easily reference
-  if (address && !address.startsWith("zil1") && isCopiable(address)) address = toBech32Address(address);
-
-
-  useEffect(() => {
-    checkProfile();
-    // eslint-disable-next-line
-  }, []);
+  const hasParam = paramAddress && paramAddress.length > 0
+  const address = hasParam ? paramAddress : connectedAddress
+  const isConnectedUser = hasParam ? connectedAddress === address : true
 
   useEffect(() => {
-    if (storeProfile?.address || !wallet?.addressInfo.bech32) {
-      checkProfile();
+    if (isConnectedUser) {
+      setViewProfile(connectedProfile!)
+    } else if (address) {
+      runQueryProfile(async () => {
+        const arkClient = new ArkClient(network);
+        try {
+          const hexAddr = fromBech32Address(address!)
+          const { result: { model } } = await arkClient.getProfile(hexAddr);
+          setViewProfile(model);
+        } catch (err) {
+          console.error(err)
+        }
+      })
     }
-
     // eslint-disable-next-line
-  }, [storeProfile, wallet])
+  }, [address, connectedProfile, network])
 
-  const checkProfile = () => {
-    if (((storeProfile?.address && !address) || (storeProfile?.address && toBech32Address(storeProfile?.address) === address)) && wallet?.addressInfo.bech32) {
-      setViewProfile(storeProfile);
-      setProfileIsOwner(true);
-      setAddrText(truncateAddress(storeProfile?.address, isXs))
-    } else {
-      if (address) {
-        getProfile(RawAddress);
-      } else {
-        setViewProfile(null);
-      }
-      setProfileIsOwner(false);
+  useEffect(() => {
+    if (connectedProfile && isConnectedUser) {
+      setViewProfile(connectedProfile);
     }
-  }
-
-  const getProfile = (address: string) => {
-    runQueryProfile(async () => {
-      const arkClient = new ArkClient(network);
-      const { result: { model } } = await arkClient.getProfile(address);
-      setViewProfile(model);
-      setAddrText(truncateAddress(model?.address, isXs))
-    })
-  }
+    // eslint-disable-next-line
+  }, [connectedProfile])
 
   const copyAddr = (text: string) => {
     navigator.clipboard.writeText(text);
-    setAddrText("Copied");
+    setTooltipText("Copied!");
     setTimeout(() => {
-      setAddrText(truncateAddress(wallet?.addressInfo.bech32 || '', isXs));
-    }, 3000);
+      setTooltipText("Copy address");
+    }, 2000);
   };
 
-  let tabHeaders = ["Collected", "For Sale", "Liked"];
-  if (profileIsOwner) tabHeaders = tabHeaders.concat(["Bids Made", "Bids Received",])
+  let tabHeaders = ["Collected", "For Sale", "Liked", "Bids Made"];
+  if (isConnectedUser) tabHeaders = tabHeaders.concat(["Bids Received"])
 
+  if (!viewProfile && !isConnectedUser) return <ArkPage {...rest} /> // loading profile data
+
+  const currentTabBody = () => {
+    if (!address) return null
+    const hexAddress = fromBech32Address(address)
+
+    switch (currentTab) {
+      case 'Collected': return <Nfts address={hexAddress} filter='collected' />
+      case 'For Sale': return <Nfts address={hexAddress} filter='onSale' />
+      case 'Liked': return <Nfts address={hexAddress} filter='liked' />
+      case 'Bids Made': return <BidsMade address={hexAddress} />
+      case 'Bids Received': return isConnectedUser && <BidsReceived address={hexAddress} />
+      default: return null
+    }
+  }
 
   return (
     <ArkPage {...rest}>
       {!showEdit && (
         <Container className={classes.root} maxWidth="lg">
-          <ArkBanner avatarImage={viewProfile?.profileImage?.url}>
-            <Typography variant="h2">
-              {viewProfile?.username || "Unnamed"}{" "}
-              {profileIsOwner && (
-                <EditIcon
-                  onClick={() => setShowEdit(true)}
-                  fill={theme.palette.type === "dark" ? undefined : "#0D1B24"}
-                  className={cls(classes.editIcon, classes.editable)}
-                />
-              )}
-            </Typography>
-            {(address || viewProfile?.address) && (
-              <Tooltip title="Copy address" placement="top" arrow>
+          <ArkBanner avatarImage={viewProfile?.profileImage?.url} />
+
+          <Box className={classes.addressBox}>
+            {address && [
+              <Typography variant="h2">
+                {viewProfile?.username || truncateAddress(address || '')}
+                {isConnectedUser && (
+                  <Box className={classes.editIcon}>
+                    <EditIcon
+                      onClick={() => setShowEdit(true)}
+                      className={cls(classes.editable)}
+                    />
+                  </Box>
+                )}
+              </Typography>,
+              <Tooltip title={tooltipText} placement="right" arrow>
                 <Box
-                  onClick={() => copyAddr(isCopiable(viewProfile?.address || address) ? toBech32Address(viewProfile?.address || address) : address)}
-                  className={classes.addrBox}
+                  onClick={() => address && copyAddr(address)}
+                  className={classes.addressBadge}
                 >
-                  <Typography variant="body1">{addrText || address}</Typography>
+                  <Typography variant="body1">
+                    {truncateAddress(address || '', isXs)}
+                  </Typography>
                 </Box>
               </Tooltip>
-            )}
+            ]}
+          </Box>
 
-            {viewProfile && (
-              <Box className={classes.descriptionBox} padding={3}>
-                {!viewProfile.bio && (
-                  <Typography
-                    onClick={() => profileIsOwner && setShowEdit(true)}
-                    className={cls(classes.editable)}
-                  >
-                    <u>Add a bio</u>
-                  </Typography>
-                )}
-                {viewProfile.bio && (
-                  <Typography>{viewProfile.bio}</Typography>
-                )}
-              </Box>
-            )}
-          </ArkBanner>
+          {
+            isConnectedUser && !viewProfile?.bio &&
+            <Box className={classes.bioBox} padding={3}>
+              <Typography
+                onClick={() => setShowEdit(true)}
+                className={cls(classes.addBio, classes.editable)}
+              >
+                <u>Add Bio</u>
+              </Typography>
+            </Box>
+          }
+          {
+            viewProfile?.bio &&
+            <Box className={classes.bioBox} padding={3}>
+              <Typography>{viewProfile?.bio}</Typography>
+            </Box>
+          }
+
           <ArkTab
+            className={classes.tabs}
             setCurrentTab={(value) => setCurrentTab(value)}
             currentTab={currentTab}
             tabHeaders={tabHeaders}
           />
-          {viewProfile && (
-            <>
-              {currentTab === "Collected" && (
-                <Collected address={viewProfile?.address} />
-              )}
-              {(currentTab === "Bids Made") && profileIsOwner && <BidsMade />}
-              {(currentTab === "Bids Received") && profileIsOwner && <BidsReceived />}
-            </>
-          )}
-          {(!wallet && !address) && (
-            <Box mt={12} display="flex" justifyContent="center">
-              <Box display="flex" flexDirection="column" textAlign="center">
-                <Typography className={classes.connectionText} variant="h1">
-                  Your wallet is not connected.
-                </Typography>
-                <Typography className={classes.connectionText} variant="body1">
-                  Please connect your wallet to view this page.
-                </Typography>
+          {
+            (!wallet && !address) ?
+              <Box mt={12} display="flex" justifyContent="center">
+                <Box display="flex" flexDirection="column" textAlign="center">
+                  <Typography className={classes.connectionText} variant="h1">
+                    Your wallet is not connected.
+                  </Typography>
+                  <Typography className={classes.connectionText} variant="body1">
+                    Please connect your wallet to view this page.
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
-          )}
+              :
+              currentTabBody()
+          }
         </Container>
       )}
       {showEdit && (
-        <Container className={classes.root} maxWidth="lg">
-          <EditProfile wallet={wallet} profile={storeProfile} onBack={() => setShowEdit(false)} />
-        </Container>
+        <EditProfile wallet={wallet} profile={viewProfile} onBack={() => setShowEdit(false)} />
       )}
     </ArkPage>
   );
 };
 
-export default Profile;
+export default ProfilePage;

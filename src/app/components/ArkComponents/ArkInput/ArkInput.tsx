@@ -1,47 +1,98 @@
-import React from "react";
-import { BoxProps, FormControl, FormHelperText, InputBase, InputLabel } from "@material-ui/core";
+import React, { useState, Fragment } from "react";
+import { BoxProps, FormControl, FormHelperText, InputAdornment, InputBase, Box, Typography } from "@material-ui/core";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import cls from "classnames"
 import { AppTheme } from "app/theme/types";
 
 interface Props extends BoxProps {
-  label: string;
+  label: React.ReactNode;
   value: string;
   onValueChange: (value: string) => void;
   multiline?: boolean;
   error?: string;
+  instruction?: string;
+  startAdorment?: JSX.Element;
+  inline?: boolean;
+  wordLimit?: number;
+  hideInput?: boolean;
 }
 
 const BootstrapInput = withStyles((theme) => ({
   root: {
-    'label + &': {
-      marginTop: theme.spacing(3),
-    },
-  },
-  input: {
     borderRadius: 12,
     backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#DEFFFF",
-    position: 'relative',
     border: '1px solid #29475A',
-    fontSize: 12,
-    width: '100%',
-    padding: '10px 12px',
-    transition: theme.transitions.create(['border-color', 'box-shadow']),
+    'label + &': {
+      marginTop: theme.spacing(3.5),
+    },
     '&:focus': {
       borderColor: theme.palette.action.selected,
     },
+    transition: theme.transitions.create(['border-color', 'box-shadow']),
+    padding: '5px 12px',
   },
-
+  input: {
+    position: 'relative',
+    fontSize: 12,
+    width: '100%',
+  },
 }))(InputBase);
+
+const ArkInput: React.FC<Props> = (props: Props) => {
+  const { hideInput, wordLimit, inline, startAdorment, instruction, error = "", label, multiline, value, onValueChange, className, ...rest } = props;
+  const classes = useStyles();
+  const [onFocus, setOnFocus] = useState(false)
+
+  return (
+    <Box className={classes.root}>
+      {inline && (<Typography className={classes.inlineLabel}>
+        {label}
+      </Typography>)}
+      <FormControl fullWidth className={cls({ [classes.inline]: inline })}>
+        {!inline && (
+          <Fragment>
+            {typeof label === "string" ? (<Typography className={classes.label}>{label}</Typography>) : label}
+            {instruction && (
+              <FormHelperText className={cls(classes.instruction, classes.extraMargin)}>{instruction}
+                {wordLimit && (<Typography className={cls(classes.wordLimit)}> {value.length || "0"}/{wordLimit}</Typography>)}
+              </FormHelperText>
+            )}
+          </Fragment>
+        )}
+        {!hideInput && (
+          <BootstrapInput
+            startAdornment={startAdorment ? <InputAdornment className={cls({ [classes.focusAdornment]: onFocus && !error })} position="start">{startAdorment}</InputAdornment> : undefined}
+            onFocus={() => setOnFocus(true)} onBlur={() => setOnFocus(false)} className={cls({ [classes.focussed]: onFocus && !error, [classes.multiline]: multiline, [classes.error]: error && !!value })}
+            multiline={multiline} value={value} onChange={(e) => onValueChange(e.target.value)} fullWidth defaultValue="react-bootstrap" {...rest} />
+        )}
+        <FormHelperText className={cls({ [classes.errorText]: true })} >{error ? error : " "}</FormHelperText>
+      </FormControl>
+    </Box >
+  );
+};
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     marginTop: theme.spacing(1),
+    width: "100%",
+    display: "flex",
+    alignItems: "center"
   },
   label: {
     fontSize: "14px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
-    fontFamily: "Avenir Next LT Pro",
+    fontFamily: "'Raleway', sans-serif",
+    fontWeight: 900,
+    overflowX: "visible",
+  },
+  inlineLabel: {
+    fontSize: "14px",
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    fontFamily: "'Raleway', sans-serif",
+    fontWeight: 900,
+    overflowX: "visible",
+    width: 100,
+    paddingBottom: theme.spacing(1.5),
   },
   error: {
     border: '1px solid #FF5252',
@@ -53,30 +104,45 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   errorText: {
     color: "#FF5252",
-  },
-  helperText: {
-    color: "#FF5252",
     fontSize: 10,
     margin: 0
   },
+  instruction: {
+    color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
+    fontFamily: 'Avenir Next',
+    fontWeight: 700,
+    fontSize: 10,
+    margin: 0,
+  },
   hiddenText: {
     visibility: "hidden"
-  }
+  },
+  focussed: {
+    borderColor: theme?.palette?.action?.selected,
+  },
+  multiline: {
+    padding: '5px 12px',
+    minHeight: 50,
+  },
+  inline: {
+    // display: "flex",
+    // justifyContent: "space-between",
+  },
+  focusAdornment: {
+    color: theme.palette.action?.selected
+  },
+  extraMargin: {
+    marginBottom: theme.spacing(.5),
+  },
+  wordLimit: {
+    float: "right",
+    color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
+    fontFamily: 'Avenir Next',
+    fontWeight: 700,
+    fontSize: 10,
+  },
 }));
 
-const ArkInput: React.FC<Props> = (props: Props) => {
-  const { error = "", label, multiline, value, onValueChange, className, ...rest } = props;
-  const classes = useStyles();
 
-  return (
-    <FormControl fullWidth className={classes.root}>
-      <InputLabel shrink focused={false} className={cls({ [classes.label]: true, [classes.errorText]: error })}>
-        {label.toLocaleUpperCase()}
-      </InputLabel>
-      <BootstrapInput  {...rest} inputProps={{ className: error ? classes.error : "", }} multiline={multiline} value={value} onChange={(e) => onValueChange(e.target.value)} fullWidth defaultValue="react-bootstrap" />
-      <FormHelperText className={cls({ [classes.helperText]: true, [classes.hiddenText]: !error })} >{error ? error : ""}</FormHelperText>
-    </FormControl>
-  );
-};
 
 export default ArkInput;

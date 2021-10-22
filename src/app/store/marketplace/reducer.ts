@@ -1,6 +1,5 @@
-import { LocalStorageKeys } from "app/utils/constants";
-import { SortBy } from "app/components/ARKFilterBar/components/SortFilter";
-import { MarketPlaceActionTypes } from "./actions";
+import { LocalStorageKeys, COLLECTION_NFT_PER_PAGE } from "app/utils/constants";
+import { SortBy, MarketPlaceActionTypes } from "./actions";
 import { MarketPlaceState } from "./types";
 
 const loadSavedAccessToken = () => {
@@ -19,12 +18,19 @@ const initial_state: MarketPlaceState = {
   tokens: [],
   oAuth: savedAccessToken,
   filter: {
-    sale_type: {
-      fixed_price: true,
-      timed_auction: true
+    saleType: {
+      fixed_price: false,
+      timed_auction: false,
     },
+    collectionAddress: null,
+    owner: null,
+    likedBy: null,
+    search: '',
     traits: {},
-    sortBy: SortBy.PriceDescending
+    sortBy: SortBy.PriceAscending,
+    pagination: {
+      limit: COLLECTION_NFT_PER_PAGE
+    },
   },
   profile: undefined,
 }
@@ -53,16 +59,20 @@ const reducer = (state: MarketPlaceState = initial_state, action: any) => {
         tokens: payload.entries,
         filter: {
           ...state.filter,
-          ...payload.meta,
+          pagination: {
+            ...state.filter.pagination,
+            ...payload.meta,
+          }
         },
       }
     case MarketPlaceActionTypes.UPDATE_FILTER:
       return {
         ...state,
+        tokens: [],
         filter: {
           ...state.filter,
           ...payload,
-        }
+        },
       }
     default:
       return state;

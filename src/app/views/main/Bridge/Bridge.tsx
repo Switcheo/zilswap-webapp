@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     boxShadow: theme.palette.mainBoxShadow,
     borderRadius: 12,
     background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     [theme.breakpoints.down("sm")]: {
       maxWidth: 450,
       padding: theme.spacing(2, 2, 0),

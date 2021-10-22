@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   snackbar: {
     background: theme.palette.background.default,
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     color: theme.palette.label,
     padding: theme.spacing(2),
     borderRadius: "12px",

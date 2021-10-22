@@ -1,17 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box, BoxProps, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, useMediaQuery, useTheme
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import groupBy from "lodash/groupBy";
+import { useSelector } from "react-redux";
 import { ArkPaginator } from "app/components";
 import { Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useBlockTime } from "app/utils";
+import { useBlockTime, useValueCalculators } from "app/utils";
+import { RootState, TokenState } from "app/store/types";
 import BidCard from "./BidCard";
 import BidRow from "./BidRow";
 
-const ITEMS_PER_PAGE = 2
+const ITEMS_PER_PAGE = 5
 
 interface Props extends BoxProps {
   bids: Cheque[]
@@ -25,7 +28,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   headerCell: {
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
-    borderBottom: "1px solid #29475A",
+    borderBottom: theme.palette.border,
     padding: "8px 16px",
     fontFamily: 'Avenir Next',
     fontWeight: 600,
@@ -43,7 +46,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     opacity: "100%",
   },
   bodyCell: {
-    borderBottom: "1px solid #29475A",
+    borderBottom: theme.palette.border,
     padding: "8px 16px",
   },
 }));
@@ -68,6 +71,9 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
   const { bids, showItem = true } = props;
   const classes = useStyles();
   const theme = useTheme();
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const vc = useValueCalculators();
+  const [pageNumber, setPageNumber] = useState<number>(0);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [blockTime, currentBlock] = useBlockTime();
@@ -82,41 +88,50 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
   //   setBid(undefined);
   // }
 
+  const handlePageChange = (page: number) => {
+    setPageNumber(page - 1)
+  }
+
   if (currentBlock === 0) return null // TODO: use loading gif instead
 
   return <Box className={classes.root}>
     {
       isMobile ?
-        <>
-          {bids.map((data) => (
-            <BidCard bid={data} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} />
-          ))}
-        </>
+        Object.entries(groupBy(bids, (bid) => bid.token.collectionAddress + bid.token.id)).map(([k, v]) => {
+          const bids = v.sort((lhs, rhs) => {
+            const diff = vc.usd(tokenState, lhs.price.address, lhs.price.amount).comparedTo(vc.usd(tokenState, rhs.price.address, rhs.price.amount)) * -1
+            if (diff === 0) return lhs.expiry > rhs.expiry ? -1 : 1
+            return diff
+          })
+          return <BidCard bid={bids[0]} relatedBids={bids.slice(1)} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} key={k} />
+        })
         :
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                {(showItem ? [ITEM_HEADER, ...HEADERS] : HEADERS).map((header, index) => (
-                  <TableCell
-                    key={`offers-${index}`}
-                    className={classes.headerCell}
-                    align={header.align}
-                  >
-                    {header.value}
-                  </TableCell>
+        [
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  {(showItem ? [ITEM_HEADER, ...HEADERS] : HEADERS).map((header, index) => (
+                    <TableCell
+                      key={`offers-${index}`}
+                      className={classes.headerCell}
+                      align={header.align}
+                    >
+                      {header.value}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {bids.slice(pageNumber * ITEMS_PER_PAGE, (pageNumber + 1) * ITEMS_PER_PAGE).map((data) => (
+                  <BidRow bid={data} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} key={data.id} />
                 ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {bids.map((data) => (
-                <BidRow bid={data} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} />
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableBody>
+            </Table>
+          </TableContainer>,
+          <ArkPaginator itemPerPage={ITEMS_PER_PAGE} totalItem={bids.length} onPageChange={handlePageChange} />
+        ]
     }
-    <ArkPaginator itemPerPage={ITEMS_PER_PAGE} totalItem={bids.length} />
     {/* {bid && <BidsDialog showDialog={!!bid} onCloseDialog={() => setBid(undefined)} bid={bid} isOffer={true} />} */}
   </Box>
 };

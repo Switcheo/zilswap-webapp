@@ -7,10 +7,11 @@ import BigNumber from "bignumber.js"
 import dayjs, { Dayjs } from "dayjs";
 import { useSelector } from "react-redux";
 import { AppTheme } from "app/theme/types";
-import { Cheque } from "app/store/types";
-import { truncateAddress, useValueCalculators } from "app/utils";
+import { Cheque, WalletState } from "app/store/types";
+import { useValueCalculators } from "app/utils";
 import { RootState, TokenState } from "app/store/types";
 import { getChequeStatus } from "core/utilities/ark"
+import { ArkOwnerLabel } from "app/components";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
 import { ReactComponent as UpArrow } from "./assets/up-arrow.svg";
 
@@ -68,7 +69,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   withBorder: {
     '&:not(:last-child)': {
-      borderBottom: "1px solid #29475A",
+      borderBottom: theme.palette.border,
     }
   },
   slideAnimation: {
@@ -124,7 +125,17 @@ const Row: React.FC<Props> = (props: Props) => {
   const [expand, setExpand] = useState(false);
   const classes = useStyles();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const valueCalculators = useValueCalculators();
+  const userAddress = walletState.wallet?.addressInfo.byte20.toLowerCase()
+
+  const cancelBid = () => {
+
+  }
+
+  const acceptBid = () => {
+
+  }
 
   return (
     <Fragment>
@@ -155,36 +166,38 @@ const Row: React.FC<Props> = (props: Props) => {
               {dayjs(bid.createdAt).format("D MMM YYYY")}
             </TableCell>
             <TableCell align="right" className={cls(classes.bodyCell, { [classes.withBorder]: expand, [classes.firstCell]: !showItem })}>
-                <strong className={classes.amount}>
-                  {priceAmount.toFormat(priceAmount.gte(1) ? 2 : priceToken.decimals)}
-                </strong> {priceToken.symbol} (${usdValue.toFormat(2)})
+              <strong className={classes.amount}>
+                {priceAmount.toFormat(priceAmount.gte(1) ? 2 : priceToken.decimals)}
+              </strong> {priceToken.symbol} (${usdValue.toFormat(2)})
             </TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>NYI</TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>
-              {bid.initiator?.username || truncateAddress(bid.initiatorAddress)}
+              <ArkOwnerLabel user={bid.initiator} address={bid.initiatorAddress} />
             </TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>
               {expiryTime.format("D MMM YYYY")}
             </TableCell>
             <TableCell align="center" className={cls(classes.actionCell, classes.lastCell, { [classes.withBorder]: expand })}>
-              {bid.cancelTransactionHash === null && bid.matchTransactionHash === null && (
-                <>
-                  {/* <IconButton onClick={() => bid.actions?.accept.action ? bid.actions?.accept.action(bid) : null} className={classes.iconButton}>
-                    <Typography className={classes.buttonText}>{bid.actions?.accept.label}</Typography>
-                  </IconButton> */}
-                  {/* <IconButton onClick={() => bid.actions?.decline.action ? bid.actions?.decline.action(bid) : null} className={classes.iconButton}>
-                    <Typography className={classes.buttonText}>{bid.actions?.decline.label}</Typography>
-                  </IconButton> */}
-                </>
-              )}
-              <Typography
-                className={cls({
-                  [classes.green]: status === 'Active',
-                  [classes.red]: status === 'Expired' || status === 'Cancelled'
-                })}
-              >
-                {status}
-              </Typography>
+              {status === 'Active' && bid.initiatorAddress === userAddress &&
+                <IconButton onClick={() => cancelBid()} className={classes.iconButton}>
+                  <Typography className={classes.buttonText}>Cancel</Typography>
+                </IconButton>
+              }
+              {status === 'Active' && bid.token.owner === userAddress &&
+                <IconButton onClick={() => acceptBid()} className={classes.iconButton}>
+                  <Typography className={classes.buttonText}>Accept</Typography>
+                </IconButton>
+              }
+              {(status !== 'Active' || (bid.token.owner !== userAddress && bid.initiatorAddress !== userAddress)) &&
+                <Typography
+                  className={cls({
+                    [classes.green]: status === 'Active',
+                    [classes.red]: status === 'Expired' || status === 'Cancelled'
+                  })}
+                >
+                  {status}
+                </Typography>
+              }
             </TableCell>
           </TableRow>
         })

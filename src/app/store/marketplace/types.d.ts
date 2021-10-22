@@ -1,9 +1,9 @@
-import { SortBy } from "app/components/ARKFilterBar/components/SortFilter";
 import { SimpleMap } from "app/utils";
+import { SortBy } from "./actions";
 
 export interface MarketPlaceState {
   collections: SimpleMap<Collection>;
-  tokens: [];
+  tokens: ReadonlyArray<Nft>;
   filter: CollectionFilter;
   profile?: Profile;
   oAuth?: OAuth;
@@ -20,9 +20,9 @@ export interface SimpleCheque {
   side: 'buy' | 'sell';
   feeAmount: string;
   publicKey: string;
-  nonce: number;
+  signature: string;
+  nonce: string;
   expiry: number;
-  asset: Asset;
   price: {
     amount: string;
     address: string;
@@ -53,6 +53,8 @@ export interface Nft {
 
   bestAsk: null | SimpleCheque;
   bestBid: null | SimpleCheque;
+  isFavourited?: boolean;
+  statistics?: SimpleMap<string>
 }
 
 export type TraitType = {
@@ -68,16 +70,29 @@ export interface TraitValue {
   selected: boolean;
 }
 
+export interface CollectionPriceStat {
+  volume: string;
+  floorPrice: string;
+}
+
+export interface CollectionTokenStat {
+  holderCount: string;
+  tokenCount: string;
+}
+
 export interface Collection {
   name: string;
-  description: string;
+  description: string | null;
   address: string;
-  verifiedAt: string;
-  websiteUrl: string;
-  discordUrl: string;
-  telegramUrl: string;
-  twitterUrl: string;
-  instagramUrl: string;
+  verifiedAt: string | null;
+  websiteUrl: string | null;
+  discordUrl: string | null;
+  telegramUrl: string | null;
+  twitterUrl: string | null;
+  instagramUrl: string | null;
+
+  priceStat?: CollectionPriceStat;
+  tokenStat?: CollectionTokenStat;
 }
 
 export interface Asset {
@@ -86,10 +101,12 @@ export interface Asset {
   filename: string;
   url: string;
   contentLength?: number;
+  id?: string;
+  host?: string
 }
 
 export type MarketplaceUser = {
-  username?: string;
+  username: string | null;
   address: string;
 }
 
@@ -99,15 +116,13 @@ export interface NftAttribute {
   rarity: number;
 }
 
-export interface Profile {
+export interface Profile extends MarketplaceUser {
   id: string;
-  username?: string;
-  address: string;
-  bio?: string;
-  twitterHandle?: string;
-  instagramHandle?: string;
-  websiteUrl?: string;
-  email?: string;
+  bio: string | null;
+  twitterHandle: string | null;
+  instagramHandle: string | null;
+  websiteUrl: string | null;
+  email: string | null;
   profileImage?: {
     url: string;
   }
@@ -131,17 +146,20 @@ export interface PaginatedList<T> {
 }
 
 export interface PaginationInfo {
-  offset: number;
-  count: number;
-  limit: number;
+  offset?: number;
+  count?: number;
+  limit?: number;
 }
 
 export interface CollectionFilter {
-  sale_type: SaleType;
-  collectionAddress?: string;
   traits: { [id: string]: TraitType };
-  pagination?: PaginationInfo;
   sortBy: SortBy;
+  saleType: SaleType;
+  search: string;
+  collectionAddress: string | null;
+  owner: string | null;
+  likedBy: string | null;
+  pagination?: PaginationInfo;
 }
 
 export interface SaleType {

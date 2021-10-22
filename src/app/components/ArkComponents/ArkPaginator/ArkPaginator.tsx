@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&:not(:last-child)": {
       marginRight: theme.spacing(1),
     },
-    fontFamily: "Avenir Next LT Pro",
+    fontFamily: "'Raleway', sans-serif",
     fontSize: 16,
     fontStyle: "normal",
     fontWeight: "bold",
@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginRight: theme.spacing(1),
   },
   selected: {
-    textDecoration: "underline",
+    // textDecoration: "underline",
     color: theme.palette.primary.dark
   },
 }));
@@ -72,7 +72,7 @@ const ArkPaginator: React.FC<Props> = (props: Props) => {
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       {items.map((pageItem, index) => {
-        const { page, type, selected, ...item } = pageItem;
+        const { page, type, selected } = pageItem;
         if (type === 'start-ellipsis' || type === 'end-ellipsis') {
           return <Typography className={classes.ellipsis}>...</Typography>;
         } else if (type === 'page') {
@@ -88,14 +88,14 @@ const ArkPaginator: React.FC<Props> = (props: Props) => {
           return (
             <ArrowRight className={cls(classes.clickable)} onClick={(e) => {
               if (selectedPage && selectedPage.page === maxPages) return;
-              else item.onClick(e)
+              else onPageClicked(page, pageItem, e)
             }} />
           );
         } else if (type === 'previous') {
           return (
             <ArrowLeft className={cls(classes.clickable)} onClick={(e) => {
               if (selectedPage && selectedPage.page === 1) return;
-              else item.onClick(e)
+              else onPageClicked(page, pageItem, e)
             }} />
           );
         }
