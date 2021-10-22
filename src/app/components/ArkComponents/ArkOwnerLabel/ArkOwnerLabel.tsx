@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { darken } from '@material-ui/core/styles';
 import { getWallet } from "app/saga/selectors";
 import { MarketplaceUser } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -59,7 +60,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiTypography-root": {
       fontSize: "14px",
     },
-    color: theme.palette.text?.secondary,
+    '&:hover $root': {
+      color: darken('#6BE1FF', 0.1),
+    }
   }
 }));
 

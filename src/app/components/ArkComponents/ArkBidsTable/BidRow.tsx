@@ -1,11 +1,13 @@
 import React, { Fragment, useState } from "react";
 import { Avatar, Box, BoxProps, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { Link } from "react-router-dom";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
 import cls from "classnames";
 import BigNumber from "bignumber.js"
 import dayjs, { Dayjs } from "dayjs";
 import { useSelector } from "react-redux";
+import { darken } from '@material-ui/core/styles';
 import { AppTheme } from "app/theme/types";
 import { Cheque, WalletState } from "app/store/types";
 import { useValueCalculators } from "app/utils";
@@ -26,6 +28,12 @@ interface Props extends BoxProps {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
+  link: {
+    color: '#6BE1FF',
+    '&:hover': {
+      color: darken('#6BE1FF', 0.1),
+    }
+  },
   text: {
     fontFamily: 'Avenir Next',
     fontWeight: 600,
@@ -35,30 +43,28 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   amount: {
     fontWeight: 800,
   },
-  bodyCell: {
-    extend: 'text',
-    padding: "8px 16px",
-    maxWidth: 200,
+  cell: {
+    background: theme.palette.type === "dark" ? "transparent" : "rgba(222, 255, 255, 0.5)",
+    color: theme.palette.text?.primary,
     margin: 0,
     border: "none",
-    backgroundColor: "#0A2530",
-    color: theme.palette.primary.contrastText
+    maxWidth: 200,
+  },
+  bodyCell: {
+    extend: ['text', 'cell'],
+    padding: "8px 16px",
   },
   actionCell: {
+    extend: 'cell',
     padding: "8px 0px",
-    maxWidth: 200,
-    margin: 0,
-    border: "none",
-    backgroundColor: "#0A2530",
   },
   buttonText: {
-    color: "#DEFFFF",
+    color: theme.palette.text?.primary,
     opacity: "100%",
   },
   iconButton: {
-    color: "#DEFFFF",
+    background: theme.palette.type === "dark" ? 'rgba(222, 255, 255, 0.1)' : 'rgba(107, 225, 255, 0.2)',
     borderRadius: "12px",
-    background: "rgba(222, 255, 255, 0.1)",
     marginRight: 8,
   },
   item: {
@@ -80,12 +86,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "100%": { transform: " translateY(0%)" }
   },
   expandCell: {
+    extend: 'cell',
     height: 10,
     padding: 0,
     textAlign: "center",
     color: "#FFFFFF",
     border: "none",
-    backgroundColor: "#0A2530",
     borderBottomLeftRadius: "12px",
     borderBottomRightRadius: "12px",
   },
@@ -95,14 +101,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   lastCell: {
     borderTopRightRadius: "12px",
   },
+  row: {
+    padding: 12,
+    background: theme.palette.type === "dark" ? "transparent" : "rgba(222, 255, 255, 0.5)",
+  },
   firstRow: {
     marginTop: theme.spacing(1),
-    padding: 12,
-
   },
   lastRow: {
     marginBottom: theme.spacing(1),
-    padding: 12,
   },
   arrowIcon: {
     padding: "4px 24px",
@@ -149,16 +156,18 @@ const Row: React.FC<Props> = (props: Props) => {
           const priceAmount = new BigNumber(bid.price.amount).shiftedBy(-priceToken.decimals)
           const usdValue = valueCalculators.amount(tokenState.prices, priceToken, new BigNumber(bid.price.amount));
 
-          return <TableRow className={cls({ [classes.firstRow]: index === 0, [classes.slideAnimation]: index > 0 })}>
+          return <TableRow className={cls(classes.row, { [classes.firstRow]: index === 0, [classes.slideAnimation]: index > 0 })}>
             {
               showItem &&
               <TableCell align="left" className={cls(classes.bodyCell, classes.firstCell)}>
                 {
                   index === 0 &&
-                  <MenuItem className={classes.item} button={false}>
-                    <ListItemIcon><Avatar alt="Remy Sharp" src={bid.token.asset.url} /></ListItemIcon>
-                    #{bid.token.tokenId}
-                  </MenuItem>
+                  <Link className={classes.link} to={`/ark/collections/${toBech32Address(bid.token.collection.address)}/${bid.token.tokenId}`}>
+                    <MenuItem className={classes.item} button={false}>
+                      <ListItemIcon><Avatar alt="Remy Sharp" src={bid.token.asset.url} /></ListItemIcon>
+                      #{bid.token.tokenId}
+                    </MenuItem>
+                  </Link>
                 }
               </TableCell>
             }
@@ -202,20 +211,20 @@ const Row: React.FC<Props> = (props: Props) => {
           </TableRow>
         })
       }
-      <TableRow className={classes.lastRow}>
-        <TableCell className={classes.expandCell} colSpan={8}>
-          {relatedBids && relatedBids.length > 0 && (
-            <IconButton
-              aria-label="expand row"
-              size="medium"
-              onClick={() => setExpand(!expand)}
-              className={classes.arrowIcon}
-            >
-              {expand ? <UpArrow /> : <DownArrow />}
-            </IconButton>
-          )}
-        </TableCell>
-      </TableRow>
+      {relatedBids && relatedBids.length > 0 && (
+        <TableRow className={cls(classes.row, classes.lastRow)}>
+          <TableCell className={classes.expandCell} colSpan={8}>
+              <IconButton
+                aria-label="expand row"
+                size="medium"
+                onClick={() => setExpand(!expand)}
+                className={classes.arrowIcon}
+              >
+                {expand ? <UpArrow /> : <DownArrow />}
+              </IconButton>
+          </TableCell>
+        </TableRow>
+      )}
       <Box mb={1}></Box>
     </Fragment>
   );

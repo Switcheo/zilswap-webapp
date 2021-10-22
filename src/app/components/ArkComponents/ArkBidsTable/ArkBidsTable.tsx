@@ -23,6 +23,18 @@ interface Props extends BoxProps {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    display: "flex",
+    flexDirection: "column",
+    marginTop: theme.spacing(3),
+    borderRadius: 12,
+    border: theme.palette.border,
+    background: theme.palette.type === "dark" ? "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)" : "transparent",
+    padding: theme.spacing(3, 5),
+    [theme.breakpoints.down("sm")]: {
+      padding: theme.spacing(1, 2),
+    },
+  },
+  container: {
     width: '100%',
     marginTop: theme.spacing(2),
   },
@@ -95,6 +107,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
   if (currentBlock === 0) return null // TODO: use loading gif instead
 
   return <Box className={classes.root}>
+    <Box className={classes.container}>
     {
       isMobile ?
         Object.entries(groupBy(bids, (bid) => bid.token.collectionAddress + bid.token.id)).map(([k, v]) => {
@@ -132,7 +145,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
           <ArkPaginator itemPerPage={ITEMS_PER_PAGE} totalItem={bids.length} onPageChange={handlePageChange} />
         ]
     }
-    {/* {bid && <BidsDialog showDialog={!!bid} onCloseDialog={() => setBid(undefined)} bid={bid} isOffer={true} />} */}
+    </Box>
   </Box>
 };
 

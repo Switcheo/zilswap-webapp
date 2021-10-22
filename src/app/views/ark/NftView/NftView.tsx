@@ -140,15 +140,13 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
 
 
         {/*Ark tabs */}
-        <ArkTab mt={3} setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids", "Price History", "Event History"]} />
+        <ArkTab mt={3} setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids",/* "Price History", "Event History" */]} />
 
-        <Box className={classes.bidsBox}>
-          {currentTab === "Bids" && (
-            <ArkBidsTable bids={bids} />
-          )}
-          {/* Price History */}
-          {/* Event History */}
-        </Box>
+        {currentTab === "Bids" && (
+          <ArkBidsTable bids={bids} />
+        )}
+        {/* Price History */}
+        {/* Event History */}
       </Container >
       {token && (
         <Fragment>
@@ -213,18 +211,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: "22px",
     height: "22px",
     verticalAlign: "text-bottom",
-  },
-  bidsBox: {
-    display: "flex",
-    flexDirection: "column",
-    marginTop: theme.spacing(3),
-    borderRadius: 12,
-    border: theme.palette.border,
-    background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
-    padding: theme.spacing(3, 5),
-    [theme.breakpoints.down("sm")]: {
-      padding: theme.spacing(1, 2),
-    },
   },
   bidsHeader: {
     fontSize: "26px",
