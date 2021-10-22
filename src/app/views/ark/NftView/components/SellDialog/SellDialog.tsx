@@ -174,12 +174,14 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         </Box>
         <Box display="flex">
           <Box flexGrow={1}>
-            <ArkInput
-              placeholder="eg. This NFT was owned by an NBA player" error={errors.description} value={inputValues.description}
-              label="Additional description" onValueChange={(value) => updateInputs("description")(value)} multiline={true}
-            />
+            <Box className={classes.description}>
+              <ArkInput
+                placeholder="eg. This NFT was owned by an NBA player" error={errors.description} value={inputValues.description}
+                label="Additional description" onValueChange={(value) => updateInputs("description")(value)} multiline={true}
+              />
+            </Box>
 
-            <Box display="flex" flexDirection="column" marginTop={2}>
+            {/* <Box display="flex" flexDirection="column" marginTop={2}>
               <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
                 Sell type
               </InputLabel>
@@ -204,10 +206,10 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                   })}
                 >Timed Auction</button>
               </Box>
-            </Box>
+            </Box> */}
             
             {inputValues.saleType === "fixed_price" &&
-              <Box display="flex" flexDirection="column" marginTop={4}>
+              <Box display="flex" flexDirection="column" marginTop={2}>
                 <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
                   Buy Now Price
                 </InputLabel>
@@ -330,8 +332,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   nftCard: {
     maxWidth: "none",
   },
+  description: {
+    "& .MuiTypography-root": {
+      marginBottom: 6,
+      textTransform: "uppercase"
+    },
+    "& .MuiInputBase-input": {
+      height: "80px !important"
+    }
+  },
   label: {
-    fontSize: "16px",
+    fontSize: "18px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     fontWeight: "bold",
     width: 150,
