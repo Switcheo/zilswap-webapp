@@ -48,16 +48,34 @@ const useStyles = makeStyles((theme) => ({
 
 interface Props extends BoxProps {
   collection?: Collection;
+  message?: string;
 }
 
 const ArkSocialLinkGroup: React.FC<Props> = (props: Props) => {
-  const { children, className, collection, ...rest } = props;
+  const {
+    message = "Check out this awesome NFT on #ARK! &link #nftmarketplace #nft #nonfungible #zilswap @zilswap",
+    children, className, collection, ...rest } = props;
   const classes = useStyles();
   const toaster = useToaster(false)
 
   const copyAndToast = () => {
     navigator.clipboard.writeText(window.location.href);
     toaster("Link to page copied")
+  }
+
+  const getHref = (type: string) => {
+    switch (type) {
+      case "twitter":
+        let tweetMsg = message.replaceAll(/ /g, "+");
+        tweetMsg = tweetMsg.replaceAll(/#/g, "%23");
+        tweetMsg = tweetMsg.replace("&link", `(${window.location.href})`);
+        return `https://twitter.com/intent/tweet?text=` + tweetMsg;
+
+      case "telegram":
+        let telegramMsg = message.replace("&link", "");
+        return `tg://msg_url?url=${window.location.href}&text=${telegramMsg}`;
+      default: return "";
+    }
   }
 
   return (
@@ -73,7 +91,7 @@ const ArkSocialLinkGroup: React.FC<Props> = (props: Props) => {
       </Button>
       <Button
         className={classes.fill}
-        href={`https://twitter.com/intent/tweet?text=Check+out+this+awesome+NFT+on+%23ARK!(${window.location.href})+%23nftmarketplace+%23nft+%23nonfungible+%23zilswap`}
+        href={getHref("twitter")}
         target="_blank"
         disableRipple
       >
@@ -91,7 +109,7 @@ const ArkSocialLinkGroup: React.FC<Props> = (props: Props) => {
       )}
       <Button
         className={classes.fill}
-        href={`tg://msg_url?url=${window.location.href}&text=${"Check out this awesome NFT on #ARK #nftmarketplace #nft #nonfungible #zilswap @zilswap"}`}
+        href={getHref("telegram")}
         target="_blank"
         disableRipple
       >
