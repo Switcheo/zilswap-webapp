@@ -22,9 +22,8 @@ import { ZIL_ADDRESS } from "app/utils/constants";
 import { ArkClient } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { toBech32Address } from "core/zilswap";
-import { ReactComponent as UnZapSVG } from "./unzap.svg";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
-import { ReactComponent as ZappedSVG } from "./zapped.svg";
+import { ReactComponent as ZapSVG } from "./zap.svg";
 
 export interface Props extends CardProps {
   token: Nft;
@@ -168,13 +167,13 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
               )}
             </Box>
             <Box display="flex" alignItems="center">
-              <Typography className={classes.likes}>{toHumanNumber(token.statistics?.favourites)}</Typography>
+              <Typography className={cls(classes.likes, { liked })}>{toHumanNumber(token.statistics?.favourites)}</Typography>
               <IconButton
                 onClick={likeToken}
                 className={classes.likeIconButton}
                 disableRipple
               >
-                {liked ? <ZappedSVG className={classes.likeButton} /> : <UnZapSVG className={classes.likeButton} />}
+                <ZapSVG className={cls(classes.likeButton, { liked })} />
               </IconButton>
             </Box>
           </Box>
@@ -225,13 +224,14 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   display="flex"
                   alignItems="center"
                   justifyContent="space-between"
-                  mt={0.5}
+                  mt={1}
+                  mb={0.5}
                 >
                   <Typography className={classes.body}>
                     #{token.tokenId}
                   </Typography>
                   <Box display="flex">
-                    <Typography className={classes.body}>owned by&nbsp;</Typography>
+                    <Typography className={classes.body}>Owned by&nbsp;</Typography>
                     <ArkOwnerLabel user={token.owner} />
                   </Box>
                 </Box>
@@ -401,7 +401,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   cardHeader: {
     display: "flex",
     justifyContent: "space-between",
-    padding: theme.spacing(1, 1.5),
+    padding: theme.spacing(1.7, 1.3),
   },
   bid: {
     fontFamily: "'Raleway', sans-serif",
@@ -424,19 +424,30 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "14px",
   },
   likes: {
-    color: theme.palette.label,
-    fontSize: "12px",
-    lineHeight: "14px",
-    marginRight: "4px",
+    color: theme.palette.type === 'dark' ? 'rgba(222, 255, 255, 0.5)' : 'rgba(0, 51, 64, 0.6)',
+    fontSize: "13px",
+    marginBottom: "-1px",
+    '&.liked': {
+      color: theme.palette.type === 'dark' ? '#00FFB0' : 'rgba(0, 51, 64, 0.6)',
+    },
   },
   likeIconButton: {
-    padding: 0,
+    padding: 3,
+    marginRight: -3,
     "&:hover": {
       backgroundColor: "transparent",
     },
   },
   likeButton: {
-    color: theme.palette.primary.light,
+    '& > path': {
+      fill: theme.palette.type === 'dark' ? 'rgba(222, 255, 255, 0.5)' : 'rgba(0, 51, 64, 0.6)',
+    },
+    '&.liked': {
+      '& > path': {
+        fill: '#00FFB0',
+        stroke: 'rgba(0, 51, 64, 0.2)',
+      },
+    }
   },
   cardContent: {
     marginLeft: "-16px",
@@ -454,8 +465,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: theme.spacing(0, 1.5),
   },
   body: {
+    fontFamily: 'Avenir Next',
     fontSize: "12px",
-    fontWeight: 700,
+    fontWeight: 600,
     color: theme.palette.primary.light,
   },
   verifiedBadge: {
@@ -478,9 +490,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: "100%",
   },
   link: {
-    "& .MuiTypography-root": {
-      fontSize: "14px",
-    },
     color: theme.palette.text?.secondary,
   },
   linkIcon: {
@@ -505,8 +514,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "16px",
   },
   username: {
+    fontFamily: 'Avenir Next',
     fontSize: "12px",
-    fontWeight: 700,
+    fontWeight: 600,
     color: "#6BE1FF",
     maxWidth: 100,
     textOverflow: "ellipsis",
