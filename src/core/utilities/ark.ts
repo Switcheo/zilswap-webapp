@@ -4,11 +4,12 @@ import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { Zilswap } from "zilswap-sdk";
 import { Network, ZIL_HASH } from "zilswap-sdk/lib/constants";
-import { Cheque, OAuth, Profile, SimpleCheque } from "app/store/types";
-import { SimpleMap } from "app/utils";
+import { Cheque, Collection, OAuth, Profile, SimpleCheque } from "app/store/types";
+import { bnOrZero, SimpleMap, toHumanNumber } from "app/utils";
 import { HTTP, logger } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
 import { fromBech32Address } from "core/zilswap";
+import { ZIL_DECIMALS } from "app/utils/constants";
 import { CHAIN_IDS, MSG_VERSION } from "../zilswap/constants";
 
 const ARK_ENDPOINTS: SimpleMap<string> = {
@@ -482,6 +483,21 @@ export class ArkClient {
         cheque.signature,
       ],
       constructor: `${this.brokerAddress}.Cheque`,
+    }
+  }
+
+
+  static parseCollectionStats(collection: Collection) {
+    const floorPrice = bnOrZero(collection.priceStat?.floorPrice).shiftedBy(-ZIL_DECIMALS)
+    const volume = bnOrZero(collection.priceStat?.volume).shiftedBy(-ZIL_DECIMALS);
+    const holderCount = bnOrZero(collection.tokenStat?.holderCount);
+    const tokenCount = bnOrZero(collection.tokenStat?.tokenCount);
+
+    return {
+      floorPrice: floorPrice.gt(0) ? toHumanNumber(floorPrice) : undefined,
+      volume: volume.gt(0) ? toHumanNumber(volume) : undefined,
+      holderCount: holderCount.gt(0) ? holderCount.toString(10) : undefined,
+      tokenCount: tokenCount.gt(0) ? tokenCount.toString(10) : undefined,
     }
   }
 }

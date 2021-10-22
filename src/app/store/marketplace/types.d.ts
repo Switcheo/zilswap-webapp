@@ -92,6 +92,11 @@ export interface Collection {
   twitterUrl: string | null;
   instagramUrl: string | null;
 
+  ownerName: string | null;
+  royaltyBps: number | null;
+  royaltyType: string | null;
+
+
   priceStat?: CollectionPriceStat;
   tokenStat?: CollectionTokenStat;
 }
