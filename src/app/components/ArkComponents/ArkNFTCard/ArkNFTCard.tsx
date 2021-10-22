@@ -265,6 +265,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     boxShadow: "none",
     backgroundColor: "transparent",
     position: "relative",
+    overflow: "initial",
     "& .MuiCardContent-root:last-child": {
       paddingBottom: theme.spacing(1.5),
     },
@@ -276,13 +277,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     border: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "rgba(0, 51, 64, 0.5)"
       }`,
     borderRadius: 10,
-    // border: "1px solid transparent",
-    // backgroundImage:
-    //   theme.palette.type === "dark"
-    //     ? "linear-gradient(transparent, transparent), linear-gradient(#29475A, #29475A)"
-    //     : "linear-gradient(transparent, transparent), linear-gradient(to right, green, gold)",
-    // backgroundOrigin: "border-box",
-    // backgroundClip: "content-box, border-box",
   },
   image: {
     borderRadius: "0px 0px 10px 10px!important",

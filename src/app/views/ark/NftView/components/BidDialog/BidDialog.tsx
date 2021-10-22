@@ -22,6 +22,7 @@ import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked
 import { ArkClient, logger } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 import { fromBech32Address, toBech32Address } from "core/zilswap";
+import { ReactComponent as WarningIcon } from "../assets/warning.svg";
 
 interface Props extends Partial<DialogProps> {
   token: Nft;
@@ -237,8 +238,15 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const isBidEnabled = useMemo(() => {
     if (!formState.acceptTerms) return false;
 
+    if (bnOrZero(formState.bidAmount).isLessThanOrEqualTo(0)) return false;
+
+    if (bnOrZero(formState.bidAmount).isGreaterThan(bnOrZero(bidToken.balance).shiftedBy(-bidToken.decimals)))
+      return false;
+
     return true;
-  }, [formState]);
+
+    // eslint-disable-next-line
+  }, [formState, bidToken]);
 
   return (
     <DialogModal
@@ -257,75 +265,80 @@ const BidDialog: React.FC<Props> = (props: Props) => {
           dialog={true}
         />
 
-        <CurrencyInput
-          label="Place Your Bid"
-          bid={true}
-          highestBid={priceHuman}
-          bidToken={priceToken}
-          token={bidToken ?? null}
-          amount={formState.bidAmount}
-          onEditorBlur={onEndEditBidAmount}
-          onAmountChange={onBidAmountChange}
-          onCurrencyChange={onCurrencyChange}
-        />
+        <Box className={classes.bidContainer}>
+          <CurrencyInput
+            label="Place Your Bid"
+            bid={true}
+            highestBid={priceHuman}
+            bidToken={priceToken}
+            token={bidToken ?? null}
+            amount={formState.bidAmount}
+            onEditorBlur={onEndEditBidAmount}
+            onAmountChange={onBidAmountChange}
+            onCurrencyChange={onCurrencyChange}
+          />
 
-        {/* Set expiry */}
-        <ArkExpiry 
-          expiryOptions={EXPIRY_OPTIONS} 
-          expiryOption={expiryOption} 
-          expiryTime={expiryTime} 
-          expiry={expiry} 
-          setExpiryDate={setExpiryDate} 
-          setExpiryOption={setExpiryOption}
-        />
+          {/* Set expiry */}
+          <ArkExpiry 
+            expiryOptions={EXPIRY_OPTIONS} 
+            expiryOption={expiryOption} 
+            expiryTime={expiryTime} 
+            expiry={expiry} 
+            setExpiryDate={setExpiryDate} 
+            setExpiryOption={setExpiryOption}
+          />
 
-        {!completedPurchase && (
-          <Fragment>
-            {/* Terms */}
-            <Box className={classes.termsBox}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    className={classes.radioButton}
-                    checkedIcon={<CheckedIcon />}
-                    icon={<UncheckedIcon fontSize="small" />}
-                    checked={formState.acceptTerms}
-                    onChange={() =>
-                      setFormState({
-                        ...formState,
-                        acceptTerms: !formState.acceptTerms,
-                      })
-                    }
-                    disableRipple
-                  />
-                }
-                label={
-                  <Text>
-                    By checking this box, I accept ARK's terms and conditions.
+          {!completedPurchase && (
+            <Fragment>
+              {/* Terms */}
+              <Box className={classes.termsBox}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      className={classes.radioButton}
+                      checkedIcon={<CheckedIcon />}
+                      icon={<UncheckedIcon fontSize="small" />}
+                      checked={formState.acceptTerms}
+                      onChange={() =>
+                        setFormState({
+                          ...formState,
+                          acceptTerms: !formState.acceptTerms,
+                        })
+                      }
+                      disableRipple
+                    />
+                  }
+                  label={
+                    <Text>
+                      By checking this box, I accept ARK's terms and conditions.
+                    </Text>
+                  }
+                />
+              </Box>
+
+              <FancyButton
+                className={classes.actionButton}
+                loading={loading}
+                variant="contained"
+                color="primary"
+                onClick={onConfirm}
+                disabled={!isBidEnabled}
+                walletRequired
+              >
+                Place Bid
+              </FancyButton>
+
+              {error && (
+                <Box className={classes.errorBox}>
+                  <WarningIcon className={classes.warningIcon} />
+                  <Text color="error">
+                    Error: {error?.message ?? "Unknown error"}
                   </Text>
-                }
-              />
-            </Box>
-
-            {error && (
-              <Text color="error">
-                Error: {error?.message ?? "Unknown error"}
-              </Text>
-            )}
-
-            <FancyButton
-              className={classes.actionButton}
-              loading={loading}
-              variant="contained"
-              color="primary"
-              onClick={onConfirm}
-              disabled={!isBidEnabled}
-              walletRequired
-            >
-              Place Bid
-            </FancyButton>
-          </Fragment>
-        )}
+                </Box>
+              )}
+            </Fragment>
+          )}
+        </Box>
 
         {completedPurchase && (
           <FancyButton
@@ -381,15 +394,29 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "0 0 12px 12px",
     padding: theme.spacing(0, 3, 2),
     overflowY: "auto",
+    "&::-webkit-scrollbar-track": {
+      marginBottom: theme.spacing(1),
+    },
     "&::-webkit-scrollbar": {
       width: "0.5rem"
     },
-    "&::-webkit-scrollbar-thumb": {
+    '&::-webkit-scrollbar-thumb': {
       backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
-      borderRadius: 12
+      borderRight: "3px solid transparent",
+      backgroundClip: "padding-box"
     },
-    minWidth: 380,
-    maxWidth: 411,
+    display: "flex",
+    [theme.breakpoints.down('sm')]: {
+      flexDirection: "column",
+      minWidth: 380,
+      maxWidth: 411,
+    },
+  },
+  bidContainer: {
+    [theme.breakpoints.up('md')]: {
+      marginLeft: theme.spacing(2),
+      maxWidth: 420
+    }
   },
   actionButton: {
     height: 46,
@@ -400,6 +427,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   nftCard: {
     maxWidth: "none",
+    [theme.breakpoints.up('md')]: {
+      maxWidth: 360
+    }
   },
   radioButton: {
     padding: "6px",
@@ -408,7 +438,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   termsBox: {
-    marginBottom: theme.spacing(1),
+    display: "flex",
+    justifyContent: "center",
+    marginTop: theme.spacing(1.5),
+    marginBottom: theme.spacing(1.5),
     "& .MuiFormControlLabel-root": {
       marginLeft: "-8px",
       marginRight: 0,
@@ -458,6 +491,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "24px",
     marginTop: theme.spacing(0.5),
   },
+  errorBox: {
+    marginTop: theme.spacing(2),
+    minHeight: 46,
+    width: "100%",
+    border: "1px solid #FF5252",
+    backgroundColor: `rgba${hexToRGBA("#FF5252", 0.2)}`,
+    borderRadius: 12,
+    padding: theme.spacing(2, 3),
+    display: "flex",
+    alignItems: "center",
+  },
+  warningIcon: {
+    height: 24,
+    width: 24,
+    flex: "none",
+    marginRight: theme.spacing(1)
+  }
 }));
 
 export default BidDialog;

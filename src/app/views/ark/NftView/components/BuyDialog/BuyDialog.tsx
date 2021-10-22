@@ -10,16 +10,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
 import { CurrencyLogo, DialogModal, FancyButton, Text, ArkNFTCard } from "app/components";
-import { SocialLinkGroup } from "app/components/ArkComponents";
 import { getBlockchain, getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, truncate, useAsyncTask } from "app/utils";
+import { bnOrZero, hexToRGBA, truncate, useAsyncTask } from "app/utils";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { ArkClient, logger } from "core/utilities";
 import { fromBech32Address, ZilswapConnector } from "core/zilswap";
+import { ReactComponent as WarningIcon } from "../assets/warning.svg";
 import { ReactComponent as ChainLinkIcon } from "./chainlink.svg";
 
 interface Props extends Partial<DialogProps> {
@@ -98,11 +98,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         tokenId: id,
       }, ZilswapConnector.getSDK());
 
-      setCompletedPurchase(true);
-
-      console.log("success: ", execTradeResult.isRejected());
-
-      logger("exec trade result", execTradeResult)
+        logger("exec trade result", execTradeResult)
     });
   };
 
@@ -215,10 +211,6 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
               />
             </Box>
 
-            {error && (
-              <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
-            )}
-
             <FancyButton
               className={classes.actionButton}
               loading={loading}
@@ -230,6 +222,15 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
             >
               Confirm Purchase
             </FancyButton>
+
+            {error && (
+                <Box className={classes.errorBox}>
+                  <WarningIcon className={classes.warningIcon} />
+                  <Text color="error">
+                    Error: {error?.message ?? "Unknown error"}
+                  </Text>
+                </Box>
+              )}
           </Fragment>
         )}
 
@@ -246,10 +247,10 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
               View Collection
             </FancyButton>
 
-            <Box display="flex" flexDirection="column" alignItems="center">
+            {/* <Box display="flex" flexDirection="column" alignItems="center">
               <Text className={classes.shareText}>Share</Text>
               <SocialLinkGroup collection={token.collection} />
-            </Box>
+            </Box> */}
           </Box>
         )}
 
@@ -312,6 +313,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minWidth: 380,
     maxWidth: 411,
     overflowY: "auto",
+    "&::-webkit-scrollbar-track": {
+      marginBottom: theme.spacing(1),
+    },
+    "&::-webkit-scrollbar": {
+      width: "0.5rem"
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
+      borderRight: "3px solid transparent",
+      backgroundClip: "padding-box"
+    },
   },
   actionButton: {
     height: 46,
@@ -326,7 +338,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   termsBox: {
-    marginBottom: theme.spacing(1),
+    display: "flex",
+    justifyContent: "center",
+    marginTop: theme.spacing(1.5),
+    marginBottom: theme.spacing(1.5),
     "& .MuiFormControlLabel-root": {
       marginLeft: "-8px",
       marginRight: 0,
@@ -384,6 +399,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginTop: theme.spacing(1.5),
     marginBottom: theme.spacing(1),
   },
+  errorBox: {
+    marginTop: theme.spacing(2),
+    minHeight: 46,
+    width: "100%",
+    border: "1px solid #FF5252",
+    backgroundColor: `rgba${hexToRGBA("#FF5252", 0.2)}`,
+    borderRadius: 12,
+    padding: theme.spacing(2, 3),
+    display: "flex",
+    alignItems: "center",
+  },
+  warningIcon: {
+    height: 24,
+    width: 24,
+    flex: "none",
+    marginRight: theme.spacing(1)
+  }
 }));
 
 export default BuyDialog;
