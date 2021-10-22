@@ -126,7 +126,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   };
 
   const onConfirm = () => {
-    if (!wallet?.provider || !match.params?.collection || !match.params?.id) return;
+    if (!wallet?.provider || !match.params?.collection || !match.params?.id || inputValues.buyNowPrice === "0") return;
     setOpen(true)
     runConfirmSell(async () => {
       const { collection: address, id } = match.params
@@ -292,10 +292,10 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 <Typography className={classes.feeLabel}>Service Fee</Typography>
                 <Typography className={classes.feeValue}>{ArkClient.FEE_BPS / 100}%</Typography>
               </Box>
-              {token?.collection?.royaltyBps &&
+              {token?.collection && token.collection.royaltyBps !== null &&
                 <Box display="flex" marginTop={1}>
                   <Typography className={classes.feeLabel}>Royalties</Typography>
-                  <Typography className={classes.feeValue}>{token.collection.royaltyBps / 100}%</Typography>
+                  <Typography className={classes.feeValue}>{new BigNumber(token.collection.royaltyBps).dividedBy(100)}%</Typography>
                 </Box>
               }  
             </Box>
