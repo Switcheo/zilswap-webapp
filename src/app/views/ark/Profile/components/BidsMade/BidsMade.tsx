@@ -10,6 +10,7 @@ import ArkBidsTable from "app/components/ArkComponents/ArkBidsTable";
 import ActiveBidToggle from "../ActiveBidToggle";
 
 interface Props extends BoxProps {
+  address: string
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -19,7 +20,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const BidsReceived: React.FC<Props> = (props: Props) => {
+const BidsMade: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const classes = useStyles();
 
@@ -31,4 +32,4 @@ const BidsReceived: React.FC<Props> = (props: Props) => {
   );
 };
 
-export default BidsReceived;
+export default BidsMade;

@@ -4,7 +4,7 @@ import {
   Container,
   Tooltip,
   Typography,
-  useMediaQuery, useTheme
+  useMediaQuery,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
@@ -70,7 +70,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: 'inline-block',
     lineHeight: 0,
     marginLeft: 8,
-    marginRight: -20,
+    marginRight: -31,
     padding: 7,
     borderRadius: 3,
     '& > svg': {
@@ -141,8 +141,6 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const hasParam = paramAddress && paramAddress.length > 0
   const address = hasParam ? paramAddress : connectedAddress
   const isConnectedUser = hasParam ? connectedAddress === address : true
-
-  console.log({address, viewProfile})
 
   useEffect(() => {
     if (isConnectedUser) {
@@ -232,15 +230,15 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           {address && (
             <>
               {currentTab === "Collected" && (
-                <Collected address={fromBech32Address(address)} />
+                <Collected address={fromBech32Address(address)} onSaleOnly={false} />
               )}
               {currentTab === "For Sale" && (
-                <Collected address={fromBech32Address(address)} />
+                <Collected address={fromBech32Address(address)} onSaleOnly={true} />
               )}
               {currentTab === "Liked" && (
-                <Collected address={fromBech32Address(address)} />
+                <Collected address={fromBech32Address(address)} onSaleOnly={true} />
               )}
-              {(currentTab === "Bids Made") && <BidsMade />}
+              {(currentTab === "Bids Made") && <BidsMade address={fromBech32Address(address)} />}
               {(currentTab === "Bids Received") && isConnectedUser && <BidsReceived />}
             </>
           )}
