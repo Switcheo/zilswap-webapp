@@ -10,13 +10,14 @@ import dayjs from "dayjs";
 import { Box, Checkbox, DialogContent, DialogProps, FormControlLabel } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
+import { ZilswapConnector } from "core/zilswap";
 import { ArkExpiry, ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
-import { getBlockchain, getTokens, getWallet } from "app/saga/selectors";
+import { getBlockchain, getTokens, getTransactions, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
-import { RootState, TokenInfo } from "app/store/types";
+import { RootState, TokenInfo, WalletObservedTx } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useAsyncTask, useBlockTime } from "app/utils";
+import { hexToRGBA, useAsyncTask, useBlockTime, useToaster } from "app/utils";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { ArkClient, logger } from "core/utilities";
@@ -86,6 +87,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const { network } = useSelector(getBlockchain);
   const { wallet } = useSelector(getWallet);
   const tokenState = useSelector(getTokens);
+  const { observingTxs }  = useSelector(getTransactions);
   const open = useSelector<RootState, boolean>(
     (state) => state.layout.showBidNftDialog
   );
@@ -100,7 +102,59 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const [expiryOption, setExpiryOption] = useState<expiryOption>(
     EXPIRY_OPTIONS[0]
   );
+  const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
   const match = useRouteMatch<{ id: string; collection: string }>();
+  const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
+  const toaster = useToaster();
+
+  const txIsPending = loadingApproveTx || observingTxs.findIndex(tx => tx.hash.toLowerCase() === pendingTxHash) >= 0;
+
+  const showTxApprove = useMemo(() => {
+    if (!bidToken || bidToken.isZil) return false;
+    setBidToken(tokenState.tokens[bidToken.address]);
+    const arkClient = new ArkClient(network);
+    const tokenProxyAddr = arkClient.tokenProxyAddress;
+
+    const priceAmount = bnOrZero(formState.bidAmount);
+    const unitlessInAmount = priceAmount.shiftedBy(bidToken.decimals);
+    const approved = bnOrZero(bidToken.allowances![tokenProxyAddr] || '0')
+    const showTxApprove = approved.isZero() || approved.comparedTo(unitlessInAmount) < 0;
+
+    return showTxApprove;
+    // eslint-disable-next-line
+  }, [bidToken, formState, txIsPending, network, tokenState.tokens])
+
+  const onApproveTx = () => {
+    if (!bidToken) return;
+    if (bidToken.isZil) return;
+    if (bnOrZero(formState.bidAmount).isLessThanOrEqualTo(0)) return;
+    if (loading) return;
+
+    runApproveTx(async () => {
+      const arkClient = new ArkClient(network);
+      const tokenProxyAddr = arkClient.tokenProxyAddress;
+      const tokenAddress = bidToken.address;
+      const tokenAmount = bnOrZero(formState.bidAmount);
+      const observedTx = await ZilswapConnector.approveTokenTransfer({
+        tokenAmount: tokenAmount.shiftedBy(bidToken.decimals),
+        tokenID: tokenAddress,
+        spenderAddress: tokenProxyAddr,
+      });
+
+      if (!observedTx)
+        throw new Error("Transfer allowance already sufficient for specified amount");
+
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx!,
+        address: wallet?.addressInfo.bech32 || "",
+        network,
+      };
+
+      setPendingTxHash(walletObservedTx.hash.toLowerCase());
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
+      toaster("Submitted", { hash: walletObservedTx.hash });
+    });
+  };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, currentBlock] = useBlockTime();
@@ -141,6 +195,9 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
   const onConfirm = () => {
     if (!wallet) return;
+
+    clearApproveError();
+
     runConfirmPurchase(async () => {
       const { collection: address, id } = match.params;
 
@@ -240,8 +297,8 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
     if (bnOrZero(formState.bidAmount).isLessThanOrEqualTo(0)) return false;
 
-    if (bnOrZero(formState.bidAmount).isGreaterThan(bnOrZero(bidToken.balance).shiftedBy(-bidToken.decimals)))
-      return false;
+    // if (bnOrZero(formState.bidAmount).isGreaterThan(bnOrZero(bidToken.balance).shiftedBy(-bidToken.decimals)))
+    //   return false;
 
     return true;
 
@@ -317,6 +374,9 @@ const BidDialog: React.FC<Props> = (props: Props) => {
               </Box>
 
               <FancyButton
+                showTxApprove={showTxApprove} 
+                loadingTxApprove={txIsPending}
+                onClickTxApprove={onApproveTx}
                 className={classes.actionButton}
                 loading={loading}
                 variant="contained"
@@ -332,7 +392,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                 <Box className={classes.errorBox}>
                   <WarningIcon className={classes.warningIcon} />
                   <Text color="error">
-                    Error: {error?.message ?? "Unknown error"}
+                    Error: {(error?.message || errorApproveTx?.message) ?? "Unknown error"}
                   </Text>
                 </Box>
               )}
