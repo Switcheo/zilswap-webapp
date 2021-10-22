@@ -30,11 +30,14 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
   const valueCalculator = useValueCalculators();
 
   const isOwnToken = useMemo(() => {
-    return token?.owner?.address && wallet?.addressInfo.byte20?.toLowerCase() === token?.owner?.address;
+    return (
+      token?.owner?.address &&
+      wallet?.addressInfo.byte20?.toLowerCase() === token?.owner?.address
+    );
   }, [token, wallet?.addressInfo]);
 
   const bestBid = useMemo(() => {
-    if (!token?.bestBid) return undefined
+    if (!token?.bestBid) return undefined;
 
     const bidToken = tokens[token?.bestBid?.price.address] || tokens[ZIL_ADDRESS]
     return bnOrZero(token?.bestBid?.price.amount).shiftedBy(-bidToken?.decimals ?? 0)
@@ -54,11 +57,15 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
 
 
   const onSell = () => {
-    dispatch(actions.Layout.toggleShowSellNftDialog("open"))
+    dispatch(actions.Layout.toggleShowSellNftDialog("open"));
   };
 
   const onBuy = () => {
-    dispatch(actions.Layout.toggleShowBuyNftDialog("open"))
+    dispatch(actions.Layout.toggleShowBuyNftDialog("open"));
+  };
+
+  const onBid = () => {
+    dispatch(actions.Layout.toggleShowBidNftDialog("open"));
   };
 
   return (
@@ -136,13 +143,12 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
                 Buy Now
               </FancyButton>
             )}
-            <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple>
+            <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onBid}>
               Place a Bid
             </FancyButton>
           </Box>
         </Box>
       </Box>
-
     </Box>
   );
 };
@@ -238,7 +244,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "#00FFB0",
     fontFamily: "Avenir Next LT Pro",
     display: "flex",
-    marginTop: theme.spacing(.5)
+    marginTop: theme.spacing(0.5),
   },
   zapScore: {
     fontFamily: "Avenir Next",
@@ -258,7 +264,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   halfOpacity: {
     opacity: 0.5,
-    color: theme.palette.primary.contrastText
+    color: theme.palette.primary.contrastText,
   },
 }));
 
