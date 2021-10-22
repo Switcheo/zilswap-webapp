@@ -137,9 +137,8 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
 
       await arkClient.putImageUpload(requestResult.result.uploadUrl, blobFile);
       await arkClient.notifyUpload(address, checkedOAuth!.access_token);
-
+      dispatch(actions.MarketPlace.loadProfile());
       toaster(`Set ${token.tokenId} as profile image`);
-      dispatch(actions.MarketPlace.updateFilter({}))
     })
   }
 

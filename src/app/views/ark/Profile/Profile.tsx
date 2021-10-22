@@ -160,6 +160,13 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     // eslint-disable-next-line
   }, [address, connectedProfile, network])
 
+  useEffect(() => {
+    if (connectedProfile && isConnectedUser) {
+      setViewProfile(connectedProfile);
+    }
+    // eslint-disable-next-line
+  }, [connectedProfile])
+
   const copyAddr = (text: string) => {
     navigator.clipboard.writeText(text);
     setTooltipText("Copied!");
