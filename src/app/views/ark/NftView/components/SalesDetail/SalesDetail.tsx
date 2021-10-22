@@ -69,11 +69,6 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
     }
   }, [tokens, token, valueCalculator, prices])
 
-
-  const onSell = () => {
-    dispatch(actions.Layout.toggleShowSellNftDialog("open"));
-  };
-
   const onBuy = () => {
     dispatch(actions.Layout.toggleShowBuyNftDialog("open"));
   };
