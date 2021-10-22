@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     borderRadius: 12,
     boxShadow: theme.palette.cardBoxShadow,
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     backgroundColor: "transparent",
     "& .MuiCardContent-root:last-child": {
       paddingBottom: 0

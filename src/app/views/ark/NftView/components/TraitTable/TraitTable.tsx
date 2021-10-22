@@ -39,7 +39,7 @@ const TraitTable: React.FC<Props> = (props: Props) => {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     "& .MuiTableCell-root": {
-      borderBottom: "1px solid #29475A",
+      borderBottom: theme.palette.border,
     }
   },
   header: {

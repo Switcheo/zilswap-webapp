@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: "6px"
   },
   topBorder: {
-    borderTop: "1px solid #29475A",
+    borderTop: theme.palette.border,
   },
   green: {
     color: "#00FFB0",

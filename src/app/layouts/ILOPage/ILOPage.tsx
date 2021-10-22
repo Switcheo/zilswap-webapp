@@ -46,12 +46,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   tabCornerLeft: {
     borderTopRightRadius: 0,
     borderBottomRightRadius: 0,
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
   },
   tabCornerRight: {
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     borderWidth: "1px 1px 1px 0",
   },
   tabActive: {

@@ -189,7 +189,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     borderRadius: theme.spacing(1.5),
-    border: "1px solid #29475A",
+    border: theme.palette.border,
     boxShadow: "0px 4px 20px #002028",
     background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
   },
@@ -234,7 +234,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   bidButton: {
     padding: theme.spacing(2.5, 4),
     borderRadius: theme.spacing(1.5),
-    border: "1px solid #29475A",
+    border: theme.palette.border,
     backgroundColor: "#FFDF6B",
     "& .MuiButton-label": {
       color: "#003340",
@@ -257,7 +257,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       color: "#003340",
     },
     "&:hover": {
-      border: "1px solid #29475A",
+      border: theme.palette.border,
       "& .MuiButton-label": {
         color: "#DEFFFF",
       },

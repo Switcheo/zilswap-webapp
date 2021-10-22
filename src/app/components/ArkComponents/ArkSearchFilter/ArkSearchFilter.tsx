@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme: AppTheme) =>({
   },
 }))
 
-const SearchFilter = () => {
+const ArkSearchFilter = () => {
   const dispatch = useDispatch();
   const classes = useStyles();
   const marketPlaceState = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
@@ -56,4 +56,4 @@ const SearchFilter = () => {
   )
 }
 
-export default SearchFilter
+export default ArkSearchFilter

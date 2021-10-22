@@ -138,7 +138,7 @@ export class ArkClient {
     return output;
   }
 
-  getNftCheques = async (params: ArkClient.GetNftChequeParams) => {
+  listNftCheques = async (params: ArkClient.ListChequesParams) => {
     const url = this.http.path("trade/list", {}, params);
     const result = await this.http.get({ url });
     const output = await result.json();
@@ -592,10 +592,13 @@ export namespace ArkClient {
   }
   export interface ListCollectionParams extends ListQueryParams {
   }
-  export interface GetNftChequeParams {
-    collectionAddress: string,
-    tokenId: string,
+  export interface ListChequesParams {
+    collectionAddress?: string,
+    tokenId?: string,
     side?: string,
+    ownerAddress?: string,
+    initiatorAddress?: string,
+    isActive?: string,
   }
 }
 

@@ -71,6 +71,8 @@ const theme = {
     main: "#FF5252"
   },
   link: "#02586D",
+  border: "1px solid #D2E5DF",
+  borderColor: "#D2E5DF",
 };
 
 export default theme;

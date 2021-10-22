@@ -3,6 +3,7 @@ import { Backdrop, Dialog, DialogProps, DialogTitle, IconButton, Typography } fr
 import { makeStyles } from "@material-ui/core/styles";
 import CloseIcon from "@material-ui/icons/CloseRounded";
 import cls from "classnames";
+import { AppTheme } from "app/theme/types";
 
 export interface DialogModalProps extends DialogProps {
   header?: string;
@@ -10,22 +11,22 @@ export interface DialogModalProps extends DialogProps {
   titlePadding?: boolean;
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
   closeButton: {
     position: "absolute",
     right: theme.spacing(1),
     top: theme.spacing(1),
-    color: theme.palette.grey[500],
+    color: theme.palette.grey?.[500],
   },
   dialogTitle: {
     backgroundColor: theme.palette.background.default,
     borderTop:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderLeft:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderRight:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderRadius: "12px 12px 0 0",
   },
   titlePadding: {

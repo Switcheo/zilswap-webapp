@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   selectMenu: {
     width: "inherit",
     padding: theme.spacing(1),
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     backgroundColor: theme.palette.background.default,
     "& .MuiListItem-root": {
       borderRadius: "12px",

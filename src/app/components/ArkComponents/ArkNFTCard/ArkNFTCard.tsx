@@ -75,6 +75,9 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   }, [blockTime, token?.bestBid, tokens])
 
   const likeToken = () => {
+    if (!wallet)
+      return dispatch(actions.Layout.toggleShowWallet("open"));
+
     runLikeToken(async () => {
       if (!wallet || !token) return;
       let newOAuth: OAuth | undefined = oAuth;
@@ -125,7 +128,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
             <Box display="flex" alignItems="center">
               <Typography className={classes.likes}>{toHumanNumber(token.statistics?.favourites)}</Typography>
               <IconButton
-                onClick={() => likeToken()}
+                onClick={likeToken}
                 className={classes.likeIconButton}
                 disableRipple
               >

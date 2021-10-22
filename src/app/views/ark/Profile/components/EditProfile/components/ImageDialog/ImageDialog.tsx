@@ -74,11 +74,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   dialogContent: {
     backgroundColor: theme.palette.background.default,
     borderLeft:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderRight:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderBottom:
-      theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+      theme.palette.border,
     borderRadius: "0 0 12px 12px",
     overflowY: "auto",
     padding: theme.spacing(2, 4, 5),

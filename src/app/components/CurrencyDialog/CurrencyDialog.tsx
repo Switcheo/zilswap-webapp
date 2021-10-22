@@ -13,9 +13,10 @@ import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { hexToRGBA, useTaskSubscriber } from "app/utils";
 import { BIG_ZERO, LoadingKeys } from "app/utils/constants";
 import { actions } from "app/store";
+import { AppTheme } from "app/theme/types";
 import { CurrencyList } from "./components";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     width: "100%",
     maxWidth: 650,
@@ -58,7 +59,7 @@ const useStyles = makeStyles(theme => ({
       width: '0.4rem'
     },
     '&::-webkit-scrollbar-thumb': {
-      backgroundColor: `rgba${hexToRGBA(theme.palette.text.primary, 0.1)}`,
+      backgroundColor: `rgba${hexToRGBA(theme.palette.text!.primary!, 0.1)}`,
       borderRadius: 12
     }
   },
@@ -76,9 +77,9 @@ const useStyles = makeStyles(theme => ({
   },
   dialogContent: {
     backgroundColor: theme.palette.type === "dark" ? "#12222C" : "#F6FFFC",
-    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderBottom: theme.palette.border,
+    borderLeft: theme.palette.border,
+    borderRight: theme.palette.border,
     borderRadius: "0 0 12px 12px",
     paddingTop: '24px',
     [theme.breakpoints.down("sm")]: {
