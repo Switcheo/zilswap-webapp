@@ -49,7 +49,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const network = useNetwork();
   const [popAnchor, setPopAnchor] = useState(null);
   const toaster = useToaster(false);
-  const isOwner = wallet?.addressInfo.byte20.toLocaleLowerCase() === token.owner?.address.toLocaleLowerCase();
+  const isOwner = wallet?.addressInfo.byte20.toLowerCase() === token.owner?.address.toLowerCase();
 
   useEffect(() => {
     if (token) setLiked(!!token.isFavourited);
@@ -132,7 +132,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
         dispatch(actions.MarketPlace.updateAccessToken(result));
         checkedOAuth = result;
       }
-      const address = wallet!.addressInfo.byte20.toLocaleLowerCase()
+      const address = wallet!.addressInfo.byte20.toLowerCase()
       const requestResult = await arkClient.requestImageUploadUrl(address, checkedOAuth!.access_token);
 
       await arkClient.putImageUpload(requestResult.result.uploadUrl, blobFile);
