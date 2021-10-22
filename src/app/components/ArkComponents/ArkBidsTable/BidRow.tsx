@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from "react";
-import { Avatar, Box, BoxProps, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
+import { Avatar, Box, BoxProps, CircularProgress, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
@@ -10,10 +10,12 @@ import { useSelector } from "react-redux";
 import { darken } from '@material-ui/core/styles';
 import { AppTheme } from "app/theme/types";
 import { Cheque, WalletState } from "app/store/types";
-import { useValueCalculators } from "app/utils";
+import { bnOrZero, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
 import { RootState, TokenState } from "app/store/types";
 import { getChequeStatus } from "core/utilities/ark"
 import { ArkOwnerLabel } from "app/components";
+import { ZilswapConnector } from "core/zilswap";
+import { logger, ArkClient } from "core/utilities";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
 import { ReactComponent as UpArrow } from "./assets/up-arrow.svg";
 
@@ -131,17 +133,99 @@ const Row: React.FC<Props> = (props: Props) => {
   const { bid: baseBid, relatedBids = [], currentBlock, blockTime, showItem } = props;
   const [expand, setExpand] = useState(false);
   const classes = useStyles();
+  const toaster = useToaster();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const valueCalculators = useValueCalculators();
+  const [runCancelBid, cancelLoading] = useAsyncTask(`cancelBid-${baseBid.id}`, e => toaster(e?.message));
+  const [runAcceptBid, acceptLoading] = useAsyncTask(`acceptBid-${baseBid.id}`, e => toaster(e?.message));
   const userAddress = walletState.wallet?.addressInfo.byte20.toLowerCase()
 
-  const cancelBid = () => {
+  const cancelBid = (bid: Cheque) => {
+    // TODO: refactor
+    runCancelBid(async () => {
+      if (!walletState.wallet) return;
+      const wallet = walletState.wallet;
 
+      const arkClient = new ArkClient(wallet.network);
+      const chequeHash = arkClient.arkChequeHash({
+        expiry: bid.expiry,
+        feeAmount: bnOrZero(bid.feeAmount),
+        nonce: bid.nonce,
+        price: {
+          address: bid.price.address,
+          amount: bnOrZero(bid.price.amount),
+        },
+        side: bid.side === "buy" ? "Buy" : "Sell",
+        token: {
+          address: bid.token?.collection?.address,
+          id: bid.token?.tokenId,
+        },
+      });
+
+      const message = await arkClient.arkMessage("Void", chequeHash);
+
+      const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
+
+      const voidChequeResult = await arkClient.voidCheque({
+        publicKey,
+        signature,
+        chequeHash,
+      }, ZilswapConnector.getSDK());
+
+      logger("void cheque result", voidChequeResult);
+    });
   }
 
-  const acceptBid = () => {
+  const acceptBid = (bid: Cheque) => {
+    // TODO: refactor
+    runAcceptBid(async () => {
+      if (!walletState.wallet) return;
+      const wallet = walletState.wallet;
+      const priceAmount = new BigNumber(bid.price.amount);
+      const price = { amount: priceAmount, address: bid.price.address };
+      const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
 
+      const arkClient = new ArkClient(wallet.network);
+      const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
+      const currentBlock = ZilswapConnector.getCurrentBlock();
+      const expiry = currentBlock + 300; // blocks
+      const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
+        side: "Buy",
+        token: {
+          address: bid.token?.collection?.address,
+          id: bid.token?.tokenId,
+        },
+        price,
+        feeAmount,
+        expiry,
+        nonce,
+      }))
+
+      const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
+
+      const sellCheque: ArkClient.ExecuteSellCheque = {
+        side: "sell",
+        expiry,
+        price: {
+          address: price.address,
+          amount: price.amount.toString(10),
+        },
+        feeAmount: feeAmount.toString(10),
+        nonce,
+        publicKey: `0x${publicKey}`,
+        signature: `0x${signature}`,
+      }
+
+      const execTradeResult = await arkClient.executeTrade({
+        buyCheque: bid,
+        sellCheque,
+        nftAddress: bid.token.collection.address,
+        tokenId: bid.token.tokenId,
+      }, ZilswapConnector.getSDK());
+
+      logger("exec trade result", execTradeResult)
+    });
   }
 
   return (
@@ -188,13 +272,23 @@ const Row: React.FC<Props> = (props: Props) => {
             </TableCell>
             <TableCell align="center" className={cls(classes.actionCell, classes.lastCell, { [classes.withBorder]: expand })}>
               {status === 'Active' && bid.initiatorAddress === userAddress &&
-                <IconButton onClick={() => cancelBid()} className={classes.iconButton}>
-                  <Typography className={classes.buttonText}>Cancel</Typography>
+                <IconButton onClick={() => cancelBid(bid)} className={classes.iconButton}>
+                  {cancelLoading && (
+                    <CircularProgress size={16} />
+                  )}
+                  {!cancelLoading && (
+                    <Typography className={classes.buttonText}>Cancel</Typography>
+                  )}
                 </IconButton>
               }
               {status === 'Active' && bid.token.owner === userAddress &&
-                <IconButton onClick={() => acceptBid()} className={classes.iconButton}>
-                  <Typography className={classes.buttonText}>Accept</Typography>
+                <IconButton onClick={() => acceptBid(bid)} className={classes.iconButton}>
+                  {acceptLoading && (
+                    <CircularProgress size={16} />
+                  )}
+                  {!acceptLoading && (
+                    <Typography className={classes.buttonText}>Accept</Typography>
+                  )}
                 </IconButton>
               }
               {(status !== 'Active' || (bid.token.owner !== userAddress && bid.initiatorAddress !== userAddress)) &&

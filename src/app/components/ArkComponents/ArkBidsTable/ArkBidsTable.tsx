@@ -17,8 +17,8 @@ import BidRow from "./BidRow";
 const ITEMS_PER_PAGE = 5
 
 interface Props extends BoxProps {
-  bids: Cheque[]
-  showItem?: boolean
+  bids: Cheque[];
+  showItem?: boolean;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -89,16 +89,6 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [blockTime, currentBlock] = useBlockTime();
-
-  // const [bid, setBid] = useState<Cheque | undefined>(undefined);
-
-  // const acceptBid = (newBid?: Cheque) => {
-  //   setBid(newBid);
-  // }
-
-  // const cancelBid = () => {
-  //   setBid(undefined);
-  // }
 
   const handlePageChange = (page: number) => {
     setPageNumber(page - 1)

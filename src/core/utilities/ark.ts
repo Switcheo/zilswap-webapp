@@ -551,6 +551,7 @@ export namespace ArkClient {
   }
 
   export type ExecuteBuyCheque = Pick<SimpleCheque, "side" | "expiry" | "publicKey" | "signature" | "nonce">;
+  export type ExecuteSellCheque = Pick<SimpleCheque, "side" | "expiry" | "publicKey" | "signature" | "nonce" | "price" | "feeAmount">;
   export interface ArkChequeParams {
     side: 'Buy' | 'Sell';
     token: { id: string, address: string };
@@ -560,12 +561,16 @@ export namespace ArkClient {
     nonce: string;
   }
 
-  export interface ExecuteTradeParams {
+  export type ExecuteTradeParams = {
     nftAddress: string;
     tokenId: string;
+  } & ({
     sellCheque: SimpleCheque;
     buyCheque: ExecuteBuyCheque;
-  }
+  } | {
+    sellCheque: ExecuteSellCheque;
+    buyCheque: SimpleCheque;
+  })
 
   export interface VoidChequeParams {
     chequeHash: String;
