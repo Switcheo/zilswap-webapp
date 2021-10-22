@@ -373,7 +373,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "#003340",
   },
   actionButton: {
-    height: 46,
+    height: 58,
     marginTop: 24
   },
   feeLabel: {
