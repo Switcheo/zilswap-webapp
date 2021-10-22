@@ -37,7 +37,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const { className, token, collectionAddress, dialog, ...rest } = props;
   const classes = useStyles();
   const [liked, setLiked] = useState<boolean>(!!token.isFavourited);
-  const { oAuth, filter } = useSelector<RootState, MarketPlaceState>((state) => state.marketplace);
+  const { oAuth } = useSelector<RootState, MarketPlaceState>((state) => state.marketplace);
   const { wallet } = useSelector(getWallet);
   const { tokens } = useSelector(getTokens);
   const [runLikeToken] = useAsyncTask("likeToken");
@@ -104,7 +104,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
         await arkClient.removeFavourite(token!.collection!.address, token.tokenId, newOAuth!.access_token);
       }
       setLiked(!liked);
-      dispatch(actions.MarketPlace.updateFilter({ ...filter }));
+      dispatch(actions.MarketPlace.reloadTokenList());
       toaster(`${!liked ? "Liked" : "Unliked"}`);
     })
   }

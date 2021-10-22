@@ -63,3 +63,9 @@ export function updateTokens(payload: PaginatedList<Nft>) {
     payload
   }
 }
+
+export function reloadTokenList() {
+  return {
+    type: MarketPlaceActionTypes.RELOAD_TOKEN_LIST,
+  }
+}
