@@ -423,7 +423,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         fontFamily: "'Raleway', sans-serif",
         fontWeight: 700,
         fontSize: "24px",
-        linHeight: "36px",
       },
       "& .MuiSvgIcon-root": {
         fontSize: "1.8rem",

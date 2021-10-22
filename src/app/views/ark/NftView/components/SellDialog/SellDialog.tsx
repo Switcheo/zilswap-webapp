@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Box, FormHelperText, InputLabel, Typography, DialogContent } from "@material-ui/core";
+import { Box, Container, FormHelperText, InputLabel, Typography, DialogContent } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/zilliqa";
 import BigNumber from "bignumber.js";
@@ -7,17 +7,18 @@ import cls from "classnames";
 import { useSelector } from "react-redux";
 import { useHistory, useRouteMatch } from "react-router";
 import { ArkInput, ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
+import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet, getTokens } from "app/saga/selectors";
 import { Nft, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useAsyncTask } from "app/utils";
+import { useAsyncTask } from "app/utils";
 import { ArkClient, logger } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import { ReactComponent as Checkmark } from "./checkmark.svg";
 
 const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
-  const { className } = props;
+  const { className, ...rest } = props;
   const classes = useStyles();
   const { network } = useSelector(getBlockchain);
   const { wallet } = useSelector(getWallet);
@@ -178,206 +179,212 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   return (
-    <Box className={cls(classes.root, className)}>
-      <Box className={classes.container}>
-        <Box justifyContent="flex-start" marginBottom={4}>
-          <Typography variant="h1">Sell</Typography>
-        </Box>
-        <Box display="flex">
-          <Box flexGrow={1}>
-            <Box className={classes.description}>
-              <ArkInput
-                placeholder="eg. This NFT was owned by an NBA player" error={errors.description} value={inputValues.description}
-                label="Additional description" onValueChange={(value) => updateInputs("description")(value)} multiline={true}
-              />
-            </Box>
-
-            {/* <Box display="flex" flexDirection="column" marginTop={2}>
-              <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
-                Sell type
-              </InputLabel>
-              <FormHelperText className={classes.instruction}>By default, all Fixed Price listings are set to open to bids.</FormHelperText>
-              <Box display="grid" gridTemplateColumns="repeat(2, minmax(0, 1fr))" gridGap={8} marginTop={1}>
-                <button 
-                  className={cls(classes.saleTypeButton, {
-                    [classes.saleTypeButtonSelected]: inputValues.saleType === "fixed_price"
-                  })} 
-                  onClick={() => setInputValues({
-                    ...inputValues,
-                    saleType: "fixed_price"
-                  })}
-                >Fixed Price</button>
-                <button 
-                  className={cls(classes.saleTypeButton, {
-                    [classes.saleTypeButtonSelected]: inputValues.saleType === "timed_auction"
-                  })}
-                  onClick={() => setInputValues({
-                    ...inputValues,
-                    saleType: "timed_auction"
-                  })}
-                >Timed Auction</button>
+    <ArkPage {...rest}>
+      <Container className={cls(classes.root, className)}>
+        <Box className={classes.container}>
+          <Box justifyContent="flex-start" marginBottom={4}>
+            <Typography variant="h1">Sell</Typography>
+          </Box>
+          <Box className={classes.contentBox}>
+            <Box>
+              <Box className={classes.description}>
+                <ArkInput
+                  placeholder="eg. This NFT was owned by an NBA player" error={errors.description} value={inputValues.description}
+                  label="Additional description" onValueChange={(value) => updateInputs("description")(value)} multiline={true}
+                />
               </Box>
-            </Box> */}
-            
-            {inputValues.saleType === "fixed_price" &&
-              <Box display="flex" flexDirection="column" marginTop={2}>
+
+              {/* <Box display="flex" flexDirection="column" marginTop={2}>
                 <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
-                  Buy Now Price
+                  Sell type
                 </InputLabel>
-                <FormHelperText className={classes.instruction}>Transactions will be made automatically once the buyer hits "Confirm".</FormHelperText>
-                <Box marginTop={1}>
-                  <CurrencyInput
-                    token={inputValues.sellToken ?? null}
-                    amount={inputValues.buyNowPrice}
-                    hideBalance
-                    onEditorBlur={() => onEndEditPrice('buyNowPrice')}
-                    onAmountChange={value => onPriceChange('buyNowPrice', value)}
-                    onCurrencyChange={onCurrencyChange}
-                  />
+                <FormHelperText className={classes.instruction}>By default, all Fixed Price listings are set to open to bids.</FormHelperText>
+                <Box display="grid" gridTemplateColumns="repeat(2, minmax(0, 1fr))" gridGap={8} marginTop={1}>
+                  <button 
+                    className={cls(classes.saleTypeButton, {
+                      [classes.saleTypeButtonSelected]: inputValues.saleType === "fixed_price"
+                    })} 
+                    onClick={() => setInputValues({
+                      ...inputValues,
+                      saleType: "fixed_price"
+                    })}
+                  >Fixed Price</button>
+                  <button 
+                    className={cls(classes.saleTypeButton, {
+                      [classes.saleTypeButtonSelected]: inputValues.saleType === "timed_auction"
+                    })}
+                    onClick={() => setInputValues({
+                      ...inputValues,
+                      saleType: "timed_auction"
+                    })}
+                  >Timed Auction</button>
                 </Box>
-              </Box>
-            }
-
-            {inputValues.saleType === "timed_auction" &&
-              <>
-                <Box display="flex" flexDirection="column" marginTop={4}>
+              </Box> */}
+              
+              {inputValues.saleType === "fixed_price" &&
+                <Box display="flex" flexDirection="column" marginTop={2}>
                   <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
-                    Starting Price
+                    Buy Now Price
                   </InputLabel>
-                  <FormHelperText className={classes.instruction}>Set a minimum bid XXXXXXXXX</FormHelperText>
+                  <FormHelperText className={classes.instruction}>Transactions will be made automatically once the buyer hits "Confirm".</FormHelperText>
                   <Box marginTop={1}>
                     <CurrencyInput
                       token={inputValues.sellToken ?? null}
                       amount={inputValues.buyNowPrice}
-                      onEditorBlur={() => onEndEditPrice('startingPrice')}
-                      onAmountChange={value => onPriceChange('startingPrice', value)}
+                      hideBalance
+                      onEditorBlur={() => onEndEditPrice('buyNowPrice')}
+                      onAmountChange={value => onPriceChange('buyNowPrice', value)}
                       onCurrencyChange={onCurrencyChange}
                     />
                   </Box>
                 </Box>
+              }
 
-                <Box display="flex" flexDirection="column" marginTop={4}>
-                  <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
-                    Reserve Price
-                  </InputLabel>
-                  <FormHelperText className={classes.instruction}>If no bid hits the reserve price, your auction will close without a sale.</FormHelperText>
-                  <Box marginTop={1}>
-                    <CurrencyInput
-                      label="Reserve Price"
-                      token={inputValues.sellToken ?? null}
-                      amount={inputValues.buyNowPrice}
-                      onEditorBlur={() => onEndEditPrice('reservePrice')}
-                      onAmountChange={value => onPriceChange('reservePrice', value)}
-                      onCurrencyChange={onCurrencyChange}
-                    />
+              {inputValues.saleType === "timed_auction" &&
+                <>
+                  <Box display="flex" flexDirection="column" marginTop={4}>
+                    <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
+                      Starting Price
+                    </InputLabel>
+                    <FormHelperText className={classes.instruction}>Set a minimum bid XXXXXXXXX</FormHelperText>
+                    <Box marginTop={1}>
+                      <CurrencyInput
+                        token={inputValues.sellToken ?? null}
+                        amount={inputValues.buyNowPrice}
+                        onEditorBlur={() => onEndEditPrice('startingPrice')}
+                        onAmountChange={value => onPriceChange('startingPrice', value)}
+                        onCurrencyChange={onCurrencyChange}
+                      />
+                    </Box>
                   </Box>
-                </Box>
 
-                <Box display="flex" flexDirection="column" marginTop={4}>
-                  <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
-                    End Auction On
-                  </InputLabel>
-                  <FormHelperText className={classes.instruction}>Choose when to end your timed auction.</FormHelperText>
-                </Box>
-              </>
-            }
-            
-            <Box display="flex" flexDirection="column" marginTop={4}>
-              <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
-                Fees
-              </InputLabel>
-              <FormHelperText className={classes.instruction}>The following fees will be deducted once this NFT is sold.</FormHelperText>
-              <Box display="flex" marginTop={1}>
-                <Typography className={classes.feeLabel}>Service Fee</Typography>
-                <Typography className={classes.feeValue}>{ArkClient.FEE_BPS / 100}%</Typography>
-              </Box>
-              {token?.collection && token.collection.royaltyBps !== null &&
+                  <Box display="flex" flexDirection="column" marginTop={4}>
+                    <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
+                      Reserve Price
+                    </InputLabel>
+                    <FormHelperText className={classes.instruction}>If no bid hits the reserve price, your auction will close without a sale.</FormHelperText>
+                    <Box marginTop={1}>
+                      <CurrencyInput
+                        label="Reserve Price"
+                        token={inputValues.sellToken ?? null}
+                        amount={inputValues.buyNowPrice}
+                        onEditorBlur={() => onEndEditPrice('reservePrice')}
+                        onAmountChange={value => onPriceChange('reservePrice', value)}
+                        onCurrencyChange={onCurrencyChange}
+                      />
+                    </Box>
+                  </Box>
+
+                  <Box display="flex" flexDirection="column" marginTop={4}>
+                    <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
+                      End Auction On
+                    </InputLabel>
+                    <FormHelperText className={classes.instruction}>Choose when to end your timed auction.</FormHelperText>
+                  </Box>
+                </>
+              }
+              
+              <Box display="flex" flexDirection="column" marginTop={4}>
+                <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
+                  Fees
+                </InputLabel>
+                <FormHelperText className={classes.instruction}>The following fees will be deducted once this NFT is sold.</FormHelperText>
                 <Box display="flex" marginTop={1}>
-                  <Typography className={classes.feeLabel}>Royalties</Typography>
-                  <Typography className={classes.feeValue}>{new BigNumber(token.collection.royaltyBps).dividedBy(100)}%</Typography>
+                  <Typography className={classes.feeLabel}>Service Fee</Typography>
+                  <Typography className={classes.feeValue}>{ArkClient.FEE_BPS / 100}%</Typography>
                 </Box>
-              }  
-            </Box>
+                {token?.collection && token.collection.royaltyBps !== null &&
+                  <Box display="flex" marginTop={1}>
+                    <Typography className={classes.feeLabel}>Royalties</Typography>
+                    <Typography className={classes.feeValue}>{new BigNumber(token.collection.royaltyBps).dividedBy(100)}%</Typography>
+                  </Box>
+                }  
+              </Box>
 
-            {error && (
-              <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
-            )}
-            <FancyButton 
-              className={classes.actionButton}
-              loading={loading} 
-              variant="contained" 
-              color="primary" 
-              onClick={onConfirm}
-              walletRequired
-            >
-              Sell NFT
-            </FancyButton>
-          </Box>
-          <Box marginLeft={6}>
-            {token &&
-              <ArkNFTCard
-                className={classes.nftCard}
-                token={token}
-                collectionAddress={fromBech32Address(collectionId).toLowerCase()}
-                dialog={true}
-              />
-            }
+              {error && (
+                <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
+              )}
+              <FancyButton 
+                className={classes.actionButton}
+                loading={loading} 
+                variant="contained" 
+                color="primary" 
+                onClick={onConfirm}
+                walletRequired
+              >
+                Sell NFT
+              </FancyButton>
+            </Box>
+            <Box className={classes.nftBox}>
+              {token &&
+                <ArkNFTCard
+                  className={classes.nftCard}
+                  token={token}
+                  collectionAddress={fromBech32Address(collectionId).toLowerCase()}
+                  dialog={true}
+                />
+              }
+            </Box>
           </Box>
         </Box>
-      </Box>
 
-      <DialogModal
-        open={open}
-        onClose={onCloseDialog}
-      >
-        <DialogContent className={classes.dialogContent}>
-          <Typography variant="h1">Complete Listing</Typography>
-          <Box display="flex" flexDirection="column" marginTop={5}>
-            <Box display="flex" alignItems="center" marginBottom={4} position="relative">
-              <Box className={cls(classes.stepBar, {
-                [classes.stepBarFirstStepCompleted]: hasApproved,
-                [classes.stepBarCompleted]: hasApproved && hasPosted
-              })}></Box>
-              <Box className={cls(classes.step, {
-                [classes.stepActive]: !hasApproved,
-                [classes.stepCompleted]: hasApproved
-              })}>
-                {hasApproved ? (
-                  <Checkmark />
-                ) : (
-                  <>1</>
-                )}
+        <DialogModal
+          className={classes.dialogRoot}
+          header="Complete Listing"
+          open={open}
+          onClose={onCloseDialog}
+        >
+          <DialogContent className={classes.dialogContent}>
+            <Box display="flex" flexDirection="column">
+              <Box display="flex" alignItems="center" marginBottom={4} position="relative">
+                <Box className={cls(classes.stepBar, {
+                  [classes.stepBarFirstStepCompleted]: hasApproved,
+                  [classes.stepBarCompleted]: hasApproved && hasPosted
+                })}></Box>
+                <Box className={cls(classes.step, {
+                  [classes.stepActive]: !hasApproved,
+                  [classes.stepCompleted]: hasApproved
+                })}>
+                  {hasApproved ? (
+                    <Checkmark />
+                  ) : (
+                    <>1</>
+                  )}
+                </Box>
+                <Box display="flex" flexDirection="column" alignItems="stretch">
+                  <Text className={classes.stepLabel}>Approve Token</Text>
+                  <Text>Approve once, and never again. This step approves the token for trading and involves a one-off gas fee.</Text>
+                </Box>
               </Box>
-              <Box display="flex" flexDirection="column" alignItems="stretch">
-                <Text className={classes.stepLabel}>Approve Token</Text>
-                <Text>Approve once, and never again. This step approves the token for trading and involves a one-off gas fee.</Text>
+              <Box display="flex" alignItems="center">
+                <Box className={cls(classes.step, {
+                  [classes.stepActive]: !hasPosted && hasApproved,
+                  [classes.stepCompleted]: hasPosted
+                })}>
+                  {hasPosted ? (
+                    <Checkmark />
+                  ) : (
+                    <>2</>
+                  )}
+                </Box>
+                <Box display="flex" flexDirection="column" alignItems="stretch">
+                  <Text className={classes.stepLabel}>Confirm Listing</Text>
+                  <Text>Approve once, and never again. This step approves the token for trading and involves a one-off gas fee.</Text>
+                </Box>
               </Box>
             </Box>
-            <Box display="flex" alignItems="center">
-              <Box className={cls(classes.step, {
-                [classes.stepActive]: !hasPosted && hasApproved,
-                [classes.stepCompleted]: hasPosted
-              })}>
-                {hasPosted ? (
-                  <Checkmark />
-                ) : (
-                  <>2</>
-                )}
-              </Box>
-              <Box display="flex" flexDirection="column" alignItems="stretch">
-                <Text className={classes.stepLabel}>Confirm Listing</Text>
-                <Text>Approve once, and never again. This step approves the token for trading and involves a one-off gas fee.</Text>
-              </Box>
-            </Box>
-          </Box>
-        </DialogContent>
-      </DialogModal>
-    </Box>
+          </DialogContent>
+        </DialogModal>
+      </Container>
+    </ArkPage>
   );
 };
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    [theme.breakpoints.down("xs")]: {
+      padding: 0
+    },
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -387,7 +394,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     maxWidth: "680px",
     width: "100%",
     display: "row",
-    paddingTop: 32
+  },
+  contentBox: {
+    display: "flex",
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
+      flexDirection: "column-reverse"
+    }
+  },
+  nftBox: {
+    marginLeft: theme.spacing(6),
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
+      marginLeft: 0,
+    }
   },
   nftCard: {
     maxWidth: "none",
@@ -415,7 +435,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: 12,
     margin: 0,
     opacity: 0.5,
-    width: 400,
+    [theme.breakpoints.up("sm")]: {
+      width: 400,
+    }
   },
   saleTypeButton: {
     padding: 20,
@@ -445,6 +467,25 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: "bold",
     fontSize: "14px"
   },
+  dialogRoot: {
+    "& .MuiDialogTitle-root": {
+      padding: theme.spacing(4.5, 4.5, 5),
+      "& .MuiTypography-root": {
+        fontFamily: "'Raleway', sans-serif",
+        fontWeight: 700,
+        fontSize: "24px",
+      },
+      "& .MuiSvgIcon-root": {
+        fontSize: "1.8rem",
+      },
+      "& .MuiIconButton-root": {
+        top: "21px",
+        right: "21px",
+      },
+    },
+    position: "relative",
+
+  },
   dialogContent: {
     backgroundColor: theme.palette.background.default,
     borderLeft:
@@ -454,21 +495,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderBottom:
       theme.palette.border,
     borderRadius: "0 0 12px 12px",
-    padding: theme.spacing(0, 4, 4),
-    minWidth: 380,
-    maxWidth: 411,
-    overflowY: "auto",
-    "&::-webkit-scrollbar-track": {
-      marginBottom: theme.spacing(1),
-    },
-    "&::-webkit-scrollbar": {
-      width: "0.5rem"
-    },
-    '&::-webkit-scrollbar-thumb': {
-      backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
-      borderRight: "3px solid transparent",
-      backgroundClip: "padding-box"
-    },
+    padding: theme.spacing(0, 4.5, 5),
+    [theme.breakpoints.up("sm")]: {
+      width: 436,
+    }
   },
   dialogButton: {
     height: 42,
