@@ -10,12 +10,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
 import { CurrencyLogo, DialogModal, FancyButton, Text, ArkNFTCard } from "app/components";
-import { getBlockchain, getTokens, getWallet } from "app/saga/selectors";
+import { getBlockchain, getTokens, getTransactions, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
-import { RootState } from "app/store/types";
+import { RootState, WalletObservedTx } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, hexToRGBA, truncate, useAsyncTask } from "app/utils";
+import { bnOrZero, hexToRGBA, truncate, useAsyncTask, useToaster } from "app/utils";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { ArkClient, logger } from "core/utilities";
 import { fromBech32Address, ZilswapConnector } from "core/zilswap";
@@ -33,6 +33,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
   const { network } = useSelector(getBlockchain);
   const tokenState = useSelector(getTokens);
   const { wallet } = useSelector(getWallet);
+  const txState = useSelector(getTransactions);
   const open = useSelector<RootState, boolean>((state) => state.layout.showBuyNftDialog);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -40,6 +41,11 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
   const match = useRouteMatch<{ id: string, collection: string }>();
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
+  const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
+  const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
+  const toaster = useToaster();
+
+  const txIsPending = loadingApproveTx || txState.observingTxs.findIndex(tx => tx.hash.toLowerCase() === pendingTxHash) >= 0;
 
   const bestAsk = token.bestAsk;
 
@@ -57,8 +63,56 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
     }
   }, [bestAsk, tokenState.tokens])
 
+  const showTxApprove = useMemo(() => {
+    if (!bestAsk || !priceToken || priceToken?.isZil) return false;
+    const arkClient = new ArkClient(network);
+    const tokenProxyAddr = arkClient.tokenProxyAddress;
+
+    const priceAmount = bnOrZero(bestAsk.price.amount);
+    const unitlessInAmount = priceAmount.shiftedBy(priceToken!.decimals);
+    const approved = bnOrZero(priceToken.allowances![tokenProxyAddr] || '0')
+    const showTxApprove = approved.isZero() || approved.comparedTo(unitlessInAmount) < 0;
+
+    return showTxApprove;
+    // eslint-disable-next-line
+  }, [bestAsk, priceToken, network, txIsPending, tokenState.tokens])
+
+  const onApproveTx = () => {
+    if (!bestAsk) return;
+    if (!priceToken) return;
+    if (priceToken.isZil) return;
+    if (loading) return;
+
+    runApproveTx(async () => {
+      const arkClient = new ArkClient(network);
+      const tokenAddress = priceToken.address;
+      const tokenAmount = new BigNumber(bestAsk.price.amount);
+      const observedTx = await ZilswapConnector.approveTokenTransfer({
+        tokenAmount: tokenAmount.shiftedBy(priceToken.decimals),
+        tokenID: tokenAddress,
+        spenderAddress: arkClient.tokenProxyAddress
+      });
+
+      if (!observedTx)
+        throw new Error("Transfer allowance already sufficient for specified amount");
+
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx!,
+        address: wallet?.addressInfo.bech32 || "",
+        network,
+      };
+
+      setPendingTxHash(walletObservedTx.hash.toLowerCase());
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
+      toaster("Submitted", { hash: walletObservedTx.hash });
+    });
+  };
+
   const onConfirm = () => {
     if (!wallet?.provider || !match.params?.collection || !match.params?.id || !bestAsk) return;
+
+    clearApproveError();
+
     runConfirmPurchase(async () => {
       const { collection: address, id } = match.params
 
@@ -212,6 +266,9 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
             </Box>
 
             <FancyButton
+              showTxApprove={showTxApprove} 
+              loadingTxApprove={txIsPending}
+              onClickTxApprove={onApproveTx}
               className={classes.actionButton}
               loading={loading}
               variant="contained"
@@ -227,7 +284,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
                 <Box className={classes.errorBox}>
                   <WarningIcon className={classes.warningIcon} />
                   <Text color="error">
-                    Error: {error?.message ?? "Unknown error"}
+                    Error: {(error?.message || errorApproveTx?.message) ?? "Unknown error"}
                   </Text>
                 </Box>
               )}
