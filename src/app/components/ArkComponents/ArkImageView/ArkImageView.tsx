@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useTheme, CardMedia, Avatar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { AppTheme } from "app/theme/types";
+import { useIntersectionObserver } from "app/utils";
 import PlaceholderLight from "./placeholder_bear_light.png";
 import PlaceholderDark from "./placeholder_bear_dark.png";
 import NFTCardLight from "./NFTCard_Light.png";
@@ -19,35 +20,39 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 const ArkImageView: React.FC<Props> = (props: Props) => {
   const { altName, imageType, imageUrl, className } = props;
   const classes = useStyles();
+  const imgRef = useRef<any>();
   const theme = useTheme().palette.type;
-  const [imgSrc, setImgSrc] = useState<string | undefined>(imageUrl);
+  const [imgSrc, setImgSrc] = useState<string | undefined>();
+  const [isInView, setIsInView] = useState(false);
+
+  useIntersectionObserver(imgRef, () => {
+    setIsInView(true);
+  });
 
   useEffect(() => {
-    if (!imageUrl) return;
+    if (!imageUrl || !isInView) return;
     if (imageUrl === imgSrc) return;
 
     let image = new Image();
-    image.onload = () => {
-      setImgSrc(imageUrl);
-    }
-    image.onerror = () => {
-      setImgSrc(undefined);
-    }
+    image.onload = () => setImgSrc(imageUrl);
 
     image.src = imageUrl;
 
     // eslint-disable-next-line
-  }, [imageUrl])
+  }, [imageUrl, isInView]);
+
+  const image = isInView ? imgSrc : null;
 
   switch (imageType) {
     case "banner": {
       const placeholder = theme === "dark" ? BannerDark : BannerLight;
       return (
         <CardMedia
+          ref={imgRef}
           component="img"
           alt={altName ?? "Banner Image"}
           height="250"
-          image={imgSrc ?? placeholder}
+          image={image ?? placeholder}
           className={className}
         />
       )
@@ -56,9 +61,10 @@ const ArkImageView: React.FC<Props> = (props: Props) => {
       const placeholder = theme === "dark" ? PlaceholderDark : PlaceholderLight;
       return (
         <Avatar
+          ref={imgRef}
           className={className}
           alt={altName ?? "Avatar Image"}
-          src={imgSrc ?? placeholder}
+          src={image ?? placeholder}
         />
       )
     }
@@ -66,8 +72,9 @@ const ArkImageView: React.FC<Props> = (props: Props) => {
       const placeholder = theme === "dark" ? NFTCardDark : NFTCardLight;
       return (
         <img
+          ref={imgRef}
           alt={altName ?? "Card image"}
-          src={imgSrc ?? placeholder}
+          src={image ?? placeholder}
           className={cls(classes.root, className)} />
       );
     }

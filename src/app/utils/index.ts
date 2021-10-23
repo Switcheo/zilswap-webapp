@@ -11,6 +11,7 @@ export * from "./strings";
 export { default as trimValue } from "./trimValue";
 export { default as truncate } from "./truncate";
 export * from "./types";
+export { default as useIntersectionObserver } from "./useIntersectionObserver";
 export { default as useAsyncTask } from "./useAsyncTask";
 export { default as useBlacklistAddress } from "./useBlacklistAddress";
 export { default as useBlockTime } from './useBlockTime'

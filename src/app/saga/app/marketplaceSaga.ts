@@ -124,7 +124,6 @@ function* loadProfile() {
 
 function* reloadExchangeInfo() {
   try {
-    console.log("reload exchange info")
     yield put(actions.Layout.addBackgroundLoading("loadMarketplaceInfo", "ARK:LOAD_MARKETPLACE_INFO"));
     const { network } = getBlockchain(yield select());
 
