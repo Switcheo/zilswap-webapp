@@ -608,18 +608,17 @@ export namespace ArkClient {
   export type ExecuteTradeParams = {
     nftAddress: string;
     tokenId: string;
+    matchedChequeHash: string;
   } & ({
     sellCheque: SimpleCheque;
     buyCheque: ExecuteBuyCheque;
   } | {
     sellCheque: ExecuteSellCheque;
     buyCheque: SimpleCheque;
-  }) & ({
-    matchedChequeHash: String;
   })
 
   export interface VoidChequeParams {
-    chequeHash: String;
+    chequeHash: string;
     publicKey: string;
     signature: string;
   }
