@@ -206,6 +206,7 @@ const Row: React.FC<Props> = (props: Props) => {
 
       const sellCheque: ArkClient.ExecuteSellCheque = {
         side: "sell",
+        initiatorAddress: wallet.addressInfo.byte20.toLowerCase(),
         expiry,
         price: {
           address: price.address,
