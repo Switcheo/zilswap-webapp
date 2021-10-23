@@ -151,7 +151,7 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         const arkClient = new ArkClient(network);
 
         const hexAddr = fromBech32Address(address);
-        const { result: { model } } = await arkClient.getProfile(hexAddr);
+        const { result: { model } } = await arkClient.getProfile(hexAddr.toLowerCase());
         setViewProfile(model);
       })
     }

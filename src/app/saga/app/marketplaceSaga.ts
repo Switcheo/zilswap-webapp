@@ -111,7 +111,7 @@ function* loadProfile() {
 
     const arkClient = new ArkClient(network);
     if (!wallet) throw new Error("invalid wallet");
-    const { result: { model } } = (yield call(arkClient.getProfile, wallet.addressInfo.byte20)) as unknown as any;
+    const { result: { model } } = (yield call(arkClient.getProfile, wallet.addressInfo.byte20.toLowerCase())) as unknown as any;
     yield put(actions.MarketPlace.updateProfile(model));
 
   } catch (error) {
