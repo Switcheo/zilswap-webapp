@@ -75,7 +75,6 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
     case MarketPlaceActionTypes.UPDATE_FILTER:
       return {
         ...state,
-        tokens: [],
         filter: {
           ...state.filter,
           ...payload,
