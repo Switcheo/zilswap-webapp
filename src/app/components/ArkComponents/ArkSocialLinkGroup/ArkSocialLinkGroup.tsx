@@ -2,13 +2,12 @@ import React from "react";
 import { Box, BoxProps, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
+import queryString from "query-string";
+import { ReactComponent as TwitterIcon } from "app/components/SocialLinkGroup/social-icons/twitter.svg";
 import { Collection } from "app/store/types";
 import { useToaster } from "app/utils";
-import { ReactComponent as TwitterIcon } from "app/components/SocialLinkGroup/social-icons/twitter.svg";
-import { ReactComponent as DiscordIcon } from "./social-icons/discord.svg";
-import { ReactComponent as GlobeIcon } from "./social-icons/globe.svg";
-import { ReactComponent as TelegramIcon } from "./social-icons/telegram.svg";
 import { ReactComponent as ShareIcon } from "./social-icons/share.svg";
+import { ReactComponent as TelegramIcon } from "./social-icons/telegram.svg";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -66,14 +65,20 @@ const ArkSocialLinkGroup: React.FC<Props> = (props: Props) => {
   const getHref = (type: string) => {
     switch (type) {
       case "twitter":
-        let tweetMsg = message.replaceAll(/ /g, "+");
-        tweetMsg = tweetMsg.replaceAll(/#/g, "%23");
-        tweetMsg = tweetMsg.replace("&link", `(${window.location.href})`);
-        return `https://twitter.com/intent/tweet?text=` + tweetMsg;
+        const shareMessage = message.replace("&link", `(${window.location.href})`);
+        const search = queryString.stringify({
+          text: shareMessage,
+        });
+        return `https://twitter.com/intent/tweet?${search}`;
 
-      case "telegram":
-        let telegramMsg = message.replace("&link", "");
-        return `tg://msg_url?url=${window.location.href}&text=${telegramMsg}`;
+      case "telegram": {
+        const shareMessage = message.replace("&link", "");
+        const search = queryString.stringify({
+          url: window.location.href,
+          text: shareMessage,
+        })
+        return `tg://msg_url?${search}`;
+      }
       default: return "";
     }
   }
@@ -84,7 +89,6 @@ const ArkSocialLinkGroup: React.FC<Props> = (props: Props) => {
       <Button
         className={classes.fill}
         onClick={copyAndToast}
-        href={""}
         disableRipple
       >
         <ShareIcon />
@@ -97,16 +101,6 @@ const ArkSocialLinkGroup: React.FC<Props> = (props: Props) => {
       >
         <TwitterIcon />
       </Button>
-      {collection?.discordUrl && (
-        <Button
-          className={classes.fill}
-          href={collection.discordUrl}
-          target="_blank"
-          disableRipple
-        >
-          <DiscordIcon />
-        </Button>
-      )}
       <Button
         className={classes.fill}
         href={getHref("telegram")}
@@ -115,15 +109,6 @@ const ArkSocialLinkGroup: React.FC<Props> = (props: Props) => {
       >
         <TelegramIcon />
       </Button>
-      {collection?.websiteUrl && (
-        <Button
-          href={collection.websiteUrl}
-          target="_blank"
-          disableRipple
-        >
-          <GlobeIcon className={classes.globeIcon} />
-        </Button>
-      )}
     </Box>
   );
 };
