@@ -1,8 +1,9 @@
 import React from "react";
-import { Avatar, Badge, Box, BoxProps, Card, CardMedia } from "@material-ui/core";
+import { Badge, Box, BoxProps, Card } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { AppTheme } from "app/theme/types";
+import { ArkImageView } from "app/components";
 
 interface Props extends BoxProps {
   badgeContent?: React.Component | JSX.Element;
@@ -33,9 +34,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   avatar: {
     height: 130,
     width: 130,
-    border: `5px solid ${
-      theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"
-    }`,
+    border: `5px solid ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"
+      }`,
   },
   infoBox: {
     display: "flex",
@@ -72,22 +72,20 @@ const ArkBanner: React.FC<Props> = (props: Props) => {
   return (
     <Card className={classes.root}>
       {!hideBanner && (
-        <CardMedia
-          component="img"
-          alt="Banner Image"
-          height="250"
-          image={bannerImage}
+        <ArkImageView
           className={classes.bannerImage}
+          imageUrl={bannerImage}
+          imageType="banner"
         />
       )}
 
       <Box className={classes.infoBox}>
         <Box className={cls(classes.avatarBox, className)}>
           <Wrapper>
-            <Avatar
+            <ArkImageView
               className={classes.avatar}
-              alt="Avatar Image"
-              src={avatarImage}
+              imageUrl={avatarImage}
+              imageType="avatar"
             />
           </Wrapper>
         </Box>

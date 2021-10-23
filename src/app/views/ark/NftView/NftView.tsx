@@ -61,7 +61,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
       const { model: { owner } } = result
       if (owner && !bypass) {
         runGetOwner(async () => {
-          const ownerResult = await arkClient.getProfile(owner.address);
+          const ownerResult = await arkClient.getProfile(owner.address.toLowerCase());
           setOwner(ownerResult.result.model)
         })
       }

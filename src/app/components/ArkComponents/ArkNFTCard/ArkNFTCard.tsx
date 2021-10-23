@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import {
-  Box, Card, CardActionArea, CardContent, CardProps, 
+  Box, Card, CardActionArea, CardContent, CardProps,
   ClickAwayListener, IconButton, Link, makeStyles, Popper, Typography
 } from "@material-ui/core";
 import LaunchIcon from "@material-ui/icons/Launch";
@@ -11,7 +11,7 @@ import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
 import { Network } from "zilswap-sdk/lib/constants";
-import { ArkOwnerLabel } from "app/components";
+import { ArkOwnerLabel, ArkImageView } from "app/components";
 import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
@@ -24,7 +24,6 @@ import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { toBech32Address } from "core/zilswap";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 import { ReactComponent as ZapSVG } from "./zap.svg";
-
 export interface Props extends CardProps {
   token: Nft;
   collectionAddress: string;
@@ -186,20 +185,22 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
           >
             <Box className={classes.imageContainer}>
               <span className={classes.imageHeight} />
-              <img
+              <ArkImageView
                 className={classes.image}
-                alt={token?.asset?.filename || "Token Image"}
-                src={token?.asset?.url || undefined}
+                altName={token?.asset?.filename || "Token Image"}
+                imageUrl={token?.asset?.url}
+                imageType="card"
               />
             </Box>
           </CardActionArea>
         ) : <Box className={classes.imageContainer}>
-            <span className={classes.imageHeight} />
-            <img
-              className={classes.image}
-              alt={token?.asset?.filename || "Token Image"}
-              src={token?.asset?.url || undefined}
-            />
+          <span className={classes.imageHeight} />
+          <ArkImageView
+            className={classes.image}
+            altName={token?.asset?.filename || "Token Image"}
+            imageUrl={token?.asset?.url}
+            imageType="card"
+          />
         </Box>}
         <CardContent className={classes.cardContent}>
           <Box className={classes.bodyBox}>

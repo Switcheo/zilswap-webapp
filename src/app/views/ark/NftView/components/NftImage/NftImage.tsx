@@ -2,7 +2,7 @@ import React from "react";
 import { Box, CardProps, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import { ArkShareLinksGroup } from "app/components";
+import { ArkShareLinksGroup, ArkImageView } from "app/components";
 import { Nft } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 
@@ -15,14 +15,16 @@ const NftImage: React.FC<Props> = (props: Props) => {
   const { onReload, token, children, className, ...rest } = props;
   const classes = useStyles();
 
+
   return (
     <Box  {...rest} className={cls(classes.root, className)}>
       <Box className={classes.imageContainer}>
         <span className={classes.imageHeight} />
-        <img
+        <ArkImageView
           className={classes.image}
-          alt={token?.asset?.filename || "Token Image"}
-          src={token?.asset?.url || undefined}
+          altName={token?.asset?.filename || "Token Image"}
+          imageUrl={token?.asset?.url}
+          imageType="card"
         />
       </Box>
       <Box display="flex" flexDirection="row" justifyContent="flex-start" alignItems="center">

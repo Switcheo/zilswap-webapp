@@ -16,4 +16,5 @@ export { default as ArkSearchFilter } from "./ArkSearchFilter"
 export { default as ArkTopBar } from "./ArkTopBar";
 export { default as ArkShareLinksGroup } from "./ArkShareLinksGroup";
 export { default as ArkSocialLinkGroup } from "./ArkSocialLinkGroup";
+export { default as ArkImageView } from "./ArkImageView";
 export { default as ZapIconButton } from "./ZapIconButton";
