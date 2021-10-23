@@ -39,7 +39,7 @@ const ArkOwnerLabel: React.FC<Props> = (props: Props) => {
       className={classes.link}
       to={`/ark/profile?address=${linkAddress}`}
     >
-      <Typography {...rest} className={cls(classes.root, className)}>
+      <Typography component="span" {...rest} className={cls(classes.root, className)}>
         {text}
       </Typography>
     </Link>

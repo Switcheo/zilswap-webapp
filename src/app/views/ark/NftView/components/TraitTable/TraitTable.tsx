@@ -78,13 +78,13 @@ const TraitTable: React.FC<Props> = (props: Props) => {
         <TableHead>
           <TableRow className={classes.header}>
             {["Category", "Attribute", "Rarity", "Rarity %"].map((head, index) => (
-              <TableCell align="center">{head}</TableCell>
+              <TableCell align="center" key={head}>{head}</TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {traitCategory.map((trait: string, index) => (
-            <TableRow className={classes.bodyRow} key={`traits-row-${index}`}>
+          {traitCategory.map((trait: string) => (
+            <TableRow className={classes.bodyRow} key={trait}>
               <TableCell className={classes.base} align="center">{traits[trait].type || "-"}</TableCell>
               <TableCell className={classes.attribute} align="center">{traits[trait].value || "-"}</TableCell>
               <TableCell align="center">{traits[trait].rarity || "-"}</TableCell>

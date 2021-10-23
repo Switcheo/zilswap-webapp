@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import {
   Box, BoxProps, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, useMediaQuery, useTheme
@@ -108,8 +108,10 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
           })
           return <BidCard bid={bids[0]} relatedBids={bids.slice(1)} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} key={k} />
         })
-        :
-        [
+        : 
+        (
+        <Fragment>
+            
           <TableContainer>
             <Table>
               <TableHead>
@@ -133,7 +135,8 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
             </Table>
           </TableContainer>,
           <ArkPaginator itemPerPage={ITEMS_PER_PAGE} totalItem={bids.length} onPageChange={handlePageChange} />
-        ]
+        </Fragment>
+        )
     }
     </Box>
   </Box>

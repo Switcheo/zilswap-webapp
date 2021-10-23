@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Button, Checkbox, FormControlLabel, OutlinedInput, Popover, makeStyles } from '@material-ui/core';
+import { Box, Button, Checkbox, FormControlLabel, OutlinedInput, Popover, makeStyles, Typography } from '@material-ui/core';
 import cls from "classnames";
 import { useDispatch, useSelector } from 'react-redux';
 import pickBy from "lodash/pickBy";
@@ -468,8 +468,8 @@ const AttributesFilter = (props: Props) => {
                               label={
                                 <span className={classes.attribute}>
                                   <Text className={classes.attributeLabel} flexGrow="1">{value.value}</Text>
-                                  <Text className={classes.attributeMeta}>2.5K <Text className={classes.attributeMetaDetail}>(10%)</Text></Text>
-                                  <Text className={classes.attributeMeta}>{value.count} <Text className={classes.attributeMetaDetail}>(5%)</Text></Text>
+                                  <Text className={classes.attributeMeta}>2.5K <Typography component="span" className={classes.attributeMetaDetail}>(10%)</Typography></Text>
+                                  <Text className={classes.attributeMeta}>{value.count} <Typography component="span" className={classes.attributeMetaDetail}>(5%)</Typography></Text>
                                 </span>
                               }
                             />

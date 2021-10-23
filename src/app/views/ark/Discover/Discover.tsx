@@ -111,26 +111,25 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             <InputAdornment position="end">
               <FormControl component="fieldset" className={classes.formControl}>
                 <FormLabel className={classes.formLabel}>By</FormLabel>
-                {SEARCH_FILTERS.map((filter) => {
-                  return (
-                    <FormControlLabel
-                      className={classes.formControlLabel}
-                      value={filter}
-                      control={
-                        <Checkbox
-                          className={classes.radioButton}
-                          onChange={(e) => handleSearchFilter(filter)}
-                          checkedIcon={<CheckedIcon />}
-                          icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                          disableRipple
-                          checked={searchFilter[filter]}
-                        // checked={false}
-                        />
-                      }
-                      label={filter.toUpperCase()}
-                    />
-                  );
-                })}
+                {SEARCH_FILTERS.map((filter) => (
+                  <FormControlLabel
+                    key={filter}
+                    className={classes.formControlLabel}
+                    value={filter}
+                    control={
+                      <Checkbox
+                        className={classes.radioButton}
+                        onChange={(e) => handleSearchFilter(filter)}
+                        checkedIcon={<CheckedIcon />}
+                        icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                        disableRipple
+                        checked={searchFilter[filter]}
+                      // checked={false}
+                      />
+                    }
+                    label={filter.toUpperCase()}
+                  />
+                ))}
               </FormControl>
             </InputAdornment>
           }
@@ -156,7 +155,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               {collections.map((collection) => {
                 const collectionStats = ArkClient.parseCollectionStats(collection);
                 return (
-                  <TableRow className={classes.tableRow} component={RouterLink} to={`/ark/collections/${toBech32Address(collection.address)}`}>
+                  <TableRow key={collection.address} className={classes.tableRow} component={RouterLink} to={`/ark/collections/${toBech32Address(collection.address)}`}>
                     <TableCell className={cls(classes.bodyCell, classes.firstCell)}>
                       <Box display="flex" alignItems="center">
                         <div className={classes.index}>1</div>
