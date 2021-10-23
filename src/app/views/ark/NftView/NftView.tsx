@@ -36,7 +36,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     runGetBids(async () => {
       const arkClient = new ArkClient(network);
       const collectionAddress = fromBech32Address(collectionId).toLowerCase();
-      const result = await arkClient.listNftCheques({ collectionAddress, tokenId });
+      const result = await arkClient.listNftCheques({ collectionAddress, tokenId, side: "buy" });
 
       setBids(result.result.entries);
     })
