@@ -144,10 +144,10 @@ const BidCard: React.FC<Props> = (props: Props) => {
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 300; // blocks
       const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
-        side: "Buy",
+        side: "Sell",
         token: {
           address: bid.token?.collection?.address,
-          id: bid.token?.tokenId,
+          id: bid.token?.tokenId.toString(10),
         },
         price,
         feeAmount,
@@ -159,6 +159,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
 
       const sellCheque: ArkClient.ExecuteSellCheque = {
         side: "sell",
+        initiatorAddress: wallet.addressInfo.byte20.toLowerCase(),
         expiry,
         price: {
           address: price.address,
@@ -173,8 +174,8 @@ const BidCard: React.FC<Props> = (props: Props) => {
       const execTradeResult = await arkClient.executeTrade({
         buyCheque: bid,
         sellCheque,
-        nftAddress: bid.token.collectionAddress,
-        tokenId: bid.token.tokenId,
+        nftAddress: bid.token.collection.address,
+        tokenId: bid.token.tokenId.toString(10),
       }, ZilswapConnector.getSDK());
 
       logger("exec trade result", execTradeResult)
@@ -246,7 +247,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
         }
-        {status === 'Active' && bid.token.owner === userAddress &&
+        {status === 'Active' && bid.token.ownerAddress === userAddress &&
           <Box mt={2} display="flex" justifyContent="center">
             <Box flexGrow={1}>
               <FancyButton variant="contained" fullWidth loading={acceptLoading} onClick={() => acceptBid(bid)} className={classes.actionButton}>
