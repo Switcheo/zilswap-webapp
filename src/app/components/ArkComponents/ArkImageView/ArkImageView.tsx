@@ -16,11 +16,11 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
   altName?: string;
 }
 
-const SampleComponent: React.FC<Props> = (props: Props) => {
+const ArkImageView: React.FC<Props> = (props: Props) => {
   const { altName, imageType, imageUrl, className } = props;
   const classes = useStyles();
   const theme = useTheme().palette.type;
-  const [imgSrc, setImgSrc] = useState<string | undefined>(undefined);
+  const [imgSrc, setImgSrc] = useState<string | undefined>(imageUrl);
 
   useEffect(() => {
     if (!imageUrl) return;
@@ -30,51 +30,48 @@ const SampleComponent: React.FC<Props> = (props: Props) => {
     image.onload = () => {
       setImgSrc(imageUrl);
     }
+    image.onerror = () => {
+      setImgSrc(undefined);
+    }
 
     image.src = imageUrl;
-  }, [imageUrl, imgSrc])
 
-  const getPlaceholder = () => {
-    switch (imageType) {
-      case "card":
-        return theme === "dark" ? NFTCardDark : NFTCardLight
-      case "avatar":
-        return theme === "dark" ? PlaceholderDark : PlaceholderLight;
-      case "banner":
-        return theme === "dark" ? BannerDark : BannerLight;
+    // eslint-disable-next-line
+  }, [imageUrl])
+
+  switch (imageType) {
+    case "banner": {
+      const placeholder = theme === "dark" ? BannerDark : BannerLight;
+      return (
+        <CardMedia
+          component="img"
+          alt={altName ?? "Banner Image"}
+          height="250"
+          image={imgSrc ?? placeholder}
+          className={className}
+        />
+      )
+    }
+    case "avatar": {
+      const placeholder = theme === "dark" ? PlaceholderDark : PlaceholderLight;
+      return (
+        <Avatar
+          className={className}
+          alt={altName ?? "Avatar Image"}
+          src={imgSrc ?? placeholder}
+        />
+      )
+    }
+    default: {
+      const placeholder = theme === "dark" ? NFTCardDark : NFTCardLight;
+      return (
+        <img
+          alt={altName ?? "Card image"}
+          src={imgSrc ?? placeholder}
+          className={cls(classes.root, className)} />
+      );
     }
   }
-
-  const placeHolder = getPlaceholder();
-
-  if (imageType === "banner") {
-    return (
-      <CardMedia
-        component="img"
-        alt={altName || "Banner Image"}
-        height="250"
-        image={imgSrc || placeHolder}
-        className={className}
-      />
-    )
-  }
-
-  if (imageType === "avatar") {
-    return (
-      <Avatar
-        className={className}
-        alt={altName || "Avatar Image"}
-        src={imgSrc || placeHolder}
-      />
-    )
-  }
-
-  return (
-    <img
-      alt={altName || "Card image"}
-      src={imgSrc || placeHolder}
-      className={cls(classes.root, className)} />
-  );
 };
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -82,4 +79,4 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-export default SampleComponent;
+export default ArkImageView;
