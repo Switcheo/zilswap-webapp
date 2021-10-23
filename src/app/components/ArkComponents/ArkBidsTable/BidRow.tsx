@@ -190,18 +190,17 @@ const Row: React.FC<Props> = (props: Props) => {
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 300; // blocks
-      const buyChequeHash = arkClient.arkChequeHash({
-        side: "Buy",
+      const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
+        side: "Sell",
         token: {
           address: bid.token?.collection?.address,
-          id: bid.token?.tokenId,
+          id: bid.token?.tokenId.toString(10),
         },
         price,
         feeAmount,
         expiry,
         nonce,
-      });
-      const message = arkClient.arkMessage("Execute", buyChequeHash)
+      }));
 
       const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
 
@@ -219,12 +218,24 @@ const Row: React.FC<Props> = (props: Props) => {
         signature: `0x${signature}`,
       }
 
+      const buyChequeHash = arkClient.arkChequeHash({
+        side: "Buy",
+        token: {
+          address: bid.token?.collection?.address,
+          id: bid.token?.tokenId.toString(10),
+        },
+        price,
+        feeAmount,
+        expiry: bid.expiry,
+        nonce: bid.nonce,
+      });
+
       const execTradeResult = await arkClient.executeTrade({
         buyCheque: bid,
         sellCheque,
         matchedChequeHash: `0x${buyChequeHash}`,
         nftAddress: bid.token.collection.address,
-        tokenId: bid.token.tokenId,
+        tokenId: bid.token.tokenId.toString(10),
       }, ZilswapConnector.getSDK());
 
       logger("exec trade result", execTradeResult)
@@ -284,7 +295,7 @@ const Row: React.FC<Props> = (props: Props) => {
                   )}
                 </IconButton>
               }
-              {status === 'Active' && bid.token.owner === userAddress &&
+              {status === 'Active' && bid.token.ownerAddress === userAddress &&
                 <IconButton onClick={() => acceptBid(bid)} className={classes.iconButton}>
                   {acceptLoading && (
                     <CircularProgress size={16} />
@@ -294,7 +305,7 @@ const Row: React.FC<Props> = (props: Props) => {
                   )}
                 </IconButton>
               }
-              {(status !== 'Active' || (bid.token.owner !== userAddress && bid.initiatorAddress !== userAddress)) &&
+              {(status !== 'Active' || (bid.token.ownerAddress !== userAddress && bid.initiatorAddress !== userAddress)) &&
                 <Typography
                   className={cls({
                     [classes.green]: status === 'Active',
