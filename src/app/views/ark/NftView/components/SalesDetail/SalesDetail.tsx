@@ -13,7 +13,7 @@ import { actions } from "app/store";
 import { Nft, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { bnOrZero, useValueCalculators, useBlockTime } from "app/utils";
-import { ZIL_ADDRESS } from "app/utils/constants";
+import { ZIL_ADDRESS, PRICE_REGEX } from "app/utils/constants";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 import { InfoBox } from "./components";
 
@@ -53,11 +53,22 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
 
     const blocksLeft = token.bestBid.expiry - currentBlock;
     const expiryTime = currentTime.add(blocksLeft * BLOCKS_PER_MINUTE, "minutes");
-    const expireText = expiryTime.isAfter(dayjs()) ? `Expirys in ` + expiryTime.fromNow() : "Expired " + expiryTime.fromNow();
+    const expireText = expiryTime.isAfter(dayjs()) ? "Expires " + expiryTime.fromNow() : "Expired " + expiryTime.fromNow();
 
-    return { amount: bnOrZero(token?.bestBid?.price.amount).shiftedBy(-bidToken?.decimals ?? 0), timeLeft: expireText }
+    return { amount: bnOrZero(token?.bestBid?.price.amount).shiftedBy(-bidToken?.decimals ?? 0), timeLeft: expireText, token: bidToken }
     // eslint-disable-next-line
   }, [token?.bestBid, tokens, blockTime])
+
+  const lastTrade = useMemo(() => {
+    if (!token?.lastTrade) return undefined;
+
+    const tradeToken = tokens[token?.lastTrade?.price.address] || tokens[ZIL_ADDRESS]
+    if (!tradeToken) return undefined;
+
+    return {
+      amount: bnOrZero(token?.lastTrade?.price.amount).shiftedBy(-tradeToken?.decimals ?? 0), token: tradeToken
+    }
+  }, [token?.lastTrade, tokens])
 
   useEffect(() => {
     if (Object.keys(tokens).length && token && token.bestAsk) {
@@ -100,7 +111,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
         {/* Token id */}
         <Typography className={classes.id}>#{tokenId}</Typography>
 
-        <Box display="flex" flexDirection="column">
+        <Box mt={2} display="flex" flexDirection="column">
           <Box className={classes.infoBoxContainer}>
             <InfoBox topLabel="ARK Score" bottomLabel="Top 51.1%" tooltip={""} flex={1}>
               <Typography className={classes.rarityLabel} variant="h3">SUPAH RARE</Typography>
@@ -127,37 +138,43 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
                 </Typography>
 
                 <Typography variant="h1" className={classes.price}>
-                  {tokenAmount?.toString() ?? "-"}
+                  <Box mr={1} display="flex">
+                    {tokenAmount?.toString().replace(PRICE_REGEX, ",") ?? "-"}
 
-                  {(tokenAmount && purchaseCurrency) ? <CurrencyLogo address={purchaseCurrency.address} currency={purchaseCurrency.symbol} /> : ""}
+                    {(tokenAmount && purchaseCurrency) ? <CurrencyLogo address={purchaseCurrency.address} currency={purchaseCurrency.symbol} /> : ""}
+                  </Box>
 
-                  {!isXs && (
-                    <Typography component="span" variant="body1" className={classes.halfOpacity}>
+                  {(!isXs && tokenAmount) && (
+                    <Typography component="span" variant="body1" className={cls(classes.halfOpacity, classes.usdPrice)}>
                       ${tokenPrice?.dp(11).toString() ?? "-"}
                     </Typography>
                   )}
                 </Typography>
                 <Box className={classes.bestLastBox}>
                   {!!bestBid && (
-                    <>
+                    <Box mr={2}>
                       <Typography variant="body1" className={classes.saleHeader}>
                         <Typography className={classes.bestLastLabel}>
                           BEST
                         </Typography>
                         {bestBid.amount.toString(10)}
                         &nbsp;
-                        ZIL
+                        {bestBid.token.symbol}
+                        &nbsp;
                         <Typography className={classes.halfOpacity}>
                           {bestBid.timeLeft}
                         </Typography>
                       </Typography>
-                      <Box mr={2} />
-                    </>
+                    </Box>
                   )}
-                  <Typography variant="body1" className={classes.saleHeader}>
-                    <Typography component="span" className={classes.bestLastLabel}>LAST</Typography>
-                    150,320 &nbsp;ZIL
-                  </Typography>
+                  {!!lastTrade && (
+                    <Box>
+                      <Typography variant="body1" className={classes.saleHeader}>
+                        <Typography component="span" className={classes.bestLastLabel}>LAST</Typography>
+                        {lastTrade.amount.toString(10)} &nbsp;{lastTrade.token.symbol}
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
               </React.Fragment>
             )}
@@ -201,7 +218,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     width: "100%",
     flexDirection: "column",
-    padding: theme.spacing(7.5),
+    padding: theme.spacing(9),
     paddingLeft: theme.spacing(5),
     [theme.breakpoints.down("sm")]: {
       padding: theme.spacing(2, 3),
@@ -224,7 +241,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   buttonBox: {
     transform: "translateY(-50%)",
     width: "100%",
-    padding: theme.spacing(0, 3),
+    padding: theme.spacing(0, 4),
+    display: "flex",
     [theme.breakpoints.down("xs")]: {
       marginTop: theme.spacing(2),
       transform: "translateY(0%)",
@@ -234,6 +252,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   button: {
     flex: 1,
     margin: theme.spacing(0, .5),
+    maxWidth: 280,
   },
   bidButton: {
     padding: theme.spacing(2.5, 4),
@@ -290,7 +309,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minHeight: theme.spacing(5),
     border: `1px solid #003340`,
     borderRadius: theme.spacing(1.5),
-    padding: theme.spacing(3, 3.5),
+    padding: theme.spacing(3, 5),
     paddingBottom: theme.spacing(6),
     [theme.breakpoints.down("xs")]: {
       padding: theme.spacing(2, 3),
@@ -312,6 +331,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     marginTop: theme.spacing(0.5),
     alignItems: "flex-end",
+    fontSize: 30,
   },
   zapScore: {
     fontFamily: "'Raleway', sans-serif",
@@ -337,8 +357,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   bestLastBox: {
     display: "flex",
-    flexDirection: "row",
-    justifyContent: "flex--start",
+    justifyContent: "flex-start",
+    flexWrap: "wrap",
+    marginTop: theme.spacing(1),
     [theme.breakpoints.down("xs")]: {
       flexDirection: "column",
     },
@@ -356,7 +377,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       padding: theme.spacing(.8, 1.6),
     },
   },
-
+  usdPrice: {
+    paddingBottom: theme.spacing(.5),
+  }
 }));
 
 export default SalesDetail;

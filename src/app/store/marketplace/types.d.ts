@@ -58,6 +58,7 @@ export interface Nft {
   bestBid: null | SimpleCheque;
   isFavourited?: boolean;
   statistics?: SimpleMap<string>
+  lastTrade?: null | SimpleCheque;
 }
 
 export type TraitType = {
