@@ -146,9 +146,19 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         signature: `0x${signature}`,
       }
 
+      const sellChequeHash = arkClient.arkChequeHash({
+        side: "Sell",
+        token: { address, id },
+        price,
+        feeAmount,
+        expiry: bestAsk.expiry,
+        nonce: bestAsk.nonce,
+      })
+
       const execTradeResult = await arkClient.executeTrade({
         buyCheque,
         sellCheque: bestAsk,
+        matchedChequeHash: `0x${sellChequeHash}`,
         nftAddress: address,
         tokenId: id,
       }, ZilswapConnector.getSDK());

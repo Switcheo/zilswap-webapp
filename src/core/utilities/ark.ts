@@ -345,7 +345,7 @@ export class ArkClient {
 
   // TODO: Refactor zilswap SDK as instance member;
   async executeTrade(executeParams: ArkClient.ExecuteTradeParams, zilswap: Zilswap, wallet?: ConnectedWallet) {
-    const { nftAddress, tokenId, sellCheque, buyCheque } = executeParams;
+    const { nftAddress, tokenId, sellCheque, buyCheque, matchedChequeHash } = executeParams;
     const { address: priceTokenAddress, amount: priceAmount } = sellCheque.price;
     const userAddress = wallet?.addressInfo.byte20.toLowerCase();
 
@@ -369,6 +369,10 @@ export class ArkClient {
       vname: 'buy_cheque',
       type: `${this.brokerAddress}.Cheque`,
       value: this.toAdtCheque(buyCheque)
+    }, {
+      vname: 'matched_cheque_hash',
+      type: "ByStr32",
+      value: matchedChequeHash
     }];
 
     const amount = sellCheque.initiatorAddress === userAddress
@@ -610,6 +614,8 @@ export namespace ArkClient {
   } | {
     sellCheque: ExecuteSellCheque;
     buyCheque: SimpleCheque;
+  }) & ({
+    matchedChequeHash: String;
   })
 
   export interface VoidChequeParams {
