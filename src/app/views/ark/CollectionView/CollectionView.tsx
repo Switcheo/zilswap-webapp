@@ -127,6 +127,18 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   // fetch nfts in collection (to use store instead)
   const [collection, setCollection] = useState<Collection>();
 
+  useEffect(() => {
+    if (match.params?.collection) {
+      dispatch(actions.MarketPlace.updateFilter({
+        collectionAddress: match.params.collection,
+        likedBy: null,
+        owner: null,
+      }));
+    }
+
+    // eslint-disable-next-line
+  }, [match.params?.collection])
+
   const { bech32Address, hexAddress } = useMemo(() => {
     if (!match.params?.collection) {
       history.push("/ark/collections");
@@ -135,8 +147,6 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
     let collectionAddress = match.params.collection;
     if (collectionAddress?.startsWith("zil1")) {
-      dispatch(actions.MarketPlace.updateFilter({ collectionAddress, likedBy: null, owner: null }));
-
       return {
         bech32Address: collectionAddress,
         hexAddress: fromBech32Address(collectionAddress)?.toLowerCase(),
@@ -174,8 +184,11 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       const collection = data.result.entries.find(
         (collection: Collection) => collection.address === hexAddress
       );
-      if (collection) setCollection(collection);
-      else history.push("/ark/collections");
+      if (collection) {
+        setCollection(collection);
+      } else {
+        history.push("/ark/collections");
+      }
     };
 
     getCollection();
