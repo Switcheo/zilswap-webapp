@@ -190,7 +190,7 @@ const Row: React.FC<Props> = (props: Props) => {
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 300; // blocks
-      const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
+      const buyChequeHash = arkClient.arkChequeHash({
         side: "Buy",
         token: {
           address: bid.token?.collection?.address,
@@ -200,7 +200,8 @@ const Row: React.FC<Props> = (props: Props) => {
         feeAmount,
         expiry,
         nonce,
-      }))
+      });
+      const message = arkClient.arkMessage("Execute", buyChequeHash)
 
       const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
 
@@ -220,6 +221,7 @@ const Row: React.FC<Props> = (props: Props) => {
       const execTradeResult = await arkClient.executeTrade({
         buyCheque: bid,
         sellCheque,
+        matchedChequeHash: `0x${buyChequeHash}`,
         nftAddress: bid.token.collection.address,
         tokenId: bid.token.tokenId,
       }, ZilswapConnector.getSDK());
@@ -308,14 +310,14 @@ const Row: React.FC<Props> = (props: Props) => {
       {relatedBids && relatedBids.length > 0 && (
         <TableRow className={cls(classes.row, classes.lastRow)}>
           <TableCell className={classes.expandCell} colSpan={8}>
-              <IconButton
-                aria-label="expand row"
-                size="medium"
-                onClick={() => setExpand(!expand)}
-                className={classes.arrowIcon}
-              >
-                {expand ? <UpArrow /> : <DownArrow />}
-              </IconButton>
+            <IconButton
+              aria-label="expand row"
+              size="medium"
+              onClick={() => setExpand(!expand)}
+              className={classes.arrowIcon}
+            >
+              {expand ? <UpArrow /> : <DownArrow />}
+            </IconButton>
           </TableCell>
         </TableRow>
       )}

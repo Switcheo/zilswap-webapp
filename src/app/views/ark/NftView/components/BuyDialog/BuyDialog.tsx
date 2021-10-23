@@ -145,14 +145,24 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         signature: `0x${signature}`,
       }
 
+      const sellChequeHash = arkClient.arkChequeHash({
+        side: "Sell",
+        token: { address, id },
+        price,
+        feeAmount,
+        expiry: bestAsk.expiry,
+        nonce: bestAsk.nonce,
+      })
+
       const execTradeResult = await arkClient.executeTrade({
         buyCheque,
         sellCheque: bestAsk,
+        matchedChequeHash: `0x${sellChequeHash}`,
         nftAddress: address,
         tokenId: id,
       }, ZilswapConnector.getSDK());
 
-        logger("exec trade result", execTradeResult)
+      logger("exec trade result", execTradeResult)
     });
   };
 
@@ -266,7 +276,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
             </Box>
 
             <FancyButton
-              showTxApprove={showTxApprove} 
+              showTxApprove={showTxApprove}
               loadingTxApprove={txIsPending}
               onClickTxApprove={onApproveTx}
               className={classes.actionButton}
@@ -281,13 +291,13 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
             </FancyButton>
 
             {error && (
-                <Box className={classes.errorBox}>
-                  <WarningIcon className={classes.warningIcon} />
-                  <Text color="error">
-                    Error: {(error?.message || errorApproveTx?.message) ?? "Unknown error"}
-                  </Text>
-                </Box>
-              )}
+              <Box className={classes.errorBox}>
+                <WarningIcon className={classes.warningIcon} />
+                <Text color="error">
+                  Error: {(error?.message || errorApproveTx?.message) ?? "Unknown error"}
+                </Text>
+              </Box>
+            )}
           </Fragment>
         )}
 

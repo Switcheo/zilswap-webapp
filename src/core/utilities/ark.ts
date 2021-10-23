@@ -21,8 +21,8 @@ const LOCALHOST_ENDPOINT = "http://localhost:8181";
 
 
 export const ARK_CONTRACTS: { [key in Network]: { broker: string, tokenProxy: string } } = {
-  [Network.MainNet]: { broker: 'zil1d37dep5u0usu259kfuk403gph2r46wna8v9gst', tokenProxy: 'zil1sn7jq59z9emcn25dn0zlfs5x6zmhqfj2n2zzaf' },
-  [Network.TestNet]: { broker: 'zil1d37dep5u0usu259kfuk403gph2r46wna8v9gst', tokenProxy: 'zil1sn7jq59z9emcn25dn0zlfs5x6zmhqfj2n2zzaf' },
+  [Network.MainNet]: { broker: 'zil1j57m7j06fgg4c30dpjzxy7rsv07lvcfayvu5zf', tokenProxy: 'zil1lwg6xfxgv33ukf8sp3fv2du7m2vfsj6ct7slat' },
+  [Network.TestNet]: { broker: 'zil1j57m7j06fgg4c30dpjzxy7rsv07lvcfayvu5zf', tokenProxy: 'zil1lwg6xfxgv33ukf8sp3fv2du7m2vfsj6ct7slat' },
 }
 
 const apiPaths = {
@@ -328,7 +328,7 @@ export class ArkClient {
 
   // TODO: Refactor zilswap SDK as instance member;
   async executeTrade(executeParams: ArkClient.ExecuteTradeParams, zilswap: Zilswap) {
-    const { nftAddress, tokenId, sellCheque, buyCheque } = executeParams;
+    const { nftAddress, tokenId, sellCheque, buyCheque, matchedChequeHash } = executeParams;
     const { address: priceTokenAddress, amount: priceAmount } = sellCheque.price;
 
     const args = [{
@@ -351,6 +351,10 @@ export class ArkClient {
       vname: 'buy_cheque',
       type: `${this.brokerAddress}.Cheque`,
       value: this.toAdtCheque(buyCheque)
+    }, {
+      vname: 'matched_cheque_hash',
+      type: "ByStr32",
+      value: matchedChequeHash
     }];
 
     const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
@@ -586,6 +590,8 @@ export namespace ArkClient {
   } | {
     sellCheque: ExecuteSellCheque;
     buyCheque: SimpleCheque;
+  }) & ({
+    matchedChequeHash: String;
   })
 
   export interface VoidChequeParams {
