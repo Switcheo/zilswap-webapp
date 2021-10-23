@@ -21,6 +21,7 @@ export const MarketPlaceActionTypes = {
   UPDATE_COLLECTION: "UPDATE_COLLECTION",
   UPDATE_FILTER: "UPDATE_FILTER",
   UPDATE_COLLECTION_TRAITS: "UPDATE_COLLECTION_TRAITS",
+  UPDATE_DENOMS: "UPDATE_DENOMS",
   RELOAD_TOKEN_LIST: "RELOAD_TOKEN_LIST",
 }
 
@@ -39,6 +40,13 @@ export function refreshAccessToken() {
 export function updateProfile(payload: Profile) {
   return {
     type: MarketPlaceActionTypes.UPDATE_PROFILE,
+    payload
+  }
+}
+
+export function updateDenoms(payload: string[]) {
+  return {
+    type: MarketPlaceActionTypes.UPDATE_DENOMS,
     payload
   }
 }

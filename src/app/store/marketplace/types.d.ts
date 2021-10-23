@@ -9,6 +9,7 @@ export interface MarketPlaceState {
   oAuth?: OAuth;
   receivedBids?: any;
   bidded?: any;
+  exchangeDenoms?: string[];
   collectionTraits: SimpleMap<CollectionTrait[]>;
 }
 

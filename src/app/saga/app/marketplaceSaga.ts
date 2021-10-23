@@ -1,6 +1,7 @@
 import { call, fork, put, select, take, takeLatest } from "redux-saga/effects";
 import { SimpleMap } from "tradehub-api-js/build/main/lib/tradehub/utils";
-import { ArkClient, logger } from "core/utilities";
+import { toBech32Address } from "@zilliqa-js/crypto";
+import { ArkClient, ArkExchangeInfo, logger } from "core/utilities";
 import { actions } from "app/store";
 import { SortBy } from "app/store/marketplace/actions";
 import { getBlockchain, getMarketplace, getWallet } from "../selectors";
@@ -8,7 +9,7 @@ import { getBlockchain, getMarketplace, getWallet } from "../selectors";
 function* loadNftList() {
   try {
     logger("load nft list", "start");
-    yield put(actions.Layout.addBackgroundLoading("reloadNftList", "RELOAD_NFT_LIST"));
+    yield put(actions.Layout.addBackgroundLoading("reloadNftList", "ARK:RELOAD_NFT_LIST"));
     const { network } = getBlockchain(yield select());
     const { filter } = getMarketplace(yield select());
     const { wallet } = getWallet(yield select());
@@ -97,13 +98,13 @@ function* loadNftList() {
     console.error("loading profile failed, Error:")
     console.error(error)
   } finally {
-    yield put(actions.Layout.removeBackgroundLoading("RELOAD_NFT_LIST"));
+    yield put(actions.Layout.removeBackgroundLoading("ARK:RELOAD_NFT_LIST"));
   }
 }
 
 function* loadProfile() {
   try {
-    yield put(actions.Layout.addBackgroundLoading("loadProfile", "LOAD_PROFILE"));
+    yield put(actions.Layout.addBackgroundLoading("loadProfile", "ARK:LOAD_PROFILE"));
     const { wallet } = getWallet(yield select());
     const { network } = getBlockchain(yield select());
 
@@ -116,7 +117,26 @@ function* loadProfile() {
     console.error("loading profile failed, Error:")
     console.error(error)
   } finally {
-    yield put(actions.Layout.removeBackgroundLoading("LOAD_PROFILE"));
+    yield put(actions.Layout.removeBackgroundLoading("ARK:LOAD_PROFILE"));
+  }
+}
+
+function* reloadExchangeInfo() {
+  try {
+    console.log("reload exchange info")
+    yield put(actions.Layout.addBackgroundLoading("loadMarketplaceInfo", "ARK:LOAD_MARKETPLACE_INFO"));
+    const { network } = getBlockchain(yield select());
+
+    const arkClient = new ArkClient(network);
+    const { denoms } = (yield call(arkClient.getExchangeInfo)) as ArkExchangeInfo;
+    const bech32Addresses = denoms.map(address => toBech32Address(address));
+    yield put(actions.MarketPlace.updateDenoms(bech32Addresses));
+
+  } catch (error) {
+    console.error("loading profile failed, Error:")
+    console.error(error)
+  } finally {
+    yield put(actions.Layout.removeBackgroundLoading("ARK:LOAD_MARKETPLACE_INFO"));
   }
 }
 
@@ -135,9 +155,17 @@ function* watchProfileLoad() {
   }
 }
 
+function* watchExchangeInfo() {
+  yield takeLatest([
+    actions.Blockchain.BlockchainActionTypes.SET_NETWORK,
+    actions.Blockchain.BlockchainActionTypes.INITIALIZED,
+  ], reloadExchangeInfo);
+}
+
 
 export default function* marketPlaceSaga() {
   logger("init marketplace saga");
+  yield fork(watchExchangeInfo);
   yield fork(watchProfileLoad);
   yield fork(watchLoadNftList);
 }

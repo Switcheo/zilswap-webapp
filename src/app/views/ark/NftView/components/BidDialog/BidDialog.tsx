@@ -324,6 +324,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         <Box className={classes.bidContainer}>
           <CurrencyInput
             label="Place Your Bid"
+            tokenList="ark-zil"
             bid={true}
             highestBid={priceHuman}
             bidToken={priceToken}

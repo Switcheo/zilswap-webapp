@@ -27,7 +27,8 @@ export const ARK_CONTRACTS: { [key in Network]: { broker: string, tokenProxy: st
 
 const apiPaths = {
   "oauth": "/oauth/access_token",
-  "health/status": "/health/status",
+  "exchange/status": "/exchange/status",
+  "exchange/info": "/exchange/info",
   "collection/list": "/nft/collection/list",
   "collection/detail": "/nft/collection/:address/detail",
   "collection/search": "/nft/collection/:address/search",
@@ -47,6 +48,15 @@ const apiPaths = {
 const getHttpClient = (network: Network) => {
   const endpoint = process.env.REACT_APP_ARK_API_LOCALHOST === "true" ? LOCALHOST_ENDPOINT : ARK_ENDPOINTS[network];
   return new HTTP(endpoint, apiPaths);
+}
+
+export interface ArkExchangeInfo {
+  network: Network;
+  brokerAddress: string;
+  tokenProxyAddress: string;
+  featuredCollections: string[];
+  baseFeeBps: number;
+  denoms: string[];
 }
 
 export interface ListQueryParams {
@@ -115,6 +125,15 @@ export class ArkClient {
     await this.checkError(output);
     return output;
   }
+
+  getExchangeInfo = async () => {
+    const url = this.http.path("exchange/info");
+    const result = await this.http.get({ url });
+    const output = await result.json();
+    await this.checkError(output);
+    return output.result;
+  }
+
   listCollection = async (params?: ArkClient.ListCollectionParams) => {
     const url = this.http.path("collection/list", null, params);
     const result = await this.http.get({ url });
@@ -354,10 +373,10 @@ export class ArkClient {
       value: this.toAdtCheque(buyCheque)
     }];
 
-    const amount = sellCheque.initiatorAddress === userAddress 
+    const amount = sellCheque.initiatorAddress === userAddress
       ? new BN(0)
-      : priceTokenAddress === ZIL_HASH 
-        ? new BN(priceAmount) 
+      : priceTokenAddress === ZIL_HASH
+        ? new BN(priceAmount)
         : new BN(0);
 
     const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;

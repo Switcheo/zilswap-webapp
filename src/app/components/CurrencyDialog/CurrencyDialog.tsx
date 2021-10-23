@@ -14,6 +14,7 @@ import { hexToRGBA, useTaskSubscriber } from "app/utils";
 import { BIG_ZERO, LoadingKeys } from "app/utils/constants";
 import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
+import { getMarketplace } from "app/saga/selectors";
 import { CurrencyList } from "./components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -91,7 +92,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-export type CurrencyListType = "zil" | "bridge-zil" | "bridge-eth";
+export type CurrencyListType = "zil" | "ark-zil" | "bridge-zil" | "bridge-eth";
 
 export interface CurrencyDialogProps extends DialogProps {
   onSelectCurrency: (token: TokenInfo) => void;
@@ -112,6 +113,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
+  const { exchangeDenoms } = useSelector(getMarketplace);
 
   useEffect(() => {
     if (!tokenState.tokens) return setTokens([]);
@@ -132,13 +134,15 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     let tokens = Object.values(tokenState.tokens);
     if (tokenList === 'zil') {
       tokens = tokens.filter(t => t.blockchain === Blockchain.Zilliqa)
+    } else if (tokenList === 'ark-zil') {
+      tokens = tokens.filter(t => t.blockchain === Blockchain.Zilliqa && exchangeDenoms && exchangeDenoms.includes(t.address))
     } else if (tokenList === 'bridge-eth') {
       tokens = tokens.filter(t => t.blockchain === Blockchain.Ethereum)
     } else if (tokenList === 'bridge-zil') {
       tokens = tokens.filter(t => bridgeState.tokens[Blockchain.Zilliqa].findIndex(b => toBech32Address(b.tokenAddress) === t.address) >= 0)
     }
     setTokens(tokens.sort(sortFn));
-  }, [tokenState.tokens, walletState.wallet, bridgeState.tokens, showContribution, tokenList]);
+  }, [tokenState.tokens, walletState.wallet, bridgeState.tokens, showContribution, tokenList, exchangeDenoms]);
 
   const filterSearch = (token: TokenInfo): boolean => {
     const searchTerm = search.toLowerCase().trim();
