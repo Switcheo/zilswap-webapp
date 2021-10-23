@@ -14,5 +14,6 @@ export { default as ArkToggle } from "./ArkToggle"
 export { default as ArkOwnerLabel } from "./ArkOwnerLabel";
 export { default as ArkSearchFilter } from "./ArkSearchFilter"
 export { default as ArkTopBar } from "./ArkTopBar";
+export { default as ArkShareLinksGroup } from "./ArkShareLinksGroup";
 export { default as ArkSocialLinkGroup } from "./ArkSocialLinkGroup";
 export { default as ZapIconButton } from "./ZapIconButton";
