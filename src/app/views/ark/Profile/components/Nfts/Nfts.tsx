@@ -25,7 +25,7 @@ const Nfts: React.FC<Props> = (props: Props) => {
         timed_auction: false,
       },
       likedBy: filter === 'liked' ? addressFilter : undefined,
-      owner: filter === 'collected' ? addressFilter : undefined,
+      owner: ['collected', 'onSale'].includes(filter) ? addressFilter : undefined,
     }));
     // eslint-disable-next-line
   }, [blockchainState.ready, address, filter])

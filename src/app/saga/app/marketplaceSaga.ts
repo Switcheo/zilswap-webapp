@@ -75,7 +75,8 @@ function* loadNftList() {
     const arkClient = new ArkClient(network); // TODO: refactor client into redux
 
     if (filter.owner || filter.likedBy) {
-      const newQuery: ArkClient.ListTokenParams = query
+      delete query.q;
+      const newQuery: ArkClient.ListTokenParams = query;
       if (filter.owner) newQuery.owner = filter.owner;
       if (filter.likedBy) newQuery.likedBy = filter.likedBy;
 
