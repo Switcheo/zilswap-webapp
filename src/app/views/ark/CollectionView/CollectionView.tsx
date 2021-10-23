@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { ArkBanner, ArkBreadcrumb, SocialLinkGroup, Text, ArkNFTListing } from "app/components";
+import { ArkBanner, ArkBreadcrumb, ArkSocialLinkGroup, Text, ArkNFTListing } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
 import { actions } from "app/store";
@@ -88,14 +88,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   socialLinkGroup: {
     alignSelf: "flex-end",
     marginTop: "-22px",
+    transform: "translateY(-40px)",
     [theme.breakpoints.down("xs")]: {
-      display: "none",
+      display: "none!important",
     },
   },
   socialLinkGroupMobile: {
     marginTop: theme.spacing(1),
     [theme.breakpoints.up("sm")]: {
-      display: "none",
+      display: "none!important",
     },
   },
   nftContainer: {
@@ -112,6 +113,8 @@ const TEMP_BANNER_URL =
   "https://pbs.twimg.com/profile_banners/1429715941399486466/1630400388/1500x500";
 const TEMP_BEAR_AVATAR_URL =
   "https://pbs.twimg.com/profile_images/1432977604563193858/z01O7Sey_400x400.jpg";
+
+const COLLECTION_SHARE_MESSAGE = "Check out this awesome NFT collection on #ARK! &link #nftmarketplace #nft #nonfungible #zilswap @zilswap"
 
 const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
@@ -201,10 +204,10 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           bannerImage={TEMP_BANNER_URL}
         />
         <Box display="flex" flexDirection="column" alignItems="center">
-          <SocialLinkGroup collection={collection} className={classes.socialLinkGroup} />
+          <ArkSocialLinkGroup message={COLLECTION_SHARE_MESSAGE} collection={collection} className={classes.socialLinkGroup} />
 
           {/* TODO: hacky way for mobile view, to clean up */}
-          <SocialLinkGroup collection={collection} className={classes.socialLinkGroupMobile} />
+          <ArkSocialLinkGroup message={COLLECTION_SHARE_MESSAGE} collection={collection} className={classes.socialLinkGroupMobile} />
 
           {/* Collection name and creator  */}
           <Box display="flex" flexDirection="column" maxWidth={500}>
