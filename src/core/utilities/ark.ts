@@ -327,9 +327,10 @@ export class ArkClient {
   }
 
   // TODO: Refactor zilswap SDK as instance member;
-  async executeTrade(executeParams: ArkClient.ExecuteTradeParams, zilswap: Zilswap) {
+  async executeTrade(executeParams: ArkClient.ExecuteTradeParams, zilswap: Zilswap, wallet?: ConnectedWallet) {
     const { nftAddress, tokenId, sellCheque, buyCheque, matchedChequeHash } = executeParams;
     const { address: priceTokenAddress, amount: priceAmount } = sellCheque.price;
+    const userAddress = wallet?.addressInfo.byte20.toLowerCase();
 
     const args = [{
       vname: "token",
@@ -357,9 +358,15 @@ export class ArkClient {
       value: matchedChequeHash
     }];
 
+    const amount = sellCheque.initiatorAddress === userAddress
+      ? new BN(0)
+      : priceTokenAddress === ZIL_HASH
+        ? new BN(priceAmount)
+        : new BN(0);
+
     const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
     const callParams = {
-      amount: priceTokenAddress === ZIL_HASH ? new BN(priceAmount) : new BN(0),
+      amount,
       gasPrice: new BN(minGasPrice),
       gasLimit: Long.fromNumber(20000),
       version: bytes.pack(CHAIN_IDS[this.network], MSG_VERSION),
@@ -571,7 +578,7 @@ export namespace ArkClient {
   }
 
   export type ExecuteBuyCheque = Pick<SimpleCheque, "side" | "expiry" | "publicKey" | "signature" | "nonce">;
-  export type ExecuteSellCheque = Pick<SimpleCheque, "side" | "expiry" | "publicKey" | "signature" | "nonce" | "price" | "feeAmount">;
+  export type ExecuteSellCheque = Pick<SimpleCheque, "side" | "expiry" | "publicKey" | "signature" | "nonce" | "price" | "feeAmount" | "initiatorAddress">;
   export interface ArkChequeParams {
     side: 'Buy' | 'Sell';
     token: { id: string, address: string };

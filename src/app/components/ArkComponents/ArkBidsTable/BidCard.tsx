@@ -143,23 +143,26 @@ const BidCard: React.FC<Props> = (props: Props) => {
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 300; // blocks
-      const buyChequeHash = arkClient.arkChequeHash({
-        side: "Buy",
+
+      const sellChequeHash = arkClient.arkChequeHash({
+        side: "Sell",
         token: {
           address: bid.token?.collection?.address,
-          id: bid.token?.tokenId,
+          id: bid.token?.tokenId.toString(10),
         },
         price,
         feeAmount,
         expiry,
         nonce,
       });
-      const message = arkClient.arkMessage("Execute", buyChequeHash);
+
+      const message = arkClient.arkMessage("Execute", sellChequeHash);
 
       const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
 
       const sellCheque: ArkClient.ExecuteSellCheque = {
         side: "sell",
+        initiatorAddress: wallet.addressInfo.byte20.toLowerCase(),
         expiry,
         price: {
           address: price.address,
@@ -174,9 +177,9 @@ const BidCard: React.FC<Props> = (props: Props) => {
       const execTradeResult = await arkClient.executeTrade({
         buyCheque: bid,
         sellCheque,
-        matchedChequeHash: `0x${buyChequeHash}`,
-        nftAddress: bid.token.collectionAddress,
-        tokenId: bid.token.tokenId,
+        matchedChequeHash: `0x${sellChequeHash}`,
+        nftAddress: bid.token.collection.address,
+        tokenId: bid.token.tokenId.toString(10),
       }, ZilswapConnector.getSDK());
 
       logger("exec trade result", execTradeResult)
@@ -248,7 +251,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
         }
-        {status === 'Active' && bid.token.owner === userAddress &&
+        {status === 'Active' && bid.token.ownerAddress === userAddress &&
           <Box mt={2} display="flex" justifyContent="center">
             <Box flexGrow={1}>
               <FancyButton variant="contained" fullWidth loading={acceptLoading} onClick={() => acceptBid(bid)} className={classes.actionButton}>
