@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState, useMemo } from "react";
 import { Avatar, Badge, Box, Container, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
@@ -8,7 +8,7 @@ import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet } from "app/saga/selectors";
 import { Cheque, Nft, Profile } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask } from "app/utils";
+import { bnOrZero, useAsyncTask } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import { ReactComponent as VerifiedBadge } from "../CollectionView/verified-badge.svg";
@@ -29,6 +29,14 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
 
   const collectionId = match.params.collection;
   const tokenId = match.params.id;
+
+  const royaltiesPercent = useMemo(() => {
+    const royaltyBps = token?.collection?.royaltyBps;
+    if (!royaltyBps) return null;
+
+    const percent = bnOrZero(royaltyBps).shiftedBy(-4).decimalPlaces(2);
+    return percent.toFormat();
+  }, [token?.collection]);
 
   // fetch nft data, if none redirect back to collections / show not found view
   useEffect(() => {
@@ -119,13 +127,19 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
                         <VerifiedBadge />
                       }
                     >
-                      <Avatar className={classes.avatar} sizes="medium" alt="Remy Sharp" src={""} />
+                      <Avatar className={classes.avatar} sizes="medium" alt="Collection owner" src={""} />
                     </Badge>
                   </ListItemIcon>
                   <Box marginLeft={1}>
-                    <Typography className={classes.halfOpacity}>Creator</Typography>
-                    <Typography variant="h3" className={classes.aboutNameText}>Switcheo Labs</Typography>
-                    <Typography>10% Royalties</Typography>
+                    {token?.collection?.ownerName && (
+                      <Fragment>
+                        <Typography className={classes.halfOpacity}>Creator</Typography>
+                        <Typography variant="h3" className={classes.aboutNameText}>{token?.collection?.ownerName}</Typography>
+                      </Fragment>
+                    )}
+                    {royaltiesPercent && (
+                      <Typography>{royaltiesPercent}% Royalties</Typography>
+                    )}
                   </Box>
                 </MenuItem>
               </Box>

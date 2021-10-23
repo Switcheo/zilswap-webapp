@@ -11,11 +11,20 @@ import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet, getTokens, getMarketplace } from "app/saga/selectors";
 import { Nft, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask } from "app/utils";
+import { useAsyncTask, bnOrZero } from "app/utils";
 import { ArkClient, logger } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import { ReactComponent as Checkmark } from "./checkmark.svg";
+
+interface SellForm {
+  description: string,
+  saleType: "fixed_price" | "timed_auction",
+  sellToken: TokenInfo,
+  buyNowPrice: string,
+  startingPrice: string,
+  reservePrice: string,
+};
 
 const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { className, ...rest } = props;
@@ -25,13 +34,14 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const tokenState = useSelector(getTokens);
   const { exchangeInfo } = useSelector(getMarketplace);
   const match = useRouteMatch<{ id: string, collection: string }>();
-  const [runConfirmSell, loading, error] = useAsyncTask("confirmSell");
+  const [open, setOpen] = useState(false)
+  const [runConfirmSell, loading, error] = useAsyncTask("confirmSell", () => setOpen(false));
   const [runGetNFTDetails] = useAsyncTask("runGetNFTDetails");
   const [token, setToken] = useState<Nft>();
   // const [errors, setErrors] = useState({
   //   description: "",
   // })
-  const [inputValues, setInputValues] = useState<any>({
+  const [inputValues, setInputValues] = useState<SellForm>({
     description: "",
     saleType: "fixed_price",
     sellToken: tokenState.tokens[ZIL_ADDRESS],
@@ -39,7 +49,6 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     startingPrice: "0",
     reservePrice: "0",
   });
-  const [open, setOpen] = useState(false)
   const [hasApproved, setHasApproved] = useState(false)
   const [hasPosted, setHasPosted] = useState(false)
   const history = useHistory()
@@ -110,7 +119,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     })
   };
 
-  const onEndEditPrice = (type: string) => {
+  const onEndEditPrice = (type: keyof Pick<SellForm, "buyNowPrice" | "reservePrice" | "startingPrice">) => {
     let bidAmount = new BigNumber(inputValues[type]).decimalPlaces(
       inputValues.sellToken?.decimals ?? 0
     );
@@ -128,12 +137,20 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const onConfirm = () => {
     if (!wallet?.provider || !match.params?.collection || !match.params?.id || !inputValues.sellToken || inputValues.buyNowPrice === "0" || !exchangeInfo) return;
-    setOpen(true)
     runConfirmSell(async () => {
-      const { collection: address, id } = match.params
+      const { collection: address, id } = match.params;
 
       const priceAmount = new BigNumber(inputValues.buyNowPrice).shiftedBy(inputValues.sellToken.decimals);
       const price = { amount: priceAmount, address: fromBech32Address(inputValues.sellToken.address) };
+
+      if (price.address === token?.bestAsk?.price.address && price.amount.gte(token.bestAsk.price.amount)) {
+        const priceToken = tokenState.tokens[inputValues.sellToken.address];
+        const decimals = priceToken?.decimals ?? 0;
+        const existingPriceHuman = bnOrZero(token.bestAsk.price.amount).decimalPlaces(0).shiftedBy(-decimals);
+        throw new Error(`Selling price should be lower than existing price of ${existingPriceHuman.toFormat()} ${priceToken?.symbol}`)
+      }
+
+      setOpen(true)
       const feeAmount = priceAmount.times(exchangeInfo.baseFeeBps).dividedToIntegerBy(10000).plus(1);
 
       const arkClient = new ArkClient(network);
@@ -306,11 +323,12 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               </Box>
 
               {error && (
-                <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
+                <Text marginTop={2} color="error">Error: {error?.message ?? "Unknown error"}</Text>
               )}
               <FancyButton
                 className={classes.actionButton}
                 loading={loading}
+                disabled={!new BigNumber(inputValues.buyNowPrice).gt(0)}
                 variant="contained"
                 color="primary"
                 onClick={onConfirm}

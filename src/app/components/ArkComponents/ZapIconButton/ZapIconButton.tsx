@@ -15,11 +15,11 @@ import { ReactComponent as ZapSVG } from "./zap.svg";
 
 interface Props extends BoxProps {
   token?: Nft;
-  onReload?: (force: boolean) => void;
+  onZap?: (change: -1 | 0 | 1) => void;
 }
 
 const ZapIconButton: React.FC<Props> = (props: Props) => {
-  const { children, className, onReload, token, ...rest } = props;
+  const { children, className, onZap, token, ...rest } = props;
   const classes = useStyles();
 
   const [liked, setLiked] = useState<boolean>(false);
@@ -49,8 +49,12 @@ const ZapIconButton: React.FC<Props> = (props: Props) => {
       } else {
         await arkClient.removeFavourite(token!.collection!.address, token.tokenId, newOAuth!.access_token);
       }
-      setLiked(!liked);
-      if (onReload) onReload(true);
+
+      const newState = !liked;
+      setLiked(newState);
+      onZap?.(token.isFavourited === newState
+        ? 0 
+        : !token.isFavourited && newState ? 1 : -1);
     })
   }
 

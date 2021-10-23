@@ -33,6 +33,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
   const { tokens, prices } = useSelector(getTokens);
   const [tokenPrice, setTokenPrice] = useState<BigNumber | null>(null);
   const [tokenAmount, setTokenAmount] = useState<BigNumber | null>(null);
+  const [zapChange, setZapChange] = useState<number>(0);
   const [purchaseCurrency, setPurchaseCurrency] = useState<TokenInfo>();
   const valueCalculator = useValueCalculators();
   const [blockTime, currentBlock, currentTime] = useBlockTime();
@@ -107,9 +108,9 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
 
             <InfoBox topLabel="ZAPs" bottomLabel="Like it? ZAP it!" tooltip={""}>
               <Text className={classes.zapScore} variant="h3">
-                {token?.statistics?.favourites || 0}
+                {parseInt(token?.statistics?.favourites ?? "0") + zapChange}
                 {" "}
-                <ZapIconButton className={classes.zapLogo} token={token} />
+                <ZapIconButton onZap={setZapChange} className={classes.zapLogo} token={token} />
               </Text>
             </InfoBox>
           </Box>
@@ -174,7 +175,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
             )}
             {isOwnToken && token?.collection && (
               <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onSell}>
-                Sell
+                {token.bestAsk ? "Lower Price" : "Sell"}
               </FancyButton>
             )}
             {!isOwnToken && token?.bestAsk && (

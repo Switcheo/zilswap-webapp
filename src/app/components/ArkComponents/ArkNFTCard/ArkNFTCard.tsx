@@ -103,7 +103,6 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
       }
       setLiked(!liked);
       dispatch(actions.MarketPlace.reloadTokenList());
-      toaster(`${!liked ? "Liked" : "Unliked"}`);
     })
   }
 
