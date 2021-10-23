@@ -128,9 +128,9 @@ function* reloadExchangeInfo() {
     const { network } = getBlockchain(yield select());
 
     const arkClient = new ArkClient(network);
-    const { denoms } = (yield call(arkClient.getExchangeInfo)) as ArkExchangeInfo;
-    const bech32Addresses = denoms.map(address => toBech32Address(address));
-    yield put(actions.MarketPlace.updateDenoms(bech32Addresses));
+    const exchangeInfo = (yield call(arkClient.getExchangeInfo)) as ArkExchangeInfo;
+    exchangeInfo.denoms = exchangeInfo.denoms.map(address => toBech32Address(address));
+    yield put(actions.MarketPlace.updateExchangeInfo(exchangeInfo));
 
   } catch (error) {
     console.error("loading profile failed, Error:")

@@ -74,10 +74,11 @@ const ArkPaginator: React.FC<Props> = (props: Props) => {
       {items.map((pageItem, index) => {
         const { page, type, selected } = pageItem;
         if (type === 'start-ellipsis' || type === 'end-ellipsis') {
-          return <Typography className={classes.ellipsis}>...</Typography>;
+          return <Typography key="ellipsis" className={classes.ellipsis}>...</Typography>;
         } else if (type === 'page') {
           return (
             <Typography
+              key={page}
               onClick={(e) => { if (!selected) onPageClicked(page, pageItem, e) }}
               className={cls(classes.clickable, classes.pageText, selected ? classes.selected : undefined)}
             >
@@ -86,14 +87,14 @@ const ArkPaginator: React.FC<Props> = (props: Props) => {
           );
         } else if (type === 'next') {
           return (
-            <ArrowRight className={cls(classes.clickable)} onClick={(e) => {
+            <ArrowRight key="next" className={cls(classes.clickable)} onClick={(e) => {
               if (selectedPage && selectedPage.page === maxPages) return;
               else onPageClicked(page, pageItem, e)
             }} />
           );
         } else if (type === 'previous') {
           return (
-            <ArrowLeft className={cls(classes.clickable)} onClick={(e) => {
+            <ArrowLeft key="previous" className={cls(classes.clickable)} onClick={(e) => {
               if (selectedPage && selectedPage.page === 1) return;
               else onPageClicked(page, pageItem, e)
             }} />

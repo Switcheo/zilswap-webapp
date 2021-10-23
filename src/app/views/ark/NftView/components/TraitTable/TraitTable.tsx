@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, TableHead, TableBody, TableRow, TableCell, TableProps } from "@material-ui/core";
+import { Table, TableHead, TableBody, TableRow, TableCell, TableProps, TableContainer } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import BigNumber from "bignumber.js";
@@ -73,25 +73,27 @@ const TraitTable: React.FC<Props> = (props: Props) => {
   }, [token?.traitValues])
 
   return (
-    <Table {...rest} className={cls(classes.root, className)}>
-      <TableHead>
-        <TableRow className={classes.header}>
-          {["Category", "Attribute", "Rarity", "Rarity %"].map((head, index) => (
-            <TableCell align="center">{head}</TableCell>
-          ))}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {traitCategory.map((trait: string, index) => (
-          <TableRow className={classes.bodyRow} key={`traits-row-${index}`}>
-            <TableCell className={classes.base} align="center">{traits[trait].type || "-"}</TableCell>
-            <TableCell className={classes.attribute} align="center">{traits[trait].value || "-"}</TableCell>
-            <TableCell align="center">{traits[trait].rarity || "-"}</TableCell>
-            <TableCell align="center">{traits[trait].percentage ? `${traits[trait].percentage} %` : "-"}</TableCell>
+    <TableContainer>
+      <Table {...rest} className={cls(classes.root, className)}>
+        <TableHead>
+          <TableRow className={classes.header}>
+            {["Category", "Attribute", "Rarity", "Rarity %"].map((head, index) => (
+              <TableCell align="center">{head}</TableCell>
+            ))}
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHead>
+        <TableBody>
+          {traitCategory.map((trait: string, index) => (
+            <TableRow className={classes.bodyRow} key={`traits-row-${index}`}>
+              <TableCell className={classes.base} align="center">{traits[trait].type || "-"}</TableCell>
+              <TableCell className={classes.attribute} align="center">{traits[trait].value || "-"}</TableCell>
+              <TableCell align="center">{traits[trait].rarity || "-"}</TableCell>
+              <TableCell align="center">{traits[trait].percentage ? `${traits[trait].percentage} %` : "-"}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 
@@ -123,9 +125,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       }
     },
     "& .MuiTableCell-root": {
-      fontSize: 14,
+      fontSize: 16,
       fontFamily: 'Avenir Next',
       fontWeight: 700,
+      whiteSpace: "nowrap",
     }
   }
 }));

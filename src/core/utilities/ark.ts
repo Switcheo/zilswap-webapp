@@ -65,8 +65,6 @@ export interface ListQueryParams {
 }
 
 export class ArkClient {
-  public static FEE_BPS = 250;
-
   public readonly brokerAddress: string;
   public readonly tokenProxyAddress: string;
   private http: HTTP<typeof apiPaths>;

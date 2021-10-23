@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
 import { CurrencyLogo, DialogModal, FancyButton, Text, ArkNFTCard } from "app/components";
-import { getBlockchain, getTokens, getTransactions, getWallet } from "app/saga/selectors";
+import { getBlockchain, getMarketplace, getTokens, getTransactions, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { RootState, WalletObservedTx } from "app/store/types";
@@ -34,6 +34,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
   const tokenState = useSelector(getTokens);
   const { wallet } = useSelector(getWallet);
   const txState = useSelector(getTransactions);
+  const { exchangeInfo } = useSelector(getMarketplace);
   const open = useSelector<RootState, boolean>((state) => state.layout.showBuyNftDialog);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -109,7 +110,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
   };
 
   const onConfirm = () => {
-    if (!wallet?.provider || !match.params?.collection || !match.params?.id || !bestAsk) return;
+    if (!wallet?.provider || !match.params?.collection || !match.params?.id || !bestAsk || !exchangeInfo) return;
 
     clearApproveError();
 
@@ -120,7 +121,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
 
       const priceAmount = new BigNumber(bestAsk.price.amount);
       const price = { amount: priceAmount, address: fromBech32Address(priceToken.address) };
-      const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
+      const feeAmount = priceAmount.times(exchangeInfo.baseFeeBps).dividedToIntegerBy(10000).plus(1);
 
       const arkClient = new ArkClient(network);
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
@@ -152,7 +153,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         tokenId: id,
       }, ZilswapConnector.getSDK());
 
-        logger("exec trade result", execTradeResult)
+      logger("exec trade result", execTradeResult)
     });
   };
 
@@ -266,7 +267,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
             </Box>
 
             <FancyButton
-              showTxApprove={showTxApprove} 
+              showTxApprove={showTxApprove}
               loadingTxApprove={txIsPending}
               onClickTxApprove={onApproveTx}
               className={classes.actionButton}
@@ -281,13 +282,13 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
             </FancyButton>
 
             {error && (
-                <Box className={classes.errorBox}>
-                  <WarningIcon className={classes.warningIcon} />
-                  <Text color="error">
-                    Error: {(error?.message || errorApproveTx?.message) ?? "Unknown error"}
-                  </Text>
-                </Box>
-              )}
+              <Box className={classes.errorBox}>
+                <WarningIcon className={classes.warningIcon} />
+                <Text color="error">
+                  Error: {(error?.message || errorApproveTx?.message) ?? "Unknown error"}
+                </Text>
+              </Box>
+            )}
           </Fragment>
         )}
 

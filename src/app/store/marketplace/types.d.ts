@@ -1,4 +1,5 @@
 import { SimpleMap } from "app/utils";
+import { ArkExchangeInfo } from "core/utilities";
 import { SortBy } from "./actions";
 
 export interface MarketPlaceState {
@@ -9,7 +10,7 @@ export interface MarketPlaceState {
   oAuth?: OAuth;
   receivedBids?: any;
   bidded?: any;
-  exchangeDenoms?: string[];
+  exchangeInfo?: ArkExchangeInfo;
   collectionTraits: SimpleMap<CollectionTrait[]>;
 }
 

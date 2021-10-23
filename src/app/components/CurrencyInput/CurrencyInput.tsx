@@ -1,28 +1,19 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import cls from "classnames";
-import {
-  Box,
-  Button,
-  InputAdornment,
-  InputLabel,
-  OutlinedInput,
-  Typography,
-} from "@material-ui/core";
+import { Box, Button, InputAdornment, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import BigNumber from "bignumber.js";
 import { CurrencyLogo } from "app/components";
 import CurrencyDialog from "app/components/CurrencyDialog";
-import { RootState, TokenInfo, WalletState } from "app/store/types";
+import { RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, toHumanNumber, useMoneyFormatter } from "app/utils";
 import { formatSymbol } from "app/utils/currencies";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
-import {
-  CurrencyDialogProps,
-  CurrencyListType,
-} from "../CurrencyDialog/CurrencyDialog";
+import { getWallet } from "app/saga/selectors";
+import { CurrencyDialogProps, CurrencyListType } from "../CurrencyDialog/CurrencyDialog";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
@@ -230,12 +221,8 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5 });
   const [tokenBalance, setTokenBalance] = useState<BigNumber | null>(null);
   const [showCurrencyDialog, setShowCurrencyDialog] = useState(false);
-  const walletState = useSelector<RootState, WalletState>(
-    (state) => state.wallet
-  );
-  const poolToken = useSelector<RootState, TokenInfo | null>(
-    (state) => state.pool.token
-  );
+  const walletState = useSelector(getWallet);
+  const poolToken = useSelector<RootState, TokenInfo | null>((state) => state.pool.token);
   const formatMoney = useMoneyFormatter({
     showCurrency: true,
     maxFractionDigits: 6,
@@ -424,6 +411,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
       {children}
       <CurrencyDialog
         {...dialogOpts}
+        token={token}
         tokenList={tokenList}
         open={showCurrencyDialog || showDialogOverride || false}
         onSelectCurrency={onCurrencySelect}

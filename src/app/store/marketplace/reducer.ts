@@ -32,7 +32,7 @@ const initial_state: MarketPlaceState = {
       limit: COLLECTION_NFT_PER_PAGE
     },
   },
-  exchangeDenoms: undefined,
+  exchangeInfo: undefined,
   profile: undefined,
   collectionTraits: {},
 }
@@ -67,10 +67,10 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
           }
         },
       }
-    case MarketPlaceActionTypes.UPDATE_DENOMS:
+    case MarketPlaceActionTypes.UPDATE_EXCHANGE_INFO:
       return {
         ...state,
-        exchangeDenoms: payload,
+        exchangeInfo: payload,
       }
     case MarketPlaceActionTypes.UPDATE_FILTER:
       return {

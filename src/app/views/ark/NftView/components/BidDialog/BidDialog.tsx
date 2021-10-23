@@ -12,7 +12,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { ZilswapConnector } from "core/zilswap";
 import { ArkExpiry, ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
-import { getBlockchain, getTokens, getTransactions, getWallet } from "app/saga/selectors";
+import { getBlockchain, getMarketplace, getTokens, getTransactions, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { RootState, TokenInfo, WalletObservedTx } from "app/store/types";
@@ -87,7 +87,8 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const { network } = useSelector(getBlockchain);
   const { wallet } = useSelector(getWallet);
   const tokenState = useSelector(getTokens);
-  const { observingTxs }  = useSelector(getTransactions);
+  const { observingTxs } = useSelector(getTransactions);
+  const { exchangeInfo } = useSelector(getMarketplace);
   const open = useSelector<RootState, boolean>(
     (state) => state.layout.showBidNftDialog
   );
@@ -194,7 +195,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   }, [bestBid, tokenState.tokens]);
 
   const onConfirm = () => {
-    if (!wallet) return;
+    if (!wallet || !exchangeInfo) return;
 
     clearApproveError();
 
@@ -211,7 +212,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         address: fromBech32Address(bidToken.address),
       };
       const feeAmount = priceAmount
-        .times(ArkClient.FEE_BPS)
+        .times(exchangeInfo.baseFeeBps)
         .dividedToIntegerBy(10000)
         .plus(1);
 
@@ -330,6 +331,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
             bidToken={priceToken}
             token={bidToken ?? null}
             amount={formState.bidAmount}
+            dialogOpts={{ zrc2Only: true }}
             onEditorBlur={onEndEditBidAmount}
             onAmountChange={onBidAmountChange}
             onCurrencyChange={onCurrencyChange}
@@ -374,7 +376,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
               </Box>
 
               <FancyButton
-                showTxApprove={showTxApprove} 
+                showTxApprove={showTxApprove}
                 loadingTxApprove={txIsPending}
                 onClickTxApprove={onApproveTx}
                 className={classes.actionButton}

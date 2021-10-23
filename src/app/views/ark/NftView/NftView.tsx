@@ -131,7 +131,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
               </Box>
             </Box>
           </Box>
-          <Box flexGrow={1} flexDirection="column" className={classes.traitContainer}>
+          <Box className={classes.traitContainer}>
             <TraitTable token={token} />
           </Box>
         </Box>
@@ -240,8 +240,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   traitContainer: {
-    display: "flex",
     minWidth: 400,
+    flex: 1,
     border: theme.palette.border,
     background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
     padding: theme.spacing(4, 5),

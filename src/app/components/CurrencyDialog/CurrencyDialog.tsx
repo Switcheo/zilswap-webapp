@@ -11,7 +11,7 @@ import { DialogModal } from "app/components";
 import { BridgeState } from "app/store/bridge/types";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { hexToRGBA, useTaskSubscriber } from "app/utils";
-import { BIG_ZERO, LoadingKeys } from "app/utils/constants";
+import { BIG_ZERO, LoadingKeys, ZIL_ADDRESS } from "app/utils/constants";
 import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
 import { getMarketplace } from "app/saga/selectors";
@@ -99,11 +99,13 @@ export interface CurrencyDialogProps extends DialogProps {
   hideZil?: boolean;
   hideNoPool?: boolean;
   showContribution?: boolean;
+  zrc2Only?: boolean;
+  token?: TokenInfo | null;
   tokenList: CurrencyListType;
 };
 
 const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProps) => {
-  const { className, onSelectCurrency, hideZil, hideNoPool, showContribution, tokenList, open, onClose } = props;
+  const { className, onSelectCurrency, hideZil, hideNoPool, showContribution, zrc2Only, tokenList, open, token, onClose } = props;
   const classes = useStyles();
   const [search, setSearch] = useState("");
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
@@ -113,7 +115,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
-  const { exchangeDenoms } = useSelector(getMarketplace);
+  const { exchangeInfo } = useSelector(getMarketplace);
 
   useEffect(() => {
     if (!tokenState.tokens) return setTokens([]);
@@ -135,14 +137,21 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     if (tokenList === 'zil') {
       tokens = tokens.filter(t => t.blockchain === Blockchain.Zilliqa)
     } else if (tokenList === 'ark-zil') {
+      const exchangeDenoms = exchangeInfo?.denoms;
       tokens = tokens.filter(t => t.blockchain === Blockchain.Zilliqa && exchangeDenoms && exchangeDenoms.includes(t.address))
     } else if (tokenList === 'bridge-eth') {
       tokens = tokens.filter(t => t.blockchain === Blockchain.Ethereum)
     } else if (tokenList === 'bridge-zil') {
       tokens = tokens.filter(t => bridgeState.tokens[Blockchain.Zilliqa].findIndex(b => toBech32Address(b.tokenAddress) === t.address) >= 0)
     }
+
+    if (zrc2Only)
+      tokens = tokens.filter(t => t.address !== ZIL_ADDRESS);
     setTokens(tokens.sort(sortFn));
-  }, [tokenState.tokens, walletState.wallet, bridgeState.tokens, showContribution, tokenList, exchangeDenoms]);
+
+    if (token && !tokens.find(t => t.address === token.address) && tokens.length > 0)
+      onSelectCurrency(tokens[0]);
+  }, [tokenState.tokens, walletState.wallet, bridgeState.tokens, showContribution, tokenList, exchangeInfo?.denoms, zrc2Only, token, onSelectCurrency]);
 
   const filterSearch = (token: TokenInfo): boolean => {
     const searchTerm = search.toLowerCase().trim();

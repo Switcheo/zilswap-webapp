@@ -1,3 +1,4 @@
+import { ArkExchangeInfo } from "core/utilities"
 import { CollectionFilter, CollectionTrait } from "../types"
 import { Nft, OAuth, PaginatedList, Profile } from "./types"
 
@@ -21,7 +22,7 @@ export const MarketPlaceActionTypes = {
   UPDATE_COLLECTION: "UPDATE_COLLECTION",
   UPDATE_FILTER: "UPDATE_FILTER",
   UPDATE_COLLECTION_TRAITS: "UPDATE_COLLECTION_TRAITS",
-  UPDATE_DENOMS: "UPDATE_DENOMS",
+  UPDATE_EXCHANGE_INFO: "UPDATE_EXCHANGE_INFO",
   RELOAD_TOKEN_LIST: "RELOAD_TOKEN_LIST",
 }
 
@@ -44,9 +45,9 @@ export function updateProfile(payload: Profile) {
   }
 }
 
-export function updateDenoms(payload: string[]) {
+export function updateExchangeInfo(payload: ArkExchangeInfo) {
   return {
-    type: MarketPlaceActionTypes.UPDATE_DENOMS,
+    type: MarketPlaceActionTypes.UPDATE_EXCHANGE_INFO,
     payload
   }
 }

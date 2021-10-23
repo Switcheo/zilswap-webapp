@@ -6,9 +6,9 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { useHistory, useRouteMatch } from "react-router";
-import { ArkInput, ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
+import { ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
-import { getBlockchain, getWallet, getTokens } from "app/saga/selectors";
+import { getBlockchain, getWallet, getTokens, getMarketplace } from "app/saga/selectors";
 import { Nft, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
@@ -23,13 +23,14 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const { network } = useSelector(getBlockchain);
   const { wallet } = useSelector(getWallet);
   const tokenState = useSelector(getTokens);
+  const { exchangeInfo } = useSelector(getMarketplace);
   const match = useRouteMatch<{ id: string, collection: string }>();
   const [runConfirmSell, loading, error] = useAsyncTask("confirmSell");
   const [runGetNFTDetails] = useAsyncTask("runGetNFTDetails");
   const [token, setToken] = useState<Nft>();
-  const [errors, setErrors] = useState({
-    description: "",
-  })
+  // const [errors, setErrors] = useState({
+  //   description: "",
+  // })
   const [inputValues, setInputValues] = useState<any>({
     description: "",
     saleType: "fixed_price",
@@ -67,33 +68,33 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     })
   }
 
-  const updateInputs = (type: string) => {
-    return (newInput: string) => {
-      setInputValues({
-        ...inputValues,
-        [type]: newInput
-      })
-      if (!newInput) {
-        return setErrors({
-          ...errors, [type]: ""
-        })
-      }
-      const errorText = validateInput(type, newInput)
+  // const updateInputs = (type: string) => {
+  //   return (newInput: string) => {
+  //     setInputValues({
+  //       ...inputValues,
+  //       [type]: newInput
+  //     })
+  //     if (!newInput) {
+  //       return setErrors({
+  //         ...errors, [type]: ""
+  //       })
+  //     }
+  //     const errorText = validateInput(type, newInput)
 
-      setErrors({
-        ...errors, [type]: errorText
-      })
-    }
-  }
+  //     setErrors({
+  //       ...errors, [type]: errorText
+  //     })
+  //   }
+  // }
 
-  const validateInput = (type: string, input: string) => {
-    switch (type) {
-      case "description":
-        if (input.length > 300) return "max 300 characters";
-        return ""
-      default: return "false";
-    }
-  }
+  // const validateInput = (type: string, input: string) => {
+  //   switch (type) {
+  //     case "description":
+  //       if (input.length > 300) return "max 300 characters";
+  //       return ""
+  //     default: return "false";
+  //   }
+  // }
 
   const onCurrencyChange = (token: TokenInfo) => {
     setInputValues({
@@ -126,14 +127,14 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   };
 
   const onConfirm = () => {
-    if (!wallet?.provider || !match.params?.collection || !match.params?.id || !inputValues.sellToken ||  inputValues.buyNowPrice === "0") return;
+    if (!wallet?.provider || !match.params?.collection || !match.params?.id || !inputValues.sellToken || inputValues.buyNowPrice === "0" || !exchangeInfo) return;
     setOpen(true)
     runConfirmSell(async () => {
       const { collection: address, id } = match.params
 
       const priceAmount = new BigNumber(inputValues.buyNowPrice).shiftedBy(inputValues.sellToken.decimals);
       const price = { amount: priceAmount, address: fromBech32Address(inputValues.sellToken.address) };
-      const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
+      const feeAmount = priceAmount.times(exchangeInfo.baseFeeBps).dividedToIntegerBy(10000).plus(1);
 
       const arkClient = new ArkClient(network);
 
@@ -173,8 +174,8 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       history.push(`/ark/collections/${collectionId}/${tokenId}`)
     });
   };
-  
-  if(!isOwnToken) {
+
+  if (!isOwnToken) {
     return <></>
   }
 
@@ -187,12 +188,12 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           </Box>
           <Box className={classes.contentBox}>
             <Box>
-              <Box className={classes.description}>
+              {/* <Box className={classes.description}>
                 <ArkInput
                   placeholder="eg. This NFT was owned by an NBA player" error={errors.description} value={inputValues.description}
                   label="Additional description" onValueChange={(value) => updateInputs("description")(value)} multiline={true}
                 />
-              </Box>
+              </Box> */}
 
               {/* <Box display="flex" flexDirection="column" marginTop={2}>
                 <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
@@ -220,7 +221,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                   >Timed Auction</button>
                 </Box>
               </Box> */}
-              
+
               {inputValues.saleType === "fixed_price" &&
                 <Box display="flex" flexDirection="column" marginTop={2}>
                   <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
@@ -231,6 +232,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                     <CurrencyInput
                       token={inputValues.sellToken ?? null}
                       amount={inputValues.buyNowPrice}
+                      tokenList="ark-zil"
                       hideBalance
                       onEditorBlur={() => onEndEditPrice('buyNowPrice')}
                       onAmountChange={value => onPriceChange('buyNowPrice', value)}
@@ -283,32 +285,34 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                   </Box>
                 </>
               }
-              
+
               <Box display="flex" flexDirection="column" marginTop={4}>
                 <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>
                   Fees
                 </InputLabel>
                 <FormHelperText className={classes.instruction}>The following fees will be deducted once this NFT is sold.</FormHelperText>
-                <Box display="flex" marginTop={1}>
-                  <Typography className={classes.feeLabel}>Service Fee</Typography>
-                  <Typography className={classes.feeValue}>{ArkClient.FEE_BPS / 100}%</Typography>
-                </Box>
+                {exchangeInfo?.baseFeeBps && (
+                  <Box display="flex" marginTop={1}>
+                    <Typography className={classes.feeLabel}>Service Fee</Typography>
+                    <Typography className={classes.feeValue}>{exchangeInfo.baseFeeBps / 100}%</Typography>
+                  </Box>
+                )}
                 {token?.collection && token.collection.royaltyBps !== null &&
                   <Box display="flex" marginTop={1}>
                     <Typography className={classes.feeLabel}>Royalties</Typography>
                     <Typography className={classes.feeValue}>{new BigNumber(token.collection.royaltyBps).dividedBy(100)}%</Typography>
                   </Box>
-                }  
+                }
               </Box>
 
               {error && (
                 <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
               )}
-              <FancyButton 
+              <FancyButton
                 className={classes.actionButton}
-                loading={loading} 
-                variant="contained" 
-                color="primary" 
+                loading={loading}
+                variant="contained"
+                color="primary"
                 onClick={onConfirm}
                 walletRequired
               >

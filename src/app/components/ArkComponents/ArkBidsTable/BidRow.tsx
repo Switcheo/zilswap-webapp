@@ -16,6 +16,7 @@ import { getChequeStatus } from "core/utilities/ark"
 import { ArkOwnerLabel } from "app/components";
 import { ZilswapConnector } from "core/zilswap";
 import { logger, ArkClient } from "core/utilities";
+import { getMarketplace } from "app/saga/selectors";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
 import { ReactComponent as UpArrow } from "./assets/up-arrow.svg";
 
@@ -136,6 +137,7 @@ const Row: React.FC<Props> = (props: Props) => {
   const toaster = useToaster();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+  const { exchangeInfo } = useSelector(getMarketplace);
   const valueCalculators = useValueCalculators();
   const [runCancelBid, cancelLoading] = useAsyncTask(`cancelBid-${baseBid.id}`, e => toaster(e?.message));
   const [runAcceptBid, acceptLoading] = useAsyncTask(`acceptBid-${baseBid.id}`, e => toaster(e?.message));
@@ -180,11 +182,11 @@ const Row: React.FC<Props> = (props: Props) => {
   const acceptBid = (bid: Cheque) => {
     // TODO: refactor
     runAcceptBid(async () => {
-      if (!walletState.wallet) return;
+      if (!walletState.wallet || !exchangeInfo) return;
       const wallet = walletState.wallet;
       const priceAmount = new BigNumber(bid.price.amount);
       const price = { amount: priceAmount, address: bid.price.address };
-      const feeAmount = priceAmount.times(ArkClient.FEE_BPS).dividedToIntegerBy(10000).plus(1);
+      const feeAmount = priceAmount.times(exchangeInfo.baseFeeBps).dividedToIntegerBy(10000).plus(1);
 
       const arkClient = new ArkClient(wallet.network);
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
