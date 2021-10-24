@@ -94,7 +94,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
         <ArkBreadcrumb linkPath={breadcrumbs} />
 
         {/* Nft image and main info */}
-        <Container disableGutters maxWidth="md" className={classes.imageInfoContainer}>
+        <Container disableGutters className={classes.imageInfoContainer}>
           <NftImage onReload={getNFTDetails} className={classes.nftImage} token={token} />
           <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} />
         </Container>
