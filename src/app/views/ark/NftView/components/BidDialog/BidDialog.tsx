@@ -28,6 +28,7 @@ import { ReactComponent as WarningIcon } from "../assets/warning.svg";
 interface Props extends Partial<DialogProps> {
   token: Nft;
   collectionAddress: string;
+  onComplete?: () => void;
 }
 
 const initialFormState = {
@@ -80,7 +81,7 @@ const EXPIRY_OPTIONS = [
 ];
 
 const BidDialog: React.FC<Props> = (props: Props) => {
-  const { children, className, collectionAddress, token, ...rest } = props;
+  const { children, className, collectionAddress, token, onComplete, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const history = useHistory();
@@ -250,6 +251,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         price,
       });
 
+      if (onComplete) onComplete();
       dispatch(actions.Layout.toggleShowBidNftDialog("close"));
       logger("post trade", result);
     });

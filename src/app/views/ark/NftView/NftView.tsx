@@ -40,14 +40,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
 
   // fetch nft data, if none redirect back to collections / show not found view
   useEffect(() => {
-    getNFTDetails()
-    runGetBids(async () => {
-      const arkClient = new ArkClient(network);
-      const collectionAddress = fromBech32Address(collectionId).toLowerCase();
-      const result = await arkClient.listNftCheques({ collectionAddress, tokenId, side: "buy" });
-
-      setBids(result.result.entries);
-    })
+    getData();
     // eslint-disable-next-line
   }, [collectionId, tokenId, network]);
 
@@ -57,6 +50,21 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     }
     // eslint-disable-next-line
   }, [wallet])
+
+  const getData = () => {
+    getNFTDetails();
+    getBids();
+  }
+
+  const getBids = () => {
+    runGetBids(async () => {
+      const arkClient = new ArkClient(network);
+      const collectionAddress = fromBech32Address(collectionId).toLowerCase();
+      const result = await arkClient.listNftCheques({ collectionAddress, tokenId, side: "buy" });
+
+      setBids(result.result.entries);
+    })
+  }
 
   const getNFTDetails = (bypass?: boolean) => {
     runGetNFTDetails(async () => {
@@ -165,8 +173,8 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
       </Container >
       {token && (
         <Fragment>
-          <BuyDialog token={token} collectionAddress={collectionId} />
-          <BidDialog token={token} collectionAddress={collectionId} />
+          <BuyDialog token={token} collectionAddress={collectionId} onComplete={() => getData()}/>
+          <BidDialog token={token} collectionAddress={collectionId} onComplete={() => getData()}/>
           <CancelDialog token={token} />
         </Fragment>
       )}
