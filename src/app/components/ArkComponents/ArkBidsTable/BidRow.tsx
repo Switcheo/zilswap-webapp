@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from "react";
-import { Avatar, Box, BoxProps, CircularProgress, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
+import { Avatar, BoxProps, CircularProgress, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 import { toBech32Address } from "@zilliqa-js/zilliqa";

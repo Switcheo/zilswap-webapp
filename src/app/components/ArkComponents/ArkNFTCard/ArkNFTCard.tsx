@@ -224,13 +224,14 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                       <LaunchIcon className={classes.linkIcon} />
                     </Typography>
                   </Link>
-                  <ArkOwnerLabel user={token.owner} />
+                  {/* <ArkOwnerLabel user={token.owner} /> */}
                 </Box>
                 <Box
                   display="flex"
                   alignItems="center"
                   justifyContent="space-between"
                   mt={0.5}
+                  mb={1.5}
                 >
                   <Typography className={classes.dialogBody}>
                     {token.name}
@@ -242,9 +243,11 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
 
             <Box display="flex">
               <Box flex={1} />
-              <IconButton size="small" className={classes.extrasButton} onClick={handlePopClick}>
-                <MoreHorizIcon />
-              </IconButton>
+              {!dialog && 
+                <IconButton size="small" className={classes.extrasButton} onClick={handlePopClick}>
+                  <MoreHorizIcon />
+                </IconButton>
+              }
               {popAnchor && (
                 <ClickAwayListener onClickAway={() => setPopAnchor(null)}>
                   <Popper className={classes.popper} open anchorEl={popAnchor} placement="bottom-end">

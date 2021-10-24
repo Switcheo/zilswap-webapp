@@ -9,6 +9,7 @@ import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
+import { ObservedTx } from "zilswap-sdk";
 import { CurrencyLogo, DialogModal, FancyButton, Text, ArkNFTCard } from "app/components";
 import { getBlockchain, getMarketplace, getTokens, getTransactions, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
@@ -25,10 +26,11 @@ import { ReactComponent as ChainLinkIcon } from "./chainlink.svg";
 interface Props extends Partial<DialogProps> {
   token: Nft;
   collectionAddress: string;
+  onComplete?: () => void;
 }
 
 const BuyDialog: React.FC<Props> = (props: Props) => {
-  const { children, className, collectionAddress, token, ...rest } = props;
+  const { children, className, collectionAddress, token, onComplete, ...rest } = props;
   const classes = useStyles();
   const { network } = useSelector(getBlockchain);
   const tokenState = useSelector(getTokens);
@@ -43,10 +45,12 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
   const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
+  const [pendingPurchaseHash, setPendingPurchaseHash] = useState<string | null>(null);
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const toaster = useToaster();
 
   const txIsPending = loadingApproveTx || txState.observingTxs.findIndex(tx => tx.hash.toLowerCase() === pendingTxHash) >= 0;
+  const confirmPurchasePending = loading || txState.observingTxs.findIndex(tx => tx.hash.toLowerCase() === pendingPurchaseHash) >= 0;
 
   const bestAsk = token.bestAsk;
 
@@ -122,6 +126,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       const priceAmount = new BigNumber(bestAsk.price.amount);
       const price = { amount: priceAmount, address: fromBech32Address(priceToken.address) };
       const feeAmount = priceAmount.times(exchangeInfo.baseFeeBps).dividedToIntegerBy(10000).plus(1);
+      const zilswap = ZilswapConnector.getSDK();
 
       const arkClient = new ArkClient(network);
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
@@ -161,14 +166,33 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         matchedChequeHash: `0x${sellChequeHash}`,
         nftAddress: address,
         tokenId: id,
-      }, ZilswapConnector.getSDK());
+      }, zilswap);
 
-      logger("exec trade result", execTradeResult)
+      logger("exec trade result", execTradeResult);
+
+      // const contract = zilswap.zilliqa.contracts.atBech32(ARK_CONTRACTS[network].broker.toLowerCase());
+
+      // await contract.prepareTx(execTradeResult, 100, 1000, false);
+
+      const observedTxn: ObservedTx = {
+        hash: execTradeResult.id!,
+        deadline: Number.MAX_SAFE_INTEGER,
+      };
+
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTxn!,
+        address: wallet?.addressInfo.bech32 || "",
+        network,
+      };
+
+      setPendingPurchaseHash(walletObservedTx.hash.toLowerCase());
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
+      toaster("Submitted", { hash: walletObservedTx.hash });
     });
   };
 
   const onCloseDialog = () => {
-    if (loading) return;
+    if (confirmPurchasePending) return;
     dispatch(actions.Layout.toggleShowBuyNftDialog("close"));
     setAcceptTerms(false);
     setCompletedPurchase(false);
@@ -179,7 +203,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
     history.push("/ark/profile");
   };
 
-  const dialogHeader = loading
+  const dialogHeader = confirmPurchasePending
     ? ""
     : completedPurchase
       ? "You now own"
@@ -192,9 +216,8 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       open={open}
       onClose={onCloseDialog}
       className={cls(classes.root, className)}
-      hideCloseButton={loading}
-      titlePadding={!!loading}
-
+      hideCloseButton={confirmPurchasePending}
+      titlePadding={!!confirmPurchasePending}
     >
       <DialogContent className={cls(classes.dialogContent)}>
         {/* Nft card */}
@@ -253,7 +276,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
           )}
         </Box>
 
-        {!(loading || completedPurchase) && (
+        {!(confirmPurchasePending || completedPurchase) && (
           <Fragment>
             {/* Terms */}
             <Box className={classes.termsBox}>
@@ -323,7 +346,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         )}
 
         {/* to clean up */}
-        <Backdrop open={loading} className={classes.backdrop}>
+        <Backdrop open={confirmPurchasePending} className={classes.backdrop}>
           <Box flex={1}>
             <Text variant="h2" align="center" className={classes.loadingTitle}>
               Purchase Processing
