@@ -297,6 +297,8 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
     if (bnOrZero(formState.bidAmount).isLessThanOrEqualTo(0)) return false;
 
+    if (!bidToken) return false;
+
     // if (bnOrZero(formState.bidAmount).isGreaterThan(bnOrZero(bidToken.balance).shiftedBy(-bidToken.decimals)))
     //   return false;
 
