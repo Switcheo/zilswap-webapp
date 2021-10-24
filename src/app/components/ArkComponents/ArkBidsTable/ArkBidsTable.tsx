@@ -6,6 +6,7 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import groupBy from "lodash/groupBy";
 import { useSelector } from "react-redux";
+import cls from "classnames"
 import { ArkBox, ArkPaginator } from "app/components";
 import { Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -22,7 +23,7 @@ interface Props extends BoxProps {
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
-  root: {
+  container: {
     display: "flex",
     flexDirection: "column",
     marginTop: theme.spacing(3),
@@ -31,9 +32,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       padding: theme.spacing(1, 2),
     },
   },
-  container: {
-    width: '100%',
-    marginTop: theme.spacing(1),
+  mobileContainer: {
+    marginTop: theme.spacing(2),
   },
   headerCell: {
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
@@ -58,13 +58,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderBottom: theme.palette.border,
     padding: "8px 16px",
   },
-  emptyRow: {
-    paddingTop: theme.spacing(3),
-    borderBottom: 'none',
+  emptyState: {
     textAlign: 'center',
     fontSize: 14,
     opacity: 0.8,
-  }
+    '&.row': {
+      paddingTop: theme.spacing(3),
+      borderBottom: 'none',
+    },
+    '&.box': {
+      padding: theme.spacing(2, 0),
+    }
+  },
 }));
 
 type CellAligns = "right" | "left" | "inherit" | "center" | "justify" | undefined;
@@ -102,21 +107,24 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
 
   const headers = showItem ? [ITEM_HEADER, ...HEADERS] : HEADERS
 
-  return <ArkBox variant="base" className={classes.root}>
-    <Box className={classes.container}>
-    {
-      isMobile ?
-        Object.entries(groupBy(bids, (bid) => bid.token.collectionAddress + bid.token.id)).map(([k, v]) => {
-          const bids = v.sort((lhs, rhs) => {
-            const diff = vc.usd(tokenState, lhs.price.address, lhs.price.amount).comparedTo(vc.usd(tokenState, rhs.price.address, rhs.price.amount)) * -1
-            if (diff === 0) return lhs.expiry > rhs.expiry ? -1 : 1
-            return diff
-          })
-          return <BidCard bid={bids[0]} relatedBids={bids.slice(1)} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} key={k} />
-        })
+  return isMobile ?
+        bids.length === 0 ?
+          <Box className={cls(classes.emptyState, 'box')}>No bid data yet.</Box>
+          :
+          <Box className={classes.mobileContainer}>
+            {
+              Object.entries(groupBy(bids, (bid) => bid.token.collectionAddress + bid.token.id)).map(([k, v]) => {
+                const bids = v.sort((lhs, rhs) => {
+                  const diff = vc.usd(tokenState, lhs.price.address, lhs.price.amount).comparedTo(vc.usd(tokenState, rhs.price.address, rhs.price.amount)) * -1
+                  if (diff === 0) return lhs.expiry > rhs.expiry ? -1 : 1
+                  return diff
+                })
+                return <BidCard bid={bids[0]} relatedBids={bids.slice(1)} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} key={k} />
+              })
+            }
+          </Box>
         :
-        (
-        <Fragment>
+        <ArkBox variant="base" className={classes.container}>
           <TableContainer>
             <Table>
               <TableHead>
@@ -139,7 +147,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
                 {
                   bids.length === 0 &&
                     <TableRow>
-                      <TableCell colSpan={headers.length} className={classes.emptyRow}>
+                      <TableCell colSpan={headers.length} className={cls(classes.emptyState, 'row')}>
                         No bid data yet.
                       </TableCell>
                     </TableRow>
@@ -148,11 +156,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
             </Table>
           </TableContainer>
           <ArkPaginator itemPerPage={ITEMS_PER_PAGE} totalItem={bids.length} onPageChange={handlePageChange} />
-        </Fragment>
-        )
-    }
-    </Box>
-  </ArkBox>
+        </ArkBox>
 };
 
 export default ArkBidsTable;

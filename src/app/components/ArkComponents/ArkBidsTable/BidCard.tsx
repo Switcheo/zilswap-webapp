@@ -6,7 +6,7 @@ import cls from "classnames";
 import BigNumber from "bignumber.js"
 import dayjs, { Dayjs } from "dayjs";
 import { useSelector } from "react-redux";
-import { FancyButton } from "app/components";
+import { ArkBox, FancyButton } from "app/components";
 import { Cheque, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient, getChequeStatus, logger } from "core/utilities"
@@ -27,7 +27,6 @@ interface Props extends CardProps {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    background: "rgba(222, 255, 255, 0.1)",
     marginBottom: theme.spacing(2),
   },
   item: {
@@ -41,7 +40,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   dateText: {
     display: "flex",
     flexDirection: "row",
-    color: theme.palette.primary.contrastText,
   },
   actionButton: {
     color: "#DEFFFF",
@@ -75,11 +73,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: "8px, 16px",
   },
   header: {
-    color: theme.palette.primary.contrastText,
-    opacity: 0.5,
+    color: theme.palette.text!.secondary,
   },
   text: {
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.text!.primary,
   }
 }));
 
@@ -212,7 +209,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
           <MenuItem className={classes.item} button={false}>
             <Box display="flex" flexDirection="row" justifyContent="center" alignItems="center">
               <ListItemIcon>
-                <Avatar alt="Remy Sharp" src={bid.token.asset.url} />
+                <Avatar alt="NFT Image" src={bid.token.asset.url} />
               </ListItemIcon>
               {
                 isInitial &&
@@ -276,30 +273,32 @@ const BidCard: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Card className={cls(classes.root)}>
-      {getCardContent(bid, true)}
-      <Collapse in={expand}>
-        {relatedBids?.map((bids) => (
-          <>
-            <Box paddingLeft={2} paddingRight={2}>
-              <Box className={classes.topBorder}></Box>
-            </Box>
-            {getCardContent(bids, false)}
-          </>
-        ))}
-      </Collapse>
-      {relatedBids?.length && (
-        <Box className={classes.actionArea}>
-          <IconButton
-            aria-label="expand row"
-            size="medium"
-            onClick={() => setExpand(!expand)}
-            className={classes.arrowIcon}
-          >
-            {expand ? <UpArrow /> : <DownArrow />}
-          </IconButton>
-        </Box>
-      )}
+    <Card className={classes.root}>
+      <ArkBox variant="base">
+        {getCardContent(bid, true)}
+        <Collapse in={expand}>
+          {relatedBids?.map((bids) => (
+            <>
+              <Box paddingLeft={2} paddingRight={2}>
+                <Box className={classes.topBorder}></Box>
+              </Box>
+              {getCardContent(bids, false)}
+            </>
+          ))}
+        </Collapse>
+        {!!(relatedBids?.length) && (
+          <Box className={classes.actionArea}>
+            <IconButton
+              aria-label="expand row"
+              size="medium"
+              onClick={() => setExpand(!expand)}
+              className={classes.arrowIcon}
+            >
+              {expand ? <UpArrow /> : <DownArrow />}
+            </IconButton>
+          </Box>
+        )}
+      </ArkBox>
     </Card>
   );
 };

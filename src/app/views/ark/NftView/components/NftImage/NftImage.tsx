@@ -27,7 +27,7 @@ const NftImage: React.FC<Props> = (props: Props) => {
         />
       </Box>
       <Box display="flex" flexDirection="row" justifyContent="flex-start" alignItems="center">
-        <Typography variant="body1">Share</Typography>
+        <Typography style={{ marginTop: 5, marginLeft: 10, }} variant="body1">Share</Typography>
         <ArkShareLinksGroup className={classes.socialLinkGroup} />
       </Box>
     </Box>
@@ -37,6 +37,7 @@ const NftImage: React.FC<Props> = (props: Props) => {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     position: "relative",
+    color: theme.palette.text!.secondary,
   },
   imageContainer: {
     borderRadius: theme.spacing(1.5),
@@ -61,7 +62,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   socialLinkGroup: {
     marginTop: theme.spacing(.5),
-    marginLeft: theme.spacing(2),
+    marginLeft: theme.spacing(1),
   },
 }));
 

@@ -76,7 +76,7 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
           <CardContent>
             <MenuItem className={classes.item} button={false}>
               <ListItemIcon>
-                <Avatar alt="Remy Sharp" src={bid.token.assetId} />
+                <Avatar alt="NFT Image" src={bid.token.assetId} />
               </ListItemIcon>
               <Typography>{bid.token.tokenId}</Typography>
             </MenuItem>
