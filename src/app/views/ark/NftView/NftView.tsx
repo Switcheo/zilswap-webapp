@@ -294,7 +294,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   avatar: {
     width: 52,
     height: 52,
-    overflow: 'visible',
   },
   aboutNameText: {
     fontSize: 14,

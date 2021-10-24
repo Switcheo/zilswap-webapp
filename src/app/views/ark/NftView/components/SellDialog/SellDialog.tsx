@@ -11,7 +11,7 @@ import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet, getTokens, getMarketplace } from "app/saga/selectors";
 import { Nft, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask, bnOrZero } from "app/utils";
+import { useAsyncTask, bnOrZero, useToaster } from "app/utils";
 import { ArkClient, logger } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { ZIL_ADDRESS } from "app/utils/constants";
@@ -38,6 +38,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const [runConfirmSell, loading, error] = useAsyncTask("confirmSell", () => setOpen(false));
   const [runGetNFTDetails] = useAsyncTask("runGetNFTDetails");
   const [token, setToken] = useState<Nft>();
+  const toaster = useToaster();
   // const [errors, setErrors] = useState({
   //   description: "",
   // })
@@ -187,7 +188,8 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       });
 
       logger("post trade", result);
-      setHasPosted(true)
+      setHasPosted(true);
+      toaster(`Successfully listed token #${id}!`);
       history.push(`/ark/collections/${collectionId}/${tokenId}`)
     });
   };

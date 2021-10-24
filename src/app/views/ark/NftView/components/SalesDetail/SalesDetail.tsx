@@ -172,23 +172,31 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   buttonBox: {
     display: "flex",
-    width: "100%",
+    justifyContent: "space-between",
     marginTop: theme.spacing(3),
+    marginRight: theme.spacing(-.5),
+    marginLeft: theme.spacing(-.5),
     '&.overlap': {
       marginTop: theme.spacing(0),
       padding: theme.spacing(0, 4),
       transform: "translateY(-50%)",
-      [theme.breakpoints.down("sm")]: {
+    },
+    [theme.breakpoints.down("sm")]: {
+      flexDirection: "column",
+      '&.overlap': {
         marginTop: theme.spacing(3),
         padding: theme.spacing(0),
         transform: "translateY(0%)",
-      },
-    }
+      }
+    },
   },
   button: {
     flex: 1,
-    marginRight: theme.spacing(.5),
+    margin: theme.spacing(0, .5),
     maxWidth: 280,
+    [theme.breakpoints.down("sm")]: {
+      maxWidth: "unset",
+    },
   },
   bidButton: {
     padding: theme.spacing(2.5, 4),
@@ -207,6 +215,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("sm")]: {
       display: "flex",
       width: "100%",
+      marginBottom: theme.spacing(1),
     },
   },
   buyButton: {
@@ -222,6 +231,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       "& .MuiButton-label": {
         color: darken("#003340", 0.15),
       },
+    },
+    [theme.breakpoints.down("sm")]: {
+      display: "flex",
+      width: "100%",
+      marginBottom: theme.spacing(1),
     },
   },
   collectionName: {
