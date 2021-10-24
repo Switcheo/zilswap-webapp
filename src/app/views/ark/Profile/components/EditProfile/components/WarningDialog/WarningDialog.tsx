@@ -7,16 +7,23 @@ import { AppTheme } from "app/theme/types";
 
 interface Props extends Partial<DialogProps> {
   onCloseDialog?: () => void;
-  onNavigateOut?: () => void;
+  onBack?: () => void;
+  clearPrompt?: () => void;
 }
 
-const ImageDialog: React.FC<Props> = (props: Props) => {
-  const { open, onCloseDialog, onNavigateOut, children, className, ...rest } = props;
+const WarningDialog: React.FC<Props> = (props: Props) => {
+  const { clearPrompt, onBack, open, onCloseDialog, children, className, ...rest } = props;
   const classes = useStyles();
 
-  const onHeadToCollected = () => {
+  const saveAndNavigate = () => {
     if (onCloseDialog) onCloseDialog();
-    if (onNavigateOut) onNavigateOut();
+    if (clearPrompt) clearPrompt();
+  }
+
+  const closeAndNavigate = () => {
+    if (onCloseDialog) onCloseDialog();
+    if (onBack) onBack();
+    if (clearPrompt) clearPrompt();
   }
 
   return (
@@ -27,11 +34,9 @@ const ImageDialog: React.FC<Props> = (props: Props) => {
       {...rest} className={cls(classes.root, className)}
     >
       <DialogContent className={classes.dialogContent}>
-        <Typography className={classes.message}>Select from your NFT collection or upload manually.</Typography>
-        <Button onClick={() => onHeadToCollected()} className={classes.labelButton}>Head to Collected</Button>
-        <label htmlFor="ark-profile-image" onClick={() => { onCloseDialog && onCloseDialog(); }} className={classes.uploadButton}>
-          <Typography className={classes.collectionText}>Upload</Typography>
-        </label>
+        <Typography className={classes.message}>Do you want to save your profile updates before heading there?</Typography>
+        <Button onClick={() => saveAndNavigate()} className={classes.labelButton}>Yes</Button>
+        <Button onClick={() => closeAndNavigate()} className={classes.uploadButton}>No</Button>
       </DialogContent>
     </DialogModal>
   );
@@ -129,4 +134,4 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-export default ImageDialog;
+export default WarningDialog;

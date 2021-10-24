@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Box, Collapse, IconButton, TextField, Typography, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
+import NavigationPrompt from "react-router-navigation-prompt";
 import { useHistory } from "react-router";
 import dayjs from "dayjs";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -15,7 +16,7 @@ import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
 import ArkPage from "app/layouts/ArkPage";
 import { getMarketplace, getWallet } from "app/saga/selectors";
-import { ImageDialog } from "./components";
+import { ImageDialog, WarningDialog } from "./components";
 
 type ProfileInputs = {
   email: string;
@@ -62,6 +63,19 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const inputRef = useRef<HTMLDivElement | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
 
+  const hasChange = useMemo(() => {
+    if (!profile) return true
+    let change = false;
+    Object.entries(inputValues).forEach(([key, value]) => {
+      const profileValue = (profile as any)[key];
+      if (!profileValue && !value) return;
+      if (profileValue !== value) {
+        change = true;
+      }
+    })
+    return change;
+  }, [inputValues, profile])
+
   useEffect(() => {
     setInputValues({
       username: profile?.username || "",
@@ -72,6 +86,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       websiteUrl: profile?.websiteUrl || "",
     })
   }, [profile])
+
 
   const onNavigateBack = () => {
     history.push(`/ark/profile`);
@@ -140,8 +155,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
   const onUpdateProfile = (goBack?: boolean) => {
     runUpdateProfile(async () => {
-      if (!hasChange() && !profileImage) {
-        // if (goBack) onBack();
+      if (!hasChange && !profileImage) {
         return;
       }
 
@@ -174,7 +188,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       if (profileImage && uploadFile) {
         imageUpload();
       }
-      if (hasChange()) {
+      if (hasChange) {
         try {
           const result = await arkClient.updateProfile(address!, filteredData, checkedOAuth!);
           if (result.error) {
@@ -182,26 +196,12 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           } else {
             toaster("Profile updated");
             dispatch(actions.MarketPlace.loadProfile());
-            // if (goBack) onBack();
           }
         } catch (err) {
           toaster(err as unknown as string);
         }
       }
     });
-  }
-
-  const hasChange = () => {
-    if (!profile) return true
-    let change = false;
-    Object.entries(inputValues).forEach(([key, value]) => {
-      const profileValue = (profile as any)[key];
-      if (!profileValue && !value) return;
-      if (profileValue !== value) {
-        change = true;
-      }
-    })
-    return change;
   }
 
   const imageUpload = () => {
@@ -318,7 +318,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                   color="primary"
                   loading={isLoading || loadingProfile}
                   onClick={() => onUpdateProfile(false)}
-                  disabled={!hasChange() && !profileImage}
+                  disabled={!hasChange && !profileImage}
                   className={classes.profileButton}
                 >
                   Save Profile
@@ -342,9 +342,18 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         <ImageDialog
           open={openDialog}
           onCloseDialog={() => setOpenDialog(false)}
-          onBack={onNavigateBack}
-          onSave={onUpdateProfile}
+          onNavigateOut={() => onNavigateBack()}
         />
+        <NavigationPrompt when={hasChange}>
+          {({ onCancel, onConfirm }) => (
+            <WarningDialog
+              open={true}
+              onCloseDialog={() => { setOpenDialog(false); onCancel(); }}
+              onBack={onConfirm}
+              clearPrompt={onCancel}
+            />
+          )}
+        </NavigationPrompt>
       </Box>
     </ArkPage>
   );
