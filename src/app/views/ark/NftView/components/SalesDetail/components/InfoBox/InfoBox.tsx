@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import { AppTheme } from "app/theme/types";
-import { Text } from "app/components";
+import { Text, ArkBox } from "app/components";
 
 interface Props extends BoxProps {
   topLabel?: string;
@@ -17,7 +17,7 @@ const InfoBox: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
 
   return (
-    <Box {...rest} className={cls(classes.root, className)}>
+    <ArkBox {...rest} className={cls(classes.root, className)}>
       {!!topLabel && (
         <Box display="flex" justifyContent="center" marginBottom={0.5}>
           <Text variant="body1">{topLabel}</Text>
@@ -32,7 +32,7 @@ const InfoBox: React.FC<Props> = (props: Props) => {
       </Box>
 
       {!!bottomLabel && <Text className={classes.bottomLabel}>{bottomLabel}</Text>}
-    </Box>
+    </ArkBox>
   );
 };
 
@@ -42,9 +42,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexDirection: "column",
     marginRight: theme.spacing(1),
     marginBottom: theme.spacing(2),
-    padding: theme.spacing(2, 3),
-    borderRadius: theme.spacing(1.5),
-    backgroundColor: theme.palette.background.contrast,
+    padding: theme.spacing(2, 4),
   },
   content: {
     flex: 1,

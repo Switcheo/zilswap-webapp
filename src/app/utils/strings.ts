@@ -29,6 +29,16 @@ export const bnOrZero = (input?: string | BigNumber | number | null, defaultValu
   return parseBN(input, defaultValue)!;
 };
 
+export const toSignificantNumber = (input: BigNumber): string => {
+  if (input.lt(1)) {
+    const zeroesAfterDecimal = input.toString().split("0").length
+    return input.toFormat(zeroesAfterDecimal + 4) // 4 s.f
+  }
+  if (input.lt(100))
+    return input.toFormat(2) // 4 s.f.
+  return input.toFormat(0)
+}
+
 export const toHumanNumber = (input?: string | BigNumber | number, dp: number = 5) => {
   const value = bnOrZero(input);
 

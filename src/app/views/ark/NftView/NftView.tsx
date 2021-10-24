@@ -95,8 +95,8 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
 
         {/* Nft image and main info */}
         <Container disableGutters className={classes.imageInfoContainer}>
-          <NftImage onReload={getNFTDetails} className={classes.nftImage} token={token} />
-          <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} />
+          <NftImage className={classes.nftImage} token={token} rounded={true} />
+          <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} tokenUpdatedCallback={() => getNFTDetails()} />
         </Container>
 
         {/* About info and trait table */}
@@ -200,7 +200,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   nftImage: {
     maxWidth: 450,
-    paddingTop: theme.spacing(8),
+    marginTop: 35,
     position: "relative",
     width: "50vw",
     [theme.breakpoints.down("xs")]: {

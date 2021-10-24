@@ -8,20 +8,19 @@ import { AppTheme } from "app/theme/types";
 
 interface Props extends CardProps {
   token?: Nft | null,
-  onReload?: (bypass?: boolean) => void,
+  rounded?: boolean,
 }
 
 const NftImage: React.FC<Props> = (props: Props) => {
-  const { onReload, token, children, className, ...rest } = props;
+  const { token, rounded, children, className, ...rest } = props;
   const classes = useStyles();
-
 
   return (
     <Box  {...rest} className={cls(classes.root, className)}>
       <Box className={classes.imageContainer}>
         <span className={classes.imageHeight} />
         <ArkImageView
-          className={classes.image}
+          className={cls(classes.image, { rounded })}
           altName={token?.asset?.filename || "Token Image"}
           imageUrl={token?.asset?.url}
           imageType="card"
@@ -50,12 +49,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     paddingTop: "100%",
   },
   image: {
-    boxShadow: "0px 4px 20px #002028",
+    boxShadow: theme.shadows?.[15],
     position: "absolute",
     left: 0,
     top: 0,
     height: "100%",
     width: "100%",
+    '&.rounded': {
+      borderRadius: 16,
+    },
   },
   socialLinkGroup: {
     marginTop: theme.spacing(.5),

@@ -37,6 +37,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       color: darken('#6BE1FF', 0.1),
     }
   },
+  imageContainer: {
+    minWidth: 35,
+  },
+  image: {
+    height: 25,
+    width: 25,
+  },
   text: {
     fontFamily: 'Avenir Next',
     fontWeight: 600,
@@ -55,7 +62,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   bodyCell: {
     extend: ['text', 'cell'],
-    padding: "8px 16px",
+    padding: "14px 12px",
   },
   actionCell: {
     extend: 'cell',
@@ -246,7 +253,6 @@ const Row: React.FC<Props> = (props: Props) => {
 
   return (
     <Fragment>
-      <Box mt={1}></Box>
       {
         (expand ? [baseBid].concat(...relatedBids) : [baseBid]).map((bid: Cheque, index: number) => {
           const status = getChequeStatus(bid, currentBlock)
@@ -264,7 +270,7 @@ const Row: React.FC<Props> = (props: Props) => {
                   index === 0 &&
                   <Link className={classes.link} to={`/ark/collections/${toBech32Address(bid.token.collection.address)}/${bid.token.tokenId}`}>
                     <MenuItem className={classes.item} button={false}>
-                      <ListItemIcon><Avatar alt="Remy Sharp" src={bid.token.asset.url} /></ListItemIcon>
+                      <ListItemIcon className={classes.imageContainer}><Avatar className={classes.image} alt="NFT Image" src={bid.token.asset.url} /></ListItemIcon>
                       #{bid.token.tokenId}
                     </MenuItem>
                   </Link>
@@ -335,7 +341,6 @@ const Row: React.FC<Props> = (props: Props) => {
           </TableCell>
         </TableRow>
       )}
-      <Box mb={1}></Box>
     </Fragment>
   );
 };
