@@ -1,5 +1,5 @@
 import React, { Fragment, useMemo, useState } from "react";
-import { Backdrop, Box, Checkbox, DialogContent, DialogProps, FormControlLabel, Link } from "@material-ui/core";
+import { Backdrop, Box, Checkbox, CircularProgress, DialogContent, DialogProps, FormControlLabel, Link } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import LaunchIcon from "@material-ui/icons/Launch";
@@ -9,12 +9,11 @@ import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
-import { ObservedTx } from "zilswap-sdk";
 import { CurrencyLogo, DialogModal, FancyButton, Text, ArkNFTCard } from "app/components";
 import { getBlockchain, getMarketplace, getTokens, getTransactions, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
-import { RootState, WalletObservedTx } from "app/store/types";
+import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { bnOrZero, hexToRGBA, truncate, useAsyncTask, useToaster } from "app/utils";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
@@ -41,16 +40,15 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const [runConfirmPurchase, loading, error] = useAsyncTask("confirmPurchase");
+  const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
+  const [waitForComplete, completePending] = useAsyncTask("waitForPurchaseComplete");
   const match = useRouteMatch<{ id: string, collection: string }>();
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
-  const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
-  const [pendingPurchaseHash, setPendingPurchaseHash] = useState<string | null>(null);
-  const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
+  const [approveTxHash, setApproveTxHash] = useState<string | null>(null);
   const toaster = useToaster();
 
-  const txIsPending = loadingApproveTx || txState.observingTxs.findIndex(tx => tx.hash.toLowerCase() === pendingTxHash) >= 0;
-  const confirmPurchasePending = loading || txState.observingTxs.findIndex(tx => tx.hash.toLowerCase() === pendingPurchaseHash) >= 0;
+  const txIsPending = loadingApproveTx || txState.observingTxs.findIndex(tx => tx.hash.toLowerCase() === approveTxHash) >= 0;
 
   const bestAsk = token.bestAsk;
 
@@ -98,18 +96,10 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         spenderAddress: arkClient.tokenProxyAddress
       });
 
-      if (!observedTx)
-        throw new Error("Transfer allowance already sufficient for specified amount");
-
-      const walletObservedTx: WalletObservedTx = {
-        ...observedTx!,
-        address: wallet?.addressInfo.bech32 || "",
-        network,
-      };
-
-      setPendingTxHash(walletObservedTx.hash.toLowerCase());
-      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
-      toaster("Submitted", { hash: walletObservedTx.hash });
+      if (observedTx) {
+        setApproveTxHash(observedTx.hash);
+        toaster("Submitted", { hash: observedTx.hash });
+      }
     });
   };
 
@@ -126,7 +116,6 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       const priceAmount = new BigNumber(bestAsk.price.amount);
       const price = { amount: priceAmount, address: fromBech32Address(priceToken.address) };
       const feeAmount = priceAmount.times(exchangeInfo.baseFeeBps).dividedToIntegerBy(10000).plus(1);
-      const zilswap = ZilswapConnector.getSDK();
 
       const arkClient = new ArkClient(network);
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
@@ -160,6 +149,8 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         nonce: bestAsk.nonce,
       })
 
+      const zilswap = ZilswapConnector.getSDK();
+
       const execTradeResult = await arkClient.executeTrade({
         buyCheque,
         sellCheque: bestAsk,
@@ -168,31 +159,35 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         tokenId: id,
       }, zilswap);
 
-      logger("exec trade result", execTradeResult);
-
-      // const contract = zilswap.zilliqa.contracts.atBech32(ARK_CONTRACTS[network].broker.toLowerCase());
-
-      // await contract.prepareTx(execTradeResult, 100, 1000, false);
-
-      const observedTxn: ObservedTx = {
+      zilswap.observeTx({
         hash: execTradeResult.id!,
         deadline: Number.MAX_SAFE_INTEGER,
-      };
+      });
 
-      const walletObservedTx: WalletObservedTx = {
-        ...observedTxn!,
-        address: wallet?.addressInfo.bech32 || "",
-        network,
-      };
+      // execute asynchronously to unblock loading for send tx.
+      waitForPurchaseComplete(execTradeResult.id!.toLowerCase());
 
-      setPendingPurchaseHash(walletObservedTx.hash.toLowerCase());
-      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
-      toaster("Submitted", { hash: walletObservedTx.hash });
+      logger("exec trade result", execTradeResult)
+      toaster(`Transaction for buying token #${token.tokenId} sent!`, { hash: execTradeResult.id });
     });
   };
 
+  const waitForPurchaseComplete = (txHash: string) => {
+    waitForComplete(async () => {
+      // wait 3s before getting tx
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      
+      const zilswap = ZilswapConnector.getSDK();
+      const arkClient = new ArkClient(network);
+      const tx = await zilswap.zilliqa.blockchain.getTransaction(txHash);
+      await zilswap.zilliqa.contracts.at(arkClient.brokerAddress).prepareTx(tx, 100, 1000, false);
+
+      setCompletedPurchase(true);
+      onComplete?.();
+    });
+  }
+
   const onCloseDialog = () => {
-    if (confirmPurchasePending) return;
     dispatch(actions.Layout.toggleShowBuyNftDialog("close"));
     setAcceptTerms(false);
     setCompletedPurchase(false);
@@ -203,7 +198,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
     history.push("/ark/profile");
   };
 
-  const dialogHeader = confirmPurchasePending
+  const dialogHeader = completePending
     ? ""
     : completedPurchase
       ? "You now own"
@@ -214,10 +209,10 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       header={dialogHeader}
       {...rest}
       open={open}
-      onClose={onCloseDialog}
+      onClose={loading ? undefined : onCloseDialog}
       className={cls(classes.root, className)}
-      hideCloseButton={confirmPurchasePending}
-      titlePadding={!!confirmPurchasePending}
+      hideCloseButton={completePending}
+      titlePadding={!!completePending}
     >
       <DialogContent className={cls(classes.dialogContent)}>
         {/* Nft card */}
@@ -276,7 +271,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
           )}
         </Box>
 
-        {!(confirmPurchasePending || completedPurchase) && (
+        {!(completePending || completedPurchase) && (
           <Fragment>
             {/* Terms */}
             <Box className={classes.termsBox}>
@@ -346,7 +341,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         )}
 
         {/* to clean up */}
-        <Backdrop open={confirmPurchasePending} className={classes.backdrop}>
+        <Backdrop open={completePending} className={classes.backdrop}>
           <Box flex={1}>
             <Text variant="h2" align="center" className={classes.loadingTitle}>
               Purchase Processing
@@ -357,6 +352,8 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
             </Text>
           </Box>
 
+          <CircularProgress color="primary" />
+          <Box marginBottom={2} />
           <ChainLinkIcon />
 
           <Box flex={1} />

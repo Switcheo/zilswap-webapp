@@ -7,8 +7,10 @@ import useStatefulTask from "./useStatefulTask";
 export type ErrorHandler = (error: any) => void;
 export type AsyncTaskOutput<T> = [(task: () => Promise<T>) => Promise<void>, boolean, Error | null, (e?: Error) => void];
 
-const parseError = (original: Error): Error => {
+const parseError = (original: Error | string): Error => {
   let error = original;
+  if (typeof error === "string")
+    error = new Error(error);
   return error;
 };
 
