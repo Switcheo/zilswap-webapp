@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Avatar, Box, Card, CardContent, CardProps, Collapse, IconButton, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
-import cls from "classnames";
 import BigNumber from "bignumber.js"
 import dayjs, { Dayjs } from "dayjs";
 import { useSelector } from "react-redux";

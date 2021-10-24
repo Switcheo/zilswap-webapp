@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { useState } from "react";
 import {
   Box, BoxProps, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, useMediaQuery, useTheme
