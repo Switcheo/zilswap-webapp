@@ -19,6 +19,7 @@ const useStyles = makeStyles(theme => ({
         fill: '#169BA3!important',
       }
     },
+    marginLeft: -8
   },
   darkMode: {
     '& svg .st0': {

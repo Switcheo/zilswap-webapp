@@ -1,6 +1,5 @@
 import React, { forwardRef, useState } from "react";
 import {
-  Box,
   Button,
   Collapse,
   List,
@@ -16,8 +15,6 @@ import { NavLink as RouterLink } from "react-router-dom";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
 import { TRANSAK_API_KEY } from "app/utils/constants";
 import { AppTheme } from "app/theme/types";
-import { useRouter } from "app/utils";
-import { Text } from "app/components";
 import * as IconModule from "../icons";
 import { NavigationPageOptions } from "../../types";
 
@@ -40,7 +37,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: 0,
   },
   buttonLeaf: {
-    padding: theme.spacing(2, 4),
+    padding: theme.spacing(2, 3),
     justifyContent: "flex-start",
     textTransform: "none",
     width: "100%",
@@ -73,10 +70,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "14px!important",
   },
   icon: {
-    marginRight: "12px",
     "& path": {
       fill: theme.palette.text?.primary,
     },
+  },
+  iconMargin: {
+    marginRight: "12px",
   },
   expandedList: {
     backgroundColor:
@@ -128,7 +127,6 @@ const NavigationContent: React.FC<NavigationContentProps> = (
   const [expand, setExpand] = useState<any>(null);
   const [widgetOpen, setWidgetOpen] = useState(false);
   const Icon = navigation.icon ? Icons[navigation.icon] : InboxIcon;
-  const router = useRouter();
 
   const initWidget = (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setWidgetOpen(true);
@@ -159,47 +157,6 @@ const NavigationContent: React.FC<NavigationContentProps> = (
   };
   const selected = (match: any, location: any) => navigation.href ? (InternalRouteMap[location.pathname] || location.pathname).startsWith(navigation.href!) : false;
 
-  if (!showDrawer)
-    return (
-      <>
-        <ListItem
-          className={classes.listItem}
-          disableGutters
-          button
-          disabled={navigation.disabled}
-        >
-          <Button
-            className={cls(
-              {
-                [classes.highlightTitle]: navigation.highlight,
-                [classes.secondaryFont]: secondary,
-                [classes.buyZil]: navigation.purchase,
-                [classes.buttonLeafActive]: selected(router.match, router.location),
-              },
-              classes.buttonLeaf,
-              classes.inactive,
-            )}
-          >
-            <Box
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-            >
-              <Icon width="20px" className={classes.inactiveIcon} />
-              {navigation.purchase ? (
-                <Text className={classes.buyZilText} variant="h6">
-                  {navigation.title}
-                </Text>
-              ) : (
-                ""
-              )}
-            </Box>
-          </Button>
-        </ListItem>
-      </>
-    );
-
   if (navigation.external && navigation.href) {
     return (
       <ListItem className={classes.listItem} disableGutters button>
@@ -214,8 +171,12 @@ const NavigationContent: React.FC<NavigationContentProps> = (
           href={navigation.href}
           target="_blank"
         >
-          <Icon width="20px" className={classes.icon} />
-          {navigation.title}
+          <Icon width="20px" className={cls(classes.icon, {
+            [classes.iconMargin]: showDrawer
+          })} />
+          {showDrawer &&
+            <>{navigation.title}</>
+          }
         </Button>
       </ListItem>
     )
@@ -235,8 +196,12 @@ const NavigationContent: React.FC<NavigationContentProps> = (
           )}
           onClick={(ev) => !widgetOpen && initWidget(ev)}
         >
-          <Icon width="20px" className={classes.icon} />
-          {navigation.title}
+          <Icon width="20px" className={cls(classes.icon, {
+            [classes.iconMargin]: showDrawer
+          })} />
+          {showDrawer &&
+            <>{navigation.title}</>
+          }
         </Button>
       </ListItem>
     )
@@ -258,12 +223,18 @@ const NavigationContent: React.FC<NavigationContentProps> = (
           setExpand(navigation.title === expand ? null : navigation.title)
         }
       >
-        <Icon width="20px" className={classes.icon} />
-        <ListItemText
-          primary={navigation.title}
-          primaryTypographyProps={{ className: classes.mainFont }}
-        />
-        {expand === navigation.title ? <ArrowDropUp /> : <ArrowDropDown />}
+        <Icon width="20px" className={cls(classes.icon, {
+            [classes.iconMargin]: showDrawer
+          })} />
+        {showDrawer &&
+          <>
+            <ListItemText
+              primary={navigation.title}
+              primaryTypographyProps={{ className: classes.mainFont }}
+            />
+            {expand === navigation.title ? <ArrowDropUp /> : <ArrowDropDown />}
+          </>
+        }
       </ListItem>
       <Collapse in={expand === navigation.title}>
         <List className={cls(classes.listItem, classes.expandedList)}>
@@ -304,22 +275,28 @@ const NavigationContent: React.FC<NavigationContentProps> = (
         to={navigation.disabled ? "/disabled-path" : navigation.href}
         exact={false}
       >
-        <Icon width="20px" className={classes.icon} />
-        {navigation.title === "Swap + Pool" ? (
-          <span>
-            Swap <span className={classes.textColoured}>+</span> Pool
-          </span>
-        ) : (
-          navigation.title
-        )}
-        {!!navigation.badge && (
-          <span
-            className={classes.textColoured}
-            style={{ fontSize: ".7em", marginLeft: "8px" }}
-          >
-            {navigation.badge}
-          </span>
-        )}
+        <Icon width="20px" className={cls(classes.icon, {
+          [classes.iconMargin]: showDrawer
+        })} />
+        {showDrawer &&
+          <>
+            {navigation.title === "Swap + Pool" ? (
+              <span>
+                Swap <span className={classes.textColoured}>+</span> Pool
+              </span>
+            ) : (
+              navigation.title
+            )}
+            {!!navigation.badge && (
+              <span
+                className={classes.textColoured}
+                style={{ fontSize: ".7em", marginLeft: "8px" }}
+              >
+                {navigation.badge}
+              </span>
+            )}
+          </>
+        }
       </Button>
     </ListItem>
   )
