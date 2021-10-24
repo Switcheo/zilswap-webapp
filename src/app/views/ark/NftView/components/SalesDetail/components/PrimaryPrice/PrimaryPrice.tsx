@@ -76,11 +76,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     textTransform: 'uppercase',
   },
   saleInfo: {
-    color: "#00FFB0",
+    color: theme.palette.primary!.dark,
     fontWeight: "bold",
     fontFamily: "Avenir Next",
     display: "flex",
-    marginTop: theme.spacing(0.5),
     alignItems: "flex-end",
     fontSize: 32,
   },

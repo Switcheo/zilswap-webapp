@@ -3,7 +3,7 @@ import { Avatar, Badge, Box, Container, ListItemIcon, MenuItem, Typography } fro
 import { makeStyles } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ArkBidsTable, ArkBreadcrumb, ArkTab, ArkOwnerLabel } from "app/components";
+import { ArkBidsTable, ArkBreadcrumb, ArkTab, ArkOwnerLabel, ArkBox } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet } from "app/saga/selectors";
 import { Cheque, Nft, Profile } from "app/store/types";
@@ -101,8 +101,8 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
 
         {/* About info and trait table */}
         <Box mt={4} display="flex" className={classes.smColumn}>
-          <Box display="flex" flexDirection="column" className={classes.aboutContainer}>
-            <Typography variant="h1">About</Typography>
+          <ArkBox variant="base" display="flex" flexDirection="column" className={classes.aboutContainer}>
+            <Typography className={classes.aboutHeader} variant="h1">About</Typography>
             <Typography className={classes.aboutText}>
               {token?.collection?.description}
             </Typography>
@@ -110,44 +110,41 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
               <Box flexGrow={1} marginRight={1}>
                 <MenuItem component={Link} to={`/ark/profile?address=${owner?.address}`} className={classes.aboutMenuItem} button={false}>
                   <ListItemIcon><Avatar className={classes.avatar} alt="owner" src={owner?.profileImage?.url || ""} /></ListItemIcon>
-                  <Box marginLeft={1}>
+                  <Box className={classes.aboutItemText}>
                     <Typography>Owner</Typography>
                     <ArkOwnerLabel user={owner} />
-                    <Typography>{""}</Typography>
                   </Box>
                 </MenuItem>
               </Box>
-              <Box flexGrow={1}>
-                <MenuItem className={classes.aboutMenuItem} button={false}>
-                  <ListItemIcon>
-                    <Badge
-                      overlap="circle"
-                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                      badgeContent={
-                        <VerifiedBadge />
-                      }
-                    >
-                      <Avatar className={classes.avatar} sizes="medium" alt="Collection owner" src={""} />
-                    </Badge>
-                  </ListItemIcon>
-                  <Box marginLeft={1}>
-                    {token?.collection?.ownerName && (
-                      <Fragment>
-                        <Typography className={classes.halfOpacity}>Creator</Typography>
-                        <Typography variant="h3" className={classes.aboutNameText}>{token?.collection?.ownerName}</Typography>
-                      </Fragment>
-                    )}
-                    {royaltiesPercent && (
-                      <Typography>{royaltiesPercent}% Royalties</Typography>
-                    )}
-                  </Box>
-                </MenuItem>
-              </Box>
+              {token?.collection?.ownerName &&
+                <Box flexGrow={1}>
+                  <MenuItem className={classes.aboutMenuItem} button={false}>
+                    <ListItemIcon style={{ paddingBottom: 5 }}>
+                      <Badge
+                        overlap="circle"
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                        badgeContent={
+                          <VerifiedBadge />
+                        }
+                      >
+                        <Avatar className={classes.avatar} sizes="medium" alt="Collection owner" src={""} />
+                      </Badge>
+                    </ListItemIcon>
+                    <Box className={classes.aboutItemText}>
+                      <Typography>Creator</Typography>
+                      <Typography variant="h3" className={classes.aboutNameText}>{token?.collection?.ownerName}</Typography>
+                      {royaltiesPercent && (
+                        <Typography>{royaltiesPercent}% Royalties</Typography>
+                      )}
+                    </Box>
+                  </MenuItem>
+                </Box>
+                }
             </Box>
-          </Box>
-          <Box className={classes.traitContainer}>
+          </ArkBox>
+          <ArkBox variant="base" className={classes.traitContainer}>
             <TraitTable token={token} />
-          </Box>
+          </ArkBox>
         </Box>
 
 
@@ -155,7 +152,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
         <ArkTab mt={3} setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids",/* "Price History", "Event History" */]} />
 
         {currentTab === "Bids" && (
-          <ArkBidsTable bids={bids} />
+          <ArkBidsTable bids={bids} showItem={false} />
         )}
         {/* Price History */}
         {/* Event History */}
@@ -192,9 +189,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "-webkit-text-stroke-width": "1px",
   },
   imageInfoContainer: {
+    alignItems: "center",
     marginTop: theme.spacing(3),
     display: "flex",
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down(850)]: {
       flexDirection: "column",
     },
   },
@@ -203,19 +201,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginTop: 35,
     position: "relative",
     width: "50vw",
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down(850)]: {
       padding: theme.spacing(0, 4),
-      maxWidth: "unset",
       width: "100%",
+      marginBottom: theme.spacing(2),
     },
   },
   mainInfoBox: {
     flex: 1,
     marginLeft: theme.spacing(-10),
     paddingLeft: theme.spacing(10),
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down(850)]: {
       marginLeft: theme.spacing(0),
       paddingLeft: theme.spacing(0),
+      width: "100%",
     },
   },
   verifiedBadge: {
@@ -235,31 +234,29 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     opacity: 0.5,
     color: theme.palette.primary.contrastText
   },
-  aboutText: {
-    opacity: 0.5,
-    color: theme.palette.primary.contrastText,
-    marginTop: theme.spacing(1),
-    fontSize: 14,
-    lineHeight: 1.4,
-  },
   aboutContainer: {
+    color: theme.palette.text!.primary,
     maxWidth: 450,
-    border: theme.palette.border,
-    background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
     padding: theme.spacing(7, 6),
-    borderRadius: 12,
     [theme.breakpoints.down("sm")]: {
       padding: theme.spacing(2, 3),
       maxWidth: "none",
     },
   },
+  aboutHeader: {
+    fontFamily: "'Raleway', sans-serif",
+    fontWeight: "bold",
+    marginBottom: theme.spacing(3),
+  },
+  aboutText: {
+    fontSize: 14,
+    lineHeight: 1.4,
+    opacity: 0.8,
+  },
   traitContainer: {
     minWidth: 400,
     flex: 1,
-    border: theme.palette.border,
-    background: "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)",
     padding: theme.spacing(4, 5),
-    borderRadius: 12,
     marginLeft: theme.spacing(2),
     overflowX: 'auto',
     [theme.breakpoints.down("sm")]: {
@@ -270,6 +267,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   aboutMenuItem: {
     extend: 'text',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'stretch',
     padding: "0",
     maxWidth: 200,
     margin: 0,
@@ -277,13 +277,26 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       marginTop: theme.spacing(1),
     },
   },
+  aboutItemText: {
+    display: 'flex',
+    margin: theme.spacing(0.5, 0, 0.5, 1),
+    flexDirection: 'column',
+    justifyContent: 'space-evenly',
+    color: theme.palette.text!.primary,
+    opacity: 0.8,
+  },
   avatar: {
-    width: 65,
-    height: 65,
+    width: 52,
+    height: 52,
+    overflow: 'visible',
   },
   aboutNameText: {
-    color: "#6BE1FF",
-    fontWeight: "bold",
+    fontSize: 14,
+    fontWeight: 700,
+    maxWidth: 100,
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
   },
   xsColumn: {
     [theme.breakpoints.down("xs")]: {

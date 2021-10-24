@@ -54,6 +54,14 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
       type: PriceType.BestBid,
       cheque: token.bestBid
     }
+    priceInfos.secondaryPrice1 = {
+      type: PriceType.BestBid,
+      cheque: token.bestBid
+    }
+    priceInfos.secondaryPrice2 = {
+      type: PriceType.LastTrade,
+      cheque: token.bestBid
+    }
   }
   if (token?.lastTrade) {
     const entry = priceInfos.primaryPrice ? (priceInfos.secondaryPrice1 ? 'secondaryPrice2' : 'secondaryPrice1') : 'primaryPrice'
@@ -104,8 +112,10 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           </Box>
           <ArkBox className={classes.saleInfoContainer}>
             {priceInfos.primaryPrice && <PrimaryPrice data={priceInfos.primaryPrice} blockTime={blockTime} currentBlock={currentBlock} />}
-            {priceInfos.secondaryPrice1 && <SecondaryPrice data={priceInfos.secondaryPrice1} blockTime={blockTime} currentBlock={currentBlock} mr={2} />}
-            {priceInfos.secondaryPrice2 && <SecondaryPrice data={priceInfos.secondaryPrice2} blockTime={blockTime} currentBlock={currentBlock} />}
+            <Box className={classes.secondaryInfo}>
+              {priceInfos.secondaryPrice1 && <SecondaryPrice data={priceInfos.secondaryPrice1} blockTime={blockTime} currentBlock={currentBlock} mr={2} />}
+              {priceInfos.secondaryPrice2 && <SecondaryPrice data={priceInfos.secondaryPrice2} blockTime={blockTime} currentBlock={currentBlock} />}
+            </Box>
           </ArkBox>
           <Box display="flex" className={classes.buttonBox}>
             {!isOwnToken && (
@@ -148,10 +158,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: "100%",
     flexDirection: "column",
     padding: theme.spacing(8, 9, 5, 6),
-    [theme.breakpoints.down("sm")]: {
-      padding: theme.spacing(2, 3),
-      textAlign: "center",
-      width: "100%",
+    [theme.breakpoints.down("md")]: {
+      padding: theme.spacing(4),
     },
   },
   tokenId: {
@@ -173,8 +181,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: "100%",
     padding: theme.spacing(0, 4),
     display: "flex",
-    [theme.breakpoints.down("xs")]: {
-      marginTop: theme.spacing(2),
+    [theme.breakpoints.down("sm")]: {
+      marginTop: theme.spacing(3),
       transform: "translateY(0%)",
       padding: theme.spacing(0),
     },
@@ -198,7 +206,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         color: darken("#003340", 0.1),
       },
     },
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("sm")]: {
       display: "flex",
       width: "100%",
     },
@@ -228,7 +236,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     marginRight: theme.spacing(-1),
     marginBottom: theme.spacing(-2),
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down("xs")]: {
+      flexDirection: "column",
+    },
+  },
+  secondaryInfo: {
+    display: "flex",
+    flex: 1,
+    [theme.breakpoints.down("xs")]: {
       flexDirection: "column",
     },
   },
@@ -238,9 +253,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginTop: theme.spacing(3),
     minHeight: theme.spacing(5),
     padding: theme.spacing(2.5, 4, 7),
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("sm")]: {
       padding: theme.spacing(2, 3),
-      alignItems: "center"
     },
   },
   rarityLabel: {

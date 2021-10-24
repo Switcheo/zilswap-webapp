@@ -85,8 +85,8 @@ const TraitTable: React.FC<Props> = (props: Props) => {
         <TableBody>
           {traitCategory.map((trait: string) => (
             <TableRow className={classes.bodyRow} key={trait}>
-              <TableCell className={classes.base} align="center">{traits[trait].type || "-"}</TableCell>
-              <TableCell className={classes.attribute} align="center">{traits[trait].value || "-"}</TableCell>
+              <TableCell className={cls(classes.key, 'highlight')} align="center">{traits[trait].type || "-"}</TableCell>
+              <TableCell className="highlight" align="center">{traits[trait].value || "-"}</TableCell>
               <TableCell align="center">{traits[trait].rarity || "-"}</TableCell>
               <TableCell align="center">{traits[trait].percentage ? `${traits[trait].percentage} %` : "-"}</TableCell>
             </TableRow>
@@ -107,16 +107,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiTableCell-root": {
       fontSize: 12,
       fontFamily: 'Avenir Next',
-      fontWeight: 700,
-      opacity: 0.5
+      fontWeight: 600,
+      opacity: 0.8,
+      letterSpacing: '0.1px',
     }
   },
-  base: {
-    color: theme.palette.primary.contrastText,
-    opacity: 0.5
-  },
-  attribute: {
-    color: theme.palette.primary.contrastText,
+  key: {
+    opacity: 0.8,
   },
   bodyRow: {
     "&:last-child": {
@@ -125,10 +122,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       }
     },
     "& .MuiTableCell-root": {
-      fontSize: 16,
+      fontSize: 14,
+      fontWeight: 600,
       fontFamily: 'Avenir Next',
-      fontWeight: 700,
       whiteSpace: "nowrap",
+      '&.highlight': {
+        fontSize: 15,
+        fontWeight: 700,
+      }
     }
   }
 }));

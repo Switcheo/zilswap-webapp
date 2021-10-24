@@ -22,25 +22,26 @@ const SecondaryPrice: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const { tokens } = useSelector(getTokens);
 
-  const priceToken = tokens[toBech32Address(data.cheque.price.address)];
-  const priceAmount = bnOrZero(data.cheque.price.amount).shiftedBy(-priceToken.decimals)
-
   const timeLeft = useMemo(() => {
     const blocksLeft = data.cheque.expiry - currentBlock;
     const expiryTime = blockTime.add(blocksLeft * BLOCKS_PER_MINUTE, "minutes");
-    return expiryTime.isAfter(dayjs()) ? expiryTime.fromNow() + "left" : "Expired " + expiryTime.fromNow();
+    return expiryTime.isAfter(dayjs()) ? expiryTime.fromNow(true) + " left" : null;
   }, [currentBlock, blockTime, data.cheque.expiry])
+
+  const priceToken = tokens[toBech32Address(data.cheque.price.address)];
+  if (!priceToken) return null; // loading tokens (most likely.. lol)
+  const priceAmount = bnOrZero(data.cheque.price.amount).shiftedBy(-priceToken.decimals)
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <Typography variant="body1" className={classes.saleHeader}>
-        <Typography className={classes.bestLastLabel}>
-          BEST
+      <Typography variant="body1" className={classes.container}>
+        <Typography className={classes.saleType}>
+          {data.type.toUpperCase()}
         </Typography>
         {toSignificantNumber(priceAmount)} {priceToken.symbol}
-        <Typography className={classes.halfOpacity}>
+        {timeLeft && <Typography className={classes.secondaryText}>
           {timeLeft}
-        </Typography>
+        </Typography>}
       </Typography>
     </Box>
   );
@@ -48,29 +49,30 @@ const SecondaryPrice: React.FC<Props> = (props: Props) => {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    '&:not(:last-child)': {
+      marginRight: theme.spacing(4),
+    }
   },
-  saleHeader: {
+  container: {
     display: "flex",
     flexDirection: "row",
-    marginTop: theme.spacing(1),
+    marginTop: theme.spacing(3),
     alignItems: "center",
+    whiteSpace: "nowrap",
   },
-  halfOpacity: {
-    opacity: 0.5,
-    color: theme.palette.primary.contrastText,
-  },
-  bestLastLabel: {
-    backgroundColor: "#6be1ff33",
+  saleType: {
+    padding: theme.spacing(0.5, 1),
+    marginRight: theme.spacing(0.8),
+    borderRadius: 6,
+    color: '#6BE1FF',
+    background: 'rgba(107, 225, 255, 0.2)',
     fontFamily: "Avenir Next",
-    color: "#6BE1FF",
-    padding: theme.spacing(1, 2),
-    borderRadius: 10,
-    fontWeight: "bold",
-    marginRight: theme.spacing(1),
-    [theme.breakpoints.down("xs")]: {
-      borderRadius: 14,
-      padding: theme.spacing(.8, 1.6),
-    },
+    fontWeight: 700,
+    textTransform: 'uppercase',
+  },
+  secondaryText: {
+    color: theme.palette.text!.secondary,
+    marginLeft: 5,
   },
 }));
 
