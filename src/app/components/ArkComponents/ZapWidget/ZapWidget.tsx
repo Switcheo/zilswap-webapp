@@ -1,40 +1,40 @@
 import React, { useEffect, useState } from "react";
-import { BoxProps, IconButton } from "@material-ui/core";
+import { Box, BoxProps, IconButton, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import clsx from "clsx";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { getMarketplace, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft, OAuth } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask } from "app/utils";
+import { toHumanNumber, useAsyncTask } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { ReactComponent as ZapSVG } from "./zap.svg";
 
 interface Props extends BoxProps {
   token?: Nft;
-  onZap?: (change: -1 | 0 | 1) => void;
+  onZap?: () => void;
 }
 
-const ZapIconButton: React.FC<Props> = (props: Props) => {
-  const { children, className, onZap, token, ...rest } = props;
+const ZapWidget: React.FC<Props> = (props: Props) => {
+  const { token, onZap } = props;
   const classes = useStyles();
 
-  const [liked, setLiked] = useState<boolean>(false);
+  const [liked, setLiked] = useState<boolean>(token?.isFavourited || false);
   const { oAuth } = useSelector(getMarketplace);
   const { wallet } = useSelector(getWallet);
   const [runLikeToken] = useAsyncTask("likeToken");
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (token) {
-      setLiked(!!token?.isFavourited);
-    }
+    if (token) setLiked(!!token.isFavourited);
   }, [token])
 
   const likeToken = () => {
+    if (!wallet)
+      return dispatch(actions.Layout.toggleShowWallet("open"));
+
     runLikeToken(async () => {
       if (!wallet || !token) return;
       let newOAuth: OAuth | undefined = oAuth;
@@ -49,33 +49,52 @@ const ZapIconButton: React.FC<Props> = (props: Props) => {
       } else {
         await arkClient.removeFavourite(token!.collection!.address, token.tokenId, newOAuth!.access_token);
       }
-
-      const newState = !liked;
-      setLiked(newState);
-      onZap?.(token.isFavourited === newState
-        ? 0 
-        : !token.isFavourited && newState ? 1 : -1);
+      setLiked(!liked);
+      if (onZap) onZap();
     })
   }
 
   return (
-    <IconButton {...rest} className={cls(classes.root, className)} size="small" onClick={likeToken}>
-      <ZapSVG className={clsx(classes.zapLogo, { [classes.active]: liked })} />
-    </IconButton>
+    <Box display="flex" alignItems="center">
+      <Typography className={cls(classes.likes, { liked })}>{toHumanNumber(token?.statistics?.favourites || 0)}</Typography>
+      <IconButton
+        onClick={likeToken}
+        className={classes.likeIconButton}
+        disableRipple
+      >
+        <ZapSVG className={cls(classes.likeButton, { liked })} />
+      </IconButton>
+    </Box>
   );
 };
 
 const useStyles = makeStyles((theme: AppTheme) => ({
-  root: {
+  likes: {
+    color: theme.palette.type === 'dark' ? 'rgba(222, 255, 255, 0.5)' : 'rgba(0, 51, 64, 0.6)',
+    fontSize: "13px",
+    marginBottom: "-1px",
+    '&.liked': {
+      color: theme.palette.type === 'dark' ? '#00FFB0' : 'rgba(0, 51, 64, 0.6)',
+    },
   },
-  zapLogo: {
-    height: "1em",
-    width: "1em",
-    color: "#DEFFFF",
+  likeIconButton: {
+    padding: 3,
+    marginRight: -3,
+    "&:hover": {
+      backgroundColor: "transparent",
+    },
   },
-  active: {
-    color: "#00FFB0",
+  likeButton: {
+    '& > path': {
+      fill: theme.palette.type === 'dark' ? 'rgba(222, 255, 255, 0.5)' : 'rgba(0, 51, 64, 0.6)',
+    },
+    '&.liked': {
+      '& > path': {
+        fill: '#00FFB0',
+        stroke: 'rgba(0, 51, 64, 0.2)',
+      },
+    }
   },
 }));
 
-export default ZapIconButton;
+export default ZapWidget;

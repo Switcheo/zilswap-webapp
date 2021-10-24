@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import React, { Fragment, useMemo, useState } from "react";
 import {
   Box, Card, CardActionArea, CardContent, CardProps,
   ClickAwayListener, IconButton, Link, makeStyles, Popper, Typography
@@ -11,7 +11,7 @@ import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
 import { Network } from "zilswap-sdk/lib/constants";
-import { ArkOwnerLabel, ArkImageView } from "app/components";
+import { ArkOwnerLabel, ArkImageView, ZapWidget } from "app/components";
 import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
@@ -23,7 +23,6 @@ import { ArkClient } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { toBech32Address } from "core/zilswap";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
-import { ReactComponent as ZapSVG } from "./zap.svg";
 export interface Props extends CardProps {
   token: Nft;
   collectionAddress: string;
@@ -34,11 +33,9 @@ export interface Props extends CardProps {
 const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const { className, token, collectionAddress, dialog, ...rest } = props;
   const classes = useStyles();
-  const [liked, setLiked] = useState<boolean>(!!token.isFavourited);
   const { oAuth } = useSelector<RootState, MarketPlaceState>((state) => state.marketplace);
   const { wallet } = useSelector(getWallet);
   const { tokens } = useSelector(getTokens);
-  const [runLikeToken] = useAsyncTask("likeToken");
   const [runUpdateProfileImage] = useAsyncTask("updateProfileImage", () => {
     toaster("Error setting profile image")
   });
@@ -48,10 +45,6 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const [popAnchor, setPopAnchor] = useState(null);
   const toaster = useToaster(false);
   const isOwner = wallet?.addressInfo.byte20.toLowerCase() === token.owner?.address.toLowerCase();
-
-  useEffect(() => {
-    if (token) setLiked(!!token.isFavourited);
-  }, [token])
 
   const bestAsk = useMemo(() => {
     if (!token?.bestAsk) return undefined;
@@ -82,29 +75,6 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     return { amount, timeLeft, bidToken };
     // eslint-disable-next-line
   }, [blockTime, token?.bestBid, tokens])
-
-  const likeToken = () => {
-    if (!wallet)
-      return dispatch(actions.Layout.toggleShowWallet("open"));
-
-    runLikeToken(async () => {
-      if (!wallet || !token) return;
-      let newOAuth: OAuth | undefined = oAuth;
-      const arkClient = new ArkClient(wallet!.network)
-      if (!newOAuth?.access_token || (newOAuth?.expires_at && dayjs(newOAuth.expires_at * 1000).isBefore(dayjs()))) {
-        const { result } = await arkClient.arkLogin(wallet!, window.location.hostname);
-        dispatch(actions.MarketPlace.updateAccessToken(result));
-        newOAuth = result;
-      }
-      if (!liked) {
-        await arkClient.postFavourite(token!.collection!.address, token.tokenId, newOAuth!.access_token);
-      } else {
-        await arkClient.removeFavourite(token!.collection!.address, token.tokenId, newOAuth!.access_token);
-      }
-      setLiked(!liked);
-      dispatch(actions.MarketPlace.reloadTokenList());
-    })
-  }
 
   const explorerLink = useMemo(() => {
     const addr = toBech32Address(collectionAddress);
@@ -146,6 +116,10 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     setPopAnchor(popAnchor ? null : event.currentTarget)
   }
 
+  const handleOnZap = () => {
+    dispatch(actions.MarketPlace.reloadTokenList())
+  }
+
   return (
     <Card {...rest} className={cls(classes.root, className)}>
       <Box className={classes.borderBox}>
@@ -164,16 +138,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                 </Typography>
               )}
             </Box>
-            <Box display="flex" alignItems="center">
-              <Typography className={cls(classes.likes, { liked })}>{toHumanNumber(token.statistics?.favourites)}</Typography>
-              <IconButton
-                onClick={likeToken}
-                className={classes.likeIconButton}
-                disableRipple
-              >
-                <ZapSVG className={cls(classes.likeButton, { liked })} />
-              </IconButton>
-            </Box>
+            <ZapWidget onZap={handleOnZap} />
           </Box>
         )}
         {!dialog ? (
@@ -423,32 +388,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.primary.light,
     fontSize: "12px",
     lineHeight: "14px",
-  },
-  likes: {
-    color: theme.palette.type === 'dark' ? 'rgba(222, 255, 255, 0.5)' : 'rgba(0, 51, 64, 0.6)',
-    fontSize: "13px",
-    marginBottom: "-1px",
-    '&.liked': {
-      color: theme.palette.type === 'dark' ? '#00FFB0' : 'rgba(0, 51, 64, 0.6)',
-    },
-  },
-  likeIconButton: {
-    padding: 3,
-    marginRight: -3,
-    "&:hover": {
-      backgroundColor: "transparent",
-    },
-  },
-  likeButton: {
-    '& > path': {
-      fill: theme.palette.type === 'dark' ? 'rgba(222, 255, 255, 0.5)' : 'rgba(0, 51, 64, 0.6)',
-    },
-    '&.liked': {
-      '& > path': {
-        fill: '#00FFB0',
-        stroke: 'rgba(0, 51, 64, 0.2)',
-      },
-    }
   },
   cardContent: {
     marginLeft: "-16px",

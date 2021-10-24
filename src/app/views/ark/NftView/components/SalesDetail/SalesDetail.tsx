@@ -7,7 +7,8 @@ import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { toBech32Address } from "@zilliqa-js/crypto";
-import { CurrencyLogo, FancyButton, Text, ZapIconButton } from "app/components";
+import { darken } from '@material-ui/core/styles';
+import { CurrencyLogo, FancyButton, ZapWidget } from "app/components";
 import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft, TokenInfo } from "app/store/types";
@@ -20,10 +21,11 @@ import { InfoBox } from "./components";
 interface Props extends BoxProps {
   token?: Nft;
   tokenId: string;
+  onTokenChange?: () => void;
 }
 
 const SalesDetail: React.FC<Props> = (props: Props) => {
-  const { token, tokenId, children, className, ...rest } = props;
+  const { token, tokenId, children, className, onTokenChange, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
   const dispatch = useDispatch();
@@ -33,7 +35,6 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
   const { tokens, prices } = useSelector(getTokens);
   const [tokenPrice, setTokenPrice] = useState<BigNumber | null>(null);
   const [tokenAmount, setTokenAmount] = useState<BigNumber | null>(null);
-  const [zapChange, setZapChange] = useState<number>(0);
   const [purchaseCurrency, setPurchaseCurrency] = useState<TokenInfo>();
   const valueCalculator = useValueCalculators();
   const [blockTime, currentBlock, currentTime] = useBlockTime();
@@ -113,16 +114,12 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
 
         <Box mt={2} display="flex" flexDirection="column">
           <Box className={classes.infoBoxContainer}>
-            <InfoBox topLabel="ARK Score" bottomLabel="Top 51.1%" tooltip={""} flex={1}>
+            {/* <InfoBox topLabel="ARK Score" bottomLabel="Top 51.1%" tooltip={""} flex={1}>
               <Typography className={classes.rarityLabel} variant="h3">SUPAH RARE</Typography>
-            </InfoBox>
+            </InfoBox> */}
 
             <InfoBox topLabel="ZAPs" bottomLabel="Like it? ZAP it!" tooltip={""}>
-              <Text className={classes.zapScore} variant="h3">
-                {parseInt(token?.statistics?.favourites ?? "0") + zapChange}
-                {" "}
-                <ZapIconButton onZap={setZapChange} className={classes.zapLogo} token={token} />
-              </Text>
+              <ZapWidget onZap={onTokenChange} token={token} />
             </InfoBox>
           </Box>
           <Box className={classes.saleInfoContainer}>
@@ -130,7 +127,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
               <React.Fragment>
                 {/* this section is WIP */}
                 <Typography variant="h6" className={cls(classes.saleHeader, classes.halfOpacity)}>
-                  Price{isXs && (
+                  Buy Now{isXs && (
                     <Typography component="span" variant="body1" className={classes.halfOpacity}>
                       &nbsp;${tokenPrice?.dp(11).toString() ?? "-"}
                     </Typography>
@@ -257,14 +254,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   bidButton: {
     padding: theme.spacing(2.5, 4),
     borderRadius: theme.spacing(1.5),
-    border: theme.palette.border,
-    backgroundColor: "#FFDF6B",
+    backgroundColor: "#6BE1FF",
     "& .MuiButton-label": {
       color: "#003340",
     },
     "&:hover": {
+      border: 'none',
+      backgroundColor: darken("#6BE1FF", 0.1),
       "& .MuiButton-label": {
-        color: "#DEFFFF",
+        color: darken("#003340", 0.1),
       },
     },
     [theme.breakpoints.down("xs")]: {
@@ -275,16 +273,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   buyButton: {
     padding: theme.spacing(2.5, 4),
     borderRadius: theme.spacing(1.5),
-    backgroundColor: "#6BE1FF",
+    border: theme.palette.border,
+    backgroundColor: "#FFDF6B",
     "& .MuiButton-label": {
       color: "#003340",
     },
     "&:hover": {
-      border: theme.palette.border,
       "& .MuiButton-label": {
         color: "#DEFFFF",
       },
-    }
+    },
   },
   collectionName: {
     fontFamily: "'Raleway', sans-serif",
