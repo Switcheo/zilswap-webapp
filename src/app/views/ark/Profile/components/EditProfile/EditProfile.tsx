@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Box, Collapse, IconButton, TextField, Typography, Button } from "@material-ui/core";
+import { Box, IconButton, TextField, Typography, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,7 +11,7 @@ import { ArkClient } from "core/utilities";
 import { EMAIL_REGEX, USERNAME_REGEX, TWITTER_REGEX, INSTAGRAM_REGEX } from "app/utils/constants";
 import { useAsyncTask, useNetwork, useToaster, useTaskSubscriber } from "app/utils";
 import { OAuth } from "app/store/types";
-import { ArkInput, ArkToggle, FancyButton, ArkCheckbox } from "app/components";
+import { ArkInput, FancyButton } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
 import ArkPage from "app/layouts/ArkPage";
@@ -56,7 +56,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     instagramHandle: profile?.instagramHandle || "",
     websiteUrl: profile?.websiteUrl || "",
   })
-  const [enableEmailNotification, setEnableEmailNotification] = useState(false);
+  // const [enableEmailNotification, setEnableEmailNotification] = useState(false);
   const toaster = useToaster(false)
   const dispatch = useDispatch();
   const [loadingProfile] = useTaskSubscriber("loadProfile");
@@ -263,7 +263,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                   label="Display Name" onValueChange={(value) => updateInputs("username")(value)}
                   instruction="This is how other users identify you on ARK." wordLimit={20}
                 />
-                <ArkInput
+                {/* <ArkInput
                   placeholder="bearsarecute@example.com" error={errors.email} value={inputValues.email}
                   label={
                     <ArkToggle className={classes.switch} initialIsChecked={enableEmailNotification}
@@ -295,7 +295,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                       lineHeader="Outbid" lineFooter="When someone outbids you in an auction."
                     />
                   </Box>
-                </Collapse>
+                </Collapse> */}
 
                 <ArkInput
                   placeholder="My spirit animal's a bear" error={errors.bio} value={inputValues.bio}
