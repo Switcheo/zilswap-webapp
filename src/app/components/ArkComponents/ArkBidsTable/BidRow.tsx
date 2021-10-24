@@ -260,7 +260,7 @@ const Row: React.FC<Props> = (props: Props) => {
           const priceAmount = new BigNumber(bid.price.amount).shiftedBy(-priceToken.decimals)
           const usdValue = valueCalculators.amount(tokenState.prices, priceToken, new BigNumber(bid.price.amount));
 
-          return <TableRow className={cls(classes.row, { [classes.firstRow]: index === 0, [classes.slideAnimation]: index > 0 })}>
+          return <TableRow key={bid.id} className={cls(classes.row, { [classes.firstRow]: index === 0, [classes.slideAnimation]: index > 0 })}>
             {
               showItem &&
               <TableCell align="left" className={cls(classes.bodyCell, classes.firstCell)}>

@@ -1,16 +1,16 @@
-import React from "react";
-import { DialogContent, DialogProps } from "@material-ui/core";
+import React, { useEffect, useState } from "react";
+import clsx from "clsx";
+import { Box, CircularProgress, DialogContent, DialogProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import BigNumber from "bignumber.js";
-import cls from "classnames";
+import { fromBech32Address } from "@zilliqa-js/crypto";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
-import { DialogModal, FancyButton, Text } from "app/components";
+import { DialogModal, Text } from "app/components";
 import { getBlockchain, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
-import { Nft, RootState } from "app/store/types";
+import { Cheque, Nft, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask } from "app/utils";
+import { useAsyncTask, useToaster } from "app/utils";
 import { ArkClient, logger } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 
@@ -22,59 +22,109 @@ const CancelDialog: React.FC<Props> = (props: Props) => {
   const { children, className, token, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
+  const toaster = useToaster();
   const { network } = useSelector(getBlockchain);
   const { wallet } = useSelector(getWallet);
   const match = useRouteMatch<{ id: string, collection: string }>();
-  const [runCancelSell, loading, error] = useAsyncTask("cancelSellNft");
+  const [sellCheques, setSellCheques] = useState<Cheque[]>([]);
+  const [cancelledCheques, setCancelledCheques] = useState<Cheque[]>([]);
+  const [runQueryAsks, loadingQueryAsks] = useAsyncTask("cancelQueryAsks");
+  const [runCancelSell, loading, error, clearError] = useAsyncTask("cancelSellNft");
 
   const open = useSelector<RootState, boolean>(state => state.layout.showCancelSellNftDialog);
 
-  const onClose = () => {
+  const onCloseDialog = () => {
     dispatch(actions.Layout.toggleShowCancelSellNftDialog("close"));
   };
 
-  const onConfirm = () => {
-    if (!wallet?.provider || !token.bestAsk) return;
-    runCancelSell(async () => {
+  useEffect(() => {
+    if (!wallet?.provider || !open) return;
+    clearError();
+    runQueryAsks(async () => {
       const { collection: address, id } = match.params
-
       const arkClient = new ArkClient(network);
-      const cheque = token.bestAsk!;
-
-      const chequeHash = arkClient.arkChequeHash({
-        side: cheque.side as "Buy" | "Sell",
-        token: { address, id, },
-        price: {
-          address: cheque.price.address,
-          amount: new BigNumber(cheque.price.amount),
-        },
-        feeAmount: new BigNumber(cheque.feeAmount),
-        expiry: cheque.expiry,
-        nonce: cheque.nonce,
+      const queryResult = await arkClient.listNftCheques({
+        collectionAddress: fromBech32Address(address),
+        initiatorAddress: wallet.addressInfo.byte20.toLowerCase(),
+        side: "sell",
+        isActive: "true",
+        tokenId: id,
+        limit: 100,
       });
 
-      const message = arkClient.arkMessage("Void", chequeHash)
-      const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
+      setSellCheques(queryResult.result.entries);
 
-      const execTradeResult = await arkClient.voidCheque({
-        publicKey,
-        signature,
-        chequeHash,
-      }, ZilswapConnector.getSDK());
+      cancelSellCheques(queryResult.result.entries);
+    });
 
-      logger("exec trade result", execTradeResult)
+    // eslint-disable-next-line
+  }, [wallet?.addressInfo.byte20, token.collection?.address, token.tokenId, open]);
+
+  const cancelSellCheques = (sellCheques: Cheque[]) => {
+    if (!wallet?.provider || !sellCheques.length) return;
+    runCancelSell(async () => {
+      const arkClient = new ArkClient(network);
+
+      const zilswap = ZilswapConnector.getSDK();
+      for (const cheque of sellCheques) {
+        const { chequeHash } = cheque;
+
+        const message = arkClient.arkMessage("Void", chequeHash.replace(/^0x/i, ""));
+        const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any;
+
+        const execTradeResult = await arkClient.voidCheque({
+          publicKey, signature, chequeHash,
+        }, zilswap);
+
+        zilswap.observeTx({
+          hash: execTradeResult.id!,
+          deadline: zilswap.getCurrentBlock() + 1000,
+        });
+
+        setCancelledCheques(cancelledCheques => [
+          ...cancelledCheques,
+          cheque,
+        ]);
+
+        logger("exec trade result", execTradeResult)
+      }
+
+      onCloseDialog();
+      toaster("Cancel listing transactions sent!")
     });
   };
 
   return (
-    <DialogModal header="Cancel Listing" onClose={onClose} {...rest} open={open} className={cls(classes.root, className)}>
-      <DialogContent>
-        {error && (
-          <Text color="error">Error: {error?.message ?? "Unknown error"}</Text>
-        )}
-        <FancyButton walletRequired loading={loading} variant="contained" color="primary" onClick={onConfirm}>
-          Confirm Cancel
-        </FancyButton>
+    <DialogModal
+      header="Cancel Listing"
+      open={open}
+      onClose={loading ? undefined : onCloseDialog}
+      {...rest}
+      className={clsx(classes.root, className)}
+    >
+      <DialogContent className={classes.dialogContent}>
+        <Box display="flex" flexDirection="column">
+          <Box display="flex" alignItems="center" marginBottom={4} position="relative">
+            <Box display="flex" flexDirection="column" alignItems="stretch">
+              <Text className={classes.label}>Approve Transaction</Text>
+              <Box display="flex" marginTop={1} alignItems="center">
+                {loading && (
+                  <CircularProgress size="small" className={classes.loader} color="primary" />
+                )}
+                {!loadingQueryAsks && (
+                  <Text>
+                    You are cancelling listing: {cancelledCheques.length + 1} of {sellCheques.length}.
+                  </Text>
+                )}
+              </Box>
+              {!!error && (
+                <Text marginTop={1} color="error">
+                  {error?.message ?? error}
+                </Text>
+              )}
+            </Box>
+          </Box>
+        </Box>
       </DialogContent>
     </DialogModal>
   );
@@ -82,6 +132,43 @@ const CancelDialog: React.FC<Props> = (props: Props) => {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    "& .MuiDialogTitle-root": {
+      padding: theme.spacing(4.5, 4.5, 5),
+      "& .MuiTypography-root": {
+        fontFamily: "'Raleway', sans-serif",
+        fontWeight: 700,
+        fontSize: "24px",
+      },
+      "& .MuiSvgIcon-root": {
+        fontSize: "1.8rem",
+      },
+      "& .MuiIconButton-root": {
+        top: "21px",
+        right: "21px",
+      },
+    },
+    position: "relative",
+  },
+  loader: {
+    marginRight: theme.spacing(1),
+    height: theme.spacing(2),
+    width: theme.spacing(2),
+  },
+  label: {
+    fontWeight: "bold",
+    fontSize: 14,
+    marginBottom: 2
+  },
+  dialogContent: {
+    backgroundColor: theme.palette.background.default,
+    borderLeft: theme.palette.border,
+    borderRight: theme.palette.border,
+    borderBottom: theme.palette.border,
+    borderRadius: "0 0 12px 12px",
+    padding: theme.spacing(0, 4.5, 2),
+    [theme.breakpoints.up("sm")]: {
+      width: 436,
+    }
   },
 }));
 

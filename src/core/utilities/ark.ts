@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { CallParams } from '@zilliqa-js/contract'
 import { BN, bytes, Long } from '@zilliqa-js/util';
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
@@ -407,15 +408,15 @@ export class ArkClient {
     const args = [{
       vname: "cheque_hash",
       type: "ByStr32",
-      value: `0x${chequeHash}`,
+      value: `0x${chequeHash.replace(/^0x/i, "")}`,
     }, {
       vname: "pubkey",
       type: "ByStr32",
-      value: `0x${publicKey}`,
+      value: `0x${publicKey.replace(/^0x/i, "")}`,
     }, {
       vname: "signature",
       type: "ByStr32",
-      value: `0x${signature}`,
+      value: `0x${signature.replace(/^0x/i, "")}`,
     }];
 
     const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
@@ -621,6 +622,7 @@ export namespace ArkClient {
     chequeHash: string;
     publicKey: string;
     signature: string;
+    opts?: Partial<CallParams>;
   }
 
   export interface ListTokenParams extends ListQueryParams {
@@ -641,7 +643,7 @@ export namespace ArkClient {
   }
   export interface ListCollectionParams extends ListQueryParams {
   }
-  export interface ListChequesParams {
+  export interface ListChequesParams extends ListQueryParams {
     collectionAddress?: string,
     tokenId?: string,
     side?: string,

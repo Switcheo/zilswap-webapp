@@ -30,6 +30,7 @@ export interface SimpleCheque {
     amount: string;
     address: string;
   },
+  chequeHash: string;
   cancelTransactionHash: string | null;
   matchTransactionHash: string | null;
 };
