@@ -115,3 +115,5 @@ export const COLLECTION_NFT_PER_PAGE = 36;
 
 export const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 export const USERNAME_REGEX = /^[A-Za-z][A-Za-z0-9_]{1,19}$/
+export const TWITTER_REGEX = /^[A-Za-z][A-Za-z0-9_]{1,14}$/
+export const INSTAGRAM_REGEX = /^[A-Za-z][A-Za-z0-9_]{1,29}$/

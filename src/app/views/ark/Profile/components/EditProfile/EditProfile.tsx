@@ -8,7 +8,7 @@ import { useHistory } from "react-router";
 import dayjs from "dayjs";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { ArkClient } from "core/utilities";
-import { EMAIL_REGEX, USERNAME_REGEX } from "app/utils/constants";
+import { EMAIL_REGEX, USERNAME_REGEX, TWITTER_REGEX, INSTAGRAM_REGEX } from "app/utils/constants";
 import { useAsyncTask, useNetwork, useToaster, useTaskSubscriber } from "app/utils";
 import { OAuth } from "app/store/types";
 import { ArkInput, ArkToggle, FancyButton, ArkCheckbox } from "app/components";
@@ -76,6 +76,11 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     return change;
   }, [inputValues, profile])
 
+  const hasError = useMemo(() => {
+    const errorString = Object.values(errors).reduce((prev, curr) => prev + curr);
+    return !!errorString;
+  }, [errors])
+
   useEffect(() => {
     setInputValues({
       username: profile?.username || "",
@@ -96,8 +101,8 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     switch (type) {
       case "username":
         if (input.length < 2) return "Minimum of 2 characters";
-        if (!USERNAME_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters";
         if (input.length > 20) return "max 20 characters";
+        if (!USERNAME_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters";
         return ""
       case "bio":
         if (input.length < 2) return "Minimum of 2 characters";
@@ -111,12 +116,12 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       case "twitterHandle":
         if (input.length < 2) return "Minimum of 2 characters";
         if (input.length > 15) return "Maximum of 15 characters";
-        if (!USERNAME_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters"
+        if (!TWITTER_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters"
         return ""
       case "instagramHandle":
         if (input.length < 2) return "Minimum of 2 characters";
         if (input.length > 30) return "Maximum of 30 characters";
-        if (!USERNAME_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters"
+        if (!INSTAGRAM_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters"
         return ""
       case "websiteUrl":
         if (input.length < 2) return "Minimum of 2 characters";
@@ -256,7 +261,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                 <ArkInput
                   placeholder="BearCollector" error={errors.username} value={inputValues.username}
                   label="Display Name" onValueChange={(value) => updateInputs("username")(value)}
-                  instruction="This is how other users identify you on ARK."
+                  instruction="This is how other users identify you on ARK." wordLimit={20}
                 />
                 <ArkInput
                   placeholder="bearsarecute@example.com" error={errors.email} value={inputValues.email}
@@ -318,7 +323,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                   color="primary"
                   loading={isLoading || loadingProfile}
                   onClick={() => onUpdateProfile(false)}
-                  disabled={!hasChange && !profileImage}
+                  disabled={(!hasChange && !profileImage) || hasError}
                   className={classes.profileButton}
                 >
                   Save Profile
