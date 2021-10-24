@@ -1,25 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Box, BoxProps, Collapse, IconButton, TextField, Typography, Button } from "@material-ui/core";
+import { Box, Collapse, IconButton, TextField, Typography, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router";
 import dayjs from "dayjs";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import { ConnectedWallet } from "core/wallet";
 import { ArkClient } from "core/utilities";
 import { EMAIL_REGEX, USERNAME_REGEX } from "app/utils/constants";
 import { useAsyncTask, useNetwork, useToaster, useTaskSubscriber } from "app/utils";
-import { MarketPlaceState, OAuth, Profile, RootState } from "app/store/types";
+import { OAuth } from "app/store/types";
 import { ArkInput, ArkToggle, FancyButton, ArkCheckbox } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
+import ArkPage from "app/layouts/ArkPage";
+import { getMarketplace, getWallet } from "app/saga/selectors";
 import { ImageDialog } from "./components";
-
-interface Props extends BoxProps {
-  onBack: () => void;
-  profile: Profile | null;
-  wallet?: ConnectedWallet | null;
-}
 
 type ProfileInputs = {
   email: string;
@@ -30,12 +26,15 @@ type ProfileInputs = {
   instagramHandle: string;
 }
 
-const EditProfile: React.FC<Props> = (props: Props) => {
-  const { wallet, profile, onBack, children, className, ...rest } = props;
+const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+  const { children, className, ...rest } = props;
   const classes = useStyles();
   const network = useNetwork();
+  const history = useHistory();
+  const { wallet } = useSelector(getWallet);
+  const marketplaceState = useSelector(getMarketplace);
   const address = wallet?.addressInfo.byte20
-  const marketplaceState = useSelector<RootState, MarketPlaceState>((state) => state.marketplace);
+  const { profile } = marketplaceState;
   const [profileImage, setProfileImage] = useState<string | ArrayBuffer | null>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [runUpdateProfile, isLoading] = useAsyncTask("updateProfile");
@@ -64,10 +63,6 @@ const EditProfile: React.FC<Props> = (props: Props) => {
   const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
-    if (!address) onBack()
-  }, [address, onBack])
-
-  useEffect(() => {
     setInputValues({
       username: profile?.username || "",
       bio: profile?.bio || "",
@@ -77,6 +72,10 @@ const EditProfile: React.FC<Props> = (props: Props) => {
       websiteUrl: profile?.websiteUrl || "",
     })
   }, [profile])
+
+  const onNavigateBack = () => {
+    history.push(`/ark/profile`);
+  }
 
   const validateInput = (type: string, input: string) => {
     switch (type) {
@@ -115,7 +114,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
   const updateInputs = (type: string) => {
     return (newInput: string) => {
       setInputValues({ ...inputValues, [type]: newInput })
-      if (!newInput || newInput.length < 2) {
+      if (!newInput) {
         setErrors({ ...errors, [type]: "" })
         return
       }
@@ -142,7 +141,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
   const onUpdateProfile = (goBack?: boolean) => {
     runUpdateProfile(async () => {
       if (!hasChange() && !profileImage) {
-        if (goBack) onBack();
+        // if (goBack) onBack();
         return;
       }
 
@@ -183,7 +182,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
           } else {
             toaster("Profile updated");
             dispatch(actions.MarketPlace.loadProfile());
-            if (goBack) onBack();
+            // if (goBack) onBack();
           }
         } catch (err) {
           toaster(err as unknown as string);
@@ -194,9 +193,11 @@ const EditProfile: React.FC<Props> = (props: Props) => {
 
   const hasChange = () => {
     if (!profile) return true
-    let change = false
+    let change = false;
     Object.entries(inputValues).forEach(([key, value]) => {
-      if ((profile as any)[key] !== value) {
+      const profileValue = (profile as any)[key];
+      if (!profileValue && !value) return;
+      if (profileValue !== value) {
         change = true;
       }
     })
@@ -225,125 +226,127 @@ const EditProfile: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Box {...rest} className={cls(classes.root, className)}>
-      <Box className={classes.container}>
-        <Box mb={3} justifyContent="flex-start">
-          <IconButton onClick={() => onBack()} className={classes.backButton}>
-            <ArrowBackIcon /><Typography className={classes.extraMargin}>Go Back</Typography>
-          </IconButton>
-          <Typography className={classes.pageHeader}>Edit Profile</Typography>
+    <ArkPage {...rest}>
+      <Box className={cls(classes.root, className)}>
+        <Box className={classes.container}>
+          <Box mb={3} justifyContent="flex-start">
+            <IconButton onClick={onNavigateBack} className={classes.backButton}>
+              <ArrowBackIcon /><Typography className={classes.extraMargin}>Go Back</Typography>
+            </IconButton>
+            <Typography className={classes.pageHeader}>Edit Profile</Typography>
+          </Box>
+          {wallet && (
+            <Box className={classes.content}>
+              <Box display="flex" justifyContent="center" paddingLeft={10} paddingRight={10}>
+                <label className={classes.uploadBox}>
+                  {(profileImage || profile?.profileImage?.url) && (<img alt="" className={classes.profileImage} src={profileImage?.toString() || profile?.profileImage?.url || ""} />)}
+                  {!profileImage && !profile?.profileImage?.url && (<div className={classes.profileImage} />)}
+                  <Button onClick={() => setOpenDialog(true)} className={classes.labelButton}>Select</Button>
+                </label>
+                <TextField
+                  className={classes.uploadInput}
+                  id="ark-profile-image"
+                  type="file"
+                  ref={inputRef}
+                  inputProps={{ accept: "image/x-png,image/jpeg" }}
+                  onChange={onImageUpload}
+                />
+              </Box>
+              <Box className={classes.formDetail}>
+                <ArkInput
+                  placeholder="BearCollector" error={errors.username} value={inputValues.username}
+                  label="Display Name" onValueChange={(value) => updateInputs("username")(value)}
+                  instruction="This is how other users identify you on ARK."
+                />
+                <ArkInput
+                  placeholder="bearsarecute@example.com" error={errors.email} value={inputValues.email}
+                  label={
+                    <ArkToggle className={classes.switch} initialIsChecked={enableEmailNotification}
+                      onCheck={(isChecked: boolean) => setEnableEmailNotification(isChecked)}
+                      overrideSm={true} header="EMAIL NOTIFICATIONS" />
+                  }
+                  onValueChange={(value) => updateInputs("email")(value)} hideInput={!enableEmailNotification}
+                  instruction="We'll send you notifications on bid updates, price changes and more."
+                />
+
+                <Collapse in={enableEmailNotification}>
+                  <Box display="flex" flexDirection="column">
+                    <ArkCheckbox className={classes.checkbox}
+                      lineHeader="Item Sold" lineFooter="When someone buys your item."
+                    />
+                    <ArkCheckbox className={classes.checkbox}
+                      lineHeader="Bid Activity" lineFooter="When someone bids on your item."
+                    />
+                    <ArkCheckbox className={classes.checkbox}
+                      lineHeader="Auction Expiration" lineFooter="When your auction expires."
+                    />
+                    <ArkCheckbox className={classes.checkbox}
+                      lineHeader="Successful Purchase" lineFooter="When you buy an item."
+                    />
+                    <ArkCheckbox className={classes.checkbox}
+                      lineHeader="Successful Bid" lineFooter="When you place a bid on an item."
+                    />
+                    <ArkCheckbox className={classes.checkbox}
+                      lineHeader="Outbid" lineFooter="When someone outbids you in an auction."
+                    />
+                  </Box>
+                </Collapse>
+
+                <ArkInput
+                  placeholder="My spirit animal's a bear" error={errors.bio} value={inputValues.bio}
+                  label="BIO" onValueChange={(value) => updateInputs("bio")(value)} multiline={true}
+                  instruction="Write a little about yourself." wordLimit={160}
+                />
+
+                <Typography className={classes.social}>SOCIALS</Typography>
+                <ArkInput
+                  startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
+                  error={errors.twitterHandle} value={inputValues.twitterHandle} label="Twitter"
+                  onValueChange={(value) => updateInputs("twitterHandle")(value)}
+                />
+                <ArkInput
+                  startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
+                  error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram"
+                  onValueChange={(value) => updateInputs("instagramHandle")(value)} />
+                <ArkInput
+                  inline={true} placeholder="www.imannftartist.com" error={errors.websiteUrl} value={inputValues.websiteUrl}
+                  label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
+                />
+                <FancyButton
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  loading={isLoading || loadingProfile}
+                  onClick={() => onUpdateProfile(false)}
+                  disabled={!hasChange() && !profileImage}
+                  className={classes.profileButton}
+                >
+                  Save Profile
+                </FancyButton>
+              </Box>
+            </Box>
+          )}
+          {!wallet && (
+            <Box mt={12} display="flex" justifyContent="center">
+              <Box display="flex" flexDirection="column" textAlign="center">
+                <Typography className={classes.connectionText} variant="h1">
+                  Your wallet is not connected.
+                </Typography>
+                <Typography className={classes.connectionText} variant="body1">
+                  Please connect your wallet to view this page.
+                </Typography>
+              </Box>
+            </Box>
+          )}
         </Box>
-        {wallet && (
-          <Box className={classes.content}>
-            <Box display="flex" justifyContent="center" paddingLeft={10} paddingRight={10}>
-              <label className={classes.uploadBox}>
-                {(profileImage || profile?.profileImage?.url) && (<img alt="" className={classes.profileImage} src={profileImage?.toString() || profile?.profileImage?.url || ""} />)}
-                {!profileImage && !profile?.profileImage?.url && (<div className={classes.profileImage} />)}
-                <Button onClick={() => setOpenDialog(true)} className={classes.labelButton}>Select</Button>
-              </label>
-              <TextField
-                className={classes.uploadInput}
-                id="ark-profile-image"
-                type="file"
-                ref={inputRef}
-                inputProps={{ accept: "image/x-png,image/jpeg" }}
-                onChange={onImageUpload}
-              />
-            </Box>
-            <Box className={classes.formDetail}>
-              <ArkInput
-                placeholder="BearCollector" error={errors.username} value={inputValues.username}
-                label="USERNAME" onValueChange={(value) => updateInputs("username")(value)}
-                instruction="This will be shown to other users in place of your wallet address."
-              />
-              <ArkInput
-                placeholder="bearsarecute@example.com" error={errors.email} value={inputValues.email}
-                label={
-                  <ArkToggle className={classes.switch} initialIsChecked={enableEmailNotification}
-                    onCheck={(isChecked: boolean) => setEnableEmailNotification(isChecked)}
-                    overrideSm={true} header="Email Notifications" />
-                }
-                onValueChange={(value) => updateInputs("email")(value)} hideInput={!enableEmailNotification}
-                instruction="We'll send you notifications on bid updates, price changes and more."
-              />
-
-              <Collapse in={enableEmailNotification}>
-                <Box display="flex" flexDirection="column" mb={0.5}>
-                  <ArkCheckbox className={classes.checkbox}
-                    lineHeader="Item Sold" lineFooter="When someone buys your item."
-                  />
-                  <ArkCheckbox className={classes.checkbox}
-                    lineHeader="Bid Activity" lineFooter="When someone bids on your item."
-                  />
-                  <ArkCheckbox className={classes.checkbox}
-                    lineHeader="Auction Expiration" lineFooter="When your auction expires."
-                  />
-                  <ArkCheckbox className={classes.checkbox}
-                    lineHeader="Successful Purchase" lineFooter="When you buy an item."
-                  />
-                  <ArkCheckbox className={classes.checkbox}
-                    lineHeader="Successful Bid" lineFooter="When you place a bid on an item."
-                  />
-                  <ArkCheckbox className={classes.checkbox}
-                    lineHeader="Outbid" lineFooter="When someone outbids you in an auction."
-                  />
-                </Box>
-              </Collapse>
-
-              <ArkInput
-                placeholder="My spirit animal's a bear" error={errors.bio} value={inputValues.bio}
-                label="BIO" onValueChange={(value) => updateInputs("bio")(value)} multiline={true}
-                instruction="This will be shown on when others view your profile." wordLimit={160}
-              />
-
-              <Typography className={classes.social}>SOCIALS</Typography>
-              <ArkInput
-                startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
-                error={errors.twitterHandle} value={inputValues.twitterHandle} label="Twitter"
-                onValueChange={(value) => updateInputs("twitterHandle")(value)}
-              />
-              <ArkInput
-                startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
-                error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram"
-                onValueChange={(value) => updateInputs("instagramHandle")(value)} />
-              <ArkInput
-                inline={true} placeholder="www.imannftartist.com" error={errors.websiteUrl} value={inputValues.websiteUrl}
-                label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
-              />
-              <FancyButton
-                fullWidth
-                variant="contained"
-                color="primary"
-                loading={isLoading || loadingProfile}
-                onClick={() => onUpdateProfile(false)}
-                disabled={!hasChange() && !profileImage}
-                className={classes.profileButton}
-              >
-                Save Profile
-              </FancyButton>
-            </Box>
-          </Box>
-        )}
-        {!wallet && (
-          <Box mt={12} display="flex" justifyContent="center">
-            <Box display="flex" flexDirection="column" textAlign="center">
-              <Typography className={classes.connectionText} variant="h1">
-                Your wallet is not connected.
-              </Typography>
-              <Typography className={classes.connectionText} variant="body1">
-                Please connect your wallet to view this page.
-              </Typography>
-            </Box>
-          </Box>
-        )}
+        <ImageDialog
+          open={openDialog}
+          onCloseDialog={() => setOpenDialog(false)}
+          onBack={onNavigateBack}
+          onSave={onUpdateProfile}
+        />
       </Box>
-      <ImageDialog
-        open={openDialog}
-        onCloseDialog={() => setOpenDialog(false)}
-        onBack={onBack}
-        onSave={onUpdateProfile}
-      />
-    </Box>
+    </ArkPage>
   );
 };
 

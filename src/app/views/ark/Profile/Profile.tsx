@@ -10,6 +10,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
 import cls from "classnames";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { ArkClient } from "core/utilities";
 import { ArkBanner, ArkTab } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
@@ -21,7 +22,6 @@ import {
   BidsMade,
   BidsReceived,
   Nfts,
-  EditProfile
 } from "./components";
 import { ReactComponent as EditIcon } from "./edit-icon.svg";
 
@@ -128,7 +128,6 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
   const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
   const { profile: connectedProfile } = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
-  const [showEdit, setShowEdit] = useState(false);
   const [currentTab, setCurrentTab] = useState("Collected");
   const [viewProfile, setViewProfile] = useState<Profile | null>(null);
   const [tooltipText, setTooltipText] = useState<string>('Copy address');
@@ -185,84 +184,77 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   return (
     <ArkPage {...rest}>
-      {!showEdit && (
-        <Container className={classes.root} maxWidth="lg">
-          <ArkBanner avatarImage={viewProfile?.profileImage?.url} />
+      <Container className={classes.root} maxWidth="lg">
+        <ArkBanner avatarImage={viewProfile?.profileImage?.url} />
 
-          <Box className={classes.addressBox}>
-            {address && [
-              <Typography variant="h2">
-                {viewProfile?.username || truncateAddress(address || '')}
-                {isConnectedUser && (
-                  <Box className={classes.editIcon} onClick={() => setShowEdit(true)}>
+        <Box className={classes.addressBox}>
+          {address && [
+            <Typography variant="h2">
+              {viewProfile?.username || truncateAddress(address || '')}
+              {isConnectedUser && (
+                <Box className={classes.editIcon}>
+                  <Link to={`/ark/profile/${address}/edit`}>
                     <EditIcon
                       className={cls(classes.editable)}
                     />
-                  </Box>
-                )}
-              </Typography>,
-              <Tooltip title={tooltipText} placement="right" arrow>
-                <Box
-                  onClick={() => address && copyAddr(address)}
-                  className={classes.addressBadge}
-                >
-                  <Typography variant="body1">
-                    {truncateAddress(address || '', isXs)}
-                  </Typography>
+                  </Link>
                 </Box>
-              </Tooltip>
-            ]}
-          </Box>
+              )}
+            </Typography>,
+            <Tooltip title={tooltipText} placement="right" arrow>
+              <Box
+                onClick={() => address && copyAddr(address)}
+                className={classes.addressBadge}
+              >
+                <Typography variant="body1">
+                  {truncateAddress(address || '', isXs)}
+                </Typography>
+              </Box>
+            </Tooltip>
+          ]}
+        </Box>
 
-          {
-            isConnectedUser && address && !viewProfile?.bio &&
-            <Box className={classes.bioBox} padding={3}>
+        {
+          isConnectedUser && !viewProfile?.bio &&
+          <Box className={classes.bioBox} padding={3}>
+            <Link to={`/ark/profile/${address}/edit`}>
               <Typography
-                onClick={() => setShowEdit(true)}
                 className={cls(classes.addBio, classes.editable)}
               >
                 <u>Add Bio</u>
               </Typography>
-            </Box>
-          }
-          {
-            viewProfile?.bio &&
-            <Box className={classes.bioBox} padding={3}>
-              <Typography>
-                {viewProfile?.bio}
-                <Typography component="span" style={{ marginLeft: 8, cursor: "pointer" }} onClick={() => setShowEdit(true)}>
-                  <u>Edit</u>
-                </Typography>
-              </Typography>
-            </Box>
-          }
+            </Link>
+          </Box>
+        }
+        {
+          viewProfile?.bio &&
+          <Box className={classes.bioBox} padding={3}>
+            <Typography>{viewProfile?.bio}</Typography>
+          </Box>
+        }
 
-          <ArkTab
-            className={classes.tabs}
-            setCurrentTab={(value) => setCurrentTab(value)}
-            currentTab={currentTab}
-            tabHeaders={tabHeaders}
-          />
-          {
-            (!wallet && !address) ?
-              <Box mt={12} display="flex" justifyContent="center">
-                <Box display="flex" flexDirection="column" textAlign="center">
-                  <Typography className={classes.connectionText} variant="h1">
-                    Your wallet is not connected.
-                  </Typography>
-                  <Typography className={classes.connectionText} variant="body1">
-                    Please connect your wallet to view this page.
-                  </Typography>
-                </Box>
+        <ArkTab
+          className={classes.tabs}
+          setCurrentTab={(value) => setCurrentTab(value)}
+          currentTab={currentTab}
+          tabHeaders={tabHeaders}
+        />
+        {
+          (!wallet && !address) ?
+            <Box mt={12} display="flex" justifyContent="center">
+              <Box display="flex" flexDirection="column" textAlign="center">
+                <Typography className={classes.connectionText} variant="h1">
+                  Your wallet is not connected.
+                </Typography>
+                <Typography className={classes.connectionText} variant="body1">
+                  Please connect your wallet to view this page.
+                </Typography>
               </Box>
-              :
-              currentTabBody()
-          }
-        </Container>
-      )}
-      {showEdit && (
-        <EditProfile wallet={wallet} profile={viewProfile} onBack={() => setShowEdit(false)} />
-      )}
+            </Box>
+            :
+            currentTabBody()
+        }
+      </Container>
     </ArkPage>
   );
 };
