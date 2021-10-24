@@ -45,7 +45,7 @@ const ArkInput: React.FC<Props> = (props: Props) => {
 
   return (
     <Box className={classes.root}>
-      {inline && (<Typography className={classes.inlineLabel}>
+      {inline && (<Typography className={cls(classes.label, 'inline')}>
         {label}
       </Typography>)}
       <FormControl fullWidth className={cls({ [classes.inline]: inline })}>
@@ -84,15 +84,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontFamily: "'Raleway', sans-serif",
     fontWeight: 900,
     overflowX: "visible",
-  },
-  inlineLabel: {
-    fontSize: "14px",
-    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
-    fontFamily: "'Raleway', sans-serif",
-    fontWeight: 900,
-    overflowX: "visible",
-    width: 100,
-    paddingBottom: theme.spacing(1.5),
+    '&.inline': {
+      width: 100,
+      paddingBottom: theme.spacing(1.5),
+    }
   },
   error: {
     border: '1px solid #FF5252',
@@ -110,9 +105,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   instruction: {
     color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
     fontFamily: 'Avenir Next',
-    fontWeight: 700,
-    fontSize: 10,
-    margin: theme.spacing(0.5, 0),
+    fontWeight: 600,
+    fontSize: 11,
+    margin: theme.spacing(0.4, 0),
   },
   hiddenText: {
     visibility: "hidden"

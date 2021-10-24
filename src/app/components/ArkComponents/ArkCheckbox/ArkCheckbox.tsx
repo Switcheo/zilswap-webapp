@@ -63,14 +63,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   header: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 900,
     fontFamily: "'Raleway', sans-serif",
   },
   footer: {
-    fontSize: 12,
+    marginTop: theme.spacing(0.5),
+    marginBottom: theme.spacing(0.2),
+    fontSize: 11,
     opacity: 0.5,
-    fontFamily: "'Raleway', sans-serif",
+    fontFamily: "Avenir",
   },
   checkbox: {
     borderRadius: 3

@@ -253,7 +253,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
             <Box className={classes.formDetail}>
               <ArkInput
                 placeholder="BearCollector" error={errors.username} value={inputValues.username}
-                label="Display Name" onValueChange={(value) => updateInputs("username")(value)}
+                label="USERNAME" onValueChange={(value) => updateInputs("username")(value)}
                 instruction="This will be shown to other users in place of your wallet address."
               />
               <ArkInput
@@ -261,14 +261,14 @@ const EditProfile: React.FC<Props> = (props: Props) => {
                 label={
                   <ArkToggle className={classes.switch} initialIsChecked={enableEmailNotification}
                     onCheck={(isChecked: boolean) => setEnableEmailNotification(isChecked)}
-                    overrideSm={true} header="EMAIL NOTIFICATIONS" />
+                    overrideSm={true} header="Email Notifications" />
                 }
                 onValueChange={(value) => updateInputs("email")(value)} hideInput={!enableEmailNotification}
                 instruction="We'll send you notifications on bid updates, price changes and more."
               />
 
               <Collapse in={enableEmailNotification}>
-                <Box display="flex" flexDirection="column">
+                <Box display="flex" flexDirection="column" mb={0.5}>
                   <ArkCheckbox className={classes.checkbox}
                     lineHeader="Item Sold" lineFooter="When someone buys your item."
                   />

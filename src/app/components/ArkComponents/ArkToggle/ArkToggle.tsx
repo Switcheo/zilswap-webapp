@@ -37,7 +37,7 @@ const ArkToggle: React.FC<Props> = (props: Props) => {
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       {
-        header && <Typography className={cls(classes.root, { [classes.smRoot]: isSm && !overrideSm })}>
+        header && <Typography className={cls(classes.header, { [classes.smRoot]: isSm && !overrideSm })}>
           {header}
         </Typography>
       }
@@ -89,22 +89,27 @@ const GreenSwitch = withStyles((theme) => ({
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    extend: 'text',
     padding: "4px 4px 0px 0px",
     display: "flex",
-    fontSize: "14px",
     flexDirection: 'row',
+  },
+  text: {
     fontFamily: "'Raleway', sans-serif",
+    fontSize: "14px",
+  },
+  header: {
+    extend: 'text',
     fontWeight: 900,
+    textTransform: "uppercase",
   },
   smRoot: {
-    fontSize: "14px",
-    flexDirection: "column",
-    fontFamily: "'Raleway', sans-serif",
+    extend: 'text',
     fontWeight: 900,
+    flexDirection: "column",
   },
   formLabel: {
-    fontSize: "14px",
-    fontFamily: "'Raleway', sans-serif",
+    extend: 'text',
     [theme.breakpoints.down("sm")]: {
       justifyContent: "left",
       marginLeft: 0,
