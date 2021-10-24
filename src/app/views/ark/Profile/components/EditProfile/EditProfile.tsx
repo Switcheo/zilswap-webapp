@@ -97,7 +97,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       case "username":
         if (input.length < 2) return "Minimum of 2 characters";
         if (!USERNAME_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters";
-        if (input.length > 20) return "max 50 characters";
+        if (input.length > 20) return "max 20 characters";
         return ""
       case "bio":
         if (input.length < 2) return "Minimum of 2 characters";
