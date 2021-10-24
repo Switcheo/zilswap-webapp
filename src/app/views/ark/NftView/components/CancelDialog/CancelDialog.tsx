@@ -90,7 +90,7 @@ const CancelDialog: React.FC<Props> = (props: Props) => {
       }
 
       onCloseDialog();
-      toaster("Cancel listing transactions sent!")
+      toaster("Cancel listing transactions submitted!")
     });
   };
 

@@ -155,7 +155,7 @@ function* txObserved(payload: TxObservedPayload) {
 
   yield put(actions.Transaction.update({ hash: tx.hash, status: status, txReceipt: receipt }));
 
-  detachedToast(`transaction ${status ? status : "confirmed"}`, { hash: tx.hash });
+  detachedToast(`Transaction ${status ? status : "confirmed"}`, { hash: tx.hash });
 
   // refetch all token states if updated TX is currently recorded within state
   const { transactions } = getTransactions(yield select());

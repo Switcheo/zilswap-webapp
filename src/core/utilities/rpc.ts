@@ -1,5 +1,6 @@
 import { RPCResponse } from "@zilliqa-js/core";
 import { Value } from "@zilliqa-js/contract";
+import { ZilswapConnector } from "core/zilswap";
 
 export class RPCResultError extends Error {
   rpcResponse?: RPCResponse<any, string>;
@@ -57,8 +58,27 @@ export class RPCHandler {
  * @param params parameters in `Value[]` array representation
  * @returns mapped object representation - refer to sample output
  */
- export const zilParamsToMap = (params: Value[]): { [index: string]: any } => {
+export const zilParamsToMap = (params: Value[]): { [index: string]: any } => {
   const output: { [index: string]: any } = {};
   for (const set of params) output[set.vname] = set.value;
   return output;
 };
+
+
+export const waitForTx = async (txHash: string, maxAttempts: number = 33, interval: number = 1000) => {
+  const zilswap = ZilswapConnector.getSDK();
+  for (let attempt = 0; attempt < 3600; ++attempt) {
+    try {
+      // wait 1s before getting tx
+      const delay = interval * attempt;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return await zilswap.zilliqa.blockchain.getTransaction(txHash);
+    } catch (error) {
+      if (error?.message === "Txn Hash not Present")
+        continue;
+      throw error;
+    }
+  }
+
+  throw new Error("could not confirm tx");
+}

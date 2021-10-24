@@ -3,6 +3,7 @@ import { Backdrop, Box, Checkbox, CircularProgress, DialogContent, DialogProps, 
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import LaunchIcon from "@material-ui/icons/Launch";
+import { Transaction } from "@zilliqa-js/account";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -17,7 +18,7 @@ import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { bnOrZero, hexToRGBA, truncate, useAsyncTask, useToaster } from "app/utils";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
-import { ArkClient, logger } from "core/utilities";
+import { ArkClient, logger, waitForTx } from "core/utilities";
 import { fromBech32Address, ZilswapConnector } from "core/zilswap";
 import { ReactComponent as WarningIcon } from "../assets/warning.svg";
 import { ReactComponent as ChainLinkIcon } from "./chainlink.svg";
@@ -39,15 +40,17 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
   const open = useSelector<RootState, boolean>((state) => state.layout.showBuyNftDialog);
   const dispatch = useDispatch();
   const history = useHistory();
-  const [runConfirmPurchase, loading, error] = useAsyncTask("confirmPurchase");
+  const [runConfirmPurchase, loading, confirmPurchaseError] = useAsyncTask("confirmPurchase");
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
-  const [waitForComplete, completePending] = useAsyncTask("waitForPurchaseComplete");
+  const [waitForComplete, completePending, waitCompleteError, clearWaitCompleteError] = useAsyncTask("waitForPurchaseComplete");
   const match = useRouteMatch<{ id: string, collection: string }>();
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
+  const [purchaseTxHash, setPurchaseTxHash] = useState<string | null>(null);
   const [approveTxHash, setApproveTxHash] = useState<string | null>(null);
   const toaster = useToaster();
 
+  const error = confirmPurchaseError ?? waitCompleteError;
   const txIsPending = loadingApproveTx || txState.observingTxs.findIndex(tx => tx.hash.toLowerCase() === approveTxHash) >= 0;
 
   const bestAsk = token.bestAsk;
@@ -98,6 +101,14 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
 
       if (observedTx) {
         setApproveTxHash(observedTx.hash);
+        dispatch(actions.Transaction.observe({
+          observedTx: {
+            deadline: observedTx.deadline,
+            hash: observedTx.hash,
+            address: wallet?.addressInfo.bech32 || "",
+            network,
+          },
+        }));
         toaster("Submitted", { hash: observedTx.hash });
       }
     });
@@ -107,6 +118,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
     if (!wallet?.provider || !match.params?.collection || !match.params?.id || !bestAsk || !exchangeInfo) return;
 
     clearApproveError();
+    clearWaitCompleteError();
 
     runConfirmPurchase(async () => {
       const { collection: address, id } = match.params
@@ -114,6 +126,9 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       if (!priceToken) return; // TODO: handle token not found
 
       const priceAmount = new BigNumber(bestAsk.price.amount);
+      if (!priceToken.balance || priceToken.balance?.lt(priceAmount))
+        throw new Error("Insufficient balance");
+
       const price = { amount: priceAmount, address: fromBech32Address(priceToken.address) };
       const feeAmount = priceAmount.times(exchangeInfo.baseFeeBps).dividedToIntegerBy(10000).plus(1);
 
@@ -165,25 +180,27 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       });
 
       // execute asynchronously to unblock loading for send tx.
-      waitForPurchaseComplete(execTradeResult.id!.toLowerCase());
+      waitForPurchaseComplete(execTradeResult);
 
       logger("exec trade result", execTradeResult)
-      toaster(`Transaction for buying token #${token.tokenId} sent!`, { hash: execTradeResult.id });
+      toaster(`Transaction token #${token.tokenId} purchase submitted!`, { hash: execTradeResult.id });
     });
   };
 
-  const waitForPurchaseComplete = (txHash: string) => {
+  const waitForPurchaseComplete = (tx: Transaction) => {
     waitForComplete(async () => {
-      // wait 3s before getting tx
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      
-      const zilswap = ZilswapConnector.getSDK();
-      const arkClient = new ArkClient(network);
-      const tx = await zilswap.zilliqa.blockchain.getTransaction(txHash);
-      await zilswap.zilliqa.contracts.at(arkClient.brokerAddress).prepareTx(tx, 100, 1000, false);
 
-      setCompletedPurchase(true);
-      onComplete?.();
+      logger("watching for purchase complete", tx.id);
+      const confirmedTx = await waitForTx(tx.id!);
+
+      const success = confirmedTx.isConfirmed() && !confirmedTx.isRejected();
+      setCompletedPurchase(success);
+      if (success) {
+        setPurchaseTxHash(confirmedTx.hash);
+        onComplete?.();
+      } else {
+        throw new Error("Purchase failed");
+      }
     });
   }
 
@@ -225,27 +242,29 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
 
         {/* Price Box */}
         <Box className={classes.priceBox}>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Text className={classes.priceText}>
-              {completedPurchase ? "Bid Price" : "Fixed Price"}
-            </Text>
-            {priceToken && (
-              <Box display="flex" alignItems="center">
-                <Text className={classes.price}>
-                  {priceHuman?.toString(10)}
-                </Text>
-                <CurrencyLogo
-                  currency={priceToken?.symbol}
-                  address={priceToken.address}
-                  className={classes.currencyLogo}
-                />
-              </Box>
-            )}
-          </Box>
+          {!completedPurchase && (
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Text className={classes.priceText}>
+                Fixed Price
+              </Text>
+              {priceToken && (
+                <Box display="flex" alignItems="center">
+                  <Text className={classes.price}>
+                    {priceHuman?.toString(10)}
+                  </Text>
+                  <CurrencyLogo
+                    currency={priceToken?.symbol}
+                    address={priceToken.address}
+                    className={classes.currencyLogo}
+                  />
+                </Box>
+              )}
+            </Box>
+          )}
 
           {completedPurchase && (
             <Box
@@ -255,18 +274,20 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
               mt={0.5}
             >
               <Text className={classes.txText}>Transaction Hash</Text>
-              <Text>
-                <Link
-                  className={classes.link}
-                  underline="hover"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  href={"hello"}
-                >
-                  {truncate("0x27f12shdj", 5, 5)}
-                  <LaunchIcon className={cls(classes.icon, classes.linkIcon)} />
-                </Link>
-              </Text>
+              {purchaseTxHash && (
+                <Text>
+                  <Link
+                    className={classes.link}
+                    underline="hover"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href={"hello"}
+                  >
+                    {truncate(purchaseTxHash, 5, 5)}
+                    <LaunchIcon className={cls(classes.icon, classes.linkIcon)} />
+                  </Link>
+                </Text>
+              )}
             </Box>
           )}
         </Box>

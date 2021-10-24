@@ -173,8 +173,8 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
       </Container >
       {token && (
         <Fragment>
-          <BuyDialog token={token} collectionAddress={collectionId} onComplete={() => getData()}/>
-          <BidDialog token={token} collectionAddress={collectionId} onComplete={() => getData()}/>
+          <BuyDialog token={token} collectionAddress={collectionId} onComplete={getData}/>
+          <BidDialog token={token} collectionAddress={collectionId} onComplete={getData}/>
           <CancelDialog token={token} />
         </Fragment>
       )}
