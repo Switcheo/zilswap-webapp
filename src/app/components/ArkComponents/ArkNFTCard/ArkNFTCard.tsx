@@ -47,8 +47,8 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const isOwner = wallet?.addressInfo.byte20.toLowerCase() === token.owner?.address.toLowerCase();
 
   const bestAsk = useMemo(() => {
-    if (!token?.bestAsk) return undefined;
-    const expiryTime = blockTime.add((token?.bestAsk?.expiry - currentBlock) / BLOCKS_PER_MINUTE, "minutes");
+    if (!token.bestAsk) return undefined;
+    const expiryTime = blockTime.add((token.bestAsk?.expiry - currentBlock) / BLOCKS_PER_MINUTE, "minutes");
     const hoursLeft = expiryTime.diff(currentTime, "hours");
     const minsLeft = expiryTime.diff(currentTime, "minutes");
     const secLeft = expiryTime.diff(currentTime, "seconds");
@@ -57,24 +57,24 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     if (!askToken) return undefined;
 
     const placement = new BigNumber(10).pow(askToken.decimals);
-    const amount = new BigNumber(token?.bestAsk?.price.amount).div(placement);
+    const amount = new BigNumber(token.bestAsk?.price.amount).div(placement);
     return { expiryTime, hoursLeft, minsLeft, secLeft, amount, askToken };
     // eslint-disable-next-line
   }, [blockTime, token.bestAsk, tokens])
 
   const bestBid = useMemo(() => {
-    if (!token?.bestBid) return undefined;
+    if (!token.bestBid) return undefined;
 
-    const expiryTime = blockTime.add((token?.bestBid?.expiry - currentBlock) / BLOCKS_PER_MINUTE, "minutes");
+    const expiryTime = blockTime.add((token.bestBid?.expiry - currentBlock) / BLOCKS_PER_MINUTE, "minutes");
     const timeLeft = expiryTime.fromNow();
-    const bidToken = tokens[token?.bestBid?.price.address] || tokens[ZIL_ADDRESS];
+    const bidToken = tokens[token.bestBid?.price.address] || tokens[ZIL_ADDRESS];
     if (!bidToken) return undefined;
 
     const placement = new BigNumber(10).pow(bidToken.decimals);
-    const amount = new BigNumber(token?.bestBid?.price.amount).div(placement);
+    const amount = new BigNumber(token.bestBid?.price.amount).div(placement);
     return { amount, timeLeft, bidToken };
     // eslint-disable-next-line
-  }, [blockTime, token?.bestBid, tokens])
+  }, [blockTime, token.bestBid, tokens])
 
   const explorerLink = useMemo(() => {
     const addr = toBech32Address(collectionAddress);
@@ -138,7 +138,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                 </Typography>
               )}
             </Box>
-            <ZapWidget onZap={handleOnZap} />
+            <ZapWidget onZap={handleOnZap} token={token} />
           </Box>
         )}
         {!dialog ? (
@@ -151,8 +151,8 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
               <span className={classes.imageHeight} />
               <ArkImageView
                 className={classes.image}
-                altName={token?.asset?.filename || "Token Image"}
-                imageUrl={token?.asset?.url}
+                altName={token.asset?.filename || "Token Image"}
+                imageUrl={token.asset?.url}
                 imageType="card"
               />
             </Box>
@@ -161,8 +161,8 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
           <span className={classes.imageHeight} />
           <ArkImageView
             className={classes.image}
-            altName={token?.asset?.filename || "Token Image"}
-            imageUrl={token?.asset?.url}
+            altName={token.asset?.filename || "Token Image"}
+            imageUrl={token.asset?.url}
             imageType="card"
           />
         </Box>}

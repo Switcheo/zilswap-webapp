@@ -13,12 +13,13 @@ import { ArkClient } from "core/utilities";
 import { ReactComponent as ZapSVG } from "./zap.svg";
 
 interface Props extends BoxProps {
-  token?: Nft;
+  token: Nft;
   onZap?: () => void;
+  variant?: "thin" | "bold"
 }
 
 const ZapWidget: React.FC<Props> = (props: Props) => {
-  const { token, onZap } = props;
+  const { token, onZap, variant = "thin" } = props;
   const classes = useStyles();
 
   const [liked, setLiked] = useState<boolean>(token?.isFavourited || false);
@@ -56,7 +57,7 @@ const ZapWidget: React.FC<Props> = (props: Props) => {
 
   return (
     <Box display="flex" alignItems="center">
-      <Typography className={cls(classes.likes, { liked })}>{toHumanNumber(token?.statistics?.favourites || 0)}</Typography>
+      <Typography className={cls(classes.likes, variant, { liked })}>{toHumanNumber(token?.statistics?.favourites || 0)}</Typography>
       <IconButton
         onClick={likeToken}
         className={classes.likeIconButton}
@@ -71,10 +72,21 @@ const ZapWidget: React.FC<Props> = (props: Props) => {
 const useStyles = makeStyles((theme: AppTheme) => ({
   likes: {
     color: theme.palette.type === 'dark' ? 'rgba(222, 255, 255, 0.5)' : 'rgba(0, 51, 64, 0.6)',
-    fontSize: "13px",
-    marginBottom: "-1px",
+    fontSize: 13,
+    marginBottom: -2,
     '&.liked': {
       color: theme.palette.type === 'dark' ? '#00FFB0' : 'rgba(0, 51, 64, 0.6)',
+    },
+    '&.bold': {
+      color: theme.palette.text!.primary,
+      fontWeight: 700,
+      fontSize: 18,
+      '&.liked': {
+        color: theme.palette.type === 'dark' ? '#00FFB0' : theme.palette.text!.primary,
+      },
+    },
+    '&.thin': {
+      marginRight: 2,
     },
   },
   likeIconButton: {

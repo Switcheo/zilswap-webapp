@@ -20,7 +20,7 @@ const InfoBox: React.FC<Props> = (props: Props) => {
     <ArkBox {...rest} className={cls(classes.root, className)}>
       {!!topLabel && (
         <Box display="flex" justifyContent="center" marginBottom={0.5}>
-          <Text variant="body1">{topLabel}</Text>
+          <Text className={classes.topLabel} variant="body1">{topLabel}</Text>
           {typeof tooltip === "string" && (
             <InfoOutlinedIcon className={classes.infoIcon} />
           )}
@@ -54,6 +54,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     opacity: 0.5,
     fontSize: 14,
     marginLeft: theme.spacing(.5),
+  },
+  topLabel: {
+    fontSize: 14,
   },
   bottomLabel: {
     opacity: 0.5,

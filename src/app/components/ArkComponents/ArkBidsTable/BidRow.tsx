@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from "react";
-import { Avatar, Box, BoxProps, CircularProgress, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
+import { Avatar, BoxProps, CircularProgress, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
@@ -54,7 +54,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 800,
   },
   cell: {
-    background: theme.palette.type === "dark" ? "transparent" : "rgba(222, 255, 255, 0.5)",
     color: theme.palette.text?.primary,
     margin: 0,
     border: "none",
@@ -62,7 +61,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   bodyCell: {
     extend: ['text', 'cell'],
-    padding: "14px 12px",
+    padding: theme.spacing(2.5, 1),
   },
   actionCell: {
     extend: 'cell',
@@ -113,7 +112,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   row: {
     padding: 12,
-    background: theme.palette.type === "dark" ? "transparent" : "rgba(222, 255, 255, 0.5)",
   },
   firstRow: {
     marginTop: theme.spacing(1),

@@ -16,7 +16,7 @@ import { InfoBox, PrimaryPrice, SecondaryPrice } from "./components";
 import { PriceInfo, PriceType } from "./types";
 
 interface Props extends BoxProps {
-  token?: Nft;
+  token: Nft;
   tokenId: string;
   tokenUpdatedCallback: () => void;
 }
@@ -31,8 +31,8 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
 
   const isOwnToken = useMemo(() => {
     return (
-      token?.owner?.address &&
-      wallet?.addressInfo.byte20?.toLowerCase() === token?.owner?.address
+      token.owner?.address &&
+      wallet?.addressInfo.byte20?.toLowerCase() === token.owner?.address
     );
   }, [token, wallet?.addressInfo]);
 
@@ -42,28 +42,20 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
     secondaryPrice1?: PriceInfo,
     secondaryPrice2?: PriceInfo,
   } = {}
-  if (token?.bestAsk) {
+  if (token.bestAsk) {
     priceInfos.primaryPrice = {
       type: PriceType.BestAsk,
       cheque: token.bestAsk
     }
   }
-  if (token?.bestBid) {
+  if (token.bestBid) {
     const entry = priceInfos.primaryPrice ? 'secondaryPrice1' : 'primaryPrice'
     priceInfos[entry] = {
       type: PriceType.BestBid,
       cheque: token.bestBid
     }
-    priceInfos.secondaryPrice1 = {
-      type: PriceType.BestBid,
-      cheque: token.bestBid
-    }
-    priceInfos.secondaryPrice2 = {
-      type: PriceType.LastTrade,
-      cheque: token.bestBid
-    }
   }
-  if (token?.lastTrade) {
+  if (token.lastTrade) {
     const entry = priceInfos.primaryPrice ? (priceInfos.secondaryPrice1 ? 'secondaryPrice2' : 'secondaryPrice1') : 'primaryPrice'
     priceInfos[entry] = {
       type: PriceType.LastTrade,
@@ -72,7 +64,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
   }
 
   const onSell = () => {
-    if (!token?.collection?.address) return;
+    if (!token.collection?.address) return;
     history.push(`/ark/collections/${toBech32Address(token.collection.address)}/${token.tokenId}/sell`);
   }
 
@@ -93,7 +85,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
       <Box className={classes.container}>
         {/* Collection name */}
         <Typography className={classes.collectionName}>
-          {token?.collection?.name ?? ""}{" "}
+          {token.collection?.name ?? ""}{" "}
           {/* <VerifiedBadge className={classes.verifiedBadge} /> */}
         </Typography>
 
@@ -107,33 +99,35 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
             </InfoBox> */}
 
             <InfoBox topLabel="ZAPs" bottomLabel="Like it? ZAP it!">
-              <ZapWidget onZap={tokenUpdatedCallback} token={token} />
+              <ZapWidget variant="bold" onZap={tokenUpdatedCallback} token={token} />
             </InfoBox>
           </Box>
-          <ArkBox className={classes.saleInfoContainer}>
-            {priceInfos.primaryPrice && <PrimaryPrice data={priceInfos.primaryPrice} blockTime={blockTime} currentBlock={currentBlock} />}
-            <Box className={classes.secondaryInfo}>
-              {priceInfos.secondaryPrice1 && <SecondaryPrice data={priceInfos.secondaryPrice1} blockTime={blockTime} currentBlock={currentBlock} mr={2} />}
-              {priceInfos.secondaryPrice2 && <SecondaryPrice data={priceInfos.secondaryPrice2} blockTime={blockTime} currentBlock={currentBlock} />}
-            </Box>
-          </ArkBox>
-          <Box display="flex" className={classes.buttonBox}>
+          {priceInfos.primaryPrice &&
+            <ArkBox className={classes.saleInfoContainer}>
+              <PrimaryPrice data={priceInfos.primaryPrice} blockTime={blockTime} currentBlock={currentBlock} />
+              <Box className={classes.secondaryInfo}>
+                {priceInfos.secondaryPrice1 && <SecondaryPrice data={priceInfos.secondaryPrice1} blockTime={blockTime} currentBlock={currentBlock} mr={2} />}
+                {priceInfos.secondaryPrice2 && <SecondaryPrice data={priceInfos.secondaryPrice2} blockTime={blockTime} currentBlock={currentBlock} />}
+              </Box>
+            </ArkBox>
+          }
+          <Box display="flex" className={cls(classes.buttonBox, { overlap: !!priceInfos.primaryPrice })}>
             {!isOwnToken && (
               <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onBid}>
                 Place Bid
               </FancyButton>
             )}
-            {isOwnToken && token?.bestAsk && (
+            {isOwnToken && token.bestAsk && (
               <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onCancel}>
                 Cancel Listing
               </FancyButton>
             )}
-            {isOwnToken && token?.collection && (
+            {isOwnToken && token.collection && (
               <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onSell}>
                 {token.bestAsk ? "Lower Price" : "Sell"}
               </FancyButton>
             )}
-            {!isOwnToken && token?.bestAsk && (
+            {!isOwnToken && token.bestAsk && (
               <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onBuy}>
                 Buy Now
               </FancyButton>
@@ -177,15 +171,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: '30px',
   },
   buttonBox: {
-    transform: "translateY(-50%)",
-    width: "100%",
-    padding: theme.spacing(0, 4),
     display: "flex",
-    [theme.breakpoints.down("sm")]: {
-      marginTop: theme.spacing(3),
-      transform: "translateY(0%)",
-      padding: theme.spacing(0),
-    },
+    width: "100%",
+    marginTop: theme.spacing(3),
+    '&.overlap': {
+      marginTop: theme.spacing(0),
+      padding: theme.spacing(0, 4),
+      transform: "translateY(-50%)",
+      [theme.breakpoints.down("sm")]: {
+        marginTop: theme.spacing(3),
+        padding: theme.spacing(0),
+        transform: "translateY(0%)",
+      },
+    }
   },
   button: {
     flex: 1,
@@ -220,8 +218,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       color: "#003340",
     },
     "&:hover": {
+      backgroundColor: darken("#FFDF6B", 0.15),
       "& .MuiButton-label": {
-        color: "#DEFFFF",
+        color: darken("#003340", 0.15),
       },
     },
   },

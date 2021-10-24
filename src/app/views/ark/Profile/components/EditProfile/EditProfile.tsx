@@ -254,7 +254,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
               <ArkInput
                 placeholder="BearCollector" error={errors.username} value={inputValues.username}
                 label="Display Name" onValueChange={(value) => updateInputs("username")(value)}
-                instruction="This is how other users identify you on ARK."
+                instruction="This will be shown to other users in place of your wallet address."
               />
               <ArkInput
                 placeholder="bearsarecute@example.com" error={errors.email} value={inputValues.email}
@@ -293,7 +293,7 @@ const EditProfile: React.FC<Props> = (props: Props) => {
               <ArkInput
                 placeholder="My spirit animal's a bear" error={errors.bio} value={inputValues.bio}
                 label="BIO" onValueChange={(value) => updateInputs("bio")(value)} multiline={true}
-                instruction="Write a little about yourself." wordLimit={160}
+                instruction="This will be shown on when others view your profile." wordLimit={160}
               />
 
               <Typography className={classes.social}>SOCIALS</Typography>

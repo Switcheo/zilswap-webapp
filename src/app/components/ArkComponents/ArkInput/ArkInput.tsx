@@ -53,7 +53,7 @@ const ArkInput: React.FC<Props> = (props: Props) => {
           <Fragment>
             {typeof label === "string" ? (<Typography className={classes.label}>{label}</Typography>) : label}
             {instruction && (
-              <FormHelperText className={cls(classes.instruction, classes.extraMargin)}>{instruction}
+              <FormHelperText className={cls(classes.instruction)}>{instruction}
                 {wordLimit && (<Typography className={cls(classes.wordLimit)}> {value.length || "0"}/{wordLimit}</Typography>)}
               </FormHelperText>
             )}
@@ -112,7 +112,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontFamily: 'Avenir Next',
     fontWeight: 700,
     fontSize: 10,
-    margin: 0,
+    margin: theme.spacing(0.5, 0),
   },
   hiddenText: {
     visibility: "hidden"
@@ -130,9 +130,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   focusAdornment: {
     color: theme.palette.action?.selected
-  },
-  extraMargin: {
-    marginBottom: theme.spacing(.5),
   },
   wordLimit: {
     float: "right",

@@ -6,7 +6,7 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import groupBy from "lodash/groupBy";
 import { useSelector } from "react-redux";
-import { ArkPaginator } from "app/components";
+import { ArkBox, ArkPaginator } from "app/components";
 import { Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useBlockTime, useValueCalculators } from "app/utils";
@@ -26,17 +26,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "column",
     marginTop: theme.spacing(3),
-    borderRadius: 12,
-    border: theme.palette.border,
-    background: theme.palette.type === "dark" ? "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)" : "transparent",
-    padding: theme.spacing(3, 5),
+    padding: theme.spacing(2, 5),
     [theme.breakpoints.down("sm")]: {
       padding: theme.spacing(1, 2),
     },
   },
   container: {
     width: '100%',
-    marginTop: theme.spacing(2),
+    marginTop: theme.spacing(1),
   },
   headerCell: {
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
@@ -61,6 +58,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderBottom: theme.palette.border,
     padding: "8px 16px",
   },
+  emptyRow: {
+    paddingTop: theme.spacing(3),
+    borderBottom: 'none',
+    textAlign: 'center',
+    fontSize: 14,
+    opacity: 0.8,
+  }
 }));
 
 type CellAligns = "right" | "left" | "inherit" | "center" | "justify" | undefined;
@@ -96,7 +100,9 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
 
   if (currentBlock === 0) return null // TODO: use loading gif instead
 
-  return <Box className={classes.root}>
+  const headers = showItem ? [ITEM_HEADER, ...HEADERS] : HEADERS
+
+  return <ArkBox variant="base" className={classes.root}>
     <Box className={classes.container}>
     {
       isMobile ?
@@ -111,12 +117,11 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
         :
         (
         <Fragment>
-
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
-                  {(showItem ? [ITEM_HEADER, ...HEADERS] : HEADERS).map((header, index) => (
+                  {headers.map((header, index) => (
                     <TableCell
                       key={`offers-${index}`}
                       className={classes.headerCell}
@@ -131,6 +136,14 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
                 {bids.slice(pageNumber * ITEMS_PER_PAGE, (pageNumber + 1) * ITEMS_PER_PAGE).map((data) => (
                   <BidRow bid={data} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} key={data.id} />
                 ))}
+                {
+                  bids.length === 0 &&
+                    <TableRow>
+                      <TableCell colSpan={headers.length} className={classes.emptyRow}>
+                        No bid data yet.
+                      </TableCell>
+                    </TableRow>
+                }
               </TableBody>
             </Table>
           </TableContainer>
@@ -139,7 +152,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
         )
     }
     </Box>
-  </Box>
+  </ArkBox>
 };
 
 export default ArkBidsTable;

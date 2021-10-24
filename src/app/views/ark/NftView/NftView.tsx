@@ -96,7 +96,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
         {/* Nft image and main info */}
         <Container disableGutters className={classes.imageInfoContainer}>
           <NftImage className={classes.nftImage} token={token} rounded={true} />
-          <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} tokenUpdatedCallback={() => getNFTDetails()} />
+          {token && <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} tokenUpdatedCallback={() => getNFTDetails()} />}
         </Container>
 
         {/* About info and trait table */}
@@ -149,10 +149,16 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
 
 
         {/*Ark tabs */}
-        <ArkTab mt={3} setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids",/* "Price History", "Event History" */]} />
+        <ArkTab mt={3} setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids", "Price History", "Event History"]} />
 
         {currentTab === "Bids" && (
           <ArkBidsTable bids={bids} showItem={false} />
+        )}
+        {currentTab === "Price History" && (
+          <ArkBox variant="base" className={classes.comingSoon}>Coming Soon.</ArkBox>
+        )}
+        {currentTab === "Event History" && (
+          <ArkBox variant="base" className={classes.comingSoon}>Coming Soon.</ArkBox>
         )}
         {/* Price History */}
         {/* Event History */}
@@ -307,6 +313,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("sm")]: {
       flexDirection: "column",
     }
+  },
+  comingSoon: {
+    margin: theme.spacing(3, 0),
+    padding: theme.spacing(3),
+    textAlign: 'center',
+    fontSize: 14,
+    opacity: 0.8,
   }
 }));
 
