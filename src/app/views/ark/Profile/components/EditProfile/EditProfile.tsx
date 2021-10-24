@@ -398,9 +398,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     opacity: "50%",
     borderRadius: "12px",
-    paddingLeft: 0,
+    paddingLeft: theme.spacing(1),
     fontFamily: "'Raleway', sans-serif",
-    marginBottom: theme.spacing(1),
+    marginBottom: theme.spacing(3),
   },
   extraMargin: {
     marginLeft: theme.spacing(2),

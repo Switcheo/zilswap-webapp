@@ -194,9 +194,8 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               <Typography variant="h2">
                 {viewProfile?.username || truncateAddress(address || '')}
                 {isConnectedUser && (
-                  <Box className={classes.editIcon}>
+                  <Box className={classes.editIcon} onClick={() => setShowEdit(true)}>
                     <EditIcon
-                      onClick={() => setShowEdit(true)}
                       className={cls(classes.editable)}
                     />
                   </Box>
@@ -216,7 +215,7 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           </Box>
 
           {
-            isConnectedUser && !viewProfile?.bio &&
+            isConnectedUser && address && !viewProfile?.bio &&
             <Box className={classes.bioBox} padding={3}>
               <Typography
                 onClick={() => setShowEdit(true)}
@@ -229,7 +228,12 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           {
             viewProfile?.bio &&
             <Box className={classes.bioBox} padding={3}>
-              <Typography>{viewProfile?.bio}</Typography>
+              <Typography>
+                {viewProfile?.bio}
+                <Typography component="span" style={{ marginLeft: 8, cursor: "pointer" }} onClick={() => setShowEdit(true)}>
+                  <u>Edit</u>
+                </Typography>
+              </Typography>
             </Box>
           }
 
