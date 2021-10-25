@@ -126,6 +126,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       case "websiteUrl":
         if (input.length < 2) return "Minimum of 2 characters";
         if (input.length > 253) return "Maximum of 253 characters";
+        if (!input.match(/^(http|https):\/\//g)) return "Invalid URL, it should begin with http:// or https://";
         return ""
       default: return "";
     }
@@ -314,7 +315,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                   error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram"
                   onValueChange={(value) => updateInputs("instagramHandle")(value)} />
                 <ArkInput
-                  inline={true} placeholder="www.imannftartist.com" error={errors.websiteUrl} value={inputValues.websiteUrl}
+                  inline={true} placeholder="https://www.example.com" error={errors.websiteUrl} value={inputValues.websiteUrl}
                   label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
                 />
                 <FancyButton
