@@ -47,7 +47,7 @@ interface ListingLimits {
 };
 
 const initialLimits = {
-  registered: 6,
+  registered: 40,
   others: 2,
 };
 
@@ -73,14 +73,21 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
     const queryRegexp = !!searchQuery ? new RegExp(searchQuery, "i") : undefined;
     const result = Object.values(tokenState.tokens)
       .sort((lhs, rhs) => {
-        const lhsRewardValue = tokenState.values[lhs.address]?.rewardsPerSecond ?? BIG_ZERO;
-        const rhsRewardValue = tokenState.values[rhs.address]?.rewardsPerSecond ?? BIG_ZERO;
+        const lhsValues = tokenState.values[lhs.address];
+        const rhsValues = tokenState.values[rhs.address];
+
+        const lhsTVL = lhsValues?.poolLiquidity ?? BIG_ZERO;
+        const rhsTVL = rhsValues?.poolLiquidity ?? BIG_ZERO;
+
+        const core = ['ZWAP', 'gZIL', 'XSGD']
+        if (core.includes(lhs.symbol) || core.includes(rhs.symbol))
+          return rhsTVL.comparedTo(lhsTVL);
+
+        const lhsRewardValue = lhsValues ? lhsValues.rewardsPerSecond.dividedBy(lhsValues.poolLiquidity) : BIG_ZERO;
+        const rhsRewardValue = rhsValues ? rhsValues.rewardsPerSecond.dividedBy(rhsValues.poolLiquidity) : BIG_ZERO;
 
         if (!lhsRewardValue.eq(rhsRewardValue))
           return rhsRewardValue.comparedTo(lhsRewardValue);
-
-        const lhsTVL = tokenState.values[lhs.address]?.poolLiquidity ?? BIG_ZERO;
-        const rhsTVL = tokenState.values[rhs.address]?.poolLiquidity ?? BIG_ZERO;
 
         return rhsTVL.comparedTo(lhsTVL);
       })
