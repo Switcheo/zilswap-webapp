@@ -2,16 +2,17 @@ import { LocalStorageKeys, COLLECTION_NFT_PER_PAGE } from "app/utils/constants";
 import { SortBy, MarketPlaceActionTypes } from "./actions";
 import { MarketPlaceState } from "./types";
 
-const loadSavedAccessToken = () => {
+const loadSaved = (key: string) => {
   try {
-    let saved = localStorage.getItem(LocalStorageKeys.ArkAccessToken)
+    let saved = localStorage.getItem(key)
     return JSON.parse(saved!);
   } catch (error) {
     return undefined;
   }
 }
 
-const savedAccessToken = loadSavedAccessToken()
+const savedAccessToken = loadSaved(LocalStorageKeys.ArkAccessToken);
+const acceptTerms = loadSaved(LocalStorageKeys.ArkAcceptTerms);
 
 const initial_state: MarketPlaceState = {
   collections: {},
@@ -36,6 +37,7 @@ const initial_state: MarketPlaceState = {
   profile: undefined,
   collectionTraits: {},
   pendingTxs: {},
+  acceptTerms: !!acceptTerms,
 }
 
 const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPlaceState => {
@@ -116,6 +118,16 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
         pendingTxs,
       }
     }
+    case MarketPlaceActionTypes.TOGGLE_ACCEPT_TERMS:
+      if (state.acceptTerms) localStorage.removeItem(LocalStorageKeys.ArkAcceptTerms);
+      else {
+        console.log("saving terms", !state.acceptTerms);
+        localStorage.setItem(LocalStorageKeys.ArkAcceptTerms, JSON.stringify("true"));
+      }
+      return {
+        ...state,
+        acceptTerms: !state.acceptTerms,
+      }
     default:
       return state;
   }

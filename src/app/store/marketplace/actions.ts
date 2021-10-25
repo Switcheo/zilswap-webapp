@@ -24,11 +24,12 @@ export const MarketPlaceActionTypes = {
   UPDATE_COLLECTION_TRAITS: "ARK:UPDATE_COLLECTION_TRAITS",
   UPDATE_EXCHANGE_INFO: "ARK:UPDATE_EXCHANGE_INFO",
   RELOAD_TOKEN_LIST: "ARK:RELOAD_TOKEN_LIST",
-  
+
   UPDATE_BIDS_TABLE_INFO: "ARK:UPDATE_BIDS_TABLE_INFO",
   REMOVE_PENDING_TX: "ARK:REMOVE_PENDING_TX",
   ADD_PENDING_TX: "ARK:ADD_PENDING_TX",
   LISTEN_PENDING_TX: "ARK:LISTEN_PENDING_TX",
+  TOGGLE_ACCEPT_TERMS: "TOGGLE_ACCEPT_TERMS",
 }
 
 export function initialize() {
@@ -116,5 +117,10 @@ export function listenPendingTx(payload: ArkPendingTx) {
   return {
     type: MarketPlaceActionTypes.LISTEN_PENDING_TX,
     payload
+  }
+}
+export function toggleAcceptTerms() {
+  return {
+    type: MarketPlaceActionTypes.TOGGLE_ACCEPT_TERMS,
   }
 }
