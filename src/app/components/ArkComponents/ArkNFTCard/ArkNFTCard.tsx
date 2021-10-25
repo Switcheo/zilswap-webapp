@@ -18,7 +18,6 @@ import { Nft } from "app/store/marketplace/types";
 import { MarketPlaceState, OAuth, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { toHumanNumber, useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
-import { ZIL_ADDRESS } from "app/utils/constants";
 import { ArkClient } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { toBech32Address } from "core/zilswap";
@@ -53,7 +52,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     const minsLeft = expiryTime.diff(currentTime, "minutes");
     const secLeft = expiryTime.diff(currentTime, "seconds");
 
-    const askToken = tokens[token.bestAsk.price.address] || tokens[ZIL_ADDRESS];
+    const askToken = tokens[toBech32Address(token.bestAsk.price.address)];
     if (!askToken) return undefined;
 
     const placement = new BigNumber(10).pow(askToken.decimals);
@@ -67,7 +66,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
 
     const expiryTime = blockTime.add((token.bestBid?.expiry - currentBlock) / BLOCKS_PER_MINUTE, "minutes");
     const timeLeft = expiryTime.fromNow();
-    const bidToken = tokens[toBech32Address(token.bestBid?.price.address)];
+    const bidToken = tokens[toBech32Address(token.bestBid.price.address)];
     if (!bidToken) return undefined;
 
     const placement = new BigNumber(10).pow(bidToken.decimals);
