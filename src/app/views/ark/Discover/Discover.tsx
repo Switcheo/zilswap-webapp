@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
@@ -14,8 +13,8 @@ import { Collection } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
-import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
-
+import { ReactComponent as UncheckedIcon } from "./unchecked-icon.svg";
+import { ReactComponent as VerifiedBadge } from "./verified-badge.svg"
 
 interface SearchFilters {
   [prop: string]: boolean;
@@ -107,7 +106,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           endAdornment={
             <InputAdornment position="end">
               <FormControl component="fieldset" className={classes.formControl}>
-                <FormLabel className={classes.formLabel}>By</FormLabel>
+                <FormLabel focused className={classes.formLabel}>By</FormLabel>
                 {SEARCH_FILTERS.map((filter) => (
                   <FormControlLabel
                     key={filter}
@@ -118,7 +117,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                         className={classes.radioButton}
                         onChange={(e) => handleSearchFilter(filter)}
                         checkedIcon={<CheckedIcon />}
-                        icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                        icon={<UncheckedIcon />}
                         disableRipple
                         checked={searchFilter[filter]}
                       // checked={false}
@@ -151,6 +150,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
               {collections.map((collection) => {
                 const collectionStats = ArkClient.parseCollectionStats(collection);
+                console.log('collectionStats', collectionStats)
                 return (
                   <TableRow key={collection.address} className={classes.tableRow} component={RouterLink} to={`/ark/collections/${toBech32Address(collection.address)}`}>
                     <TableCell className={cls(classes.bodyCell, classes.firstCell)}>
@@ -228,7 +228,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     paddingLeft: "8px",
     paddingRight: "8px",
     marginTop: theme.spacing(2),
-    borderColor: "rgba(222, 255, 255, 0.5)",
+    borderColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "rgba(0, 51, 64, 0.2)",
     marginBottom: theme.spacing(5),
   },
   inputText: {
@@ -242,9 +242,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignSelf: "center",
     fontWeight: 700,
     marginRight: theme.spacing(2),
-    "&.Mui-focused": {
-      color: "rgba(222, 255, 255, 0.5)",
-    },
   },
   formControlLabel: {
     "& .MuiTypography-root": {
@@ -254,12 +251,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   radioButton: {
     padding: "6px",
+    '& svg > path': {
+      fill: theme.palette.text!.primary,
+    },
     "&:hover": {
       background: "transparent!important",
     },
   },
   titleDescription: {
-    color: "#26D4FF",
+    color: theme.palette.type === "dark" ? "#26D4FF" : "#003340",
     marginBottom: "20px",
     "-webkit-text-stroke-color": "rgba(107, 225, 255, 0.2)",
     "-webkit-text-stroke-width": "1px",
@@ -278,21 +278,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderBottom: 'none',
   },
   tableRow: {
-    animation: `$slideEffect 1000ms linear`,
     padding: 12,
     height: 72,
-  },
-  "@keyframes slideEffect": {
-    "100%": { transform: " translateY(0%)" }
+    background: theme.palette.type === "dark" ? "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)" : "rgba(222, 255, 255, 0.5)",
   },
   // TODO: reduce bodyCell, percentCell and numberCell
   bodyCell: {
-    extend: 'text',
     padding: "8px 16px",
     maxWidth: 200,
     margin: 0,
-    borderTop: "1px solid rgba(222, 255, 255, 0.5)",
-    borderBottom: "1px solid rgba(222, 255, 255, 0.5)",
+    borderTop: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid rgba(107, 225, 255, 0.2)",
+    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid rgba(107, 225, 255, 0.2)",
     fontFamily: "'Raleway', sans-serif",
     fontWeight: 900,
     fontSize: "20px",
@@ -300,34 +296,21 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.text?.primary,
   },
   percentCell: {
-    extend: 'text',
-    padding: "8px 16px",
-    maxWidth: 200,
-    margin: 0,
-    borderTop: "1px solid rgba(222, 255, 255, 0.5)",
-    borderBottom: "1px solid rgba(222, 255, 255, 0.5)",
+    extend: 'bodyCell',
     fontSize: 18,
-    lineHeight: "16px",
     color: '#00FFB0',
   },
   numberCell: {
-    extend: 'text',
-    padding: "8px 16px",
-    maxWidth: 200,
-    margin: 0,
-    borderTop: "1px solid rgba(222, 255, 255, 0.5)",
-    borderBottom: "1px solid rgba(222, 255, 255, 0.5)",
+    extend: 'bodyCell',
     fontSize: 18,
-    lineHeight: "16px",
-    color: theme.palette.text?.primary,
   },
   firstCell: {
-    borderLeft: "1px solid rgba(222, 255, 255, 0.5)",
+    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid rgba(107, 225, 255, 0.2)",
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
   },
   lastCell: {
-    borderRight: "1px solid rgba(222, 255, 255, 0.5)",
+    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid rgba(107, 225, 255, 0.2)",
     borderTopRightRadius: 12,
     borderBottomRightRadius: 12,
   },
