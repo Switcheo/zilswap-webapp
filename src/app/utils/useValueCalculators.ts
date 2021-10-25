@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { toBech32Address } from "@zilliqa-js/crypto";
+import { normaliseAddress, toBech32Address } from "@zilliqa-js/crypto";
 import { TokenInfo, TokenState } from "app/store/types";
 import { BIG_ZERO, ZIL_ADDRESS } from "./constants";
 
@@ -22,7 +22,7 @@ export const valueCalculators = {
   },
 
   usd: (tokenState: TokenState, bech32Address: string, rawAmount: string) => {
-    const token = tokenState.tokens[toBech32Address(bech32Address)]
+    const token = tokenState.tokens[toBech32Address(normaliseAddress(bech32Address))]
     if (!token) return BIG_ZERO
     return valueCalculators.amount(tokenState.prices, token, new BigNumber(rawAmount))
   }

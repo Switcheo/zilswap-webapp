@@ -6,12 +6,13 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { useHistory, useRouteMatch } from "react-router";
+import { BN_ZERO } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet, getTokens, getMarketplace } from "app/saga/selectors";
 import { Nft, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask, bnOrZero, useToaster } from "app/utils";
+import { useAsyncTask, bnOrZero, useToaster, useValueCalculators, toHumanNumber } from "app/utils";
 import { ArkClient, logger } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { ZIL_ADDRESS } from "app/utils/constants";
@@ -33,6 +34,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const { wallet } = useSelector(getWallet);
   const tokenState = useSelector(getTokens);
   const { exchangeInfo } = useSelector(getMarketplace);
+  const valueCalculators = useValueCalculators();
   const match = useRouteMatch<{ id: string, collection: string }>();
   const [open, setOpen] = useState(false)
   const [runConfirmSell, loading, error] = useAsyncTask("confirmSell", () => setOpen(false));
@@ -194,6 +196,13 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     });
   };
 
+  const sellUsdValue = useMemo(() => {
+    if (!inputValues.sellToken) return BN_ZERO;
+    const input = bnOrZero(inputValues.buyNowPrice).shiftedBy(inputValues.sellToken.decimals);
+
+    return valueCalculators.usd(tokenState, inputValues.sellToken.address, input.toString(10));
+  }, [inputValues, valueCalculators, tokenState])
+
   if (!isOwnToken) {
     return <></>
   }
@@ -258,6 +267,9 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                       onCurrencyChange={onCurrencyChange}
                     />
                   </Box>
+                  <Text variant="body2" align="left" marginTop={1} marginLeft={2}>
+                    ≈ ${toHumanNumber(sellUsdValue, 2)}
+                  </Text>
                 </Box>
               }
 
