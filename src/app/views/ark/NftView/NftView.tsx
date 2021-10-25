@@ -104,7 +104,6 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
   }
 
   const isCancelling = token?.bestAsk && !!Object.values(pendingTxs).find(tx => tx.chequeHash === token?.bestAsk?.chequeHash);
-  console.log("cancelling", isCancelling, token?.bestAsk, pendingTxs)
 
   const breadcrumbs = [
     { path: "/ark/collections", value: "Collections" },
