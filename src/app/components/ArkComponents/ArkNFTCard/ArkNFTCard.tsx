@@ -67,7 +67,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
 
     const expiryTime = blockTime.add((token.bestBid?.expiry - currentBlock) / BLOCKS_PER_MINUTE, "minutes");
     const timeLeft = expiryTime.fromNow();
-    const bidToken = tokens[token.bestBid?.price.address] || tokens[ZIL_ADDRESS];
+    const bidToken = tokens[toBech32Address(token.bestBid?.price.address)];
     if (!bidToken) return undefined;
 
     const placement = new BigNumber(10).pow(bidToken.decimals);
@@ -132,8 +132,10 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                 </Typography>
               )} */}
               {bestBid && (
-                <Typography className={classes.lastOffer}>
-                  Last Offer {toHumanNumber(bestBid.amount)} {bestBid.bidToken.symbol}
+                <Typography className={classes.secondaryPrice}>
+                  <Typography className={classes.secondaryPriceLabel}>Best</Typography>
+                  <Typography component="span" style={{ fontWeight: 700 }}>{toHumanNumber(bestBid.amount)}</Typography>
+                  {bestBid.bidToken.symbol}
                 </Typography>
               )}
             </Box>
@@ -300,6 +302,29 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: "transparent",
     position: "relative",
     overflow: "initial",
+    "& .MuiCardContent-root:last-child": {
+      paddingBottom: theme.spacing(1.5),
+    },
+    [theme.breakpoints.down("sm")]: {
+      minWidth: "240px",
+    },
+  },
+  cardHeader: {
+    borderRadius: '10px 10px 0 0',
+    border: theme.palette.border,
+    borderBottom: "none",
+    display: "flex",
+    justifyContent: "space-between",
+    padding: theme.spacing(1.7, 1.3),
+  },
+  cardContent: {
+    marginLeft: "-16px",
+    marginRight: "-16px",
+  },
+  cardActionArea: {
+    border: "none",
+    borderRadius: 0,
+    paddingBottom: 0,
     background: `linear-gradient(to top, transparent 0%, ${borderColor(theme)} 100%)`,
     '&:before': {
       content: '',
@@ -310,12 +335,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       right: -10,
       position: 'absolute',
       zIndex: -1,
-    },
-    "& .MuiCardContent-root:last-child": {
-      paddingBottom: theme.spacing(1.5),
-    },
-    [theme.breakpoints.down("sm")]: {
-      minWidth: "240px",
     },
   },
   extrasButton: {
@@ -335,7 +354,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   borderBox: {
     borderRadius: '10px 10px 0 0',
     margin: '1px 1px 0 1px',
-    background: theme.palette.background.default,
+    // background: 'theme.palette.background.default',
   },
   imageContainer: {
     borderRadius: '0px 0px 8px 8px',
@@ -366,11 +385,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       lineHeight: "40px",
     },
   },
-  cardHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: theme.spacing(1.7, 1.3),
-  },
   bid: {
     fontFamily: "'Raleway', sans-serif",
     fontWeight: 900,
@@ -386,15 +400,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginLeft: "-2px",
     marginRight: "2px",
   },
-  lastOffer: {
-    color: theme.palette.primary.light,
+  secondaryPrice: {
+    display: 'flex',
+    color: theme.palette.text!.primary,
     fontSize: "12px",
     lineHeight: "14px",
+    '& > *': {
+      marginRight: 3,
+    }
   },
-  cardContent: {
-    marginLeft: "-16px",
-    marginRight: "-16px",
-    paddingBottom: 0,
+  secondaryPriceLabel: {
+    opacity: 0.6,
+    marginRight: 6,
   },
   title: {
     fontFamily: "'Raleway', sans-serif",
@@ -464,10 +481,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     textOverflow: "ellipsis",
     overflow: "hidden",
     whiteSpace: "nowrap"
-  },
-  cardActionArea: {
-    borderRadius: 0,
-    border: "none",
   },
   popper: {
     backgroundColor: "#003340",

@@ -84,7 +84,7 @@ interface HeadersProp {
 const ITEM_HEADER: HeadersProp = { align: 'left', value: "Item" };
 const HEADERS: HeadersProp[] = [
   { align: "center", value: "Date" },
-  { align: "right", value: "Price" },
+  { align: "center", value: "Price" },
   { align: "center", value: "Versus Floor" },
   { align: "center", value: "Bidder" },
   { align: "center", value: "Expires" },
