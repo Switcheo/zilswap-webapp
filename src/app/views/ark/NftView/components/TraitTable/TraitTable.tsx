@@ -58,13 +58,14 @@ const TraitTable: React.FC<Props> = (props: Props) => {
       })
 
       token.traitValues.forEach((trait) => {
-        let currentTrait = newTraits[trait.traitType!.trait];
+        const currentTrait = newTraits[trait.traitType!.trait];
         currentTrait.rarity = currentTrait.values[trait.value];
         currentTrait.value = trait.value;
         currentTrait.type = trait.traitType?.trait;
         currentTrait.total = (Object.values(currentTrait.values) as number[]).reduce((prev, cur) => prev + cur, 0);
 
-        currentTrait.percentage = new BigNumber(currentTrait.values[trait.value]).div(currentTrait.total).times(100).toFixed(1);
+        const percent = new BigNumber(currentTrait.values[trait.value]).div(currentTrait.total);
+        currentTrait.percentage = percent.shiftedBy(2).toFormat(percent.lt(1) ? 2 : 0);
       })
       setTraits(newTraits);
       setTraitCategory(categories);
