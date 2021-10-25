@@ -54,6 +54,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     maxWidth: 100,
     textOverflow: "ellipsis",
     overflow: "hidden",
+    display: "block",
     whiteSpace: "nowrap"
   },
   link: {

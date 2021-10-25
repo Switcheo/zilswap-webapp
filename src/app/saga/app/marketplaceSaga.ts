@@ -148,7 +148,7 @@ function* listenPendingTx(action: any) {
   yield put(actions.MarketPlace.addPendingTx(pendingTx));
 
   try {
-    yield call(waitForTx, pendingTx.txHash, 500, 2000);
+    yield call(waitForTx, pendingTx.txHash, 500, 1000);
 
     yield delay(3000);
 

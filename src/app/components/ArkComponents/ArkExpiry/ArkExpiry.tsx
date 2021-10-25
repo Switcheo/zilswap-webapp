@@ -91,10 +91,10 @@ const ArkExpiry: React.FC<Props> = (props: Props) => {
         <AccordionDetails className={classes.accordionDetail}>
           <Box className={classes.expiryBox}>
             <MenuList>
-              {expiryOptions.map((option) => {
+              {expiryOptions.map((option, index) => {
                 return (
                   <MenuItem
-                    key={option.value}
+                    key={index}
                     onClick={() => onSelectOption(option)}
                     value={option.text}
                     className={cls(classes.menuItem, {
