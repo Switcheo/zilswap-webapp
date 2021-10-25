@@ -102,7 +102,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
   const [pageNumber, setPageNumber] = useState<number>(0);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [blockTime, currentBlock] = useBlockTime();
+  const [blockTime, currentBlock, currentTime] = useBlockTime();
 
   const handlePageChange = (page: number) => {
     setPageNumber(page - 1)
@@ -168,6 +168,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
                   <BidRow
                     onAction={appendPendingTx}
                     bid={data}
+                    currentTime={currentTime}
                     blockTime={blockTime}
                     currentBlock={currentBlock}
                     showItem={showItem}

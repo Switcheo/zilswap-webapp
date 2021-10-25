@@ -1,5 +1,6 @@
 import React, { Fragment, useState, useMemo } from "react";
-import { Avatar, BoxProps, CircularProgress, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
+import { Avatar, Box, BoxProps, CircularProgress, IconButton,
+  ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
@@ -25,6 +26,7 @@ interface Props extends BoxProps {
   showItem: boolean
   bid: Cheque
   relatedBids?: Cheque[]
+  currentTime: Dayjs
   blockTime: Dayjs
   currentBlock: number
   onAction?: (matchedCheque: Cheque, observedTx: ObservedTx) => void;
@@ -53,7 +55,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     letterSpacing: '0.1px',
   },
   amount: {
-    fontWeight: 800,
+    fontWeight: 700,
   },
   cell: {
     color: theme.palette.text?.primary,
@@ -83,6 +85,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: "0",
     maxWidth: 200,
     margin: 0
+  },
+  doubleInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    '& > span:last-child': {
+      fontSize: 10,
+      opacity: 0.6,
+      '&.large': {
+        fontSize: 12,
+      }
+    }
   },
   withBorder: {
     '&:not(:last-child)': {
@@ -138,7 +153,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const Row: React.FC<Props> = (props: Props) => {
-  const { bid: baseBid, relatedBids = [], currentBlock, blockTime, showItem, onAction } = props;
+  const { bid: baseBid, relatedBids = [], currentTime: now, currentBlock, blockTime, showItem, onAction } = props;
   const [expand, setExpand] = useState(false);
   const classes = useStyles();
   const toaster = useToaster();
@@ -149,7 +164,7 @@ const Row: React.FC<Props> = (props: Props) => {
   const [runCancelBid, cancelLoading] = useAsyncTask(`cancelBid-${baseBid.id}`, e => toaster(e?.message));
   const [runAcceptBid, acceptLoading] = useAsyncTask(`acceptBid-${baseBid.id}`, e => toaster(e?.message));
   const userAddress = walletState.wallet?.addressInfo.byte20.toLowerCase()
-  
+
   const isPendingTx = useMemo(() => {
     for (const pendingTx of Object.values(pendingTxs)) {
       if (pendingTx.chequeHash === baseBid.chequeHash)
@@ -251,7 +266,7 @@ const Row: React.FC<Props> = (props: Props) => {
         nftAddress: bid.token.collection.address,
         tokenId: bid.token.tokenId.toString(10),
       }, zilswap);
-      
+
       const observedTx = {
         hash: execTradeResult.id!,
         deadline: Number.MAX_SAFE_INTEGER,
@@ -274,6 +289,17 @@ const Row: React.FC<Props> = (props: Props) => {
           const priceAmount = new BigNumber(bid.price.amount).shiftedBy(-priceToken.decimals)
           const usdValue = valueCalculators.amount(tokenState.prices, priceToken, new BigNumber(bid.price.amount));
 
+          const getExpiryText = () => {
+            if (expiryTime.isBefore(now)) return expiryTime.format("D MMM YYYY")
+            const hours = expiryTime.diff(now, 'hours')
+            if (hours > 48) return expiryTime.format("D MMM YYYY")
+            if (hours > 24) return 'Tomorrow'
+            if (hours > 1) return `In ${hours} hours`
+            const mins = expiryTime.diff(now, 'minutes')
+            if (mins > 5) return `In ${mins} minutes`
+            return 'In a few minutes'
+          }
+
           return <TableRow key={bid.id} className={cls(classes.row, { [classes.firstRow]: index === 0, [classes.slideAnimation]: index > 0 })}>
             {
               showItem &&
@@ -293,16 +319,24 @@ const Row: React.FC<Props> = (props: Props) => {
               {dayjs(bid.createdAt).format("D MMM YYYY")}
             </TableCell>
             <TableCell align="right" className={cls(classes.bodyCell, { [classes.withBorder]: expand, [classes.firstCell]: !showItem })}>
-              <strong className={classes.amount}>
-                {priceAmount.toFormat(priceAmount.gte(1) ? 2 : priceToken.decimals)}
-              </strong> {priceToken.symbol} (${usdValue.toFormat(2)})
+              <Box className={classes.doubleInfo}>
+                <Box component="span">
+                  <strong className={classes.amount}>
+                    {priceAmount.toFormat(priceAmount.gte(1) ? 2 : priceToken.decimals)}
+                  </strong> {priceToken.symbol}
+                </Box>
+                <Box className="large" component="span">${usdValue.toFormat(2)}</Box>
+              </Box>
             </TableCell>
-            <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>NYI</TableCell>
+            <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>-</TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>
               <ArkOwnerLabel user={bid.initiator} address={bid.initiatorAddress} />
             </TableCell>
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>
-              {expiryTime.format("D MMM YYYY")}
+              <Box className={classes.doubleInfo}>
+                <Box component="span">{getExpiryText()}</Box>
+                <Box component="span">Block {bid.expiry}</Box>
+              </Box>
             </TableCell>
             <TableCell align="center" className={cls(classes.actionCell, classes.lastCell, { [classes.withBorder]: expand })}>
               {status === 'Active' && bid.initiatorAddress === userAddress &&

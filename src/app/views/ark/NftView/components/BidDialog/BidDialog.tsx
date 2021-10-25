@@ -499,7 +499,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: 12,
     color: theme.palette.text!.primary,
     marginLeft: 18,
-    marginTop: theme.spacing(-3.5),
+    marginTop: theme.spacing(-3.7),
     marginBottom: theme.spacing(1),
   },
   bestBidLabel: {

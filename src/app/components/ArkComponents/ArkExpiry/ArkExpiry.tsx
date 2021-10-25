@@ -267,7 +267,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   blockHeightText: {
     fontFamily: "Avenir Next",
-    marginTop: 2,
+    marginTop: 3,
     fontSize: 12,
     lineHeight: 1,
   },
