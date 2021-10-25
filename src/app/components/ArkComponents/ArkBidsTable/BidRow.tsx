@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useMemo } from "react";
 import { Avatar, BoxProps, CircularProgress, IconButton, ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
@@ -8,6 +8,7 @@ import BigNumber from "bignumber.js"
 import dayjs, { Dayjs } from "dayjs";
 import { useSelector } from "react-redux";
 import { darken } from '@material-ui/core/styles';
+import { ObservedTx } from "zilswap-sdk";
 import { AppTheme } from "app/theme/types";
 import { Cheque, WalletState } from "app/store/types";
 import { bnOrZero, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
@@ -26,6 +27,7 @@ interface Props extends BoxProps {
   relatedBids?: Cheque[]
   blockTime: Dayjs
   currentBlock: number
+  onAction?: (matchedCheque: Cheque, observedTx: ObservedTx) => void;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -136,17 +138,26 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const Row: React.FC<Props> = (props: Props) => {
-  const { bid: baseBid, relatedBids = [], currentBlock, blockTime, showItem } = props;
+  const { bid: baseBid, relatedBids = [], currentBlock, blockTime, showItem, onAction } = props;
   const [expand, setExpand] = useState(false);
   const classes = useStyles();
   const toaster = useToaster();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const { exchangeInfo } = useSelector(getMarketplace);
+  const { exchangeInfo, pendingTxs } = useSelector(getMarketplace);
   const valueCalculators = useValueCalculators();
   const [runCancelBid, cancelLoading] = useAsyncTask(`cancelBid-${baseBid.id}`, e => toaster(e?.message));
   const [runAcceptBid, acceptLoading] = useAsyncTask(`acceptBid-${baseBid.id}`, e => toaster(e?.message));
   const userAddress = walletState.wallet?.addressInfo.byte20.toLowerCase()
+  
+  const isPendingTx = useMemo(() => {
+    for (const pendingTx of Object.values(pendingTxs)) {
+      if (pendingTx.chequeHash === baseBid.chequeHash)
+        return true;
+    }
+
+    return false;
+  }, [pendingTxs, baseBid])
 
   const cancelBid = (bid: Cheque) => {
     // TODO: refactor
@@ -174,12 +185,20 @@ const Row: React.FC<Props> = (props: Props) => {
 
       const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
 
+      const zilswap = ZilswapConnector.getSDK();
       const voidChequeResult = await arkClient.voidCheque({
         publicKey,
         signature,
         chequeHash,
-      }, ZilswapConnector.getSDK());
+      }, zilswap);
 
+      const observedTx = {
+        hash: voidChequeResult.id!,
+        deadline: Number.MAX_SAFE_INTEGER,
+      };
+      zilswap.observeTx(observedTx);
+      onAction?.(bid, observedTx);
+      toaster("Cancellation submitted", { hash: voidChequeResult.id! });
       logger("void cheque result", voidChequeResult);
     });
   }
@@ -225,13 +244,21 @@ const Row: React.FC<Props> = (props: Props) => {
         signature: `0x${signature}`,
       }
 
+      const zilswap = ZilswapConnector.getSDK();
       const execTradeResult = await arkClient.executeTrade({
         buyCheque: bid,
         sellCheque,
         nftAddress: bid.token.collection.address,
         tokenId: bid.token.tokenId.toString(10),
-      }, ZilswapConnector.getSDK());
-
+      }, zilswap);
+      
+      const observedTx = {
+        hash: execTradeResult.id!,
+        deadline: Number.MAX_SAFE_INTEGER,
+      };
+      zilswap.observeTx(observedTx);
+      onAction?.(bid, observedTx);
+      toaster("Accept TX submitted", { hash: execTradeResult.id! });
       logger("exec trade result", execTradeResult)
     });
   }
@@ -280,20 +307,20 @@ const Row: React.FC<Props> = (props: Props) => {
             <TableCell align="center" className={cls(classes.actionCell, classes.lastCell, { [classes.withBorder]: expand })}>
               {status === 'Active' && bid.initiatorAddress === userAddress &&
                 <IconButton onClick={() => cancelBid(bid)} className={classes.iconButton}>
-                  {cancelLoading && (
+                  {(cancelLoading || isPendingTx) && (
                     <CircularProgress size={16} />
                   )}
-                  {!cancelLoading && (
+                  {!(cancelLoading || isPendingTx) && (
                     <Typography className={classes.buttonText}>Cancel</Typography>
                   )}
                 </IconButton>
               }
               {status === 'Active' && bid.token.ownerAddress === userAddress &&
                 <IconButton onClick={() => acceptBid(bid)} className={classes.iconButton}>
-                  {acceptLoading && (
+                  {(acceptLoading || isPendingTx) && (
                     <CircularProgress size={16} />
                   )}
-                  {!acceptLoading && (
+                  {!(acceptLoading || isPendingTx) && (
                     <Typography className={classes.buttonText}>Accept</Typography>
                   )}
                 </IconButton>

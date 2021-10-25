@@ -150,7 +150,6 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
               {collections.map((collection) => {
                 const collectionStats = ArkClient.parseCollectionStats(collection);
-                console.log('collectionStats', collectionStats)
                 return (
                   <TableRow key={collection.address} className={classes.tableRow} component={RouterLink} to={`/ark/collections/${toBech32Address(collection.address)}`}>
                     <TableCell className={cls(classes.bodyCell, classes.firstCell)}>

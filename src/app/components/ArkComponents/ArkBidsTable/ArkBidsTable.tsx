@@ -1,17 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, } from "react";
 import {
   Box, BoxProps, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, useMediaQuery, useTheme
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { ObservedTx } from "zilswap-sdk";
 import groupBy from "lodash/groupBy";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import cls from "classnames"
 import { ArkBox, ArkPaginator } from "app/components";
 import { Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useBlockTime, useValueCalculators } from "app/utils";
 import { RootState, TokenState } from "app/store/types";
+import { getMarketplace } from "app/saga/selectors";
+import { actions } from "app/store";
 import BidCard from "./BidCard";
 import BidRow from "./BidRow";
 
@@ -92,7 +95,9 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
   const { bids, showItem = true } = props;
   const classes = useStyles();
   const theme = useTheme();
+  const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const { pendingTxs } = useSelector(getMarketplace);
   const vc = useValueCalculators();
   const [pageNumber, setPageNumber] = useState<number>(0);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -101,6 +106,14 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
 
   const handlePageChange = (page: number) => {
     setPageNumber(page - 1)
+  }
+
+  const appendPendingTx = (matchedCheque: Cheque, observedTx: ObservedTx) => {
+    if (pendingTxs[observedTx.hash]) return;
+    dispatch(actions.MarketPlace.listenPendingTx({
+      txHash: observedTx.hash,
+      chequeHash: matchedCheque.chequeHash,
+    }))
   }
 
   if (currentBlock === 0) return null // TODO: use loading gif instead
@@ -119,7 +132,17 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
                   if (diff === 0) return lhs.expiry > rhs.expiry ? -1 : 1
                   return diff
                 })
-                return <BidCard bid={bids[0]} relatedBids={bids.slice(1)} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} key={k} />
+                return (
+                  <BidCard
+                    onAction={appendPendingTx}
+                    bid={bids[0]}
+                    relatedBids={bids.slice(1)}
+                    blockTime={blockTime}
+                    currentBlock={currentBlock}
+                    showItem={showItem}
+                    key={k}
+                  />
+                )
               })
             }
           </Box>
@@ -142,15 +165,22 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
               </TableHead>
               <TableBody>
                 {bids.slice(pageNumber * ITEMS_PER_PAGE, (pageNumber + 1) * ITEMS_PER_PAGE).map((data) => (
-                  <BidRow bid={data} blockTime={blockTime} currentBlock={currentBlock} showItem={showItem} key={data.id} />
+                  <BidRow
+                    onAction={appendPendingTx}
+                    bid={data}
+                    blockTime={blockTime}
+                    currentBlock={currentBlock}
+                    showItem={showItem}
+                    key={data.id}
+                  />
                 ))}
                 {
                   bids.length === 0 &&
-                    <TableRow>
-                      <TableCell colSpan={headers.length} className={cls(classes.emptyState, 'row')}>
-                        No bid data yet.
-                      </TableCell>
-                    </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={headers.length} className={cls(classes.emptyState, 'row')}>
+                      No bid data yet.
+                    </TableCell>
+                  </TableRow>
                 }
               </TableBody>
             </Table>

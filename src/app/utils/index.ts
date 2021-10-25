@@ -11,15 +11,16 @@ export * from "./strings";
 export { default as trimValue } from "./trimValue";
 export { default as truncate } from "./truncate";
 export * from "./types";
-export { default as useIntersectionObserver } from "./useIntersectionObserver";
 export { default as useAsyncTask } from "./useAsyncTask";
 export { default as useBlacklistAddress } from "./useBlacklistAddress";
-export { default as useBlockTime } from './useBlockTime'
+export { default as useBlockTime } from './useBlockTime';
 export { default as useBridgeableTokenFinder } from "./useBridgeableTokenFinder";
 export { default as useClaimEnabled } from "./useClaimEnabled";
 export { default as useErrorCatcher } from "./useErrorCatcher";
 export { default as useFilter } from "./useFilter";
 export { default as useFormHandler } from "./useFormHandler";
+export { default as useIntersectionObserver } from "./useIntersectionObserver";
+export { default as useInterval } from "./useInterval";
 export { default as useMessageSubscriber } from "./useMessageSubscriber";
 export { default as useMoneyFormatter } from "./useMoneyFormatter";
 export { default as useNetwork } from "./useNetwork";
@@ -30,3 +31,4 @@ export * from "./useToaster";
 export { default as useTokenFinder } from "./useTokenFinder";
 export * from "./useValueCalculators";
 export { default as useValueCalculators } from "./useValueCalculators";
+

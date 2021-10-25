@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Avatar, Box, Card, CardContent, CardProps, Collapse, IconButton, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
 import BigNumber from "bignumber.js"
 import dayjs, { Dayjs } from "dayjs";
 import { useSelector } from "react-redux";
+import { ObservedTx } from "zilswap-sdk";
 import { ArkBox, FancyButton } from "app/components";
 import { Cheque, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -22,6 +23,7 @@ interface Props extends CardProps {
   relatedBids?: Cheque[]
   blockTime: Dayjs
   currentBlock: number
+  onAction?: (matchedCheque: Cheque, observedTx: ObservedTx) => void;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -80,17 +82,26 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const BidCard: React.FC<Props> = (props: Props) => {
-  const { bid, relatedBids, currentBlock, blockTime, showItem } = props;
+  const { bid, relatedBids, currentBlock, blockTime, showItem, onAction } = props;
   const classes = useStyles();
   const toaster = useToaster();
   const [expand, setExpand] = useState(false);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const { exchangeInfo } = useSelector(getMarketplace);
+  const { exchangeInfo, pendingTxs } = useSelector(getMarketplace);
   const valueCalculators = useValueCalculators();
   const [runCancelBid, cancelLoading] = useAsyncTask(`cancelBid-${bid.id}`, e => toaster(e?.message));
   const [runAcceptBid, acceptLoading] = useAsyncTask(`acceptBid-${bid.id}`, e => toaster(e?.message));
   const userAddress = walletState.wallet?.addressInfo.byte20.toLowerCase();
+
+  const isPendingTx = useMemo(() => {
+    for (const pendingTx of Object.values(pendingTxs)) {
+      if (pendingTx.chequeHash === bid.chequeHash)
+        return true;
+    }
+
+    return false;
+  }, [pendingTxs, bid])
 
   const cancelBid = (bid: Cheque) => {
     // TODO: refactor
@@ -118,12 +129,21 @@ const BidCard: React.FC<Props> = (props: Props) => {
 
       const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
 
+      const zilswap = ZilswapConnector.getSDK();
       const voidChequeResult = await arkClient.voidCheque({
         publicKey,
         signature,
         chequeHash,
-      }, ZilswapConnector.getSDK());
+      }, zilswap);
 
+      const observedTx = {
+        hash: voidChequeResult.id!,
+        deadline: Number.MAX_SAFE_INTEGER,
+      };
+      zilswap.observeTx(observedTx);
+
+      onAction?.(bid, observedTx);
+      toaster("Cancellation submitted", { hash: voidChequeResult.id! });
       logger("void cheque result", voidChequeResult);
     });
   }
@@ -169,13 +189,21 @@ const BidCard: React.FC<Props> = (props: Props) => {
         signature: `0x${signature}`,
       }
 
+      const zilswap = ZilswapConnector.getSDK();
       const execTradeResult = await arkClient.executeTrade({
         buyCheque: bid,
         sellCheque,
         nftAddress: bid.token.collection.address,
         tokenId: bid.token.tokenId.toString(10),
-      }, ZilswapConnector.getSDK());
+      }, zilswap);
 
+      const observedTx = {
+        hash: execTradeResult.id!,
+        deadline: Number.MAX_SAFE_INTEGER,
+      };
+      zilswap.observeTx(observedTx);
+      onAction?.(bid, observedTx);
+      toaster("Accept TX submitted", { hash: execTradeResult.id! });
       logger("exec trade result", execTradeResult)
     });
   }
@@ -239,7 +267,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
         {status === 'Active' && bid.initiatorAddress === userAddress &&
           <Box mt={2} display="flex" justifyContent="center">
             <Box flexGrow={1}>
-              <FancyButton variant="contained" fullWidth loading={cancelLoading} onClick={() => cancelBid(bid)} className={classes.actionButton}>
+              <FancyButton variant="contained" fullWidth loading={cancelLoading || isPendingTx} onClick={() => cancelBid(bid)} className={classes.actionButton}>
                 <Typography className={classes.buttonText}>Cancel</Typography>
               </FancyButton>
             </Box>
@@ -248,7 +276,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
         {status === 'Active' && bid.token.ownerAddress === userAddress &&
           <Box mt={2} display="flex" justifyContent="center">
             <Box flexGrow={1}>
-              <FancyButton variant="contained" fullWidth loading={acceptLoading} onClick={() => acceptBid(bid)} className={classes.actionButton}>
+              <FancyButton variant="contained" fullWidth loading={acceptLoading || isPendingTx} onClick={() => acceptBid(bid)} className={classes.actionButton}>
                 <Typography className={classes.buttonText}>Accept</Typography>
               </FancyButton>
             </Box>

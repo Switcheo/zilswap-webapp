@@ -1,9 +1,10 @@
-import { call, fork, put, select, take, takeLatest } from "redux-saga/effects";
+import { call, fork, delay, put, select, take, takeLatest, takeEvery } from "redux-saga/effects";
 import { SimpleMap } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { toBech32Address } from "@zilliqa-js/crypto";
-import { ArkClient, ArkExchangeInfo, logger } from "core/utilities";
+import { ArkClient, ArkExchangeInfo, logger, waitForTx } from "core/utilities";
 import { actions } from "app/store";
 import { SortBy } from "app/store/marketplace/actions";
+import { ArkPendingTx } from "app/store/types";
 import { getBlockchain, getMarketplace, getWallet } from "../selectors";
 
 function* loadNftList() {
@@ -124,6 +125,7 @@ function* loadProfile() {
 
 function* reloadExchangeInfo() {
   try {
+    logger("reload exchange info")
     yield put(actions.Layout.addBackgroundLoading("loadMarketplaceInfo", "ARK:LOAD_MARKETPLACE_INFO"));
     const { network } = getBlockchain(yield select());
 
@@ -137,6 +139,43 @@ function* reloadExchangeInfo() {
     console.error(error)
   } finally {
     yield put(actions.Layout.removeBackgroundLoading("ARK:LOAD_MARKETPLACE_INFO"));
+  }
+}
+
+function* listenPendingTx(action: any) {
+  const pendingTx: ArkPendingTx = action.payload;
+
+  yield put(actions.MarketPlace.addPendingTx(pendingTx));
+
+  try {
+    yield call(waitForTx, pendingTx.txHash, 500, 2000);
+
+    yield delay(3000);
+
+    const { bidsTable, exchangeInfo } = getMarketplace(yield select());
+    const { network } = getBlockchain(yield select());
+
+    if (bidsTable && exchangeInfo) {
+      const arkClient = new ArkClient(network);
+      const { collectionAddress, side, tokenId } = bidsTable;
+      const result = (yield arkClient.listNftCheques({
+        collectionAddress,
+        side,
+        tokenId,
+      }) as any)
+
+      yield put(actions.MarketPlace.updateBidsTable({
+        bids: result.result.entries,
+        collectionAddress,
+        tokenId,
+        side: "buy",
+      }));
+    }
+  } catch (error) {
+    console.error("listening to tx failed");
+    console.error(error);
+  } finally {
+    yield put(actions.MarketPlace.removePendingTx(pendingTx));
   }
 }
 
@@ -162,10 +201,15 @@ function* watchExchangeInfo() {
   ], reloadExchangeInfo);
 }
 
+function* watchPendingTxs() {
+  yield takeEvery(actions.MarketPlace.MarketPlaceActionTypes.LISTEN_PENDING_TX, listenPendingTx);
+}
+
 
 export default function* marketPlaceSaga() {
   logger("init marketplace saga");
   yield fork(watchExchangeInfo);
   yield fork(watchProfileLoad);
   yield fork(watchLoadNftList);
+  yield fork(watchPendingTxs);
 }

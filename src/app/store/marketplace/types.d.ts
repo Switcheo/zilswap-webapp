@@ -12,7 +12,16 @@ export interface MarketPlaceState {
   bidded?: any;
   exchangeInfo?: ArkExchangeInfo;
   collectionTraits: SimpleMap<CollectionTrait[]>;
+  pendingTxs: SimpleMap<ArkPendingTx>;
+  bidsTable?: BidsTableInfo;
 }
+
+export interface BidsTableInfo {
+  bids: Cheque[],
+  collectionAddress: string,
+  tokenId: string,
+  side: "buy" | "sell", 
+};
 
 export interface SimpleCheque {
   id: string;
@@ -184,4 +193,9 @@ export interface SaleType {
 export interface CollectionTrait {
   trait: string;
   values: SimpleMap<number>;
+}
+
+export interface ArkPendingTx {
+  txHash: string;
+  chequeHash: string;
 }

@@ -1,27 +1,29 @@
 import React, { Fragment, useEffect, useState, useMemo } from "react";
 import { Avatar, Badge, Box, Container, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { ArkBidsTable, ArkBreadcrumb, ArkTab, ArkOwnerLabel, ArkBox } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
-import { getBlockchain, getWallet } from "app/saga/selectors";
-import { Cheque, Nft, Profile } from "app/store/types";
+import { getBlockchain, getMarketplace, getWallet } from "app/saga/selectors";
+import { Nft, Profile } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { bnOrZero, useAsyncTask } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
+import { actions } from "app/store";
 import { ReactComponent as VerifiedBadge } from "../CollectionView/verified-badge.svg";
 import { BidDialog, BuyDialog, CancelDialog, NftImage, SalesDetail, TraitTable } from "./components";
 
 const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
+  const dispatch = useDispatch();
   const { network } = useSelector(getBlockchain);
+  const { bidsTable } = useSelector(getMarketplace);
   const { wallet } = useSelector(getWallet);
   const [token, setToken] = useState<Nft>();
   const [runGetNFTDetails] = useAsyncTask("runGetNFTDetails");
-  const [bids, setBids] = useState<Cheque[]>([]);
   const [runGetBids] = useAsyncTask("getBids");
   const [owner, setOwner] = useState<Profile>();
   const [runGetOwner] = useAsyncTask("getOwner");
@@ -58,11 +60,18 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
 
   const getBids = () => {
     runGetBids(async () => {
+      dispatch(actions.MarketPlace.updateBidsTable(undefined));
+
       const arkClient = new ArkClient(network);
       const collectionAddress = fromBech32Address(collectionId).toLowerCase();
       const result = await arkClient.listNftCheques({ collectionAddress, tokenId, side: "buy" });
 
-      setBids(result.result.entries);
+      dispatch(actions.MarketPlace.updateBidsTable({
+        bids: result.result.entries,
+        collectionAddress,
+        tokenId,
+        side: "buy",
+      }));
     })
   }
 
@@ -160,7 +169,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
         <ArkTab mt={3} setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids", "Price History", "Event History"]} />
 
         {currentTab === "Bids" && (
-          <ArkBidsTable bids={bids} showItem={false} />
+          <ArkBidsTable bids={bidsTable?.bids ?? []} showItem={false} />
         )}
         {currentTab === "Price History" && (
           <ArkBox variant="base" className={classes.comingSoon}>Coming Soon.</ArkBox>

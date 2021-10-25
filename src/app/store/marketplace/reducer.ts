@@ -35,6 +35,7 @@ const initial_state: MarketPlaceState = {
   exchangeInfo: undefined,
   profile: undefined,
   collectionTraits: {},
+  pendingTxs: {},
 }
 
 const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPlaceState => {
@@ -88,6 +89,33 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
           [payload.address]: payload.traits,
         }
       }
+    case MarketPlaceActionTypes.UPDATE_BIDS_TABLE_INFO: {
+      return {
+        ...state,
+        bidsTable: payload,
+      }
+    }
+    case MarketPlaceActionTypes.ADD_PENDING_TX: {
+      if (state.pendingTxs[payload.txHash])
+        return state;
+
+      const pendingTxs = {
+        ...state.pendingTxs,
+        [payload.txHash]: payload,
+      };
+      return {
+        ...state,
+        pendingTxs,
+      }
+    }
+    case MarketPlaceActionTypes.REMOVE_PENDING_TX: {
+      const pendingTxs = { ...state.pendingTxs };
+      delete pendingTxs[payload.txHash];
+      return {
+        ...state,
+        pendingTxs,
+      }
+    }
     default:
       return state;
   }
