@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
+import { Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useTheme, useMediaQuery } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
@@ -46,6 +46,8 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const { network } = useSelector(getBlockchain);
+  const theme = useTheme();
+  const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
   const [search, setSearch] = useState<string>("");
   const [searchFilter, setSearchFilter] = useState<SearchFilters>({
     profile: true,
@@ -104,30 +106,32 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           className={classes.input}
           onChange={(e) => setSearch(e.target.value)}
           endAdornment={
-            <InputAdornment position="end">
-              <FormControl component="fieldset" className={classes.formControl}>
-                <FormLabel focused className={classes.formLabel}>By</FormLabel>
-                {SEARCH_FILTERS.map((filter) => (
-                  <FormControlLabel
-                    key={filter}
-                    className={classes.formControlLabel}
-                    value={filter}
-                    control={
-                      <Checkbox
-                        className={classes.radioButton}
-                        onChange={(e) => handleSearchFilter(filter)}
-                        checkedIcon={<CheckedIcon />}
-                        icon={<UncheckedIcon />}
-                        disableRipple
-                        checked={searchFilter[filter]}
-                      // checked={false}
-                      />
-                    }
-                    label={filter.toUpperCase()}
-                  />
-                ))}
-              </FormControl>
-            </InputAdornment>
+            !isMobileView && (
+              <InputAdornment position="end">
+                <FormControl component="fieldset" className={classes.formControl}>
+                  <FormLabel focused className={classes.formLabel}>By</FormLabel>
+                  {SEARCH_FILTERS.map((filter) => (
+                    <FormControlLabel
+                      key={filter}
+                      className={classes.formControlLabel}
+                      value={filter}
+                      control={
+                        <Checkbox
+                          className={classes.radioButton}
+                          onChange={(e) => handleSearchFilter(filter)}
+                          checkedIcon={<CheckedIcon />}
+                          icon={<UncheckedIcon />}
+                          disableRipple
+                          checked={searchFilter[filter]}
+                        // checked={false}
+                        />
+                      }
+                      label={filter.toUpperCase()}
+                    />
+                  ))}
+                </FormControl>
+              </InputAdornment>
+            )
           }
         />
         {/* TODO: convert OutlinedInput to Autocomplete  */}
