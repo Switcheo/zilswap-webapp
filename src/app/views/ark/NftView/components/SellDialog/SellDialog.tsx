@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Box, Container, FormHelperText, InputLabel, Typography, DialogContent } from "@material-ui/core";
+import { Box, Container, FormHelperText, InputLabel, Typography, DialogContent, CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/zilliqa";
 import BigNumber from "bignumber.js";
@@ -13,7 +13,7 @@ import { getBlockchain, getWallet, getTokens, getMarketplace } from "app/saga/se
 import { Nft, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, bnOrZero, useToaster, useValueCalculators, toHumanNumber } from "app/utils";
-import { ArkClient, logger } from "core/utilities";
+import { ArkClient, logger, waitForTx } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { ZIL_ADDRESS } from "app/utils/constants";
 import { ReactComponent as Checkmark } from "./checkmark.svg";
@@ -40,6 +40,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const [runConfirmSell, loading, error] = useAsyncTask("confirmSell", () => setOpen(false));
   const [runGetNFTDetails] = useAsyncTask("runGetNFTDetails");
   const [token, setToken] = useState<Nft>();
+  const [waitingForApprove, setWaitingForApprove] = useState(false);
   const toaster = useToaster();
   // const [errors, setErrors] = useState({
   //   description: "",
@@ -160,8 +161,20 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
       const walletAddress = wallet.addressInfo.byte20.toLowerCase();
       const hexTokenAddress = fromBech32Address(address).toLowerCase();
-      await arkClient.approveAllowanceIfRequired(hexTokenAddress, walletAddress, ZilswapConnector.getSDK());
-      setHasApproved(true)
+      const transaction = await arkClient.approveAllowanceIfRequired(hexTokenAddress, walletAddress, ZilswapConnector.getSDK());
+
+      if (transaction?.id) {
+        toaster("Approve TX Submitted", { hash: transaction.id });
+        setWaitingForApprove(true);
+
+        try {
+          await waitForTx(transaction.id);
+          setHasApproved(true);
+        } finally {
+          setWaitingForApprove(false);
+        }
+      }
+
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 300; // blocks
@@ -386,6 +399,9 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                   ) : (
                     <>1</>
                   )}
+                  {waitingForApprove && (
+                    <CircularProgress className={classes.progress} color="inherit" />
+                  )}
                 </Box>
                 <Box display="flex" flexDirection="column" alignItems="stretch">
                   <Text className={classes.stepLabel}>Approve Token</Text>
@@ -539,6 +555,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   dialogButton: {
     height: 42,
     marginTop: 6
+  },
+  progress: {
+    position: "absolute",
   },
   step: {
     width: 110,
