@@ -36,7 +36,7 @@ const BidsReceived: React.FC<Props> = (props: Props) => {
       dispatch(actions.MarketPlace.updateBidsTable(undefined));
 
       const arkClient = new ArkClient(network);
-      const listFilter: ArkClient.ListChequesParams = { initiatorAddress: address, isActive: activeOnly ? "true" : undefined, side: "buy" }
+      const listFilter: ArkClient.ListChequesParams = { ownerAddress: address, isActive: activeOnly ? "true" : undefined, side: "sell" }
       const result = await arkClient.listNftCheques(listFilter);
 
       dispatch(actions.MarketPlace.updateBidsTable({
