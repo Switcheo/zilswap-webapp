@@ -64,8 +64,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     margin: 'auto',
     marginTop: theme.spacing(3),
   },
-  addBio: {
-    fontSize: 14,
+  textLink: {
+    fontSize: 12,
+    color: theme.palette.text?.primary,
   },
   editIcon: {
     display: 'inline-block',
@@ -74,7 +75,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginRight: -31,
     padding: 7,
     borderRadius: 3,
-    '& > svg': {
+    '& svg': {
       width: 13,
       height: 13,
       fill: theme.palette.type === "dark" ? undefined : "#0D1B24",
@@ -82,13 +83,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     '&:hover': {
       extend: 'badge',
       cursor: 'pointer',
-      '& > svg > path': {
+      '& svg > path': {
         stroke: "#00FFB0",
       },
     }
-  },
-  editable: {
-    cursor: "pointer",
   },
   button: {
     padding: "16px",
@@ -188,19 +186,17 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         <ArkBanner avatarImage={viewProfile?.profileImage?.url} />
 
         <Box className={classes.addressBox}>
-          {address && (
+          {address &&
             <Fragment>
               <Typography variant="h2">
-                {viewProfile?.username || truncateAddress(address || '')}
-                {isConnectedUser && (
-                  <Box className={classes.editIcon}>
-                    <Link to={`/ark/profile/${address}/edit`}>
-                      <EditIcon
-                        className={cls(classes.editable)}
-                      />
-                    </Link>
-                  </Box>
-                )}
+              {viewProfile?.username || truncateAddress(address || '')}
+              {isConnectedUser &&
+                <Box className={classes.editIcon}>
+                  <Link to={`/ark/profile/${address}/edit`}>
+                    <EditIcon />
+                  </Link>
+                </Box>
+              }
               </Typography>
               <Tooltip title={tooltipText} placement="right" arrow>
                 <Box
@@ -213,25 +209,28 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                 </Box>
               </Tooltip>
             </Fragment>
-          )}
+          }
         </Box>
 
         {
-          isConnectedUser && !viewProfile?.bio &&
+          isConnectedUser && address && !viewProfile?.bio &&
           <Box className={classes.bioBox} padding={3}>
-            <Link to={`/ark/profile/${address}/edit`}>
-              <Typography
-                className={cls(classes.addBio, classes.editable)}
-              >
-                <u>Add Bio</u>
-              </Typography>
+            <Link className={classes.textLink} to={`/ark/profile/${address}/edit`}>
+              <u>Add Bio</u>
             </Link>
           </Box>
         }
         {
           viewProfile?.bio &&
-          <Box className={classes.bioBox} padding={3}>
-            <Typography>{viewProfile?.bio}</Typography>
+          <Box className={cls({[classes.bioBox]: isConnectedUser && address}) } padding={3}>
+            <Typography>
+              {viewProfile?.bio}
+              {isConnectedUser && address &&
+                <Link className={classes.textLink} to={`/ark/profile/${address}/edit`} style={{ marginLeft: 8 }}>
+                  <u>Edit</u>
+                </Link>
+              }
+            </Typography>
           </Box>
         }
 

@@ -17,11 +17,11 @@ interface Props extends BoxProps {
   hideInput?: boolean;
 }
 
-const BootstrapInput = withStyles((theme) => ({
+const BootstrapInput = withStyles(theme => ({
   root: {
     borderRadius: 12,
     backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#DEFFFF",
-    border: '1px solid #29475A',
+    border: (theme as unknown as AppTheme).palette.border,
     'label + &': {
       marginTop: theme.spacing(3.5),
     },
@@ -79,10 +79,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignItems: "center"
   },
   label: {
-    fontSize: "14px",
+    fontSize: 13,
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     fontFamily: "'Raleway', sans-serif",
-    fontWeight: 900,
+    fontWeight: 800,
     overflowX: "visible",
     '&.inline': {
       width: 100,

@@ -100,31 +100,31 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const validateInput = (type: string, input: string) => {
     switch (type) {
       case "username":
-        if (input.length < 2) return "Minimum of 2 characters";
+        if (input.length && input.length < 2) return "Minimum of 2 characters";
         if (input.length > 20) return "max 20 characters";
         if (!USERNAME_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters";
         return ""
       case "bio":
-        if (input.length < 2) return "Minimum of 2 characters";
+        if (input.length && input.length < 2) return "Minimum of 2 characters";
         if (input.length > 160) return "Maximum of 160 characters";
         return ""
       case "email":
-        if (input.length < 2) return "Minimum of 2 characters";
+        if (input.length && input.length < 2) return "Minimum of 2 characters";
         if (input.length > 320) return "Maximum of 320 characters";
-        if (!EMAIL_REGEX.test(input)) return "Email is invalid"
+        if (input.length && !EMAIL_REGEX.test(input)) return "Email is invalid"
         return ""
       case "twitterHandle":
-        if (input.length < 2) return "Minimum of 2 characters";
+        if (input.length && input.length < 2) return "Minimum of 2 characters";
         if (input.length > 15) return "Maximum of 15 characters";
-        if (!TWITTER_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters"
+        if (input.length && !TWITTER_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters"
         return ""
       case "instagramHandle":
-        if (input.length < 2) return "Minimum of 2 characters";
+        if (input.length && input.length < 2) return "Minimum of 2 characters";
         if (input.length > 30) return "Maximum of 30 characters";
-        if (!INSTAGRAM_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters"
+        if (input.length && !INSTAGRAM_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters"
         return ""
       case "websiteUrl":
-        if (input.length < 2) return "Minimum of 2 characters";
+        if (input.length && input.length < 2) return "Minimum of 2 characters";
         if (input.length > 253) return "Maximum of 253 characters";
         if (!input.match(/^(http|https):\/\//g)) return "Invalid URL, it should begin with http:// or https://";
         return ""
@@ -168,8 +168,10 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       let ok = true
       let filteredData: any = {};
       Object.entries(inputValues).forEach(([key, value]) => {
-        if (value === '') return
-        if (!profile || (profile as any)[key] !== value) {
+        const previous = profile ? (profile as any)[key] : null
+        console.log(previous, value)
+        if (previous !== value) {
+          if (value === '' && !previous) return
           filteredData[key] = value;
           const errorText = validateInput(key, value)
           if (errorText !== "") {
@@ -183,29 +185,29 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         return
       }
 
-      const arkClient = new ArkClient(network);
-      const { oAuth } = marketplaceState;
-      let checkedOAuth: OAuth | undefined = oAuth;
-      if (!oAuth?.access_token || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
-        const { result } = await arkClient.arkLogin(wallet!, window.location.hostname);
-        dispatch(actions.MarketPlace.updateAccessToken(result));
-        checkedOAuth = result;
-      }
-      if (profileImage && uploadFile) {
-        imageUpload();
-      }
-      if (hasChange) {
-        try {
+      try {
+        const arkClient = new ArkClient(network);
+        const { oAuth } = marketplaceState;
+        let checkedOAuth: OAuth | undefined = oAuth;
+        if (!oAuth?.access_token || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
+          const { result } = await arkClient.arkLogin(wallet!, window.location.hostname);
+          dispatch(actions.MarketPlace.updateAccessToken(result));
+          checkedOAuth = result;
+        }
+        if (profileImage && uploadFile) {
+          imageUpload();
+        }
+        if (hasChange) {
           const result = await arkClient.updateProfile(address!, filteredData, checkedOAuth!);
           if (result.error) {
-            toaster("Error updating profile");
+            toaster(`Error updating profile: ${result.error}`);
           } else {
             toaster("Profile updated");
             dispatch(actions.MarketPlace.loadProfile());
           }
-        } catch (err) {
-          toaster(err as unknown as string);
         }
+      } catch (err) {
+        toaster(JSON.stringify(err));
       }
     });
   }
@@ -261,7 +263,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
               <Box className={classes.formDetail}>
                 <ArkInput
                   placeholder="BearCollector" error={errors.username} value={inputValues.username}
-                  label="Display Name" onValueChange={(value) => updateInputs("username")(value)}
+                  label="DISPLAY NAME" onValueChange={(value) => updateInputs("username")(value)}
                   instruction="This is how other users identify you on ARK." wordLimit={20}
                 />
                 {/* <ArkInput
