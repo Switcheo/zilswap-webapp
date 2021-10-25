@@ -494,14 +494,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     paddingBottom: theme.spacing(2),
   },
   bestBid: {
+    zIndex: 1,
     fontFamily: "Avenir Next",
     fontSize: 12,
+    color: theme.palette.text!.primary,
     marginLeft: 18,
     marginTop: theme.spacing(-3.5),
     marginBottom: theme.spacing(1),
   },
   bestBidLabel: {
-    color: theme.palette.text!.secondary,
+    color: theme.palette.text!.primary,
+    opacity: 0.6,
     marginRight: 4,
   },
   bestBidTokenLogo: {
