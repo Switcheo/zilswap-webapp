@@ -34,7 +34,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     const royaltyBps = token?.collection?.royaltyBps;
     if (!royaltyBps) return null;
 
-    const percent = bnOrZero(royaltyBps).shiftedBy(-4).decimalPlaces(2);
+    const percent = bnOrZero(royaltyBps).shiftedBy(-2).decimalPlaces(2);
     return percent.toFormat();
   }, [token?.collection]);
 

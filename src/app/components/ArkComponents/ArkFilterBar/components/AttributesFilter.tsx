@@ -5,9 +5,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import pickBy from "lodash/pickBy";
 import { ArkClient } from 'core/utilities';
 import { AppTheme } from 'app/theme/types';
-import { hexToRGBA } from 'app/utils';
+import { bnOrZero, hexToRGBA } from 'app/utils';
 import { Text } from "app/components";
-import { TraitType, TraitValue } from 'app/store/types';
+import { Collection, TraitType, TraitValue } from 'app/store/types';
 import { updateFilter } from 'app/store/marketplace/actions';
 import { getBlockchain } from 'app/saga/selectors';
 import { ReactComponent as IndeterminateIcon } from "./indeterminate.svg";
@@ -258,6 +258,7 @@ const AttributesFilter = (props: Props) => {
   const dispatch = useDispatch();
 
   const classes = useStyles();
+  const [collection, setCollection] = useState<Collection | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [traits, setTraits] = useState<{ [id: string]: TraitType }>({})
   const [filteredTraits, setFilteredTraits] = useState<{ [id: string]: TraitType }>({})
@@ -273,6 +274,7 @@ const AttributesFilter = (props: Props) => {
     const arkClient = new ArkClient(network);
     const data = await arkClient.getCollectionTraits(collectionAddress);
 
+    setCollection(data.result.collection);
     var newTraits: { [id: string]: TraitType } = {}
     data.result.entries.forEach((model: any) => {
       var values: { [id: string]: TraitValue } = {}
@@ -357,6 +359,12 @@ const AttributesFilter = (props: Props) => {
 
     setFilteredTraits(updatedTraits)
   }, [search, traits])
+
+  const tokenCount = bnOrZero(collection?.tokenStat?.tokenCount);
+  const getPercent = (count: number) => {
+    if (tokenCount.lte(0)) return "-"
+    return bnOrZero(count).div(tokenCount).shiftedBy(2).decimalPlaces(2).toString(10);
+  };
 
   const selectedValues = useMemo(() => {
     var totalSelectCount = 0
@@ -450,7 +458,7 @@ const AttributesFilter = (props: Props) => {
                       <span className={classes.filterCategory}>
                         <Text flexGrow="1" className={classes.filterCategoryLabel}>{trait.trait}</Text>
                         <Text className={classes.attributeMeta}>Att. Rarity</Text>
-                        <Text className={classes.attributeMeta}>Match</Text>
+                        {/* <Text className={classes.attributeMeta}>Match</Text> */}
                       </span>
 
                       {Object.values(trait.values).map(value => {
@@ -468,8 +476,20 @@ const AttributesFilter = (props: Props) => {
                               label={
                                 <span className={classes.attribute}>
                                   <Text className={classes.attributeLabel} flexGrow="1">{value.value}</Text>
-                                  <Text className={classes.attributeMeta}>2.5K <Typography component="span" className={classes.attributeMetaDetail}>(10%)</Typography></Text>
-                                  <Text className={classes.attributeMeta}>{value.count} <Typography component="span" className={classes.attributeMetaDetail}>(5%)</Typography></Text>
+                                  <Text className={classes.attributeMeta}>
+                                    {value.count}
+                                    {" "}
+                                    <Typography component="span" className={classes.attributeMetaDetail}>
+                                      ({getPercent(value.count)}%)
+                                    </Typography>
+                                  </Text>
+                                  {/* <Text className={classes.attributeMeta}>
+                                    {value.count}
+                                    {" "}
+                                    <Typography component="span" className={classes.attributeMetaDetail}>
+                                      (5%)
+                                    </Typography>
+                                  </Text> */}
                                 </span>
                               }
                             />

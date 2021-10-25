@@ -319,7 +319,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 {token?.collection && token.collection.royaltyBps !== null &&
                   <Box display="flex" marginTop={1}>
                     <Typography className={classes.feeLabel}>Royalties</Typography>
-                    <Typography className={classes.feeValue}>{new BigNumber(token.collection.royaltyBps).dividedBy(100)}%</Typography>
+                    <Typography className={classes.feeValue}>{new BigNumber(token.collection.royaltyBps).shiftedBy(-2).toString()}%</Typography>
                   </Box>
                 }
               </Box>
