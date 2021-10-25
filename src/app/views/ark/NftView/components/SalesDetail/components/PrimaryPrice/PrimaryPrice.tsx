@@ -33,8 +33,9 @@ const PrimaryPrice: React.FC<Props> = (props: Props) => {
   const priceToken = tokens[toBech32Address(data.cheque.price.address)];
   if (!priceToken) return null; // loading tokens (most likely.. lol)
 
-  const priceAmount = bnOrZero(data.cheque.price.amount).shiftedBy(-priceToken.decimals)
-  const priceValue = valueCalculator.amount(prices, priceToken, bnOrZero(data.cheque.price.amount));
+  const amount = bnOrZero(data.cheque.price.amount);
+  const priceAmount = amount.shiftedBy(-priceToken.decimals);
+  const priceValue = valueCalculator.amount(prices, priceToken, amount);
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
