@@ -12,7 +12,7 @@ import BannerLight from "./Banner_Light.png";
 import BannerDark from "./Banner_Dark.png";
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
-  imageUrl?: string;
+  imageUrl?: string | null;
   imageType: "card" | "banner" | "avatar";
   altName?: string;
 }

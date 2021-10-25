@@ -95,6 +95,8 @@ export interface Collection {
   telegramUrl: string | null;
   twitterUrl: string | null;
   instagramUrl: string | null;
+  bannerImageUrl: string | null;
+  profileImageUrl: string | null;
   royaltyBps: string | null;
   royaltyType: string | null;
 

@@ -8,8 +8,8 @@ import { ArkImageView } from "app/components";
 interface Props extends BoxProps {
   badgeContent?: React.Component | JSX.Element;
   hideBanner?: boolean;
-  avatarImage?: string;
-  bannerImage?: string;
+  avatarImage?: string | null;
+  bannerImage?: string | null;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -32,8 +32,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: "#29475A",
   },
   avatar: {
-    height: 130,
-    width: 130,
+    height: "130px !important",
+    width: "130px !important",
     border: `5px solid ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"
       }`,
   },

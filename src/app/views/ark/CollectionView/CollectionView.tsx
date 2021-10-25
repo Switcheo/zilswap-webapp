@@ -110,11 +110,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const TEMP_BANNER_URL =
-  "https://pbs.twimg.com/profile_banners/1429715941399486466/1630400388/1500x500";
-const TEMP_BEAR_AVATAR_URL =
-  "https://pbs.twimg.com/profile_images/1432977604563193858/z01O7Sey_400x400.jpg";
-
 const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
 ) => {
@@ -212,8 +207,8 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
         <ArkBanner
           badgeContent={<VerifiedBadge className={classes.verifiedBadge} />}
-          avatarImage={TEMP_BEAR_AVATAR_URL}
-          bannerImage={TEMP_BANNER_URL}
+          avatarImage={collection.profileImageUrl}
+          bannerImage={collection.bannerImageUrl}
         />
         <Box display="flex" flexDirection="column" alignItems="center">
           <ArkSocialLinkGroup collection={collection} className={classes.socialLinkGroup} />

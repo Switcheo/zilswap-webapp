@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Avatar, Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
+import { Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { toBech32Address } from "@zilliqa-js/crypto";
@@ -7,7 +7,7 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
-import { CurrencyLogo } from "app/components";
+import { ArkImageView, CurrencyLogo } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
 import { Collection } from "app/store/types";
@@ -20,9 +20,6 @@ import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 interface SearchFilters {
   [prop: string]: boolean;
 }
-const TEMP_BEAR_AVATAR_URL =
-  "https://pbs.twimg.com/profile_images/1432977604563193858/z01O7Sey_400x400.jpg";
-
 
 const SEARCH_FILTERS = ["profile", "artist", "collection"]
 
@@ -159,10 +156,10 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                     <TableCell className={cls(classes.bodyCell, classes.firstCell)}>
                       <Box display="flex" alignItems="center">
                         <div className={classes.index}>1</div>
-                        <Avatar
+                        <ArkImageView
+                          imageType="avatar"
                           className={classes.avatar}
-                          alt="Avatar Image"
-                          src={TEMP_BEAR_AVATAR_URL}
+                          imageUrl={collection.profileImageUrl}
                         />
                         <Box display="flex" flexDirection="column" className={classes.collectionName}>
                           <Box display="flex">
