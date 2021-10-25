@@ -37,12 +37,15 @@ const ArkExpiry: React.FC<Props> = (props: Props) => {
       (option) => option.text === "Select a date"
     )[0];
     setExpiryOption(option);
+    setExpanded(false);
   };
 
   const onSelectOption = (option: expiryOption) => {
     setExpiryOption(option);
     if (option.text === "Select a date") {
       setExpiryDate(new Date());
+    } else {
+      setExpanded(false);
     }
   }
 
@@ -66,12 +69,12 @@ const ArkExpiry: React.FC<Props> = (props: Props) => {
             flexDirection="column"
             className={classes.expiryTextBox}
           >
-            <Text color="textSecondary">
-              Set Estimated Expiry
+            <Text color="textPrimary">
+              Bid Expiry
               <HelpInfo
                 className={classes.helpInfo}
                 placement="top"
-                title="The date and time you select here is an estimated conversion based on block time"
+                title="The date or time you select here will be converted to its corresponding estimated block height"
               />
             </Text>
             <Text className={classes.expiryDate}>
@@ -91,6 +94,7 @@ const ArkExpiry: React.FC<Props> = (props: Props) => {
               {expiryOptions.map((option) => {
                 return (
                   <MenuItem
+                    key={option.value}
                     onClick={() => onSelectOption(option)}
                     value={option.text}
                     className={cls(classes.menuItem, {
@@ -134,6 +138,7 @@ const ArkExpiry: React.FC<Props> = (props: Props) => {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    fontFamily: "Avenir Next",
     "& .MuiAccordionSummary-root": {
       backgroundColor: theme.palette.currencyInput,
       border: "1px solid transparent",
@@ -251,22 +256,27 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   helpInfo: {
-    verticalAlign: "top",
-    marginLeft: "4px",
+    verticalAlign: "middle",
+    marginLeft: 6,
+    marginTop: -2,
+    height: 10,
+    width: 10,
   },
   dropDownIcon: {
     color: theme.palette.primary.light,
   },
   blockHeightText: {
-    fontSize: "10px",
-    lineHeight: "12px",
+    fontFamily: "Avenir Next",
+    marginTop: 2,
+    fontSize: 12,
+    lineHeight: 1,
   },
   blockHeightColor: {
     color: theme.palette.text?.primary,
   },
   expiryDate: {
+    marginTop: theme.spacing(1),
     lineHeight: "24px",
-    fontFamily: "'Raleway', sans-serif",
     fontSize: "16px",
     fontWeight: 900,
   },

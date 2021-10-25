@@ -239,7 +239,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
               alignItems="center"
             >
               <Text className={classes.priceText}>
-                Fixed Price
+                Purchase Price
               </Text>
               {priceToken && (
                 <Box display="flex" alignItems="center">
@@ -299,7 +299,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
                 }
                 label={
                   <Text>
-                    By checking this box, I accept ARK's terms and conditions.
+                    I accept ARK's terms and conditions.
                   </Text>
                 }
               />
@@ -438,9 +438,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   termsBox: {
     display: "flex",
-    justifyContent: "center",
+    justifyContent: "flex-start",
+    marginLeft: 2,
     marginTop: theme.spacing(1.5),
-    marginBottom: theme.spacing(1.5),
+    marginBottom: theme.spacing(1),
     "& .MuiFormControlLabel-root": {
       marginLeft: "-8px",
       marginRight: 0,

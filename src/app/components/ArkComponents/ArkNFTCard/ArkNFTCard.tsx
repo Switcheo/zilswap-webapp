@@ -78,13 +78,12 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
 
   const explorerLink = useMemo(() => {
     const addr = toBech32Address(collectionAddress);
-
     if (network === Network.MainNet) {
-      return `https://viewblock.io/zilliqa/address/${addr}`;
+      return `https://viewblock.io/zilliqa/address/${addr}?txsType=nft&specific=${token.tokenId}`;
     } else {
-      return `https://viewblock.io/zilliqa/address/${addr}?network=testnet`;
+      return `https://viewblock.io/zilliqa/address/${addr}?txsType=nft&specific=${token.tokenId}&network=testnet`;
     }
-  }, [network, collectionAddress]);
+  }, [network, collectionAddress, token.tokenId]);
   const setAsProfileImage = () => {
     runUpdateProfileImage(async () => {
       if (!token.asset?.url) {
@@ -243,7 +242,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
 
             <Box display="flex">
               <Box flex={1} />
-              {!dialog && 
+              {!dialog &&
                 <IconButton size="small" className={classes.extrasButton} onClick={handlePopClick}>
                   <MoreHorizIcon />
                 </IconButton>

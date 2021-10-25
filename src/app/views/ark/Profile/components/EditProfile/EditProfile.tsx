@@ -169,7 +169,6 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       let filteredData: any = {};
       Object.entries(inputValues).forEach(([key, value]) => {
         const previous = profile ? (profile as any)[key] : null
-        console.log(previous, value)
         if (previous !== value) {
           if (value === '' && !previous) return
           filteredData[key] = value;

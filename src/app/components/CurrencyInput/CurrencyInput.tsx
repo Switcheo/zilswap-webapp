@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import cls from "classnames";
 import { Box, Button, InputAdornment, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
@@ -9,7 +9,7 @@ import { CurrencyLogo } from "app/components";
 import CurrencyDialog from "app/components/CurrencyDialog";
 import { RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, toHumanNumber, useMoneyFormatter } from "app/utils";
+import { hexToRGBA, useMoneyFormatter } from "app/utils";
 import { formatSymbol } from "app/utils/currencies";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
 import { getWallet } from "app/saga/selectors";
@@ -52,16 +52,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     top: 12,
     zIndex: 1,
   },
+  endAdornment: {
+    height: 'auto',
+    maxHeight: 'none',
+  },
   currencyButton: {
     display: "flex",
     justifyContent: "space-between",
     fontFamily: "Avenir Next",
     fontWeight: "bold",
     borderRadius: 12,
-    padding: "34px 18px 12px 5px",
+    padding: "30px 18px 8px 5px",
     color: theme.palette.text?.primary,
     "& .MuiButton-label": {
-      padding: theme.spacing(1),
+      padding: theme.spacing(0.75),
     },
     "&:hover": {
       backgroundColor: "transparent",
@@ -130,42 +134,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       padding: "56px 18px 12px 5px",
     },
   },
-  bidLabel: {
-    top: 34,
-    color: theme.palette.primary.light,
-  },
-  bidText: {
-    position: "absolute",
-    fontSize: "14px",
-    lineHeight: "18px",
-    color: theme.palette.text?.primary,
-    fontWeight: "bold",
-    left: 20,
-    top: 12,
-    zIndex: 1,
-  },
-  bidPrice: {
-    position: "absolute",
-    "& .MuiTypography-root": {
-      fontFamily: "'Raleway', sans-serif",
-      fontSize: "16px",
-      lineHeight: "14px",
-      color: theme.palette.text?.primary,
-      fontWeight: 800,
-    },
-    right: 20,
-    top: 12,
-    zIndex: 1,
-  },
-  bidTokenLogo: {
-    height: "18px",
-    width: "18px",
-  },
 }));
 
 export interface CurrencyInputProps
   extends React.HTMLAttributes<HTMLFormElement> {
   label?: string;
+  inputClassName?: string;
   token: TokenInfo | null;
   amount: string;
   tokenList?: CurrencyListType;
@@ -176,9 +150,7 @@ export interface CurrencyInputProps
   showMaxButton?: boolean;
   showPoolBalance?: boolean;
   showContribution?: boolean;
-  bid?: boolean;
   highestBid?: BigNumber;
-  bidToken?: TokenInfo;
   dialogOpts?: Partial<CurrencyDialogProps>;
 
   onCurrencyChange?: (token: TokenInfo) => void;
@@ -193,10 +165,8 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
   props: CurrencyInputProps
 ) => {
   const {
-    bid,
-    highestBid,
-    bidToken,
     children,
+    inputClassName,
     className,
     label,
     fixedToken,
@@ -281,45 +251,20 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
 
   return (
     <form
-      className={cls(classes.form, className, { [classes.bidDialog]: !!bid })}
+      className={cls(classes.form, className)}
       noValidate
       autoComplete="off"
       onSubmit={onSubmitHandler}
     >
-      {bid && (
-        <Fragment>
-          <InputLabel className={classes.bidText}>
-            Current Highest Bid
-          </InputLabel>
-
-          <Box display="flex" alignItems="center" className={classes.bidPrice}>
-            {highestBid ? (
-              <Fragment>
-                <Typography variant="body2">
-                  {toHumanNumber(highestBid)}
-                </Typography>
-                <CurrencyLogo
-                  currency={bidToken?.symbol}
-                  address={bidToken?.address}
-                  className={classes.bidTokenLogo}
-                />
-              </Fragment>
-            ) : (
-              "-"
-            )}
-          </Box>
-        </Fragment>
-      )}
-
       {label &&
-        <InputLabel className={cls(classes.label, { [classes.bidLabel]: !!bid })}>
+        <InputLabel className={cls(classes.label)}>
           {label}
         </InputLabel>
       }
-      
+
       {!hideBalance && (
         <Typography
-          className={cls(classes.balance, { [classes.bidLabel]: !!bid })}
+          className={cls(classes.balance)}
           variant="body1"
         >
           Balance:{" "}
@@ -342,7 +287,8 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
 
       <OutlinedInput
         className={cls(classes.inputRow, {
-          [classes.inputRowNoLabel]: !label
+          [classes.inputRowNoLabel]: !label,
+          [inputClassName!]: !!inputClassName,
         })}
         placeholder={"0"}
         value={amount.toString()}
@@ -353,7 +299,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
         type="number"
         inputProps={{ min: "0", className: classes.input }}
         endAdornment={
-          <InputAdornment position="end">
+          <InputAdornment className={classes.endAdornment} position="end">
             {fixedToken ? (
               <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
                 <Box display="flex" alignItems="center">
@@ -398,7 +344,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
                       variant="button"
                       className={classes.currencyText}
                     >
-                      {formatSymbol(token) ?? "Select Token"}
+                      {formatSymbol(token) ?? <Box component="span" ml={1}>Select Token</Box>}
                     </Typography>
                   </Box>
                   <ExpandMoreIcon className={classes.expandIcon} />

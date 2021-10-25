@@ -11,18 +11,18 @@ import { Box, Checkbox, DialogContent, DialogProps, FormControlLabel } from "@ma
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { ZilswapConnector } from "core/zilswap";
-import { ArkExpiry, ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
+import { ArkExpiry, ArkNFTCard, CurrencyInput, CurrencyLogo, DialogModal, FancyButton, Text } from "app/components";
 import { getBlockchain, getMarketplace, getTokens, getTransactions, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { RootState, TokenInfo, WalletObservedTx } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useAsyncTask, useBlockTime, useToaster } from "app/utils";
-import { ZIL_ADDRESS } from "app/utils/constants";
+import { hexToRGBA, toHumanNumber, useAsyncTask, useBlockTime, useToaster } from "app/utils";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { ArkClient, logger } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 import { fromBech32Address, toBech32Address } from "core/zilswap";
+import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import { ReactComponent as WarningIcon } from "../assets/warning.svg";
 
 interface Props extends Partial<DialogProps> {
@@ -98,7 +98,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const [formState, setFormState] =
     useState<typeof initialFormState>(initialFormState);
   const [bidToken, setBidToken] = useState<TokenInfo>(
-    tokenState.tokens[ZIL_ADDRESS]
+    tokenState.tokens[ZWAP_TOKEN_CONTRACT[network]]
   );
   const [expiryDate, setExpiryDate] = useState<Date | null>(null);
   const [expiryOption, setExpiryOption] = useState<expiryOption>(
@@ -107,8 +107,10 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
   const match = useRouteMatch<{ id: string; collection: string }>();
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
+  const [, currentBlock] = useBlockTime();
   const toaster = useToaster();
 
+  const bestBid = token.bestBid;
   const txIsPending = loadingApproveTx || observingTxs.findIndex(tx => tx.hash.toLowerCase() === pendingTxHash) >= 0;
 
   const showTxApprove = useMemo(() => {
@@ -157,11 +159,6 @@ const BidDialog: React.FC<Props> = (props: Props) => {
       toaster("Submitted", { hash: walletObservedTx.hash });
     });
   };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, currentBlock] = useBlockTime();
-
-  const bestBid = token.bestBid;
 
   const { blockExpiry, expiryTime } = useMemo(() => {
     const currentTime = dayjs();
@@ -326,18 +323,30 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
         <Box className={classes.bidContainer}>
           <CurrencyInput
-            label="Place Your Bid"
+            label="Bid Amount"
             tokenList="ark-zil"
-            bid={true}
-            highestBid={priceHuman}
-            bidToken={priceToken}
+            inputClassName={cls({ [classes.expandedCurrencyInput]: !!bestBid })}
             token={bidToken ?? null}
             amount={formState.bidAmount}
             dialogOpts={{ zrc2Only: true }}
             onEditorBlur={onEndEditBidAmount}
             onAmountChange={onBidAmountChange}
             onCurrencyChange={onCurrencyChange}
-          />
+          >
+          {bestBid && (
+            <Box display="flex" alignItems="center" className={classes.bestBid}>
+              <Text className={classes.bestBidLabel}>
+                Highest Bid:
+              </Text>
+              {toHumanNumber(priceHuman)}
+              <CurrencyLogo
+                currency={priceToken?.symbol}
+                address={bidToken?.address}
+                className={classes.bestBidTokenLogo}
+              />
+            </Box>
+          )}
+          </CurrencyInput>
 
           {/* Set expiry */}
           <ArkExpiry
@@ -371,7 +380,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                   }
                   label={
                     <Text>
-                      By checking this box, I accept ARK's terms and conditions.
+                      I accept ARK's terms and conditions.
                     </Text>
                   }
                 />
@@ -481,6 +490,24 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       maxWidth: 420
     }
   },
+  expandedCurrencyInput: {
+    paddingBottom: theme.spacing(2),
+  },
+  bestBid: {
+    fontFamily: "Avenir Next",
+    fontSize: 12,
+    marginLeft: 18,
+    marginTop: theme.spacing(-3.5),
+    marginBottom: theme.spacing(1),
+  },
+  bestBidLabel: {
+    color: theme.palette.text!.secondary,
+    marginRight: 4,
+  },
+  bestBidTokenLogo: {
+    height: "18px",
+    width: "18px",
+  },
   actionButton: {
     height: 46,
   },
@@ -502,9 +529,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   termsBox: {
     display: "flex",
-    justifyContent: "center",
+    justifyContent: "flex-start",
+    marginLeft: 2,
     marginTop: theme.spacing(1.5),
-    marginBottom: theme.spacing(1.5),
+    marginBottom: theme.spacing(1),
     "& .MuiFormControlLabel-root": {
       marginLeft: "-8px",
       marginRight: 0,
