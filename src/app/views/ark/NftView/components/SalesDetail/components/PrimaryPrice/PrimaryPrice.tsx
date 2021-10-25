@@ -24,10 +24,11 @@ const PrimaryPrice: React.FC<Props> = (props: Props) => {
   const valueCalculator = useValueCalculators();
 
   const timeLeft = useMemo(() => {
+    if (data.type === PriceType.LastTrade) return null;
     const blocksLeft = data.cheque.expiry - currentBlock;
     const expiryTime = blockTime.add(blocksLeft * BLOCKS_PER_MINUTE, "minutes");
     return expiryTime.isAfter(dayjs()) ? expiryTime.fromNow(true) + " left" : "Expired " + expiryTime.fromNow();
-  }, [currentBlock, blockTime, data.cheque.expiry])
+  }, [currentBlock, blockTime, data.cheque.expiry, data.type])
 
   const priceToken = tokens[toBech32Address(data.cheque.price.address)];
   if (!priceToken) return null; // loading tokens (most likely.. lol)
@@ -48,16 +49,14 @@ const PrimaryPrice: React.FC<Props> = (props: Props) => {
           {toSignificantNumber(priceAmount)} {priceToken.symbol}
         </Box>
 
-        {data.type !== PriceType.LastTrade && (
-          <Box className={classes.secondaryInfo}>
-            <Typography component="span" variant="body1" className={cls(classes.secondaryText)}>
-              {timeLeft}
-            </Typography>
-            <Typography component="span" variant="body1" className={cls(classes.secondaryText)}>
-              ${priceValue.toFormat(2).toString()}
-            </Typography>
-          </Box>
-        )}
+        <Box className={classes.secondaryInfo}>
+          {timeLeft && <Typography component="span" variant="body1" className={cls(classes.secondaryText)}>
+            {timeLeft}
+          </Typography>}
+          <Typography component="span" variant="body1" className={cls(classes.secondaryText)}>
+            ${priceValue.toFormat(2).toString()}
+          </Typography>
+        </Box>
       </Typography>
     </Box>
   );
