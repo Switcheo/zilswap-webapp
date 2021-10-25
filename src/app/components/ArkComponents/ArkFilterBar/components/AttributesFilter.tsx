@@ -330,8 +330,7 @@ const AttributesFilter = (props: Props) => {
       return ({
         ...prevTraits,
       })
-    }
-    )
+    })
   }
 
   useEffect(() => {
@@ -348,7 +347,7 @@ const AttributesFilter = (props: Props) => {
 
     var updatedTraits: { [id: string]: TraitType } = { ...traits }
     Object.keys(updatedTraits).forEach(trait => {
-      updatedTraits[trait] = traits[trait]
+      updatedTraits[trait] = JSON.parse(JSON.stringify(traits[trait]))
 
       const result = pickBy(updatedTraits[trait].values, function (value, key) {
         return value.value.toLowerCase().includes(search.toLowerCase())
