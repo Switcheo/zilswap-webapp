@@ -658,6 +658,7 @@ export namespace ArkClient {
     sortDir?: string;
   }
   export interface ListCollectionParams extends ListQueryParams {
+    search?: string
   }
   export interface ListChequesParams extends ListQueryParams {
     collectionAddress?: string,
