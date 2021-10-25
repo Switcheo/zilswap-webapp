@@ -540,8 +540,8 @@ export class ArkClient {
     const tokenCount = bnOrZero(collection.tokenStat?.tokenCount);
 
     return {
-      floorPrice: floorPrice.gt(0) ? toHumanNumber(floorPrice) : undefined,
-      volume: volume.gt(0) ? toHumanNumber(volume) : undefined,
+      floorPrice: floorPrice.gt(0) ? toHumanNumber(floorPrice, 2) : undefined,
+      volume: volume.gt(0) ? toHumanNumber(volume, 2) : undefined,
       holderCount: holderCount.gt(0) ? holderCount.toString(10) : undefined,
       tokenCount: tokenCount.gt(0) ? tokenCount.toString(10) : undefined,
     }
