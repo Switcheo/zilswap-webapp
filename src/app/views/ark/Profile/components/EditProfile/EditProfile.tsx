@@ -161,9 +161,11 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
   const onUpdateProfile = (goBack?: boolean) => {
     runUpdateProfile(async () => {
-      if (!hasChange && !profileImage) {
+      if (!hasChange && !profileImage)
         return;
-      }
+
+      if (!wallet)
+        return;
 
       let ok = true
       let filteredData: any = {};
@@ -188,7 +190,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         const arkClient = new ArkClient(network);
         const { oAuth } = marketplaceState;
         let checkedOAuth: OAuth | undefined = oAuth;
-        if (!oAuth?.access_token || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
+        if (!oAuth?.access_token || oAuth.address !== wallet.addressInfo.bech32 || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
           const { result } = await arkClient.arkLogin(wallet!, window.location.hostname);
           dispatch(actions.MarketPlace.updateAccessToken(result));
           checkedOAuth = result;
@@ -197,28 +199,24 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           imageUpload();
         }
         if (hasChange) {
-          const result = await arkClient.updateProfile(address!, filteredData, checkedOAuth!);
-          if (result.error) {
-            toaster(`Error updating profile: ${result.error}`);
-          } else {
-            toaster("Profile updated");
-            dispatch(actions.MarketPlace.loadProfile());
-          }
+          await arkClient.updateProfile(address!, filteredData, checkedOAuth!);
+          toaster("Profile updated");
+          dispatch(actions.MarketPlace.loadProfile());
         }
-      } catch (err) {
-        toaster(JSON.stringify(err));
+      } catch (error) {
+        toaster(`Error updating profile: ${typeof error === "string" ? error : error?.message}`);
       }
     });
   }
 
   const imageUpload = () => {
     runUploadImage(async () => {
-      if (!uploadFile) return;
+      if (!uploadFile || !wallet) return;
       const arkClient = new ArkClient(network);
       const { oAuth } = marketplaceState;
       let checkedOAuth: OAuth | undefined = oAuth;
-      if (!oAuth?.access_token || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
-        const { result } = await arkClient.arkLogin(wallet!, window.location.hostname);
+      if (!oAuth?.access_token || oAuth.address !== wallet.addressInfo.bech32 || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
+        const { result } = await arkClient.arkLogin(wallet, window.location.hostname);
         dispatch(actions.MarketPlace.updateAccessToken(result));
         checkedOAuth = result;
       }

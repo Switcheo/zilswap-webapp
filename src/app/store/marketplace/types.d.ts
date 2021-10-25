@@ -159,6 +159,7 @@ export interface OAuth {
   expires_in: number;
   refresh_token: string;
   token_type: string;
+  address: string
 }
 
 export interface PaginatedList<T> {

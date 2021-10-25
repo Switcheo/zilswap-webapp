@@ -109,6 +109,7 @@ export class ArkClient {
     const result = await this.http.post({ url, data });
     const output = await result.json();
     await this.checkError(output);
+    output.result.address = bech32Address;
     return output;
   }
 
