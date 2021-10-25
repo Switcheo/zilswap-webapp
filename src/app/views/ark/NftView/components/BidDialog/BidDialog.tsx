@@ -508,8 +508,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginRight: 4,
   },
   bestBidTokenLogo: {
-    height: "18px",
-    width: "18px",
+    height: "18px !important",
+    width: "18px !important",
   },
   actionButton: {
     height: 46,
