@@ -34,7 +34,7 @@ const PrimaryPrice: React.FC<Props> = (props: Props) => {
   if (!priceToken) return null; // loading tokens (most likely.. lol)
 
   const priceAmount = bnOrZero(data.cheque.price.amount).shiftedBy(-priceToken.decimals)
-  const priceValue = valueCalculator.amount(prices, priceToken, priceAmount);
+  const priceValue = valueCalculator.amount(prices, priceToken, bnOrZero(data.cheque.price.amount));
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
