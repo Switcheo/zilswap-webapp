@@ -4,13 +4,13 @@ import {
   Box, BoxProps,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask } from "app/utils";
 import { ArkClient } from "core/utilities";
-import { Cheque } from "app/store/types";
-import { getBlockchain } from "app/saga/selectors";
+import { getBlockchain, getMarketplace } from "app/saga/selectors";
 import { ArkBidsTable, ArkToggle } from "app/components";
+import { actions } from "app/store";
 
 interface Props extends BoxProps {
   address: string
@@ -26,18 +26,25 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const BidsReceived: React.FC<Props> = (props: Props) => {
   const { address, className } = props;
   const classes = useStyles();
+  const dispatch = useDispatch();
   const { network } = useSelector(getBlockchain);
+  const { bidsTable } = useSelector(getMarketplace);
   const [activeOnly, setActiveOnly] = useState<boolean>(false);
-  const [bids, setBids] = useState<Cheque[]>([]);
   const [runGetBids] = useAsyncTask("getBids");
 
   // fetch nft data, if none redirect back to collections / show not found view
   useEffect(() => {
     runGetBids(async () => {
-      const arkClient = new ArkClient(network);
-      const result = await arkClient.listNftCheques({ initiatorAddress: address, isActive: activeOnly ? 'true' : undefined, side: 'buy' });
+      dispatch(actions.MarketPlace.updateBidsTable(undefined));
 
-      setBids(result.result.entries);
+      const arkClient = new ArkClient(network);
+      const listFilter: ArkClient.ListChequesParams = { initiatorAddress: address, isActive: activeOnly ? "true" : undefined, side: "buy" }
+      const result = await arkClient.listNftCheques(listFilter);
+
+      dispatch(actions.MarketPlace.updateBidsTable({
+        bids: result.result.entries,
+        ...listFilter,
+      }));
     })
     // eslint-disable-next-line
   }, [network, address, activeOnly]);
@@ -45,7 +52,7 @@ const BidsReceived: React.FC<Props> = (props: Props) => {
   return (
     <Box className={cls(classes.root, className)}>
       <ArkToggle onCheck={setActiveOnly} label="Show active offers only&nbsp;"/>
-      <ArkBidsTable bids={bids} />
+      <ArkBidsTable bids={bidsTable?.bids ?? []} />
     </Box>
   );
 };

@@ -1,5 +1,5 @@
 import { SimpleMap } from "app/utils";
-import { ArkExchangeInfo } from "core/utilities";
+import { ArkClient, ArkExchangeInfo } from "core/utilities";
 import { SortBy } from "./actions";
 
 export interface MarketPlaceState {
@@ -16,11 +16,8 @@ export interface MarketPlaceState {
   bidsTable?: BidsTableInfo;
 }
 
-export interface BidsTableInfo {
+export interface BidsTableInfo extends ArkClient.ListChequesParams {
   bids: Cheque[],
-  collectionAddress: string,
-  tokenId: string,
-  side: "buy" | "sell",
 };
 
 export interface SimpleCheque {

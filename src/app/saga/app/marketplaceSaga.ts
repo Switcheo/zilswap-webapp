@@ -157,18 +157,12 @@ function* listenPendingTx(action: any) {
 
     if (bidsTable && exchangeInfo) {
       const arkClient = new ArkClient(network);
-      const { collectionAddress, side, tokenId } = bidsTable;
-      const result = (yield arkClient.listNftCheques({
-        collectionAddress,
-        side,
-        tokenId,
-      }) as any)
+      const { bids, ...listFilter } = bidsTable;
+      const result = (yield arkClient.listNftCheques(listFilter) as any)
 
       yield put(actions.MarketPlace.updateBidsTable({
         bids: result.result.entries,
-        collectionAddress,
-        tokenId,
-        side: "buy",
+        ...listFilter,
       }));
     }
   } catch (error) {

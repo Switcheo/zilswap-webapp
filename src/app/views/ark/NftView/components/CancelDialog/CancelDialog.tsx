@@ -72,12 +72,12 @@ const CancelDialog: React.FC<Props> = (props: Props) => {
         const message = arkClient.arkMessage("Void", chequeHash.replace(/^0x/i, ""));
         const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any;
 
-        const execTradeResult = await arkClient.voidCheque({
+        const voidChequeResult = await arkClient.voidCheque({
           publicKey, signature, chequeHash,
         }, zilswap);
 
         zilswap.observeTx({
-          hash: execTradeResult.id!,
+          hash: voidChequeResult.id!,
           deadline: zilswap.getCurrentBlock() + 1000,
         });
 
@@ -86,7 +86,12 @@ const CancelDialog: React.FC<Props> = (props: Props) => {
           cheque,
         ]);
 
-        logger("exec trade result", execTradeResult)
+        dispatch(actions.MarketPlace.addPendingTx({
+          chequeHash: `0x${chequeHash}`,
+          txHash: voidChequeResult.id!,
+        }));
+
+        logger("exec trade result", voidChequeResult)
       }
 
       onCloseDialog();
