@@ -36,7 +36,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
   const tokenState = useSelector(getTokens);
   const { wallet } = useSelector(getWallet);
   const txState = useSelector(getTransactions);
-  const { exchangeInfo } = useSelector(getMarketplace);
+  const { exchangeInfo, acceptTerms } = useSelector(getMarketplace);
   const open = useSelector<RootState, boolean>((state) => state.layout.showBuyNftDialog);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -44,7 +44,6 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const [waitForComplete, completePending, waitCompleteError, clearWaitCompleteError] = useAsyncTask("waitForPurchaseComplete");
   const match = useRouteMatch<{ id: string, collection: string }>();
-  const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
   const [purchaseTxHash, setPurchaseTxHash] = useState<string | null>(null);
   const [approveTxHash, setApproveTxHash] = useState<string | null>(null);
@@ -196,7 +195,6 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
 
   const onCloseDialog = () => {
     dispatch(actions.Layout.toggleShowBuyNftDialog("close"));
-    setAcceptTerms(false);
     setCompletedPurchase(false);
   };
 
@@ -204,6 +202,10 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
     dispatch(actions.Layout.toggleShowBuyNftDialog("close"));
     history.push("/ark/profile");
   };
+
+  const toggleAcceptTerms = () => {
+    dispatch(actions.MarketPlace.toggleAcceptTerms());
+  }
 
   const dialogHeader = completePending
     ? ""
@@ -293,7 +295,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
                     checkedIcon={<CheckedIcon />}
                     icon={<UncheckedIcon fontSize="small" />}
                     checked={acceptTerms}
-                    onChange={() => setAcceptTerms(!acceptTerms)}
+                    onChange={() => toggleAcceptTerms()}
                     disableRipple
                   />
                 }

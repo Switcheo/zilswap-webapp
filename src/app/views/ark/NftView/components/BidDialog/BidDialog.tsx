@@ -31,11 +31,6 @@ interface Props extends Partial<DialogProps> {
   onComplete?: () => void;
 }
 
-const initialFormState = {
-  bidAmount: "0",
-  acceptTerms: false,
-};
-
 export type expiryOption = {
   text: string;
   value: number | undefined;
@@ -89,14 +84,13 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const { wallet } = useSelector(getWallet);
   const tokenState = useSelector(getTokens);
   const { observingTxs } = useSelector(getTransactions);
-  const { exchangeInfo } = useSelector(getMarketplace);
+  const { exchangeInfo, acceptTerms } = useSelector(getMarketplace);
   const open = useSelector<RootState, boolean>(
     (state) => state.layout.showBidNftDialog
   );
   const [runConfirmPurchase, loading, error] = useAsyncTask("confirmPurchase");
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
-  const [formState, setFormState] =
-    useState<typeof initialFormState>(initialFormState);
+  const [bidAmount, setBidAmount] = useState<string>("0");
   const [bidToken, setBidToken] = useState<TokenInfo>(
     tokenState.tokens[ZWAP_TOKEN_CONTRACT[network]]
   );
@@ -119,26 +113,26 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     const arkClient = new ArkClient(network);
     const tokenProxyAddr = arkClient.tokenProxyAddress;
 
-    const priceAmount = bnOrZero(formState.bidAmount);
+    const priceAmount = bnOrZero(bidAmount);
     const unitlessInAmount = priceAmount.shiftedBy(bidToken.decimals);
     const approved = bnOrZero(bidToken.allowances![tokenProxyAddr] || '0')
     const showTxApprove = approved.isZero() || approved.comparedTo(unitlessInAmount) < 0;
 
     return showTxApprove;
     // eslint-disable-next-line
-  }, [bidToken, formState, txIsPending, network, tokenState.tokens])
+  }, [bidToken, bidAmount, txIsPending, network, tokenState.tokens])
 
   const onApproveTx = () => {
     if (!bidToken) return;
     if (bidToken.isZil) return;
-    if (bnOrZero(formState.bidAmount).isLessThanOrEqualTo(0)) return;
+    if (bnOrZero(bidAmount).isLessThanOrEqualTo(0)) return;
     if (loading) return;
 
     runApproveTx(async () => {
       const arkClient = new ArkClient(network);
       const tokenProxyAddr = arkClient.tokenProxyAddress;
       const tokenAddress = bidToken.address;
-      const tokenAmount = bnOrZero(formState.bidAmount);
+      const tokenAmount = bnOrZero(bidAmount);
       const observedTx = await ZilswapConnector.approveTokenTransfer({
         tokenAmount: tokenAmount.shiftedBy(bidToken.decimals),
         tokenID: tokenAddress,
@@ -202,7 +196,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
       if (!bidToken) return; // TODO: handle token not found
 
-      const priceAmount = bnOrZero(formState.bidAmount).shiftedBy(
+      const priceAmount = bnOrZero(bidAmount).shiftedBy(
         bidToken.decimals
       );
       const price = {
@@ -258,10 +252,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const onCloseDialog = () => {
     if (loading) return;
     dispatch(actions.Layout.toggleShowBidNftDialog("close"));
-    setFormState({
-      bidAmount: "0",
-      acceptTerms: false,
-    });
+    setBidAmount("0")
     setCompletedPurchase(false);
   };
 
@@ -275,34 +266,32 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   };
 
   const onBidAmountChange = (rawAmount: string = "0") => {
-    setFormState({
-      ...formState,
-      bidAmount: rawAmount,
-    });
+    setBidAmount(rawAmount);
   };
 
   const onEndEditBidAmount = () => {
-    let bidAmount = new BigNumber(formState.bidAmount).decimalPlaces(
+    let endBid = new BigNumber(bidAmount).decimalPlaces(
       bidToken?.decimals ?? 0
     );
-    if (bidAmount.isNaN() || bidAmount.isNegative() || !bidAmount.isFinite())
-      setFormState({
-        ...formState,
-        bidAmount: "0",
-      });
+    if (endBid.isNaN() || endBid.isNegative() || !endBid.isFinite())
+      setBidAmount("0");
   };
 
   const isBidEnabled = useMemo(() => {
-    if (!formState.acceptTerms) return false;
+    if (!acceptTerms) return false;
 
-    if (bnOrZero(formState.bidAmount).isLessThanOrEqualTo(0)) return false;
+    if (bnOrZero(bidAmount).isLessThanOrEqualTo(0)) return false;
 
     if (!bidToken) return false;
 
     return true;
 
     // eslint-disable-next-line
-  }, [formState, bidToken]);
+  }, [bidAmount, acceptTerms, bidToken]);
+
+  const onToggleAcceptTerm = () => {
+    dispatch(actions.MarketPlace.toggleAcceptTerms());
+  }
 
   return (
     <DialogModal
@@ -327,7 +316,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
             tokenList="ark-zil"
             inputClassName={cls({ [classes.expandedCurrencyInput]: !!bestBid })}
             token={bidToken ?? null}
-            amount={formState.bidAmount}
+            amount={bidAmount}
             dialogOpts={{ zrc2Only: true }}
             onEditorBlur={onEndEditBidAmount}
             onAmountChange={onBidAmountChange}
@@ -368,13 +357,8 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                       className={classes.radioButton}
                       checkedIcon={<CheckedIcon />}
                       icon={<UncheckedIcon fontSize="small" />}
-                      checked={formState.acceptTerms}
-                      onChange={() =>
-                        setFormState({
-                          ...formState,
-                          acceptTerms: !formState.acceptTerms,
-                        })
-                      }
+                      checked={acceptTerms}
+                      onChange={() => onToggleAcceptTerm()}
                       disableRipple
                     />
                   }

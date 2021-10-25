@@ -119,9 +119,9 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
       }
     }
     case MarketPlaceActionTypes.TOGGLE_ACCEPT_TERMS:
-      if (state.acceptTerms) localStorage.removeItem(LocalStorageKeys.ArkAcceptTerms);
-      else {
-        console.log("saving terms", !state.acceptTerms);
+      if (state.acceptTerms) {
+        localStorage.removeItem(LocalStorageKeys.ArkAcceptTerms);
+      } else {
         localStorage.setItem(LocalStorageKeys.ArkAcceptTerms, JSON.stringify("true"));
       }
       return {
