@@ -93,7 +93,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const open = useSelector<RootState, boolean>(
     (state) => state.layout.showBidNftDialog
   );
-  const [runConfirmPurchase, loading, error] = useAsyncTask("confirmPurchase");
+  const [runConfirmPurchase, loading, error, setPurchaseError] = useAsyncTask("confirmPurchase");
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
   const [formState, setFormState] =
     useState<typeof initialFormState>(initialFormState);
@@ -196,6 +196,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     if (!wallet || !exchangeInfo) return;
 
     clearApproveError();
+    setPurchaseError();
 
     runConfirmPurchase(async () => {
       const { collection: address, id } = match.params;
@@ -205,6 +206,12 @@ const BidDialog: React.FC<Props> = (props: Props) => {
       const priceAmount = bnOrZero(formState.bidAmount).shiftedBy(
         bidToken.decimals
       );
+
+      if (!bidToken.balance || bidToken.balance?.lt(priceAmount)) {
+        setPurchaseError(new Error("Insufficient balance."))
+        return;
+      }
+
       const price = {
         amount: priceAmount,
         address: fromBech32Address(bidToken.address),
@@ -271,10 +278,12 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   };
 
   const onCurrencyChange = (token: TokenInfo) => {
+    setPurchaseError()
     setBidToken(token);
   };
 
   const onBidAmountChange = (rawAmount: string = "0") => {
+    setPurchaseError()
     setFormState({
       ...formState,
       bidAmount: rawAmount,
