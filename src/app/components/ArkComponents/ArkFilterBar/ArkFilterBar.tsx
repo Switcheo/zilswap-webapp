@@ -16,7 +16,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexGrow: 1,
     display: "grid",
     gridTemplateColumns: "repeat(4,minmax(0,1fr))",
-    gap: 10
+    gap: 10,
+    [theme.breakpoints.down("sm")]: {
+      gridTemplate: "auto / repeat(2, minmax(0,1fr))"
+    },
   },
 }))
 
