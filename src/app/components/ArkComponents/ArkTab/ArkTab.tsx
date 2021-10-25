@@ -94,7 +94,7 @@ const ArkTab: React.FC<Props> = (props: Props) => {
         className={classes.tabButton}
       >
         {tabHeaders.map((header, index) => (
-          <BaseTab key={`${header}${index}`} label={header} {...tabProps(index)} />
+          <BaseTab key={header} label={header} {...tabProps(index)} />
         ))}
       </BaseTabs>
     </Box>

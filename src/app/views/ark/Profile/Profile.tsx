@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -188,30 +188,32 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         <ArkBanner avatarImage={viewProfile?.profileImage?.url} />
 
         <Box className={classes.addressBox}>
-          {address && [
-            <Typography variant="h2">
-              {viewProfile?.username || truncateAddress(address || '')}
-              {isConnectedUser && (
-                <Box className={classes.editIcon}>
-                  <Link to={`/ark/profile/${address}/edit`}>
-                    <EditIcon
-                      className={cls(classes.editable)}
-                    />
-                  </Link>
+          {address && (
+            <Fragment>
+              <Typography variant="h2">
+                {viewProfile?.username || truncateAddress(address || '')}
+                {isConnectedUser && (
+                  <Box className={classes.editIcon}>
+                    <Link to={`/ark/profile/${address}/edit`}>
+                      <EditIcon
+                        className={cls(classes.editable)}
+                      />
+                    </Link>
+                  </Box>
+                )}
+              </Typography>
+              <Tooltip title={tooltipText} placement="right" arrow>
+                <Box
+                  onClick={() => address && copyAddr(address)}
+                  className={classes.addressBadge}
+                >
+                  <Typography variant="body1">
+                    {truncateAddress(address || '', isXs)}
+                  </Typography>
                 </Box>
-              )}
-            </Typography>,
-            <Tooltip title={tooltipText} placement="right" arrow>
-              <Box
-                onClick={() => address && copyAddr(address)}
-                className={classes.addressBadge}
-              >
-                <Typography variant="body1">
-                  {truncateAddress(address || '', isXs)}
-                </Typography>
-              </Box>
-            </Tooltip>
-          ]}
+              </Tooltip>
+            </Fragment>
+          )}
         </Box>
 
         {

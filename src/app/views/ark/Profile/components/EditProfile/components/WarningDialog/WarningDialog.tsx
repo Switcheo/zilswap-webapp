@@ -30,7 +30,7 @@ const WarningDialog: React.FC<Props> = (props: Props) => {
     <DialogModal
       open={!!open}
       onClose={onCloseDialog}
-      header="Profile Photo"
+      header="Save Changes"
       {...rest} className={cls(classes.root, className)}
     >
       <DialogContent className={classes.dialogContent}>
