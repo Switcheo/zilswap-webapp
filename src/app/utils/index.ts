@@ -31,4 +31,5 @@ export * from "./useToaster";
 export { default as useTokenFinder } from "./useTokenFinder";
 export * from "./useValueCalculators";
 export { default as useValueCalculators } from "./useValueCalculators";
+export { default as getLocalStored } from "./getLocalStored";
 
