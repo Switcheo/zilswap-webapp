@@ -9,7 +9,7 @@ import { AppTheme } from "app/theme/types";
 import { bnOrZero, toSignificantNumber, useValueCalculators } from "app/utils";
 import { getTokens } from "app/saga/selectors";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
-import { PriceInfo } from "../../types";
+import { PriceInfo, PriceType } from "../../types";
 
 interface Props extends BoxProps {
   data: PriceInfo;
@@ -24,16 +24,18 @@ const PrimaryPrice: React.FC<Props> = (props: Props) => {
   const valueCalculator = useValueCalculators();
 
   const timeLeft = useMemo(() => {
+    if (data.type === PriceType.LastTrade) return null;
     const blocksLeft = data.cheque.expiry - currentBlock;
     const expiryTime = blockTime.add(blocksLeft * BLOCKS_PER_MINUTE, "minutes");
     return expiryTime.isAfter(dayjs()) ? expiryTime.fromNow(true) + " left" : "Expired " + expiryTime.fromNow();
-  }, [currentBlock, blockTime, data.cheque.expiry])
+  }, [currentBlock, blockTime, data.cheque.expiry, data.type])
 
   const priceToken = tokens[toBech32Address(data.cheque.price.address)];
   if (!priceToken) return null; // loading tokens (most likely.. lol)
 
-  const priceAmount = bnOrZero(data.cheque.price.amount).shiftedBy(-priceToken.decimals)
-  const priceValue = valueCalculator.amount(prices, priceToken, priceAmount);
+  const amount = bnOrZero(data.cheque.price.amount);
+  const priceAmount = amount.shiftedBy(-priceToken.decimals);
+  const priceValue = valueCalculator.amount(prices, priceToken, amount);
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
@@ -49,9 +51,9 @@ const PrimaryPrice: React.FC<Props> = (props: Props) => {
         </Box>
 
         <Box className={classes.secondaryInfo}>
-          <Typography component="span" variant="body1" className={cls(classes.secondaryText)}>
+          {timeLeft && <Typography component="span" variant="body1" className={cls(classes.secondaryText)}>
             {timeLeft}
-          </Typography>
+          </Typography>}
           <Typography component="span" variant="body1" className={cls(classes.secondaryText)}>
             ${priceValue.toFormat(2).toString()}
           </Typography>

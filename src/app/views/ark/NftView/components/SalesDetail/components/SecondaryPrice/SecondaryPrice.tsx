@@ -9,7 +9,7 @@ import { AppTheme } from "app/theme/types";
 import { getTokens } from "app/saga/selectors";
 import { bnOrZero, toSignificantNumber } from "app/utils";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
-import { PriceInfo } from "../../types";
+import { PriceInfo, PriceType } from "../../types";
 
 interface Props extends BoxProps {
   data: PriceInfo;
@@ -23,10 +23,11 @@ const SecondaryPrice: React.FC<Props> = (props: Props) => {
   const { tokens } = useSelector(getTokens);
 
   const timeLeft = useMemo(() => {
+    if (data.type === PriceType.LastTrade) return null;
     const blocksLeft = data.cheque.expiry - currentBlock;
     const expiryTime = blockTime.add(blocksLeft * BLOCKS_PER_MINUTE, "minutes");
     return expiryTime.isAfter(dayjs()) ? expiryTime.fromNow(true) + " left" : null;
-  }, [currentBlock, blockTime, data.cheque.expiry])
+  }, [currentBlock, blockTime, data.cheque.expiry, data.type])
 
   const priceToken = tokens[toBech32Address(data.cheque.price.address)];
   if (!priceToken) return null; // loading tokens (most likely.. lol)
