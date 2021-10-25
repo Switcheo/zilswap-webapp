@@ -649,7 +649,7 @@ export namespace ArkClient {
 }
 
 export const getChequeStatus = (cheque: Cheque, currentBlock: number): 'Active' | 'Expired' | 'Cancelled' | 'Accepted' => {
-  if (cheque.cancelTransactionHash) return 'Cancelled'
+  if (cheque.cancelTransactionHash || cheque.invalidatedAt) return 'Cancelled'
   if (cheque.matchTransactionHash) return 'Accepted'
   if (cheque.expiry <= currentBlock) return 'Expired'
   return 'Active'

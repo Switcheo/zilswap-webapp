@@ -20,7 +20,7 @@ export interface BidsTableInfo {
   bids: Cheque[],
   collectionAddress: string,
   tokenId: string,
-  side: "buy" | "sell", 
+  side: "buy" | "sell",
 };
 
 export interface SimpleCheque {
@@ -42,6 +42,7 @@ export interface SimpleCheque {
   chequeHash: string;
   cancelTransactionHash: string | null;
   matchTransactionHash: string | null;
+  invalidatedAt: string | null;
 };
 
 export interface Cheque extends SimpleCheque {

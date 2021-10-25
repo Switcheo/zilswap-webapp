@@ -88,7 +88,7 @@ const HEADERS: HeadersProp[] = [
   { align: "center", value: "Versus Floor" },
   { align: "center", value: "Bidder" },
   { align: "center", value: "Expires" },
-  { align: "center", value: "Actions" },
+  { align: "center", value: "Status" },
 ]
 
 const ArkBidsTable: React.FC<Props> = (props: Props) => {
