@@ -22,8 +22,8 @@ const LOCALHOST_ENDPOINT = "http://localhost:8181";
 
 
 export const ARK_CONTRACTS: { [key in Network]: { broker: string, tokenProxy: string } } = {
-  [Network.MainNet]: { broker: 'zil1j57m7j06fgg4c30dpjzxy7rsv07lvcfayvu5zf', tokenProxy: 'zil1lwg6xfxgv33ukf8sp3fv2du7m2vfsj6ct7slat' },
-  [Network.TestNet]: { broker: 'zil1j57m7j06fgg4c30dpjzxy7rsv07lvcfayvu5zf', tokenProxy: 'zil1lwg6xfxgv33ukf8sp3fv2du7m2vfsj6ct7slat' },
+  [Network.MainNet]: { broker: 'zil1jna6pq6fsjsxdkvkz2wyt6tg80p762neqkz2qh', tokenProxy: 'zil1yrqlm8cxpqt8wq5y6axejvcs2h350ykj9cc758' },
+  [Network.TestNet]: { broker: 'zil1nyapz27kck9tteejccfr354tnx89s2sddfzqpl', tokenProxy: 'zil1hfp8fn6026kvel2zc25xztk3lss68nlmqmm2fn' },
 }
 
 const apiPaths = {
