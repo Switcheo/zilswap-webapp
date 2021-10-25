@@ -53,9 +53,6 @@ const ArkPaginator: React.FC<Props> = (props: Props) => {
 
   const { items }: UsePaginationResult = usePagination({
     count: maxPages,
-    boundaryCount: 1,
-    siblingCount: 0,
-    defaultPage: 1,
   })
 
   const selectedPage = items.find((item) => item.selected);
@@ -74,7 +71,7 @@ const ArkPaginator: React.FC<Props> = (props: Props) => {
       {items.map((pageItem, index) => {
         const { page, type, selected } = pageItem;
         if (type === 'start-ellipsis' || type === 'end-ellipsis') {
-          return <Typography key="ellipsis" className={classes.ellipsis}>...</Typography>;
+          return <Typography key={type} className={classes.ellipsis}>...</Typography>;
         } else if (type === 'page') {
           return (
             <Typography
