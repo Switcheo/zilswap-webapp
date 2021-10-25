@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect, useState, useMemo } from "react";
 import { Avatar, Badge, Box, Container, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { Transaction } from "@zilliqa-js/account";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { ArkBidsTable, ArkBreadcrumb, ArkTab, ArkOwnerLabel, ArkBox } from "app/components";
@@ -9,7 +10,7 @@ import { getBlockchain, getMarketplace, getWallet } from "app/saga/selectors";
 import { Nft, Profile } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { bnOrZero, useAsyncTask } from "app/utils";
-import { ArkClient } from "core/utilities";
+import { ArkClient, waitForTx } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import { actions } from "app/store";
 import { ReactComponent as VerifiedBadge } from "../CollectionView/verified-badge.svg";
@@ -20,7 +21,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
   const classes = useStyles();
   const dispatch = useDispatch();
   const { network } = useSelector(getBlockchain);
-  const { bidsTable } = useSelector(getMarketplace);
+  const { bidsTable, pendingTxs } = useSelector(getMarketplace);
   const { wallet } = useSelector(getWallet);
   const [token, setToken] = useState<Nft>();
   const [runGetNFTDetails] = useAsyncTask("runGetNFTDetails");
@@ -52,6 +53,15 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     }
     // eslint-disable-next-line
   }, [wallet])
+
+  const onCancelListing = async (txs: Transaction[]) => {
+    await Promise.all(txs.map(tx => waitForTx(tx.id!, 300, 1000)));
+
+    // wait 3s for backend to sync
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    getData();
+  };
 
   const getData = () => {
     getNFTDetails();
@@ -93,6 +103,9 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     })
   }
 
+  const isCancelling = token?.bestAsk && !!Object.values(pendingTxs).find(tx => tx.chequeHash === token?.bestAsk?.chequeHash);
+  console.log("cancelling", isCancelling, token?.bestAsk, pendingTxs)
+
   const breadcrumbs = [
     { path: "/ark/collections", value: "Collections" },
     {
@@ -113,7 +126,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
         {/* Nft image and main info */}
         <Container disableGutters className={classes.imageInfoContainer}>
           <NftImage className={classes.nftImage} token={token} rounded={true} />
-          {token && <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} tokenUpdatedCallback={() => getNFTDetails()} />}
+          {token && <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} isCancelling={isCancelling} tokenUpdatedCallback={() => getNFTDetails()} />}
         </Container>
 
         {/* About info and trait table */}
@@ -156,7 +169,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
                     </Box>
                   </MenuItem>
                 </Box>
-                }
+              }
             </Box>
           </ArkBox>
           <ArkBox variant="base" className={classes.traitContainer}>
@@ -182,9 +195,9 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
       </Container >
       {token && (
         <Fragment>
-          <BuyDialog token={token} collectionAddress={collectionId} onComplete={getData}/>
-          <BidDialog token={token} collectionAddress={collectionId} onComplete={getData}/>
-          <CancelDialog token={token} />
+          <BuyDialog token={token} collectionAddress={collectionId} onComplete={getData} />
+          <BidDialog token={token} collectionAddress={collectionId} onComplete={getData} />
+          <CancelDialog token={token} onComplete={onCancelListing} />
         </Fragment>
       )}
     </ArkPage >

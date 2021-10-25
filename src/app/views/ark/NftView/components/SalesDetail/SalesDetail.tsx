@@ -18,11 +18,12 @@ import { PriceInfo, PriceType } from "./types";
 interface Props extends BoxProps {
   token: Nft;
   tokenId: string;
+  isCancelling?: boolean | null;
   tokenUpdatedCallback: () => void;
 }
 
 const SalesDetail: React.FC<Props> = (props: Props) => {
-  const { token, tokenId, children, className, tokenUpdatedCallback, ...rest } = props;
+  const { token, tokenId, children, className, tokenUpdatedCallback, isCancelling, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
   const dispatch = useDispatch();
@@ -118,7 +119,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
               </FancyButton>
             )}
             {isOwnToken && token.bestAsk && (
-              <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onCancel}>
+              <FancyButton loading={!!isCancelling} containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onCancel}>
                 Cancel Listing
               </FancyButton>
             )}
