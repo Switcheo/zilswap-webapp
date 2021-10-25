@@ -9,7 +9,7 @@ import { AppTheme } from "app/theme/types";
 import { bnOrZero, toSignificantNumber, useValueCalculators } from "app/utils";
 import { getTokens } from "app/saga/selectors";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
-import { PriceInfo } from "../../types";
+import { PriceInfo, PriceType } from "../../types";
 
 interface Props extends BoxProps {
   data: PriceInfo;
@@ -48,14 +48,16 @@ const PrimaryPrice: React.FC<Props> = (props: Props) => {
           {toSignificantNumber(priceAmount)} {priceToken.symbol}
         </Box>
 
-        <Box className={classes.secondaryInfo}>
-          <Typography component="span" variant="body1" className={cls(classes.secondaryText)}>
-            {timeLeft}
-          </Typography>
-          <Typography component="span" variant="body1" className={cls(classes.secondaryText)}>
-            ${priceValue.toFormat(2).toString()}
-          </Typography>
-        </Box>
+        {data.type !== PriceType.LastTrade && (
+          <Box className={classes.secondaryInfo}>
+            <Typography component="span" variant="body1" className={cls(classes.secondaryText)}>
+              {timeLeft}
+            </Typography>
+            <Typography component="span" variant="body1" className={cls(classes.secondaryText)}>
+              ${priceValue.toFormat(2).toString()}
+            </Typography>
+          </Box>
+        )}
       </Typography>
     </Box>
   );

@@ -9,7 +9,7 @@ import { AppTheme } from "app/theme/types";
 import { getTokens } from "app/saga/selectors";
 import { bnOrZero, toSignificantNumber } from "app/utils";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
-import { PriceInfo } from "../../types";
+import { PriceInfo, PriceType } from "../../types";
 
 interface Props extends BoxProps {
   data: PriceInfo;
@@ -39,7 +39,7 @@ const SecondaryPrice: React.FC<Props> = (props: Props) => {
           {data.type.toUpperCase()}
         </Typography>
         {toSignificantNumber(priceAmount)} {priceToken.symbol}
-        {timeLeft && <Typography className={classes.secondaryText}>
+        {(timeLeft && data.type !== PriceType.LastTrade) && <Typography className={classes.secondaryText}>
           {timeLeft}
         </Typography>}
       </Typography>
