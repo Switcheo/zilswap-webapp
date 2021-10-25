@@ -9,6 +9,7 @@ import { AppTheme } from "app/theme/types";
 import { bnOrZero, toSignificantNumber, useValueCalculators } from "app/utils";
 import { getTokens } from "app/saga/selectors";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
+import { CurrencyLogo } from "app/components";
 import { PriceInfo, PriceType } from "../../types";
 
 interface Props extends BoxProps {
@@ -47,7 +48,12 @@ const PrimaryPrice: React.FC<Props> = (props: Props) => {
 
       <Typography variant="h1" className={classes.saleInfo}>
         <Box mr={1} display="flex">
-          {toSignificantNumber(priceAmount)} {priceToken.symbol}
+          {toSignificantNumber(priceAmount)}
+          <CurrencyLogo
+            currency={priceToken.symbol}
+            address={priceToken.address}
+            className={classes.tokenLogo}
+          />
         </Box>
 
         <Box className={classes.secondaryInfo}>
@@ -68,7 +74,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   saleType: {
     display: 'inline-block',
-    margin: theme.spacing(1, 0),
+    margin: theme.spacing(1, 0, 1.5, 0),
     padding: theme.spacing(1, 2),
     borderRadius: 10,
     color: '#6BE1FF',
@@ -94,6 +100,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: 12,
     lineHeight: 1,
     paddingBottom: 2,
+    marginLeft: 3,
+  },
+  tokenLogo: {
+    width: 32,
+    height: 32,
+    marginTop: -3,
     marginLeft: 3,
   },
 }));

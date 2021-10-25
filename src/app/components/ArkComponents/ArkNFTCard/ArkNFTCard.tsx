@@ -11,7 +11,7 @@ import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
 import { Network } from "zilswap-sdk/lib/constants";
-import { ArkOwnerLabel, ArkImageView, ZapWidget } from "app/components";
+import { ArkOwnerLabel, ArkImageView, ZapWidget, CurrencyLogo } from "app/components";
 import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
@@ -134,7 +134,11 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                 <Typography className={classes.secondaryPrice}>
                   <Typography className={classes.secondaryPriceLabel}>Best</Typography>
                   <Typography component="span" style={{ fontWeight: 700 }}>{toHumanNumber(bestBid.amount)}</Typography>
-                  {bestBid.bidToken.symbol}
+                  <CurrencyLogo
+                    currency={bestBid.bidToken.symbol}
+                    address={bestBid.bidToken.address}
+                    className={classes.tokenLogo}
+                  />
                 </Typography>
               )}
             </Box>
@@ -182,7 +186,14 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   </Typography>
                   {bestAsk && (
                     <Typography className={classes.title}>
-                      {toHumanNumber(bestAsk.amount)} {bestAsk.askToken.symbol}
+                      <Typography component="span" className={classes.bestAsk}>
+                        {toHumanNumber(bestAsk.amount)}
+                      </Typography>
+                      <CurrencyLogo
+                        currency={bestAsk.askToken.symbol}
+                        address={bestAsk.askToken.address}
+                        className={classes.tokenLogo}
+                      />
                     </Typography>
                   )}
                 </Box>
@@ -399,14 +410,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginLeft: "-2px",
     marginRight: "2px",
   },
+  bestAsk: {
+    fontFamily: 'Avenir Next',
+    fontSize: 14,
+    fontWeight: 700,
+  },
+  tokenLogo: {
+    height: 18,
+    width: 18,
+    marginLeft: 1,
+    marginTop: -2,
+  },
   secondaryPrice: {
     display: 'flex',
     color: theme.palette.text!.primary,
     fontSize: "12px",
     lineHeight: "14px",
-    '& > *': {
-      marginRight: 3,
-    }
   },
   secondaryPriceLabel: {
     opacity: 0.6,
@@ -418,6 +437,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "14px",
     lineHeight: "16px",
     color: theme.palette.text?.primary,
+    display: 'flex',
   },
   bodyBox: {
     padding: theme.spacing(0, 1.5),
