@@ -225,22 +225,9 @@ const Row: React.FC<Props> = (props: Props) => {
         signature: `0x${signature}`,
       }
 
-      const buyChequeHash = arkClient.arkChequeHash({
-        side: "Buy",
-        token: {
-          address: bid.token?.collection?.address,
-          id: bid.token?.tokenId.toString(10),
-        },
-        price,
-        feeAmount,
-        expiry: bid.expiry,
-        nonce: bid.nonce,
-      });
-
       const execTradeResult = await arkClient.executeTrade({
         buyCheque: bid,
         sellCheque,
-        matchedChequeHash: `0x${buyChequeHash}`,
         nftAddress: bid.token.collection.address,
         tokenId: bid.token.tokenId.toString(10),
       }, ZilswapConnector.getSDK());
