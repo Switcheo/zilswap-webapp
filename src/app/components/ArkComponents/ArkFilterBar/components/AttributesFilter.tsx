@@ -460,7 +460,7 @@ const AttributesFilter = (props: Props) => {
                         {/* <Text className={classes.attributeMeta}>Match</Text> */}
                       </span>
 
-                      {Object.values(trait.values).map(value => {
+                      {Object.values(trait.values).sort((a, b) => b.count - a.count).map(value => {
                         return (
                           <Box key={value.value} marginBottom={1}>
                             <FormControlLabel className={classes.attributeValue} value={value.value} control={<Checkbox

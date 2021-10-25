@@ -10,7 +10,7 @@ import { bnOrZero, SimpleMap, toHumanNumber } from "app/utils";
 import { HTTP, logger } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
 import { fromBech32Address } from "core/zilswap";
-import { ZIL_DECIMALS } from "app/utils/constants";
+import { WZIL_TOKEN_CONTRACT, ZIL_DECIMALS } from "app/utils/constants";
 import { CHAIN_IDS, MSG_VERSION } from "../zilswap/constants";
 
 const ARK_ENDPOINTS: SimpleMap<string> = {
@@ -345,6 +345,27 @@ export class ArkClient {
   }
 
   // TODO: Refactor zilswap SDK as instance member;
+  async wrapZil(amount: BigNumber, zilswap: Zilswap) {
+    const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
+    const callParams = {
+      amount: new BN(amount.toString()),
+      gasPrice: new BN(minGasPrice),
+      gasLimit: Long.fromNumber(20000),
+      version: bytes.pack(CHAIN_IDS[this.network], MSG_VERSION),
+    };
+
+    const result = await zilswap.callContract(
+      zilswap.getContract(WZIL_TOKEN_CONTRACT[zilswap.network]),
+      "Mint",
+      [],
+      callParams,
+      true,
+    );
+
+    return result;
+  }
+
+  // TODO: Refactor zilswap SDK as instance member;
   async executeTrade(executeParams: ArkClient.ExecuteTradeParams, zilswap: Zilswap, wallet?: ConnectedWallet) {
     const { nftAddress, tokenId, sellCheque, buyCheque } = executeParams;
     const { address: priceTokenAddress, amount: priceAmount } = sellCheque.price;
@@ -637,6 +658,7 @@ export namespace ArkClient {
     sortDir?: string;
   }
   export interface ListCollectionParams extends ListQueryParams {
+    search?: string
   }
   export interface ListChequesParams extends ListQueryParams {
     collectionAddress?: string,

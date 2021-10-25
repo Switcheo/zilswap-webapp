@@ -18,7 +18,7 @@ import { getConnectedBoltX } from "core/utilities/boltx";
 import { SimpleMap } from "app/utils";
 import { BridgeableToken } from "app/store/bridge/types";
 import { detachedToast } from "app/utils/useToaster";
-import { BRIDGEABLE_WRAPPED_DENOMS, BoltXNetworkMap, RPCEndpoints, ZIL_ADDRESS } from "app/utils/constants";
+import { BRIDGEABLE_WRAPPED_DENOMS, BoltXNetworkMap, RPCEndpoints, ZIL_ADDRESS, WZIL_TOKEN_CONTRACT } from "app/utils/constants";
 import { TokenInfo, Transaction } from "app/store/types";
 import { BridgeWalletAction, WalletAction, WalletActionTypes } from "app/store/wallet/actions";
 import { ChainInitAction } from "app/store/blockchain/actions";
@@ -211,6 +211,7 @@ const addToken = (r: SimpleMap<TokenInfo>, t: TradeHubToken) => {
     initialized: false,
     registered: true,
     whitelisted: true,
+    isWzil: false, // TODO: maybe true?
     isZil: false, // TODO: maybe true?
     isZwap: false, // TODO: maybe true?
     address,
@@ -259,6 +260,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
         initialized: false,
         registered: tkn.registered,
         whitelisted: tkn.whitelisted,
+        isWzil: tkn.address === WZIL_TOKEN_CONTRACT[network],
         isZil: tkn.address === ZIL_ADDRESS,
         isZwap: tkn.address === ZWAP_TOKEN_CONTRACT[network],
         address: tkn.address,

@@ -67,7 +67,7 @@ export const zilParamsToMap = (params: Value[]): { [index: string]: any } => {
 
 export const waitForTx = async (txHash: string, maxAttempts: number = 33, interval: number = 1000) => {
   const zilswap = ZilswapConnector.getSDK();
-  for (let attempt = 0; attempt < 3600; ++attempt) {
+  for (let attempt = 0; attempt < maxAttempts; ++attempt) {
     try {
       // wait 1s before getting tx
       const delay = interval * attempt;

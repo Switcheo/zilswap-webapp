@@ -312,12 +312,12 @@ const ConfirmTransfer = (props: any) => {
     * returns the txn hash if lock txn is successful, otherwise return null
     * @param asset         details of the asset being locked; retrieved from tradehub
     */
-  async function lockAssetOnEth(asset: RestModels.Token) {
-    if (!bridgeToken || !fromToken || !sdk) return null;
+  async function lockAssetOnEth(asset: RestModels.Token, tradehubMnemonics: string) {
+    if (!bridgeToken || !fromToken || !sdk || !swthAddrMnemonic) return null;
 
     const lockProxy = asset.lock_proxy_hash;
     sdk.eth.configProvider.getConfig().Eth.LockProxyAddr = `0x${lockProxy}`;
-    const swthAddress = sdk.wallet.bech32Address;
+    const swthAddress = SWTHAddress.generateAddress(swthAddrMnemonic);
 
     const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider);
     const signer = ethersProvider.getSigner();
@@ -379,7 +379,7 @@ const ConfirmTransfer = (props: any) => {
     * returns the txn hash if lock txn is successful, otherwise return null
     * @param asset         details of the asset being locked; retrieved from tradehub
     */
-  async function lockAssetOnZil(asset: RestModels.Token) {
+  async function lockAssetOnZil(asset: RestModels.Token, tradehubMnemonics: string) {
     if (wallet === null) {
       console.error("Zilliqa wallet not connected");
       return null;
@@ -392,7 +392,7 @@ const ConfirmTransfer = (props: any) => {
     const lockProxy = asset.lock_proxy_hash;
     const amount = bridgeFormState.transferAmount;
     const zilAddress = santizedAddress(wallet.addressInfo.byte20);
-    const swthAddress = sdk.wallet.bech32Address;
+    const swthAddress = SWTHAddress.generateAddress(tradehubMnemonics);
     const swthAddressBytes = SWTHAddress.getAddressBytes(swthAddress, sdk.network);
     const depositAmt = amount.shiftedBy(asset.decimals)
 
@@ -497,16 +497,15 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
-    downloadTransferKey(swthAddrMnemonic);
-
     runConfirmTransfer(async () => {
       let sourceTxHash;
+      downloadTransferKey(swthAddrMnemonic);
       if (fromBlockchain === Blockchain.Zilliqa) {
         // init lock on zil side
-        sourceTxHash = await lockAssetOnZil(asset);
+        sourceTxHash = await lockAssetOnZil(asset, swthAddrMnemonic);
       } else {
         // init lock on eth side
-        sourceTxHash = await lockAssetOnEth(asset);
+        sourceTxHash = await lockAssetOnEth(asset, swthAddrMnemonic);
       }
 
       if (sourceTxHash === null) {

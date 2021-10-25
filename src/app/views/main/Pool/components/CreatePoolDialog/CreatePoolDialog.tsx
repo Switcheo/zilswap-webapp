@@ -65,6 +65,7 @@ const CreatePoolDialog = (props: any) => {
         address,
         initialized: false,
         whitelisted: false,
+        isWzil: false,
         isZil: false,
         isZwap: false,
         registered: false,

@@ -19,6 +19,7 @@ import { ArkOwnerLabel } from "app/components";
 import { ZilswapConnector } from "core/zilswap";
 import { logger, ArkClient } from "core/utilities";
 import { getMarketplace } from "app/saga/selectors";
+import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
 import { ReactComponent as UpArrow } from "./assets/up-arrow.svg";
 
@@ -283,7 +284,7 @@ const Row: React.FC<Props> = (props: Props) => {
       {
         (expand ? [baseBid].concat(...relatedBids) : [baseBid]).map((bid: Cheque, index: number) => {
           const status = getChequeStatus(bid, currentBlock)
-          const expiryTime = blockTime.add(15 * (bid.expiry - currentBlock), 'seconds')
+          const expiryTime = blockTime.add((bid.expiry - currentBlock) * BLOCKS_PER_MINUTE, 'minutes')
           const priceToken = tokenState.tokens[toBech32Address(bid.price.address)]
           if (!priceToken) return null
           const priceAmount = new BigNumber(bid.price.amount).shiftedBy(-priceToken.decimals)

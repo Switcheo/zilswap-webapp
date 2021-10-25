@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { Box, CircularProgress, DialogContent, DialogProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
+import { Transaction } from "@zilliqa-js/account";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { DialogModal, Text } from "app/components";
@@ -16,10 +17,11 @@ import { ZilswapConnector } from "core/zilswap";
 
 interface Props extends Partial<DialogProps> {
   token: Nft;
+  onComplete?: (txs: Transaction[]) => Promise<void> | void;
 }
 
 const CancelDialog: React.FC<Props> = (props: Props) => {
-  const { children, className, token, ...rest } = props;
+  const { children, className, token, onComplete, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const toaster = useToaster();
@@ -66,6 +68,7 @@ const CancelDialog: React.FC<Props> = (props: Props) => {
       const arkClient = new ArkClient(network);
 
       const zilswap = ZilswapConnector.getSDK();
+      const cancelTxs: Transaction[] = [];
       for (const cheque of sellCheques) {
         const { chequeHash } = cheque;
 
@@ -86,15 +89,19 @@ const CancelDialog: React.FC<Props> = (props: Props) => {
           cheque,
         ]);
 
-        dispatch(actions.MarketPlace.addPendingTx({
-          chequeHash: `0x${chequeHash}`,
+        dispatch(actions.MarketPlace.listenPendingTx({
+          chequeHash,
           txHash: voidChequeResult.id!,
         }));
+
+        cancelTxs.push(voidChequeResult);
 
         logger("exec trade result", voidChequeResult)
       }
 
+
       onCloseDialog();
+      onComplete?.(cancelTxs);
       toaster("Cancel listing transactions submitted!")
     });
   };

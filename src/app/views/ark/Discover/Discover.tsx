@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useTheme, useMediaQuery } from "@material-ui/core";
+import React, { useEffect, useMemo, useState } from "react";
+import { Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
@@ -14,7 +14,7 @@ import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
 import { ReactComponent as UncheckedIcon } from "./unchecked-icon.svg";
-import { ReactComponent as VerifiedBadge } from "./verified-badge.svg"
+import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 
 interface SearchFilters {
   [prop: string]: boolean;
@@ -46,6 +46,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const { network } = useSelector(getBlockchain);
+  // const { exchangeInfo } = useSelector(getMarketplace);
   const theme = useTheme();
   const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
   const [search, setSearch] = useState<string>("");
@@ -75,6 +76,20 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     }))
   }
 
+  const filteredCollections = useMemo(() => {
+    if (!search.trim().length) return collections;
+
+    return collections.filter(c => (
+      c.description?.includes(search)
+      || c.ownerName?.includes(search)
+      || c.name?.includes(search)
+    ))
+  }, [collections, search]);
+
+  // const featuredCollections = useMemo(() => {
+  //   return collections.filter(c => exchangeInfo?.featuredCollections.includes(c.address));
+  // }, [collections, exchangeInfo?.featuredCollections])
+
   return (
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
@@ -82,21 +97,20 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           <Typography className={classes.topBarTitle} variant="h1">Featured</Typography>
           <Typography className={classes.titleDescription} variant="h4">Top NFTs at a glance. Ranked by volume, price, number of owners, and assets.</Typography>
         </Box>
-        {/* 
-        <CardActionArea
-          component={RouterLink}
-          //   to={`/ark/collections/${toBech32Address("ab")}`}
-          to={`/ark/collections/mocked`} // TODO: unmock it
-        >
-          <CardMedia
-            // TODO: unmock it
-            className={classes.image}
-            component="img"
-            alt="NFT Collection"
-            height="308"
-          // image={token.asset?.url}
-          />
-        </CardActionArea> */}
+
+        {/* {featuredCollections.map((collection) => (
+          <CardActionArea
+            key={collection.address}
+            component={RouterLink}
+            to={`/ark/collections/${toBech32Address(collection.address)}`}
+          >
+            <ArkImageView
+              className={classes.image}
+              imageType="banner"
+              imageUrl={collection.bannerImageUrl}
+            />
+          </CardActionArea>
+        ))} */}
 
         <OutlinedInput
           placeholder="Search for an artist or a collection"
@@ -152,7 +166,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             </TableHead>
             <TableBody>
 
-              {collections.map((collection) => {
+              {filteredCollections.map((collection) => {
                 const collectionStats = ArkClient.parseCollectionStats(collection);
                 return (
                   <TableRow key={collection.address} className={classes.tableRow} component={RouterLink} to={`/ark/collections/${toBech32Address(collection.address)}`}>

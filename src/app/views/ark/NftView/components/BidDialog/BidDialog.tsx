@@ -24,6 +24,7 @@ import { ArkClient, logger } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 import { fromBech32Address, toBech32Address } from "core/zilswap";
 import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
+import { ZIL_ADDRESS } from "app/utils/constants";
 import { ReactComponent as WarningIcon } from "../assets/warning.svg";
 
 interface Props extends Partial<DialogProps> {
@@ -96,7 +97,8 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const open = useSelector<RootState, boolean>(
     (state) => state.layout.showBidNftDialog
   );
-  const [runConfirmPurchase, loading, error] = useAsyncTask("confirmPurchase");
+  const [runConfirmPurchase, loading, error, setPurchaseError] = useAsyncTask("confirmPurchase");
+  const [runWrapTx, loadingWrapTx, wrapError, setWrapError] = useAsyncTask("wrapZil");
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
   const [formState, setFormState] =
     useState<typeof initialFormState>(initialFormState);
@@ -109,12 +111,29 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   );
   const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
   const match = useRouteMatch<{ id: string; collection: string }>();
-  const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
+  const [runApproveTx, loadingApproveTx, approveError, clearApproveError] = useAsyncTask("approveTx");
   const [, currentBlock] = useBlockTime();
   const toaster = useToaster();
 
   const bestBid = token.bestBid;
   const txIsPending = loadingApproveTx || observingTxs.findIndex(tx => tx.hash.toLowerCase() === pendingTxHash) >= 0;
+
+  const wrappingRequired = bidToken && bidToken.isWzil &&
+    (bnOrZero(bidToken.balance).lt(
+        bnOrZero(formState.bidAmount).shiftedBy(bidToken.decimals)
+    ))
+
+  const isBidEnabled = useMemo(() => {
+    if (!formState.acceptTerms) return false;
+
+    if (bnOrZero(formState.bidAmount).isLessThanOrEqualTo(0)) return false;
+
+    if (!bidToken) return false;
+
+    return true;
+
+    // eslint-disable-next-line
+  }, [formState, bidToken]);
 
   const showTxApprove = useMemo(() => {
     if (!bidToken || bidToken.isZil) return false;
@@ -130,38 +149,6 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     return showTxApprove;
     // eslint-disable-next-line
   }, [bidToken, formState, txIsPending, network, tokenState.tokens])
-
-  const onApproveTx = () => {
-    if (!bidToken) return;
-    if (bidToken.isZil) return;
-    if (bnOrZero(formState.bidAmount).isLessThanOrEqualTo(0)) return;
-    if (loading) return;
-
-    runApproveTx(async () => {
-      const arkClient = new ArkClient(network);
-      const tokenProxyAddr = arkClient.tokenProxyAddress;
-      const tokenAddress = bidToken.address;
-      const tokenAmount = bnOrZero(formState.bidAmount);
-      const observedTx = await ZilswapConnector.approveTokenTransfer({
-        tokenAmount: tokenAmount.shiftedBy(bidToken.decimals),
-        tokenID: tokenAddress,
-        spenderAddress: tokenProxyAddr,
-      });
-
-      if (!observedTx)
-        throw new Error("Transfer allowance already sufficient for specified amount");
-
-      const walletObservedTx: WalletObservedTx = {
-        ...observedTx!,
-        address: wallet?.addressInfo.bech32 || "",
-        network,
-      };
-
-      setPendingTxHash(walletObservedTx.hash.toLowerCase());
-      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
-      toaster("Submitted", { hash: walletObservedTx.hash });
-    });
-  };
 
   const { blockExpiry, expiryTime } = useMemo(() => {
     const currentTime = dayjs();
@@ -195,10 +182,73 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     };
   }, [bestBid, tokenState.tokens]);
 
+  const clearErrors = () => {
+    clearApproveError();
+    setPurchaseError();
+    setWrapError();
+  }
+
+  const onApproveTx = () => {
+    if (!bidToken) return;
+    if (bidToken.isZil) return;
+    if (bnOrZero(formState.bidAmount).isLessThanOrEqualTo(0)) return;
+    if (loading) return;
+
+    runApproveTx(async () => {
+      const arkClient = new ArkClient(network);
+      const tokenProxyAddr = arkClient.tokenProxyAddress;
+      const tokenAddress = bidToken.address;
+      const tokenAmount = bnOrZero(formState.bidAmount);
+      const observedTx = await ZilswapConnector.approveTokenTransfer({
+        tokenAmount: tokenAmount.shiftedBy(bidToken.decimals),
+        tokenID: tokenAddress,
+        spenderAddress: tokenProxyAddr,
+      });
+
+      if (!observedTx)
+        throw new Error("Transfer allowance already sufficient for specified amount");
+
+      const walletObservedTx: WalletObservedTx = {
+        ...observedTx!,
+        address: wallet?.addressInfo.bech32 || "",
+        network,
+      };
+
+      setPendingTxHash(walletObservedTx.hash.toLowerCase());
+      dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
+      toaster("Submitted", { hash: walletObservedTx.hash });
+    });
+  };
+
+  const onWrap = () => {
+    const wzilBalance = bnOrZero(bidToken.balance)
+    const zilBalance = bnOrZero(tokenState.tokens[ZIL_ADDRESS].balance)
+    const requiredAmount = bnOrZero(formState.bidAmount).shiftedBy(bidToken.decimals)
+    const wrapAmount = requiredAmount.minus(wzilBalance)
+    if (zilBalance.lt(wrapAmount)) {
+      setWrapError(new Error(`Insufficient ZIL balance to wrap. Require ${wrapAmount.shiftedBy(-bidToken.decimals).toFormat(2)
+      } more wZIL but only have ${zilBalance.shiftedBy(-12).toFormat(2)} ZIL.`));
+      return
+    }
+
+    runWrapTx(async () => {
+      const arkClient = new ArkClient(network);
+      const zilswap = ZilswapConnector.getSDK();
+      const result = await arkClient.wrapZil(wrapAmount, zilswap);
+
+      zilswap.observeTx({
+        hash: result.id!,
+        deadline: Number.MAX_SAFE_INTEGER,
+      });
+
+      toaster(`Wrap token txn submitted!`, { hash: result.id });
+    });
+  }
+
   const onConfirm = () => {
     if (!wallet || !exchangeInfo) return;
 
-    clearApproveError();
+    clearErrors();
 
     runConfirmPurchase(async () => {
       const { collection: address, id } = match.params;
@@ -208,6 +258,12 @@ const BidDialog: React.FC<Props> = (props: Props) => {
       const priceAmount = bnOrZero(formState.bidAmount).shiftedBy(
         bidToken.decimals
       );
+
+      if (!bidToken.balance || bidToken.balance?.lt(priceAmount)) {
+        setPurchaseError(new Error("Insufficient balance."))
+        return;
+      }
+
       const price = {
         amount: priceAmount,
         address: fromBech32Address(bidToken.address),
@@ -270,10 +326,12 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   };
 
   const onCurrencyChange = (token: TokenInfo) => {
+    clearErrors();
     setBidToken(token);
   };
 
   const onBidAmountChange = (rawAmount: string = "0") => {
+    clearErrors();
     setFormState({
       ...formState,
       bidAmount: rawAmount,
@@ -291,17 +349,6 @@ const BidDialog: React.FC<Props> = (props: Props) => {
       });
   };
 
-  const isBidEnabled = useMemo(() => {
-    if (!formState.acceptTerms) return false;
-
-    if (bnOrZero(formState.bidAmount).isLessThanOrEqualTo(0)) return false;
-
-    if (!bidToken) return false;
-
-    return true;
-
-    // eslint-disable-next-line
-  }, [formState, bidToken]);
 
   const onToggleAcceptTerms = () => {
     if (formState.acceptTerms) localStorage.removeItem(bidStorageKey);
@@ -389,29 +436,45 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                 />
               </Box>
 
-              <FancyButton
-                showTxApprove={showTxApprove}
-                loadingTxApprove={txIsPending}
-                onClickTxApprove={onApproveTx}
-                className={classes.actionButton}
-                loading={loading}
-                variant="contained"
-                color="primary"
-                onClick={onConfirm}
-                disabled={!isBidEnabled}
-                walletRequired
-              >
-                Place Bid
-              </FancyButton>
+              {
+                wrappingRequired ?
+                  <FancyButton
+                    className={classes.actionButton}
+                    loading={loadingWrapTx}
+                    variant="contained"
+                    color="primary"
+                    onClick={onWrap}
+                    disabled={!isBidEnabled}
+                    walletRequired
+                  >
+                    Wrap ZIL
+                  </FancyButton>
+                  :
+                  <FancyButton
+                    showTxApprove={showTxApprove}
+                    loadingTxApprove={txIsPending}
+                    onClickTxApprove={onApproveTx}
+                    className={classes.actionButton}
+                    loading={loading}
+                    variant="contained"
+                    color="primary"
+                    onClick={onConfirm}
+                    disabled={!isBidEnabled}
+                    walletRequired
+                  >
+                    Place Bid
+                  </FancyButton>
+              }
 
-              {error && (
+              {(error || wrapError || approveError) && (
                 <Box className={classes.errorBox}>
                   <WarningIcon className={classes.warningIcon} />
                   <Text color="error">
-                    Error: {(error?.message || errorApproveTx?.message) ?? "Unknown error"}
+                    Error: {(error?.message || wrapError?.message || approveError?.message) ?? "Unknown error"}
                   </Text>
                 </Box>
               )}
+
             </Fragment>
           )}
         </Box>
