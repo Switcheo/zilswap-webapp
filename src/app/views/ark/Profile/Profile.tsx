@@ -54,15 +54,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   bioBox: {
     width: 480,
     maxWidth: '90%',
-    border: theme.palette.border,
     boxSizing: "border-box",
     borderRadius: "12px",
-    filter: "drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))",
     textAlign: "center",
     color: theme.palette.text?.primary,
     opacity: 0.8,
     margin: 'auto',
     marginTop: theme.spacing(3),
+    '&.border': {
+      border: theme.palette.border,
+      filter: "drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))",
+    }
   },
   textLink: {
     fontSize: 12,
@@ -222,7 +224,7 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         }
         {
           viewProfile?.bio &&
-          <Box className={cls({[classes.bioBox]: isConnectedUser && address}) } padding={3}>
+          <Box className={cls(classes.bioBox, { border: isConnectedUser && address})} padding={3}>
             <Typography>
               {viewProfile?.bio}
               {isConnectedUser && address &&
