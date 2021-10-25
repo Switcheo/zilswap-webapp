@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Button, Checkbox, FormControlLabel, Popover, makeStyles } from '@material-ui/core';
 import cls from "classnames";
 import { useDispatch, useSelector } from 'react-redux';
@@ -131,11 +131,15 @@ const SaleTypeFilter = () => {
       newSaleType.timed_auction = !saleType.timed_auction
     }
     setSaleType(newSaleType)
-    dispatch(updateFilter({
-      ...marketPlaceState.filter,
-      saleType: newSaleType,
-    }))
+    dispatch(updateFilter({ saleType: newSaleType }))
   }
+
+  useEffect(() => {
+    if (marketPlaceState.filter.saleType !== saleType) {
+      setSaleType(marketPlaceState.filter.saleType)
+    }
+    // eslint-disable-next-line
+  }, [marketPlaceState.filter.saleType])
 
   return (
     <>

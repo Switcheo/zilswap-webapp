@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
+import cls from "classnames";
 import { ArkBanner, ArkBreadcrumb, ArkNFTListing, ArkFilterBar, Text, ArkSocialLinkGroup } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
@@ -14,6 +15,7 @@ import { bnOrZero, toHumanNumber } from "app/utils";
 import { ZIL_DECIMALS } from "app/utils/constants";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
+import { updateFilter } from "app/store/marketplace/actions";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -61,6 +63,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 12,
     backgroundColor:
       theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#6BE1FF40",
+  },
+  clickable: {
+    cursor: 'pointer',
   },
   statsHeader: {
     fontSize: "12px",
@@ -162,8 +167,8 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     const tokenCount = bnOrZero(collection.tokenStat?.tokenCount);
 
     return {
-      floorPrice: floorPrice.gt(0) ? toHumanNumber(floorPrice) : undefined,
-      volume: volume.gt(0) ? toHumanNumber(volume) : undefined,
+      floorPrice: floorPrice.gt(0) ? toHumanNumber(floorPrice, 4) : undefined,
+      volume: volume.gt(0) ? toHumanNumber(volume, 0) : undefined,
       holderCount: holderCount.gt(0) ? holderCount.toString(10) : undefined,
       tokenCount: tokenCount.gt(0) ? tokenCount.toString(10) : undefined,
     }
@@ -189,6 +194,10 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     getCollection();
     // eslint-disable-next-line
   }, [hexAddress]);
+
+  const handleFilterBuyNow = () => {
+    dispatch(updateFilter({ saleType: { fixed_price: true, timed_auction: false } }))
+  }
 
   if (!collection) return null;
 
@@ -241,7 +250,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
             {/* Need to convert to human number else might overflow */}
             <Grid item xs={6} sm={3}>
-              <Box className={classes.statsItem}>
+              <Box className={cls(classes.statsItem, classes.clickable)} onClick={handleFilterBuyNow}>
                 <Text className={classes.statsHeader}>Floor Price</Text>
                 <Text className={classes.statsContent}>{floorPrice ? `${floorPrice} ZIL` : "-"}</Text>
               </Box>
