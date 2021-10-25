@@ -1,5 +1,12 @@
+import React from 'react';
 import { Box, Link, makeStyles } from '@material-ui/core';
 import ViewHeadlineIcon from '@material-ui/icons/ViewHeadline';
+import BigNumber from 'bignumber.js';
+import cls from "classnames";
+import { Dayjs } from 'dayjs';
+import { useSelector } from 'react-redux';
+import { ILOData } from 'core/zilo/constants';
+import { ZWAP_TOKEN_CONTRACT } from 'core/zilswap/constants';
 import { CurrencyInputILO, FancyButton, Text } from 'app/components';
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import ProgressBar from 'app/components/ProgressBar';
@@ -7,13 +14,6 @@ import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from 'app/theme/types';
 import { useNetwork } from 'app/utils';
 import { ZIL_ADDRESS } from 'app/utils/constants';
-import BigNumber from 'bignumber.js';
-import cls from "classnames";
-import { ILOData } from 'core/zilo/constants';
-import { ZWAP_TOKEN_CONTRACT } from 'core/zilswap/constants';
-import { Dayjs } from 'dayjs';
-import React from 'react';
-import { useSelector } from 'react-redux';
 
 
 const useStyles = makeStyles((theme: AppTheme) => ({

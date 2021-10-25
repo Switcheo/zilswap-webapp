@@ -10,6 +10,7 @@ export type TokenUSDValues = {
 
 export type TokenInfo = {
   initialized: boolean;
+  isWzil: boolean;
   isZil: boolean;
   isZwap: boolean;
   registered: boolean;

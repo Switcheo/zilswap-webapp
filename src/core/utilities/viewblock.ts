@@ -1,7 +1,7 @@
-import { HTTP } from "./http";
-import { toBech32Address, fromBech32Address } from "@zilliqa-js/crypto";
+import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
+import { HTTP } from "./http";
 
 const API_KEY_LIBRARY = process.env.REACT_APP_VIEWBLOCK_API_KEY?.split(",") ?? [];
 const API_KEY = (() => {

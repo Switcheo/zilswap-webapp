@@ -1,9 +1,9 @@
-import sagaMiddleware from "app/saga";
 import dayjs from "dayjs";
-import { applyMiddleware, createStore, Middleware } from "redux";
+import { Middleware, applyMiddleware, createStore } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
 import { createLogger } from "redux-logger";
 import thunk from "redux-thunk";
+import sagaMiddleware from "app/saga";
 import combinedReducers from "./reducers";
 
 const middlewares: Middleware[] = [thunk, sagaMiddleware];

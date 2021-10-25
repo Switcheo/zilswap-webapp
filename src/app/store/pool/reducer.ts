@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 import { TokenActionTypes } from "../token/actions";
-import { TokenUpdateProps, TokenUpdateAllProps } from "../token/types";
+import { TokenUpdateAllProps, TokenUpdateProps } from "../token/types";
 import { PoolActionTypes } from "./actions";
 import { PoolFormState, PoolSelectProps } from "./types";
 

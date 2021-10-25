@@ -1,5 +1,5 @@
-import { DEFAULT_TX_EXPIRY, DEFAULT_TX_SLIPPAGE, LocalStorageKeys } from "app/utils/constants";
 import BigNumber from "bignumber.js";
+import { DEFAULT_TX_EXPIRY, DEFAULT_TX_SLIPPAGE, LocalStorageKeys } from "app/utils/constants";
 import { TokenActionTypes } from "../token/actions";
 import { TokenUpdateAllProps, TokenUpdateProps } from "../token/types";
 import { SwapActionTypes } from "./actions";

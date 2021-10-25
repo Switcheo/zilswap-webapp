@@ -1,9 +1,9 @@
+import React from "react";
 import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
 import cls from "classnames";
+import { AppTheme } from "app/theme/types";
 import { ReactComponent as EmptyStateSVG } from "./empty-state.svg";
-import React from "react";
 
 interface Props extends BoxProps {
   iconClass?: string;

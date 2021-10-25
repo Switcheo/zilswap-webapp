@@ -1,13 +1,13 @@
-import { Box, IconButton, makeStyles, Typography, Accordion, AccordionSummary, AccordionDetails } from "@material-ui/core";
+import React, { useState } from "react";
+import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Typography, makeStyles } from "@material-ui/core";
+import { useDispatch, useSelector } from "react-redux";
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
+import CloseIcon from '@material-ui/icons/CloseRounded';
 import { ContrastBox } from "app/components";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useMoneyFormatter, useToaster } from "app/utils";
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { ExpiryField, SlippageField, FancyButton } from "app/components";
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
-import CloseIcon from '@material-ui/icons/CloseRounded';
+import { ExpiryField, FancyButton, SlippageField } from "app/components";
 import { actions } from "app/store";
 import HelpInfo from "../HelpInfo";
 
@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   iconButton: {
     color: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#003340",
-    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    backgroundColor: theme.palette.background.contrast,
     borderRadius: 12,
     padding: 5,
     marginLeft: 5,

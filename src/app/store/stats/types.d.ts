@@ -1,6 +1,6 @@
-import { SimpleMap } from "app/utils";
 import BigNumber from "bignumber.js";
 import { SwapVolume } from "core/utilities";
+import { SimpleMap } from "app/utils";
 
 export interface PoolSwapVolume extends SwapVolume {
   totalZilVolume: BigNumber;

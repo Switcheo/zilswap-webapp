@@ -2,20 +2,20 @@
 import BigNumber from "bignumber.js";
 import { Network } from "zilswap-sdk/lib/constants";
 import { Task } from "redux-saga";
-import { all, call, put, fork, select, race, delay, take, cancel } from "redux-saga/effects";
+import { all, call, cancel, delay, fork, put, race, select, take } from "redux-saga/effects";
 
-import { actions } from "app/store";
-import { TokenInfo } from "app/store/types";
-import { SimpleMap, strings } from "app/utils";
+import { Blockchain } from "tradehub-api-js";
 import { logger } from "core/utilities";
 import {
-  balanceBatchRequest, BatchRequestType, sendBatchRequest,
-  tokenAllowancesBatchRequest, tokenBalanceBatchRequest, ZilswapConnector
+  BatchRequestType, ZilswapConnector, balanceBatchRequest,
+  sendBatchRequest, tokenAllowancesBatchRequest, tokenBalanceBatchRequest
 } from "core/zilswap";
-import { getWallet, getTokens, getBlockchain } from "../selectors";
-import { PollIntervals, ETH_ADDRESS } from "app/utils/constants";
-import { Blockchain } from "tradehub-api-js";
 import { ETHBalances } from "core/ethereum";
+import { actions } from "app/store";
+import { TokenInfo } from "app/store/types";
+import { SimpleMap, bnOrZero } from "app/utils";
+import { ETH_ADDRESS, PollIntervals } from "app/utils/constants";
+import { getBlockchain, getTokens, getWallet } from "../selectors";
 
 const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string | null) => {
   const updates: SimpleMap<TokenInfo> = {};
@@ -100,7 +100,7 @@ const fetchZilTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
 
       switch (request.type) {
         case BatchRequestType.Balance: {
-          let balance: BigNumber | undefined = strings.bnOrZero(result.balance);
+          let balance: BigNumber | undefined = bnOrZero(result.balance);
 
           const tokenInfo: Partial<TokenInfo> = {
             ...updates[token.address],
@@ -122,7 +122,7 @@ const fetchZilTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
             initialized: true,
             symbol: tokenDetails?.symbol ?? token.symbol,
             pool: tokenPool ?? undefined,
-            balance: result ? strings.bnOrZero(result.balances[address]) : token.balance,
+            balance: result ? bnOrZero(result.balances[address]) : token.balance,
           };
 
           updates[token.address] = { ...updates[token.address], ...tokenInfo };

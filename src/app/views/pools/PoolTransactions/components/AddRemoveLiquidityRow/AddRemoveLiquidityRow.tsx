@@ -1,6 +1,11 @@
 /* eslint-disable no-lone-blocks */
+import React from "react";
 import { Box, TableCell, TableRow, TableRowProps, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import BigNumber from "bignumber.js";
+import clsx from "clsx";
+import { useSelector } from "react-redux";
+import { PoolTransaction } from "core/utilities";
 import { AmountLabel, PoolRouteIcon, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import TxStatusIndicator from "app/components/TxStatusIndicator";
@@ -8,11 +13,6 @@ import { RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
-import BigNumber from "bignumber.js";
-import clsx from "clsx";
-import { PoolTransaction } from "core/utilities";
-import React from "react";
-import { useSelector } from "react-redux";
 
 interface Props extends TableRowProps {
   transaction: PoolTransaction;

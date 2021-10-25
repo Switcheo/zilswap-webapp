@@ -1,11 +1,11 @@
+import React from "react";
 import { Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { PoolFormState, RootState, SwapFormState } from "app/store/types";
-import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React from "react";
 import { useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
+import { AppTheme } from "app/theme/types";
+import { PoolFormState, RootState, SwapFormState } from "app/store/types";
 import UserPoolMessage from "../UserPoolMessage";
 
 const useStyles = makeStyles((theme: AppTheme) => ({

@@ -1,11 +1,11 @@
+import React, { useMemo } from "react";
 import { makeStyles } from "@material-ui/core";
+import { BigNumber } from "bignumber.js"
+import dayjs from "dayjs";
+import { useSelector } from "react-redux";
 import { PoolFormState, RewardsState, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { BIG_ZERO } from "app/utils/constants";
-import { BigNumber } from "bignumber.js"
-import dayjs from "dayjs";
-import React, { useMemo } from "react";
-import { useSelector } from "react-redux";
 import HelpInfo from "../HelpInfo";
 import KeyValueDisplay, { Props as KeyValueDisplayProps } from "../KeyValueDisplay";
 

@@ -1,6 +1,6 @@
 import {
-  TokenInitProps, TokenUpdateProps, TokenUpdateAllProps,
-  TokenAddProps, UpdatePriceProps, UpdateUSDValuesProps,
+  TokenAddProps, TokenInitProps, TokenUpdateAllProps,
+  TokenUpdateProps, UpdatePriceProps, UpdateUSDValuesProps,
 } from "./types";
 
 export const TokenActionTypes = {

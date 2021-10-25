@@ -1,8 +1,8 @@
-import { HTTP } from "./http";
 import dayjs from "dayjs";
 import BigNumber from "bignumber.js";
-import { bnOrZero } from "app/utils/strings/strings";
 import { Network } from "zilswap-sdk/lib/constants";
+import { bnOrZero } from "app/utils";
+import { HTTP } from "./http";
 
 const FEE_PATHS = {
   getFee: "/fees",
@@ -28,7 +28,7 @@ export class Bridge {
 
   /**
    * Static function to query estimated fees.
-   * 
+   *
    * @param denom denom of the selected token.
    */
   static getEstimatedFees = async ({ denom, network }: GetEstimatedFeesProp): Promise<FeesData> => {

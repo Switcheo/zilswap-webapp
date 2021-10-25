@@ -1,19 +1,18 @@
+import React, { useMemo } from "react";
 import { Box, Button, Card, CardContent, CardProps, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Add, ViewHeadline } from "@material-ui/icons";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router";
+import groupBy from "lodash/groupBy";
 import { CurrencyLogo, HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { actions } from "app/store";
 import { EMPTY_USD_VALUE } from "app/store/token/reducer";
 import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useNetwork, useValueCalculators } from "app/utils";
+import { hexToRGBA, toHumanNumber, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
-import { toHumanNumber } from "app/utils/strings/strings";
-import cls from "classnames";
-import React, { useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router";
-import groupBy from "lodash/groupBy";
 
 interface Props extends CardProps {
   token: TokenInfo;
@@ -23,7 +22,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     borderRadius: 12,
     boxShadow: theme.palette.cardBoxShadow,
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     backgroundColor: "transparent",
     "& .MuiCardContent-root:last-child": {
       paddingBottom: 0

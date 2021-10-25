@@ -1,10 +1,10 @@
+import React from "react";
 import { makeStyles } from "@material-ui/core";
+import { useDispatch, useSelector } from "react-redux";
 import { DialogModal } from 'app/components';
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
 import ResumeTransferBox from "./ResumeTransferBox";
 
 

@@ -1,7 +1,7 @@
+import React from "react";
 import { ClickAwayListener, FormControl, MenuItem, Paper, Popper, PopperProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { AppTheme } from "app/theme/types";
-import React from "react";
 
 export interface ConnectETHPopperProps extends PopperProps {
   onClickaway: () => void,
@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   selectMenu: {
     width: "inherit",
     padding: theme.spacing(1),
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     backgroundColor: theme.palette.background.default,
     "& .MuiListItem-root": {
       borderRadius: "12px",

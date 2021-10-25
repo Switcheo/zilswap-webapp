@@ -1,20 +1,20 @@
-import { Box, Button, Chip, makeStyles, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
+import React, { Fragment } from "react";
+import { Box, Button, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, makeStyles } from "@material-ui/core";
 import AddIcon from '@material-ui/icons/AddRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import RefreshIcon from '@material-ui/icons/RefreshRounded';
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { Blockchain } from "tradehub-api-js";
 import { CurrencyLogo, HelpInfo, ResumeTransferDialog, RevealMnemonic, Text } from 'app/components';
 import BridgeCard from "app/layouts/BridgeCard";
 import { actions } from "app/store";
 import { BridgeState, BridgeTx, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useBridgeableTokenFinder } from "app/utils";
-import { toHumanNumber } from "app/utils/strings/strings";
+import { toHumanNumber } from "app/utils";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
-import cls from "classnames";
-import React, { Fragment } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import { Blockchain } from "tradehub-api-js";
 import { ReactComponent as EthereumLogo } from "../../main/Bridge/ethereum-logo.svg";
 import { ReactComponent as ZilliqaLogo } from "../../main/Bridge/zilliqa-logo.svg";
 
@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         boxShadow: theme.palette.mainBoxShadow,
         borderRadius: 12,
         background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
-        border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+        border: theme.palette.border,
         backgroundColor: theme.palette.background.default,
         padding: theme.spacing(2, 8, 2),
         maxWidth: 1100,
@@ -435,7 +435,7 @@ const TransferHistory = (props: any) => {
                                 ))}
                             </TableBody>
                         </Table>
-                        
+
                         {!bridgeTxs.length && (
                             <Typography align="center" variant="body2" className={classes.noTransaction}>No transactions found.</Typography>
                         )}

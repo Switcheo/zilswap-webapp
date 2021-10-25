@@ -1,5 +1,5 @@
-import { bnOrZero } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
+import { bnOrZero } from "app/utils";
 import { HTTP } from "./http";
 
 export const PATH_PREFIX = "https://api.coingecko.com/api/v3";
@@ -26,7 +26,7 @@ export class CoinGecko {
 
 	/**
 	 * Static function to query Contract Events from CoinGecko given a contact address and event name.
-	 * 
+	 *
 	 * @param address address to query.
 	 * @param network mainnet | testnet - defaults to `testnet`
 	 * @param event event types to query.

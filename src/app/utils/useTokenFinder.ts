@@ -1,8 +1,8 @@
-import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
-import { RootState, TokenInfo } from "app/store/types";
 import { useMemo } from "react";
+import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
 import { useSelector } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
+import { RootState, TokenInfo } from "app/store/types";
 import { SimpleMap } from "./types";
 
 const useTokenFinder = () => {

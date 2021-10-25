@@ -1,10 +1,10 @@
-import { actions } from "app/store";
-import { PoolLiquidityMap } from "app/store/types";
-import { STATS_REFRESH_RATE } from "app/utils/constants";
-import { logger, ZAPStats, SwapVolume, GetLiquidityOpts } from "core/utilities";
 import dayjs from "dayjs";
 import { delay, fork, put, select } from "redux-saga/effects";
 import { Network } from "zilswap-sdk/lib/constants";
+import { GetLiquidityOpts, SwapVolume, ZAPStats, logger } from "core/utilities";
+import { STATS_REFRESH_RATE } from "app/utils/constants";
+import { PoolLiquidityMap } from "app/store/types";
+import { actions } from "app/store";
 import { getBlockchain } from "../selectors";
 
 interface QueryOpts {

@@ -1,6 +1,6 @@
-import { SimpleMap } from "app/utils";
 import BigNumber from "bignumber.js";
-import { Distributor, SwapVolume, Distribution } from "core/utilities";
+import { Distribution, Distributor, SwapVolume } from "core/utilities";
+import { SimpleMap } from "app/utils";
 import { TokenInfo } from "../token/types";
 
 export interface PoolSwapVolume extends SwapVolume {

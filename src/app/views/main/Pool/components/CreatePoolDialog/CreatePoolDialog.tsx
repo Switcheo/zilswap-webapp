@@ -1,18 +1,19 @@
-import { DialogContent, makeStyles, Typography } from "@material-ui/core";
+import React, { useState } from "react";
+import { DialogContent, Typography, makeStyles } from "@material-ui/core";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import { Blockchain } from "tradehub-api-js";
+import { ZilswapConnector } from "core/zilswap";
 import { DialogModal, FancyButton } from "app/components";
 import { actions } from "app/store";
 import { RootState, TokenInfo, WalletState } from "app/store/types";
 import { useAsyncTask, useNetwork } from "app/utils";
 import { BIG_ZERO, PlaceholderStrings } from "app/utils/constants";
-import cls from "classnames";
-import { ZilswapConnector } from "core/zilswap";
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Blockchain } from "tradehub-api-js";
+import { AppTheme } from "app/theme/types";
 import { AddressInput } from "./components";
 import { TokenPreview } from "./components/AddressInput/AddressInput";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   content: {
@@ -22,10 +23,10 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.down("xs")]: {
       width: "fit-content",
     },
-    backgroundColor: theme.palette.background.default,
-    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    backgroundColor: theme.palette.background!.default,
+    borderLeft: theme.palette.border,
+    borderRight: theme.palette.border,
+    borderBottom: theme.palette.border,
     borderRadius: "0 0 12px 12px"
   },
   actionButton: {
@@ -64,6 +65,7 @@ const CreatePoolDialog = (props: any) => {
         address,
         initialized: false,
         whitelisted: false,
+        isWzil: false,
         isZil: false,
         isZwap: false,
         registered: false,

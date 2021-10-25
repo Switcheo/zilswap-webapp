@@ -86,4 +86,4 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
   }],
 }
 
-export const BLOCKS_PER_MINUTE = 1.6667 // 100 blocks per hour
+export const BLOCKS_PER_MINUTE = 1.757

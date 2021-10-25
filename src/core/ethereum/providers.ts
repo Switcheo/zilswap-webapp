@@ -3,8 +3,8 @@ import Fortmatic from "fortmatic";
 import Portis from "@portis/web3";
 import Authereum from "authereum";
 import Torus from "@toruslabs/torus-embed";
-import BoltXLogo from "./boltx.svg";
 import { ethers } from "ethers";
+import BoltXLogo from "./boltx.svg";
 
 export const providerOptions = {
   injected: {

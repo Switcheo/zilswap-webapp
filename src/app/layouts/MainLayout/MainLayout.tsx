@@ -1,10 +1,10 @@
+import React, { Suspense, useState } from "react";
 import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
+import { renderRoutes } from "react-router-config";
 import { NavDrawer, TopBar } from "app/components";
 import ConnectWalletButton from "app/components/ConnectWalletButton";
 import { AppTheme } from "app/theme/types";
-import React, { Suspense, useState } from "react";
-import { renderRoutes } from "react-router-config";
 import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
 import { DevInfoBadge } from "./components";
@@ -22,14 +22,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flex: 1,
     display: "flex",
     flexDirection: "column",
-    // paddingBottom: theme.spacing(8),
     [theme.breakpoints.down("sm")]: {
       display: "block",
-    }
+    },
+    [theme.breakpoints.up("sm")]: {
+      paddingLeft: theme.spacing(8),
+    },
   },
 }));
 
-const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
+  props: any
+) => {
   const { route } = props;
   const classes = useStyles();
   const [showDrawer, setShowDrawer] = useState(false);
@@ -41,6 +45,7 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   return (
     <Box className={classes.root}>
       <TopBar onToggleDrawer={onToggleDrawer} />
+      <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />
       <main className={classes.content}>
         <DevInfoBadge />
         <Suspense fallback={<LinearProgress />}>
@@ -52,7 +57,6 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       </Hidden>
       <WalletDialog />
       <TransactionDialog />
-      <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />
     </Box>
   );
 };

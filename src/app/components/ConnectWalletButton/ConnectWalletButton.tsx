@@ -1,15 +1,16 @@
+import React from "react";
 import { Box, Button, Chip, Typography, useMediaQuery } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import { ConnectedWallet } from "core/wallet";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
-import { hexToRGBA, truncate, useTaskSubscriber } from "app/utils";
-import cls from "classnames";
-import { ConnectedWallet } from "core/wallet";
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import LoadableArea from "../LoadableArea";
+import { hexToRGBA, useTaskSubscriber } from "app/utils";
 import { LoadingKeys } from "app/utils/constants";
 import { AppTheme } from "app/theme/types";
+import { truncateAddress } from "app/utils";
+import LoadableArea from "../LoadableArea";
 import { ReactComponent as DotIcon } from "./dot.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -38,7 +39,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px 12px 0 0",
     backgroundColor: theme.palette.type === "dark" ? "#13222C" : "#003340",
     color: theme.palette.tab.selected,
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     "&:hover": {
       backgroundColor: theme.palette.type === "dark" ? "" : `rgba${hexToRGBA("#003340", 0.8)}`
     }
@@ -50,7 +51,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px 12px 0 0",
     backgroundColor: theme.palette.type === "dark" ? "#13222C" : "#003340",
     color: theme.palette.tab.selected,
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     justifyContent: "space-between",
     "&:hover": {
       backgroundColor: theme.palette.type === "dark" ? "" : `rgba${hexToRGBA("#003340", 0.8)}`
@@ -79,7 +80,7 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
     <Box {...rest} className={cls(classes.root, className)}>
       <LoadableArea loading={loading}>
         {!wallet && (
-          isXs 
+          isXs
           ? <Box className={classes.mobileButtonBox}>
               <Button
               disableElevation
@@ -92,7 +93,7 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
           : <Button className={classes.button} onClick={onConnectWallet}>Connect</Button>
         )}
         {!!wallet && (
-          isXs 
+          isXs
           ? <Box className={classes.mobileButtonBox}>
               <Button
               disableElevation
@@ -100,7 +101,7 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
               onClick={onConnectWallet}
               className={classes.mobileButtonConnected}>
                   <span>Wallet Connected</span>
-                  <span><DotIcon className={classes.dotIcon}/>{truncate(wallet!.addressInfo.bech32, 5, 4)}</span>
+                  <span><DotIcon className={classes.dotIcon}/>{truncateAddress(wallet!.addressInfo.bech32)}</span>
               </Button>
             </Box>
           : <Chip
@@ -111,7 +112,7 @@ const ConnectWalletButton: React.FC<React.HTMLAttributes<HTMLDivElement>> = (pro
             className={classes.button}
             label={(
               <Typography variant="button" className={classes.textWhite}>
-                {truncate(wallet!.addressInfo.bech32, 5, isXs ? 2 : 5)}
+                {truncateAddress(wallet!.addressInfo.bech32, isXs)}
               </Typography>
             )} />
         )}

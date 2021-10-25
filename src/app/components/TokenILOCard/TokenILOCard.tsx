@@ -2,26 +2,26 @@ import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import BigNumber from 'bignumber.js'
 import { ZiloAppState } from 'zilswap-sdk/lib/zilo';
-import { Box, Link, CircularProgress, Typography, makeStyles } from '@material-ui/core'
+import { Box, CircularProgress, Link, Typography, makeStyles } from '@material-ui/core'
 import { fromBech32Address } from "@zilliqa-js/crypto";
+import ViewHeadlineIcon from '@material-ui/icons/ViewHeadline';
+import { Dayjs } from 'dayjs';
+import { ILOState } from 'zilswap-sdk/lib/constants';
+import { ObservedTx } from 'zilswap-sdk';
+import cls from "classnames";
+import { BLOCKS_PER_MINUTE, ILOData } from 'core/zilo/constants';
+import { ZilswapConnector } from "core/zilswap";
 import { CurrencyInputILO, FancyButton, Text } from 'app/components'
 import ProgressBar from 'app/components/ProgressBar'
 import { actions } from "app/store";
 import { RootState, TokenState, TransactionState, WalletObservedTx, WalletState } from "app/store/types"
 import { useAsyncTask, useNetwork, useToaster } from "app/utils"
 import { ZIL_ADDRESS } from 'app/utils/constants';
-import { ZilswapConnector } from "core/zilswap";
-import { ILOData, BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
-import ViewHeadlineIcon from '@material-ui/icons/ViewHeadline';
 
-import HelpInfo from "../HelpInfo";
-import { Dayjs } from 'dayjs';
-import { ILOState } from 'zilswap-sdk/lib/constants';
-import { ObservedTx } from 'zilswap-sdk';
 import { AppTheme } from 'app/theme/types';
-import cls from "classnames";
-import { toHumanNumber } from 'app/utils/strings/strings';
+import { toHumanNumber } from 'app/utils';
+import HelpInfo from "../HelpInfo";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

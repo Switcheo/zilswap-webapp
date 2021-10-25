@@ -1,4 +1,4 @@
-import { TransactionUpdateProps, ObserveTxProps, TransactionsInitProps, TransactionRemoveProps } from "./types";
+import { ObserveTxProps, TransactionRemoveProps, TransactionUpdateProps, TransactionsInitProps } from "./types";
 
 export const Types = {
   TX_UPDATE: "TX_UPDATE",

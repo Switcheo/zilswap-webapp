@@ -1,8 +1,8 @@
+import React, { ChangeEvent } from "react";
 import { Box, InputLabel, TextField, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React, { ChangeEvent } from "react";
+import { AppTheme } from "app/theme/types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

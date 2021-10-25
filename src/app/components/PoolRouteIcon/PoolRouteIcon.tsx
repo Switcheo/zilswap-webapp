@@ -1,9 +1,9 @@
+import React from "react";
 import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
 import { TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import cls from "classnames";
-import React from "react";
 import CurrencyLogo from "../CurrencyLogo";
 
 interface Props extends BoxProps {

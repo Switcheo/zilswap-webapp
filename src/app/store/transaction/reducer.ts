@@ -1,10 +1,10 @@
-import { Types } from "./actions";
+import { ObservedTx } from "zilswap-sdk";
+import { Network } from "zilswap-sdk/lib/constants";
+import { ConnectedWallet } from "core/wallet";
 import { WalletActionTypes as WalletTypes } from "../wallet/actions";
 import { BlockchainActionTypes as BlockchainTypes } from "../blockchain/actions";
-import { ObserveTxProps, Transaction, TransactionsInitProps, TransactionState, TransactionUpdateProps, TransactionRemoveProps, SubmittedTx, WalletObservedTx } from "./types";
-import { ObservedTx } from "zilswap-sdk";
-import { ConnectedWallet } from "core/wallet";
-import { Network } from "zilswap-sdk/lib/constants";
+import { ObserveTxProps, SubmittedTx, Transaction, TransactionRemoveProps, TransactionState, TransactionUpdateProps, TransactionsInitProps, WalletObservedTx } from "./types";
+import { Types } from "./actions";
 
 
 const LOCAL_STORAGE_KEY_OBSERVING_TXS = "zilswap:observing-txs";

@@ -1,11 +1,11 @@
 import { fromBech32Address } from "@zilliqa-js/crypto";
-import { BIG_ZERO } from "app/utils/constants";
 import BigNumber from "bignumber.js";
 import { ObservedTx, Pool, TokenDetails, Zilswap } from "zilswap-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
+import { BIG_ZERO } from "app/utils/constants";
 
 import { logger } from "core/utilities";
-import { ConnectedWallet,  } from "core/wallet/ConnectedWallet";
+import { ConnectedWallet, } from "core/wallet/ConnectedWallet";
 
 export interface ConnectProps {
   wallet: ConnectedWallet;
@@ -314,7 +314,7 @@ export class ZilswapConnector {
    *
    * @throws "not initialized" if `ZilswapConnector.setSDK` has not been called.
    */
-   static contributeZILO = async (props: ContributeZILOProps) => {
+  static contributeZILO = async (props: ContributeZILOProps) => {
     if (!zilswap) throw new Error('not initialized');
     logger(props.address);
     logger(props.amount.toString());
@@ -334,7 +334,7 @@ export class ZilswapConnector {
    *
    * @throws "not initialized" if `ZilswapConnector.setSDK` has not been called.
    */
-   static claimZILO = async (props: ClaimZILOProps) => {
+  static claimZILO = async (props: ClaimZILOProps) => {
     if (!zilswap) throw new Error('not initialized');
     logger(props.address);
     const observedTx = await zilswap.zilos[fromBech32Address(props.address).toLowerCase()]!.claim();

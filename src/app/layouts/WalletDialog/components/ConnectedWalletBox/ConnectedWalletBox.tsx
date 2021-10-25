@@ -1,6 +1,10 @@
+import React, { useMemo, useState } from "react";
 import { Box, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import { ConnectedWallet, WalletConnectType } from "core/wallet";
 import { FancyButton } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
@@ -8,18 +12,15 @@ import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { hexToRGBA, truncate, useNetwork, useTaskSubscriber } from "app/utils";
 import { LoadingKeys } from "app/utils/constants";
-import cls from "classnames";
-import { ConnectedWallet, WalletConnectType } from "core/wallet";
-import React, { useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { AppTheme } from "app/theme/types";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     overflow: "hidden",
-    backgroundColor: theme.palette.background.default,
-    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    backgroundColor: theme.palette.background!.default,
+    borderLeft: theme.palette.border,
+    borderRight: theme.palette.border,
+    borderBottom: theme.palette.border,
     borderRadius: "0 0 12px 12px"
   },
   walletDetail: {
@@ -80,7 +81,7 @@ const useStyles = makeStyles(theme => ({
   },
   icons: {
     "& path": {
-      fill: `rgba${hexToRGBA(theme.palette.text.primary, 0.5)}`
+      fill: `rgba${hexToRGBA(theme.palette.text!.primary!, 0.5)}`
     }
   }
 }));

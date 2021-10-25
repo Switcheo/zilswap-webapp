@@ -1,21 +1,21 @@
 
+import React, { useEffect, useState } from "react";
 import { Box, Button, Divider, IconButton, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowBack } from "@material-ui/icons";
 import BrightnessLowIcon from '@material-ui/icons/BrightnessLowRounded';
 import ViewHeadlineIcon from '@material-ui/icons/ViewHeadline';
+import BigNumber from "bignumber.js";
+import clsx from "clsx";
+import { useDispatch, useSelector } from "react-redux";
+import { ZilswapConnector, toBasisPoints } from "core/zilswap";
 import { ContrastBox, CurrencyInput, CurrencyLogo, FancyButton, KeyValueDisplay, ProportionSelect, Text } from "app/components";
 import { actions } from "app/store";
 import { LayoutState, PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useMoneyFormatter, useNetwork, useToaster } from "app/utils";
-import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
-import BigNumber from "bignumber.js";
-import clsx from "clsx";
-import { toBasisPoints, ZilswapConnector } from "core/zilswap";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import PoolDetail from "../PoolDetail";
 
 const useStyles = makeStyles((theme: AppTheme) => ({

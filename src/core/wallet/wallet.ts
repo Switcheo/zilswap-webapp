@@ -2,14 +2,14 @@ import { Account } from "@zilliqa-js/account/dist/account";
 import { RPCResponse } from "@zilliqa-js/core";
 import { validation } from "@zilliqa-js/util";
 import { Zilliqa } from "@zilliqa-js/zilliqa";
-import { RPCHandler } from "core/utilities";
 import dayjs from "dayjs";
 import { WalletProvider } from "zilswap-sdk";
 import { Network } from 'zilswap-sdk/lib/constants';
+import { RPCHandler } from "core/utilities";
+import { BoltXNetworkMap, DefaultFallbackNetwork, RPCEndpoints, ZeevesNetworkMap, ZilPayNetworkMap } from "app/utils/constants";
 import { ConnectWalletResult } from "./ConnectedWallet";
 import { PrivateKeyConnectedWallet } from "./PrivateKeyConnectedWallet";
 import { ZilPayConnectedWallet } from "./ZilPayConnectedWallet";
-import { DefaultFallbackNetwork, ZilPayNetworkMap, BoltXNetworkMap, RPCEndpoints, ZeevesNetworkMap } from "app/utils/constants";
 import { ZeevesConnectedWallet } from "./ZeevesConnectedWallet";
 import { BoltXConnectedWallet } from "./BoltXConnectedWallet";
 

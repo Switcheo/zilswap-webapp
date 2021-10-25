@@ -1,15 +1,15 @@
+import React, { useEffect, useState } from "react";
 import { Box, BoxProps, Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import dayjs from "dayjs";
+import { useSelector } from "react-redux";
 import { StatsCard, Text } from "app/components";
 import { RewardsState, RootState, StatsState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
-import { bnOrZero, toHumanNumber } from "app/utils/strings/strings";
-import cls from "classnames";
-import dayjs from "dayjs";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { bnOrZero, toHumanNumber } from "app/utils";
 
 interface Props extends BoxProps { }
 
@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   banner: {
     background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     padding: theme.spacing(4, 4),
     borderRadius: 12,
     boxShadow: theme.palette.cardBoxShadow,

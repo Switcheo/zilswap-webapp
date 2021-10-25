@@ -1,10 +1,10 @@
+import React from "react";
 import { Box, Container } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
 import { PoolsNavigationTabs, PoolsOverviewBanner } from "app/components";
 import Page from "app/layouts/Page";
 import { AppTheme } from "app/theme/types";
-import cls from "classnames";
-import React from "react";
 import { PoolsListing } from "./components";
 
 const useStyles = makeStyles((theme: AppTheme) => ({

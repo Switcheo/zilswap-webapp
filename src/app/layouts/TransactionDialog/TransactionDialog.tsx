@@ -1,13 +1,13 @@
+import React from "react";
 import { makeStyles } from "@material-ui/core";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
 import { DialogModal } from "app/components";
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import cls from "classnames";
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import TransactionBox from "./TransactionBox";
 import { WalletState } from "app/store/wallet/types";
+import TransactionBox from "./TransactionBox";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {

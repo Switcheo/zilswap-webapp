@@ -1,6 +1,6 @@
 import { createMuiTheme } from "@material-ui/core";
 
-import { light, dark } from "./palettes";
+import { dark, light } from "./palettes";
 import typography from "./typography";
 import overrides from "./overrides";
 

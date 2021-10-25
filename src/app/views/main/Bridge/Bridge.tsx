@@ -1,6 +1,17 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Button, FormControl, MenuItem, Select } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
+import BigNumber from 'bignumber.js';
+import cls from "classnames";
+import { ethers } from "ethers";
+import { useDispatch, useSelector } from 'react-redux';
+import { Blockchain, RestModels, TradeHubSDK } from "tradehub-api-js";
+import Web3Modal from 'web3modal';
+import { Network } from "zilswap-sdk/lib/constants";
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
+import { ConnectedWallet } from "core/wallet";
+import { providerOptions } from "core/ethereum";
 import { ConfirmTransfer, ConnectETHPopper, CurrencyInput, Text } from 'app/components';
 import FailedBridgeTxWarning from "app/components/FailedBridgeTxWarning";
 import NetworkSwitchDialog from "app/components/NetworkSwitchDialog";
@@ -9,19 +20,8 @@ import { actions } from "app/store";
 import { BridgeFormState, BridgeState } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, netZilToTradeHub, strings, useAsyncTask, useNetwork, useTokenFinder } from "app/utils";
+import { bnOrZero, hexToRGBA, netZilToTradeHub, useAsyncTask, useNetwork, useTokenFinder } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
-import BigNumber from 'bignumber.js';
-import cls from "classnames";
-import { providerOptions } from "core/ethereum";
-import { ConnectedWallet } from "core/wallet";
-import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
-import { ethers } from "ethers";
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Blockchain, RestModels, TradeHubSDK } from "tradehub-api-js";
-import Web3Modal from 'web3modal';
-import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectButton } from "./components";
 import { BridgeParamConstants } from "./components/constants";
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     boxShadow: theme.palette.mainBoxShadow,
     borderRadius: 12,
     background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     [theme.breakpoints.down("sm")]: {
       maxWidth: 450,
       padding: theme.spacing(2, 2, 0),
@@ -489,7 +489,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       return false;
     if (bridgeFormState.transferAmount.isZero())
       return false;
-    if (fromToken && bridgeFormState.transferAmount.isGreaterThan(strings.bnOrZero(fromToken.balance).shiftedBy(-fromToken.decimals)))
+    if (fromToken && bridgeFormState.transferAmount.isGreaterThan(bnOrZero(fromToken.balance).shiftedBy(-fromToken.decimals)))
       return false;
 
     return true
@@ -518,7 +518,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const onSelectMax = async () => {
     if (!fromToken || !sdk) return;
 
-    let balance = strings.bnOrZero(fromToken.balance);
+    let balance = bnOrZero(fromToken.balance);
     const asset = sdk.token.tokens[bridgeToken?.denom ?? ""];
 
     if (!asset) return;

@@ -1,9 +1,9 @@
-import { Chip, Tooltip, BoxProps, Box, Avatar, useMediaQuery } from "@material-ui/core";
+import React from "react";
+import { Avatar, Box, BoxProps, Chip, Tooltip, useMediaQuery } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
+import cls from "classnames";
 import { AppTheme } from "app/theme/types";
 import { PRODUCTION_HOSTS } from "app/utils/constants";
-import cls from "classnames";
-import React from "react";
 
 interface Props extends BoxProps {
 

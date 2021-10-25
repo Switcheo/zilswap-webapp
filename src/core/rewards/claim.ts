@@ -2,12 +2,12 @@ import { BN, Long, bytes } from '@zilliqa-js/util';
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
 import groupBy from "lodash/groupBy";
+import { Network } from "zilswap-sdk/lib/constants";
+import { ObservedTx } from "zilswap-sdk";
 import { ConnectedWallet } from "core/wallet";
 import { ZilswapConnector } from 'core/zilswap';
-import { Network } from "zilswap-sdk/lib/constants";
-import { REWARDS_DISTRIBUTOR_CONTRACT, CHAIN_IDS, MSG_VERSION } from "../zilswap/constants";
-import { ObservedTx } from "zilswap-sdk";
 import { logger } from 'core/utilities';
+import { CHAIN_IDS, MSG_VERSION, REWARDS_DISTRIBUTOR_CONTRACT } from "../zilswap/constants";
 
 export interface Distribution {
   distrAddr: string;

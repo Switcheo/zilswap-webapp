@@ -1,4 +1,4 @@
-import { BridgeableTokenMapping, BridgeFormState, BridgeTx } from "./types";
+import { BridgeFormState, BridgeTx, BridgeableTokenMapping } from "./types";
 import { WithdrawFee } from "./types";
 
 export enum BridgeActionTypes {
