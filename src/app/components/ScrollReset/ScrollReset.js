@@ -1,5 +1,5 @@
-import { useRouter } from 'app/utils';
 import { useEffect } from 'react';
+import { useRouter } from 'app/utils';
 
 
 const ScrollReset = () => {

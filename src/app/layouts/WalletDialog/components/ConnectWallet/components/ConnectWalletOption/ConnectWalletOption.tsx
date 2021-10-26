@@ -1,10 +1,10 @@
+import React from "react";
 import { Box, Button, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import cls from "classnames";
 import { ContrastBox, FancyButton } from "app/components";
 import { AppTheme } from "app/theme/types";
-import cls from "classnames";
-import React from "react";
 import { ReactComponent as SecurityLevelIcon } from "./security-bars.svg";
 
 export interface ConnectWalletOptionProps {

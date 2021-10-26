@@ -1,8 +1,8 @@
+import React from "react";
 import { Box, Tooltip, TooltipProps, Typography, TypographyProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { extractBoxProps, PartialBoxProps } from "app/utils";
 import clsx from "clsx";
-import React from "react";
+import { PartialBoxProps, extractBoxProps } from "app/utils";
 
 interface Props extends TypographyProps, PartialBoxProps {
   isPlaceholder?: boolean;

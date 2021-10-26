@@ -1,14 +1,14 @@
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, Button, makeStyles } from "@material-ui/core";
+import { useDispatch, useSelector } from "react-redux";
+import { Blockchain } from "tradehub-api-js/build/main/lib/tradehub/utils";
+import { Network } from "zilswap-sdk/lib/constants";
+import cls from "classnames";
 import { DialogModal, Text } from "app/components";
 import { actions } from "app/store";
 import { BridgeState, BridgeTx, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useNetwork } from "app/utils";
-import React, { useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Blockchain } from "tradehub-api-js/build/main/lib/tradehub/utils";
-import { Network } from "zilswap-sdk/lib/constants";
-import cls from "classnames";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -18,9 +18,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   container: {
     backgroundColor: theme.palette.background.default,
-    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderLeft: theme.palette.border,
+    borderRight: theme.palette.border,
+    borderBottom: theme.palette.border,
     borderRadius: "0 0 12px 12px",
     padding: theme.spacing(2, 8, 2),
     minWidth: 510,
@@ -127,11 +127,6 @@ const FailedBridgeTxWarning = (props: any) => {
         <Box mt={2} mb={2.5} display="flex" flexDirection="column" alignItems="center">
           <Text marginBottom={1} variant="h6" align="center">
             The bridge transaction has been rejected, your funds are not deducted, you may try again.
-          </Text>
-          <Text marginBottom={1} variant="h6" align="center">
-            There is a known issue with bridging from Zilliqa to Ethereum, we are working on resolving this as soon as possible.
-            <br />Bridging Ethereum to Zilliqa is unaffected. Please check <a className={classes.link} href="https://twitter.com/ZilSwap" target="_blank"
-              rel="noreferrer">ZilSwap Twitter</a> for updates.
           </Text>
 
           <Text marginBottom={1} variant="h6" align="center" className={classes.breakLine}>

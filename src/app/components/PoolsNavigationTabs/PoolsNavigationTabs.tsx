@@ -1,10 +1,10 @@
+import React from "react";
 import { Box, Tab, Tabs, TabsProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { TypographyOptions } from "@material-ui/core/styles/createTypography";
-import { AppTheme } from "app/theme/types";
 import clsx from "clsx";
-import React from "react";
 import { useHistory, useLocation, useRouteMatch } from "react-router";
+import { AppTheme } from "app/theme/types";
 
 interface Props extends Omit<TabsProps, "value"> { }
 
@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   tab: {
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     "&:not(:first-child)": {
       borderRadius: "0 12px 12px 0",
       borderWidth: "1px 1px 1px 0",

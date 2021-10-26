@@ -1,19 +1,22 @@
+import React, { useEffect } from "react";
 import DayJsUtils from "@date-io/dayjs";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
-import { ThemeProvider } from "@material-ui/styles";
-import { AppButler, isDebug } from "core/utilities";
+import { StylesProvider, ThemeProvider, jssPreset } from "@material-ui/styles";
+import { create } from "jss";
+import jssCompose from "jss-plugin-compose";
+import jssExtend from "jss-plugin-extend";
 import { createBrowserHistory } from "history";
-import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { renderRoutes } from "react-router-config";
 import { Router } from "react-router-dom";
-import { GoogleAnalytics, ScrollReset, NotificationBar } from "./components";
+import { AppButler, isDebug } from "core/utilities";
+import { SnackbarUtilsConfigurator } from "app/utils/useToaster";
+import { GoogleAnalytics, NotificationBar, ScrollReset } from "./components";
 import routes from "./routes";
 import { startSagas } from "./saga";
 import { RootState } from "./store/types";
 import { darkTheme, lightTheme } from "./theme";
-import { SnackbarUtilsConfigurator } from "app/utils/useToaster";
 
 import "zeeves-auth-sdk-js";
 
@@ -27,6 +30,9 @@ const themes: any = {
   dark: darkTheme,
   light: lightTheme,
 };
+const jss = create({
+  plugins: [jssExtend(), jssCompose(), ...jssPreset().plugins],
+});
 
 const AppContainer: React.FC = () => {
 
@@ -38,20 +44,22 @@ const AppContainer: React.FC = () => {
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
-      <NotificationBar>
-        <SnackbarUtilsConfigurator />
-        <AppButler />
-        <CssBaseline />
-        <MuiPickersUtilsProvider utils={DayJsUtils}>
-          <Router history={history}>
-            <ScrollReset />
-            <GoogleAnalytics />
-            {renderRoutes(routes)}
-          </Router>
-        </MuiPickersUtilsProvider>
-      </NotificationBar>
-    </ThemeProvider>
+    <StylesProvider jss={jss}>
+      <ThemeProvider theme={theme}>
+        <NotificationBar>
+          <SnackbarUtilsConfigurator />
+          <AppButler />
+          <CssBaseline />
+          <MuiPickersUtilsProvider utils={DayJsUtils}>
+            <Router history={history}>
+              <ScrollReset />
+              <GoogleAnalytics />
+              {renderRoutes(routes)}
+            </Router>
+          </MuiPickersUtilsProvider>
+        </NotificationBar>
+      </ThemeProvider>
+    </StylesProvider>
   );
 };
 

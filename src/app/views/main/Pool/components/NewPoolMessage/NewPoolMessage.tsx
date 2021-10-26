@@ -1,10 +1,10 @@
-import { Box, Typography, Link } from "@material-ui/core";
+import React from "react";
+import { Box, Link, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
 import { NotificationBox } from "app/components";
 import { TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import cls from "classnames";
-import React from "react";
 import { ReactComponent as WarningLogo } from "./warning_logo.svg";
 
 export interface NewPoolMessageProps extends React.HTMLAttributes<HTMLDivElement> {

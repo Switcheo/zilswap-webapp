@@ -1,8 +1,8 @@
+import React from "react";
 import { Tooltip, TooltipProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React from "react";
+import { AppTheme } from "app/theme/types";
 import { ReactComponent as TooltipSVG } from "./tooltip.svg";
 
 interface Props extends Omit<TooltipProps, "children"> {
@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   tooltip: {
     borderRadius: 12,
     backgroundColor: theme.palette.background.tooltip,
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     color: theme.palette.text?.secondary,
     padding: theme.spacing(1.5),
     fontSize: 11,

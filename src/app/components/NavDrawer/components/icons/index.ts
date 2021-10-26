@@ -1,6 +1,7 @@
 export { default as Bridge } from "./Bridge";
 export { default as Category } from "./Category";
 export { default as Code } from "./Code";
+export { default as Dashboard } from "./Dashboard"; 
 export { default as DeveloperBoard } from "./DeveloperBoard"; 
 export { default as FileCopy } from "./FileCopy";
 export { default as Flame } from "./Flame";

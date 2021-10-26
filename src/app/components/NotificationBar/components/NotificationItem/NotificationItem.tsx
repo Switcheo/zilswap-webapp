@@ -1,3 +1,4 @@
+import React, { forwardRef, useEffect, useState } from "react";
 import { Box, BoxProps, CircularProgress, IconButton, Link, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import FailIcon from "@material-ui/icons/CancelOutlined";
@@ -5,15 +6,14 @@ import CheckmarkIcon from "@material-ui/icons/CheckOutlined";
 import CloseIcon from "@material-ui/icons/CloseOutlined";
 import LaunchIcon from '@material-ui/icons/Launch';
 import TimeoutIcon from "@material-ui/icons/TimerOutlined";
-import { BridgeState, RootState, TransactionState } from "app/store/types";
-import { AppTheme } from "app/theme/types";
-import { truncate, useNetwork } from "app/utils";
 import cls from "classnames";
 import { SnackbarContent, SnackbarKey, SnackbarProvider } from "notistack";
-import React, { forwardRef, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { TxStatus } from "zilswap-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
+import { truncate, useNetwork } from "app/utils";
+import { AppTheme } from "app/theme/types";
+import { BridgeState, RootState, TransactionState } from "app/store/types";
 
 interface Props extends BoxProps {
   message: string,
@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   snackbar: {
     background: theme.palette.background.default,
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     color: theme.palette.label,
     padding: theme.spacing(2),
     borderRadius: "12px",

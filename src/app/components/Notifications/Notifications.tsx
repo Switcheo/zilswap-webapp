@@ -1,11 +1,11 @@
+import React from "react";
 import { Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { PoolFormState, RootState, SwapFormState } from "app/store/types";
-import { AppTheme } from "app/theme/types";
 import cls from "classnames";
-import React from "react";
 import { useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
+import { AppTheme } from "app/theme/types";
+import { PoolFormState, RootState, SwapFormState } from "app/store/types";
 import UserPoolMessage from "../UserPoolMessage";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -52,16 +52,16 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
     <Box {...rest} className={cls(classes.root, className)}>
       {isPool ?
         <UserPoolMessage token={userToken}>
-          Liquidity pools created by other users are not screened by Zilswap.
-          All tokens (including ZIL) deposited to the pool may be lost if the ZRC-2 token contract
+          Liquidity pools created by other users are not screened or audited by ZilSwap.
+          All tokens (including ZIL) deposited may be lost if the ZRC-2 token contract
           is malicious or otherwise exploited.
-          Please verify the legitimacy of this token yourself before contributing liquidity.
+          Please conduct your own due diligence before contributing liquidity.
           </UserPoolMessage>
         :
         <UserPoolMessage token={userToken}>
-          ZRC-2 tokens issued by other users are not screened or audited by Zilswap.
-          There is no guarantee that your purchased tokens will remain tradable or maintain any value.
-          Please verify the legitimacy of this token yourself before swapping.
+          ZRC-2 tokens issued by other users are not screened or audited by ZilSwap.
+          There is no guarantee that your purchased tokens will maintain its current swap value.
+          Please conduct your own due diligence before swapping.
         </UserPoolMessage>
       }
     </Box>

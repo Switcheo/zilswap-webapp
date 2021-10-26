@@ -1,5 +1,10 @@
+import React, { useMemo, useState } from "react";
 import { Box, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { toBech32Address } from "@zilliqa-js/zilliqa";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import { ConnectedWallet, WalletConnectType } from "core/wallet";
 import { FancyButton } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
@@ -7,18 +12,15 @@ import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { hexToRGBA, truncate, useNetwork, useTaskSubscriber } from "app/utils";
 import { LoadingKeys } from "app/utils/constants";
-import cls from "classnames";
-import { ConnectedWallet, WalletConnectType } from "core/wallet";
-import React, { useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { AppTheme } from "app/theme/types";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     overflow: "hidden",
-    backgroundColor: theme.palette.background.default,
-    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    backgroundColor: theme.palette.background!.default,
+    borderLeft: theme.palette.border,
+    borderRight: theme.palette.border,
+    borderBottom: theme.palette.border,
     borderRadius: "0 0 12px 12px"
   },
   walletDetail: {
@@ -79,7 +81,7 @@ const useStyles = makeStyles(theme => ({
   },
   icons: {
     "& path": {
-      fill: `rgba${hexToRGBA(theme.palette.text.primary, 0.5)}`
+      fill: `rgba${hexToRGBA(theme.palette.text!.primary!, 0.5)}`
     }
   }
 }));
@@ -99,13 +101,13 @@ const ConnectedWalletBox = (props: any) => {
   const theme = useTheme();
   const isMediaXS = useMediaQuery(theme.breakpoints.down("xs"));
 
-  const walletType = useMemo(() => {
-    if (!wallet?.type) return undefined;
+  const walletName = useMemo(() => {
     switch (wallet?.type) {
       case WalletConnectType.PrivateKey: return "Private Key";
       case WalletConnectType.Zeeves: return "Zeeves Wallet";
       case WalletConnectType.ZilPay: return "ZilPay";
-      default: return "Unknown";
+      case WalletConnectType.BoltX: return "BoltX";
+      default: return "Unknown Wallet";
     }
   }, [wallet?.type]);
 
@@ -123,15 +125,17 @@ const ConnectedWalletBox = (props: any) => {
   };
 
   if (!wallet) return null;
+
   const address = wallet.addressInfo.byte20;
-  const humanAddress = wallet.addressInfo.bech32;
+  const humanAddress = wallet?.type === WalletConnectType.BoltX ? toBech32Address(address) : wallet.addressInfo.bech32;
+
   return (
     <Box display="flex" flexDirection="column" className={cls(classes.root, className)}>
       <Box className={classes.walletDetail}>
         <Typography variant="h4">You are connected to</Typography>
         <Box display="flex" alignItems="center" justifyContent="center" className={classes.zilpayWallet}>
           <Icon className={classes.icon} />
-          <Typography variant="h1">{walletType}</Typography>
+          <Typography variant="h1">{walletName}</Typography>
         </Box>
         <Typography variant="h3">{isMediaXS ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
         <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(humanAddress)} open={!!copyMap[humanAddress]} title="Copied!">
@@ -140,7 +144,7 @@ const ConnectedWalletBox = (props: any) => {
             <Typography color="textSecondary" className={classes.iconText}>Copy Address</Typography>
           </IconButton>
         </Tooltip>
-        <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network}`} className={classes.newLink} size="small">
+        <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network.toLowerCase()}`} className={classes.newLink} size="small">
           <NewLinkIcon className={classes.icons}/>
           <Typography color="textSecondary" className={classes.iconText}>View on Explorer</Typography>
         </IconButton>

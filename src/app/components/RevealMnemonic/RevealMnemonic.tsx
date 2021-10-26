@@ -1,9 +1,9 @@
+import React, { Fragment, useState } from "react";
 import { Button, makeStyles } from "@material-ui/core";
 import { VisibilityRounded as Visibility } from "@material-ui/icons";
 import { DialogModal, Text } from 'app/components';
 import MnemonicBox from "app/components/MnemonicDialog/MnemonicBox";
 import { AppTheme } from "app/theme/types";
-import React, { Fragment, useState } from "react";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {

@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js";
 import { Network } from "zilswap-sdk/lib/constants";
+import { SimpleMap } from "./types";
 
 export const DefaultFallbackNetwork = Network.MainNet;
 
@@ -17,12 +18,16 @@ export const LoadingKeys = {
 export const LocalStorageKeys = {
   PrivateKey: "zilswap:private-key",
   ZilPayConnected: "zilswap:zilpay-connected",
+  BoltXConnected: "zilswap:boltx-connected",
   ZeevesConnected: "zilswap:zeeves-connected",
   Network: "zilswap:network",
   UserTokenList: "zilswap:user-token-list",
   PendingClaimedTxs: "zilswap:pending-claimed-txs",
   SwapSlippageExpiry: "zilswap:swap-slippage-expiry",
   BridgeTxs: 'zilswap:bridge-txs',
+  ArkAccessToken: 'zilswap:ark-access-token',
+  ArkBuyAcceptTerms: 'zilswap:ark-buy-accept-terms',
+  ArkBidAcceptTerms: 'zilswap:ark-bid-accept-terms',
 };
 
 export const PlaceholderStrings = {
@@ -31,6 +36,11 @@ export const PlaceholderStrings = {
 };
 
 export const ZilPayNetworkMap = {
+  mainnet: Network.MainNet,
+  testnet: Network.TestNet,
+} as { [index: string]: Network };
+
+export const BoltXNetworkMap = {
   mainnet: Network.MainNet,
   testnet: Network.TestNet,
 } as { [index: string]: Network };
@@ -63,7 +73,7 @@ export const DEFAULT_TX_EXPIRY = 3;
 
 export const MAX_CLAIMS_PER_TX = 4;
 
-export const STATS_REFRESH_RATE = 30000; // ms
+export const STATS_REFRESH_RATE = 300000; // ms
 
 export const BRIDGE_TX_DEPOSIT_CONFIRM_ZIL = 3;
 export const BRIDGE_TX_DEPOSIT_CONFIRM_ETH = 12;
@@ -71,6 +81,23 @@ export const BRIDGE_TX_DEPOSIT_CONFIRM_ETH = 12;
 export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const ZIL_ADDRESS = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
 export const ZIL_DECIMALS = 12;
+
+export const WZIL_TOKEN_CONTRACT = {
+  [Network.MainNet]: "zil1gvr0jgwfsfmxsyx0xsnhtlte4gks6r3yk8x5fn",
+  [Network.TestNet]: "zil1nzn3k336xwal7egdzgalqnclxtgu3dggxed85m",
+}
+
+export const BRIDGEABLE_WRAPPED_DENOMS = {
+  [Network.MainNet]: ["zusdt.z.3", "zeth.z.1", "zwbtc.z.1"],
+  // [Network.MainNet]: ["zusdt.z.3", "zeth.z.1", "zwbtc.z.1", "xcad.z.1"],
+  [Network.TestNet]: ["zil5.e", "zwap5.e", "eth6.z", "dai6.z"],
+}
+
+export const TOKEN_SYMBOLS = {
+  "ZETH": "zETH",
+  "ZWBTC": "zWBTC",
+  "ZUSDT": "zUSDT",
+} as SimpleMap<string>;
 
 export const TRANSAK_API_KEY = {
   DEVELOPMENT: process.env.REACT_APP_TRANSAK_DEV,
@@ -91,3 +118,10 @@ export class PollIntervals {
   public static BridgeWithdrawWatcher = 10000;
   public static BridgeTokenFee = 60000;
 }
+
+export const COLLECTION_NFT_PER_PAGE = 36;
+
+export const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
+export const USERNAME_REGEX = /^[A-Za-z][A-Za-z0-9_]{1,19}$/
+export const TWITTER_REGEX = /^[A-Za-z][A-Za-z0-9_]{1,14}$/
+export const INSTAGRAM_REGEX = /^[A-Za-z][A-Za-z0-9_]{1,29}$/

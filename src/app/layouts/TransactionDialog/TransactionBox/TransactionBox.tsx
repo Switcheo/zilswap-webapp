@@ -1,4 +1,7 @@
-import { Box, IconButton, makeStyles, Tooltip, Typography } from "@material-ui/core";
+import React, { useState } from "react";
+import { Box, IconButton, Tooltip, Typography, makeStyles } from "@material-ui/core";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
 import { FancyButton } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
@@ -6,16 +9,13 @@ import { actions } from "app/store";
 import { RootState, Transaction, TransactionState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { truncate, useNetwork } from "app/utils";
-import cls from "classnames";
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
         backgroundColor: theme.palette.background.default,
-        borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-        borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-        borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+        borderLeft: theme.palette.border,
+        borderRight: theme.palette.border,
+        borderBottom: theme.palette.border,
         borderRadius: "0 0 12px 12px",
         padding: theme.spacing(2, 8, 2),
         minWidth: 510,

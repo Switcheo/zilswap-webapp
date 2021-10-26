@@ -1,12 +1,13 @@
+import React, { useEffect, useState } from "react";
 import { Box, BoxProps, Button, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { useSelector } from "react-redux";
+import { Blockchain } from "tradehub-api-js";
 import { Text } from "app/components";
 import { RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { BIG_ZERO } from "app/utils/constants";
-import cls from "classnames";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import PoolInfoCard from "../PoolInfoCard";
 import PoolsSearchInput from "../PoolsSearchInput";
 
@@ -17,7 +18,7 @@ interface Props extends BoxProps {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     padding: theme.spacing(4, 6),
     borderRadius: 12,
     boxShadow: theme.palette.cardBoxShadow,
@@ -46,7 +47,7 @@ interface ListingLimits {
 };
 
 const initialLimits = {
-  registered: 6,
+  registered: 40,
   others: 2,
 };
 
@@ -72,14 +73,21 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
     const queryRegexp = !!searchQuery ? new RegExp(searchQuery, "i") : undefined;
     const result = Object.values(tokenState.tokens)
       .sort((lhs, rhs) => {
-        const lhsRewardValue = tokenState.values[lhs.address]?.rewardsPerSecond ?? BIG_ZERO;
-        const rhsRewardValue = tokenState.values[rhs.address]?.rewardsPerSecond ?? BIG_ZERO;
+        const lhsValues = tokenState.values[lhs.address];
+        const rhsValues = tokenState.values[rhs.address];
+
+        const lhsTVL = lhsValues?.poolLiquidity ?? BIG_ZERO;
+        const rhsTVL = rhsValues?.poolLiquidity ?? BIG_ZERO;
+
+        const core = ['ZWAP', 'gZIL', 'XSGD']
+        if (core.includes(lhs.symbol) || core.includes(rhs.symbol))
+          return rhsTVL.comparedTo(lhsTVL);
+
+        const lhsRewardValue = lhsValues ? lhsValues.rewardsPerSecond.dividedBy(lhsValues.poolLiquidity) : BIG_ZERO;
+        const rhsRewardValue = rhsValues ? rhsValues.rewardsPerSecond.dividedBy(rhsValues.poolLiquidity) : BIG_ZERO;
 
         if (!lhsRewardValue.eq(rhsRewardValue))
           return rhsRewardValue.comparedTo(lhsRewardValue);
-
-        const lhsTVL = tokenState.values[lhs.address]?.poolLiquidity ?? BIG_ZERO;
-        const rhsTVL = tokenState.values[rhs.address]?.poolLiquidity ?? BIG_ZERO;
 
         return rhsTVL.comparedTo(lhsTVL);
       })
@@ -97,6 +105,8 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
         if (token.isZil) {
           return accum;
         }
+
+        if (token.blockchain !== Blockchain.Zilliqa) return accum;
 
         if (token.registered) {
           accum.registeredTokens.push(token);
@@ -126,7 +136,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
     <Box {...rest} className={cls(classes.root, className)} mt={6} mb={2}>
       <Box display="flex" justifyContent="space-between" mb={2} className={classes.header}>
         <Text variant="h2" margin={2}>Registered Pools ({registeredTokens.length})</Text>
-        <PoolsSearchInput onSearch={onSearch}/>
+        <PoolsSearchInput onSearch={onSearch} />
       </Box>
       <Grid container spacing={2}>
         {registeredTokens.slice(0, limits.registered).map((token) => (

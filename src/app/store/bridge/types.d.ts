@@ -1,6 +1,7 @@
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { Blockchain, RestModels } from "tradehub-api-js";
+import { Network } from "zilswap-sdk/lib/constants";
 
 export type BridgeableToken = {
   blockchain: Blockchain;
@@ -51,6 +52,8 @@ export interface BridgeFormState {
 export interface BridgeTx {
   srcChain: BridgeableChains;
   dstChain: BridgeableChains;
+
+  network: Network;
 
   // in respective display formats
   // zil: bech32 (zil1…)

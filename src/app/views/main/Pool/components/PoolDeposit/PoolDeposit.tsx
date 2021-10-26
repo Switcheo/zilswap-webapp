@@ -1,20 +1,20 @@
+import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
+import BigNumber from "bignumber.js";
+import clsx from "clsx";
+import { useDispatch, useSelector } from "react-redux";
+import { CONTRACTS } from "zilswap-sdk/lib/constants";
+import { ZilswapConnector, toBasisPoints } from "core/zilswap";
 import { CurrencyInput, FancyButton, ProportionSelect } from "app/components";
 import { actions } from "app/store";
 import { PoolFormState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
-import { strings, useAsyncTask, useNetwork, useToaster } from "app/utils";
+import { bnOrZero, useAsyncTask, useNetwork, useToaster } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
-import BigNumber from "bignumber.js";
-import clsx from "clsx";
-import { toBasisPoints, ZilswapConnector } from "core/zilswap";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { CONTRACTS } from "zilswap-sdk/lib/constants";
+import { AppTheme } from "app/theme/types";
 import PoolDetail from "../PoolDetail";
 import PoolIcon from "../PoolIcon";
-import { AppTheme } from "app/theme/types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -195,9 +195,9 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       const tokenAddress = poolToken.address;
       const { addTokenAmount, addZilAmount } = poolFormState;
       const { slippage } = swapFormState;
-      const tokenBalance = strings.bnOrZero(poolToken!.balance).shiftedBy(-poolToken.decimals);
+      const tokenBalance = bnOrZero(poolToken!.balance).shiftedBy(-poolToken.decimals);
       const zilToken = tokenState.tokens[ZIL_ADDRESS];
-      const zilBalance = strings.bnOrZero(zilToken!.balance).shiftedBy(-zilToken.decimals);
+      const zilBalance = bnOrZero(zilToken!.balance).shiftedBy(-zilToken.decimals);
 
       if (addTokenAmount.gt(tokenBalance)) {
         throw new Error(`Insufficient ${poolToken.symbol} balance.`)
@@ -278,7 +278,7 @@ const PoolDeposit: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   let showTxApprove = false;
   if (poolToken) {
     const addTokenUnitlessAmount = poolFormState.addTokenAmount.shiftedBy(poolToken.decimals);
-    showTxApprove = strings.bnOrZero(poolToken.allowances?.[byte20ContractAddress]).comparedTo(addTokenUnitlessAmount) < 0
+    showTxApprove = bnOrZero(poolToken.allowances?.[byte20ContractAddress]).comparedTo(addTokenUnitlessAmount) < 0
   }
 
   return (

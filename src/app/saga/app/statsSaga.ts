@@ -1,10 +1,10 @@
-import { actions } from "app/store";
-import { PoolLiquidityMap } from "app/store/types";
-import { STATS_REFRESH_RATE } from "app/utils/constants";
-import { logger, ZAPStats, SwapVolume, GetLiquidityOpts } from "core/utilities";
 import dayjs from "dayjs";
 import { delay, fork, put, select } from "redux-saga/effects";
 import { Network } from "zilswap-sdk/lib/constants";
+import { GetLiquidityOpts, SwapVolume, ZAPStats, logger } from "core/utilities";
+import { STATS_REFRESH_RATE } from "app/utils/constants";
+import { PoolLiquidityMap } from "app/store/types";
+import { actions } from "app/store";
 import { getBlockchain } from "../selectors";
 
 interface QueryOpts {
@@ -23,8 +23,8 @@ const fetchPoolLiquidity = async (opts: GetLiquidityOpts) => {
 function* queryVolumeDay({ network }: QueryOpts) {
   try {
     const aDayAgo = dayjs().add(-1, "d").unix();
-    // stick query to lastest minute to improve cache
-    const refTime =  aDayAgo - aDayAgo % 60;
+    // stick query to last 5 minutes to improve cache
+    const refTime =  aDayAgo - aDayAgo % 300;
     const volumeDay: SwapVolume[] = yield ZAPStats.getSwapVolume({
       network,
       from: refTime,
@@ -39,8 +39,8 @@ function* queryVolumeDay({ network }: QueryOpts) {
 function* queryPoolLiquidityDay({ network }: QueryOpts) {
   try {
     const now = dayjs().unix();
-    // stick query to lastest minute to improve cache
-    const refTime =  now - now % 60;
+    // stick query to last 5 minutes to improve caching
+    const refTime =  now - now % 300;
     const liquiditySnapshot24hAgo: PoolLiquidityMap = yield fetchPoolLiquidity({
       network,
       timestamp: refTime - 86400,

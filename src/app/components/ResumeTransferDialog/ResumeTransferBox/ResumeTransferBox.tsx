@@ -1,33 +1,34 @@
-import { Box, Button, CircularProgress, Grid, makeStyles, OutlinedInput } from "@material-ui/core";
+import React, { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
+import { Box, Button, CircularProgress, Grid, OutlinedInput, makeStyles } from "@material-ui/core";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
-import RefreshIcon from '@material-ui/icons/RefreshRounded';
 import CheckCircleIcon from "@material-ui/icons/CheckCircleOutlineRounded";
-import { ConnectETHPopper, Text } from 'app/components';
-import { actions } from "app/store";
-import { BridgeableTokenMapping, BridgeState, BridgeTx } from "app/store/bridge/types";
-import { RootState } from "app/store/types";
-import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useAsyncTask } from "app/utils";
-import { ConnectButton } from "app/views/main/Bridge/components";
+import RefreshIcon from '@material-ui/icons/RefreshRounded';
 import BigNumber from 'bignumber.js';
-import { providerOptions } from "core/ethereum";
-import { ConnectedWallet } from "core/wallet";
-import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
+import cls from "classnames";
 import dayjs from "dayjs";
 import { ethers } from "ethers";
-import React, { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
-import { useHistory } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router";
 import { Blockchain, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
-import cls from "classnames";
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
+import { ConnectedWallet } from "core/wallet";
+import { Bridge } from "core/utilities";
+import { providerOptions } from "core/ethereum";
+import { ConnectButton } from "app/views/main/Bridge/components";
+import { hexToRGBA, netZilToTradeHub, useAsyncTask, useNetwork } from "app/utils";
+import { AppTheme } from "app/theme/types";
+import { RootState } from "app/store/types";
+import { BridgeState, BridgeTx, BridgeableTokenMapping } from "app/store/bridge/types";
+import { actions } from "app/store";
+import { ConnectETHPopper, Text } from 'app/components';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
         backgroundColor: theme.palette.background.default,
-        borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-        borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-        borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+        borderLeft: theme.palette.border,
+        borderRight: theme.palette.border,
+        borderBottom: theme.palette.border,
         borderRadius: "0 0 12px 12px",
         padding: theme.spacing(0, 7, 2),
         maxWidth: 510,
@@ -129,22 +130,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const ResumeTransferBox = (props: any) => {
     const classes = useStyles();
     const dispatch = useDispatch();
+    const network = useNetwork();
     const history = useHistory();
     const [showPhrase, setShowPhrase] = useState<boolean>(false);
     const [mnemonic, setMnemonic] = useState<Array<string>>(Array(12).fill(""));
     const [errorMsg, setErrorMsg] = useState<string>("");
+    const [swthAddress, setSwthAddress] = useState<string | null>(null);
     const bridgeableTokens = useSelector<RootState, BridgeableTokenMapping>(store => store.bridge.tokens);
     const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
     const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]); // eth wallet
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
     const pendingBridgeTx = bridgeState.activeBridgeTx;
 
-    const network = TradeHubSDK.Network.DevNet;
-
     const [depositTransfer, setDepositTransfer] = useState<RestModels.Transfer | null>(null);
     const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
 
     const [runGetTransfer, loading, error] = useAsyncTask("getTransfer");
+    const [runResumeTransfer, loadingResume] = useAsyncTask("resumeTransfer", (error) => setErrorMsg(error?.message));
     const [showMenu, setShowMenu] = useState<MutableRefObject<undefined>>();
 
     const buttonRef = useRef();
@@ -154,7 +156,9 @@ const ResumeTransferBox = (props: any) => {
     }, [mnemonic])
 
     useEffect(() => {
-        const sdk = new TradeHubSDK({ network });
+        const tradehubNetwork = netZilToTradeHub(network);
+        const sdk = new TradeHubSDK({ network: tradehubNetwork });
+        sdk.token.reloadTokens();
         setSdk(sdk);
     }, [network])
 
@@ -203,6 +207,7 @@ const ResumeTransferBox = (props: any) => {
     const handleClearAll = () => {
         setMnemonic(Array(12).fill(""));
         setDepositTransfer(null);
+        setSwthAddress(null);
     }
 
     const handleGetTransfer = () => {
@@ -212,7 +217,8 @@ const ResumeTransferBox = (props: any) => {
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
             const mnemonicString = mnemonic.join(" ");
-            const swthAddress = SWTHAddress.generateAddress(mnemonicString, undefined, { network });
+            const tradehubNetwork = sdk.network;
+            const swthAddress = SWTHAddress.generateAddress(mnemonicString, undefined, { network: tradehubNetwork });
 
             // find deposit confirmation tx
             const extTransfers = await sdk.api.getTransfers({ account: swthAddress }) as RestModels.Transfer[];
@@ -221,9 +227,11 @@ const ResumeTransferBox = (props: any) => {
             if (depositTransfer) {
                 setErrorMsg("");
                 setDepositTransfer(depositTransfer);
+                setSwthAddress(swthAddress);
             } else {
                 setErrorMsg("Please enter a valid transfer key.");
                 setDepositTransfer(null);
+                setSwthAddress(swthAddress);
             }
         })
     }
@@ -234,7 +242,17 @@ const ResumeTransferBox = (props: any) => {
             const srcChain = depositTransfer.blockchain as Blockchain.Zilliqa | Blockchain.Ethereum;
             const bridgeToken = bridgeableTokens[srcChain].find(token => token.denom === depositTransfer.denom);
 
-            if (bridgeToken) {
+            if (!bridgeToken || !sdk) return;
+            runResumeTransfer(async () => {
+                const fee = await Bridge.getEstimatedFees({ denom: bridgeToken.toDenom, network });
+                if (!fee.withdrawalFee?.gt(0))
+                    throw new Error("Could not retrieve withdraw fee");
+                const decimals = sdk.token.getDecimals(bridgeToken.toDenom) ?? 0;
+                const feeAmount = fee.withdrawalFee.shiftedBy(-decimals);
+
+                if (new BigNumber(depositTransfer.amount).lt(feeAmount))
+                    throw new Error("Transferred amount insufficient to pay for withdraw fees.");
+
                 const bridgeTx: BridgeTx = {
                     srcChain,
                     dstChain,
@@ -244,9 +262,10 @@ const ResumeTransferBox = (props: any) => {
                     dstToken: bridgeToken.toDenom,
                     inputAmount: new BigNumber(depositTransfer.amount),
                     interimAddrMnemonics: mnemonic.join(" "),
-                    withdrawFee: new BigNumber(depositTransfer.fee_amount), // need to check
+                    withdrawFee: feeAmount, // need to check
                     sourceTxHash: depositTransfer.transaction_hash,
                     depositDispatchedAt: dayjs(),
+                    network,
                 }
 
                 if (pendingBridgeTx) {
@@ -256,7 +275,7 @@ const ResumeTransferBox = (props: any) => {
                 dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
                 dispatch(actions.Layout.toggleShowResumeTransfer("close"));
                 history.push('/bridge');
-            }
+            });
         }
     }
 
@@ -313,6 +332,7 @@ const ResumeTransferBox = (props: any) => {
                 <Text variant="h4">
                     <CheckCircleIcon className={classes.checkIcon} />
                     Transfer Key Verified
+                    <Text variant="body2">{swthAddress}</Text>
                 </Text>
             )
         } else {
@@ -405,10 +425,13 @@ const ResumeTransferBox = (props: any) => {
             </Box>
 
             {(errorMsg || error) &&
-                <Box display="flex" justifyContent="center" mb={0.5}>
-                    <Text color="error">
-                        <strong>Error:</strong> Please enter a valid transfer key.
+                <Box display="flex" flexDirection="column" justifyContent="center" mb={0.5}>
+                    <Text color="error" variant="body1">
+                        <strong>Error:</strong> {errorMsg ?? error?.message ?? "Please enter a valid transfer key."}
                     </Text>
+                    {swthAddress && !depositTransfer && (
+                        <Text color="error" variant="body2" marginTop={0.5}>No transactions found for TradeHub address: {swthAddress}.</Text>
+                    )}
                 </Box>
             }
 
@@ -429,6 +452,7 @@ const ResumeTransferBox = (props: any) => {
                     disabled={!isResumeTransferEnabled}
                     fullWidth
                 >
+                    {loadingResume && <CircularProgress size={20} className={classes.progress} />}
                     Resume Transfer
                 </Button>
             </Box>

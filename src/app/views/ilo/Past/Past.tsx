@@ -1,15 +1,15 @@
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, makeStyles } from '@material-ui/core';
+import dayjs, { Dayjs } from "dayjs";
+import { useSelector } from 'react-redux';
+import { Link } from "react-router-dom";
+import { ZilswapConnector } from "core/zilswap";
+import { ZILO_DATA } from "core/zilo/constants";
 import { ILOCard, Text, TokenILOCard } from "app/components";
 import ILOPage from "app/layouts/ILOPage";
 import { BlockchainState, RootState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useNetwork } from "app/utils";
-import { ZILO_DATA } from "core/zilo/constants";
-import { ZilswapConnector } from "core/zilswap";
-import dayjs, { Dayjs } from "dayjs";
-import React, { useEffect, useMemo, useState } from "react";
-import { useSelector } from 'react-redux';
-import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   container: {
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }))
 
-const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
+const PastView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
 
   const classes = useStyles();
@@ -92,4 +92,4 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   )
 }
 
-export default CurrentView
+export default PastView

@@ -1,7 +1,7 @@
 import { Account } from "@zilliqa-js/account/dist/account";
-import { DefaultFallbackNetwork } from "app/utils/constants";
 import dayjs, { Dayjs } from "dayjs";
 import { Network } from "zilswap-sdk/lib/constants";
+import { DefaultFallbackNetwork } from "app/utils/constants";
 import { ConnectedWallet, WalletAccountInfo, WalletConnectType } from "./ConnectedWallet";
 
 export interface PrivateKeyConnectProps {

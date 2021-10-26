@@ -1,13 +1,13 @@
-import { Box, Button, Checkbox, makeStyles, Popover } from "@material-ui/core";
-import { RootState, TokenInfo, TokenState } from "app/store/types";
-import { hexToRGBA } from "app/utils";
 import React from "react";
 import { useState } from "react";
-import { useSelector } from "react-redux";
-import { AppTheme } from "app/theme/types";
-import cls from "classnames";
 import { useEffect } from "react";
 import { useMemo } from "react";
+import { Box, Button, Checkbox, Popover, makeStyles } from "@material-ui/core";
+import { useSelector } from "react-redux";
+import cls from "classnames";
+import { RootState, TokenInfo, TokenState } from "app/store/types";
+import { hexToRGBA } from "app/utils";
+import { AppTheme } from "app/theme/types";
 
 const useStyles = makeStyles((theme: AppTheme) =>({
   button: {
@@ -98,7 +98,7 @@ const TokenFilter = (props: Props) => {
     Object.values(tokenState.tokens).forEach(token => {
       initialSelectedState[token.address] = true
     })
-    
+
     setSelectedState(initialSelectedState)
     setInitialized(true)
   }, [tokenState, initialized])
@@ -111,8 +111,8 @@ const TokenFilter = (props: Props) => {
     setAnchorEl(null);
   };
 
-  const { 
-    tokens, 
+  const {
+    tokens,
     registeredTokens,
     unregisteredTokens,
     selectedTokens,
@@ -149,7 +149,7 @@ const TokenFilter = (props: Props) => {
     setSelectedState(newState)
     props.onFilterChange(Object.keys(newState).filter(address => newState[address]))
   }
-  
+
   const handleGroupChange = (event: React.ChangeEvent<HTMLInputElement>, registered: boolean) => {
     let newState = {...selectedState}
     tokens.filter(token => token.registered === registered).forEach(token => {
@@ -175,7 +175,7 @@ const TokenFilter = (props: Props) => {
           <span>Select tokens (All)</span>
         ) : (
           <span>Select tokens ({selectedTokens.length} of {tokens.length})</span>
-        )}        
+        )}
         <svg width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.2016 13.1737L14.2879 16.0874C13.8491 16.5262 13.1404 16.5262 12.7016 16.0874L9.78787 13.1737C9.07912 12.4649 9.58537 11.2499 10.5866 11.2499L16.4141 11.2499C17.4154 11.2499 17.9104 12.4649 17.2016 13.1737Z" fill="#DEFFFF"/></svg>
       </Button>
       <Popover

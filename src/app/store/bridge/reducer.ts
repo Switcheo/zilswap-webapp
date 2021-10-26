@@ -1,18 +1,20 @@
-import { SimpleMap } from "app/utils";
-import { LocalStorageKeys } from "app/utils/constants";
-import { bnOrZero, DataCoder } from "app/utils/strings/strings";
 import BigNumber from "bignumber.js";
-import { logger } from "core/utilities";
 import dayjs from "dayjs";
 import { Blockchain } from "tradehub-api-js";
+import { Network } from "zilswap-sdk/lib/constants";
+import { logger } from "core/utilities";
+import { DataCoder, bnOrZero } from "app/utils";
+import { LocalStorageKeys } from "app/utils/constants";
+import { SimpleMap } from "app/utils";
 import { BridgeActionTypes } from "./actions";
-import { BridgeableTokenMapping, BridgeState, BridgeTx } from "./types";
+import { BridgeState, BridgeTx, BridgeableTokenMapping } from "./types";
 
 export const BridgeTxEncoder: DataCoder<BridgeTx> = {
   encode: (tx: BridgeTx): object => {
     return {
       srcChain: tx.srcChain,
       dstChain: tx.dstChain,
+      network: tx.network,
       srcAddr: tx.srcAddr,
       dstAddr: tx.dstAddr,
       srcToken: tx.srcToken,
@@ -38,6 +40,7 @@ export const BridgeTxEncoder: DataCoder<BridgeTx> = {
     return {
       srcChain: object.srcChain,
       dstChain: object.dstChain,
+      network: object.network ?? Network.TestNet,
       srcAddr: object.srcAddr,
       dstAddr: object.dstAddr,
       srcToken: object.srcToken,
@@ -94,8 +97,8 @@ const initial_state: BridgeState = {
 
   formState: {
     transferAmount: new BigNumber(0),
-    fromBlockchain: Blockchain.Zilliqa,
-    toBlockchain: Blockchain.Ethereum,
+    fromBlockchain: Blockchain.Ethereum,
+    toBlockchain: Blockchain.Zilliqa,
 
     isInsufficientReserves: false,
     forNetwork: null,
@@ -153,7 +156,11 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
       // reconstruct txs to force component re-render.
       const newTxs: BridgeTx[] = payload.map((tx: BridgeTx) => ({ ...tx }));
       for (const tx of [...state.bridgeTxs, ...newTxs]) {
-        uniqueTxs[tx.sourceTxHash!] = tx;
+        const sourceTxHash = tx.sourceTxHash!
+        uniqueTxs[sourceTxHash] = {
+          ...state.bridgeTxs.find(tx => tx.sourceTxHash === sourceTxHash),
+          ...tx,
+        };
       }
 
       const newBridgeTxs = Object.values(uniqueTxs);

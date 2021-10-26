@@ -1,8 +1,8 @@
 import { colors } from '@material-ui/core';
-import { zilliqa, switcheo } from './colors';
+import { switcheo, zilliqa } from './colors';
 
 const TEXT_COLORS = {
-  primary: "#003340",
+  primary: "rgba(0, 51, 64, 0.8)", // made less harsh
   secondary: "rgba(0, 51, 64, 0.5)",
 };
 
@@ -71,6 +71,8 @@ const theme = {
     main: "#FF5252"
   },
   link: "#02586D",
+  border: "1px solid #D2E5DF",
+  borderColor: "#D2E5DF",
 };
 
 export default theme;

@@ -1,15 +1,15 @@
+import React, { useEffect, useState } from "react";
 import { Box, BoxProps, Checkbox, CircularProgress, Container, FormControlLabel, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Pagination } from "@material-ui/lab";
+import cls from "classnames";
+import { useSelector } from "react-redux";
+import { PoolTransaction, ZAPStats } from "core/utilities";
 import { PoolsNavigationTabs, PoolsOverviewBanner, Text, TokenFilter } from "app/components";
 import Page from "app/layouts/Page";
 import { RootState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useAsyncTask, useNetwork } from "app/utils";
-import cls from "classnames";
-import { PoolTransaction, ZAPStats } from "core/utilities";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { AddRemoveLiquidityRow, SwapTxRow } from "./components";
 
 interface Props extends BoxProps {
@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     boxShadow: theme.palette.cardBoxShadow,
     position: "relative",
     background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     marginBottom: theme.spacing(2)
   },
   text: {

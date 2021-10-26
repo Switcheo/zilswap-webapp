@@ -1,17 +1,17 @@
+import React from "react";
 import { Box, Button, IconButton, } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
+import BrightnessLowIcon from '@material-ui/icons/BrightnessLowRounded';
 import { Notifications, ShowAdvanced } from "app/components";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { LayoutState, OpenCloseState, PoolFormState, RootState } from "app/store/types";
-import cls from "classnames";
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { AppTheme } from "app/theme/types";
 import { CreatePoolDialog, NewPoolMessage, PoolDeposit, PoolManage, PoolToggleButton, PoolWithdraw } from "./components";
 import AddLiquidityEarnMessage from "./components/AddLiquidityEarnMessage";
 import { ReactComponent as PlusSVG } from "./plus_icon.svg";
-import BrightnessLowIcon from '@material-ui/icons/BrightnessLowRounded';
-import { AppTheme } from "app/theme/types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

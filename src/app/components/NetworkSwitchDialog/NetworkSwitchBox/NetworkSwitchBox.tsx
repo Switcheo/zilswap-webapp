@@ -1,20 +1,22 @@
-import { Box, Button, makeStyles } from "@material-ui/core";
+import React, { Fragment } from "react";
+import { useEffect } from "react";
+import { Box, BoxProps, Button, makeStyles } from "@material-ui/core";
 import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernetRounded';
+import cls from "classnames";
+import { useDispatch } from "react-redux";
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { Text } from 'app/components';
 import { ReactComponent as DotIcon } from "app/components/ConnectWalletButton/dot.svg";
 import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA } from "app/utils";
-import cls from "classnames";
-import React, { Fragment } from "react";
-import { useDispatch } from "react-redux";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
         backgroundColor: theme.palette.background.default,
-        borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-        borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-        borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+        borderLeft: theme.palette.border,
+        borderRight: theme.palette.border,
+        borderBottom: theme.palette.border,
         borderRadius: "0 0 12px 12px",
         padding: theme.spacing(2, 8, 2),
         minWidth: 510,
@@ -53,31 +55,46 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         backgroundColor: "transparent",
         border: `1px solid ${theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : "#D2E5DF"}`,
         "&:hover": {
-          backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.2)}`
+            backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.2)}`
         }
     },
 }));
 
-const NetworkSwitchBox = (props: any) => {
-    const { className, chainName, network } = props;
+interface Props extends BoxProps {
+  currentChainName: string | null;
+  requiredChainName: string | null;
+  requiredChainID: string | null;
+  walletToChange: string | null;
+  ethWallet: ConnectedBridgeWallet | null;
+}
+const NetworkSwitchBox = (props: Props) => {
+    const { className, currentChainName, requiredChainName, requiredChainID, walletToChange, ethWallet } = props;
     const classes = useStyles();
     const dispatch = useDispatch();
-    
+
+    useEffect(() => {
+        if (requiredChainName === null) {
+            dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
+        }
+
+        // eslint-disable-next-line
+    }, [requiredChainName]);
+
     const onCloseDialog = () => {
-        dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
+      dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
     };
 
-    const switchChain = async () => {
-        try {
-            const ethereum = window.ethereum;
-            await ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: '0x3' }],
-            });
-            dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
-        } catch (switchError) {
-            console.log(switchError);
-        }
+    const switchEthChain = async () => {
+      try {
+        if (!ethWallet) return
+        await ethWallet.provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: requiredChainID }],
+        });
+        onCloseDialog();
+      } catch (switchError) {
+        console.error(switchError);
+      }
     }
 
     return (
@@ -93,25 +110,25 @@ const NetworkSwitchBox = (props: any) => {
 
                 <Button variant="contained" className={classes.connectedButton}>
                     <Text variant="button">
-                        <DotIcon className={classes.dotIcon} />{chainName ? chainName : `Zilliqa ${network}`}
+                        <DotIcon className={classes.dotIcon} />{currentChainName}
                     </Text>
                 </Button>
             </Box>
-            
+
 
             <Text marginBottom={2.5} align="center">
-                Switch to the <span style={{ fontWeight: "bold" }}>{chainName ? 'Ropsten Test Network' : 'Zilliqa TestNet'}</span> on <span style={{ fontWeight: "bold" }}>{chainName ? 'MetaMask' : 'ZilPay'}</span> to start using ZilBridge.
+                Switch to the <span style={{ fontWeight: "bold" }}>{requiredChainName}</span> on <span style={{ fontWeight: "bold" }}>{walletToChange}</span> to start using ZilBridge.
             </Text>
 
-            {chainName 
+            {requiredChainID && !ethWallet?.provider.isBoltX
                 ? <Fragment>
                     <Button
                         variant="contained"
                         color="primary"
                         className={classes.actionButton}
-                        onClick={switchChain}
-                        >
-                        Switch to Ropsten Test Network
+                        onClick={switchEthChain}
+                    >
+                        Switch to {requiredChainName}
                     </Button>
 
                     <Text marginTop={1.5} marginBottom={1.5} className={classes.cancel} align="center" onClick={onCloseDialog}>
@@ -125,7 +142,7 @@ const NetworkSwitchBox = (props: any) => {
                         className={classes.actionButton}
                         onClick={onCloseDialog}
                         fullWidth
-                        >
+                    >
                         Close
                     </Button>
                 </Box>

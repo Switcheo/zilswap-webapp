@@ -1,17 +1,19 @@
-import { DialogContent, makeStyles, Typography } from "@material-ui/core";
-import { DialogModal, FancyButton } from "app/components";
-import { actions } from "app/store";
-import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
-import { useAsyncTask, useNetwork } from "app/utils";
-import { BIG_ZERO, PlaceholderStrings } from "app/utils/constants";
-import cls from "classnames";
 import React, { useState } from "react";
+import { DialogContent, Typography, makeStyles } from "@material-ui/core";
+import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
+import { ZilswapConnector } from "core/zilswap";
+import { DialogModal, FancyButton } from "app/components";
+import { actions } from "app/store";
+import { RootState, TokenInfo, WalletState } from "app/store/types";
+import { useAsyncTask, useNetwork } from "app/utils";
+import { BIG_ZERO, PlaceholderStrings } from "app/utils/constants";
+import { AppTheme } from "app/theme/types";
 import { AddressInput } from "./components";
 import { TokenPreview } from "./components/AddressInput/AddressInput";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   content: {
@@ -21,10 +23,10 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.down("xs")]: {
       width: "fit-content",
     },
-    backgroundColor: theme.palette.background.default,
-    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    backgroundColor: theme.palette.background!.default,
+    borderLeft: theme.palette.border,
+    borderRight: theme.palette.border,
+    borderBottom: theme.palette.border,
     borderRadius: "0 0 12px 12px"
   },
   actionButton: {
@@ -44,23 +46,26 @@ const CreatePoolDialog = (props: any) => {
   const [tokenPreview, setTokenPreview] = useState<TokenPreview | undefined>();
   const [runAsyncTask, loading, error] = useAsyncTask("createPool");
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const tokenState = useSelector<RootState, TokenState>(state => state.token);
 
   const onCreatePool = () => {
     if (loading) return;
 
     runAsyncTask(async () => {
+      const zilswapSdk = ZilswapConnector.getSDK();
+      if (!zilswapSdk)
+        throw new Error("zilswap not initialized");
       if (!walletState.wallet)
         throw new Error("Connect wallet to create pool");
       if (!tokenPreview) throw new Error("Address not valid");
       const { address } = tokenPreview;
-      if (tokenState.tokens[address])
+      if (zilswapSdk.getAppState().tokens[address])
         throw new Error(`Pool for ${tokenPreview.symbol} already exists`);
 
       const token: TokenInfo = {
         address,
         initialized: false,
         whitelisted: false,
+        isWzil: false,
         isZil: false,
         isZwap: false,
         registered: false,

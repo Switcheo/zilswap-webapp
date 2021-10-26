@@ -1,21 +1,23 @@
 
-import { Box, CircularProgress, DialogContent, DialogProps, makeStyles, OutlinedInput, InputAdornment, IconButton } from "@material-ui/core";
+import React, { useEffect, useState } from "react";
+import { Box, CircularProgress, DialogContent, DialogProps, IconButton, InputAdornment, OutlinedInput, makeStyles } from "@material-ui/core";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
+import BigNumber from "bignumber.js";
+import clsx from "clsx";
+import { useDispatch, useSelector } from "react-redux";
+import { Blockchain } from "tradehub-api-js";
+import CloseIcon from "@material-ui/icons/CloseOutlined";
 import { DialogModal } from "app/components";
 import { BridgeState } from "app/store/bridge/types";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { hexToRGBA, useTaskSubscriber } from "app/utils";
-import { BIG_ZERO, LoadingKeys } from "app/utils/constants";
-import BigNumber from "bignumber.js";
-import clsx from "clsx";
-import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Blockchain } from "tradehub-api-js";
-import { CurrencyList } from "./components";
+import { BIG_ZERO, LoadingKeys, ZIL_ADDRESS } from "app/utils/constants";
 import { actions } from "app/store";
-import CloseIcon from "@material-ui/icons/CloseOutlined";
+import { AppTheme } from "app/theme/types";
+import { getMarketplace } from "app/saga/selectors";
+import { CurrencyList } from "./components";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     width: "100%",
     maxWidth: 650,
@@ -58,7 +60,7 @@ const useStyles = makeStyles(theme => ({
       width: '0.4rem'
     },
     '&::-webkit-scrollbar-thumb': {
-      backgroundColor: `rgba${hexToRGBA(theme.palette.text.primary, 0.1)}`,
+      backgroundColor: `rgba${hexToRGBA(theme.palette.text!.primary!, 0.1)}`,
       borderRadius: 12
     }
   },
@@ -76,9 +78,9 @@ const useStyles = makeStyles(theme => ({
   },
   dialogContent: {
     backgroundColor: theme.palette.type === "dark" ? "#12222C" : "#F6FFFC",
-    borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderLeft: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
-    borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    borderBottom: theme.palette.border,
+    borderLeft: theme.palette.border,
+    borderRight: theme.palette.border,
     borderRadius: "0 0 12px 12px",
     paddingTop: '24px',
     [theme.breakpoints.down("sm")]: {
@@ -90,18 +92,20 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export type CurrencyListType = "zil" | "bridge-zil" | "bridge-eth";
+export type CurrencyListType = "zil" | "ark-zil" | "bridge-zil" | "bridge-eth";
 
 export interface CurrencyDialogProps extends DialogProps {
   onSelectCurrency: (token: TokenInfo) => void;
   hideZil?: boolean;
   hideNoPool?: boolean;
   showContribution?: boolean;
+  zrc2Only?: boolean;
+  token?: TokenInfo | null;
   tokenList: CurrencyListType;
 };
 
 const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProps) => {
-  const { className, onSelectCurrency, hideZil, hideNoPool, showContribution, tokenList, open, onClose } = props;
+  const { className, onSelectCurrency, hideZil, hideNoPool, showContribution, zrc2Only, tokenList, open, token, onClose } = props;
   const classes = useStyles();
   const [search, setSearch] = useState("");
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
@@ -111,6 +115,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
+  const { exchangeInfo } = useSelector(getMarketplace);
 
   useEffect(() => {
     if (!tokenState.tokens) return setTokens([]);
@@ -131,13 +136,22 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     let tokens = Object.values(tokenState.tokens);
     if (tokenList === 'zil') {
       tokens = tokens.filter(t => t.blockchain === Blockchain.Zilliqa)
+    } else if (tokenList === 'ark-zil') {
+      const exchangeDenoms = exchangeInfo?.denoms;
+      tokens = tokens.filter(t => t.blockchain === Blockchain.Zilliqa && exchangeDenoms && exchangeDenoms.includes(t.address))
     } else if (tokenList === 'bridge-eth') {
       tokens = tokens.filter(t => t.blockchain === Blockchain.Ethereum)
     } else if (tokenList === 'bridge-zil') {
       tokens = tokens.filter(t => bridgeState.tokens[Blockchain.Zilliqa].findIndex(b => toBech32Address(b.tokenAddress) === t.address) >= 0)
     }
+
+    if (zrc2Only)
+      tokens = tokens.filter(t => t.address !== ZIL_ADDRESS);
     setTokens(tokens.sort(sortFn));
-  }, [tokenState.tokens, walletState.wallet, bridgeState.tokens, showContribution, tokenList]);
+
+    if (token && !tokens.find(t => t.address === token.address) && tokens.length > 0)
+      onSelectCurrency(tokens[0]);
+  }, [tokenState.tokens, walletState.wallet, bridgeState.tokens, showContribution, tokenList, exchangeInfo?.denoms, zrc2Only, token, onSelectCurrency]);
 
   const filterSearch = (token: TokenInfo): boolean => {
     const searchTerm = search.toLowerCase().trim();

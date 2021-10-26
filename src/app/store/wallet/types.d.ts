@@ -1,6 +1,6 @@
+import { Blockchain } from "tradehub-api-js";
 import { ConnectedWallet } from "core/wallet";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
-import { Blockchain } from "tradehub-api-js";
 
 export interface WalletState {
   wallet: ConnectedWallet | null;

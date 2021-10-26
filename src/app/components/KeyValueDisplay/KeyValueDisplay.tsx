@@ -1,7 +1,7 @@
+import React from "react";
 import { Box, BoxProps, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import React from "react";
 import { AppTheme } from "app/theme/types";
 
 export interface Props extends BoxProps {

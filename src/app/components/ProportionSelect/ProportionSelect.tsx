@@ -1,21 +1,22 @@
+import React, { useState } from "react";
 import { ButtonGroupProps, Typography } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import React, { useState } from "react";
+import { AppTheme } from "app/theme/types";
 
 export interface ProportionSelectProps extends ButtonGroupProps {
   onSelectProp?: (proportion: number) => void;
 };
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
   },
   percentageButton: {
     borderRadius: 5,
     padding: '3px 7px',
     color: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.5)" : "#003340",
-    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#D4FFF2",
+    backgroundColor: theme.palette.background!.contrast,
     border: 0,
     margin: '4px 5px',
     [theme.breakpoints.down("sm")]: {

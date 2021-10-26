@@ -1,13 +1,13 @@
-import { Box, BoxProps, InputLabel, makeStyles, OutlinedInput, Typography } from "@material-ui/core";
+import React, { useEffect, useState } from "react";
+import { Box, BoxProps, InputLabel, OutlinedInput, Typography, makeStyles } from "@material-ui/core";
+import cls from "classnames";
+import { useSelector } from "react-redux";
+import { zilParamsToMap } from "core/utilities";
+import { Contract, ZilliqaValidate, ZilswapConnector, toBech32Address } from "core/zilswap";
 import { KeyValueDisplay, LoadableArea } from "app/components";
 import { RootState, WalletState } from "app/store/types";
 import { useAsyncTask } from "app/utils";
 import { PlaceholderStrings } from "app/utils/constants";
-import cls from "classnames";
-import { zilParamsToMap } from "core/utilities";
-import { Contract, toBech32Address, ZilliqaValidate, ZilswapConnector } from "core/zilswap";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 
 export type TokenPreview = {
   contract: Contract;

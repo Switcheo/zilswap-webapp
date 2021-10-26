@@ -1,11 +1,11 @@
+import React from "react";
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
 import { NotificationBox } from "app/components";
 import { TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useNetwork } from "app/utils";
-import cls from "classnames";
-import React from "react";
 import { ReactComponent as LinkLogo } from "./link_logo.svg";
 import { ReactComponent as WarningLogo } from "./warning_logo.svg";
 

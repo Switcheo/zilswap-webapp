@@ -2,8 +2,8 @@
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import { Network } from "zilswap-sdk/lib/constants";
 
-import { TokenInfo } from "app/store/types";
 import { HTTP } from "core/utilities";
+import { TokenInfo } from "app/store/types";
 
 export enum BatchRequestType {
   Balance = "balance",

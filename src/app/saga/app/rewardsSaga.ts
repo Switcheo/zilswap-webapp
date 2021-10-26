@@ -1,16 +1,16 @@
 import { BigNumber } from 'bignumber.js'
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
+import { Distribution, Distributor, EstimatedRewards, ZAPStats, logger } from "core/utilities";
+import { ZilswapConnector } from "core/zilswap";
 import { actions } from "app/store";
 import { BlockchainActionTypes } from "app/store/blockchain/actions";
 import { RewardsActionTypes } from "app/store/rewards/actions";
-import { DistributorWithTimings, DistributionWithStatus, PoolReward, PotentialRewards } from "app/store/types";
+import { DistributionWithStatus, DistributorWithTimings, PoolReward, PotentialRewards } from "app/store/types";
 import { WalletActionTypes } from "app/store/wallet/actions";
 import { SimpleMap } from "app/utils";
 import { PollIntervals } from "app/utils/constants";
-import { logger, ZAPStats, Distribution, Distributor, EstimatedRewards } from "core/utilities";
-import { ZilswapConnector } from "core/zilswap";
-import { getWallet, getTokens, getRewards, getBlockchain } from "../selectors";
+import { getBlockchain, getRewards, getTokens, getWallet } from "../selectors";
 
 function* queryDistributors() {
   while (true) {

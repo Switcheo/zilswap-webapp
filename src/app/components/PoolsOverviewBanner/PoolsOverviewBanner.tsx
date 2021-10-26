@@ -1,18 +1,15 @@
+import React, { useEffect, useState } from "react";
 import { Box, BoxProps, Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
+import dayjs from "dayjs";
+import { useSelector } from "react-redux";
 import { StatsCard, Text } from "app/components";
 import { RewardsState, RootState, StatsState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useValueCalculators, useNetwork } from "app/utils";
-import { BIG_ZERO } from "app/utils/constants";
-import { bnOrZero } from "app/utils/strings/strings";
-import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
-import cls from "classnames";
-import dayjs from "dayjs";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import HelpInfo from "../HelpInfo";
-import CurrencyLogo from "../CurrencyLogo";
+import { useValueCalculators } from "app/utils";
+import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
+import { bnOrZero, toHumanNumber } from "app/utils";
 
 interface Props extends BoxProps { }
 
@@ -21,7 +18,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   banner: {
     background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     padding: theme.spacing(4, 4),
     borderRadius: 12,
     boxShadow: theme.palette.cardBoxShadow,
@@ -75,7 +72,6 @@ interface Countdown {
 
 const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
-  const network = useNetwork();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
   const statsState = useSelector<RootState, StatsState>(state => state.stats);
@@ -140,6 +136,12 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
     });
   };
 
+  const { totalSwapVolumeZIL, totalSwapVolumeUSD } = React.useMemo(() => {
+    const zil = Object.values(statsState.dailySwapVolumes).reduce((acc, item) => acc.plus(item.totalZilVolume), BIG_ZERO);
+    const usd = valueCalculators.amount(tokenState.prices, tokenState.tokens[ZIL_ADDRESS], zil);
+    return { totalSwapVolumeZIL: toHumanNumber(zil.shiftedBy(-12), 0), totalSwapVolumeUSD: `$${usd.toFormat(0)}` }
+  }, [statsState.dailySwapVolumes, valueCalculators, tokenState.prices, tokenState.tokens])
+
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <Box className={classes.banner}>
@@ -148,7 +150,7 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
           <Grid container spacing={2}>
             <Grid item xs={12} md={4}>
               <StatsCard heading="Total Value Locked">
-                <Text marginBottom={2} variant="h1" className={classes.statistic}>${totalLiquidity.toFormat(2)}</Text>
+                <Text marginBottom={2} variant="h1" className={classes.statistic}>${totalLiquidity.toFormat(0)}</Text>
                 <Box display="flex" flexDirection="row" alignItems="center" className={classes.subtitle}>
                   {
                     <Text className={liquidityChangePercent.gte(0) ? classes.percentagePositive : classes.percentageNegative}>
@@ -159,25 +161,14 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
               </StatsCard>
             </Grid>
             <Grid item xs={12} md={4}>
-              <StatsCard heading={(
-                <Box display="flex" justifyContent="space-between">
-                  <span>
-                    Rewards to be Distributed
-                  </span>
-                  <HelpInfo className={classes.helpInfo} placement="top" title="Rewards are distributed weekly, every Wednesday, to liquidity providers of eligible token pools." />
-                </Box>
-              )}>
-                <Text marginBottom={2} variant="h1" className={cls(classes.statistic, classes.reward)}>
-                  5312.5
-                  <CurrencyLogo currency="ZWAP" address={ZWAP_TOKEN_CONTRACT[network]} className={classes.currencyLogo}/>
-                  <span className={classes.currency}>
-                    ZWAP
-                  </span>
-                </Text>
-                <Box alignItems="center" display="flex" className={classes.subtitle}>
-                  <Text>
-                    Per Week
-                  </Text>
+              <StatsCard heading="24 Hour Volume">
+                <Text marginBottom={2} variant="h1" className={classes.statistic}>{totalSwapVolumeUSD}</Text>
+                <Box display="flex" flexDirection="row" alignItems="center" className={classes.subtitle}>
+                  {
+                    <Text className={classes.percentagePositive}>
+                      ({totalSwapVolumeZIL} ZIL)
+                    </Text>
+                  }
                 </Box>
               </StatsCard>
             </Grid>

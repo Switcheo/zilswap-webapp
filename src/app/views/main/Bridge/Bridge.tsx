@@ -1,6 +1,17 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Button, FormControl, MenuItem, Select } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
+import BigNumber from 'bignumber.js';
+import cls from "classnames";
+import { ethers } from "ethers";
+import { useDispatch, useSelector } from 'react-redux';
+import { Blockchain, RestModels, TradeHubSDK } from "tradehub-api-js";
+import Web3Modal from 'web3modal';
+import { Network } from "zilswap-sdk/lib/constants";
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
+import { ConnectedWallet } from "core/wallet";
+import { providerOptions } from "core/ethereum";
 import { ConfirmTransfer, ConnectETHPopper, CurrencyInput, Text } from 'app/components';
 import FailedBridgeTxWarning from "app/components/FailedBridgeTxWarning";
 import NetworkSwitchDialog from "app/components/NetworkSwitchDialog";
@@ -9,19 +20,8 @@ import { actions } from "app/store";
 import { BridgeFormState, BridgeState } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, strings, useAsyncTask, useNetwork, useTokenFinder } from "app/utils";
+import { bnOrZero, hexToRGBA, netZilToTradeHub, useAsyncTask, useNetwork, useTokenFinder } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
-import BigNumber from 'bignumber.js';
-import cls from "classnames";
-import { providerOptions } from "core/ethereum";
-import { ConnectedWallet } from "core/wallet";
-import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
-import { ethers } from "ethers";
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Blockchain, RestModels, TradeHubSDK } from "tradehub-api-js";
-import Web3Modal from 'web3modal';
-import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectButton } from "./components";
 import { BridgeParamConstants } from "./components/constants";
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     boxShadow: theme.palette.mainBoxShadow,
     borderRadius: 12,
     background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #D2E5DF",
+    border: theme.palette.border,
     [theme.breakpoints.down("sm")]: {
       maxWidth: 450,
       padding: theme.spacing(2, 2, 0),
@@ -178,23 +178,33 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout);
   const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
   const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK");
+  const [runLoadGasPrice] = useAsyncTask("loadGasPrice");
   const [disconnectMenu, setDisconnectMenu] = useState<any>();
+  const [gasPrice, setGasPrice] = useState<BigNumber | undefined>();
   const disconnectSrcButtonRef = useRef();
   const disconnectDestButtonRef = useRef();
 
   useEffect(() => {
+    if (gasPrice?.gt(0) || !sdk) return;
+
+    runLoadGasPrice(async () => {
+      const gasPrice = await sdk?.eth.getProvider().getGasPrice();
+      setGasPrice(new BigNumber(gasPrice.toString()));
+    })
+
+    // eslint-disable-next-line
+  }, [sdk, gasPrice])
+
+  useEffect(() => {
     runInitTradeHubSDK(async () => {
-      const sdk = new TradeHubSDK({ network: TradeHubSDK.Network.DevNet });
+      const tradehubNetwork = netZilToTradeHub(network)
+      const sdk = new TradeHubSDK({ network: tradehubNetwork });
       await sdk.token.reloadTokens();
       setSdk(sdk);
     })
 
     // eslint-disable-next-line
-  }, []);
-
-  const isCorrectChain = useMemo(() => {
-    return network === Network.TestNet && Number(bridgeWallet?.chainId) === 3;
-  }, [bridgeWallet, network]);
+  }, [network]);
 
   const tokenList: 'bridge-zil' | 'bridge-eth' = bridgeFormState.fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth';
 
@@ -249,7 +259,8 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }, [wallet, bridgeFormState.fromBlockchain])
 
   const setSourceAddress = (address: string) => {
-    setFormState(prevState => ({
+
+  setFormState(prevState => ({
       ...prevState,
       sourceAddress: address
     }))
@@ -310,9 +321,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const onClickConnectETH = async () => {
     const web3Modal = new Web3Modal({
-      cacheProvider: true,
+      cacheProvider: false,
       disableInjectedProvider: false,
-      network: "ropsten",
+      network: network === Network.MainNet ? 'mainnet' : 'ropsten',
       providerOptions
     });
 
@@ -331,6 +342,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }
 
     setEthConnectedAddress(ethAddress);
+
     dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: { provider: provider, address: ethAddress, chainId: chainId } }));
     dispatch(actions.Token.refetchState());
   };
@@ -348,7 +360,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   };
 
   const onTransferAmountChange = (rawAmount: string = "0") => {
-    let transferAmount = new BigNumber(rawAmount);
+    let transferAmount = new BigNumber(rawAmount).decimalPlaces(fromToken?.decimals ?? 0);
     if (transferAmount.isNaN() || transferAmount.isNegative() || !transferAmount.isFinite()) transferAmount = BIG_ZERO;
 
     setFormState({
@@ -408,6 +420,14 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   };
 
   const showTransfer = () => {
+    if (!(
+      (Number(bridgeWallet?.chainId) === 1 && wallet?.network === Network.MainNet) ||
+      (Number(bridgeWallet?.chainId) === 3 && wallet?.network === Network.TestNet)
+    )) {
+      dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
+      return
+    }
+
     dispatch(actions.Layout.showTransferConfirmation(!layoutState.showTransferConfirmation))
   }
 
@@ -465,15 +485,15 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const isSubmitEnabled = useMemo(() => {
-    if (!isCorrectChain || !formState.sourceAddress || !formState.destAddress)
+    if (!formState.sourceAddress || !formState.destAddress)
       return false;
     if (bridgeFormState.transferAmount.isZero())
       return false;
-    if (fromToken && bridgeFormState.transferAmount.isGreaterThan(strings.bnOrZero(fromToken.balance).shiftedBy(-fromToken.decimals)))
+    if (fromToken && bridgeFormState.transferAmount.isGreaterThan(bnOrZero(fromToken.balance).shiftedBy(-fromToken.decimals)))
       return false;
 
     return true
-  }, [isCorrectChain, formState, bridgeFormState.transferAmount, fromToken])
+  }, [formState, bridgeFormState.transferAmount, fromToken])
 
   // returns true if asset is native coin, false otherwise
   const isNativeAsset = (asset: RestModels.Token) => {
@@ -481,43 +501,41 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     return (asset.asset_id === zeroAddress)
   }
 
-  const adjustedForGas = async (balance: BigNumber, blockchain: Blockchain, sdk: TradeHubSDK) => {
+  const adjustedForGas = (balance: BigNumber, blockchain: Blockchain) => {
     if (blockchain === Blockchain.Zilliqa) {
       const gasPrice = new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`);
       const gasLimit = new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`);
 
       return balance.minus(gasPrice.multipliedBy(gasLimit));
     } else {
-      const gasPrice = await sdk.eth.getProvider().getGasPrice();
-      const gasPriceGwei = new BigNumber(ethers.utils.formatUnits(gasPrice, "gwei"));
+      const gasPriceGwei = new BigNumber(ethers.utils.formatUnits((gasPrice ?? new BigNumber(65)).toString(10), "gwei"));
       const gasLimit = new BigNumber(`${BridgeParamConstants.ETH_GAS_LIMIT}`);
 
       return balance.minus(gasPriceGwei.multipliedBy(gasLimit));
     }
   }
 
-  // eth takes awhile to load, need to fix
   const onSelectMax = async () => {
     if (!fromToken || !sdk) return;
 
-    let balance = strings.bnOrZero(fromToken.balance);
+    let balance = bnOrZero(fromToken.balance);
     const asset = sdk.token.tokens[bridgeToken?.denom ?? ""];
 
     if (!asset) return;
 
     // Check if gas fees need to be deducted
     if (isNativeAsset(asset) && CHAIN_NAMES[fromToken.blockchain] === fromBlockchain) {
-      balance = await adjustedForGas(balance, fromToken.blockchain, sdk);
+      balance = adjustedForGas(balance, fromToken.blockchain);
     }
 
     setFormState({
       ...formState,
-      transferAmount: balance.shiftedBy(-fromToken.decimals).toString(),
+      transferAmount: balance.decimalPlaces(0).shiftedBy(-fromToken.decimals).toString(),
     })
 
     dispatch(actions.Bridge.updateForm({
       forNetwork: network,
-      transferAmount: balance.shiftedBy(-fromToken.decimals),
+      transferAmount: balance.decimalPlaces(0).shiftedBy(-fromToken.decimals),
     }))
   }
 

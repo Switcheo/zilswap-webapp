@@ -11,6 +11,10 @@ const initial_state: LayoutState = {
   showTransferConfirmation: false,
   showMnemonicDialog: false,
   showResumeTransferDialog: false,
+  showBuyNftDialog: false,
+  showBidNftDialog: false,
+  showCancelSellNftDialog: false,
+  expandNavDrawer: false,
   liquidityEarnHidden: false,
   notification: undefined,
   showPoolType: "add",
@@ -18,7 +22,7 @@ const initial_state: LayoutState = {
   tasksRegistry: {},
 };
 
-const reducer = (state: LayoutState = initial_state, action: any) => {
+const reducer = (state: LayoutState = initial_state, action: any): LayoutState => {
   let loadingTask = null, taskName;
   switch (action.type) {
     case LayoutActionTypes.TOGGLE_SHOW_WALLET:
@@ -65,6 +69,26 @@ const reducer = (state: LayoutState = initial_state, action: any) => {
       return {
         ...state,
         showResumeTransferDialog: !action.override ? !state.showResumeTransferDialog : action.override === "open",
+      };
+    case LayoutActionTypes.TOGGLE_SHOW_BUY_NFT:
+      return {
+        ...state,
+        showBuyNftDialog: !action.override ? !state.showBuyNftDialog : action.override === "open",
+      };
+    case LayoutActionTypes.TOGGLE_SHOW_BID_NFT:
+      return {
+        ...state,
+        showBidNftDialog: !action.override ? !state.showBidNftDialog : action.override === "open",
+      };
+    case LayoutActionTypes.TOGGLE_SHOW_CANCEL_SELL_NFT:
+      return {
+        ...state,
+        showCancelSellNftDialog: !action.override ? !state.showCancelSellNftDialog : action.override === "open",
+      };
+    case LayoutActionTypes.TOGGLE_EXPAND_NAV_DRAWER:
+      return {
+        ...state,
+        expandNavDrawer: !action.override ? !state.expandNavDrawer : action.override === "open",
       };
     case LayoutActionTypes.HIDE_LIQUIDITY_EARN:
       return {

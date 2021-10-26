@@ -1,11 +1,11 @@
+import React, { ChangeEvent, useState } from "react";
 import { Box, BoxProps, Button, TextField, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { RootState } from "app/store/types";
-import { AppTheme } from "app/theme/types";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import React, { ChangeEvent, useState } from "react";
 import { useSelector } from "react-redux";
+import { AppTheme } from "app/theme/types";
+import { RootState } from "app/store/types";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {

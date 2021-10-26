@@ -1,9 +1,9 @@
+import React from "react";
 import { Box, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
 import { SearchInput } from "app/components";
 import { AppTheme } from "app/theme/types";
-import cls from "classnames";
-import React from "react";
 
 interface Props extends BoxProps {
   onSearch: (query: string | undefined) => void;
