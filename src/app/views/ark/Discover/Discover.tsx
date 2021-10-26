@@ -37,7 +37,7 @@ const HEADERS: HeadersProp[] = [
   { align: "center", value: "Collection Size" },
 ]
 
-const mockedDaily = new BigNumber(23.23)
+// const mockedDaily = new BigNumber(23.23)
 // const mockedWeekly = new BigNumber(-1.23)
 
 const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
@@ -368,6 +368,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     height: "20px",
     verticalAlign: "text-top",
     alignSelf: 'flex-start',
+    [theme.breakpoints.down('md')]: {
+      height: 14,
+      width: 14,
+    }
   },
   index: {
     margin: "0px 14px",
