@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
-import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
@@ -37,7 +36,7 @@ const HEADERS: HeadersProp[] = [
   { align: "center", value: "Collection Size" },
 ]
 
-const mockedDaily = new BigNumber(23.23)
+// const mockedDaily = new BigNumber(23.23)
 // const mockedWeekly = new BigNumber(-1.23)
 
 const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
