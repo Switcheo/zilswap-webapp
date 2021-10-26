@@ -143,7 +143,7 @@ export class ArkClient {
   }
 
   getCollectionTraits = async (address: string) => {
-    const url = this.http.path("collection/traits", { address });
+    const url = this.http.path("collection/traits", { address }, { limit: 100 });
     const result = await this.http.get({ url });
     const output = await result.json();
     await this.checkError(output);
