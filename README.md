@@ -1,12 +1,12 @@
-# Zilswap Webapp
+# ZilSwap Webapp
 
-This repository contains the UI code for the Zilswap dApp.
+This repository contains the UI code for the ZilSwap dApp.
 
 The webapp is hosted on canonical url: [https://zilswap.io](https://zilswap.io). IFPS hosting is coming soon.
 
 ## Development
 
-The Zilswap webapp is built using React. Simply install Node.js and node package dependencies to begin.
+The ZilSwap webapp is built using React. Simply install Node.js and node package dependencies to begin.
 
 ```bash
 yarn install

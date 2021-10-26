@@ -1,15 +1,15 @@
 # CONTRIBUTING
 
-## How to contribute to Zilswap Webapp
+## How to contribute to ZilSwap Webapp
 
 ### **Do you intend to add your project's token logo?**
 
-Please visit the [zilswap token list](https://github.com/Switcheo/zilswap-token-list) to add your token logo. This repository only hosts the Zilswap UI source code.
+Please visit the [zilswap token list](https://github.com/Switcheo/zilswap-token-list) to add your token logo. This repository only hosts the ZilSwap UI source code.
 
 ### **Did you find a bug?**
 
 * **Do not open up a GitHub issue if the bug is a security vulnerability
-  in the Zilswap UI or smart contract**, and instead to send an email to [security@switcheo.network](mailto:https://security@switcheo.network).
+  in the ZilSwap UI or smart contract**, and instead to send an email to [security@switcheo.network](mailto:https://security@switcheo.network).
 
 * **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.com/Switcheo/zilswap-webapp/issues).
 
@@ -25,7 +25,7 @@ Please visit the [zilswap token list](https://github.com/Switcheo/zilswap-token-
 
 ### **Did you fix whitespace, format code, or make a purely cosmetic patch?**
 
-Changes that are cosmetic in nature and do not add anything substantial to the stability, functionality, or testability of Zilswap will generally not be accepted.
+Changes that are cosmetic in nature and do not add anything substantial to the stability, functionality, or testability of ZilSwap will generally not be accepted.
 
 ### **Do you intend to add a new feature or change an existing one?**
 
@@ -33,12 +33,12 @@ Changes that are cosmetic in nature and do not add anything substantial to the s
 
 * Do not open an issue on GitHub until you have collected positive feedback about the change. GitHub issues are primarily intended for bug reports and fixes.
 
-### **Do you want to contribute to the Zilswap documentation or SDK?**
+### **Do you want to contribute to the ZilSwap documentation or SDK?**
 
-* Please see [https://github.com/Switcheo/zilswap/blob/master/CONTRIBUTING.md] to contribute to the Zilswap API documentation.
+* Please see [https://github.com/Switcheo/zilswap/blob/master/CONTRIBUTING.md] to contribute to the ZilSwap API documentation.
 
-* Please see [https://github.com/Switcheo/zilswap-sdk/blob/master/CONTRIBUTING.md] to contribute to the Zilswap Typescript SDK.
+* Please see [https://github.com/Switcheo/zilswap-sdk/blob/master/CONTRIBUTING.md] to contribute to the ZilSwap Typescript SDK.
 
 ### **Do you have questions about the source code?**
 
-Ask any question about how to use Zilswap in the [zilswap discord channel](https://discord.gg/5n8AMQH).
+Ask any question about how to use ZilSwap in the [zilswap discord channel](https://discord.gg/5n8AMQH).
