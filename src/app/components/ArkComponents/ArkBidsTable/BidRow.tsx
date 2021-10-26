@@ -12,7 +12,7 @@ import { darken } from '@material-ui/core/styles';
 import { ObservedTx } from "zilswap-sdk";
 import { AppTheme } from "app/theme/types";
 import { Cheque, WalletState } from "app/store/types";
-import { bnOrZero, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
+import { bnOrZero, toSignificantNumber, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
 import { RootState, TokenState } from "app/store/types";
 import { getChequeStatus } from "core/utilities/ark"
 import { ArkOwnerLabel } from "app/components";
@@ -331,7 +331,7 @@ const Row: React.FC<Props> = (props: Props) => {
               <Box className={classes.doubleInfo}>
                 <Box component="span">
                   <strong className={classes.amount}>
-                    {priceAmount.toFormat(priceAmount.gte(1) ? 2 : priceToken.decimals)}
+                    {toSignificantNumber(priceAmount)}
                   </strong> {priceToken.symbol}
                 </Box>
                 <Box className="large" component="span">${usdValue.toFormat(2)}</Box>

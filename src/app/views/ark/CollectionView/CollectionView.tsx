@@ -167,7 +167,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     const tokenCount = bnOrZero(collection.tokenStat?.tokenCount);
 
     return {
-      floorPrice: floorPrice.gt(0) ? toHumanNumber(floorPrice, 4) : undefined,
+      floorPrice: floorPrice.gt(0) ? floorPrice.toFormat(0) : undefined,
       volume: volume.gt(0) ? toHumanNumber(volume, 0) : undefined,
       holderCount: holderCount.gt(0) ? holderCount.toString(10) : undefined,
       tokenCount: tokenCount.gt(0) ? tokenCount.toString(10) : undefined,

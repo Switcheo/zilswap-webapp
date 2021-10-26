@@ -11,7 +11,7 @@ import { Cheque, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient, getChequeStatus, logger } from "core/utilities"
 import { RootState, TokenState } from "app/store/types";
-import { bnOrZero, truncateAddress, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
+import { bnOrZero, toSignificantNumber, truncateAddress, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
 import { ZilswapConnector } from "core/zilswap";
 import { getMarketplace } from "app/saga/selectors";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
@@ -250,7 +250,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
           <Typography className={classes.header}>Amount</Typography>
           <Typography>
             <strong className={classes.amount}>
-              {priceAmount.toFormat(priceAmount.gte(1) ? 2 : priceToken.decimals)}
+              {toSignificantNumber(priceAmount)}
             </strong> {priceToken.symbol} (${usdValue.toFormat(2)})
           </Typography>
         </Box>
