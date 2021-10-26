@@ -17,7 +17,8 @@ import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { RootState, TokenInfo, WalletObservedTx } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, toHumanNumber, useAsyncTask, useBlockTime, useToaster } from "app/utils";
+import { hexToRGBA, toHumanNumber, useAsyncTask, useBlockTime, useToaster, getLocalStored } from "app/utils";
+import { LocalStorageKeys } from "app/utils/constants";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { ArkClient, logger } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
@@ -32,9 +33,11 @@ interface Props extends Partial<DialogProps> {
   onComplete?: () => void;
 }
 
+const bidStorageKey = LocalStorageKeys.ArkBidAcceptTerms
+
 const initialFormState = {
   bidAmount: "0",
-  acceptTerms: false,
+  acceptTerms: !!getLocalStored(bidStorageKey),
 };
 
 export type expiryOption = {
@@ -314,10 +317,6 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const onCloseDialog = () => {
     if (loading) return;
     dispatch(actions.Layout.toggleShowBidNftDialog("close"));
-    setFormState({
-      bidAmount: "0",
-      acceptTerms: false,
-    });
     setCompletedPurchase(false);
   };
 
@@ -350,6 +349,16 @@ const BidDialog: React.FC<Props> = (props: Props) => {
       });
   };
 
+
+  const onToggleAcceptTerms = () => {
+    if (formState.acceptTerms) localStorage.removeItem(bidStorageKey);
+    else localStorage.setItem(bidStorageKey, JSON.stringify("true"));
+    setFormState({
+      ...formState,
+      acceptTerms: !formState.acceptTerms,
+    })
+  }
+
   return (
     <DialogModal
       header="Place a Bid"
@@ -379,19 +388,19 @@ const BidDialog: React.FC<Props> = (props: Props) => {
             onAmountChange={onBidAmountChange}
             onCurrencyChange={onCurrencyChange}
           >
-          {bestBid && (
-            <Box display="flex" alignItems="center" className={classes.bestBid}>
-              <Text className={classes.bestBidLabel}>
-                Highest Bid:
-              </Text>
-              {toHumanNumber(priceHuman)}
-              <CurrencyLogo
-                currency={priceToken?.symbol}
-                address={bidToken?.address}
-                className={classes.bestBidTokenLogo}
-              />
-            </Box>
-          )}
+            {bestBid && (
+              <Box display="flex" alignItems="center" className={classes.bestBid}>
+                <Text className={classes.bestBidLabel}>
+                  Highest Bid:
+                </Text>
+                {toHumanNumber(priceHuman)}
+                <CurrencyLogo
+                  currency={priceToken?.symbol}
+                  address={bidToken?.address}
+                  className={classes.bestBidTokenLogo}
+                />
+              </Box>
+            )}
           </CurrencyInput>
 
           {/* Set expiry */}
@@ -415,12 +424,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                       checkedIcon={<CheckedIcon />}
                       icon={<UncheckedIcon fontSize="small" />}
                       checked={formState.acceptTerms}
-                      onChange={() =>
-                        setFormState({
-                          ...formState,
-                          acceptTerms: !formState.acceptTerms,
-                        })
-                      }
+                      onChange={() => onToggleAcceptTerms()}
                       disableRipple
                     />
                   }

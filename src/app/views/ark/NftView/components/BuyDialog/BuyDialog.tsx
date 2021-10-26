@@ -16,8 +16,9 @@ import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, hexToRGBA, truncate, useAsyncTask, useToaster } from "app/utils";
+import { bnOrZero, hexToRGBA, truncate, useAsyncTask, useToaster, getLocalStored } from "app/utils";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
+import { LocalStorageKeys } from "app/utils/constants";
 import { ArkClient, logger, waitForTx } from "core/utilities";
 import { fromBech32Address, ZilswapConnector } from "core/zilswap";
 import { ReactComponent as WarningIcon } from "../assets/warning.svg";
@@ -28,6 +29,8 @@ interface Props extends Partial<DialogProps> {
   collectionAddress: string;
   onComplete?: () => void;
 }
+
+const buyStorageKey = LocalStorageKeys.ArkBuyAcceptTerms
 
 const BuyDialog: React.FC<Props> = (props: Props) => {
   const { children, className, collectionAddress, token, onComplete, ...rest } = props;
@@ -44,7 +47,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const [waitForComplete, completePending, waitCompleteError, clearWaitCompleteError] = useAsyncTask("waitForPurchaseComplete");
   const match = useRouteMatch<{ id: string, collection: string }>();
-  const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
+  const [acceptTerms, setAcceptTerms] = useState<boolean>(!!getLocalStored(buyStorageKey));
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
   const [purchaseTxHash, setPurchaseTxHash] = useState<string | null>(null);
   const [approveTxHash, setApproveTxHash] = useState<string | null>(null);
@@ -196,7 +199,6 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
 
   const onCloseDialog = () => {
     dispatch(actions.Layout.toggleShowBuyNftDialog("close"));
-    setAcceptTerms(false);
     setCompletedPurchase(false);
   };
 
@@ -210,6 +212,12 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
     : completedPurchase
       ? "You now own"
       : "Confirm Purchase";
+
+  const onAcceptTerms = () => {
+    setAcceptTerms(!acceptTerms);
+    if (acceptTerms) localStorage.removeItem(buyStorageKey);
+    else localStorage.setItem(buyStorageKey, JSON.stringify("true"));
+  }
 
   return (
     <DialogModal
@@ -293,7 +301,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
                     checkedIcon={<CheckedIcon />}
                     icon={<UncheckedIcon fontSize="small" />}
                     checked={acceptTerms}
-                    onChange={() => setAcceptTerms(!acceptTerms)}
+                    onChange={() => onAcceptTerms()}
                     disableRipple
                   />
                 }
