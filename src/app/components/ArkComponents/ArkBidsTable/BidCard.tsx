@@ -155,9 +155,17 @@ const BidCard: React.FC<Props> = (props: Props) => {
       const wallet = walletState.wallet;
       const priceAmount = new BigNumber(bid.price.amount);
       const price = { amount: priceAmount, address: bid.price.address };
-      const feeAmount = priceAmount.times(exchangeInfo.baseFeeBps).dividedToIntegerBy(10000).plus(1);
 
       const arkClient = new ArkClient(wallet.network);
+      const result = await arkClient.getNftToken(bid.token!.collection!.address, bid.token!.tokenId);
+      const token = result.result.model;
+
+      if (typeof token?.collection?.royaltyBps !== "number")
+        throw new Error("Could not retrieve collection information");
+
+      const totalFeeBps = bnOrZero(exchangeInfo.baseFeeBps).plus(bid.token.collection.royaltyBps);
+      const feeAmount = priceAmount.times(totalFeeBps).dividedToIntegerBy(10000).plus(1);
+
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 300; // blocks

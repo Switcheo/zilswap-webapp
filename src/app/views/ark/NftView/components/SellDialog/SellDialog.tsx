@@ -154,9 +154,13 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         throw new Error(`Selling price should be lower than existing price of ${existingPriceHuman.toFormat()} ${priceToken?.symbol}`)
       }
 
-      setOpen(true)
-      const feeAmount = priceAmount.times(exchangeInfo.baseFeeBps).dividedToIntegerBy(10000).plus(1);
+      if (typeof token?.collection?.royaltyBps !== "number")
+        throw new Error("Could not retrieve collection information");
 
+      const totalFeeBps = bnOrZero(exchangeInfo.baseFeeBps).plus(token.collection.royaltyBps);
+      const feeAmount = priceAmount.times(totalFeeBps).dividedToIntegerBy(10000).plus(1);
+
+      setOpen(true)
       const arkClient = new ArkClient(network);
 
       const walletAddress = wallet.addressInfo.byte20.toLowerCase();
