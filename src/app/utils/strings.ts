@@ -1,4 +1,4 @@
-import { toBech32Address } from "@zilliqa-js/crypto";
+import { normaliseAddress, toBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { BIG_ONE, BIG_ZERO } from "./constants";
@@ -52,6 +52,13 @@ export const toHumanNumber = (input?: string | BigNumber | number, dp: number = 
 
   return `${value.shiftedBy(-9).decimalPlaces(dp).toFormat()}B`
 };
+
+export const tryGetBech32Address = (input: string | undefined | null) => {
+  try {
+    return toBech32Address(normaliseAddress(input!));
+  } catch (error) { };
+  return null;
+}
 
 export const truncateAddress = (input: string, forSmallScreen: boolean = false): string => {
   let i = input
