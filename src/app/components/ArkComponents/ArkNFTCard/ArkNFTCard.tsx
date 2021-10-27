@@ -56,8 +56,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     const askToken = tokens[toBech32Address(token.bestAsk.price.address)];
     if (!askToken) return undefined;
 
-    const placement = new BigNumber(10).pow(askToken.decimals);
-    const amount = new BigNumber(token.bestAsk?.price.amount).div(placement);
+    const amount = new BigNumber(token.bestAsk?.price.amount).shiftedBy(-askToken.decimals);
     return { expiryTime, hoursLeft, minsLeft, secLeft, amount, askToken };
     // eslint-disable-next-line
   }, [blockTime, token.bestAsk, tokens])
@@ -70,11 +69,20 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     const bidToken = tokens[toBech32Address(token.bestBid.price.address)];
     if (!bidToken) return undefined;
 
-    const placement = new BigNumber(10).pow(bidToken.decimals);
-    const amount = new BigNumber(token.bestBid?.price.amount).div(placement);
+    const amount = new BigNumber(token.bestBid?.price.amount).shiftedBy(-bidToken.decimals);
     return { amount, timeLeft, bidToken };
     // eslint-disable-next-line
   }, [blockTime, token.bestBid, tokens])
+
+  const lastTrade = useMemo(() => {
+    if (!token.lastTrade) return undefined;
+
+    const lastTradeToken = tokens[toBech32Address(token.lastTrade.price.address)];
+    if (!lastTradeToken) return;
+
+    const amount = new BigNumber(token.lastTrade.price.amount).shiftedBy(-lastTradeToken.decimals);
+    return { amount, lastTradeToken };
+  }, [token.lastTrade, tokens])
 
   const explorerLink = useMemo(() => {
     const addr = toBech32Address(collectionAddress);
@@ -134,19 +142,25 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
         {!dialog && (
           <Box className={classes.cardHeader}>
             {/* to accept as props */}
-            <Box display="flex" flexDirection="column" justifyContent="center">
-              {/* {bestAsk && (
-                <Typography className={classes.bid}>
-                  <DotIcon className={classes.dotIcon} /> BID LIVE {bestAsk.hoursLeft}:{bestAsk.minsLeft}:{bestAsk.secLeft} Left
-                </Typography>
-              )} */}
+            <Box pl={0.5} display="flex" flexDirection="row" alignItems="center" justifyContent="center">
               {bestBid && (
                 <Typography className={classes.secondaryPrice}>
                   <Typography className={classes.secondaryPriceLabel}>Best</Typography>
-                  <Typography component="span" style={{ fontWeight: 700 }}>{toHumanNumber(bestBid.amount)}</Typography>
+                  <Typography component="span" style={{ fontWeight: 700 }}>{toHumanNumber(bestBid.amount, 2)}</Typography>
                   <CurrencyLogo
                     currency={bestBid.bidToken.symbol}
                     address={bestBid.bidToken.address}
+                    className={classes.tokenLogo}
+                  />
+                </Typography>
+              )}
+              {lastTrade && (
+                <Typography className={cls(classes.secondaryPrice, { [classes.extraMargin]: bestBid })}>
+                  <Typography className={classes.secondaryPriceLabel}>Last</Typography>
+                  <Typography component="span" style={{ fontWeight: 700 }}>{toHumanNumber(lastTrade.amount, 2)}</Typography>
+                  <CurrencyLogo
+                    currency={lastTrade.lastTradeToken.symbol}
+                    address={lastTrade.lastTradeToken.address}
                     className={classes.tokenLogo}
                   />
                 </Typography>
@@ -530,6 +544,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&:hover": {
       color: "#6BE1FF",
     }
+  },
+  extraMargin: {
+    marginLeft: 6,
   }
 }));
 
