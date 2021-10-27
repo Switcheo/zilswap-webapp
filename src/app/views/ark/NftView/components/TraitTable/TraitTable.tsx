@@ -31,9 +31,8 @@ const TraitTable: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const [runGetCollectionTraits] = useAsyncTask("getCollectionTraits");
   const network = useNetwork();
-  const [traitCategory, setTraitCategory] = useState<string[]>([]);
   const { collectionTraits } = useSelector(getMarketplace);
-  const [traits, setTraits] = useState<any>([]);
+  const [traits, setTraits] = useState<TraitsStatistic[]>([]);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -49,16 +48,17 @@ const TraitTable: React.FC<Props> = (props: Props) => {
         currentCollectionTraits = resultTraits;
         dispatch(actions.MarketPlace.updateCollectionTraits({ address, traits: resultTraits }));
       }
-      const categories = currentCollectionTraits.map((collectionTrait: CollectionTrait) => collectionTrait.trait);
+
+      const traitMap: SimpleMap<CollectionTrait> = currentCollectionTraits.reduce((prev, curr) => ({ ...prev, [curr.trait]: curr }), {});
 
       let newTraits: SimpleMap<TraitsStatistic> = {};
 
-      currentCollectionTraits.forEach((cate: any) => {
-        newTraits[cate.trait] = cate
-      })
-
       token.traitValues.forEach((trait) => {
-        const currentTrait = newTraits[trait.traitType!.trait];
+        if (!trait.traitType?.trait) return;
+        const traitName = trait.traitType.trait;
+        newTraits[traitName] = traitMap[traitName];
+
+        const currentTrait = newTraits[traitName];
         currentTrait.rarity = currentTrait.values[trait.value];
         currentTrait.value = trait.value;
         currentTrait.type = trait.traitType?.trait;
@@ -67,8 +67,7 @@ const TraitTable: React.FC<Props> = (props: Props) => {
         const percent = new BigNumber(currentTrait.values[trait.value]).div(currentTrait.total);
         currentTrait.percentage = percent.shiftedBy(2).toFormat(percent.lt(1) ? 2 : 0);
       })
-      setTraits(newTraits);
-      setTraitCategory(categories);
+      setTraits(Object.values(newTraits));
     })
     // eslint-disable-next-line
   }, [token?.traitValues])
@@ -84,14 +83,21 @@ const TraitTable: React.FC<Props> = (props: Props) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {traitCategory.map((trait: string) => (
-            <TableRow className={classes.bodyRow} key={trait}>
-              <TableCell className={cls(classes.key, 'highlight')} align="center">{traits[trait].type || "-"}</TableCell>
-              <TableCell className="highlight" align="center">{traits[trait].value || "-"}</TableCell>
-              <TableCell align="center">{traits[trait].rarity || "-"}</TableCell>
-              <TableCell align="center">{traits[trait].percentage ? `${traits[trait].percentage} %` : "-"}</TableCell>
+          {traits.map((trait: TraitsStatistic) => (
+            <TableRow className={classes.bodyRow} key={trait.value}>
+              <TableCell className={cls(classes.key, 'highlight')} align="center">{trait.type || "-"}</TableCell>
+              <TableCell className="highlight" align="center">{trait.value || "-"}</TableCell>
+              <TableCell align="center">{trait.rarity || "-"}</TableCell>
+              <TableCell align="center">{trait.percentage ? `${trait.percentage} %` : "-"}</TableCell>
             </TableRow>
           ))}
+          {traits.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={4} className={cls(classes.emptyState, 'row')}>
+                No data yet.
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </TableContainer>
@@ -132,7 +138,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         fontWeight: 700,
       }
     }
-  }
+  },
+  emptyState: {
+    textAlign: 'center',
+    fontSize: 14,
+    opacity: 0.8,
+    '&.row': {
+      paddingTop: theme.spacing(3),
+      borderBottom: 'none',
+    },
+    '&.box': {
+      padding: theme.spacing(2, 0),
+    }
+  },
 }));
 
 export default TraitTable;
