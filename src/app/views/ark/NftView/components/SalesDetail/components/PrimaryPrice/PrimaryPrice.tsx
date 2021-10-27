@@ -27,7 +27,7 @@ const PrimaryPrice: React.FC<Props> = (props: Props) => {
   const timeLeft = useMemo(() => {
     if (data.type === PriceType.LastTrade) return null;
     const blocksLeft = data.cheque.expiry - currentBlock;
-    const expiryTime = blockTime.add(blocksLeft * BLOCKS_PER_MINUTE, "minutes");
+    const expiryTime = blockTime.add(blocksLeft / BLOCKS_PER_MINUTE, "minutes");
     return expiryTime.isAfter(dayjs()) ? expiryTime.fromNow(true) + " left" : "Expired " + expiryTime.fromNow();
   }, [currentBlock, blockTime, data.cheque.expiry, data.type])
 

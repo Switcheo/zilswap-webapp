@@ -7,7 +7,7 @@ import cls from "classnames";
 import { useSelector } from "react-redux";
 import { useHistory, useRouteMatch } from "react-router";
 import { BN_ZERO } from "tradehub-api-js/build/main/lib/tradehub/utils";
-import { ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
+import { ArkExpiry, ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet, getTokens, getMarketplace } from "app/saga/selectors";
 import { Nft, TokenInfo } from "app/store/types";
@@ -37,6 +37,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const valueCalculators = useValueCalculators();
   const match = useRouteMatch<{ id: string, collection: string }>();
   const [open, setOpen] = useState(false)
+  const [expiry, setExpiry] = useState(0)
   const [runConfirmSell, loading, error] = useAsyncTask("confirmSell", () => setOpen(false));
   const [runGetNFTDetails] = useAsyncTask("runGetNFTDetails");
   const [token, setToken] = useState<Nft>();
@@ -134,6 +135,10 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       })
   };
 
+  const onExpiryChange = (expiryBlock: number) => {
+    setExpiry(expiryBlock)
+  }
+
   const onCloseDialog = () => {
     if (loading) return;
     setOpen(false);
@@ -154,9 +159,13 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         throw new Error(`Selling price should be lower than existing price of ${existingPriceHuman.toFormat()} ${priceToken?.symbol}`)
       }
 
-      setOpen(true)
-      const feeAmount = priceAmount.times(exchangeInfo.baseFeeBps).dividedToIntegerBy(10000).plus(1);
+      if (typeof token?.collection?.royaltyBps !== "number")
+        throw new Error("Could not retrieve collection information");
 
+      const totalFeeBps = bnOrZero(exchangeInfo.baseFeeBps).plus(token.collection.royaltyBps);
+      const feeAmount = priceAmount.times(totalFeeBps).dividedToIntegerBy(10000).plus(1);
+
+      setOpen(true)
       const arkClient = new ArkClient(network);
 
       const walletAddress = wallet.addressInfo.byte20.toLowerCase();
@@ -176,8 +185,6 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       }
 
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
-      const currentBlock = ZilswapConnector.getCurrentBlock();
-      const expiry = currentBlock + 300; // blocks
       const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
         side: "Sell",
         token: { address, id, },
@@ -242,16 +249,16 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 </InputLabel>
                 <FormHelperText className={classes.instruction}>By default, all Fixed Price listings are set to open to bids.</FormHelperText>
                 <Box display="grid" gridTemplateColumns="repeat(2, minmax(0, 1fr))" gridGap={8} marginTop={1}>
-                  <button 
+                  <button
                     className={cls(classes.saleTypeButton, {
                       [classes.saleTypeButtonSelected]: inputValues.saleType === "fixed_price"
-                    })} 
+                    })}
                     onClick={() => setInputValues({
                       ...inputValues,
                       saleType: "fixed_price"
                     })}
                   >Fixed Price</button>
-                  <button 
+                  <button
                     className={cls(classes.saleTypeButton, {
                       [classes.saleTypeButtonSelected]: inputValues.saleType === "timed_auction"
                     })}
@@ -329,6 +336,8 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                   </Box>
                 </>
               }
+
+              <ArkExpiry label="Offer Expiry" onExpiryChange={onExpiryChange} />
 
               <Box display="flex" flexDirection="column" marginTop={4}>
                 <InputLabel shrink focused={false} className={cls({ [classes.label]: true })}>

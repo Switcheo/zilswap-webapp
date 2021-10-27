@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
-import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
@@ -12,6 +11,7 @@ import { getBlockchain } from "app/saga/selectors";
 import { Collection } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
+import { bnOrZero } from "app/utils";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
 import { ReactComponent as UncheckedIcon } from "./unchecked-icon.svg";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
@@ -31,14 +31,13 @@ const HEADERS: HeadersProp[] = [
   { align: "left", value: "Collection" },
   { align: "center", value: "Volume" },
   { align: "center", value: "Floor" },
-  { align: "center", value: "24 Hour %" },
-  { align: "center", value: "7 Day %" },
+  // { align: "center", value: "% Change (24hr / 7day)" },
   { align: "center", value: "Owners" },
   { align: "center", value: "Collection Size" },
 ]
 
-const mockedDaily = new BigNumber(23.23)
-const mockedWeekly = new BigNumber(-1.23)
+// const mockedDaily = new BigNumber(23.23)
+// const mockedWeekly = new BigNumber(-1.23)
 
 const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
@@ -77,13 +76,15 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   }
 
   const filteredCollections = useMemo(() => {
-    if (!search.trim().length) return collections;
+    const sorted = collections.sort((a, b) => bnOrZero(b.priceStat?.volume).comparedTo(a.priceStat?.volume || 0))
 
-    return collections.filter(c => (
+    if (!search.trim().length) return sorted
+
+    return sorted.filter(c => (
       c.description?.includes(search)
       || c.ownerName?.includes(search)
-      || c.name?.includes(search)
-    ))
+      || c.name?.includes(search))
+    )
   }, [collections, search]);
 
   // const featuredCollections = useMemo(() => {
@@ -166,27 +167,30 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             </TableHead>
             <TableBody>
 
-              {filteredCollections.map((collection) => {
-                const collectionStats = ArkClient.parseCollectionStats(collection);
+              {filteredCollections.map((collection, i) => {
+                const collectionStats = ArkClient.parseCollectionStats(collection)
                 return (
-                  <TableRow key={collection.address} className={classes.tableRow} component={RouterLink} to={`/ark/collections/${toBech32Address(collection.address)}`}>
+                  <TableRow
+                    key={collection.address}
+                    className={classes.tableRow}
+                    component={RouterLink}
+                    to={`/ark/collections/${toBech32Address(collection.address)}`}
+                  >
                     <TableCell className={cls(classes.bodyCell, classes.firstCell)}>
-                      <Box display="flex" alignItems="center">
-                        <div className={classes.index}>1</div>
+                      <Box className={classes.collectionNameCell}>
+                        <Box className={classes.index}>{i+1}</Box>
                         <ArkImageView
                           imageType="avatar"
                           className={classes.avatar}
                           imageUrl={collection.profileImageUrl}
                         />
-                        <Box display="flex" flexDirection="column" className={classes.collectionName}>
+                        <Box className={classes.collectionNameContainer}>
                           <Box display="flex">
-                            <div>
-                              {collection.name}
-                            </div>
-                            <VerifiedBadge className={classes.verifiedBadge} />
+                            <Box className={classes.collectionName}>{collection.name}</Box>
                           </Box>
-                          <Typography>By {collection.ownerName}</Typography>
+                          <Typography className={classes.ownerName}>By {collection.ownerName}</Typography>
                         </Box>
+                        <VerifiedBadge className={classes.verifiedBadge} />
                       </Box>
                     </TableCell>
                     <TableCell align="center" className={classes.bodyCell}>
@@ -207,12 +211,10 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                         <CurrencyLogo currency="ZIL" className={classes.currencyLogo} />
                       </Box>
                     </TableCell>
-                    <TableCell align="center" className={cls(classes.percentCell, { [classes.isNegative]: mockedDaily.isNegative() })}>
+                    {/* <TableCell align="center" className={cls(classes.percentCell, { [classes.isNegative]: mockedDaily.isNegative() })}> */}
                       {/* {mockedDaily.isPositive() ? '+' : ''}{mockedDaily.toFormat(2)}% */}
-                    </TableCell>
-                    <TableCell align="center" className={cls(classes.percentCell, { [classes.isNegative]: mockedWeekly.isNegative() })}>
                       {/* {mockedWeekly.isPositive() ? '+' : ''}{mockedWeekly.toFormat(2)}% */}
-                    </TableCell>
+                    {/* </TableCell> */}
                     <TableCell align="center" className={classes.numberCell}>
                       {collectionStats.holderCount ?? "-"}
                     </TableCell>
@@ -299,10 +301,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     height: 72,
     background: theme.palette.type === "dark" ? "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)" : "rgba(222, 255, 255, 0.5)",
   },
-  // TODO: reduce bodyCell, percentCell and numberCell
   bodyCell: {
     padding: "8px 16px",
-    maxWidth: 200,
     margin: 0,
     borderTop: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid rgba(107, 225, 255, 0.2)",
     borderBottom: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid rgba(107, 225, 255, 0.2)",
@@ -330,6 +330,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid rgba(107, 225, 255, 0.2)",
     borderTopRightRadius: 12,
     borderBottomRightRadius: 12,
+    minWidth: 100,
   },
   amount: {
     fontWeight: 800,
@@ -347,6 +348,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   avatar: {
     height: 40,
     width: 40,
+    [theme.breakpoints.down('md')]: {
+      height: 24,
+      width: 24,
+    }
   },
   rowText: {
     fontFamily: "'Raleway', sans-serif",
@@ -357,15 +362,37 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   verifiedBadge: {
     marginLeft: "4px",
+    marginTop: 2,
     width: "20px",
     height: "20px",
     verticalAlign: "text-top",
+    alignSelf: 'flex-start',
+    [theme.breakpoints.down('md')]: {
+      height: 14,
+      width: 14,
+    }
   },
   index: {
     margin: "0px 14px",
   },
-  collectionName: {
+  collectionNameCell: {
+    display:"flex" ,
+    flexDirection: "row",
+    alignItems: "center",
+    minWidth: 240,
+  },
+  collectionNameContainer: {
     marginLeft: "14px",
+    display:"flex" ,
+    flexDirection: "column",
+  },
+  collectionName: {
+    [theme.breakpoints.down('md')]: {
+      fontSize: 14,
+    }
+  },
+  ownerName: {
+    marginTop: 2,
   },
   isNegative: {
     color: theme.palette.error.main,

@@ -11,7 +11,7 @@ import { Cheque, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient, getChequeStatus, logger } from "core/utilities"
 import { RootState, TokenState } from "app/store/types";
-import { bnOrZero, truncateAddress, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
+import { bnOrZero, toSignificantNumber, truncateAddress, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
 import { ZilswapConnector } from "core/zilswap";
 import { getMarketplace } from "app/saga/selectors";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
@@ -155,12 +155,20 @@ const BidCard: React.FC<Props> = (props: Props) => {
       const wallet = walletState.wallet;
       const priceAmount = new BigNumber(bid.price.amount);
       const price = { amount: priceAmount, address: bid.price.address };
-      const feeAmount = priceAmount.times(exchangeInfo.baseFeeBps).dividedToIntegerBy(10000).plus(1);
 
       const arkClient = new ArkClient(wallet.network);
+      const result = await arkClient.getNftToken(bid.token!.collection!.address, bid.token!.tokenId);
+      const token = result.result.model;
+
+      if (typeof token?.collection?.royaltyBps !== "number")
+        throw new Error("Could not retrieve collection information");
+
+      const totalFeeBps = bnOrZero(exchangeInfo.baseFeeBps).plus(bid.token.collection.royaltyBps);
+      const feeAmount = priceAmount.times(totalFeeBps).dividedToIntegerBy(10000).plus(1);
+
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
-      const expiry = currentBlock + 300; // blocks
+      const expiry = currentBlock + 25; // blocks
       const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
         side: "Sell",
         token: {
@@ -242,7 +250,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
           <Typography className={classes.header}>Amount</Typography>
           <Typography>
             <strong className={classes.amount}>
-              {priceAmount.toFormat(priceAmount.gte(1) ? 2 : priceToken.decimals)}
+              {toSignificantNumber(priceAmount)}
             </strong> {priceToken.symbol} (${usdValue.toFormat(2)})
           </Typography>
         </Box>

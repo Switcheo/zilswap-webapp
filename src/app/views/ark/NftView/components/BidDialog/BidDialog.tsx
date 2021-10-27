@@ -6,7 +6,6 @@ import { useHistory } from "react-router-dom";
 import { bnOrZero } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import dayjs from "dayjs";
 import { Box, Checkbox, DialogContent, DialogProps, FormControlLabel } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
@@ -17,11 +16,10 @@ import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { RootState, TokenInfo, WalletObservedTx } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, toHumanNumber, useAsyncTask, useBlockTime, useToaster, getLocalStored } from "app/utils";
+import { hexToRGBA, toHumanNumber, useAsyncTask, useToaster, getLocalStored } from "app/utils";
 import { LocalStorageKeys } from "app/utils/constants";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { ArkClient, logger } from "core/utilities";
-import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 import { fromBech32Address, toBech32Address } from "core/zilswap";
 import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import { ZIL_ADDRESS } from "app/utils/constants";
@@ -40,50 +38,6 @@ const initialFormState = {
   acceptTerms: !!getLocalStored(bidStorageKey),
 };
 
-export type expiryOption = {
-  text: string;
-  value: number | undefined;
-  unit: string | undefined;
-};
-
-const EXPIRY_OPTIONS = [
-  {
-    text: "6 hours",
-    value: 6,
-    unit: "hours",
-  },
-  {
-    value: 1,
-    text: "1 day",
-    unit: "day",
-  },
-  {
-    value: 3,
-    text: "3 days",
-    unit: "day",
-  },
-  {
-    value: 1,
-    text: "1 week",
-    unit: "week",
-  },
-  {
-    value: 1,
-    text: "1 month",
-    unit: "month",
-  },
-  {
-    value: 3,
-    text: "3 months",
-    unit: "month",
-  },
-  {
-    value: undefined,
-    text: "Select a date",
-    unit: undefined,
-  },
-];
-
 const BidDialog: React.FC<Props> = (props: Props) => {
   const { children, className, collectionAddress, token, onComplete, ...rest } = props;
   const classes = useStyles();
@@ -100,19 +54,15 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const [runConfirmPurchase, loading, error, setPurchaseError] = useAsyncTask("confirmPurchase");
   const [runWrapTx, loadingWrapTx, wrapError, setWrapError] = useAsyncTask("wrapZil");
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
+  const [expiry, setExpiry] = useState<number>(0);
   const [formState, setFormState] =
     useState<typeof initialFormState>(initialFormState);
   const [bidToken, setBidToken] = useState<TokenInfo>(
     tokenState.tokens[ZWAP_TOKEN_CONTRACT[network]]
   );
-  const [expiryDate, setExpiryDate] = useState<Date | null>(null);
-  const [expiryOption, setExpiryOption] = useState<expiryOption>(
-    EXPIRY_OPTIONS[0]
-  );
   const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
   const match = useRouteMatch<{ id: string; collection: string }>();
   const [runApproveTx, loadingApproveTx, approveError, clearApproveError] = useAsyncTask("approveTx");
-  const [, currentBlock] = useBlockTime();
   const toaster = useToaster();
 
   const bestBid = token.bestBid;
@@ -150,35 +100,17 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     // eslint-disable-next-line
   }, [bidToken, formState, txIsPending, network, tokenState.tokens])
 
-  const { blockExpiry, expiryTime } = useMemo(() => {
-    const currentTime = dayjs();
-    let expiryTime;
-
-    if (!!expiryOption.value) {
-      expiryTime = dayjs().add(expiryOption.value, expiryOption.unit as any);
-    } else {
-      expiryTime = dayjs(expiryDate!!);
-    }
-
-    const minutes = expiryTime.diff(currentTime, "minutes");
-    const blocks = minutes * BLOCKS_PER_MINUTE;
-
-    const blockExpiry = currentBlock + ~~blocks;
-
-    return { blockExpiry, expiryTime };
-  }, [currentBlock, expiryOption, expiryDate]);
-
-  const { priceToken, priceHuman } = useMemo(() => {
+  const { bestBidToken, bestBidAmount } = useMemo(() => {
     if (!bestBid) return {};
-    const priceToken =
+    const bestBidToken =
       tokenState.tokens[toBech32Address(bestBid.price.address)];
-    const priceHuman = bnOrZero(bestBid.price.amount).shiftedBy(
-      -(priceToken?.decimals ?? 0)
+    const bestBidAmount = bnOrZero(bestBid.price.amount).shiftedBy(
+      -(bestBidToken?.decimals ?? 0)
     );
 
     return {
-      priceToken,
-      priceHuman,
+      bestBidToken,
+      bestBidAmount,
     };
   }, [bestBid, tokenState.tokens]);
 
@@ -245,6 +177,10 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     });
   }
 
+  const onExpiryChange = (expiryBlock: number) => {
+    setExpiry(expiryBlock)
+  }
+
   const onConfirm = () => {
     if (!wallet || !exchangeInfo) return;
 
@@ -285,7 +221,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
           token: { address, id },
           price,
           feeAmount,
-          expiry: blockExpiry,
+          expiry,
           nonce,
         })
       );
@@ -302,7 +238,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         address: wallet.addressInfo.byte20.toLowerCase(),
         tokenId: id,
         side: "Buy",
-        expiry: blockExpiry,
+        expiry,
         nonce,
         price,
       });
@@ -393,10 +329,10 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                 <Text className={classes.bestBidLabel}>
                   Highest Bid:
                 </Text>
-                {toHumanNumber(priceHuman)}
+                {toHumanNumber(bestBidAmount)}
                 <CurrencyLogo
-                  currency={priceToken?.symbol}
-                  address={bidToken?.address}
+                  currency={bestBidToken?.symbol}
+                  address={bestBidToken?.address}
                   className={classes.bestBidTokenLogo}
                 />
               </Box>
@@ -404,14 +340,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
           </CurrencyInput>
 
           {/* Set expiry */}
-          <ArkExpiry
-            expiryOptions={EXPIRY_OPTIONS}
-            expiryOption={expiryOption}
-            expiryTime={expiryTime}
-            expiry={blockExpiry}
-            setExpiryDate={setExpiryDate}
-            setExpiryOption={setExpiryOption}
-          />
+          <ArkExpiry label="Bid Expiry" onExpiryChange={onExpiryChange} />
 
           {!completedPurchase && (
             <Fragment>

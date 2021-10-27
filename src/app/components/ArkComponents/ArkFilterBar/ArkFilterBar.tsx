@@ -20,6 +20,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("sm")]: {
       gridTemplate: "auto / repeat(2, minmax(0,1fr))"
     },
+    [theme.breakpoints.down("xs")]: {
+      '& > *': {
+        gridColumn: "span 2 / span 2",
+      },
+    },
   },
 }))
 

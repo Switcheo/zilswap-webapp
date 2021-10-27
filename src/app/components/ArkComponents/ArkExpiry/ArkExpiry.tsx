@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import cls from "classnames";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Accordion, AccordionDetails, AccordionSummary, Box, ClickAwayListener, DialogProps, MenuItem, MenuList } from "@material-ui/core";
@@ -9,38 +9,93 @@ import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDownRounded";
 import DoneIcon from "@material-ui/icons/DoneRounded";
 import { HelpInfo, Text } from "app/components";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA } from "app/utils";
+import { hexToRGBA, useBlockTime } from "app/utils";
+import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 
 interface Props extends Partial<DialogProps> {
-  expiryTime: dayjs.Dayjs;
-  expiryOption: expiryOption;
-  expiryOptions: expiryOption[];
-  setExpiryDate: React.Dispatch<React.SetStateAction<Date | null>>;
-  setExpiryOption: React.Dispatch<React.SetStateAction<expiryOption>>;
-  expiry: number;
+  onExpiryChange: (block: number) => void;
+  label: string;
 }
 
-export type expiryOption = {
+type ExpiryOption = {
   text: string;
   value: number | undefined;
   unit: string | undefined;
 };
 
+const EXPIRY_OPTIONS = [
+  {
+    text: "6 hours",
+    value: 6,
+    unit: "hours",
+  },
+  {
+    value: 1,
+    text: "1 day",
+    unit: "day",
+  },
+  {
+    value: 3,
+    text: "3 days",
+    unit: "day",
+  },
+  {
+    value: 1,
+    text: "1 week",
+    unit: "week",
+  },
+  {
+    value: 1,
+    text: "1 month",
+    unit: "month",
+  },
+  {
+    value: 3,
+    text: "3 months",
+    unit: "month",
+  },
+  {
+    value: undefined,
+    text: "Select a date",
+    unit: undefined,
+  },
+];
+
 const ArkExpiry: React.FC<Props> = (props: Props) => {
-  const { expiry, expiryOption, expiryOptions, expiryTime, setExpiryDate, setExpiryOption } = props;
+  const { label, onExpiryChange } = props;
   const classes = useStyles();
   const [expanded, setExpanded] = useState<boolean>(false);
+  const [expiryOption, setExpiryOption] = useState<ExpiryOption>(EXPIRY_OPTIONS[3]);
+  const [expiryDate, setExpiryDate] = useState<Date>(new Date());
+  const [expiryTime, setExpiryTime] = useState<Dayjs>(dayjs());
+  const [expiryBlock, setExpiryBlock] = useState<number>(0);
+  const [, currentBlock] = useBlockTime();
+
+  useEffect(() => {
+    const currentTime = dayjs();
+    const expiryTime = !!expiryOption.value ?
+      dayjs().add(expiryOption.value, expiryOption.unit as any) :
+      dayjs(expiryDate)
+
+    const minutes = expiryTime.diff(currentTime, "minutes");
+    const blocks = minutes * BLOCKS_PER_MINUTE;
+
+    setExpiryTime(expiryTime);
+    setExpiryBlock(currentBlock + ~~blocks);
+  }, [setExpiryTime, setExpiryBlock, expiryTime, currentBlock, expiryOption, expiryDate]);
+
+  useEffect(() => {
+    onExpiryChange(expiryBlock)
+  }, [onExpiryChange, expiryBlock])
 
   const onChangeExpiry = (date: any) => {
-    setExpiryDate(date);
-    const option = expiryOptions.filter(
-      (option) => option.text === "Select a date"
-    )[0];
+    const option = EXPIRY_OPTIONS.filter(option => option.text === "Select a date")[0];
     setExpiryOption(option);
+    setExpiryDate(date);
     setExpanded(false);
   };
 
-  const onSelectOption = (option: expiryOption) => {
+  const onSelectOption = (option: ExpiryOption) => {
     setExpiryOption(option);
     if (option.text === "Select a date") {
       setExpiryDate(new Date());
@@ -70,7 +125,7 @@ const ArkExpiry: React.FC<Props> = (props: Props) => {
             className={classes.expiryTextBox}
           >
             <Text color="textPrimary">
-              Bid Expiry
+              {label}
               <HelpInfo
                 className={classes.helpInfo}
                 placement="top"
@@ -83,7 +138,7 @@ const ArkExpiry: React.FC<Props> = (props: Props) => {
             <Text color="textSecondary" className={classes.blockHeightText}>
               Block Height:{" "}
               <span className={classes.blockHeightColor}>
-                {expiry.toFixed(0)}
+                {expiryBlock.toFixed(0)}
               </span>
             </Text>
           </Box>
@@ -91,7 +146,7 @@ const ArkExpiry: React.FC<Props> = (props: Props) => {
         <AccordionDetails className={classes.accordionDetail}>
           <Box className={classes.expiryBox}>
             <MenuList>
-              {expiryOptions.map((option, index) => {
+              {EXPIRY_OPTIONS.map((option, index) => {
                 return (
                   <MenuItem
                     key={index}

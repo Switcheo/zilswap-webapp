@@ -92,7 +92,7 @@ export class ArkClient {
   }
 
   arkLogin = async (wallet: ConnectedWallet, hostname: string) => {
-    const timestamp = dayjs().format("YYYY/MM/DD HH:mm:ss +0");
+    const timestamp = dayjs().format("YYYY/MM/DD HH:mm:ss Z");
     const bech32Address = wallet.addressInfo.bech32;
     const signMessage = `[${timestamp}] ARK Authentication\nPlease issue my browser at ${hostname} an ARK API key for my address:\n${bech32Address}`;
 
@@ -143,7 +143,7 @@ export class ArkClient {
   }
 
   getCollectionTraits = async (address: string) => {
-    const url = this.http.path("collection/traits", { address });
+    const url = this.http.path("collection/traits", { address }, { limit: 100 });
     const result = await this.http.get({ url });
     const output = await result.json();
     await this.checkError(output);
