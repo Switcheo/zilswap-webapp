@@ -100,17 +100,17 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     // eslint-disable-next-line
   }, [bidToken, formState, txIsPending, network, tokenState.tokens])
 
-  const { priceToken, priceHuman } = useMemo(() => {
+  const { bestBidToken, bestBidAmount } = useMemo(() => {
     if (!bestBid) return {};
-    const priceToken =
+    const bestBidToken =
       tokenState.tokens[toBech32Address(bestBid.price.address)];
-    const priceHuman = bnOrZero(bestBid.price.amount).shiftedBy(
-      -(priceToken?.decimals ?? 0)
+    const bestBidAmount = bnOrZero(bestBid.price.amount).shiftedBy(
+      -(bestBidToken?.decimals ?? 0)
     );
 
     return {
-      priceToken,
-      priceHuman,
+      bestBidToken,
+      bestBidAmount,
     };
   }, [bestBid, tokenState.tokens]);
 
@@ -329,10 +329,10 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                 <Text className={classes.bestBidLabel}>
                   Highest Bid:
                 </Text>
-                {toHumanNumber(priceHuman)}
+                {toHumanNumber(bestBidAmount)}
                 <CurrencyLogo
-                  currency={priceToken?.symbol}
-                  address={bidToken?.address}
+                  currency={bestBidToken?.symbol}
+                  address={bestBidToken?.address}
                   className={classes.bestBidTokenLogo}
                 />
               </Box>
