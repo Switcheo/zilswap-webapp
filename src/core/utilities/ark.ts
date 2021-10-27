@@ -35,6 +35,7 @@ const apiPaths = {
   "collection/search": "/nft/collection/:address/search",
   "collection/traits": "/nft/collection/:address/traits",
   "collection/token/detail": "/nft/collection/:address/:tokenId/detail",
+  "collection/resync/metadata": "/nft/collection/:collectionAddress/:tokenId/resync",
   "token/favourite": "/nft/collection/:address/:tokenId/favourite",
   "token/list": "/nft/token/list",
   "trade/list": "/nft/trade/list",
@@ -263,6 +264,14 @@ export class ArkClient {
     const headers = { "authorization": "Bearer " + access_token };
     const url = this.http.path("token/favourite", { address, tokenId });
     const result = await this.http.del({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  resyncMetadata = async (collectionAddress: string, tokenId: number) => {
+    const url = this.http.path("collection/resync/metadata", { collectionAddress, tokenId });
+    const result = await this.http.post({ url });
     const output = await result.json();
     await this.checkError(output);
     return output;
