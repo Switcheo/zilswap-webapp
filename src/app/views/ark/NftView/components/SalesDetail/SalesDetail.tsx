@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
-import { Box, BoxProps, Typography } from "@material-ui/core";
+import { Box, BoxProps, Typography, IconButton } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import ReplayIcon from '@material-ui/icons/Replay';
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
@@ -11,7 +12,8 @@ import { getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useBlockTime } from "app/utils";
+import { useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
+import { ArkClient } from "core/utilities";
 import { InfoBox, PrimaryPrice, SecondaryPrice } from "./components";
 import { PriceInfo, PriceType } from "./types";
 
@@ -27,8 +29,11 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const history = useHistory();
   const dispatch = useDispatch();
+  const network = useNetwork();
+  const toaster = useToaster(false);
   const { wallet } = useSelector(getWallet);
   const [blockTime, currentBlock] = useBlockTime();
+  const [runResyncMetadata] = useAsyncTask("resyncMetadata");
 
   const isOwnToken = useMemo(() => {
     return (
@@ -81,17 +86,33 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
     dispatch(actions.Layout.toggleShowCancelSellNftDialog("open"));
   };
 
+  const onResyncMetadata = () => {
+    runResyncMetadata(async () => {
+      const arkClient = new ArkClient(network);
+      const { result } = await arkClient.resyncMetadata(token.collection!.address, token.tokenId);
+      toaster(result.status);
+    })
+  }
+
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <Box className={classes.container}>
         {/* Collection name */}
-        <Typography className={classes.collectionName}>
-          {token.collection?.name ?? ""}{" "}
-          {/* <VerifiedBadge className={classes.verifiedBadge} /> */}
-        </Typography>
+        <Box display="flex" flexDirection="row">
+          <Box>
+            <Typography className={classes.collectionName}>
+              {token.collection?.name ?? ""}{" "}
+              {/* <VerifiedBadge className={classes.verifiedBadge} /> */}
+            </Typography>
 
-        {/* Token id */}
-        <Typography className={classes.tokenId}><span className={classes.hexSymbol}>#</span>{tokenId}</Typography>
+            {/* Token id */}
+            <Typography className={classes.tokenId}><span className={classes.hexSymbol}>#</span>{tokenId}</Typography>
+          </Box>
+          <Box flexGrow={1} />
+          <Box>
+            <IconButton onClick={onResyncMetadata} className={classes.menuButton}><ReplayIcon /></IconButton>
+          </Box>
+        </Box>
 
         <Box mt={2} display="flex" flexDirection="column">
           <Box className={classes.infoBoxContainer}>
@@ -278,6 +299,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     textAlign: "center",
     WebkitTextStroke: "4px #7B61FF33"
   },
+  menuButton: {
+    borderRadius: 8,
+    padding: "8px",
+    backgroundColor: theme.palette.type === "dark" ? "#DEFFFF17" : "#6BE1FF33",
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
+    "&:hover": {
+      opacity: 0.5,
+    },
+    "& .MuiButton-label": {
+      padding: "12px 14px",
+    }
+  },
+  noPadding: {
+    padding: 0,
+    margin: 0,
+  }
 }));
 
 export default SalesDetail;

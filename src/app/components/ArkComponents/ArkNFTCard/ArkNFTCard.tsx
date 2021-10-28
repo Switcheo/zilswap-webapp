@@ -38,6 +38,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const [runUpdateProfileImage] = useAsyncTask("updateProfileImage", () => {
     toaster("Error setting profile image")
   });
+  const [runResyncMetadata] = useAsyncTask("resyncMetadata");
   const dispatch = useDispatch();
   const [blockTime, currentBlock, currentTime] = useBlockTime();
   const network = useNetwork();
@@ -116,6 +117,15 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
 
   const handleOnZap = () => {
     dispatch(actions.MarketPlace.reloadTokenList())
+  }
+
+  const onResyncMetadata = () => {
+    runResyncMetadata(async () => {
+      const arkClient = new ArkClient(network);
+      const { result } = await arkClient.resyncMetadata(collectionAddress, token.tokenId);
+      toaster(result.status);
+      setPopAnchor(null)
+    })
   }
 
   return (
@@ -283,8 +293,11 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                         </Link>
                         <Box className={classes.divider} />
                         <Typography onClick={setAsProfileImage} className={classes.popperText}>Set as profile picture</Typography>
+
                       </>
                     )}
+                    <Box className={classes.divider} />
+                    <Typography onClick={onResyncMetadata} className={classes.popperText}>Reload Metadata</Typography>
                   </Popper>
                 </ClickAwayListener>
               )}
