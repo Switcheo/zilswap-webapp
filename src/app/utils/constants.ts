@@ -82,15 +82,18 @@ export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const ZIL_ADDRESS = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
 export const ZIL_DECIMALS = 12;
 
+export const TOKEN_NAME_OVERRIDE: SimpleMap<string> = {
+  // Legacy XCAD Network token
+  "zil1h63h5rlg7avatnlzhfnfzwn8vfspwkapzdy2aw": "XCAD (Legacy)",
+}
+
 export const WZIL_TOKEN_CONTRACT = {
   [Network.MainNet]: "zil1gvr0jgwfsfmxsyx0xsnhtlte4gks6r3yk8x5fn",
   [Network.TestNet]: "zil1nzn3k336xwal7egdzgalqnclxtgu3dggxed85m",
 }
 
 export const BRIDGEABLE_WRAPPED_DENOMS = {
-  [Network.MainNet]: ["zusdt.z.3", "zeth.z.1", "zwbtc.z.1",
-    ...window.location.host === "staging.zilswap.io" ? ["xcad.z.1"] : []
-  ],
+  [Network.MainNet]: ["zusdt.z.3", "zeth.z.1", "zwbtc.z.1", "xcad.z.1"],
   [Network.TestNet]: ["zil5.e", "zwap5.e", "eth6.z", "dai6.z"],
 }
 
