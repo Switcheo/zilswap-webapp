@@ -26,6 +26,8 @@
     "decimal.js": "^10.2.0",
     "ethers": "^5.3.1",
     "fortmatic": "^2.2.1",
+    "highcharts": "^9.3.0",
+    "highcharts-react-official": "^3.1.0",
     "jss": "10.5.1",
     "jss-plugin-compose": "10.5.1",
     "jss-plugin-extend": "10.5.1",

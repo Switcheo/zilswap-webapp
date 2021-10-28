@@ -37,6 +37,9 @@ const apiPaths = {
   "collection/token/detail": "/nft/collection/:address/:tokenId/detail",
   "collection/resync/metadata": "/nft/collection/:collectionAddress/:tokenId/resync",
   "token/favourite": "/nft/collection/:address/:tokenId/favourite",
+  "history/floor": "/nft/history/floor",
+  "history/saleprice": "/nft/history/saleprice",
+  "history/bidprice": "/nft/history/bidprice",
   "token/list": "/nft/token/list",
   "trade/list": "/nft/trade/list",
   "trade/post": "/nft/trade/:address/:tokenId",
@@ -160,6 +163,30 @@ export class ArkClient {
 
   getNftToken = async (address: string, tokenId: string, viewer?: string) => {
     const url = this.http.path("collection/token/detail", { address, tokenId }, { viewer });
+    const result = await this.http.get({ url });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  getCollectionFloor = async (params: ArkClient.CollectionFloorParams) => {
+    const url = this.http.path("history/floor", {}, params);
+    const result = await this.http.get({ url });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  getSalePrice = async (params: ArkClient.SalePriceParams) => {
+    const url = this.http.path("history/saleprice", {}, params);
+    const result = await this.http.get({ url });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  getBidPrice = async (params: ArkClient.BidPriceParams) => {
+    const url = this.http.path("history/bidprice", {}, params);
     const result = await this.http.get({ url });
     const output = await result.json();
     await this.checkError(output);
@@ -695,6 +722,20 @@ export namespace ArkClient {
     ownerAddress?: string,
     initiatorAddress?: string,
     isActive?: string,
+  }
+  export interface CollectionFloorParams extends ListQueryParams {
+    collection: string,
+    interval: string,
+  }
+  export interface SalePriceParams extends ListQueryParams {
+    collection: string,
+    tokenId: string,
+    interval: string,
+  }
+  export interface BidPriceParams extends ListQueryParams {
+    collection: string,
+    tokenId: string,
+    interval: string,
   }
 }
 
