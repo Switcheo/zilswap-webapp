@@ -136,7 +136,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           <Box display="flex" className={cls(classes.buttonBox, { overlap: !!priceInfos.primaryPrice })}>
             {!isOwnToken && (
               <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onBid}>
-                Place Bid
+                Place Offer
               </FancyButton>
             )}
             {isOwnToken && token.bestAsk && (
