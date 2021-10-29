@@ -5,7 +5,6 @@ import {
 } from "@material-ui/core";
 import LaunchIcon from "@material-ui/icons/Launch";
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import BigNumber from "bignumber.js";
 import cls from "classnames";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,11 +16,12 @@ import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { MarketPlaceState, OAuth, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { toHumanNumber, useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
+import { bnOrZero, toHumanNumber, useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { toBech32Address } from "core/zilswap";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
+
 export interface Props extends CardProps {
   token: Nft;
   collectionAddress: string;
@@ -56,7 +56,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     const askToken = tokens[toBech32Address(token.bestAsk.price.address)];
     if (!askToken) return undefined;
 
-    const amount = new BigNumber(token.bestAsk?.price.amount).shiftedBy(-askToken.decimals);
+    const amount = bnOrZero(token.bestAsk?.price.amount).shiftedBy(-askToken.decimals);
     return { expiryTime, hoursLeft, minsLeft, secLeft, amount, askToken };
     // eslint-disable-next-line
   }, [blockTime, token.bestAsk, tokens])
@@ -69,7 +69,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     const bidToken = tokens[toBech32Address(token.bestBid.price.address)];
     if (!bidToken) return undefined;
 
-    const amount = new BigNumber(token.bestBid?.price.amount).shiftedBy(-bidToken.decimals);
+    const amount = bnOrZero(token.bestBid?.price.amount).shiftedBy(-bidToken.decimals);
     return { amount, timeLeft, bidToken };
     // eslint-disable-next-line
   }, [blockTime, token.bestBid, tokens])
@@ -80,7 +80,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     const lastTradeToken = tokens[toBech32Address(token.lastTrade.price.address)];
     if (!lastTradeToken) return;
 
-    const amount = new BigNumber(token.lastTrade.price.amount).shiftedBy(-lastTradeToken.decimals);
+    const amount = bnOrZero(token.lastTrade.price.amount).shiftedBy(-lastTradeToken.decimals);
     return { amount, lastTradeToken };
   }, [token.lastTrade, tokens])
 

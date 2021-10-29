@@ -1,6 +1,7 @@
 export { default as AmountLabel } from "./AmountLabel";
 export { default as ConfirmTransfer } from "./ConfirmTransfer";
 export { default as ConnectETHPopper } from "./ConnectETHPopper";
+export { default as ConnectWalletButton } from "./ConnectWalletButton";
 export { default as ContrastBox } from "./ContrastBox";
 export { default as CopyIcon } from "./copy.svg";
 export { default as CurrencyInput } from "./CurrencyInput";
@@ -26,6 +27,7 @@ export { default as PoolLogo } from "./PoolLogo";
 export { default as PoolRouteIcon } from "./PoolRouteIcon";
 export { default as PoolsNavigationTabs } from "./PoolsNavigationTabs";
 export { default as PoolsOverviewBanner } from "./PoolsOverviewBanner";
+export { default as ArkCTABanner } from "./ArkCTABanner"
 export { default as PotentialRewardInfo } from "./PotentialRewardInfo";
 export { default as ProportionSelect } from "./ProportionSelect";
 export { default as RandomAsciiEmoji } from "./RandomAsciiEmoji";
