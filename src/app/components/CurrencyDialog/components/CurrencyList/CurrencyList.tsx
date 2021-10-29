@@ -12,7 +12,7 @@ import { BridgeState, RootState, TokenInfo, TokenState, WalletState } from "app/
 import { AppTheme } from "app/theme/types";
 import { useMoneyFormatter } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
-import { formatSymbol } from "app/utils/currencies";
+import { formatSymbol, formatTokenName } from "app/utils/currencies";
 
 type CurrencyListProps = BoxProps & {
   tokens: TokenInfo[];
@@ -130,7 +130,9 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
 
               <Box display="flex" flexDirection="row">
                 {!!token.name && (
-                  <Typography className={classes.tokenName} color="textSecondary" variant="body2">{token.name}</Typography>
+                  <Typography className={classes.tokenName} color="textSecondary" variant="body2">
+                    {formatTokenName(token)}
+                  </Typography>
                 )}
                 {!token.registered && (
                   <Typography className={classes.addRemoveFont} onClick={(e) => onAddRemove(e, token)}>
