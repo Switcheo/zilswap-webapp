@@ -184,7 +184,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
           <ArkBidsTable bids={bidsTable?.bids ?? []} showItem={false} />
         )}
         {currentTab === "Price History" && (
-          <ArkPriceHistoryGraph collectionId={collectionId} tokenId={tokenId} interval="hour" />
+          <ArkPriceHistoryGraph collectionId={collectionId} tokenId={tokenId} />
         )}
         {currentTab === "Event History" && (
           <ArkBox variant="base" className={classes.comingSoon}>Coming Soon.</ArkBox>
