@@ -5,7 +5,7 @@ import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { Zilswap } from "zilswap-sdk";
 import { Network, ZIL_HASH } from "zilswap-sdk/lib/constants";
-import { Cheque, Collection, OAuth, Profile, SimpleCheque } from "app/store/types";
+import { Cheque, Collection, CollectionWithStats, Nft, OAuth, Profile, SimpleCheque, TraitType } from "app/store/types";
 import { bnOrZero, SimpleMap, toHumanNumber } from "app/utils";
 import { HTTP, logger } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
@@ -65,6 +65,11 @@ export interface ListQueryParams {
   limit?: number;
   offset?: number;
 }
+
+export type TraitsResponse = {
+  trait: string;
+  values: SimpleMap<number>;
+}[]
 
 export class ArkClient {
   public readonly brokerAddress: string;
@@ -143,12 +148,14 @@ export class ArkClient {
     return output;
   }
 
-  getCollectionTraits = async (address: string) => {
+  getCollectionTraits = async (address: string): Promise<{ traits: SimpleMap<TraitType>, collection: Collection }> => {
     const url = this.http.path("collection/traits", { address }, { limit: 100 });
     const result = await this.http.get({ url });
-    const output = await result.json();
-    await this.checkError(output);
-    return output;
+    const json = await result.json();
+    await this.checkError(json);
+
+    const traits = json.result.entries as TraitsResponse
+    return { traits: parseTraits(traits), collection: json.result.collection }
   }
 
   getNftToken = async (address: string, tokenId: string, viewer?: string) => {
@@ -183,14 +190,17 @@ export class ArkClient {
     return output;
   }
 
-  searchCollection = async (address: string, params?: ArkClient.SearchCollectionParams) => {
+  searchCollection = async (address: string, params?: ArkClient.SearchCollectionParams):
+    Promise<{ tokens: ReadonlyArray<Nft>, traits: SimpleMap<TraitType> }> => {
     if (address.startsWith("zil1"))
       address = fromBech32Address(address).toLowerCase();
     const url = this.http.path("collection/search", { address }, params);
     const result = await this.http.get({ url });
-    const output = await result.json();
-    await this.checkError(output);
-    return output;
+    const json = await result.json();
+    await this.checkError(json);
+
+    const traits = json.result.extras.traits as TraitsResponse
+    return { traits: parseTraits(traits), tokens: json.result.entries }
   }
 
   updateProfile = async (address: string, data: Omit<Profile, "id" | "address">, oAuth: OAuth) => {
@@ -542,12 +552,11 @@ export class ArkClient {
     }
   }
 
-
-  static parseCollectionStats(collection: Collection) {
+  static parseCollectionStats(collection: CollectionWithStats) {
     const floorPrice = bnOrZero(collection.priceStat?.floorPrice).shiftedBy(-ZIL_DECIMALS)
     const volume = bnOrZero(collection.priceStat?.volume).shiftedBy(-ZIL_DECIMALS);
-    const holderCount = bnOrZero(collection.tokenStat?.holderCount);
-    const tokenCount = bnOrZero(collection.tokenStat?.tokenCount);
+    const holderCount = bnOrZero(collection.tokenStat.holderCount);
+    const tokenCount = bnOrZero(collection.tokenStat.tokenCount);
 
     return {
       floorPrice: floorPrice.gt(0) ? toHumanNumber(floorPrice, 2) : undefined,
@@ -556,6 +565,15 @@ export class ArkClient {
       tokenCount: tokenCount.gt(0) ? tokenCount.toString(10) : undefined,
     }
   }
+}
+
+const parseTraits = (traits: TraitsResponse): SimpleMap<TraitType> => {
+  return traits.reduce((prev, curr) => {
+    const { trait, values } = curr
+    const v = Object.entries(values).reduce((acc, [k, v]) => ({ ...acc, [k]: { value: k, count: v } }), {})
+    prev[trait] = { trait, values: v }
+    return prev
+  }, {} as SimpleMap<TraitType>)
 }
 
 const parseChequeSide = (side: string): "Sell" | "Buy" => {

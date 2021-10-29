@@ -172,7 +172,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
             </Box>
           </ArkBox>
           <ArkBox variant="base" className={classes.traitContainer}>
-            <TraitTable token={token} />
+            {token && <TraitTable token={token} />}
           </ArkBox>
         </Box>
 

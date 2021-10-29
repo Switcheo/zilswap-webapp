@@ -3,7 +3,7 @@ import { ArkClient, ArkExchangeInfo } from "core/utilities";
 import { SortBy } from "./actions";
 
 export interface MarketPlaceState {
-  collections: SimpleMap<Collection>;
+  collections: SimpleMap<CollectionWithStats>;
   tokens: ReadonlyArray<Nft>;
   filter: CollectionFilter;
   profile?: Profile;
@@ -11,7 +11,8 @@ export interface MarketPlaceState {
   receivedBids?: any;
   bidded?: any;
   exchangeInfo?: ArkExchangeInfo;
-  collectionTraits: SimpleMap<CollectionTrait[]>;
+  collectionTraits: SimpleMap<TraitType>;
+  filteredTokensTraits: SimpleMap<TraitType>;
   pendingTxs: SimpleMap<ArkPendingTx>;
   bidsTable?: BidsTableInfo;
 }
@@ -59,8 +60,8 @@ export interface Nft {
   metadata?: string;
   asset?: Asset;
   owner?: MarketplaceUser;
-  collection?: Collection;
-  traitValues?: TraitValue[];
+  collection: Collection;
+  traitValues: TraitValueWithType[];
 
   bestAsk: null | SimpleCheque;
   bestBid: null | SimpleCheque;
@@ -69,27 +70,31 @@ export interface Nft {
   lastTrade?: null | SimpleCheque;
 }
 
+export type TraitValueWithType = {
+  value: string;
+  count: number;
+  traitType: {
+    trait: string;
+  }
+}
+
 export type TraitType = {
   trait: string;
-  collection?: Collection;
-  values: { [id: string]: TraitValue };
+  values: SimpleMap<TraitValue>;
 }
 
 export interface TraitValue {
   value: string;
   count: number;
-  traitType?: TraitType;
-  selected: boolean;
 }
 
-export interface CollectionPriceStat {
-  volume: string;
-  floorPrice: string;
+export type TraitTypeWithSelection = {
+  trait: string;
+  values: SimpleMap<TraitValueWithSelection>;
 }
 
-export interface CollectionTokenStat {
-  holderCount: string;
-  tokenCount: string;
+export interface TraitValueWithSelection extends TraitValue {
+  selected: boolean
 }
 
 export interface Collection {
@@ -110,10 +115,21 @@ export interface Collection {
   ownerName: string | null;
   royaltyBps: number | null;
   royaltyType: string | null;
+}
 
+export interface CollectionWithStats extends Collection {
+  priceStat: CollectionPriceStat | null;
+  tokenStat: CollectionTokenStat;
+}
 
-  priceStat?: CollectionPriceStat;
-  tokenStat?: CollectionTokenStat;
+export interface CollectionPriceStat {
+  volume: string;
+  floorPrice: string;
+}
+
+export interface CollectionTokenStat {
+  holderCount: string;
+  tokenCount: string;
 }
 
 export interface Asset {
@@ -129,12 +145,6 @@ export interface Asset {
 export type MarketplaceUser = {
   username: string | null;
   address: string;
-}
-
-export interface NftAttribute {
-  traitType: string;
-  value: string;
-  rarity: number;
 }
 
 export interface Profile extends MarketplaceUser {
@@ -174,7 +184,7 @@ export interface PaginationInfo {
 }
 
 export interface CollectionFilter {
-  traits: { [id: string]: TraitType };
+  traits: { [id: string]: TraitTypeWithSelection };
   sortBy: SortBy;
   saleType: SaleType;
   search: string;
@@ -187,11 +197,6 @@ export interface CollectionFilter {
 export interface SaleType {
   fixed_price: boolean;
   timed_auction: boolean;
-}
-
-export interface CollectionTrait {
-  trait: string;
-  values: SimpleMap<number>;
 }
 
 export interface ArkPendingTx {

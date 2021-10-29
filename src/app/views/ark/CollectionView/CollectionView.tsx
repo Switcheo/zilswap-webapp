@@ -9,7 +9,7 @@ import { ArkBanner, ArkBreadcrumb, ArkNFTListing, ArkFilterBar, Text, ArkSocialL
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
 import { actions } from "app/store";
-import { Collection } from "app/store/types";
+import { CollectionWithStats } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { bnOrZero, toHumanNumber } from "app/utils";
 import { ZIL_DECIMALS } from "app/utils/constants";
@@ -125,7 +125,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const dispatch = useDispatch();
 
   // fetch nfts in collection (to use store instead)
-  const [collection, setCollection] = useState<Collection>();
+  const [collection, setCollection] = useState<CollectionWithStats>();
 
   useEffect(() => {
     if (match.params?.collection) {
@@ -163,8 +163,8 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
     const floorPrice = bnOrZero(collection.priceStat?.floorPrice).shiftedBy(-ZIL_DECIMALS)
     const volume = bnOrZero(collection.priceStat?.volume).shiftedBy(-ZIL_DECIMALS);
-    const holderCount = bnOrZero(collection.tokenStat?.holderCount);
-    const tokenCount = bnOrZero(collection.tokenStat?.tokenCount);
+    const holderCount = bnOrZero(collection.tokenStat.holderCount);
+    const tokenCount = bnOrZero(collection.tokenStat.tokenCount);
 
     return {
       floorPrice: floorPrice.gt(0) ? floorPrice.toFormat(0) : undefined,
@@ -182,7 +182,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       const arkClient = new ArkClient(network);
       const data = await arkClient.listCollection();
       const collection = data.result.entries.find(
-        (collection: Collection) => collection.address === hexAddress
+        (collection: CollectionWithStats) => collection.address === hexAddress
       );
       if (collection) {
         setCollection(collection);

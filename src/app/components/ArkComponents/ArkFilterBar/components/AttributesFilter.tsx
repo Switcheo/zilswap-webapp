@@ -5,11 +5,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import pickBy from "lodash/pickBy";
 import { ArkClient } from 'core/utilities';
 import { AppTheme } from 'app/theme/types';
-import { bnOrZero, hexToRGBA } from 'app/utils';
+import { bnOrZero, hexToRGBA, SimpleMap, useAsyncTask } from 'app/utils';
 import { Text } from "app/components";
-import { Collection, TraitType, TraitValue } from 'app/store/types';
+import { TraitTypeWithSelection, TraitValueWithSelection } from 'app/store/types';
 import { updateFilter } from 'app/store/marketplace/actions';
-import { getBlockchain } from 'app/saga/selectors';
+import { getBlockchain, getMarketplace } from 'app/saga/selectors';
+import { actions } from 'app/store';
 import { ReactComponent as IndeterminateIcon } from "./indeterminate.svg";
 import { ReactComponent as UncheckedIcon } from "./unchecked.svg";
 import { ReactComponent as CheckedIcon } from "./checked.svg";
@@ -217,10 +218,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   attributeMeta: {
-    width: 60,
     textAlign: "right",
     color: theme.palette.type === "dark" ? "white" : "",
     fontSize: 11,
+    paddingLeft: 10,
+    minWidth: 90,
     display: "flex",
     alignItems: "center",
     justifyContent: "right"
@@ -254,47 +256,97 @@ const abbreviateTraitValue = (traitValue: string) => {
 
 const AttributesFilter = (props: Props) => {
   const { collectionAddress } = props;
-  const { network } = useSelector(getBlockchain);
-  const dispatch = useDispatch();
-
   const classes = useStyles();
-  const [collection, setCollection] = useState<Collection | null>(null);
+  const dispatch = useDispatch();
+  const [runGetCollectionTraits] = useAsyncTask("getCollectionTraits");
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [traits, setTraits] = useState<{ [id: string]: TraitType }>({})
-  const [filteredTraits, setFilteredTraits] = useState<{ [id: string]: TraitType }>({})
+  const [traits, setTraits] = useState<SimpleMap<TraitTypeWithSelection>>({}) // for selecting
+  const [filteredTraits, setFilteredTraits] = useState<SimpleMap<TraitTypeWithSelection>>({}) // for searching
   const [search, setSearch] = useState<string>("");
+  const { network } = useSelector(getBlockchain);
+  const { collections, collectionTraits, filteredTokensTraits } = useSelector(getMarketplace);
+
+  const collection = collections[collectionAddress]
+  const currentCollectionTraits = collectionTraits[collectionAddress];
+
+  const total = bnOrZero(collection?.tokenStat.tokenCount);
 
   useEffect(() => {
-    if (!collectionAddress && Object.keys(traits).length === 0) return
-    getTraits()
-    // eslint-disable-next-line
-  }, [collectionAddress])
+    runGetCollectionTraits(async () => {
+      if (!collection || !currentCollectionTraits) {
+        const arkClient = new ArkClient(network);
+        const res = await arkClient.getCollectionTraits(collectionAddress);
+        dispatch(actions.MarketPlace.updateCollectionTraits(res));
 
-  const getTraits = async () => {
-    const arkClient = new ArkClient(network);
-    const data = await arkClient.getCollectionTraits(collectionAddress);
-
-    setCollection(data.result.collection);
-    var newTraits: { [id: string]: TraitType } = {}
-    data.result.entries.forEach((model: any) => {
-      var values: { [id: string]: TraitValue } = {}
-
-      Object.keys(model.values).forEach(value => {
-        values[value] = {
-          value: value,
-          count: +model.values[value],
-          selected: false
-        };
-      });
-
-      newTraits[model.trait] = {
-        trait: model.trait,
-        values: values
+        // map into initial selectable traits
+        const initial: SimpleMap<TraitTypeWithSelection> = {}
+        for (const x in res.traits) {
+          initial[x] = { trait: res.traits[x].trait, values: {} }
+          for (const y in res.traits[x].values) {
+            initial[x].values[y] = { ...res.traits[x].values[y], selected: false }
+          }
+        }
+        setTraits(initial)
       }
-    });
+    })
+    // eslint-disable-next-line
+  }, [])
 
-    setTraits(newTraits)
-  }
+  useEffect(() => {
+    dispatch(updateFilter({ traits }))
+    // eslint-disable-next-line
+  }, [traits])
+
+  useEffect(() => {
+    // Check for empty search case
+    if (search === "") {
+      setFilteredTraits(traits)
+      return
+    }
+
+    var updatedTraits: { [id: string]: TraitTypeWithSelection } = { ...traits }
+    Object.keys(updatedTraits).forEach(trait => {
+      updatedTraits[trait] = JSON.parse(JSON.stringify(traits[trait]))
+
+      const result = pickBy(updatedTraits[trait].values, function (value, key) {
+        return value.value.toLowerCase().includes(search.toLowerCase())
+      })
+
+      updatedTraits[trait].values = result
+    })
+
+    setFilteredTraits(updatedTraits)
+  }, [search, traits])
+
+  const selectedValues = useMemo(() => {
+    var totalSelectCount = 0
+    return (
+      <>
+        <div className={classes.filterSelectedValue}>
+          {Object.values(traits).map(type => {
+            const selected = Object.values(type.values).filter(value => value.selected) as ReadonlyArray<TraitValueWithSelection>
+            const selectedCount = Object.keys(selected).length
+            totalSelectCount += selectedCount
+            return selectedCount > 0 && (
+              <span key={type.trait} className={classes.filterSelectedValueContainer}>
+                <span className={classes.filterSelectedValueCategory}>{type.trait.toUpperCase()}:</span>
+                {
+                  selectedCount > 2 || totalSelectCount > 3 ?
+                    <span className={classes.filterSelectedValueValue}>{selectedCount}</span>
+                    :
+                    selected.map(selected => (<span className={classes.filterSelectedValueValue}>
+                      {abbreviateTraitValue(selected.value)}
+                    </span>))
+                }
+              </span>
+            )
+          })}
+          {totalSelectCount === 0 && <span>ALL</span>}
+        </div>
+      </>
+    )
+    // eslint-disable-next-line
+  }, [traits])
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -333,67 +385,12 @@ const AttributesFilter = (props: Props) => {
     })
   }
 
-  useEffect(() => {
-    dispatch(updateFilter({ traits }))
-    // eslint-disable-next-line
-  }, [traits])
-
-  useEffect(() => {
-    // Check for empty search case
-    if (search === "") {
-      setFilteredTraits(traits)
-      return
-    }
-
-    var updatedTraits: { [id: string]: TraitType } = { ...traits }
-    Object.keys(updatedTraits).forEach(trait => {
-      updatedTraits[trait] = JSON.parse(JSON.stringify(traits[trait]))
-
-      const result = pickBy(updatedTraits[trait].values, function (value, key) {
-        return value.value.toLowerCase().includes(search.toLowerCase())
-      })
-
-      updatedTraits[trait].values = result
-    })
-
-    setFilteredTraits(updatedTraits)
-  }, [search, traits])
-
-  const tokenCount = bnOrZero(collection?.tokenStat?.tokenCount);
-  const getPercent = (count: number) => {
-    if (tokenCount.lte(0)) return "-"
-    return bnOrZero(count).div(tokenCount).shiftedBy(2).decimalPlaces(2).toString(10);
-  };
-
-  const selectedValues = useMemo(() => {
-    var totalSelectCount = 0
-    return (
-      <>
-        <div className={classes.filterSelectedValue}>
-          {Object.values(traits).map(type => {
-            const selected = Object.values(type.values).filter(value => value.selected) as ReadonlyArray<TraitValue>
-            const selectedCount = Object.keys(selected).length
-            totalSelectCount += selectedCount
-            return selectedCount > 0 && (
-              <span key={type.trait} className={classes.filterSelectedValueContainer}>
-                <span className={classes.filterSelectedValueCategory}>{type.trait.toUpperCase()}:</span>
-                {
-                  selectedCount > 2 || totalSelectCount > 3 ?
-                    <span className={classes.filterSelectedValueValue}>{selectedCount}</span>
-                    :
-                    selected.map(selected => (<span className={classes.filterSelectedValueValue}>
-                      {abbreviateTraitValue(selected.value)}
-                    </span>))
-                }
-              </span>
-            )
-          })}
-          {totalSelectCount === 0 && <span>ALL</span>}
-        </div>
-      </>
-    )
-    // eslint-disable-next-line
-  }, [traits])
+  const getPercent = (c?: number) => {
+    const count = bnOrZero(c)
+    if (count.lte(0)) return "0%"
+    const percent = count.div(total);
+    return `${percent.shiftedBy(2).toFormat(percent.lt(1) ? 2 : 0)}%`
+  }
 
   return (
     <>
@@ -456,11 +453,12 @@ const AttributesFilter = (props: Props) => {
                     <Box id={trait.trait} key={trait.trait} marginBottom={3}>
                       <span className={classes.filterCategory}>
                         <Text flexGrow="1" className={classes.filterCategoryLabel}>{trait.trait}</Text>
-                        <Text className={classes.attributeMeta}>Att. Rarity</Text>
-                        {/* <Text className={classes.attributeMeta}>Match</Text> */}
+                        <Text className={classes.attributeMeta}>Count</Text>
+                        <Text className={classes.attributeMeta}>Filtered</Text>
                       </span>
 
                       {Object.values(trait.values).sort((a, b) => b.count - a.count).map(value => {
+                        const filteredCount = filteredTokensTraits[trait.trait]?.values[value.value]?.count || 0
                         return (
                           <Box key={value.value} marginBottom={1}>
                             <FormControlLabel className={classes.attributeValue} value={value.value} control={<Checkbox
@@ -479,16 +477,16 @@ const AttributesFilter = (props: Props) => {
                                     {value.count}
                                     {" "}
                                     <Typography component="span" className={classes.attributeMetaDetail}>
-                                      ({getPercent(value.count)}%)
+                                      ({getPercent(value.count)})
                                     </Typography>
                                   </Text>
-                                  {/* <Text className={classes.attributeMeta}>
-                                    {value.count}
+                                  <Text className={classes.attributeMeta}>
+                                    {filteredCount}
                                     {" "}
                                     <Typography component="span" className={classes.attributeMetaDetail}>
-                                      (5%)
+                                      ({getPercent(filteredCount)})
                                     </Typography>
-                                  </Text> */}
+                                  </Text>
                                 </span>
                               }
                             />

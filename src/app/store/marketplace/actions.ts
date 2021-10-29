@@ -1,6 +1,7 @@
+import { SimpleMap } from "app/utils"
 import { ArkExchangeInfo } from "core/utilities"
-import { CollectionFilter, CollectionTrait } from "../types"
-import { ArkPendingTx, BidsTableInfo, Nft, OAuth, PaginatedList, Profile } from "./types"
+import { CollectionFilter } from "../types"
+import { ArkPendingTx, BidsTableInfo, Collection, Nft, OAuth, PaginatedList, Profile, TraitType } from "./types"
 
 export enum SortBy {
   PriceDescending,
@@ -24,7 +25,7 @@ export const MarketPlaceActionTypes = {
   UPDATE_COLLECTION_TRAITS: "ARK:UPDATE_COLLECTION_TRAITS",
   UPDATE_EXCHANGE_INFO: "ARK:UPDATE_EXCHANGE_INFO",
   RELOAD_TOKEN_LIST: "ARK:RELOAD_TOKEN_LIST",
-  
+
   UPDATE_BIDS_TABLE_INFO: "ARK:UPDATE_BIDS_TABLE_INFO",
   REMOVE_PENDING_TX: "ARK:REMOVE_PENDING_TX",
   ADD_PENDING_TX: "ARK:ADD_PENDING_TX",
@@ -71,7 +72,7 @@ export function updateFilter(payload: Partial<CollectionFilter>) {
   }
 }
 
-export function updateTokens(payload: PaginatedList<Nft>) {
+export function updateTokens(payload: { tokens: PaginatedList<Nft>, traits?: SimpleMap<TraitType> }) {
   return {
     type: MarketPlaceActionTypes.UPDATE_TOKENS,
     payload
@@ -84,7 +85,7 @@ export function reloadTokenList() {
   }
 }
 
-export function updateCollectionTraits(payload: { address: string, traits: CollectionTrait[] }) {
+export function updateCollectionTraits(payload: { traits: SimpleMap<TraitType>, collection: Collection }) {
   return {
     type: MarketPlaceActionTypes.UPDATE_COLLECTION_TRAITS,
     payload
