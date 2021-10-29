@@ -493,7 +493,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                     {index === 0
                       ? fromChainName
                       : index === 1
-                        ? "TradeHub"
+                        ? "Carbon"
                         : toChainName
                     }
                   </Text>
@@ -521,7 +521,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                 {/* Stage 1 */}
                 <Box mb={1}>
                   <Text>
-                    <strong>Stage 1: {fromChainName} <ArrowRightRoundedIcon fontSize="small" className={classes.arrowIcon} /> TradeHub</strong>
+                    <strong>Stage 1: {fromChainName} <ArrowRightRoundedIcon fontSize="small" className={classes.arrowIcon} /> Carbon</strong>
                   </Text>
                   <Box display="flex" mb={0.5} className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
@@ -548,7 +548,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                   </Box>
                   <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, currentBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Deposit to TradeHub Contract
+                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, currentBridgeTx.sourceTxHash ? classes.checkIconCompleted : "")} /> Deposit to Carbon Contract
                     </Text>
                     <Text className={cls(classes.link, classes.progressInfo)}>
                       {currentBridgeTx.sourceTxHash
@@ -569,11 +569,11 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                 {/* Stage 2 */}
                 <Box mb={1}>
                   <Text>
-                    <strong>Stage 2: TradeHub Confirmation</strong>
+                    <strong>Stage 2: Carbon Confirmation</strong>
                   </Text>
                   <Box display="flex" mt={0.9} mb={0.5}>
                     <Text flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, currentBridgeTx?.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> TradeHub Deposit Confirmation
+                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, currentBridgeTx?.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> Carbon Deposit Confirmation
                     </Text>
                     {!!depositConfirmations && (
                       <Text flexGrow={1} align="right">
@@ -595,7 +595,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                           rel="noopener noreferrer"
                           target="_blank"
                           href={getTradeHubExplorerLink(currentBridgeTx.withdrawTxHash)}>
-                          View on TradeHub <NewLinkIcon className={classes.linkIcon} />
+                          View on Carbon <NewLinkIcon className={classes.linkIcon} />
                         </Link>
                         : "-"
                       }
@@ -606,7 +606,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                 {/* Stage 3 */}
                 <Box>
                   <Text>
-                    <strong>Stage 3: TradeHub <ArrowRightRoundedIcon fontSize="small" className={classes.arrowIcon} /> {toChainName}</strong>
+                    <strong>Stage 3: Carbon <ArrowRightRoundedIcon fontSize="small" className={classes.arrowIcon} /> {toChainName}</strong>
                   </Text>
                   <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">

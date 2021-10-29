@@ -82,10 +82,10 @@ export interface BridgeTx {
   // .lock tx on the source chain
   sourceTxHash?: string;
 
-  // TradeHub external transfers confirmed
+  // Carbon external transfers confirmed
   depositTxConfirmedAt?: dayjs.Dayjs;
 
-  // TradeHub withdraw tx
+  // Carbon withdraw tx
   withdrawTxHash?: string;
 
   // tx on the destination chain
