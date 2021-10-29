@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { makeStyles } from "@material-ui/core";
+import { Box, makeStyles } from "@material-ui/core";
 import BigNumber from "bignumber.js";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { createChart, CrosshairMode, IChartApi, ISeriesApi, LineData, UTCTimestamp } from "lightweight-charts";
 import { ArkBox } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { getBlockchain } from "app/saga/selectors";
@@ -16,18 +16,18 @@ interface Props {
   interval: string;
 }
 
-interface CollectionFloor {
-  value: number,
+interface FloorPrice {
+  floorPrice: number,
   intervalTime: string,
 }
 
 interface SalePrice {
-  value: number,
+  highestSale: number,
   intervalTime: string,
 }
 
 interface BidPrice {
-  value: number,
+  highestBid: number,
   intervalTime: string,
 }
 
@@ -41,6 +41,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       padding: theme.spacing(1, 2),
     },
   },
+  graph: {
+    overflow: "hidden",
+    minWidth: 300,
+    boxShadow: theme.palette.mainBoxShadow,
+    display: "center",
+  },
 }));
 
 const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
@@ -51,9 +57,12 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
   const [runGetCollectionFloor] = useAsyncTask("getCollectionFloor");
   const [runGetSalePrice] = useAsyncTask("getSalePrice");
   const [runGetBidPrice] = useAsyncTask("getBidPrice");
-  const [collectionFloor, setCollectionFloor] = useState<CollectionFloor[]>([]);
-  const [salePrice, setSalePrice] = useState<SalePrice[]>([]);
-  const [bidPrice, setBidPrice] = useState<BidPrice[]>([]);
+  const [collectionFloor, setCollectionFloor] = useState<LineData[] | null>(null);
+  const [salePrice, setSalePrice] = useState<LineData[] | null>(null);
+  const [bidPrice, setBidPrice] = useState<LineData[] | null>(null);
+  const [chart, setChart] = useState<IChartApi | null>(null);
+  const [series, setSeries] = useState<ISeriesApi<"Line"> | null>(null);
+  const graphRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     getCollectionFloor();
@@ -66,12 +75,16 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
     runGetCollectionFloor(async () => {
       const arkClient = new ArkClient(network);
       const result = await arkClient.getCollectionFloor({ collection, interval });
-      const arr = result.result.map((obj: any) => {
-        obj.value = new BigNumber(obj.floorPrice).shiftedBy(-12).toNumber();
-        return obj
-      })
-      console.log(arr);
-      setCollectionFloor(arr)
+      const floors: FloorPrice[] = result.result;
+      let collectionFloors = new Array<LineData>();
+      floors.forEach(floor => {
+        collectionFloors.push({
+          value: new BigNumber(floor.floorPrice).shiftedBy(-12).toNumber(),
+          time: (Date.parse(floor.intervalTime) / 1000) as UTCTimestamp,
+        })
+      });
+      console.log(collectionFloors);
+      setCollectionFloor(collectionFloors)
     })
   }
 
@@ -79,12 +92,16 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
     runGetSalePrice(async () => {
       const arkClient = new ArkClient(network);
       const result = await arkClient.getSalePrice({ collection, tokenId, interval });
-      const arr = result.result.map((obj: any) => {
-        obj.value = new BigNumber(obj.highestSale).shiftedBy(-12).toNumber();
-        return obj
-      })
-      console.log(arr);
-      setSalePrice(arr);
+      const prices: SalePrice[] = result.result;
+      let salePrices = new Array<LineData>();
+      prices.forEach(price => {
+        salePrices.push({
+          value: new BigNumber(price.highestSale).shiftedBy(-12).toNumber(),
+          time: (Date.parse(price.intervalTime) / 1000) as UTCTimestamp,
+        })
+      });
+      console.log(salePrices);
+      setSalePrice(salePrices);
     })
   }
 
@@ -92,69 +109,85 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
     runGetBidPrice(async () => {
       const arkClient = new ArkClient(network);
       const result = await arkClient.getBidPrice({ collection, tokenId, interval });
-      const arr = result.result.map((obj: any) => {
-        obj.value = new BigNumber(obj.highestBid).shiftedBy(-12).toNumber();
-        return obj
-      })
-      console.log(arr);
-      setBidPrice(arr);
+      const prices: BidPrice[] = result.result;
+      let bidPrices = new Array<LineData>();
+      prices.forEach(price => {
+        bidPrices.push({
+          value: new BigNumber(price.highestBid).shiftedBy(-12).toNumber(),
+          time: (Date.parse(price.intervalTime) / 1000) as UTCTimestamp,
+        })
+      });
+      console.log(bidPrices);
+      setBidPrice(bidPrices);
     })
   }
 
-  const series = [
-    {
-      name: 'Collection Floor',
-      data: collectionFloor,
-    },
-    {
-      name: 'Sale Price',
-      data: salePrice,
-    },
-    {
-      name: 'Bid Price',
-      data: bidPrice,
-    },
-  ];
+  useEffect(() => {
+    if (!collectionFloor || !salePrice || !bidPrice) return;
+    if (graphRef.current && !chart) {
+      const newChart = createChart(graphRef.current, {
+        width: 600,
+        height: 400,
+        layout: {
+          backgroundColor: "#131722",
+          textColor: "#d1d4dc"
+        },
+        grid: {
+          vertLines: {
+            color: "rgba(42, 46, 57, 0.6)",
+            style: 1,
+            visible: false,
+          },
+          horzLines: {
+            color: "rgba(42, 46, 57, 0.6)",
+            style: 1,
+            visible: false,
+          },
+        },
+        timeScale: {
+          rightOffset: 10,
+          lockVisibleTimeRangeOnResize: true,
+          timeVisible: true,
+          secondsVisible: false,
+          borderColor: "rgba(222, 255, 255, 0.1)",
+        },
+        crosshair: {
+          mode: CrosshairMode.Normal,
+        },
+      });
 
+      const floorSeries = newChart.addLineSeries({
+        color: "rgba(73, 194, 121, 1)",
+        lineWidth: 1
+      });
 
-  return <ArkBox variant="base" className={classes.container}>
-    {(collectionFloor).map((obj: CollectionFloor) => {
-      return <div>
-        Floor price is : {obj.value}   At time : {obj.intervalTime}
-      </div>
-    })}
+      const bidSeries = newChart.addLineSeries({
+        color: "rgba(73, 14, 121, 1)",
+        lineWidth: 1
+      });
 
-    {(salePrice).map((obj: SalePrice) => {
-      return <div>
-        Sale price is : {obj.value}   At time : {obj.intervalTime}
-      </div>
-    })}
+      const saleSeries = newChart.addLineSeries({
+        color: "rgba(155, 14, 121, 1)",
+        lineWidth: 1
+      });
 
-    {(bidPrice).map((obj: BidPrice) => {
-      return <div>
-        Bid price is : {obj.value}   At time : {obj.intervalTime}
-      </div>
-    })}
+      floorSeries.setData(collectionFloor);
 
-    <ResponsiveContainer minWidth={600} minHeight={400} width="100%" height="100%">
-      <LineChart width={500} height={300}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="intervalTime"
-          type="category"
-          allowDuplicatedCategory={false} />
-        <YAxis dataKey="value"
-          type="number"
-          domain={['auto', 'auto']}
-        />
-        <Tooltip />
-        <Legend />
-        {series.map((s) => (
-          <Line dataKey="value" data={s.data} name={s.name} key={s.name} />
-        ))}
-      </LineChart>
-    </ResponsiveContainer>
+      bidSeries.setData(bidPrice);
 
-  </ArkBox >
+      saleSeries.setData(salePrice);
+
+      setChart(newChart);
+      setSeries(floorSeries);
+    }
+  }, [collectionFloor, bidPrice, salePrice])
+
+  return (
+    <ArkBox variant="base" className={classes.container}>
+      <Box className={classes.graph} {...{ ref: graphRef }}></Box>
+    </ArkBox>
+
+  )
 };
 
 export default ArkPriceHistoryGraph;
