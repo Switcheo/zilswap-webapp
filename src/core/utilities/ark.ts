@@ -366,6 +366,33 @@ export class ArkClient {
     return result;
   }
 
+  async unwrapZil(amount: BigNumber, zilswap: Zilswap) {
+    const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
+
+    const args = [{
+      vname: "amount",
+      type: "Uint128",
+      value: amount.toString(),
+    }];
+    
+    const callParams = {
+      amount: new BN(0),
+      gasPrice: new BN(minGasPrice),
+      gasLimit: Long.fromNumber(20000),
+      version: bytes.pack(CHAIN_IDS[this.network], MSG_VERSION),
+    };
+
+    const result = await zilswap.callContract(
+      zilswap.getContract(WZIL_TOKEN_CONTRACT[zilswap.network]),
+      "Burn",
+      args as any,
+      callParams,
+      true,
+    );
+
+    return result;
+  }
+
   // TODO: Refactor zilswap SDK as instance member;
   async executeTrade(executeParams: ArkClient.ExecuteTradeParams, zilswap: Zilswap, wallet?: ConnectedWallet) {
     const { nftAddress, tokenId, sellCheque, buyCheque } = executeParams;

@@ -102,10 +102,11 @@ export interface CurrencyDialogProps extends DialogProps {
   zrc2Only?: boolean;
   token?: TokenInfo | null;
   tokenList: CurrencyListType;
+  wrapZil?: boolean;
 };
 
 const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProps) => {
-  const { className, onSelectCurrency, hideZil, hideNoPool, showContribution, zrc2Only, tokenList, open, token, onClose } = props;
+  const { className, onSelectCurrency, hideZil, hideNoPool, showContribution, zrc2Only, tokenList, open, token, onClose, wrapZil } = props;
   const classes = useStyles();
   const [search, setSearch] = useState("");
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
@@ -149,14 +150,19 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
       tokens = tokens.filter(t => t.address !== ZIL_ADDRESS);
     setTokens(tokens.sort(sortFn));
 
+    if (wrapZil) {
+      tokens = tokens.filter(t => t.isZil || t.isWzil);
+      setTokens(tokens);
+    }
+
     if (token && !tokens.find(t => t.address === token.address) && tokens.length > 0)
       onSelectCurrency(tokens[0]);
-  }, [tokenState.tokens, walletState.wallet, bridgeState.tokens, showContribution, tokenList, exchangeInfo?.denoms, zrc2Only, token, onSelectCurrency]);
+  }, [tokenState.tokens, walletState.wallet, bridgeState.tokens, showContribution, tokenList, exchangeInfo?.denoms, zrc2Only, wrapZil, token, onSelectCurrency]);
 
   const filterSearch = (token: TokenInfo): boolean => {
     const searchTerm = search.toLowerCase().trim();
     if (token.isZil && hideZil) return false;
-    if (!token.isZil && !token.pool && hideNoPool) return false;
+    if (!token.isZil && !token.pool && hideNoPool && !token.isWzil) return false;
     if (searchTerm === "" && !token.registered && !tokenState.userSavedTokens.includes(token.address)) return false;
 
     if (!token.registered && !tokenState.userSavedTokens.includes(token.address)) {

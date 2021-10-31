@@ -141,7 +141,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   const { bech32Address, hexAddress } = useMemo(() => {
     if (!match.params?.collection) {
-      history.push("/ark/collections");
+      history.push("/ark/discover");
       return {};
     }
 
@@ -187,7 +187,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       if (collection) {
         setCollection(collection);
       } else {
-        history.push("/ark/collections");
+        history.push("/ark/discover");
       }
     };
 
@@ -202,7 +202,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   if (!collection) return null;
 
   const breadcrumbs = [
-    { path: "/ark/collections", value: "Collections" },
+    { path: "/ark/discover", value: "Discover" },
     {
       path: `/ark/collections/${bech32Address}`,
       value: collection?.name,

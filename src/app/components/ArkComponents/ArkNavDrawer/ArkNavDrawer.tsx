@@ -123,10 +123,10 @@ const ArkNavDrawer: React.FC<DrawerProps> = (props: any) => {
           <ListItem
             button
             component={Link}
-            to="/ark/collections"
+            to="/ark/discover"
             className={cls(classes.listItem, {
               [classes.buttonLeafActive]:
-                location.pathname === "/ark/collections",
+                location.pathname === "/ark/discover",
             })}
           >
             <Text variant="button">Discover</Text>

@@ -6,7 +6,7 @@ import { useHistory } from "react-router-dom";
 import { bnOrZero } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import { Box, Checkbox, DialogContent, DialogProps, FormControlLabel } from "@material-ui/core";
+import { Box, Checkbox, DialogContent, DialogProps, FormControlLabel, Link } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { ZilswapConnector } from "core/zilswap";
@@ -19,7 +19,7 @@ import { AppTheme } from "app/theme/types";
 import { hexToRGBA, toHumanNumber, useAsyncTask, useToaster, getLocalStored } from "app/utils";
 import { LocalStorageKeys } from "app/utils/constants";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
-import { ArkClient, logger } from "core/utilities";
+import { ArkClient, logger, waitForTx } from "core/utilities";
 import { fromBech32Address, toBech32Address } from "core/zilswap";
 import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import { ZIL_ADDRESS } from "app/utils/constants";
@@ -52,6 +52,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     (state) => state.layout.showBidNftDialog
   );
   const [runConfirmPurchase, loading, error, setPurchaseError] = useAsyncTask("confirmPurchase");
+  const [waitWrapComplete, completeWrapPending, wrapCompleteError, setWrapCompleteError] = useAsyncTask("waitForWrapComplete");
   const [runWrapTx, loadingWrapTx, wrapError, setWrapError] = useAsyncTask("wrapZil");
   const [completedPurchase, setCompletedPurchase] = useState<boolean>(false);
   const [expiry, setExpiry] = useState<number>(0);
@@ -118,6 +119,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     clearApproveError();
     setPurchaseError();
     setWrapError();
+    setWrapCompleteError();
   }
 
   const onApproveTx = () => {
@@ -173,10 +175,20 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         deadline: Number.MAX_SAFE_INTEGER,
       });
 
+      waitForWrapComplete(result.id!);
+
       toaster(`Wrap token txn submitted!`, { hash: result.id });
     });
   }
 
+  const waitForWrapComplete = (txId: string) => {
+    waitWrapComplete(async () => {
+
+      logger("watching for wrap tx complete", txId);
+      await waitForTx(txId);
+    });
+  }
+  
   const onExpiryChange = (expiryBlock: number) => {
     setExpiry(expiryBlock)
   }
@@ -285,7 +297,6 @@ const BidDialog: React.FC<Props> = (props: Props) => {
       });
   };
 
-
   const onToggleAcceptTerms = () => {
     if (formState.acceptTerms) localStorage.removeItem(bidStorageKey);
     else localStorage.setItem(bidStorageKey, JSON.stringify("true"));
@@ -365,11 +376,30 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                 />
               </Box>
 
+              {wrappingRequired && (
+                <Box className={classes.infoBox}>
+                  <Text>
+                    You will need to wrap your <strong>ZIL</strong> to <strong>Wrapped ZIL</strong> (w<strong>ZIL</strong>) in Step 2
+                    to place this bid. wZIL can be exchanged back to ZIL in a 1:1 ratio. Click
+                    {" "}
+                    <Link
+                      rel="noopener noreferrer"
+                      target="_blank"
+                      href="https://dev.zilliqa.com/docs/dev/dev-wrapped-zil"
+                    >
+                      here
+                    </Link>
+                    {" "}
+                    to learn more.
+                  </Text>
+                </Box>
+              )}
+
               {
                 wrappingRequired ?
                   <FancyButton
                     className={classes.actionButton}
-                    loading={loadingWrapTx}
+                    loading={loadingWrapTx || completeWrapPending}
                     variant="contained"
                     color="primary"
                     onClick={onWrap}
@@ -395,11 +425,11 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                   </FancyButton>
               }
 
-              {(error || wrapError || approveError) && (
+              {(error || wrapError || approveError || wrapCompleteError) && (
                 <Box className={classes.errorBox}>
                   <WarningIcon className={classes.warningIcon} />
                   <Text color="error">
-                    Error: {(error?.message || wrapError?.message || approveError?.message) ?? "Unknown error"}
+                    Error: {(error?.message || wrapError?.message || approveError?.message || wrapCompleteError?.message) ?? "Unknown error"}
                   </Text>
                 </Box>
               )}
@@ -596,7 +626,24 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: 24,
     flex: "none",
     marginRight: theme.spacing(1)
-  }
+  },
+  infoBox: {
+    marginBottom: theme.spacing(2),
+    minHeight: 46,
+    width: "100%",
+    border: "1px solid #FFDF6B",
+    backgroundColor: `rgba${hexToRGBA("#FFDF6B", 0.2)}`,
+    borderRadius: 12,
+    padding: theme.spacing(2, 3),
+    "& .MuiTypography-root": {
+      color: "#FFDF6B",
+      fontSize: "14px",
+      lineHeight: "17px",
+      [theme.breakpoints.down('sm')]: {
+        fontSize: "12px",
+      },
+    }
+  },
 }));
 
 export default BidDialog;
