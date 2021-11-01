@@ -44,6 +44,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   graph: {
     overflow: "hidden",
     minWidth: 300,
+    height: "70vh",
     boxShadow: theme.palette.mainBoxShadow,
     display: "center",
   },
@@ -87,8 +88,15 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
     }
     return data;
   }
+  const updateSize = () => {
+    if (graphRef.current) {
+      chart?.resize(graphRef.current.clientWidth, graphRef.current.clientHeight);
+    }
+  }
 
   useEffect(() => {
+    // setStartTime(null);
+    // setEndTime(null);
     getCollectionFloor();
     getSalePrice();
     getBidPrice();
@@ -96,29 +104,30 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
   }, [currentInterval])
 
   useEffect(() => {
-    if (!collectionFloor || !salePrice || !bidPrice || !startTime || !endTime) return;
-    if (graphRef.current && !chart) {
+    console.log(startTime);
+    console.log(endTime);
+    if (!collectionFloor || !salePrice || !bidPrice) return;
+    if (graphRef.current && !chart && startTime && endTime) {
       const newChart = createChart(graphRef.current, {
-        width: 600,
-        height: 400,
+        width: graphRef.current.clientWidth,
+        height: graphRef.current.clientHeight,
         layout: {
-          backgroundColor: "#131722",
-          textColor: "#d1d4dc"
+          backgroundColor: 'rgba(0,0,0, 0.0)',
+          textColor: "#DEFFFF",
         },
         grid: {
           vertLines: {
-            color: "rgba(42, 46, 57, 0.6)",
+            color: 'rgba(220, 220, 220, 0.1)',
             style: 1,
             visible: false,
           },
           horzLines: {
-            color: "rgba(42, 46, 57, 0.6)",
+            color: 'rgba(220, 220, 220, 0.1)',
             style: 1,
             visible: false,
           },
         },
         timeScale: {
-          rightOffset: 10,
           lockVisibleTimeRangeOnResize: true,
           timeVisible: true,
           secondsVisible: false,
@@ -127,21 +136,30 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
         crosshair: {
           mode: CrosshairMode.Normal,
         },
+        rightPriceScale: {
+          borderColor: "rgba(222, 255, 255, 0.1)",
+        }
       });
 
       const floorSeries = newChart.addLineSeries({
-        color: "rgba(73, 194, 121, 1)",
-        lineWidth: 3
+        color: "#6BE1FF",
+        lineWidth: 3,
+        title: "Floor",
+        priceLineVisible: false,
       });
 
       const bidSeries = newChart.addLineSeries({
-        color: "rgba(73, 14, 121, 1)",
-        lineWidth: 3
+        color: "#00FFB0",
+        lineWidth: 3,
+        title: "Highest Bid",
+        priceLineVisible: false,
       });
 
       const saleSeries = newChart.addLineSeries({
-        color: "rgba(155, 14, 121, 1)",
-        lineWidth: 3
+        color: "rgba(255, 215, 71, 1)",
+        lineWidth: 3,
+        title: "Last Sale",
+        priceLineVisible: false,
       });
 
       const whiteSeries = newChart.addLineSeries();
@@ -150,21 +168,28 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       bidSeries.setData(bidPrice);
       saleSeries.setData(salePrice);
       whiteSeries.setData(whitespaceData);
+      newChart.timeScale().fitContent();
       setChart(newChart);
       setFloorSeries(floorSeries);
       setBidSeries(bidSeries);
       setSaleSeries(saleSeries);
       setWhiteSeries(whiteSeries);
+      window.addEventListener('resize', updateSize)
     }
-    if (chart && floorSeries && bidSeries && saleSeries && whiteSeries) {
+    console.log("here")
+    console.log(startTime)
+    console.log(endTime)
+    if (chart && floorSeries && bidSeries && saleSeries && whiteSeries && startTime && endTime) {
+      console.log("oh here");
       const whitespaceData = generateWhitespaceData(startTime, endTime, currentInterval);
       floorSeries.setData(collectionFloor);
       bidSeries.setData(bidPrice);
       saleSeries.setData(salePrice);
       whiteSeries.setData(whitespaceData);
+      chart.timeScale().fitContent();
     }
     // eslint-disable-next-line
-  }, [collectionFloor, bidPrice, salePrice])
+  }, [collectionFloor, bidPrice, salePrice, startTime, endTime])
 
   const getCollectionFloor = () => {
     runGetCollectionFloor(async () => {
@@ -181,10 +206,15 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       const firstTimestamp = collectionFloors[0].time as UTCTimestamp;
       const lastTimestamp = collectionFloors[collectionFloors.length - 1].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
+        console.log("start set")
+        console.log(firstTimestamp)
         setStartTime(firstTimestamp);
       }
+      console.log(endTime)
       if (!endTime || lastTimestamp > endTime) {
-        setEndTime(lastTimestamp)
+        console.log("end set")
+        console.log(lastTimestamp)
+        setEndTime(lastTimestamp);
       }
       setCollectionFloor(collectionFloors)
     })
@@ -205,10 +235,14 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       const firstTimestamp = salePrices[0].time as UTCTimestamp;
       const lastTimestamp = salePrices[salePrices.length - 1].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
+        console.log("start set")
+        console.log(firstTimestamp)
         setStartTime(firstTimestamp);
       }
       if (!endTime || lastTimestamp > endTime) {
-        setEndTime(lastTimestamp)
+        console.log("end set")
+        console.log(lastTimestamp)
+        setEndTime(lastTimestamp);
       }
       setSalePrice(salePrices);
     })
@@ -229,10 +263,14 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       const firstTimestamp = bidPrices[0].time as UTCTimestamp;
       const lastTimestamp = bidPrices[bidPrices.length - 1].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
+        console.log("start set")
+        console.log(firstTimestamp)
         setStartTime(firstTimestamp);
       }
       if (!endTime || lastTimestamp > endTime) {
-        setEndTime(lastTimestamp)
+        console.log("end set")
+        console.log(lastTimestamp)
+        setEndTime(lastTimestamp);
       }
       setBidPrice(bidPrices);
     })
