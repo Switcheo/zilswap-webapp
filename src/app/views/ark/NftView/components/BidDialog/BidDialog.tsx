@@ -379,7 +379,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
               {wrappingRequired && (
                 <Box className={classes.infoBox}>
                   <Text>
-                    You will need to wrap your <strong>ZIL</strong> to <strong>Wrapped ZIL</strong> (w<strong>ZIL</strong>) in Step 2
+                    You will need to wrap your <strong>ZIL</strong> to <strong>Wrapped ZIL</strong> (<strong>wZIL</strong>) in Step 2
                     to place this bid. wZIL can be exchanged back to ZIL in a 1:1 ratio. Click
                     {" "}
                     <Link
@@ -387,7 +387,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                       target="_blank"
                       href="https://dev.zilliqa.com/docs/dev/dev-wrapped-zil"
                     >
-                      here
+                      <strong>here</strong>
                     </Link>
                     {" "}
                     to learn more.
@@ -634,7 +634,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     border: "1px solid #FFDF6B",
     backgroundColor: `rgba${hexToRGBA("#FFDF6B", 0.2)}`,
     borderRadius: 12,
-    padding: theme.spacing(2, 3),
+    padding: theme.spacing(2),
     "& .MuiTypography-root": {
       color: "#FFDF6B",
       fontSize: "14px",
