@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { Box, Button, ButtonGroup, makeStyles, Typography } from "@material-ui/core";
+import { Box, Button, ButtonGroup, Container, makeStyles, Typography } from "@material-ui/core";
 import BigNumber from "bignumber.js";
 import { createChart, CrosshairMode, IChartApi, ISeriesApi, LineData, UTCTimestamp, WhitespaceData } from "lightweight-charts";
 import { ArkBox } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { getBlockchain } from "app/saga/selectors";
 import { ArkClient } from "core/utilities";
-import { useAsyncTask } from "app/utils";
+import { useAsyncTask, useMoneyFormatter } from "app/utils";
 import { fromBech32Address } from "core/zilswap";
 import { TIME_UNIX_PAIRS } from "app/utils/constants";
 
@@ -108,7 +108,7 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
   }, [startTime, endTime])
 
   useEffect(() => {
-    if (!collectionFloor || !salePrice || !bidPrice) return;
+    if (!collectionFloor && !salePrice && !bidPrice) return;
     if (graphRef.current && !chart && startTime && endTime) {
       const newChart = createChart(graphRef.current, {
         width: graphRef.current.clientWidth,
@@ -166,9 +166,9 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
 
       const whiteSeries = newChart.addLineSeries();
       const whitespaceData = generateWhitespaceData(startTime, endTime, currentInterval)
-      floorSeries.setData(collectionFloor);
-      bidSeries.setData(bidPrice);
-      saleSeries.setData(salePrice);
+      if (collectionFloor) floorSeries.setData(collectionFloor);
+      if (bidPrice) bidSeries.setData(bidPrice);
+      if (salePrice) saleSeries.setData(salePrice);
       whiteSeries.setData(whitespaceData);
       newChart.timeScale().fitContent();
       setChart(newChart);
@@ -180,9 +180,9 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
     }
     if (chart && floorSeries && bidSeries && saleSeries && whiteSeries && startTime && endTime) {
       const whitespaceData = generateWhitespaceData(startTime, endTime, currentInterval);
-      floorSeries.setData(collectionFloor);
-      bidSeries.setData(bidPrice);
-      saleSeries.setData(salePrice);
+      if (collectionFloor) floorSeries.setData(collectionFloor);
+      if (bidPrice) bidSeries.setData(bidPrice);
+      if (salePrice) saleSeries.setData(salePrice);
       whiteSeries.setData(whitespaceData);
       chart.timeScale().fitContent();
     }
@@ -201,6 +201,7 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
           time: (Date.parse(floor.intervalTime) / 1000) as UTCTimestamp,
         })
       });
+      if (collectionFloors.length === 0) return;
       const firstTimestamp = collectionFloors[0].time as UTCTimestamp;
       const lastTimestamp = collectionFloors[collectionFloors.length - 1].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
@@ -225,6 +226,7 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
           time: (Date.parse(price.intervalTime) / 1000) as UTCTimestamp,
         })
       });
+      if (salePrices.length === 0) return;
       const firstTimestamp = salePrices[0].time as UTCTimestamp;
       const lastTimestamp = salePrices[salePrices.length - 1].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
@@ -249,6 +251,7 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
           time: (Date.parse(price.intervalTime) / 1000) as UTCTimestamp,
         })
       });
+      if (bidPrices.length === 0) return;
       const firstTimestamp = bidPrices[0].time as UTCTimestamp;
       const lastTimestamp = bidPrices[bidPrices.length - 1].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
@@ -268,15 +271,47 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
     return "inherit"
   }
 
+  const moneyFormat = useMoneyFormatter({ maxFractionDigits: 2 });
+
   return (
     <ArkBox variant="base" className={classes.container}>
-      <Box display="flex" justifyContent="flex-end">
+      <Box display="flex" justifyContent="space-between">
+        <div>$35,000 (+52.89%) Past 1 Hour</div>
         <ButtonGroup variant="text">
           <Button color={getColor("hour")} onClick={() => setCurrentInterval("hour")} className={classes.noBorder}><Typography>1H</Typography></Button>
           <Button color={getColor("day")} onClick={() => setCurrentInterval("day")} className={classes.noBorder}><Typography>1D</Typography></Button>
           <Button color={getColor("week")} onClick={() => setCurrentInterval("week")} className={classes.noBorder}><Typography>1W</Typography></Button>
           {/* <Button color={getColor("1month")} onClick={() => setIntervalAndPeriod("1month", "24month")} className={classes.noBorder}><Typography>1M</Typography></Button> */}
         </ButtonGroup>
+      </Box>
+      <Box display="flex" justifyContent="flex-start">
+        <Box>
+          <Container flex-direction="column">
+            Highest Bid
+          </Container>
+          {bidPrice && (
+            <Container flex-direction="column">
+              {moneyFormat(bidPrice[bidPrice.length - 1].value, {})} ZIL
+            </Container>)}
+        </Box>
+        <Box>
+          <Container flex-direction="column">
+            Last Traded
+          </Container>
+          {salePrice && (
+            <Container flex-direction="column">
+              {moneyFormat(salePrice[salePrice.length - 1].value, {})} ZIL
+            </Container>)}
+        </Box>
+        <Box>
+          <Container flex-direction="column">
+            Floor Price
+          </Container>
+          {collectionFloor && (
+            <Container flex-direction="column">
+              {moneyFormat(collectionFloor[collectionFloor.length - 1].value, {})} ZIL
+            </Container>)}
+        </Box>
       </Box>
       <Box className={classes.graph} {...{ ref: graphRef }}></Box>
     </ArkBox>
