@@ -5,7 +5,6 @@ import {
 } from "@material-ui/core";
 import LaunchIcon from "@material-ui/icons/Launch";
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import BigNumber from "bignumber.js";
 import cls from "classnames";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,11 +16,12 @@ import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { MarketPlaceState, OAuth, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { toHumanNumber, useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
+import { bnOrZero, toHumanNumber, useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { toBech32Address } from "core/zilswap";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
+
 export interface Props extends CardProps {
   token: Nft;
   collectionAddress: string;
@@ -38,6 +38,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const [runUpdateProfileImage] = useAsyncTask("updateProfileImage", () => {
     toaster("Error setting profile image")
   });
+  const [runResyncMetadata] = useAsyncTask("resyncMetadata");
   const dispatch = useDispatch();
   const [blockTime, currentBlock, currentTime] = useBlockTime();
   const network = useNetwork();
@@ -55,8 +56,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     const askToken = tokens[toBech32Address(token.bestAsk.price.address)];
     if (!askToken) return undefined;
 
-    const placement = new BigNumber(10).pow(askToken.decimals);
-    const amount = new BigNumber(token.bestAsk?.price.amount).div(placement);
+    const amount = bnOrZero(token.bestAsk?.price.amount).shiftedBy(-askToken.decimals);
     return { expiryTime, hoursLeft, minsLeft, secLeft, amount, askToken };
     // eslint-disable-next-line
   }, [blockTime, token.bestAsk, tokens])
@@ -69,11 +69,20 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     const bidToken = tokens[toBech32Address(token.bestBid.price.address)];
     if (!bidToken) return undefined;
 
-    const placement = new BigNumber(10).pow(bidToken.decimals);
-    const amount = new BigNumber(token.bestBid?.price.amount).div(placement);
+    const amount = bnOrZero(token.bestBid?.price.amount).shiftedBy(-bidToken.decimals);
     return { amount, timeLeft, bidToken };
     // eslint-disable-next-line
   }, [blockTime, token.bestBid, tokens])
+
+  const lastTrade = useMemo(() => {
+    if (!token.lastTrade) return undefined;
+
+    const lastTradeToken = tokens[toBech32Address(token.lastTrade.price.address)];
+    if (!lastTradeToken) return;
+
+    const amount = bnOrZero(token.lastTrade.price.amount).shiftedBy(-lastTradeToken.decimals);
+    return { amount, lastTradeToken };
+  }, [token.lastTrade, tokens])
 
   const explorerLink = useMemo(() => {
     const addr = toBech32Address(collectionAddress);
@@ -118,25 +127,40 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     dispatch(actions.MarketPlace.reloadTokenList())
   }
 
+  const onResyncMetadata = () => {
+    runResyncMetadata(async () => {
+      const arkClient = new ArkClient(network);
+      const { result } = await arkClient.resyncMetadata(collectionAddress, token.tokenId);
+      toaster(result.status);
+      setPopAnchor(null)
+    })
+  }
+
   return (
     <Card {...rest} className={cls(classes.root, className)}>
       <Box className={classes.borderBox}>
         {!dialog && (
           <Box className={classes.cardHeader}>
             {/* to accept as props */}
-            <Box display="flex" flexDirection="column" justifyContent="center">
-              {/* {bestAsk && (
-                <Typography className={classes.bid}>
-                  <DotIcon className={classes.dotIcon} /> BID LIVE {bestAsk.hoursLeft}:{bestAsk.minsLeft}:{bestAsk.secLeft} Left
-                </Typography>
-              )} */}
+            <Box pl={0.5} display="flex" flexDirection="row" alignItems="center" justifyContent="center">
               {bestBid && (
                 <Typography className={classes.secondaryPrice}>
                   <Typography className={classes.secondaryPriceLabel}>Best</Typography>
-                  <Typography component="span" style={{ fontWeight: 700 }}>{toHumanNumber(bestBid.amount)}</Typography>
+                  <Typography component="span" style={{ fontWeight: 700 }}>{toHumanNumber(bestBid.amount, 2)}</Typography>
                   <CurrencyLogo
                     currency={bestBid.bidToken.symbol}
                     address={bestBid.bidToken.address}
+                    className={classes.tokenLogo}
+                  />
+                </Typography>
+              )}
+              {lastTrade && (
+                <Typography className={cls(classes.secondaryPrice, { [classes.extraMargin]: bestBid })}>
+                  <Typography className={classes.secondaryPriceLabel}>Last</Typography>
+                  <Typography component="span" style={{ fontWeight: 700 }}>{toHumanNumber(lastTrade.amount, 2)}</Typography>
+                  <CurrencyLogo
+                    currency={lastTrade.lastTradeToken.symbol}
+                    address={lastTrade.lastTradeToken.address}
                     className={classes.tokenLogo}
                   />
                 </Typography>
@@ -283,8 +307,11 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                         </Link>
                         <Box className={classes.divider} />
                         <Typography onClick={setAsProfileImage} className={classes.popperText}>Set as profile picture</Typography>
+
                       </>
                     )}
+                    <Box className={classes.divider} />
+                    <Typography onClick={onResyncMetadata} className={classes.popperText}>Reload Metadata</Typography>
                   </Popper>
                 </ClickAwayListener>
               )}
@@ -517,6 +544,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&:hover": {
       color: "#6BE1FF",
     }
+  },
+  extraMargin: {
+    marginLeft: 6,
   }
 }));
 

@@ -1,76 +1,50 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Table, TableHead, TableBody, TableRow, TableCell, TableProps, TableContainer } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import BigNumber from "bignumber.js";
 import { useDispatch, useSelector } from "react-redux";
 import { AppTheme } from "app/theme/types";
-import { CollectionTrait, Nft, TraitValue } from "app/store/types";
-import { SimpleMap, useAsyncTask, useNetwork } from "app/utils";
+import { Nft } from "app/store/types";
+import { bnOrZero, useAsyncTask, useNetwork } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { getMarketplace } from "app/saga/selectors";
 import { actions } from "app/store";
 
 interface Props extends TableProps {
-  traits?: TraitValue[];
-  token?: Nft;
-}
-
-interface TraitsStatistic {
-  trait: string;
-  rarity?: number;
-  value?: string;
-  type?: string;
-  total?: number;
-  percentage?: string;
-  values: SimpleMap<number>;
+  token: Nft;
 }
 
 const TraitTable: React.FC<Props> = (props: Props) => {
   const { token, children, className, ...rest } = props;
-  const classes = useStyles();
-  const [runGetCollectionTraits] = useAsyncTask("getCollectionTraits");
-  const network = useNetwork();
-  const { collectionTraits } = useSelector(getMarketplace);
-  const [traits, setTraits] = useState<TraitsStatistic[]>([]);
   const dispatch = useDispatch();
+  const classes = useStyles();
+  const network = useNetwork();
+  const { collections, collectionTraits } = useSelector(getMarketplace);
+  const [runGetCollectionTraits] = useAsyncTask("getCollectionTraits");
+
+  const collectionAddress = token.collection.address.toLowerCase();
+  const currentCollectionTraits = collectionTraits[collectionAddress];
+  const collection = collections[collectionAddress]
+
+  const total = bnOrZero(collection?.tokenStat.tokenCount);
 
   useEffect(() => {
     runGetCollectionTraits(async () => {
-      if (!token?.collection || !token?.traitValues?.length) return;
-
-      const address = token.collection.address.toLowerCase();
-      const arkClient = new ArkClient(network);
-      let currentCollectionTraits = collectionTraits[address];
-      if (!currentCollectionTraits) {
-        const { result } = await arkClient.getCollectionTraits(address);
-        const resultTraits: CollectionTrait[] = result.entries;
-        currentCollectionTraits = resultTraits;
-        dispatch(actions.MarketPlace.updateCollectionTraits({ address, traits: resultTraits }));
+      if (!collection || !currentCollectionTraits) {
+        const arkClient = new ArkClient(network);
+        const res = await arkClient.getCollectionTraits(collectionAddress);
+        dispatch(actions.MarketPlace.updateCollectionTraits(res));
       }
-
-      const traitMap: SimpleMap<CollectionTrait> = currentCollectionTraits.reduce((prev, curr) => ({ ...prev, [curr.trait]: curr }), {});
-
-      let newTraits: SimpleMap<TraitsStatistic> = {};
-
-      token.traitValues.forEach((trait) => {
-        if (!trait.traitType?.trait) return;
-        const traitName = trait.traitType.trait;
-        newTraits[traitName] = traitMap[traitName];
-
-        const currentTrait = newTraits[traitName];
-        currentTrait.rarity = currentTrait.values[trait.value];
-        currentTrait.value = trait.value;
-        currentTrait.type = trait.traitType?.trait;
-        currentTrait.total = (Object.values(currentTrait.values) as number[]).reduce((prev, cur) => prev + cur, 0);
-
-        const percent = new BigNumber(currentTrait.values[trait.value]).div(currentTrait.total);
-        currentTrait.percentage = percent.shiftedBy(2).toFormat(percent.lt(1) ? 2 : 0);
-      })
-      setTraits(Object.values(newTraits));
     })
     // eslint-disable-next-line
-  }, [token?.traitValues])
+  }, [])
+
+  const getPercent = (c?: number) => {
+    const count = bnOrZero(c)
+    if (count.lte(0) || total.isZero()) return "-"
+    const percent = count.div(total);
+    return `${percent.shiftedBy(2).toFormat(percent.lt(1) ? 2 : 0)} %`
+  }
 
   return (
     <TableContainer>
@@ -83,18 +57,19 @@ const TraitTable: React.FC<Props> = (props: Props) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {traits.map((trait: TraitsStatistic) => (
-            <TableRow className={classes.bodyRow} key={trait.value}>
-              <TableCell className={cls(classes.key, 'highlight')} align="center">{trait.type || "-"}</TableCell>
-              <TableCell className="highlight" align="center">{trait.value || "-"}</TableCell>
-              <TableCell align="center">{trait.rarity || "-"}</TableCell>
-              <TableCell align="center">{trait.percentage ? `${trait.percentage} %` : "-"}</TableCell>
+          {token.traitValues.sort((a, b) => a.traitType.trait.localeCompare(b.traitType.trait)).map((value) => {
+            const trait = value.traitType.trait
+            return <TableRow className={classes.bodyRow} key={value.value}>
+              <TableCell className={cls(classes.key, 'highlight')} align="center">{trait}</TableCell>
+              <TableCell className="highlight" align="center">{value.value || "-"}</TableCell>
+              <TableCell align="center">{value.count || "-"}</TableCell>
+              <TableCell align="center">{getPercent(value.count)}</TableCell>
             </TableRow>
-          ))}
-          {traits.length === 0 && (
+          })}
+          {(!token.traitValues || token.traitValues.length === 0) && (
             <TableRow>
               <TableCell colSpan={4} className={cls(classes.emptyState, 'row')}>
-                No data yet.
+                No trait data yet.
               </TableCell>
             </TableRow>
           )}

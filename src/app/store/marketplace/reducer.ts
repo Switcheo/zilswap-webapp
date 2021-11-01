@@ -35,6 +35,7 @@ const initial_state: MarketPlaceState = {
   exchangeInfo: undefined,
   profile: undefined,
   collectionTraits: {},
+  filteredTokensTraits: {},
   pendingTxs: {},
 }
 
@@ -59,7 +60,8 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
     case MarketPlaceActionTypes.UPDATE_TOKENS:
       return {
         ...state,
-        tokens: payload.entries,
+        tokens: payload.tokens,
+        filteredTokensTraits: payload.traits ?? state.filteredTokensTraits,
         filter: {
           ...state.filter,
           pagination: {
@@ -84,9 +86,13 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
     case MarketPlaceActionTypes.UPDATE_COLLECTION_TRAITS:
       return {
         ...state,
+        collections: {
+          ...state.collections,
+          [payload.collection.address]: payload.collection,
+        },
         collectionTraits: {
           ...state.collectionTraits,
-          [payload.address]: payload.traits,
+          [payload.collection.address]: payload.traits,
         }
       }
     case MarketPlaceActionTypes.UPDATE_BIDS_TABLE_INFO: {

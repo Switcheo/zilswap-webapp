@@ -8,7 +8,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { ArkImageView, CurrencyLogo } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
-import { Collection } from "app/store/types";
+import { CollectionWithStats } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
 import { bnOrZero } from "app/utils";
@@ -56,7 +56,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   });
 
   // fetch collections (to use store instead)
-  const [collections, setCollections] = useState<Collection[]>([]);
+  const [collections, setCollections] = useState<CollectionWithStats[]>([]);
 
   useEffect(() => {
     const getCollections = async () => {
@@ -76,7 +76,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   }
 
   const filteredCollections = useMemo(() => {
-    const sorted = collections.sort((a, b) => bnOrZero(b.priceStat?.volume).comparedTo(a.priceStat?.volume || 0))
+    const sorted = collections.sort((a, b) => bnOrZero(b.priceStat ? b.priceStat.volume : 0).comparedTo(a.priceStat ? a.priceStat.volume : 0))
 
     if (!search.trim().length) return sorted
 

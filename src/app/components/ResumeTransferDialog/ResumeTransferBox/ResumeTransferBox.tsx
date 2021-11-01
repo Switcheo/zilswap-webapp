@@ -430,7 +430,7 @@ const ResumeTransferBox = (props: any) => {
                         <strong>Error:</strong> {errorMsg ?? error?.message ?? "Please enter a valid transfer key."}
                     </Text>
                     {swthAddress && !depositTransfer && (
-                        <Text color="error" variant="body2" marginTop={0.5}>No transactions found for TradeHub address: {swthAddress}.</Text>
+                        <Text color="error" variant="body2" marginTop={0.5}>No transactions found for Carbon address: {swthAddress}.</Text>
                     )}
                 </Box>
             }

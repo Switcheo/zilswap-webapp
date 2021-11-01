@@ -81,19 +81,19 @@ function* loadNftList() {
       if (filter.owner) newQuery.owner = filter.owner;
       if (filter.likedBy) newQuery.likedBy = filter.likedBy;
 
-      const tokenResult = (yield call(arkClient.listTokens, newQuery)) as unknown as any;
+      const res = (yield call(arkClient.listTokens, newQuery)) as unknown as any;
 
-      logger("load nft list", "result", tokenResult);
-      yield put(actions.MarketPlace.updateTokens(tokenResult.result));
+      logger("load nft list", "result", res);
+      yield put(actions.MarketPlace.updateTokens({ tokens: res.result.entries }));
     } else {
       if (!collectionAddress) return;
       if (wallet) {
         query.viewer = wallet.addressInfo.byte20.toLowerCase()
       }
-      const tokenResult = (yield call(arkClient.searchCollection, collectionAddress, query)) as unknown as any;
+      const result = (yield call(arkClient.searchCollection, collectionAddress, query)) as unknown as any;
 
-      logger("load nft search", "result", tokenResult);
-      yield put(actions.MarketPlace.updateTokens(tokenResult.result));
+      logger("load nft search", "result", result);
+      yield put(actions.MarketPlace.updateTokens(result));
     }
 
   } catch (error) {

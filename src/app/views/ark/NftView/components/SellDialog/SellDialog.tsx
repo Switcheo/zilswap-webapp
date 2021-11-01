@@ -359,7 +359,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               </Box>
 
               {error && (
-                <Text marginTop={2} color="error">Error: {error?.message ?? "Unknown error"}</Text>
+                <Text marginTop={2} className={classes.breakWord} color="error" >Error: {error?.message ?? "Unknown error"}</Text>
               )}
               <FancyButton
                 className={classes.actionButton}
@@ -609,7 +609,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   stepBarCompleted: {
     backgroundImage: "linear-gradient(#00FFB0, #00FFB0)",
-  }
+  },
+  breakWord: {
+    wordBreak: "break-word"
+  },
 }));
 
 export default SellDialog;

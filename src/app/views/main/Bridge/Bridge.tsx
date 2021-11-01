@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Button, FormControl, MenuItem, Select } from "@material-ui/core";
+import { Box, Button, FormControl, MenuItem, Select, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from 'bignumber.js';
@@ -260,7 +260,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const setSourceAddress = (address: string) => {
 
-  setFormState(prevState => ({
+    setFormState(prevState => ({
       ...prevState,
       sourceAddress: address
     }))
@@ -552,7 +552,15 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
           <Text variant="h2" align="center" marginTop={2}>
             Zil<span className={classes.textColoured}>Bridge</span>
           </Text>
-          <Text margin={1} align="center" color="textSecondary" className={classes.textSpacing}>Powered by Switcheo TradeHub</Text>
+          <Text margin={1} align="center" color="textSecondary" className={classes.textSpacing}>
+            <Tooltip placement="bottom" arrow title="TradeHub has been renamed Carbon!">
+              <span>
+                Powered by
+                {" "}
+                <a href="https://carbon.network" target="_blank" rel="noreferrer">Carbon</a>
+              </span>
+            </Tooltip>
+          </Text>
           <Box mt={2} mb={2} display="flex" justifyContent="space-between" position="relative">
             <Box className={classes.box} bgcolor="background.contrast">
               <Text variant="h4" align="center">From</Text>
