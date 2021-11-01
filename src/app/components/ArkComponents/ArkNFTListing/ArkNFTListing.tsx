@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import clsx from "clsx";
-import { Box, BoxProps, CircularProgress, Grid } from "@material-ui/core";
+import { Box, BoxProps, Grid, CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useSelector, useDispatch } from "react-redux";
 import { ArkNFTCard, Text } from "app/components";
@@ -19,7 +19,6 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
   const { filterComponent, className, collectionName } = props;
   const classes = useStyles();
   const { filter, tokens } = useSelector(getMarketplace);
-  const [loading] = useTaskSubscriber("reloadNftList");
   const [loadingScroll] = useTaskSubscriber("loadTokens");
   const dispatch = useDispatch();
   const loader = useRef<any>();
@@ -47,7 +46,7 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
             {collectionName}
           </span>
         }
-        {!!filter?.pagination?.count && 
+        {!!filter?.pagination?.count &&
           <span>
             |
             <span className={classes.results}>
@@ -67,10 +66,6 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
             />
           </Grid>
         ))}
-        <Box className={clsx(classes.backdrop, { [classes.backdropActive]: loading })}>
-          <Box marginTop={10} />
-          <CircularProgress color="inherit" />
-        </Box>
       </Grid>
       {loadingScroll &&
         <Box display="flex" justifyContent="center" alignItems="center" mt={4}>
