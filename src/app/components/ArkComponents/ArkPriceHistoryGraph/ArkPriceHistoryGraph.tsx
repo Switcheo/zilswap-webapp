@@ -2,13 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { Box, Button, ButtonGroup, makeStyles, Typography } from "@material-ui/core";
 import BigNumber from "bignumber.js";
-import { createChart, CrosshairMode, IChartApi, ISeriesApi, LineData, UTCTimestamp } from "lightweight-charts";
+import { createChart, CrosshairMode, IChartApi, ISeriesApi, LineData, UTCTimestamp, WhitespaceData } from "lightweight-charts";
 import { ArkBox } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { getBlockchain } from "app/saga/selectors";
 import { ArkClient } from "core/utilities";
 import { useAsyncTask } from "app/utils";
 import { fromBech32Address } from "core/zilswap";
+import { TIME_UNIX_PAIRS } from "app/utils/constants";
 
 interface Props {
   collectionId: string;
@@ -68,20 +69,26 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
   const [floorSeries, setFloorSeries] = useState<ISeriesApi<"Line"> | null>(null);
   const [bidSeries, setBidSeries] = useState<ISeriesApi<"Line"> | null>(null);
   const [saleSeries, setSaleSeries] = useState<ISeriesApi<"Line"> | null>(null);
-  const [currentInterval, setCurrentInterval] = useState("hour")
+  const [whiteSeries, setWhiteSeries] = useState<ISeriesApi<"Line"> | null>(null);
+  const [currentInterval, setCurrentInterval] = useState("hour");
+  const [startTime, setStartTime] = useState<UTCTimestamp | null>(null);
+  const [endTime, setEndTime] = useState<UTCTimestamp | null>(null);
   const graphRef = useRef<HTMLDivElement | null>(null);
 
-  // TODO: generate dynamic WhiteSpaceData
-  // const whiteSpace: WhitespaceData[] = [
-  //   { time: 1635314400 as UTCTimestamp },
-  //   { time: 1635318000 as UTCTimestamp },
-  //   { time: 1635321600 as UTCTimestamp },
-  //   { time: 1635325200 as UTCTimestamp },
-  //   { time: 1635328800 as UTCTimestamp },
-  //   { time: 1635332400 as UTCTimestamp },
-  //   { time: 1635336000 as UTCTimestamp },
-  //   { time: 1635339600 as UTCTimestamp }
-  // ]
+  const generateWhitespaceData = (start: UTCTimestamp, end: UTCTimestamp, interval: string) => {
+    const unixInterval = TIME_UNIX_PAIRS[interval]
+    console.log(unixInterval)
+    let data = new Array<WhitespaceData>();
+    let currentTimestamp = start as number;
+    while (currentTimestamp <= end) {
+      data.push({
+        time: currentTimestamp as UTCTimestamp,
+      });
+      currentTimestamp += unixInterval;
+    }
+    console.log(data);
+    return data;
+  }
 
   useEffect(() => {
     getCollectionFloor();
@@ -91,7 +98,7 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
   }, [currentInterval])
 
   useEffect(() => {
-    if (!collectionFloor || !salePrice || !bidPrice) return;
+    if (!collectionFloor || !salePrice || !bidPrice || !startTime || !endTime) return;
     if (graphRef.current && !chart) {
       const newChart = createChart(graphRef.current, {
         width: 600,
@@ -139,21 +146,24 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
         lineWidth: 3
       });
 
-      // const whiteSeries = newChart.addLineSeries();
-
+      const whiteSeries = newChart.addLineSeries();
+      const whitespaceData = generateWhitespaceData(startTime, endTime, currentInterval)
       floorSeries.setData(collectionFloor);
       bidSeries.setData(bidPrice);
       saleSeries.setData(salePrice);
-      // whiteSeries.setData(whiteSpace);
+      whiteSeries.setData(whitespaceData);
       setChart(newChart);
       setFloorSeries(floorSeries);
       setBidSeries(bidSeries);
       setSaleSeries(saleSeries);
+      setWhiteSeries(whiteSeries);
     }
-    if (chart && floorSeries && bidSeries && saleSeries) {
+    if (chart && floorSeries && bidSeries && saleSeries && whiteSeries) {
+      const whitespaceData = generateWhitespaceData(startTime, endTime, currentInterval);
       floorSeries.setData(collectionFloor);
       bidSeries.setData(bidPrice);
       saleSeries.setData(salePrice);
+      whiteSeries.setData(whitespaceData);
     }
     // eslint-disable-next-line
   }, [collectionFloor, bidPrice, salePrice])
@@ -170,6 +180,16 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
           time: (Date.parse(floor.intervalTime) / 1000) as UTCTimestamp,
         })
       });
+      const firstTimestamp = collectionFloors[0].time as UTCTimestamp;
+      const lastTimestamp = collectionFloors[collectionFloors.length - 1].time as UTCTimestamp;
+      console.log(firstTimestamp);
+      console.log(lastTimestamp);
+      if (!startTime || firstTimestamp < startTime) {
+        setStartTime(firstTimestamp);
+      }
+      if (!endTime || lastTimestamp > endTime) {
+        setEndTime(lastTimestamp)
+      }
       console.log(collectionFloors);
       setCollectionFloor(collectionFloors)
     })
@@ -187,6 +207,16 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
           time: (Date.parse(price.intervalTime) / 1000) as UTCTimestamp,
         })
       });
+      const firstTimestamp = salePrices[0].time as UTCTimestamp;
+      const lastTimestamp = salePrices[salePrices.length - 1].time as UTCTimestamp;
+      console.log(firstTimestamp);
+      console.log(lastTimestamp);
+      if (!startTime || firstTimestamp < startTime) {
+        setStartTime(firstTimestamp);
+      }
+      if (!endTime || lastTimestamp > endTime) {
+        setEndTime(lastTimestamp)
+      }
       console.log(salePrices);
       setSalePrice(salePrices);
     })
@@ -204,6 +234,16 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
           time: (Date.parse(price.intervalTime) / 1000) as UTCTimestamp,
         })
       });
+      const firstTimestamp = bidPrices[0].time as UTCTimestamp;
+      const lastTimestamp = bidPrices[bidPrices.length - 1].time as UTCTimestamp;
+      console.log(firstTimestamp);
+      console.log(lastTimestamp);
+      if (!startTime || firstTimestamp < startTime) {
+        setStartTime(firstTimestamp);
+      }
+      if (!endTime || lastTimestamp > endTime) {
+        setEndTime(lastTimestamp)
+      }
       console.log(bidPrices);
       setBidPrice(bidPrices);
     })
