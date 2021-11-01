@@ -77,7 +77,6 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
 
   const generateWhitespaceData = (start: UTCTimestamp, end: UTCTimestamp, interval: string) => {
     const unixInterval = TIME_UNIX_PAIRS[interval]
-    console.log(unixInterval)
     let data = new Array<WhitespaceData>();
     let currentTimestamp = start as number;
     while (currentTimestamp <= end) {
@@ -86,7 +85,6 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       });
       currentTimestamp += unixInterval;
     }
-    console.log(data);
     return data;
   }
 
@@ -182,15 +180,12 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       });
       const firstTimestamp = collectionFloors[0].time as UTCTimestamp;
       const lastTimestamp = collectionFloors[collectionFloors.length - 1].time as UTCTimestamp;
-      console.log(firstTimestamp);
-      console.log(lastTimestamp);
       if (!startTime || firstTimestamp < startTime) {
         setStartTime(firstTimestamp);
       }
       if (!endTime || lastTimestamp > endTime) {
         setEndTime(lastTimestamp)
       }
-      console.log(collectionFloors);
       setCollectionFloor(collectionFloors)
     })
   }
@@ -209,15 +204,12 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       });
       const firstTimestamp = salePrices[0].time as UTCTimestamp;
       const lastTimestamp = salePrices[salePrices.length - 1].time as UTCTimestamp;
-      console.log(firstTimestamp);
-      console.log(lastTimestamp);
       if (!startTime || firstTimestamp < startTime) {
         setStartTime(firstTimestamp);
       }
       if (!endTime || lastTimestamp > endTime) {
         setEndTime(lastTimestamp)
       }
-      console.log(salePrices);
       setSalePrice(salePrices);
     })
   }
@@ -236,15 +228,12 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       });
       const firstTimestamp = bidPrices[0].time as UTCTimestamp;
       const lastTimestamp = bidPrices[bidPrices.length - 1].time as UTCTimestamp;
-      console.log(firstTimestamp);
-      console.log(lastTimestamp);
       if (!startTime || firstTimestamp < startTime) {
         setStartTime(firstTimestamp);
       }
       if (!endTime || lastTimestamp > endTime) {
         setEndTime(lastTimestamp)
       }
-      console.log(bidPrices);
       setBidPrice(bidPrices);
     })
   }
