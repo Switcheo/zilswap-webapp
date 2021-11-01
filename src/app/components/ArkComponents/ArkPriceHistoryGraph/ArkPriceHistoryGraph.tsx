@@ -95,17 +95,19 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
   }
 
   useEffect(() => {
-    // setStartTime(null);
-    // setEndTime(null);
-    getCollectionFloor();
-    getSalePrice();
-    getBidPrice();
+    setStartTime(null);
+    setEndTime(null);
     // eslint-disable-next-line
   }, [currentInterval])
 
   useEffect(() => {
-    console.log(startTime);
-    console.log(endTime);
+    getCollectionFloor();
+    getSalePrice();
+    getBidPrice();
+    // eslint-disable-next-line
+  }, [startTime, endTime])
+
+  useEffect(() => {
     if (!collectionFloor || !salePrice || !bidPrice) return;
     if (graphRef.current && !chart && startTime && endTime) {
       const newChart = createChart(graphRef.current, {
@@ -176,11 +178,7 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       setWhiteSeries(whiteSeries);
       window.addEventListener('resize', updateSize)
     }
-    console.log("here")
-    console.log(startTime)
-    console.log(endTime)
     if (chart && floorSeries && bidSeries && saleSeries && whiteSeries && startTime && endTime) {
-      console.log("oh here");
       const whitespaceData = generateWhitespaceData(startTime, endTime, currentInterval);
       floorSeries.setData(collectionFloor);
       bidSeries.setData(bidPrice);
@@ -206,14 +204,9 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       const firstTimestamp = collectionFloors[0].time as UTCTimestamp;
       const lastTimestamp = collectionFloors[collectionFloors.length - 1].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
-        console.log("start set")
-        console.log(firstTimestamp)
         setStartTime(firstTimestamp);
       }
-      console.log(endTime)
       if (!endTime || lastTimestamp > endTime) {
-        console.log("end set")
-        console.log(lastTimestamp)
         setEndTime(lastTimestamp);
       }
       setCollectionFloor(collectionFloors)
@@ -235,13 +228,9 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       const firstTimestamp = salePrices[0].time as UTCTimestamp;
       const lastTimestamp = salePrices[salePrices.length - 1].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
-        console.log("start set")
-        console.log(firstTimestamp)
         setStartTime(firstTimestamp);
       }
       if (!endTime || lastTimestamp > endTime) {
-        console.log("end set")
-        console.log(lastTimestamp)
         setEndTime(lastTimestamp);
       }
       setSalePrice(salePrices);
@@ -263,13 +252,9 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       const firstTimestamp = bidPrices[0].time as UTCTimestamp;
       const lastTimestamp = bidPrices[bidPrices.length - 1].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
-        console.log("start set")
-        console.log(firstTimestamp)
         setStartTime(firstTimestamp);
       }
       if (!endTime || lastTimestamp > endTime) {
-        console.log("end set")
-        console.log(lastTimestamp)
         setEndTime(lastTimestamp);
       }
       setBidPrice(bidPrices);
