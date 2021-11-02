@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { Box, Button, ButtonGroup, Container, makeStyles, Typography } from "@material-ui/core";
 import BigNumber from "bignumber.js";
-import { createChart, CrosshairMode, IChartApi, ISeriesApi, LineData, UTCTimestamp, WhitespaceData } from "lightweight-charts";
+import moment from "moment";
+import { createChart, CrosshairMode, IChartApi, ISeriesApi, LineData, UTCTimestamp } from "lightweight-charts";
 import { ArkBox } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { getBlockchain } from "app/saga/selectors";
@@ -21,17 +22,17 @@ interface Props {
 }
 
 interface FloorPrice {
-  floorPrice: number,
+  floorPrice: string,
   intervalTime: string,
 }
 
 interface SalePrice {
-  highestSale: number,
+  highestSale: string,
   intervalTime: string,
 }
 
 interface BidPrice {
-  highestBid: number,
+  highestBid: string,
   intervalTime: string,
 }
 
@@ -102,6 +103,21 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "12px",
     fontWeight: 700,
     color: "rgba(222, 255, 255, 0.5)",
+  },
+  change: {
+    fontFamily: 'Avenir Next',
+    fontSize: "14px",
+  },
+  noChange: {
+    marginRight: theme.spacing(1),
+  },
+  priceUp: {
+    color: "#00FFB0",
+    marginRight: theme.spacing(1),
+  },
+  priceDown: {
+    color: "#FF5252",
+    marginRight: theme.spacing(1),
   }
 }));
 
@@ -123,21 +139,10 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
   const [whiteSeries, setWhiteSeries] = useState<ISeriesApi<"Line"> | null>(null);
   const [currentInterval, setCurrentInterval] = useState("hour");
   const [startTime, setStartTime] = useState<UTCTimestamp | null>(null);
-  const [endTime, setEndTime] = useState<UTCTimestamp | null>(null);
+  const [endTime, setEndTime] = useState<UTCTimestamp>(moment().unix() as UTCTimestamp);
+  const [growth, setGrowth] = useState<BigNumber | null>(null);
   const graphRef = useRef<HTMLDivElement | null>(null);
 
-  const generateWhitespaceData = (start: UTCTimestamp, end: UTCTimestamp, interval: string) => {
-    const unixInterval = TIME_UNIX_PAIRS[interval]
-    let data = new Array<WhitespaceData>();
-    let currentTimestamp = start as number;
-    while (currentTimestamp <= end) {
-      data.push({
-        time: currentTimestamp as UTCTimestamp,
-      });
-      currentTimestamp += unixInterval;
-    }
-    return data;
-  }
   const updateSize = () => {
     if (graphRef.current) {
       chart?.resize(graphRef.current.clientWidth, graphRef.current.clientHeight);
@@ -146,7 +151,7 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     setStartTime(null);
-    setEndTime(null);
+    setEndTime(moment().unix() as UTCTimestamp);
     // eslint-disable-next-line
   }, [currentInterval])
 
@@ -155,11 +160,11 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
     getSalePrice();
     getBidPrice();
     // eslint-disable-next-line
-  }, [startTime, endTime])
+  }, [startTime])
 
   useEffect(() => {
     if (!collectionFloor && !salePrice && !bidPrice) return;
-    if (graphRef.current && !chart && startTime && endTime) {
+    if (graphRef.current && !chart && startTime) {
       const newChart = createChart(graphRef.current, {
         width: graphRef.current.clientWidth,
         height: graphRef.current.clientHeight,
@@ -215,11 +220,9 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       });
 
       const whiteSeries = newChart.addLineSeries();
-      const whitespaceData = generateWhitespaceData(startTime, endTime, currentInterval)
       if (collectionFloor) floorSeries.setData(collectionFloor);
       if (bidPrice) bidSeries.setData(bidPrice);
       if (salePrice) saleSeries.setData(salePrice);
-      whiteSeries.setData(whitespaceData);
       newChart.timeScale().fitContent();
       setChart(newChart);
       setFloorSeries(floorSeries);
@@ -228,37 +231,56 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       setWhiteSeries(whiteSeries);
       window.addEventListener('resize', updateSize)
     }
-    if (chart && floorSeries && bidSeries && saleSeries && whiteSeries && startTime && endTime) {
-      const whitespaceData = generateWhitespaceData(startTime, endTime, currentInterval);
+    if (chart && floorSeries && bidSeries && saleSeries && whiteSeries && startTime) {
       if (collectionFloor) floorSeries.setData(collectionFloor);
       if (bidPrice) bidSeries.setData(bidPrice);
       if (salePrice) saleSeries.setData(salePrice);
-      whiteSeries.setData(whitespaceData);
       chart.timeScale().fitContent();
     }
     // eslint-disable-next-line
-  }, [collectionFloor, bidPrice, salePrice, startTime, endTime])
+  }, [collectionFloor, bidPrice, salePrice, startTime])
 
   const getCollectionFloor = () => {
     runGetCollectionFloor(async () => {
       const arkClient = new ArkClient(network);
       const result = await arkClient.getCollectionFloor({ collection, interval: currentInterval });
       const floors: FloorPrice[] = result.result;
+      if (floors.length === 0) return;
+      const unixInterval = TIME_UNIX_PAIRS[currentInterval];
       let collectionFloors = new Array<LineData>();
-      floors.forEach(floor => {
-        collectionFloors.push({
-          value: new BigNumber(floor.floorPrice).shiftedBy(-12).toNumber(),
-          time: (Date.parse(floor.intervalTime) / 1000) as UTCTimestamp,
-        })
-      });
-      if (collectionFloors.length === 0) return;
+      let currentTimestamp = (Date.parse(floors[0].intervalTime) / 1000);
+      let currentValue = new BigNumber(floors[0].floorPrice).shiftedBy(-12).toNumber();
+      let floorsIndex = 0;
+      while (currentTimestamp <= endTime) {
+        if (floorsIndex === floors.length) {
+          collectionFloors.push({
+            value: currentValue,
+            time: currentTimestamp as UTCTimestamp,
+          })
+          currentTimestamp += unixInterval;
+          continue;
+        }
+        const floorsTimestamp = (Date.parse(floors[floorsIndex].intervalTime) / 1000);
+        if (floorsTimestamp === currentTimestamp) {
+          const latestValue = new BigNumber(floors[floorsIndex].floorPrice).shiftedBy(-12).toNumber();
+          collectionFloors.push({
+            value: latestValue,
+            time: currentTimestamp as UTCTimestamp,
+          })
+          currentTimestamp += unixInterval;
+          floorsIndex++;
+          currentValue = latestValue;
+        } else {
+          collectionFloors.push({
+            value: currentValue,
+            time: currentTimestamp as UTCTimestamp,
+          })
+          currentTimestamp += unixInterval;
+        }
+      }
       const firstTimestamp = collectionFloors[0].time as UTCTimestamp;
-      const lastTimestamp = collectionFloors[collectionFloors.length - 1].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
         setStartTime(firstTimestamp);
-      }
-      if (!endTime || lastTimestamp > endTime) {
-        setEndTime(lastTimestamp);
       }
       setCollectionFloor(collectionFloors)
     })
@@ -269,23 +291,49 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       const arkClient = new ArkClient(network);
       const result = await arkClient.getSalePrice({ collection, tokenId, interval: currentInterval });
       const prices: SalePrice[] = result.result;
+      if (prices.length === 0) return
+      const unixInterval = TIME_UNIX_PAIRS[currentInterval];
       let salePrices = new Array<LineData>();
-      prices.forEach(price => {
-        salePrices.push({
-          value: new BigNumber(price.highestSale).shiftedBy(-12).toNumber(),
-          time: (Date.parse(price.intervalTime) / 1000) as UTCTimestamp,
-        })
-      });
-      if (salePrices.length === 0) return;
+      let currentTimestamp = (Date.parse(prices[0].intervalTime) / 1000);
+      let currentValue = new BigNumber(prices[0].highestSale).shiftedBy(-12).toNumber();
+      let pricesIndex = 0;
+      while (currentTimestamp <= endTime) {
+        if (pricesIndex === prices.length) {
+          salePrices.push({
+            value: currentValue,
+            time: currentTimestamp as UTCTimestamp,
+          })
+          currentTimestamp += unixInterval;
+          continue;
+        }
+        const floorsTimestamp = (Date.parse(prices[pricesIndex].intervalTime) / 1000);
+        if (floorsTimestamp === currentTimestamp) {
+          const latestValue = new BigNumber(prices[pricesIndex].highestSale).shiftedBy(-12).toNumber();
+          salePrices.push({
+            value: latestValue,
+            time: currentTimestamp as UTCTimestamp,
+          })
+          currentTimestamp += unixInterval;
+          pricesIndex++;
+          currentValue = latestValue;
+        } else {
+          salePrices.push({
+            value: currentValue,
+            time: currentTimestamp as UTCTimestamp,
+          })
+          currentTimestamp += unixInterval;
+        }
+      }
       const firstTimestamp = salePrices[0].time as UTCTimestamp;
-      const lastTimestamp = salePrices[salePrices.length - 1].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
         setStartTime(firstTimestamp);
       }
-      if (!endTime || lastTimestamp > endTime) {
-        setEndTime(lastTimestamp);
-      }
       setSalePrice(salePrices);
+      if (salePrices.length <= 1) return;
+      const lastSale = salePrices[salePrices.length - 1].value;
+      const secondLastSale = salePrices[salePrices.length - 2].value;
+      const change = (lastSale - secondLastSale) / secondLastSale;
+      setGrowth(new BigNumber(change * 100));
     })
   }
 
@@ -294,21 +342,42 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       const arkClient = new ArkClient(network);
       const result = await arkClient.getBidPrice({ collection, tokenId, interval: currentInterval });
       const prices: BidPrice[] = result.result;
+      if (prices.length === 0) return;
+      const unixInterval = TIME_UNIX_PAIRS[currentInterval];
       let bidPrices = new Array<LineData>();
-      prices.forEach(price => {
-        bidPrices.push({
-          value: new BigNumber(price.highestBid).shiftedBy(-12).toNumber(),
-          time: (Date.parse(price.intervalTime) / 1000) as UTCTimestamp,
-        })
-      });
-      if (bidPrices.length === 0) return;
+      let currentTimestamp = (Date.parse(prices[0].intervalTime) / 1000);
+      let currentValue = new BigNumber(prices[0].highestBid).shiftedBy(-12).toNumber();
+      let pricesIndex = 0;
+      while (currentTimestamp <= endTime) {
+        if (pricesIndex === prices.length) {
+          bidPrices.push({
+            value: currentValue,
+            time: currentTimestamp as UTCTimestamp,
+          })
+          currentTimestamp += unixInterval;
+          continue;
+        }
+        const floorsTimestamp = (Date.parse(prices[pricesIndex].intervalTime) / 1000);
+        if (floorsTimestamp === currentTimestamp) {
+          const latestValue = new BigNumber(prices[pricesIndex].highestBid).shiftedBy(-12).toNumber();
+          bidPrices.push({
+            value: latestValue,
+            time: currentTimestamp as UTCTimestamp,
+          })
+          currentTimestamp += unixInterval;
+          pricesIndex++;
+          currentValue = latestValue;
+        } else {
+          bidPrices.push({
+            value: currentValue,
+            time: currentTimestamp as UTCTimestamp,
+          })
+          currentTimestamp += unixInterval;
+        }
+      }
       const firstTimestamp = bidPrices[0].time as UTCTimestamp;
-      const lastTimestamp = bidPrices[bidPrices.length - 1].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
         setStartTime(firstTimestamp);
-      }
-      if (!endTime || lastTimestamp > endTime) {
-        setEndTime(lastTimestamp);
       }
       setBidPrice(bidPrices);
     })
@@ -335,17 +404,15 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       </Box>
 
       <Box display="flex" justifyContent="space-between">
-        {salePrice ? (
-          <Typography>
-            <span style={{ color: "#00FFB0" }}>$35,000 (+52.89%) </span>
-            Past 1 hour
-          </Typography>
-        ) : <Typography />}
+        {growth ? <Typography className={classes.change}>
+          <span className={growth.isZero() ? classes.noChange : (growth.isPositive() ? classes.priceUp : classes.priceDown)}>{growth.toString()}% </span>
+          Past 1 {currentInterval}
+        </Typography>
+          : <Typography />}
         <ButtonGroup variant="text">
           <Button color={getColor("hour")} onClick={() => setCurrentInterval("hour")} className={classes.noBorder}><Typography>1H</Typography></Button>
           <Button color={getColor("day")} onClick={() => setCurrentInterval("day")} className={classes.noBorder}><Typography>1D</Typography></Button>
           <Button color={getColor("week")} onClick={() => setCurrentInterval("week")} className={classes.noBorder}><Typography>1W</Typography></Button>
-          {/* <Button color={getColor("1month")} onClick={() => setIntervalAndPeriod("1month", "24month")} className={classes.noBorder}><Typography>1M</Typography></Button> */}
         </ButtonGroup>
       </Box>
 
