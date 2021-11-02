@@ -60,7 +60,10 @@ const ArkSocialShareDialog: React.FC<Props> = (props: Props) => {
           className={classes.icon}
           onClick={copyAndToast}
         >
-          <ShareIcon />
+          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+            <ShareIcon />
+            <Typography>Share</Typography>
+          </Box>
         </Button>
         <Button
           className={classes.icon}
@@ -77,7 +80,10 @@ const ArkSocialShareDialog: React.FC<Props> = (props: Props) => {
           href={getHref("telegram")}
           target="_blank"
         >
-          <TelegramIcon />
+          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+            <TelegramIcon />
+            <Typography>Telegram</Typography>
+          </Box>
         </Button>
       </Box>
     </DialogModal>
