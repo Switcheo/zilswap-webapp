@@ -239,9 +239,9 @@ export class ArkClient {
     return output;
   };
 
-  requestImageUploadUrl = async (address: string, access_token: string) => {
+  requestImageUploadUrl = async (address: string, access_token: string, type = "profile") => {
     const headers = { Authorization: "Bearer " + access_token };
-    const url = this.http.path("user/image/request", { address }, { type: "profile" });
+    const url = this.http.path("user/image/request", { address }, { type });
     const result = await this.http.get({ url, headers });
     const output = await result.json();
     await this.checkError(output);
@@ -253,9 +253,9 @@ export class ArkClient {
     return
   }
 
-  notifyUpload = async (address: string, access_token: string) => {
+  notifyUpload = async (address: string, access_token: string, type = "profile") => {
     const headers = { Authorization: "Bearer " + access_token };
-    const url = this.http.path("user/image/notify", { address }, { type: "profile" });
+    const url = this.http.path("user/image/notify", { address }, { type });
     const result = await this.http.post({ url, headers });
     const output = await result.json();
     await this.checkError(output);

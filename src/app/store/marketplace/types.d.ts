@@ -156,7 +156,10 @@ export interface Profile extends MarketplaceUser {
   email: string | null;
   profileImage?: {
     url: string;
-  }
+  };
+  bannerImage?: {
+    url: string;
+  };
 }
 
 export interface BiddedNft {

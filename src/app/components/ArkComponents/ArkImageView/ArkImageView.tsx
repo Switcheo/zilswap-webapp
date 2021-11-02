@@ -18,7 +18,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const ArkImageView: React.FC<Props> = (props: Props) => {
-  const { altName, imageType, imageUrl, className } = props;
+  const { altName, imageType, imageUrl, className, ...rest } = props;
   const classes = useStyles();
   const imgRef = useRef<any>();
   const theme = useTheme().palette.type;
@@ -30,7 +30,7 @@ const ArkImageView: React.FC<Props> = (props: Props) => {
   });
 
   useEffect(() => {
-    if (!imageUrl || !isInView) return;
+    if (!imageUrl || !isInView) return setImgSrc(undefined);
     if (imageUrl === imgSrc) return;
 
     let image = new Image();
@@ -54,6 +54,7 @@ const ArkImageView: React.FC<Props> = (props: Props) => {
           height="250"
           image={image ?? placeholder}
           className={className}
+          {...rest}
         />
       )
     }
@@ -65,6 +66,7 @@ const ArkImageView: React.FC<Props> = (props: Props) => {
           className={className}
           alt={altName ?? "Avatar Image"}
           src={image ?? placeholder}
+          {...rest}
         />
       )
     }
@@ -75,6 +77,7 @@ const ArkImageView: React.FC<Props> = (props: Props) => {
           ref={imgRef}
           alt={altName ?? "Card image"}
           src={image ?? placeholder}
+          {...rest}
           className={cls(classes.root, className)} />
       );
     }
