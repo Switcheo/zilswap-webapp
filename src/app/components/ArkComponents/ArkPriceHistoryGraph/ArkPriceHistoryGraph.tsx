@@ -10,6 +10,10 @@ import { ArkClient } from "core/utilities";
 import { useAsyncTask, useMoneyFormatter } from "app/utils";
 import { fromBech32Address } from "core/zilswap";
 import { TIME_UNIX_PAIRS } from "app/utils/constants";
+import { ReactComponent as ZilIcon } from "./assets/zil-icon.svg";
+import { ReactComponent as BidLegend } from "./assets/bid-legend.svg";
+import { ReactComponent as SaleLegend } from "./assets/sale-legend.svg";
+import { ReactComponent as FloorLegend } from "./assets/floor-legend.svg";
 
 interface Props {
   collectionId: string;
@@ -53,6 +57,52 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRight: "none!important",
     padding: 0,
   },
+  line: {
+    width: "50px",
+    height: "1px",
+    color: "#00FFB0",
+  },
+  priceHistory: {
+    fontFamily: "'Raleway', sans-serif",
+    fontSize: "30px",
+    fontWeight: 700,
+    margin: theme.spacing(4, 0, 2, 0),
+  },
+  salePrice: {
+    fontFamily: 'Avenir Next',
+    fontSize: "20px",
+    fontWeight: 800,
+    marginTop: theme.spacing(0.5),
+  },
+  zilIcon: {
+    marginBottom: theme.spacing(1),
+    marginLeft: theme.spacing(0.5),
+  },
+  legend: {
+    marginTop: theme.spacing(2),
+  },
+  legendIcon: {
+    width: 30,
+    padding: 0,
+    display: "flex",
+    alignItems: "center",
+  },
+  legendInfo: {
+    marginRight: "10px",
+    padding: 5,
+  },
+  legendData: {
+    fontFamily: 'Avenir Next',
+    fontSize: "12px",
+    fontWeight: 700,
+    color: "rgba(222, 255, 255, 1)",
+  },
+  legendText: {
+    fontFamily: 'Avenir Next',
+    fontSize: "12px",
+    fontWeight: 700,
+    color: "rgba(222, 255, 255, 0.5)",
+  }
 }));
 
 const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
@@ -271,12 +321,26 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
     return "inherit"
   }
 
-  const moneyFormat = useMoneyFormatter({ maxFractionDigits: 2 });
+  const moneyFormat = useMoneyFormatter({});
 
   return (
     <ArkBox variant="base" className={classes.container}>
+      <Typography className={classes.priceHistory}>Price History</Typography>
+      <Box display="flex" justifyContent="flex-start">
+        {salePrice ? <Typography className={classes.salePrice}> {moneyFormat(salePrice[salePrice.length - 1].value, {
+          maxFractionDigits: 5,
+        })}</Typography>
+          : <Typography className={classes.salePrice}>-</Typography>}
+        <ZilIcon className={classes.zilIcon} />
+      </Box>
+
       <Box display="flex" justifyContent="space-between">
-        <div>$35,000 (+52.89%) Past 1 Hour</div>
+        {salePrice ? (
+          <Typography>
+            <span style={{ color: "#00FFB0" }}>$35,000 (+52.89%) </span>
+            Past 1 hour
+          </Typography>
+        ) : <Typography />}
         <ButtonGroup variant="text">
           <Button color={getColor("hour")} onClick={() => setCurrentInterval("hour")} className={classes.noBorder}><Typography>1H</Typography></Button>
           <Button color={getColor("day")} onClick={() => setCurrentInterval("day")} className={classes.noBorder}><Typography>1D</Typography></Button>
@@ -284,37 +348,56 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
           {/* <Button color={getColor("1month")} onClick={() => setIntervalAndPeriod("1month", "24month")} className={classes.noBorder}><Typography>1M</Typography></Button> */}
         </ButtonGroup>
       </Box>
-      <Box display="flex" justifyContent="flex-start">
-        <Box>
-          <Container flex-direction="column">
-            Highest Bid
+
+      <Box display="flex" justifyContent="flex-start" className={classes.legend}>
+        <Box display="flex">
+          <Container flex-direction="row" className={classes.legendIcon}>
+            <BidLegend />
           </Container>
-          {bidPrice && (
-            <Container flex-direction="column">
-              {moneyFormat(bidPrice[bidPrice.length - 1].value, {})} ZIL
-            </Container>)}
+          <Container flex-direction="row" className={classes.legendInfo}>
+            <Typography flex-direction="column" className={classes.legendText}>
+              Highest Bid
+            </Typography>
+            <Typography flex-direction="column" className={classes.legendData}>
+              {bidPrice ? moneyFormat(bidPrice[bidPrice.length - 1].value, { maxFractionDigits: 4 })
+                : "-"}
+              <span className={classes.legendText}> ZIL</span>
+            </Typography>
+          </Container>
         </Box>
-        <Box>
-          <Container flex-direction="column">
-            Last Traded
+        <Box display="flex">
+          <Container flex-direction="row" className={classes.legendIcon}>
+            <SaleLegend />
           </Container>
-          {salePrice && (
-            <Container flex-direction="column">
-              {moneyFormat(salePrice[salePrice.length - 1].value, {})} ZIL
-            </Container>)}
+          <Container flex-direction="row" className={classes.legendInfo}>
+            <Typography flex-direction="column" className={classes.legendText}>
+              Last Traded
+            </Typography>
+            <Typography flex-direction="column" className={classes.legendData}>
+              {salePrice ? moneyFormat(salePrice[salePrice.length - 1].value, { maxFractionDigits: 4 })
+                : "-"}
+              <span className={classes.legendText}> ZIL</span>
+            </Typography>
+          </Container>
         </Box>
-        <Box>
-          <Container flex-direction="column">
-            Floor Price
+        <Box display="flex">
+          <Container flex-direction="row" className={classes.legendIcon}>
+            <FloorLegend />
           </Container>
-          {collectionFloor && (
-            <Container flex-direction="column">
-              {moneyFormat(collectionFloor[collectionFloor.length - 1].value, {})} ZIL
-            </Container>)}
+          <Container flex-direction="row" className={classes.legendInfo}>
+            <Typography flex-direction="column" className={classes.legendText}>
+              Floor Price
+            </Typography>
+            <Typography flex-direction="column" className={classes.legendData}>
+              {collectionFloor ? moneyFormat(collectionFloor[collectionFloor.length - 1].value, { maxFractionDigits: 4 })
+                : "-"}
+              <span className={classes.legendText}> ZIL</span>
+            </Typography>
+          </Container>
         </Box>
       </Box>
       <Box className={classes.graph} {...{ ref: graphRef }}></Box>
-    </ArkBox>
+    </ArkBox >
   )
 };
 
