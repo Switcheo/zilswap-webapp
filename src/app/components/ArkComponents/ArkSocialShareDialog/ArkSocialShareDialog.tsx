@@ -57,27 +57,33 @@ const ArkSocialShareDialog: React.FC<Props> = (props: Props) => {
     <DialogModal header={header} open={!!open} onClose={onCloseDialog} titlePadding={true}>
       <Box display="flex" justifyContent="center" translate="yes" {...rest} className={cls(classes.root, className)}>
         <Button
-          className={classes.icon}
+          className={classes.iconButton}
           onClick={copyAndToast}
         >
-          <ShareIcon />
+          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+            <ShareIcon className={classes.icon} />
+            <Typography>Link</Typography>
+          </Box>
         </Button>
         <Button
-          className={classes.icon}
+          className={classes.iconButton}
           href={getHref("twitter")}
           target="_blank"
         >
           <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
-            <TwitterIcon />
+            <TwitterIcon className={classes.icon} />
             <Typography>Twitter</Typography>
           </Box>
         </Button>
         <Button
-          className={classes.icon}
+          className={classes.iconButton}
           href={getHref("telegram")}
           target="_blank"
         >
-          <TelegramIcon />
+          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+            <TelegramIcon className={classes.icon} />
+            <Typography>Telegram</Typography>
+          </Box>
         </Button>
       </Box>
     </DialogModal>
@@ -101,18 +107,21 @@ const useStyles = makeStyles((theme) => ({
   content: {
     backgroundColor: theme.palette.background.default,
   },
-  icon: {
+  iconButton: {
     margin: theme.spacing(0, .5),
     height: 70,
     width: 100,
     borderRadius: 12,
     minWidth: 0,
-    fontSize: 16,
     color: theme.palette.text.primary,
     backgroundColor: theme.palette.type === "dark" ? "#DEFFFF17" : "#6BE1FF33",
     opacity: 0.5,
     display: "flex",
     flexDirection: "column",
+  },
+  icon: {
+    fontSize: 20,
+    marginBottom: theme.spacing(1),
   },
 }));
 
