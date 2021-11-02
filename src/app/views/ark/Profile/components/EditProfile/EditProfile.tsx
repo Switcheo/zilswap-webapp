@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Box, IconButton, TextField, Typography, Button } from "@material-ui/core";
+import { Box, IconButton, TextField, Typography, Button, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,6 +8,7 @@ import { useHistory } from "react-router";
 import dayjs from "dayjs";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import PanoramaIcon from '@material-ui/icons/Panorama';
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { ArkClient } from "core/utilities";
 import { EMAIL_REGEX, USERNAME_REGEX, TWITTER_REGEX, INSTAGRAM_REGEX } from "app/utils/constants";
@@ -281,7 +282,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
               <Box className={classes.formDetail}>
 
                 <Typography className={classes.social}>BANNER</Typography>
-                <Typography className={classes.instruction}>Decorate your profile with a banner.</Typography>
+                <Typography className={classes.instruction}>Decorate your profile with a banner.&nbsp;<Tooltip placement="top" title="Note that image uploaded will be applied to both dark and light themes on ARK." ><ErrorOutlineIcon fontSize="small" /></Tooltip></Typography>
                 <Dropzone accept='image/jpeg, image/png' onFileDialogCancel={() => setBannerImage(null)} onDrop={onHandleDrop}>
                   {({ getRootProps, getInputProps }) => (
                     <Box className={classes.dropBox}>
@@ -530,7 +531,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 700,
   },
   dropBox: {
-    marginTop: theme.spacing(1),
     borderRadius: 12,
     border: `2px dotted ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"}`,
     backgroundColor: theme.palette.type === "dark" ? "#DEFFFF17" : "#6BE1FF33",
@@ -554,6 +554,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 600,
     fontSize: 11,
     margin: theme.spacing(0.4, 0),
+    display: "flex",
+    alignItems: "center",
   },
   footerInstruction: {
     marginTop: theme.spacing(1),
