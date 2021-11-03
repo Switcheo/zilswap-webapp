@@ -71,7 +71,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
   const wrappingRequired = bidToken && bidToken.isWzil &&
     (bnOrZero(bidToken.balance).lt(
-        bnOrZero(formState.bidAmount).shiftedBy(bidToken.decimals)
+      bnOrZero(formState.bidAmount).shiftedBy(bidToken.decimals)
     ))
 
   const isBidEnabled = useMemo(() => {
@@ -161,7 +161,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     const wrapAmount = requiredAmount.minus(wzilBalance)
     if (zilBalance.lt(wrapAmount)) {
       setWrapError(new Error(`Insufficient ZIL balance to wrap. Require ${wrapAmount.shiftedBy(-bidToken.decimals).toFormat(2)
-      } more wZIL but only have ${zilBalance.shiftedBy(-12).toFormat(2)} ZIL.`));
+        } more wZIL but only have ${zilBalance.shiftedBy(-12).toFormat(2)} ZIL.`));
       return
     }
 
@@ -308,7 +308,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
   return (
     <DialogModal
-      header="Place a Bid"
+      header="Place an Offer"
       {...rest}
       open={open}
       onClose={onCloseDialog}
@@ -325,7 +325,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
         <Box className={classes.bidContainer}>
           <CurrencyInput
-            label="Bid Amount"
+            label="Offer Amount"
             tokenList="ark-zil"
             inputClassName={cls({ [classes.expandedCurrencyInput]: !!bestBid })}
             token={bidToken ?? null}
@@ -338,7 +338,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
             {bestBid && (
               <Box display="flex" alignItems="center" className={classes.bestBid}>
                 <Text className={classes.bestBidLabel}>
-                  Highest Bid:
+                  Highest Offer:
                 </Text>
                 {toHumanNumber(bestBidAmount)}
                 <CurrencyLogo
@@ -351,7 +351,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
           </CurrencyInput>
 
           {/* Set expiry */}
-          <ArkExpiry label="Bid Expiry" onExpiryChange={onExpiryChange} />
+          <ArkExpiry label="Offer Expiry" onExpiryChange={onExpiryChange} />
 
           {!completedPurchase && (
             <Fragment>
@@ -421,7 +421,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                     disabled={!isBidEnabled}
                     walletRequired
                   >
-                    Place Bid
+                    Place Offer
                   </FancyButton>
               }
 
