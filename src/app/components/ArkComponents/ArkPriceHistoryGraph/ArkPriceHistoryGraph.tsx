@@ -128,7 +128,6 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
   const [saleSeries, setSaleSeries] = useState<ISeriesApi<"Line"> | null>(null);
   const [whiteSeries, setWhiteSeries] = useState<ISeriesApi<"Line"> | null>(null);
   const [currentInterval, setCurrentInterval] = useState("hour");
-  const [startTime, setStartTime] = useState<UTCTimestamp | null>(null);
   const [endTime, setEndTime] = useState<UTCTimestamp>(moment().unix() as UTCTimestamp);
   const [growth, setGrowth] = useState<BigNumber | null>(null);
   const [change, setChange] = useState<BigNumber | null>(null);
@@ -143,21 +142,16 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
   }
 
   useEffect(() => {
-    setStartTime(null);
     setEndTime(moment().unix() as UTCTimestamp);
-    // eslint-disable-next-line
-  }, [currentInterval])
-
-  useEffect(() => {
     getCollectionFloor();
     getSalePrice();
     getBidPrice();
     // eslint-disable-next-line
-  }, [startTime])
+  }, [currentInterval])
 
   useEffect(() => {
     if (!collectionFloor && !salePrice && !bidPrice) return;
-    if (graphRef.current && !chart && startTime) {
+    if (graphRef.current && !chart) {
       const newChart = createChart(graphRef.current, {
         width: graphRef.current.clientWidth,
         height: graphRef.current.clientHeight,
@@ -224,14 +218,14 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       setWhiteSeries(whiteSeries);
       window.addEventListener('resize', updateSize)
     }
-    if (chart && floorSeries && bidSeries && saleSeries && whiteSeries && startTime) {
+    if (chart && floorSeries && bidSeries && saleSeries && whiteSeries) {
       if (collectionFloor) floorSeries.setData(collectionFloor);
       if (bidPrice) bidSeries.setData(bidPrice);
       if (salePrice) saleSeries.setData(salePrice);
       chart.timeScale().fitContent();
     }
     // eslint-disable-next-line
-  }, [collectionFloor, bidPrice, salePrice, startTime])
+  }, [collectionFloor, bidPrice, salePrice])
 
   const getCollectionFloor = () => {
     runGetCollectionFloor(async () => {
@@ -240,10 +234,6 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       const floors: PriceData[] = result.result;
       if (floors.length === 0) return;
       const collectionFloors: Array<LineData> = fillData(floors);
-      const firstTimestamp = collectionFloors[0].time as UTCTimestamp;
-      if (!startTime || firstTimestamp < startTime) {
-        setStartTime(firstTimestamp);
-      }
       setCollectionFloor(collectionFloors)
     })
   }
@@ -255,10 +245,6 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       const priceData: PriceData[] = result.result;
       if (priceData.length === 0) return
       const salePrices: Array<LineData> = fillData(priceData);
-      const firstTimestamp = salePrices[0].time as UTCTimestamp;
-      if (!startTime || firstTimestamp < startTime) {
-        setStartTime(firstTimestamp);
-      }
       setSalePrice(salePrices);
       if (salePrices.length <= 1) return;
       const lastSale = salePrices[salePrices.length - 1].value;
@@ -279,10 +265,6 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       const priceData: PriceData[] = result.result;
       if (priceData.length === 0) return;
       const bidPrices: Array<LineData> = fillData(priceData);
-      const firstTimestamp = bidPrices[0].time as UTCTimestamp;
-      if (!startTime || firstTimestamp < startTime) {
-        setStartTime(firstTimestamp);
-      }
       setBidPrice(bidPrices);
     })
   }
