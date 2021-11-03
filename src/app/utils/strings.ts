@@ -6,6 +6,7 @@ import { truncate } from ".";
 
 const BILLION = BIG_ONE.shiftedBy(9);
 const MILLION = BIG_ONE.shiftedBy(6);
+const HUNDRED = BIG_ONE.shiftedBy(2);
 
 export const uuidv4 = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -41,7 +42,7 @@ export const toSignificantNumber = (input: BigNumber): string => {
 export const toHumanNumber = (input?: string | BigNumber | number, dp: number = 5) => {
   const value = bnOrZero(input);
 
-  if (value.lt(BIG_ONE.shiftedBy(dp)))
+  if (value.lt(BIG_ONE.shiftedBy(dp)) || value.lt(HUNDRED))
     return value.decimalPlaces(dp).toFormat();
 
   if (value.lt(MILLION))
