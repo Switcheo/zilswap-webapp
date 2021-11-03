@@ -49,7 +49,6 @@
     "react-router-dom": "^5.2.0",
     "react-router-navigation-prompt": "^1.9.1",
     "react-scripts": "4.0.3",
-    "recharts": "^2.1.6",
     "redux": "^4.0.4",
     "redux-logger": "^3.0.6",
     "redux-saga": "^1.1.3",
