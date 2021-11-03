@@ -1,9 +1,12 @@
 import React, { useState, useMemo, useRef } from "react";
-import { Badge, Box, BoxProps, TextField, Card } from "@material-ui/core";
+import { Badge, Box, BoxProps, TextField, Card, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
+import { useDispatch, useSelector } from "react-redux";
 import { AppTheme } from "app/theme/types";
 import { ArkImageView } from "app/components";
+import { getWallet } from "app/saga/selectors";
+import { actions } from "app/store";
 
 interface Props extends BoxProps {
   badgeContent?: React.Component | JSX.Element;
@@ -87,6 +90,8 @@ const ArkBanner: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const [showUploadBanner, setShowUploadBanner] = useState(false);
   const inputRef = useRef<HTMLDivElement | null>(null);
+  const { wallet } = useSelector(getWallet);
+  const dispatch = useDispatch();
 
   const Wrapper = useMemo(() => {
     const Wrap: React.FC<any> = ({ children, ...rest }) => {
@@ -119,6 +124,11 @@ const ArkBanner: React.FC<Props> = (props: Props) => {
     reader.readAsDataURL(files[0]);
   }
 
+  const onButtonClick = () => {
+    if (!wallet) return dispatch(actions.Layout.toggleShowWallet());
+    inputRef.current?.click();
+  }
+
   return (
     <Card className={classes.root}>
       {!hideBanner && (
@@ -135,12 +145,12 @@ const ArkBanner: React.FC<Props> = (props: Props) => {
         className={classes.uploadInput}
         id="ark-banner-image"
         type="file"
-        ref={inputRef}
+        inputRef={inputRef}
         inputProps={{ accept: "image/x-png,image/jpeg" }}
         onChange={onImageUpload}
       />
       <Box className={classes.buttonBox} height={0} display="flex" justifyContent="flex-end">
-        {showUploadBanner && uploadBanner && <label htmlFor="ark-banner-image" onMouseEnter={() => setShowUploadBanner(true)} className={classes.bannerButton}>Add Banner</label>}
+        {showUploadBanner && uploadBanner && <Button onClick={() => onButtonClick()} onMouseEnter={() => setShowUploadBanner(true)} className={classes.bannerButton}>Add Banner</Button>}
       </Box>
       <Box className={classes.infoBox}>
         <Box className={cls(classes.avatarBox, className)}>
