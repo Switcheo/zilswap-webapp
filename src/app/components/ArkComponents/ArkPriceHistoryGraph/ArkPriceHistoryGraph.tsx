@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { Box, Button, ButtonGroup, Container, makeStyles, Typography } from "@material-ui/core";
 import BigNumber from "bignumber.js";
-import moment from "moment";
 import { createChart, CrosshairMode, IChartApi, ISeriesApi, LineData, UTCTimestamp } from "lightweight-charts";
 import { ArkBox } from "app/components";
 import { AppTheme } from "app/theme/types";
@@ -15,6 +14,7 @@ import { ReactComponent as ZilIcon } from "./assets/zil-icon.svg";
 import { ReactComponent as BidLegend } from "./assets/bid-legend.svg";
 import { ReactComponent as SaleLegend } from "./assets/sale-legend.svg";
 import { ReactComponent as FloorLegend } from "./assets/floor-legend.svg";
+
 
 interface Props {
   collectionId: string;
@@ -128,7 +128,7 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
   const [saleSeries, setSaleSeries] = useState<ISeriesApi<"Line"> | null>(null);
   const [whiteSeries, setWhiteSeries] = useState<ISeriesApi<"Line"> | null>(null);
   const [currentInterval, setCurrentInterval] = useState("hour");
-  const [endTime, setEndTime] = useState<UTCTimestamp>(moment().unix() as UTCTimestamp);
+  const [endTime, setEndTime] = useState<UTCTimestamp>(Math.floor(Date.now() / 1000) as UTCTimestamp);
   const [growth, setGrowth] = useState<BigNumber | null>(null);
   const [change, setChange] = useState<BigNumber | null>(null);
   const graphRef = useRef<HTMLDivElement | null>(null);
@@ -142,7 +142,7 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
   }
 
   useEffect(() => {
-    setEndTime(moment().unix() as UTCTimestamp);
+    setEndTime(Math.floor(Date.now() / 1000) as UTCTimestamp);
     getCollectionFloor();
     getSalePrice();
     getBidPrice();
@@ -272,34 +272,36 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
   const fillData = (data: PriceData[]) => {
     const unixInterval = TIME_UNIX_PAIRS[currentInterval];
     let result = new Array<LineData>();
-    let currentTimestamp = (Date.parse(data[0].intervalTime) / 1000);
+    let currentUnix = (Date.parse(data[0].intervalTime) / 1000);
     let currentValue = new BigNumber(data[0].value).shiftedBy(-12).toNumber();
     let index = 0;
-    while (currentTimestamp <= endTime) {
+    const offsetHours = -(new Date().getTimezoneOffset() / 60);
+    const offsetHoursUnix = offsetHours * TIME_UNIX_PAIRS['hour'];
+    while (currentUnix <= endTime) {
       if (index === data.length) {
         result.push({
           value: currentValue,
-          time: currentTimestamp as UTCTimestamp,
+          time: (currentUnix + offsetHoursUnix) as UTCTimestamp,
         })
-        currentTimestamp += unixInterval;
+        currentUnix += unixInterval;
         continue;
       }
       const floorsTimestamp = (Date.parse(data[index].intervalTime) / 1000);
-      if (floorsTimestamp === currentTimestamp) {
+      if (floorsTimestamp === currentUnix) {
         const latestValue = new BigNumber(data[index].value).shiftedBy(-12).toNumber();
         result.push({
           value: latestValue,
-          time: currentTimestamp as UTCTimestamp,
+          time: (currentUnix + offsetHoursUnix) as UTCTimestamp,
         })
-        currentTimestamp += unixInterval;
+        currentUnix += unixInterval;
         index++;
         currentValue = latestValue;
       } else {
         result.push({
           value: currentValue,
-          time: currentTimestamp as UTCTimestamp,
+          time: (currentUnix + offsetHoursUnix) as UTCTimestamp,
         })
-        currentTimestamp += unixInterval;
+        currentUnix += unixInterval;
       }
     }
     return result;
