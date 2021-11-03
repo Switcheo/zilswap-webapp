@@ -6,11 +6,11 @@ import moment from "moment";
 import { createChart, CrosshairMode, IChartApi, ISeriesApi, LineData, UTCTimestamp } from "lightweight-charts";
 import { ArkBox } from "app/components";
 import { AppTheme } from "app/theme/types";
-import { getBlockchain } from "app/saga/selectors";
+import { getBlockchain, getTokens } from "app/saga/selectors";
 import { ArkClient } from "core/utilities";
-import { useAsyncTask, useMoneyFormatter } from "app/utils";
+import { useAsyncTask, useMoneyFormatter, useValueCalculators } from "app/utils";
 import { fromBech32Address } from "core/zilswap";
-import { TIME_UNIX_PAIRS } from "app/utils/constants";
+import { TIME_UNIX_PAIRS, ZIL_ADDRESS } from "app/utils/constants";
 import { ReactComponent as ZilIcon } from "./assets/zil-icon.svg";
 import { ReactComponent as BidLegend } from "./assets/bid-legend.svg";
 import { ReactComponent as SaleLegend } from "./assets/sale-legend.svg";
@@ -131,7 +131,10 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
   const [startTime, setStartTime] = useState<UTCTimestamp | null>(null);
   const [endTime, setEndTime] = useState<UTCTimestamp>(moment().unix() as UTCTimestamp);
   const [growth, setGrowth] = useState<BigNumber | null>(null);
+  const [change, setChange] = useState<BigNumber | null>(null);
   const graphRef = useRef<HTMLDivElement | null>(null);
+  const { tokens, prices } = useSelector(getTokens);
+  const valueCalculator = useValueCalculators();
 
   const updateSize = () => {
     if (graphRef.current) {
@@ -249,9 +252,9 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
     runGetSalePrice(async () => {
       const arkClient = new ArkClient(network);
       const result = await arkClient.getSalePrice({ collection, tokenId, interval: currentInterval });
-      const prices: PriceData[] = result.result;
-      if (prices.length === 0) return
-      const salePrices: Array<LineData> = fillData(prices);
+      const priceData: PriceData[] = result.result;
+      if (priceData.length === 0) return
+      const salePrices: Array<LineData> = fillData(priceData);
       const firstTimestamp = salePrices[0].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
         setStartTime(firstTimestamp);
@@ -260,8 +263,12 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
       if (salePrices.length <= 1) return;
       const lastSale = salePrices[salePrices.length - 1].value;
       const secondLastSale = salePrices[salePrices.length - 2].value;
-      const change = (lastSale - secondLastSale) / secondLastSale;
-      setGrowth(new BigNumber(change * 100));
+      const change = lastSale - secondLastSale;
+      const percentageChange = (change * 100) / secondLastSale;
+      setGrowth(new BigNumber(percentageChange));
+      const priceToken = tokens[ZIL_ADDRESS];
+      const priceValue = valueCalculator.amount(prices, priceToken, new BigNumber(change).shiftedBy(12))
+      setChange(priceValue);
     })
   }
 
@@ -269,9 +276,9 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
     runGetBidPrice(async () => {
       const arkClient = new ArkClient(network);
       const result = await arkClient.getBidPrice({ collection, tokenId, interval: currentInterval });
-      const prices: PriceData[] = result.result;
-      if (prices.length === 0) return;
-      const bidPrices: Array<LineData> = fillData(prices);
+      const priceData: PriceData[] = result.result;
+      if (priceData.length === 0) return;
+      const bidPrices: Array<LineData> = fillData(priceData);
       const firstTimestamp = bidPrices[0].time as UTCTimestamp;
       if (!startTime || firstTimestamp < startTime) {
         setStartTime(firstTimestamp);
@@ -338,7 +345,10 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
 
       <Box display="flex" justifyContent="space-between">
         {growth ? <Typography className={classes.change}>
-          <span className={growth.isZero() ? classes.noChange : (growth.isPositive() ? classes.priceUp : classes.priceDown)}>{growth.toString()}% </span>
+          <span className={growth.isZero() ? classes.noChange : (growth.isPositive() ? classes.priceUp : classes.priceDown)}>
+            {`${change?.isNegative ? "-" : ""}`}${change?.abs().toFormat(2).toString()}
+            {` (${growth.isGreaterThan(0) ? "+" : ""}${growth.toFixed(2)}%)`}
+          </span>
           Past 1 {currentInterval}
         </Typography>
           : <Typography />}
