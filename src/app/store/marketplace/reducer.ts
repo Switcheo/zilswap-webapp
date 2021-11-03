@@ -70,6 +70,19 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
           }
         },
       }
+    case MarketPlaceActionTypes.APPEND_TOKENS:
+      return {
+        ...state,
+        tokens: [...state.tokens, ...payload.tokens],
+        filteredTokensTraits: payload.traits ?? state.filteredTokensTraits,
+        filter: {
+          ...state.filter,
+          pagination: {
+            ...state.filter.pagination,
+            ...payload.meta,
+          }
+        },
+      }
     case MarketPlaceActionTypes.UPDATE_EXCHANGE_INFO:
       return {
         ...state,

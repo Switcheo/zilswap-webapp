@@ -192,6 +192,7 @@ export interface CollectionFilter {
   owner: string | null;
   likedBy: string | null;
   pagination?: PaginationInfo;
+  infinite?: boolean;
 }
 
 export interface SaleType {

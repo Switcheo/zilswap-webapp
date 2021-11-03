@@ -18,6 +18,7 @@ export const MarketPlaceActionTypes = {
   LOAD_PROFILE: "ARK:LOAD_PROFILE",
   UPDATE_PROFILE: "ARK:UPDATE_PROFILE",
   UPDATE_TOKENS: "ARK:UPDATE_TOKENS",
+  APPEND_TOKENS: "ARK:APPEND_TOKENS",
   UPDATE_ACCESS_TOKEN: "ARK:UPDATE_ACCESS_TOKEN",
   REFRESH_ACCESS_TOKEN: "ARK:REFRESH_ACCESS_TOKEN",
   UPDATE_COLLECTION: "ARK:UPDATE_COLLECTION",
@@ -75,6 +76,13 @@ export function updateFilter(payload: Partial<CollectionFilter>) {
 export function updateTokens(payload: { tokens: PaginatedList<Nft>, traits?: SimpleMap<TraitType> }) {
   return {
     type: MarketPlaceActionTypes.UPDATE_TOKENS,
+    payload
+  }
+}
+
+export function appendTokens(payload: { tokens: PaginatedList<Nft>, traits?: SimpleMap<TraitType> }) {
+  return {
+    type: MarketPlaceActionTypes.APPEND_TOKENS,
     payload
   }
 }

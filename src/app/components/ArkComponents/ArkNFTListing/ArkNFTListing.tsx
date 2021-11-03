@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import clsx from "clsx";
 import { Box, BoxProps, CircularProgress, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -8,7 +8,7 @@ import { getMarketplace } from "app/saga/selectors";
 import { AppTheme } from "app/theme/types";
 import { Nft } from "app/store/types";
 import { actions } from "app/store";
-import { useTaskSubscriber } from "app/utils";
+import { useIntersectionObserver, useTaskSubscriber } from "app/utils";
 
 interface Props extends BoxProps {
   filterComponent: React.ReactNode;
@@ -18,12 +18,25 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
   const { filterComponent, className } = props;
   const classes = useStyles();
   const { filter, tokens } = useSelector(getMarketplace);
-  const [loading] = useTaskSubscriber("reloadNftList")
-  const dispatch = useDispatch()
+  const [loading] = useTaskSubscriber("reloadNftList");
+  const dispatch = useDispatch();
+  const loader = useRef<any>();
+  const [page, setPage] = useState<number>(1);
 
-  const handlePageChange = (page: number) => {
-    const offset = (page - 1) * (filter.pagination?.limit || 0)
-    dispatch(actions.MarketPlace.updateFilter({ ...filter, pagination: { ...filter.pagination, offset } }));
+  useIntersectionObserver(loader, () => {
+    handleInfiniteScroll();
+  });
+
+  // const handlePageChange = (page: number) => {
+  //   const offset = (page - 1) * (filter.pagination?.limit || 0)
+  //   dispatch(actions.MarketPlace.updateFilter({ ...filter, pagination: { ...filter.pagination, offset } }));
+  // }
+
+  const handleInfiniteScroll = () => {
+    const offset = (page - 1) * (filter.pagination?.limit || 0);
+    // const offset = (filter.pagination?.offset || 0) + (filter.pagination?.limit || 36);
+    dispatch(actions.MarketPlace.updateFilter({ ...filter, pagination: { ...filter.pagination, offset }, infinite: true }));
+    setPage(page + 1);
   }
 
   return (
@@ -43,7 +56,8 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
           <CircularProgress color="inherit" />
         </Box>
       </Grid>
-      <ArkPaginator itemPerPage={filter?.pagination?.limit || 0} totalItem={filter?.pagination?.count || 0} onPageChange={handlePageChange} />
+      <div ref={loader} />
+      {/* <ArkPaginator itemPerPage={filter?.pagination?.limit || 0} totalItem={filter?.pagination?.count || 0} onPageChange={handlePageChange} /> */}
     </Box>
   );
 };

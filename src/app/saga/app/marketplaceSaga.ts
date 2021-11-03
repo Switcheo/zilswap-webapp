@@ -93,7 +93,11 @@ function* loadNftList() {
       const result = (yield call(arkClient.searchCollection, collectionAddress, query)) as unknown as any;
 
       logger("load nft search", "result", result);
-      yield put(actions.MarketPlace.updateTokens(result));
+      if (filter?.infinite) {
+        yield put(actions.MarketPlace.appendTokens(result));
+      } else {
+        yield put(actions.MarketPlace.updateTokens(result));
+      }
     }
 
   } catch (error) {
