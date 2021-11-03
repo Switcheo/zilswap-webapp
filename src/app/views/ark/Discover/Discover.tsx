@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useMediaQuery, useTheme } from "@material-ui/core";
+import BigNumber from "bignumber.js"
+import { Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useMediaQuery, useTheme, Popover } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import cls from "classnames";
@@ -36,9 +37,6 @@ const HEADERS: HeadersProp[] = [
   { align: "center", value: "Collection Size" },
 ]
 
-// const mockedDaily = new BigNumber(23.23)
-// const mockedWeekly = new BigNumber(-1.23)
-
 const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
 ) => {
@@ -54,6 +52,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     artist: true,
     collection: true,
   });
+  // const [searchResultOpen, setSearchResultOpen] = useState<boolean>(false);
 
   // fetch collections (to use store instead)
   const [collections, setCollections] = useState<CollectionWithStats[]>([]);
@@ -75,6 +74,18 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     }))
   }
 
+  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    setAnchorEl(anchorEl ? null : event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popper' : undefined;
+
   const filteredCollections = useMemo(() => {
     const sorted = collections.sort((a, b) => bnOrZero(b.priceStat ? b.priceStat.volume : 0).comparedTo(a.priceStat ? a.priceStat.volume : 0))
 
@@ -86,6 +97,14 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       || c.name?.includes(search))
     )
   }, [collections, search]);
+
+  const isMd = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("md"));
+
+  const fullCollections = useMemo(() => {
+    const sorted = collections.sort((a, b) => bnOrZero(b.priceStat ? b.priceStat.volume : 0).comparedTo(a.priceStat ? a.priceStat.volume : 0))
+    return sorted
+
+  }, [collections]);
 
   // const featuredCollections = useMemo(() => {
   //   return collections.filter(c => exchangeInfo?.featuredCollections.includes(c.address));
@@ -99,26 +118,13 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           <Typography className={classes.titleDescription} variant="h4">Top NFTs at a glance. Ranked by volume, price, number of owners, and assets.</Typography>
         </Box>
 
-        {/* {featuredCollections.map((collection) => (
-          <CardActionArea
-            key={collection.address}
-            component={RouterLink}
-            to={`/ark/collections/${toBech32Address(collection.address)}`}
-          >
-            <ArkImageView
-              className={classes.image}
-              imageType="banner"
-              imageUrl={collection.bannerImageUrl}
-            />
-          </CardActionArea>
-        ))} */}
-
         <OutlinedInput
           placeholder="Search for an artist or a collection"
           value={search}
           fullWidth
           classes={{ input: classes.inputText }}
           className={classes.input}
+          onClick={handleClick}
           onChange={(e) => setSearch(e.target.value)}
           endAdornment={
             !isMobileView && (
@@ -138,7 +144,6 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                           icon={<UncheckedIcon />}
                           disableRipple
                           checked={searchFilter[filter]}
-                        // checked={false}
                         />
                       }
                       label={filter.toUpperCase()}
@@ -149,7 +154,42 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             )
           }
         />
-        {/* TODO: convert OutlinedInput to Autocomplete  */}
+        <Popover
+          id={id} open={open && filteredCollections.length > 0 && search.length > 1} anchorEl={anchorEl}
+          disableAutoFocus={true}
+          disableEnforceFocus={true}
+          onClose={handleClose}
+          className={classes.popover}
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: isMd ? 'right' : 'left',
+          }}
+        >
+          <Container maxWidth="lg"
+            className={cls(classes.popoverContainer, {
+              [classes.popoverSmall]: isMd,
+            })}
+          >
+            <Box className={classes.searchResultHeader}>Collections</Box>
+            {filteredCollections.map((collection) => (
+              <RouterLink to={`/ark/collections/${toBech32Address(collection.address)}`}>
+                <Box className={classes.popoverRow} display="flex" justifyContent="space-between" alignItems="center">
+                  <Box className={classes.resultCollectionName} display="flex" alignItems="center">
+                    <ArkImageView
+                      imageType="avatar"
+                      className={classes.searchResultAvatar}
+                      imageUrl={collection.profileImageUrl}
+                    />
+                    {collection.name}
+                  </Box>
+                  <Typography>{new BigNumber(collection.tokenStat.tokenCount).toFormat(0)} ITEMS</Typography>
+                </Box>
+              </RouterLink>
+            ))}
+          </Container>
+        </Popover>
+
         <TableContainer>
           <Table className={classes.table}>
             <TableHead>
@@ -167,7 +207,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             </TableHead>
             <TableBody>
 
-              {filteredCollections.map((collection, i) => {
+              {fullCollections.map((collection, i) => {
                 const collectionStats = ArkClient.parseCollectionStats(collection)
                 return (
                   <TableRow
@@ -400,5 +440,50 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   topBarTitle: {
     fontSize: "48px",
     margin: "0 0 48px 0px",
+  },
+  popover: {
+    marginTop: 8,
+  },
+  popoverContainer: {
+    backgroundColor: theme.palette.type === "dark" ? "#223139" : "#D4FFF2",
+    width: 1230,
+    borderRadius: 12,
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid rgba(107, 225, 255, 0.2)",
+    padding: 0,
+  },
+  popoverSmall: {
+    width: 'calc(100vw - 98px)',
+  },
+  popoverRow: {
+    padding: '12px 24px',
+    fontFamily: 'Avenir Next',
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    borderRadius: 12,
+    fontWeight: 700,
+    "&:hover": {
+      backgroundColor: theme.palette.type === "dark" ? "#4E5A60" : "#A9CCC1",
+    },
+  },
+  resultCollectionName: {
+    fontFamily: 'Avenir Next',
+    fontSize: 18,
+    fontWeight: 700,
+  },
+  searchResultHeader: {
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    opacity: 0.5,
+    textTransform: 'uppercase',
+    padding: '20px 24px 6px 24px',
+    fontWeight: 900,
+    fontFamily: "'Raleway', sans-serif",
+  },
+  searchResultAvatar: {
+    height: 30,
+    marginRight: 8,
+    width: 30,
+    [theme.breakpoints.down('md')]: {
+      height: 20,
+      width: 20,
+    }
   },
 }));
