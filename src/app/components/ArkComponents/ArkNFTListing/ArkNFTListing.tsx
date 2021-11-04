@@ -1,9 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import clsx from "clsx";
 import { Box, BoxProps, CircularProgress, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useSelector, useDispatch } from "react-redux";
-import { ArkNFTCard, ArkPaginator } from "app/components";
+import { ArkNFTCard, Text } from "app/components";
 import { getMarketplace } from "app/saga/selectors";
 import { AppTheme } from "app/theme/types";
 import { Nft } from "app/store/types";
@@ -11,14 +11,16 @@ import { actions } from "app/store";
 import { useIntersectionObserver, useTaskSubscriber } from "app/utils";
 
 interface Props extends BoxProps {
+  collectionName?: string;
   filterComponent: React.ReactNode;
 }
 
 const ArkNFTListing: React.FC<Props> = (props: Props) => {
-  const { filterComponent, className } = props;
+  const { filterComponent, className, collectionName } = props;
   const classes = useStyles();
   const { filter, tokens } = useSelector(getMarketplace);
   const [loading] = useTaskSubscriber("reloadNftList");
+  const [loadingScroll] = useTaskSubscriber("loadTokens");
   const dispatch = useDispatch();
   const loader = useRef<any>();
 
@@ -38,9 +40,26 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
   return (
     <Box className={clsx(classes.root, className)}>
       {filterComponent}
+      <Text className={classes.resultsText}>
+        {collectionName &&
+          <span className={classes.collectionName}>
+            {collectionName}
+          </span>
+        }
+        {filter?.pagination?.count && 
+          <span>
+            |
+            <span className={classes.results}>
+              {filter.pagination.count}
+              {" "}
+              {filter.pagination.count === 1 ? "Result" : "Results"}
+            </span>
+          </span>
+        }
+      </Text>
       <Grid container spacing={2} className={classes.listingContainer}>
-        {tokens.map((token: Nft) => (
-          <Grid item key={token.tokenId} xs={12} lg={3} md={4} sm={6} className={classes.gridItem}>
+        {tokens.map((token: Nft, index) => (
+          <Grid item key={index} xs={12} lg={3} md={4} sm={6} className={classes.gridItem}>
             <ArkNFTCard
               token={token}
               collectionAddress={token.collection!.address}
@@ -52,8 +71,12 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
           <CircularProgress color="inherit" />
         </Box>
       </Grid>
+      {loadingScroll &&
+        <Box display="flex" justifyContent="center" alignItems="center" mt={4}>
+          <CircularProgress className={classes.loadingScroll} />
+        </Box>
+      }
       <div ref={loader} />
-      {/* <ArkPaginator itemPerPage={filter?.pagination?.limit || 0} totalItem={filter?.pagination?.count || 0} onPageChange={handlePageChange} /> */}
     </Box>
   );
 };
@@ -92,6 +115,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexDirection: "column",
     alignItems: "center",
   },
+  resultsText: {
+    fontFamily: "'Raleway', sans-serif",
+    fontWeight: 900,
+    fontSize: "18px",
+    lineHeight: "21px",
+    marginTop: theme.spacing(3),
+  },
+  collectionName: {
+    marginRight: theme.spacing(1),
+  },
+  results: {
+    marginLeft: theme.spacing(1),
+  },
+  loadingScroll: {
+    color: theme.palette.primary.dark,
+  }
 }));
 
 export default ArkNFTListing;

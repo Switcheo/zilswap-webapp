@@ -10,9 +10,13 @@ import { getBlockchain, getMarketplace, getWallet } from "../selectors";
 function* loadNftList() {
   try {
     logger("load nft list", "start");
-    yield put(actions.Layout.addBackgroundLoading("reloadNftList", "ARK:RELOAD_NFT_LIST"));
-    const { network } = getBlockchain(yield select());
     const { filter } = getMarketplace(yield select());
+    if (filter?.infinite) {
+      yield put(actions.Layout.addBackgroundLoading("loadTokens", "ARK:LOAD_TOKENS"));
+    } else {
+      yield put(actions.Layout.addBackgroundLoading("reloadNftList", "ARK:RELOAD_NFT_LIST"));
+    }
+    const { network } = getBlockchain(yield select());
     const { wallet } = getWallet(yield select());
     const collectionAddress = filter.collectionAddress;
     logger("load nft list", "filter", filter);
@@ -93,8 +97,7 @@ function* loadNftList() {
       const result = (yield call(arkClient.searchCollection, collectionAddress, query)) as unknown as any;
 
       logger("load nft search", "result", result);
-      if (filter?.infinite && filter.infinite) {
-        logger("appending");
+      if (filter?.infinite) {
         yield put(actions.MarketPlace.appendTokens(result));
       } else {
         yield put(actions.MarketPlace.updateTokens(result));
@@ -105,6 +108,7 @@ function* loadNftList() {
     console.error("loading profile failed, Error:")
     console.error(error)
   } finally {
+    yield put(actions.Layout.removeBackgroundLoading("ARK:LOAD_TOKENS"));
     yield put(actions.Layout.removeBackgroundLoading("ARK:RELOAD_NFT_LIST"));
   }
 }
