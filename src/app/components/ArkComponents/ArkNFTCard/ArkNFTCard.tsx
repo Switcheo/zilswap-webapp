@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
 import { Network } from "zilswap-sdk/lib/constants";
-import { ArkOwnerLabel, ArkImageView, ZapWidget, CurrencyLogo } from "app/components";
+import { ArkOwnerLabel, ArkImageView, ZapWidget, CurrencyLogo, ArkSocialShareDialog } from "app/components";
 import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
@@ -43,6 +43,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const [blockTime, currentBlock, currentTime] = useBlockTime();
   const network = useNetwork();
   const [popAnchor, setPopAnchor] = useState(null);
+  const [openShareDialog, setOpenShareDialog] = useState(false);
   const toaster = useToaster(false);
   const isOwner = wallet?.addressInfo.byte20.toLowerCase() === token.owner?.address.toLowerCase();
 
@@ -311,6 +312,8 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                       </>
                     )}
                     <Box className={classes.divider} />
+                    <Typography onClick={() => { setOpenShareDialog(true); setPopAnchor(null); }} className={classes.popperText}>Share NFT</Typography>
+                    <Box className={classes.divider} />
                     <Typography onClick={onResyncMetadata} className={classes.popperText}>Reload Metadata</Typography>
                   </Popper>
                 </ClickAwayListener>
@@ -325,6 +328,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
           </Box>
         </CardContent >
       </Box >
+      <ArkSocialShareDialog open={openShareDialog} onCloseDialog={() => setOpenShareDialog(false)} tokenId={token.tokenId} collectionAddress={toBech32Address(collectionAddress)} />
     </Card >
   );
 };

@@ -5,7 +5,7 @@ import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { Zilswap } from "zilswap-sdk";
 import { Network, ZIL_HASH } from "zilswap-sdk/lib/constants";
-import { Cheque, Collection, CollectionWithStats, Nft, OAuth, Profile, SimpleCheque, TraitType } from "app/store/types";
+import { Cheque, Collection, CollectionWithStats, Nft, OAuth, Profile, SimpleCheque, TraitType, PaginationInfo } from "app/store/types";
 import { bnOrZero, SimpleMap, toHumanNumber } from "app/utils";
 import { HTTP, logger } from "core/utilities";
 import { ConnectedWallet } from "core/wallet";
@@ -191,7 +191,7 @@ export class ArkClient {
   }
 
   searchCollection = async (address: string, params?: ArkClient.SearchCollectionParams):
-    Promise<{ tokens: ReadonlyArray<Nft>, traits: SimpleMap<TraitType> }> => {
+    Promise<{ tokens: ReadonlyArray<Nft>, traits: SimpleMap<TraitType>, meta: PaginationInfo }> => {
     if (address.startsWith("zil1"))
       address = fromBech32Address(address).toLowerCase();
     const url = this.http.path("collection/search", { address }, params);
@@ -200,7 +200,7 @@ export class ArkClient {
     await this.checkError(json);
 
     const traits = json.result.extras.traits as TraitsResponse
-    return { traits: parseTraits(traits), tokens: json.result.entries }
+    return { traits: parseTraits(traits), tokens: json.result.entries, meta: json.result.meta }
   }
 
   updateProfile = async (address: string, data: Omit<Profile, "id" | "address">, oAuth: OAuth) => {

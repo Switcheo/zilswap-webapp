@@ -14,7 +14,7 @@ interface Props extends BoxProps {
   message?: string;
 }
 
-const ArkSocialLinkGroup: React.FC<Props> = (props: Props) => {
+const ArkShareLinksGroup: React.FC<Props> = (props: Props) => {
   const {
     message = "Check out this awesome NFT on #ARK! &link #nftmarketplace #nft #nonfungible #zilswap @zilswap",
     children, className, collection, ...rest } = props;
@@ -95,4 +95,4 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default ArkSocialLinkGroup;
+export default ArkShareLinksGroup;
