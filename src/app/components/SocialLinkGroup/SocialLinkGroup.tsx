@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
         margin: 1,
         "& path": {
           transition: "fill .2s ease-in-out",
-          fill: `rgba${hexToRGBA(theme.palette.text.primary, 0.5)}`,
+          fill: theme.palette.primary.light,
         },
       },
     },
