@@ -21,22 +21,18 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
   const [loading] = useTaskSubscriber("reloadNftList");
   const dispatch = useDispatch();
   const loader = useRef<any>();
-  const [page, setPage] = useState<number>(1);
 
   useIntersectionObserver(loader, () => {
     handleInfiniteScroll();
   });
 
-  // const handlePageChange = (page: number) => {
-  //   const offset = (page - 1) * (filter.pagination?.limit || 0)
-  //   dispatch(actions.MarketPlace.updateFilter({ ...filter, pagination: { ...filter.pagination, offset } }));
-  // }
-
   const handleInfiniteScroll = () => {
-    const offset = (page - 1) * (filter.pagination?.limit || 0);
-    // const offset = (filter.pagination?.offset || 0) + (filter.pagination?.limit || 36);
+    if (tokens.length === 0) return;
+    if (filter?.pagination?.count && tokens.length === filter.pagination.count) return;
+    if (filter.pagination?.offset && tokens.length === filter.pagination.offset) return;
+
+    const offset = tokens.length;
     dispatch(actions.MarketPlace.updateFilter({ ...filter, pagination: { ...filter.pagination, offset }, infinite: true }));
-    setPage(page + 1);
   }
 
   return (

@@ -77,9 +77,11 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
         filteredTokensTraits: payload.traits ?? state.filteredTokensTraits,
         filter: {
           ...state.filter,
+          infinite: false,
           pagination: {
             ...state.filter.pagination,
             ...payload.meta,
+            offset: 0,
           }
         },
       }
