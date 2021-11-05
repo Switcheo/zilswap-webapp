@@ -232,8 +232,8 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
 
     return {
       poolRewards,
-      roi: roiPerDay.isZero() || roiPerDay.isNaN() ? "-" : `${roiPerDay.toFormat()}%`,
-      apr: apr.isZero() || apr.isNaN() ? '-' : `${toHumanNumber(apr, 1)}%`,
+      roi: roiPerDay.isZero() || roiPerDay.isNaN() ? "-" : `${roiPerDay.dp(2).toFormat()}%`,
+      apr: apr.isZero() || apr.isNaN() ? '-' : `${apr.dp(2).toFormat()}%`,
     };
   }, [rewardsState.rewardsByPool, token, usdValues]);
 
@@ -313,7 +313,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
           </Box>
 
           <Box display="flex" className={classes.statItem}>
-            <Text align="right" variant="subtitle2" marginBottom={1.5}>Daily ROI</Text>
+            <Text align="right" variant="subtitle2" marginBottom={1.5}>Daily </Text>
             <Box display="flex" className={classes.roiContainer}>
               <Text color="textPrimary" className={classes.rewardValue}>
                 {roi}
