@@ -274,6 +274,18 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     })
   }
 
+  const clearOrRemove = (type: string) => {
+    switch (type) {
+      case "banner":
+        if (bannerImage) return setBannerImage(null);
+        return setToRemove(type);
+      case "profile":
+        if (profileImage) return setProfileImage(null);
+        return setToRemove(type);
+      default: return;
+    }
+  }
+
   return (
     <ArkPage {...rest}>
       <Box className={cls(classes.root, className)}>
@@ -291,7 +303,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                   {(profileImage || profile?.profileImage?.url) && (<img alt="" className={classes.profileImage} src={profileImage?.toString() || profile?.profileImage?.url || ""} />)}
                   {!profileImage && !profile?.profileImage?.url && (<div className={classes.profileImage} />)}
                   <Button onClick={() => setOpenDialog(true)} className={classes.labelButton}>Select</Button>
-                  <Button className={classes.deleteButton} onClick={() => setToRemove("profile")} >Remove</Button>
+                  {(profileImage || profile?.profileImage?.url) && (<Button className={classes.deleteButton} onClick={() => clearOrRemove("profile")} >{profileImage ? "Clear" : "Remove"}</Button>)}
                 </Box>
                 <TextField
                   className={classes.uploadInput}
@@ -308,7 +320,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                 <Box display="flex">
                   <Typography className={classes.instruction}>Decorate your profile with a banner.&nbsp;<Tooltip placement="top" title="Note that image uploaded will be applied to both dark and light themes on ARK." ><ErrorOutlineIcon fontSize="small" /></Tooltip></Typography>
                   <Box flexGrow={1} />
-                  <Button className={classes.deleteButton} onClick={() => setToRemove("banner")}>Remove</Button>
+                  {(bannerImage || profile?.bannerImage?.url) && (<Button className={classes.deleteButton} onClick={() => clearOrRemove("banner")}>{bannerImage ? "Clear" : "Remove"}</Button>)}
                 </Box>
                 <Dropzone accept='image/jpeg, image/png' onFileDialogCancel={() => setBannerImage(null)} onDrop={onHandleDrop}>
                   {({ getRootProps, getInputProps }) => (
@@ -520,10 +532,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontFamily: "'Raleway', sans-serif",
   },
   uploadBox: {
-    maxHeight: 200,
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
   },
   connectionText: {
