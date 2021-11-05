@@ -150,7 +150,7 @@ const ArkBanner: React.FC<Props> = (props: Props) => {
         onChange={onImageUpload}
       />
       <Box className={classes.buttonBox} height={0} display="flex" justifyContent="flex-end">
-        {showUploadBanner && uploadBanner && <Button onClick={() => onButtonClick()} onMouseEnter={() => setShowUploadBanner(true)} className={classes.bannerButton}>Add Banner</Button>}
+        {showUploadBanner && uploadBanner && <Button onClick={() => onButtonClick()} onMouseEnter={() => setShowUploadBanner(true)} className={classes.bannerButton}>{bannerImage ? "Edit Banner" : "Add Banner"}</Button>}
       </Box>
       <Box className={classes.infoBox}>
         <Box className={cls(classes.avatarBox, className)}>
