@@ -156,14 +156,14 @@ const ArkTopBar: React.FC<
             <Box className={classes.navLinkBox}>
               <Button
                 component={Link}
-                to="/ark/collections"
+                to="/ark/discover"
                 className={classes.navLinkButton}
                 disableRipple
               >
                 <Typography
                   className={cls(classes.navLink, {
                     [classes.selectedMenu]:
-                      location.pathname.indexOf("/ark/collections") === 0,
+                      location.pathname.indexOf("/ark/discover") === 0,
                   })}
                 >
                   Discover

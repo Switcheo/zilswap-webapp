@@ -55,7 +55,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     textOverflow: "ellipsis",
     overflow: "hidden",
     display: "block",
-    whiteSpace: "nowrap"
+    whiteSpace: "nowrap",
+    marginLeft: "auto",
+    marginRight: "auto",
   },
   link: {
     "& .MuiTypography-root": {

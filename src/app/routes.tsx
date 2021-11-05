@@ -48,7 +48,7 @@ const routes: RouteConfig[] = [
     component: ArkLayout,
     routes: [
       {
-        path: "/ark/collections",
+        path: "/ark/discover",
         exact: true,
         component: lazy(() => import("./views/ark/Discover")),
       },
@@ -83,7 +83,7 @@ const routes: RouteConfig[] = [
         component: lazy(() => import("./views/ark/Profile/components/EditProfile")),
       },
       {
-        component: () => <Redirect to="/ark/collections"></Redirect>,
+        component: () => <Redirect to="/ark/discover"></Redirect>,
       },
     ],
   },
