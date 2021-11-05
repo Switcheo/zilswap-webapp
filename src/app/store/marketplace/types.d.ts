@@ -11,7 +11,7 @@ export interface MarketPlaceState {
   receivedBids?: any;
   bidded?: any;
   exchangeInfo?: ArkExchangeInfo;
-  collectionTraits: SimpleMap<TraitType>;
+  collectionTraits: SimpleMap<SimpleMap<TraitType>>;
   filteredTokensTraits: SimpleMap<TraitType>;
   pendingTxs: SimpleMap<ArkPendingTx>;
   bidsTable?: BidsTableInfo;

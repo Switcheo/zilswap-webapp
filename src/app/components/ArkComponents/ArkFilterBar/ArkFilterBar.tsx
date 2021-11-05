@@ -47,17 +47,21 @@ const ArkFilterBar = (props: Props) => {
   const dispatch = useDispatch()
   const [initialized, setInitialized] = useState<boolean>(false)
 
-  useEffect(() => {
-    if(Object.keys(marketPlaceState.filter.traits).length === 0 || initialized) return
+  const parseQuery = () => {
+    return queryString.parse(search, { arrayFormat: "index" })
+  };
 
-    const query = queryString.parse(search, {arrayFormat: 'index'})
+  useEffect(() => {
+    if (Object.keys(marketPlaceState.filter.traits).length === 0 || initialized) return
+
+    const query = parseQuery();
     const filter = marketPlaceState.filter
 
-    if(query["search"] !== undefined) {
-      filter.search = query["search"] as string
+    if (query["search"]) {
+      filter.search = query["search"].toString().trim();
     }
 
-    if(query["saleType"] !== undefined) {
+    if (query["saleType"]) {
       const types = query["saleType"] as string[]
       filter.saleType = {
         fixed_price: types.includes('fixed_price'),
@@ -65,42 +69,41 @@ const ArkFilterBar = (props: Props) => {
       }
     }
 
-    const traits = marketPlaceState.filter.traits
-    for(const x in traits) {
+    const traits = filter.traits
+    for (const x in traits) {
       const trait = traits[x]
 
-      if(query[`attributes[${trait.trait.toLowerCase()}]`] !== undefined) {
-        const values = query[`attributes[${trait.trait.toLowerCase()}]`] as string[]
+      if (query[`attributes[${trait.trait}]`] !== undefined) {
+        const values = query[`attributes[${trait.trait}]`] as string[]
         values.forEach(value => {
-          // Filtering to lowercase values here because we're not sure if collections
-          // always capitalize their trait values.
-          const selectedValues = Object.keys(filter.traits[trait.trait].values).filter(v => v.toLowerCase() === value.toLowerCase())
+          const selectedValues = Object.keys(filter.traits[trait.trait].values).filter(v => v === value)
           selectedValues.forEach(v => {
             filter.traits[trait.trait].values[v].selected = true
-          })          
+          })
         })
       }
     }
+    filter.traits = { ...filter.traits };
 
-    if(query["sortBy"] !== undefined && query["sortDir"] !== undefined) {
+    if (query["sortBy"] !== undefined && query["sortDir"] !== undefined) {
       const sort = query["sortBy"] as string
       const sortDirection = query["sortDir"] as string
 
       var sortBy = SortBy.PriceAscending
 
-      if(sort === "price" && sortDirection === "asc") {
+      if (sort === "price" && sortDirection === "asc") {
         sortBy = SortBy.PriceAscending
-      } else if(sort === "price" && sortDirection === "desc") {
+      } else if (sort === "price" && sortDirection === "desc") {
         sortBy = SortBy.PriceAscending
-      } else if(sort === "rarity" && sortDirection === "asc") {
+      } else if (sort === "rarity" && sortDirection === "asc") {
         sortBy = SortBy.RarityAscending
-      } else if(sort === "rarity" && sortDirection === "desc") {
+      } else if (sort === "rarity" && sortDirection === "desc") {
         sortBy = SortBy.RarityDescending
-      } else if(sort === "recent") {
+      } else if (sort === "recent") {
         sortBy = SortBy.MostRecent
-      } else if(sort === "loved") {
+      } else if (sort === "loved") {
         sortBy = SortBy.MostLoved
-      } else if(sort === "viewed") {
+      } else if (sort === "viewed") {
         sortBy = SortBy.MostViewed
       }
 
@@ -115,47 +118,47 @@ const ArkFilterBar = (props: Props) => {
   }, [marketPlaceState.filter])
 
   useEffect(() => {
-    if(!initialized) return
-
+    if (!initialized) return
     var path = toBech32Address(collectionAddress)
 
     path += `?search=${marketPlaceState.filter.search}`
 
     Object.entries(marketPlaceState.filter.saleType).forEach(([type, enabled], index) => {
-      if(enabled) {
+      if (enabled) {
         path += `&saleType[${index}]=${type}`
       }
     })
 
     const traits = marketPlaceState.filter.traits
-    for(const x in traits) {
+    for (const x in traits) {
       const trait = traits[x]
 
       // eslint-disable-next-line
       Object.keys(trait.values).filter(v => trait.values[v].selected).forEach((v, index) => {
-        path += `&attributes[${trait.trait.toLowerCase()}][${index}]=${v.toLowerCase()}`
+        path += `&attributes[${trait.trait}][${index}]=${v}`
       })
     }
 
     const sortBy = marketPlaceState.filter.sortBy
-    if(sortBy === SortBy.PriceAscending) {
+    if (sortBy === SortBy.PriceAscending) {
       path += `&sortBy=price&sortDir=asc`
-    } else if(sortBy === SortBy.PriceDescending) {
+    } else if (sortBy === SortBy.PriceDescending) {
       path += `&sortBy=price&sortDir=desc`
-    } else if(sortBy === SortBy.RarityAscending) {
+    } else if (sortBy === SortBy.RarityAscending) {
       path += `&sortBy=rarity&sortDir=asc`
-    } else if(sortBy === SortBy.RarityDescending) {
+    } else if (sortBy === SortBy.RarityDescending) {
       path += `&sortBy=rarity&sortDir=desc`
-    } else if(sortBy === SortBy.MostRecent) {
+    } else if (sortBy === SortBy.MostRecent) {
       path += `&sortBy=recent&sortDir=desc`
-    } else if(sortBy === SortBy.MostLoved) {
+    } else if (sortBy === SortBy.MostLoved) {
       path += `&sortBy=loved&sortDir=desc`
-    } else if(sortBy === SortBy.MostViewed) {
+    } else if (sortBy === SortBy.MostViewed) {
       path += `&sortBy=viewed&sortDir=desc`
     }
 
     window.history.replaceState(null, document.title, path)
-  }, [initialized, collectionAddress, marketPlaceState.filter])
+    // eslint-disable-next-line
+  }, [marketPlaceState.filter])
 
   return (
     <Box className={classes.root} marginTop={2}>
