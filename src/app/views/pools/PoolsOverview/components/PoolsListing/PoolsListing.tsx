@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, BoxProps, Button, Grid } from "@material-ui/core";
+import { Box, BoxProps, Button, Grid, Hidden } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useSelector } from "react-redux";
@@ -10,6 +10,7 @@ import { AppTheme } from "app/theme/types";
 import { BIG_ZERO } from "app/utils/constants";
 import PoolInfoCard from "../PoolInfoCard";
 import PoolsSearchInput from "../PoolsSearchInput";
+import PoolMobileInfoCard from "../PoolMobileInfoCard";
 
 interface Props extends BoxProps {
   query?: string
@@ -140,8 +141,13 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
       </Box>
       <Grid container spacing={2}>
         {registeredTokens.slice(0, limits.registered).map((token) => (
-          <Grid key={token.address} item xs={12} md={6}>
-            <PoolInfoCard token={token} />
+          <Grid key={token.address} item xs={12} >
+            <Hidden smDown>
+              <PoolInfoCard token={token} />
+            </Hidden>
+            <Hidden mdUp>
+              <PoolMobileInfoCard token={token} />
+            </Hidden>
           </Grid>
         ))}
       </Grid>
@@ -157,8 +163,13 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
       <Text variant="h2" margin={2}>Unregistered Pools ({otherTokens.length})</Text>
       <Grid container spacing={2}>
         {otherTokens.slice(0, limits.others).map((token) => (
-          <Grid key={token.address} item xs={12} md={6}>
-            <PoolInfoCard token={token} />
+          <Grid key={token.address} item xs={12} >
+            <Hidden smDown>
+              <PoolInfoCard token={token} />
+            </Hidden>
+            <Hidden mdUp>
+              <PoolMobileInfoCard token={token} />
+            </Hidden>
           </Grid>
         ))}
       </Grid>
