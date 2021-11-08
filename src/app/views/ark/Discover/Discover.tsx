@@ -52,7 +52,6 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     artist: true,
     collection: true,
   });
-  // const [searchResultOpen, setSearchResultOpen] = useState<boolean>(false);
 
   // fetch collections (to use store instead)
   const [collections, setCollections] = useState<CollectionWithStats[]>([]);
@@ -99,16 +98,13 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   }, [collections, search]);
 
   const isMd = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("md"));
+  const isSm = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("sm"));
 
   const fullCollections = useMemo(() => {
     const sorted = collections.sort((a, b) => bnOrZero(b.priceStat ? b.priceStat.volume : 0).comparedTo(a.priceStat ? a.priceStat.volume : 0))
     return sorted
 
   }, [collections]);
-
-  // const featuredCollections = useMemo(() => {
-  //   return collections.filter(c => exchangeInfo?.featuredCollections.includes(c.address));
-  // }, [collections, exchangeInfo?.featuredCollections])
 
   return (
     <ArkPage {...rest}>
@@ -169,6 +165,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           <Container maxWidth="lg"
             className={cls(classes.popoverContainer, {
               [classes.popoverSmall]: isMd,
+              [classes.popoverMobile]: isSm,
             })}
           >
             <Box className={classes.searchResultHeader}>Collections</Box>
@@ -454,12 +451,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   popoverSmall: {
     width: 'calc(100vw - 98px)',
   },
+  popoverMobile: {
+    width: 'calc(100vw)',
+  },
   popoverRow: {
     padding: '12px 24px',
     fontFamily: 'Avenir Next',
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     borderRadius: 12,
     fontWeight: 700,
+    [theme.breakpoints.down('sm')]: {
+      width: '92vw',
+      padding: '10px 18px',
+    },
     "&:hover": {
       backgroundColor: theme.palette.type === "dark" ? "#4E5A60" : "#A9CCC1",
     },
@@ -467,6 +471,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   resultCollectionName: {
     fontFamily: 'Avenir Next',
     fontSize: 18,
+    [theme.breakpoints.down('sm')]: {
+      fontSize: 16,
+    },
     fontWeight: 700,
   },
   searchResultHeader: {
@@ -476,6 +483,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: '20px 24px 6px 24px',
     fontWeight: 900,
     fontFamily: "'Raleway', sans-serif",
+    [theme.breakpoints.down('sm')]: {
+      padding: '14px 18px 4px 18px',
+    },
   },
   searchResultAvatar: {
     height: 30,
