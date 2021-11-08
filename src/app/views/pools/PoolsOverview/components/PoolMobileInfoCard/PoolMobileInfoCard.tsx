@@ -9,14 +9,203 @@ import groupBy from "lodash/groupBy";
 import { KeyValueDisplay, Text, FancyButton, PoolLogo } from "app/components";
 import { actions } from "app/store";
 import { EMPTY_USD_VALUE } from "app/store/token/reducer";
-import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
+import { DistributorWithTimings, PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, toHumanNumber, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
+import { toBech32Address } from "@zilliqa-js/crypto";
 
 interface Props extends CardProps {
   token: TokenInfo;
+  preStartDistributors?: DistributorWithTimings[];
 }
+
+const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
+  const { children, className, token, preStartDistributors, ...rest } = props;
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const valueCalculators = useValueCalculators();
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
+  const swapVolumes = useSelector<RootState, PoolSwapVolumeMap>(state => state.stats.dailySwapVolumes);
+  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
+  const network = useNetwork();
+  const classes = useStyles();
+  const [showDetail, setShowDetail] = useState(false);
+
+  const onGotoAddLiquidity = () => {
+    dispatch(actions.Pool.select({ network, token }));
+    dispatch(actions.Layout.showPoolType("add"));
+    history.push("/pool");
+  }
+  const { totalZilVolumeUSD, usdValues } = useMemo(() => {
+    if (token.isZil) {
+      return { totalLiquidity: BIG_ZERO, usdValues: EMPTY_USD_VALUE };
+    }
+
+    const usdValues = tokenState.values[token.address] ?? EMPTY_USD_VALUE;
+    const totalZilVolume = swapVolumes[token.address]?.totalZilVolume ?? BIG_ZERO;
+    const totalZilVolumeUSD = valueCalculators.amount(tokenState.prices, tokenState.tokens[ZIL_ADDRESS], totalZilVolume);
+
+    return {
+      totalZilVolumeUSD,
+      usdValues,
+    };
+  }, [tokenState, token, valueCalculators, swapVolumes]);
+
+
+  const {
+    poolRewards,
+    roi,
+    apr,
+  } = React.useMemo(() => {
+    const poolRewards = rewardsState.rewardsByPool[token.address] || [];
+
+    // calculate total roi and apr
+    const roiPerSecond = usdValues.rewardsPerSecond.dividedBy(usdValues.poolLiquidity);
+    const secondsPerDay = 24 * 3600
+    const roiPerDay = roiPerSecond.times(secondsPerDay).shiftedBy(2).decimalPlaces(2);
+    const apr = roiPerSecond.times(secondsPerDay * 365).shiftedBy(2).decimalPlaces(1);
+
+    return {
+      poolRewards,
+      roi: roiPerDay.isZero() || roiPerDay.isNaN() ? "-" : `${roiPerDay.toFormat()}%`,
+      apr: apr.isZero() || apr.isNaN() ? '-' : `${toHumanNumber(apr, 1)}%`,
+    };
+  }, [rewardsState.rewardsByPool, token, usdValues]);
+
+
+  if (token.isZil) return null;
+
+  const decimals = token.address === ZIL_ADDRESS ? 12 : (token.decimals ?? 0);
+
+  const poolShare = token.pool?.contributionPercentage.shiftedBy(-2) ?? BIG_ZERO;
+  const poolShareLabel = poolShare.shiftedBy(2).decimalPlaces(3).toString(10) ?? "";
+  const tokenAmount = toHumanNumber(poolShare.times(token.pool?.tokenReserve ?? BIG_ZERO).shiftedBy(-decimals));
+  const zilAmount = toHumanNumber(poolShare.times(token.pool?.zilReserve ?? BIG_ZERO).shiftedBy(-12));
+  const depositedValue = poolShare.times(usdValues?.poolLiquidity ?? BIG_ZERO);
+
+  const potentialRewards = rewardsState.potentialRewardsByPool[token.address] || [];
+
+  return (
+    <Card {...rest} className={cls(classes.root, className)}>
+      <CardContent className={classes.title}>
+        <Box display="flex" alignItems="center">
+          <PoolLogo className={classes.poolIcon} pair={[token.symbol, "ZIL"]} tokenAddress={token.address} noOverlap={true} /><Text variant="h6">{token.symbol} - ZIL</Text>
+        </Box>
+      </CardContent>
+
+
+      <Box className={classes.dividerBox}>
+        <Divider className={classes.divider} />
+      </Box>
+
+      <CardContent className={classes.content}>
+        <KeyValueDisplay wrapLabel={true} kkey="Total Stake" ValueComponent="span">
+          <Box>
+            <Text variant="h4" className={classes.flexText}><Text variant="h4" className={classes.textColoured}>{toHumanNumber(token.pool?.tokenReserve.shiftedBy(-decimals), 2)}</Text>&nbsp;{token.symbol}</Text>
+            <Text variant="h4" className={classes.flexText}><Text variant="h4" className={classes.textColoured}>{toHumanNumber(token.pool?.zilReserve.shiftedBy(-12), 2)}</Text>&nbsp;ZIL</Text>
+          </Box>
+        </KeyValueDisplay>
+
+        <KeyValueDisplay wrapLabel={true} kkey="Rewards to be Distributed" ValueComponent="span" mt={2}>
+          <Text variant="h4" color="textPrimary">
+            {
+              poolRewards.length > 0 ?
+                "$" + Object.entries(groupBy(poolRewards, (reward) => reward.rewardToken.address))
+                  .filter(([address, rewards]) => {
+                    return !preStartDistributors?.find(distributor => toBech32Address(distributor.reward_token_address_hex) === address)
+                  })
+                  .reduce((total, [address, rewards]) =>
+                    total.plus(rewards.reduce((acc, reward) =>
+                      acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).times(tokenState.prices[address])), BIG_ZERO)
+                  .toFormat(2)
+                :
+                "-"
+            }
+          </Text>
+        </KeyValueDisplay>
+
+        {/* <Box p={3} pt={2} pb={0}>
+        <KeyValueDisplay wrapLabel={true} kkey="Rewards to be Distributed" ValueComponent="span">
+          {
+            poolRewards.length > 0 ?
+              Object.entries(groupBy(poolRewards, (reward) => reward.rewardToken.address)).map(([address, rewards]) => {
+                return (
+                  <Text variant="h4" className={classes.flexText}><Text variant="h4" className={classes.textColoured}>{rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}</Text>&nbsp;{rewards[0].rewardToken.symbol}</Text>
+                )
+              })
+              :
+              <Text color="textPrimary" className={classes.rewardValue}>
+                -
+              </Text>
+          }
+
+          <Text variant="h4" className={classes.flexText}><Text variant="h4" className={classes.textColoured}>{toHumanNumber(token.pool?.zilReserve.shiftedBy(-12), 2)}</Text>&nbsp;ZIL</Text>
+        </KeyValueDisplay>
+      </Box > */}
+
+        <KeyValueDisplay wrapLabel={true} kkey="APR" ValueComponent="span" mt={2}>
+          <Text variant="h4" className={classes.flexText}><Text variant="h4" >{apr}</Text><Text variant="h4" className={classes.boldless}>(Daily ROI {roi})</Text></Text>
+        </KeyValueDisplay>
+
+
+        <Box display="flex" alignItems="center" mt={2}>
+          <Text variant="h4" className={cls(classes.detailSelect, { [classes.textColoured]: !!showDetail })} onClick={() => setShowDetail(!showDetail)} >Details {showDetail ? <ArrowDropUp /> : <ArrowDropDown />}</Text>
+          <Box flexGrow={1} />
+          <FancyButton onClick={() => onGotoAddLiquidity()} className={classes.addLiquidity}>Add Liquidity</FancyButton>
+        </Box>
+
+        {showDetail && <Box className={classes.detailBox}>
+          <KeyValueDisplay wrapLabel={true} kkey="Total Liquidity" ValueComponent="span">
+            <Text variant="h4" >${usdValues?.poolLiquidity.dp(0).toFormat()}</Text>
+          </KeyValueDisplay>
+          <KeyValueDisplay wrapLabel={true} kkey="24H Volume" ValueComponent="span" mt={.5}>
+            <Box display="flex" flexDirection="column" textAlign="end">
+              <Text variant="h4">
+                <span className={classes.titleColoured}>{(swapVolumes[token.address]?.totalZilVolume || BIG_ZERO).shiftedBy(-12).dp(0).toFormat()}</span> ZIL
+              </Text>
+              <Text className={classes.label}>
+                ${totalZilVolumeUSD?.dp(0).toFormat()}
+              </Text>
+            </Box>
+          </KeyValueDisplay>
+          {walletState.wallet && !poolShare.isZero() && <Box my={1}>
+            <KeyValueDisplay marginBottom={1.5} kkey="Your Stake" ValueComponent="span">
+              <Box display="flex" flexDirection="column" textAlign="end">
+                <Text variant="h4">
+                  <span className={classes.textColoured}>{tokenAmount}</span> {token.symbol}
+                </Text>
+                <Text variant="h4">
+                  <span className={classes.textColoured}>{zilAmount}</span> ZIL
+                </Text>
+                <Text className={classes.label}>
+                  ${depositedValue.toFormat(2) || "-"} ({poolShareLabel || "-"}%)
+                </Text>
+              </Box>
+            </KeyValueDisplay>
+            <KeyValueDisplay marginBottom={1.5} kkey="Your Expected Rewards" ValueComponent="span" wrapLabel={true}>
+              <Box display="flex" flexDirection="column">
+                {
+                  potentialRewards.flatMap(reward => {
+                    const rewardToken = tokenState.tokens[reward.tokenAddress]
+                    if (!rewardToken) return []
+                    return [
+                      <Text variant="h4">
+                        <span className={classes.textColoured}>{reward.amount.shiftedBy(-rewardToken.decimals).dp(5).toFormat()}</span> {rewardToken.symbol}
+                      </Text>
+                    ]
+                  })
+                }
+              </Box>
+            </KeyValueDisplay>
+          </Box>}
+        </Box>}
+      </CardContent>
+    </Card >
+  );
+};
+
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -120,187 +309,5 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
-  const { children, className, token, ...rest } = props;
-  const dispatch = useDispatch();
-  const history = useHistory();
-  const valueCalculators = useValueCalculators();
-  const tokenState = useSelector<RootState, TokenState>(state => state.token);
-  const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
-  const swapVolumes = useSelector<RootState, PoolSwapVolumeMap>(state => state.stats.dailySwapVolumes);
-  const walletState = useSelector<RootState, WalletState>(state => state.wallet);
-  const network = useNetwork();
-  const classes = useStyles();
-  const [showDetail, setShowDetail] = useState(false);
-
-  const onGotoAddLiquidity = () => {
-    dispatch(actions.Pool.select({ network, token }));
-    dispatch(actions.Layout.showPoolType("add"));
-    history.push("/pool");
-  }
-  const { totalZilVolumeUSD, usdValues } = useMemo(() => {
-    if (token.isZil) {
-      return { totalLiquidity: BIG_ZERO, usdValues: EMPTY_USD_VALUE };
-    }
-
-    const usdValues = tokenState.values[token.address] ?? EMPTY_USD_VALUE;
-    const totalZilVolume = swapVolumes[token.address]?.totalZilVolume ?? BIG_ZERO;
-    const totalZilVolumeUSD = valueCalculators.amount(tokenState.prices, tokenState.tokens[ZIL_ADDRESS], totalZilVolume);
-
-    return {
-      totalZilVolumeUSD,
-      usdValues,
-    };
-  }, [tokenState, token, valueCalculators, swapVolumes]);
-
-
-  const {
-    poolRewards,
-    roi,
-    apr,
-  } = React.useMemo(() => {
-    const poolRewards = rewardsState.rewardsByPool[token.address] || [];
-
-    // calculate total roi and apr
-    const roiPerSecond = usdValues.rewardsPerSecond.dividedBy(usdValues.poolLiquidity);
-    const secondsPerDay = 24 * 3600
-    const roiPerDay = roiPerSecond.times(secondsPerDay).shiftedBy(2).decimalPlaces(2);
-    const apr = roiPerSecond.times(secondsPerDay * 365).shiftedBy(2).decimalPlaces(1);
-
-    return {
-      poolRewards,
-      roi: roiPerDay.isZero() || roiPerDay.isNaN() ? "-" : `${roiPerDay.toFormat()}%`,
-      apr: apr.isZero() || apr.isNaN() ? '-' : `${toHumanNumber(apr, 1)}%`,
-    };
-  }, [rewardsState.rewardsByPool, token, usdValues]);
-
-
-  if (token.isZil) return null;
-
-  const decimals = token.address === ZIL_ADDRESS ? 12 : (token.decimals ?? 0);
-
-  const poolShare = token.pool?.contributionPercentage.shiftedBy(-2) ?? BIG_ZERO;
-  const poolShareLabel = poolShare.shiftedBy(2).decimalPlaces(3).toString(10) ?? "";
-  const tokenAmount = toHumanNumber(poolShare.times(token.pool?.tokenReserve ?? BIG_ZERO).shiftedBy(-decimals));
-  const zilAmount = toHumanNumber(poolShare.times(token.pool?.zilReserve ?? BIG_ZERO).shiftedBy(-12));
-  const depositedValue = poolShare.times(usdValues?.poolLiquidity ?? BIG_ZERO);
-
-  const potentialRewards = rewardsState.potentialRewardsByPool[token.address] || [];
-
-  return (
-    <Card {...rest} className={cls(classes.root, className)}>
-      <CardContent className={classes.title}>
-        <Box display="flex" alignItems="center">
-          <PoolLogo className={classes.poolIcon} pair={[token.symbol, "ZIL"]} tokenAddress={token.address} noOverlap={true} /><Text variant="h6">{token.symbol} - ZIL</Text>
-        </Box>
-      </CardContent>
-
-
-      <Box className={classes.dividerBox}>
-        <Divider className={classes.divider} />
-      </Box>
-
-      <CardContent className={classes.content}>
-        <KeyValueDisplay wrapLabel={true} kkey="Total Stake" ValueComponent="span">
-          <Box>
-            <Text variant="h4" className={classes.flexText}><Text variant="h4" className={classes.textColoured}>{toHumanNumber(token.pool?.tokenReserve.shiftedBy(-decimals), 2)}</Text>&nbsp;{token.symbol}</Text>
-            <Text variant="h4" className={classes.flexText}><Text variant="h4" className={classes.textColoured}>{toHumanNumber(token.pool?.zilReserve.shiftedBy(-12), 2)}</Text>&nbsp;ZIL</Text>
-          </Box>
-        </KeyValueDisplay>
-
-        <KeyValueDisplay wrapLabel={true} kkey="Rewards to be Distributed" ValueComponent="span" mt={2}>
-          <Text variant="h4" color="textPrimary">
-            {
-              poolRewards.length > 0 ?
-                "$" + Object.entries(groupBy(poolRewards, (reward) => reward.rewardToken.address))
-                  .reduce((total, [address, rewards]) =>
-                    total.plus(rewards.reduce((acc, reward) =>
-                      acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).times(tokenState.prices[address])), BIG_ZERO)
-                  .toFormat(2)
-                :
-                "-"
-            }
-          </Text>
-        </KeyValueDisplay>
-
-        {/* <Box p={3} pt={2} pb={0}>
-        <KeyValueDisplay wrapLabel={true} kkey="Rewards to be Distributed" ValueComponent="span">
-          {
-            poolRewards.length > 0 ?
-              Object.entries(groupBy(poolRewards, (reward) => reward.rewardToken.address)).map(([address, rewards]) => {
-                return (
-                  <Text variant="h4" className={classes.flexText}><Text variant="h4" className={classes.textColoured}>{rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}</Text>&nbsp;{rewards[0].rewardToken.symbol}</Text>
-                )
-              })
-              :
-              <Text color="textPrimary" className={classes.rewardValue}>
-                -
-              </Text>
-          }
-
-          <Text variant="h4" className={classes.flexText}><Text variant="h4" className={classes.textColoured}>{toHumanNumber(token.pool?.zilReserve.shiftedBy(-12), 2)}</Text>&nbsp;ZIL</Text>
-        </KeyValueDisplay>
-      </Box > */}
-
-        <KeyValueDisplay wrapLabel={true} kkey="APR" ValueComponent="span" mt={2}>
-          <Text variant="h4" className={classes.flexText}><Text variant="h4" >{apr}</Text><Text variant="h4" className={classes.boldless}>(Daily ROI {roi})</Text></Text>
-        </KeyValueDisplay>
-
-
-        <Box display="flex" alignItems="center" mt={2}>
-          <Text variant="h4" className={cls(classes.detailSelect, { [classes.textColoured]: !!showDetail })} onClick={() => setShowDetail(!showDetail)} >Details {showDetail ? <ArrowDropUp /> : <ArrowDropDown />}</Text>
-          <Box flexGrow={1} />
-          <FancyButton onClick={() => onGotoAddLiquidity()} className={classes.addLiquidity}>Add Liquidity</FancyButton>
-        </Box>
-
-        {showDetail && <Box className={classes.detailBox}>
-          <KeyValueDisplay wrapLabel={true} kkey="Total Liquidity" ValueComponent="span">
-            <Text variant="h4" >${usdValues?.poolLiquidity.dp(0).toFormat()}</Text>
-          </KeyValueDisplay>
-          <KeyValueDisplay wrapLabel={true} kkey="24H Volume" ValueComponent="span" mt={.5}>
-            <Box display="flex" flexDirection="column" textAlign="end">
-              <Text variant="h4">
-                <span className={classes.titleColoured}>{(swapVolumes[token.address]?.totalZilVolume || BIG_ZERO).shiftedBy(-12).dp(0).toFormat()}</span> ZIL
-              </Text>
-              <Text className={classes.label}>
-                ${totalZilVolumeUSD?.dp(0).toFormat()}
-              </Text>
-            </Box>
-          </KeyValueDisplay>
-          {walletState.wallet && !poolShare.isZero() && <Box my={1}>
-            <KeyValueDisplay marginBottom={1.5} kkey="Your Stake" ValueComponent="span">
-              <Box display="flex" flexDirection="column" textAlign="end">
-                <Text variant="h4">
-                  <span className={classes.textColoured}>{tokenAmount}</span> {token.symbol}
-                </Text>
-                <Text variant="h4">
-                  <span className={classes.textColoured}>{zilAmount}</span> ZIL
-                </Text>
-                <Text className={classes.label}>
-                  ${depositedValue.toFormat(2) || "-"} ({poolShareLabel || "-"}%)
-                </Text>
-              </Box>
-            </KeyValueDisplay>
-            <KeyValueDisplay marginBottom={1.5} kkey="Your Expected Rewards" ValueComponent="span" wrapLabel={true}>
-              <Box display="flex" flexDirection="column">
-                {
-                  potentialRewards.flatMap(reward => {
-                    const rewardToken = tokenState.tokens[reward.tokenAddress]
-                    if (!rewardToken) return []
-                    return [
-                      <Text variant="h4">
-                        <span className={classes.textColoured}>{reward.amount.shiftedBy(-rewardToken.decimals).dp(5).toFormat()}</span> {rewardToken.symbol}
-                      </Text>
-                    ]
-                  })
-                }
-              </Box>
-            </KeyValueDisplay>
-          </Box>}
-        </Box>}
-      </CardContent>
-    </Card >
-  );
-};
 
 export default PoolMobileInfoCard;
