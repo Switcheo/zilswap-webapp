@@ -6,6 +6,7 @@ import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import groupBy from "lodash/groupBy";
+import { toBech32Address } from "@zilliqa-js/crypto";
 import { KeyValueDisplay, Text, FancyButton, PoolLogo } from "app/components";
 import { actions } from "app/store";
 import { EMPTY_USD_VALUE } from "app/store/token/reducer";
@@ -13,7 +14,6 @@ import { DistributorWithTimings, PoolSwapVolumeMap, RewardsState, RootState, Tok
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, toHumanNumber, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
-import { toBech32Address } from "@zilliqa-js/crypto";
 
 interface Props extends CardProps {
   token: TokenInfo;
