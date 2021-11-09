@@ -1,8 +1,9 @@
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useState, useMemo } from "react";
 import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { renderRoutes } from "react-router-config";
-import { ArkCTABanner, ConnectWalletButton, NavDrawer, TopBar } from "app/components";
+import { useLocation } from "react-router-dom";
+import { ArkCTABanner, ConnectWalletButton, NavDrawer, TopBar, DrawerComp } from "app/components";
 import { AppTheme } from "app/theme/types";
 import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
@@ -36,14 +37,36 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { route } = props;
   const classes = useStyles();
   const [showDrawer, setShowDrawer] = useState(false);
+  const [showTabDrawer, setShowTabDrawer] = useState(false);
+  const location = useLocation();
+
+  const currentPath: "swap" | "pool" | "bridge" | "zilo" | "ark" | "main" = useMemo(() => {
+    const current = location.pathname;
+
+    if (current.indexOf("/swap") === 0) return "swap";
+    else if (current.indexOf("/pool") === 0 || current.indexOf("/pools") === 0)
+      return "pool";
+    else if (
+      current.indexOf("/bridge") === 0 ||
+      current.indexOf("/history") === 0
+    )
+      return "bridge";
+    else if (current.indexOf("/zilo") === 0) return "zilo";
+    else if (current.indexOf("/ark") === 0) return "ark";
+    else return "main";
+  }, [location.pathname]);
 
   const onToggleDrawer = (override?: boolean) => {
     setShowDrawer(typeof override === "boolean" ? override : !showDrawer);
   };
 
+  const onToggleTabDrawer = (override?: boolean) => {
+    setShowTabDrawer(typeof override === "boolean" ? override : !showTabDrawer);
+  };
+
   return (
     <Box className={classes.root}>
-      <TopBar onToggleDrawer={onToggleDrawer} />
+      <TopBar currentPath={currentPath} onToggleDrawer={onToggleDrawer} onToggleTabDrawer={onToggleTabDrawer} />
       <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />
       <main className={classes.content}>
         <DevInfoBadge />
@@ -57,6 +80,7 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       </Hidden>
       <WalletDialog />
       <TransactionDialog />
+      <DrawerComp onClose={() => setShowTabDrawer(false)} open={showTabDrawer} navPath={currentPath} />
     </Box>
   );
 };
