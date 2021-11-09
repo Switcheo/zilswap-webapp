@@ -195,7 +195,7 @@ const TopBar: React.FC<Props> = (
           alignItems="center"
         >
           {/* TODO temperory add drawer to only pool */}
-          {currentPath === "pool" ? (
+          {(currentPath === "pool" && isXs) ? (
             <div className={classes.menuIcon}>
               <IconButton onClick={() => onToggleTabDrawer && onToggleTabDrawer()}>
                 <MenuIcon />

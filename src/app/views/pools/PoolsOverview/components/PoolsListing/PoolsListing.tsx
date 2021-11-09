@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Box, BoxProps, Button, Grid, Hidden, Tabs, Tab } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import dayjs from "dayjs";
 import { useSelector } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
 import { Text } from "app/components";
@@ -51,13 +50,10 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
   const {
     registeredTokens,
     otherTokens,
-    preStartDistributors,
     megaDrop,
     singleDrop,
   } = React.useMemo(() => {
     const queryRegexp = !!searchQuery ? new RegExp(searchQuery, "i") : undefined;
-
-    const preStartDistributors = rewardsState.distributors.filter((distributor) => !dayjs().isAfter(distributor.emission_info.distribution_start_time * 1000));
     const result = Object.values(tokenState.tokens)
       .sort((lhs, rhs) => {
         const lhsValues = tokenState.values[lhs.address];
@@ -119,14 +115,12 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
         megaDrop: [] as TokenInfo[],
         registeredTokens: [] as TokenInfo[],
         otherTokens: [] as TokenInfo[],
-        preStartDistributors: preStartDistributors,
       });
 
     return result;
   }, [
     tokenState.tokens, tokenState.values, searchQuery,
-    rewardsState.distributors, ownedLiquidity,
-    rewardsState.rewardsByPool,
+    ownedLiquidity, rewardsState.rewardsByPool,
   ]);
 
   const onLoadMore = () => {
@@ -149,59 +143,58 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
 
       <Box display="flex" flexDirection="column" justifyContent="space-between" mb={3} className={classes.header}>
         <Text variant="h2">Pools </Text>
-        <Box display="flex" mt={1}>
-          <Tabs className={classes.tabs} value={tabValue} onChange={handleTabChange}>
-            <Tab className={classes.tab} label={<Text className={classes.tabText}>Mega Drop {!!megaDrop.length && (<Text className={classes.tabLabel}>{megaDrop.length}</Text>)}</Text>} />
-            <Tab className={classes.tab} label={<Text className={classes.tabText}>Single Drop {!!singleDrop.length && (<Text className={classes.tabLabel}>{singleDrop.length}</Text>)}</Text>} />
-            <Tab className={classes.tab} label={<Text className={classes.tabText}>Main Pools {!!registeredTokens.length && (<Text className={classes.tabLabel}>{registeredTokens.length}</Text>)}</Text>} />
-            <Tab className={classes.tab} label={<Text className={classes.tabText}>All Pools {!!allTokens.length && (<Text className={classes.tabLabel}>{allTokens.length}</Text>)}</Text>} />
-          </Tabs>
+        <Box display="flex" mt={1} className={classes.tabSearchBox}>
+          <Box display="flex" overflow="auto">
+            <Tabs className={classes.tabs} value={tabValue} onChange={handleTabChange}>
+              <Tab className={classes.tab} label={<Text className={classes.tabText}>Mega Drop {!!megaDrop.length && (<Text className={classes.tabLabel}>{megaDrop.length}</Text>)}</Text>} />
+              <Tab className={classes.tab} label={<Text className={classes.tabText}>Single Drop {!!singleDrop.length && (<Text className={classes.tabLabel}>{singleDrop.length}</Text>)}</Text>} />
+              <Tab className={classes.tab} label={<Text className={classes.tabText}>Main Pools {!!registeredTokens.length && (<Text className={classes.tabLabel}>{registeredTokens.length}</Text>)}</Text>} />
+              <Tab className={classes.tab} label={<Text className={classes.tabText}>All Pools {!!allTokens.length && (<Text className={classes.tabLabel}>{allTokens.length}</Text>)}</Text>} />
+            </Tabs>
+          </Box>
           <Box flexGrow={1} />
           <PoolsSearchInput onSearch={onSearch} />
         </Box>
       </Box>
 
-
-
-
       <Grid container spacing={2}>
         {tabValue === 0 && megaDrop.slice(0, limits[currentLimit]).map((token) => (
           <Grid key={token.address} item xs={12} >
             <Hidden smDown>
-              <PoolInfoCard preStartDistributors={preStartDistributors} token={token} />
+              <PoolInfoCard token={token} />
             </Hidden>
             <Hidden mdUp>
-              <PoolMobileInfoCard preStartDistributors={preStartDistributors} token={token} />
+              <PoolMobileInfoCard token={token} />
             </Hidden>
           </Grid>
         ))}
         {tabValue === 1 && singleDrop.slice(0, limits[currentLimit]).map((token) => (
           <Grid key={token.address} item xs={12} >
             <Hidden smDown>
-              <PoolInfoCard preStartDistributors={preStartDistributors} token={token} />
+              <PoolInfoCard token={token} />
             </Hidden>
             <Hidden mdUp>
-              <PoolMobileInfoCard preStartDistributors={preStartDistributors} token={token} />
+              <PoolMobileInfoCard token={token} />
             </Hidden>
           </Grid>
         ))}
         {tabValue === 2 && registeredTokens.slice(0, limits[currentLimit]).map((token) => (
           <Grid key={token.address} item xs={12} >
             <Hidden smDown>
-              <PoolInfoCard preStartDistributors={preStartDistributors} token={token} />
+              <PoolInfoCard token={token} />
             </Hidden>
             <Hidden mdUp>
-              <PoolMobileInfoCard preStartDistributors={preStartDistributors} token={token} />
+              <PoolMobileInfoCard token={token} />
             </Hidden>
           </Grid>
         ))}
         {tabValue === 3 && allTokens.slice(0, limits[currentLimit]).map((token) => (
           <Grid key={token.address} item xs={12} >
             <Hidden smDown>
-              <PoolInfoCard preStartDistributors={preStartDistributors} token={token} />
+              <PoolInfoCard token={token} />
             </Hidden>
             <Hidden mdUp>
-              <PoolMobileInfoCard preStartDistributors={preStartDistributors} token={token} />
+              <PoolMobileInfoCard token={token} />
             </Hidden>
           </Grid>
         ))}
@@ -250,6 +243,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       justifyContent: 'center',
       backgroundColor: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
     },
+    '& .MuiTabs-fixed': {
+      overflow: "scroll!important",
+    },
+    [theme.breakpoints.down("xs")]: {
+      marginBottom: theme.spacing(1),
+    }
   },
   tab: {
     display: "flex",
@@ -279,6 +278,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: theme.spacing(.7, 1),
     borderRadius: 8,
     background: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
+  },
+  tabSearchBox: {
+    display: "flex",
+    flexDirection: "row",
+    [theme.breakpoints.down("xs")]: {
+      flexDirection: "column",
+    }
   }
 }));
 

@@ -11,18 +11,17 @@ import { toBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyLogo, FancyButton, KeyValueDisplay, Text, ConnectWalletButton } from "app/components";
 import { actions } from "app/store";
 import { EMPTY_USD_VALUE } from "app/store/token/reducer";
-import { DistributorWithTimings, PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
+import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, toHumanNumber, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ONE, BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 
 interface Props extends CardProps {
   token: TokenInfo;
-  preStartDistributors?: DistributorWithTimings[];
 }
 
 const PoolInfoCard: React.FC<Props> = (props: Props) => {
-  const { children, className, token, preStartDistributors, ...rest } = props;
+  const { children, className, token, ...rest } = props;
   const dispatch = useDispatch();
   const history = useHistory();
   const valueCalculators = useValueCalculators();
