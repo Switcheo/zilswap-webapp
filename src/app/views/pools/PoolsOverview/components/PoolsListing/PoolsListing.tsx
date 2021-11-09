@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Box, BoxProps, Button, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
+import dayjs from "dayjs";
 import { useSelector } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
 import { Text } from "app/components";
-import { RootState, TokenInfo, TokenState } from "app/store/types";
+import { RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { BIG_ZERO } from "app/utils/constants";
 import PoolInfoCard from "../PoolInfoCard";
@@ -56,6 +57,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
   const [limits, setLimits] = useState<ListingLimits>(initialLimits);
   const [searchQuery, setSearchQuery] = useState<string | undefined>();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
   const classes = useStyles();
 
   useEffect(() => {
@@ -69,8 +71,10 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
   const {
     registeredTokens,
     otherTokens,
+    preStartDistributors
   } = React.useMemo(() => {
     const queryRegexp = !!searchQuery ? new RegExp(searchQuery, "i") : undefined;
+    const preStartDistributors = rewardsState.distributors.filter((distributor) => !dayjs().isAfter(distributor.emission_info.distribution_start_time * 1000));
     const result = Object.values(tokenState.tokens)
       .sort((lhs, rhs) => {
         const lhsValues = tokenState.values[lhs.address];
@@ -118,10 +122,11 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
       }, {
         registeredTokens: [] as TokenInfo[],
         otherTokens: [] as TokenInfo[],
+        preStartDistributors: preStartDistributors,
       });
 
     return result;
-  }, [tokenState.tokens, tokenState.values, searchQuery]);
+  }, [tokenState.tokens, tokenState.values, searchQuery, rewardsState.distributors]);
 
   const onLoadMore = (key: keyof ListingLimits) => {
     return () => {
@@ -141,7 +146,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
       <Grid container spacing={2}>
         {registeredTokens.slice(0, limits.registered).map((token) => (
           <Grid key={token.address} item xs={12} md={6}>
-            <PoolInfoCard token={token} />
+            <PoolInfoCard preStartDistributors={preStartDistributors} token={token} />
           </Grid>
         ))}
       </Grid>

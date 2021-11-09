@@ -6,16 +6,18 @@ import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import groupBy from "lodash/groupBy";
+import { toBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyLogo, HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { actions } from "app/store";
 import { EMPTY_USD_VALUE } from "app/store/token/reducer";
-import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
+import { DistributorWithTimings, PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, toHumanNumber, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 
 interface Props extends CardProps {
   token: TokenInfo;
+  preStartDistributors?: DistributorWithTimings[];
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -159,8 +161,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   divider: {
     borderBottom: theme.palette.type === "dark" ? "1px solid transparent" : `1px solid rgba${hexToRGBA("#003340", 0.5)}`,
     borderImage: theme.palette.type === "dark"
-                  ? "linear-gradient(to left, #003340 1%, #00FFB0  50%, #003340 100%) 0 0 100% 0/0 0 1px 0 stretch"
-                  : "",
+      ? "linear-gradient(to left, #003340 1%, #00FFB0  50%, #003340 100%) 0 0 100% 0/0 0 1px 0 stretch"
+      : "",
   },
   label: {
     color: theme.palette.label
@@ -186,7 +188,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const PoolInfoCard: React.FC<Props> = (props: Props) => {
-  const { children, className, token, ...rest } = props;
+  const { children, className, token, preStartDistributors, ...rest } = props;
   const dispatch = useDispatch();
   const history = useHistory();
   const valueCalculators = useValueCalculators();
@@ -267,25 +269,25 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
       <CardContent className={classes.content}>
         <Box mt={1.5} mb={2} display="flex" bgcolor="background.contrast" padding={0.5} borderRadius={12} position="relative">
           <Box className={classes.box} display="flex" flexDirection="column" alignItems="start" flex={1} borderRadius={12}>
-              <Box py={"4px"} px={"16px"}>
-                <Box display="flex" alignItems="flex-end" mt={1} mb={1}>
-                  <CurrencyLogo className={classes.logo} currency={token.symbol} address={token.address} />
-                  <Text className={classes.token}>{token.symbol}</Text>
-                </Box>
-                <Text className={classes.poolSize}>{toHumanNumber(token.pool?.tokenReserve.shiftedBy(-decimals), 2)}</Text>
+            <Box py={"4px"} px={"16px"}>
+              <Box display="flex" alignItems="flex-end" mt={1} mb={1}>
+                <CurrencyLogo className={classes.logo} currency={token.symbol} address={token.address} />
+                <Text className={classes.token}>{token.symbol}</Text>
+              </Box>
+              <Text className={classes.poolSize}>{toHumanNumber(token.pool?.tokenReserve.shiftedBy(-decimals), 2)}</Text>
             </Box>
           </Box>
-          <ViewHeadline className={classes.viewIcon}/>
+          <ViewHeadline className={classes.viewIcon} />
           <Box className={classes.box} display="flex" flexDirection="column" flex={1} borderRadius={12}>
             <Box py={"4px"} px={"16px"}>
-                <Box mt={1} mb={1} display="flex" justifyContent="space-between">
-                  <Box display="flex" alignItems="flex-end">
-                    <CurrencyLogo className={classes.logo} currency="ZIL" address={ZIL_ADDRESS} />
-                    <Text className={classes.token}>ZIL</Text>
-                  </Box>
-                  <HelpInfo placement="top" title={`This shows the current ${token.symbol}-ZIL pool size.`}/>
+              <Box mt={1} mb={1} display="flex" justifyContent="space-between">
+                <Box display="flex" alignItems="flex-end">
+                  <CurrencyLogo className={classes.logo} currency="ZIL" address={ZIL_ADDRESS} />
+                  <Text className={classes.token}>ZIL</Text>
                 </Box>
-                <Text className={classes.poolSize}>{toHumanNumber(token.pool?.zilReserve.shiftedBy(-12), 2)}</Text>
+                <HelpInfo placement="top" title={`This shows the current ${token.symbol}-ZIL pool size.`} />
+              </Box>
+              <Text className={classes.poolSize}>{toHumanNumber(token.pool?.zilReserve.shiftedBy(-12), 2)}</Text>
             </Box>
           </Box>
         </Box>
@@ -295,20 +297,24 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
             <Text variant="subtitle2" marginBottom={1.5}>Reward to be Distributed</Text>
             {
               poolRewards.length > 0 ?
-                Object.entries(groupBy(poolRewards, (reward) => reward.rewardToken.address)).map(([address, rewards]) => {
-                  return (
-                    <Box display="flex" className={classes.rewardContainer} alignItems="flex-end" flexWrap="wrap" key={address}>
-                      <Text variant="h1" color="textPrimary" className={classes.rewardValue}>
-                        {rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}
-                      </Text>
-                      <CurrencyLogo className={classes.rewardTokenLogo} currency={rewards[0].rewardToken.symbol} address={address} />
-                    </Box>
-                  )
-                })
-              :
-              <Text color="textPrimary" className={classes.rewardValue}>
-                -
-              </Text>
+                Object.entries(groupBy(poolRewards, (reward) => reward.rewardToken.address))
+                  .filter(([address, rewards]) => {
+                    return !preStartDistributors?.find(distributor => toBech32Address(distributor.reward_token_address_hex) === address)
+                  })
+                  .map(([address, rewards]) => {
+                    return (
+                      <Box display="flex" className={classes.rewardContainer} alignItems="flex-end" flexWrap="wrap" key={address}>
+                        <Text variant="h1" color="textPrimary" className={classes.rewardValue}>
+                          {rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}
+                        </Text>
+                        <CurrencyLogo className={classes.rewardTokenLogo} currency={rewards[0].rewardToken.symbol} address={address} />
+                      </Box>
+                    )
+                  })
+                :
+                <Text color="textPrimary" className={classes.rewardValue}>
+                  -
+                </Text>
             }
           </Box>
 
@@ -332,7 +338,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
         </Box>
 
         <Box className={classes.dividerBox}>
-          <Divider className={classes.divider}/>
+          <Divider className={classes.divider} />
         </Box>
 
         <Box marginBottom={1} display="flex" flexDirection="column" className={classes.liquidityVolumeContainer}>
@@ -347,11 +353,11 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
           </KeyValueDisplay>
           {
             !poolShare.isZero() &&
-              <KeyValueDisplay marginBottom={1.5} kkey={`Your Pool Share (${poolShareLabel}%)`} ValueComponent="span">
-                <Text align="right" className={classes.label}>
-                  <span className={classes.textColoured}>{tokenAmount}</span> {token.symbol} + <span className={classes.textColoured}>{zilAmount}</span> ZIL
-                  (${toHumanNumber(depositedValue, 2)})
-                </Text>
+            <KeyValueDisplay marginBottom={1.5} kkey={`Your Pool Share (${poolShareLabel}%)`} ValueComponent="span">
+              <Text align="right" className={classes.label}>
+                <span className={classes.textColoured}>{tokenAmount}</span> {token.symbol} + <span className={classes.textColoured}>{zilAmount}</span> ZIL
+                (${toHumanNumber(depositedValue, 2)})
+              </Text>
             </KeyValueDisplay>
           }
           {
