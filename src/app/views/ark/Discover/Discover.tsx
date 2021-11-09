@@ -91,8 +91,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     if (!search.trim().length) return sorted
 
     return sorted.filter(c => (
-      c.description?.includes(search)
-      || c.ownerName?.includes(search)
+      c.ownerName?.includes(search)
       || c.name?.includes(search))
     )
   }, [collections, search]);
