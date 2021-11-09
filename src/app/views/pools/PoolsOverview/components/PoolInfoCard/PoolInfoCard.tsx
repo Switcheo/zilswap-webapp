@@ -174,8 +174,6 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
                 </Text>
             } */}
           </Box>
-
-
         </Box>
 
 

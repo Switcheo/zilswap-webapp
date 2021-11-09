@@ -2,16 +2,23 @@ import React, { useEffect, useState } from "react";
 import { Box, BoxProps, Button, Grid, Hidden, Tabs, Tab } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
+import groupBy from "lodash/groupBy";
+import dayjs from "dayjs";
+import { toBech32Address } from "@zilliqa-js/crypto";
 import { useSelector } from "react-redux";
 import { Blockchain } from "tradehub-api-js";
 import { Text } from "app/components";
 import { RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { BIG_ZERO } from "app/utils/constants";
+import { EMPTY_USD_VALUE } from "app/store/token/reducer";
 import { hexToRGBA, SimpleMap } from 'app/utils';
 import PoolInfoCard from "../PoolInfoCard";
 import PoolsSearchInput from "../PoolsSearchInput";
 import PoolMobileInfoCard from "../PoolMobileInfoCard";
+import { ReactComponent as Unsorted } from "./sort.svg";
+import { ReactComponent as Desc } from "./desc.svg";
+import { ReactComponent as Asc } from "./asc.svg";
 
 interface Props extends BoxProps {
   query?: string;
@@ -38,6 +45,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
   const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
   const classes = useStyles();
   const currentLimit = limitArr[tabValue];
+  const [sortBy, setSortBy] = useState("apr:desc");
 
   useEffect(() => {
     setLimits(initialLimits);
@@ -54,6 +62,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
     singleDrop,
   } = React.useMemo(() => {
     const queryRegexp = !!searchQuery ? new RegExp(searchQuery, "i") : undefined;
+    const preStartDistributors = rewardsState.distributors.filter((distributor) => !dayjs().isAfter(distributor.emission_info.distribution_start_time * 1000));
     const result = Object.values(tokenState.tokens)
       .sort((lhs, rhs) => {
         const lhsValues = tokenState.values[lhs.address];
@@ -73,6 +82,51 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
           return rhsRewardValue.comparedTo(lhsRewardValue);
 
         return rhsTVL.comparedTo(lhsTVL);
+      })
+      .sort((lhs, rhs) => {
+        const [sortType, sortOrder] = sortBy.split(":");
+        if (sortType === "dist") {
+          const lhsRewards = rewardsState.rewardsByPool[lhs.address] || [];
+          const rhsRewards = rewardsState.rewardsByPool[rhs.address] || [];
+
+          const lhsAmount = Object.entries(groupBy(lhsRewards, (reward) => reward.rewardToken.address))
+            .filter(([address, rewards]) => {
+              return !preStartDistributors?.find(distributor => toBech32Address(distributor.reward_token_address_hex) === address)
+            })
+            .reduce((total, [address, rewards]) =>
+              total.plus(rewards.reduce((acc, reward) =>
+                acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).times(tokenState.prices[address])), BIG_ZERO)
+
+          const rhsAmount = Object.entries(groupBy(rhsRewards, (reward) => reward.rewardToken.address))
+            .filter(([address, rewards]) => {
+              return !preStartDistributors?.find(distributor => toBech32Address(distributor.reward_token_address_hex) === address)
+            })
+            .reduce((total, [address, rewards]) =>
+              total.plus(rewards.reduce((acc, reward) =>
+                acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).times(tokenState.prices[address])), BIG_ZERO)
+
+
+          if (sortOrder === "asc") {
+            return lhsAmount.comparedTo(rhsAmount);
+          }
+          return rhsAmount.comparedTo(lhsAmount);
+        }
+
+        const lhsUsdValues = tokenState.values[lhs.address] ?? EMPTY_USD_VALUE;
+        const rhsUsdValues = tokenState.values[rhs.address] ?? EMPTY_USD_VALUE;
+
+        const secondsPerDay = 24 * 3600
+
+        const lhsRoiPerSec = lhsUsdValues.rewardsPerSecond.dividedBy(lhsUsdValues.poolLiquidity);
+        const rhsRoiPerSec = rhsUsdValues.rewardsPerSecond.dividedBy(rhsUsdValues.poolLiquidity);
+
+        const lhsApr = lhsRoiPerSec.times(secondsPerDay * 365).shiftedBy(2).decimalPlaces(1);
+        const rhsApr = rhsRoiPerSec.times(secondsPerDay * 365).shiftedBy(2).decimalPlaces(1);
+
+        if (sortOrder === "asc") {
+          return lhsApr.comparedTo(rhsApr);
+        }
+        return rhsApr.comparedTo(lhsApr);
       })
       .filter((token) => !ownedLiquidity || (token.pool && !token.pool.contributionPercentage.isZero()))
       .reduce((accum, token) => {
@@ -120,7 +174,8 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
     return result;
   }, [
     tokenState.tokens, tokenState.values, searchQuery,
-    ownedLiquidity, rewardsState.rewardsByPool,
+    ownedLiquidity, rewardsState.rewardsByPool, sortBy,
+    rewardsState.distributors, tokenState.prices
   ]);
 
   const onLoadMore = () => {
@@ -134,6 +189,27 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
 
   const handleTabChange = (ev: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+  }
+
+  const updateSort = (type: string) => {
+    const [sortType, sortOrder] = sortBy.split(":");
+    let newOrder = sortOrder;
+    let newSort = sortType;
+    if (newSort === type) {
+      if (newOrder === "desc") newOrder = "asc";
+      else newOrder = "desc";
+    } else {
+      newSort = type;
+      newOrder = "asc";
+    }
+    setSortBy(newSort + ":" + newOrder);
+  }
+
+  const getLogo = (type: string) => {
+    const [sortType, sortOrder] = sortBy.split(":");
+    if (type !== sortType) return <Unsorted />;
+    if (sortOrder === "asc") return <Asc />;
+    return <Desc />;
   }
 
   const allTokens = [...registeredTokens, ...otherTokens];
@@ -156,6 +232,26 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
           <PoolsSearchInput onSearch={onSearch} />
         </Box>
       </Box>
+
+      <Hidden smDown>
+        <Box padding={3} paddingBottom={1} display="flex" alignItems="center">
+          <Box flex={.5} mr={2} justifyContent="center" display="flex">
+            <Text>Pool</Text>
+          </Box>
+          <Box flex={2} justifyContent="flex-start" display="flex" flexDirection="column">
+            <Text paddingLeft="16px" >Total Staked</Text>
+          </Box>
+          <Box flex={2} justifyContent="flex-start" display="flex">
+            <Text onClick={() => updateSort("dist")} className={classes.headerText}>{getLogo("dist")}Reward to be Distributed</Text>
+          </Box>
+          <Box flex={1.5} display="flex" flexDirection="column" >
+            <Text onClick={() => updateSort("apr")} className={classes.headerText}>{getLogo("apr")}APR</Text>
+          </Box>
+          <Box flex={2.5}>
+            <Text></Text>
+          </Box>
+        </Box>
+      </Hidden>
 
       <Grid container spacing={2}>
         {tabValue === 0 && megaDrop.slice(0, limits[currentLimit]).map((token) => (
@@ -261,7 +357,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       minWidth: 0,
     },
     fontWeight: 600,
-    marginRight: theme.spacing(3),
+    marginRight: theme.spacing(4),
     opacity: 0.5,
     '&:hover': {
       opacity: 1,
@@ -288,6 +384,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("xs")]: {
       flexDirection: "column",
     }
+  },
+  headerText: {
+    display: "flex",
+    alignItems: "center",
+    transform: "translateX(-10px)",
+    cursor: "pointer",
   }
 }));
 
