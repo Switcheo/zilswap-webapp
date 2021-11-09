@@ -14,7 +14,7 @@ import { EMPTY_USD_VALUE } from "app/store/token/reducer";
 import { DistributorWithTimings, PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, toHumanNumber, useNetwork, useValueCalculators } from "app/utils";
-import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
+import { BIG_ONE, BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 
 interface Props extends CardProps {
   token: TokenInfo;
@@ -126,7 +126,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
                   })
                   .reduce((total, [address, rewards]) =>
                     total.plus(rewards.reduce((acc, reward) =>
-                      acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).times(tokenState.prices[address])), BIG_ZERO)
+                      acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).times(tokenState.prices[address] || BIG_ONE)), BIG_ZERO)
                   .toFormat(2)
                 :
                 "-"}
