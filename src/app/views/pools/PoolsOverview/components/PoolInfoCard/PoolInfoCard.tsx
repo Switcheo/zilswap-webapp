@@ -3,6 +3,7 @@ import { Box, Button, Card, CardContent, CardProps, Divider } from "@material-ui
 import { makeStyles } from "@material-ui/core/styles";
 import { Add, ViewHeadline } from "@material-ui/icons";
 import cls from "classnames";
+import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import groupBy from "lodash/groupBy";
@@ -10,14 +11,13 @@ import { toBech32Address } from "@zilliqa-js/crypto";
 import { CurrencyLogo, HelpInfo, KeyValueDisplay, Text } from "app/components";
 import { actions } from "app/store";
 import { EMPTY_USD_VALUE } from "app/store/token/reducer";
-import { DistributorWithTimings, PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
+import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, toHumanNumber, useNetwork, useValueCalculators } from "app/utils";
 import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 
 interface Props extends CardProps {
   token: TokenInfo;
-  preStartDistributors?: DistributorWithTimings[];
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -188,7 +188,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const PoolInfoCard: React.FC<Props> = (props: Props) => {
-  const { children, className, token, preStartDistributors, ...rest } = props;
+  const { children, className, token, ...rest } = props;
   const dispatch = useDispatch();
   const history = useHistory();
   const valueCalculators = useValueCalculators();
@@ -223,6 +223,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     poolRewards,
     roi,
     apr,
+    preStartDistributors
   } = React.useMemo(() => {
     const poolRewards = rewardsState.rewardsByPool[token.address] || [];
 
@@ -231,13 +232,15 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
     const secondsPerDay = 24 * 3600
     const roiPerDay = roiPerSecond.times(secondsPerDay).shiftedBy(2).decimalPlaces(2);
     const apr = roiPerSecond.times(secondsPerDay * 365).shiftedBy(2).decimalPlaces(1);
+    const preStartDistributors = rewardsState.distributors.filter((distributor) => !dayjs().isAfter(distributor.emission_info.distribution_start_time * 1000));
 
     return {
       poolRewards,
       roi: roiPerDay.isZero() || roiPerDay.isNaN() ? "-" : `${roiPerDay.dp(2).toFormat()}%`,
       apr: apr.isZero() || apr.isNaN() ? '-' : `${apr.dp(2).toFormat()}%`,
+      preStartDistributors,
     };
-  }, [rewardsState.rewardsByPool, token, usdValues]);
+  }, [rewardsState.rewardsByPool, rewardsState.distributors, token, usdValues]);
 
 
   if (token.isZil) return null;
