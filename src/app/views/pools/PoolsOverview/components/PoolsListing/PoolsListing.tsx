@@ -144,7 +144,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
       <Box display="flex" flexDirection="column" justifyContent="space-between" mb={3} className={classes.header}>
         <Text variant="h2">Pools </Text>
         <Box display="flex" mt={1} className={classes.tabSearchBox}>
-          <Box display="flex" overflow="auto">
+          <Box display="flex">
             <Tabs className={classes.tabs} value={tabValue} onChange={handleTabChange}>
               <Tab className={classes.tab} label={<Text className={classes.tabText}>Mega Drop {!!megaDrop.length && (<Text className={classes.tabLabel}>{megaDrop.length}</Text>)}</Text>} />
               <Tab className={classes.tab} label={<Text className={classes.tabText}>Single Drop {!!singleDrop.length && (<Text className={classes.tabLabel}>{singleDrop.length}</Text>)}</Text>} />
@@ -243,12 +243,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       justifyContent: 'center',
       backgroundColor: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
     },
-    '& .MuiTabs-fixed': {
-      overflow: "scroll!important",
-    },
     [theme.breakpoints.down("xs")]: {
       marginBottom: theme.spacing(1),
-    }
+      '& .MuiTabs-fixed': {
+        overflow: "scroll!important",
+      },
+    },
   },
   tab: {
     display: "flex",
