@@ -39,6 +39,7 @@
     "react": "^17.0.2",
     "react-datepicker": "^4.2.1",
     "react-dom": "^17.0.2",
+    "react-dropzone": "^11.4.2",
     "react-helmet": "^5.2.1",
     "react-hot-loader": "^4.12.19",
     "react-inlinesvg": "^2.1.1",

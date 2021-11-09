@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Box, IconButton, TextField, Typography, Button } from "@material-ui/core";
+import { Box, IconButton, TextField, Typography, Button, Tooltip } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,9 +7,12 @@ import NavigationPrompt from "react-router-navigation-prompt";
 import { useHistory } from "react-router";
 import dayjs from "dayjs";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import PanoramaIcon from '@material-ui/icons/Panorama';
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { ArkClient } from "core/utilities";
 import { EMAIL_REGEX, USERNAME_REGEX, TWITTER_REGEX, INSTAGRAM_REGEX } from "app/utils/constants";
-import { useAsyncTask, useNetwork, useToaster, useTaskSubscriber } from "app/utils";
+import { useAsyncTask, useNetwork, useToaster, useTaskSubscriber, SimpleMap, snakeToTitle } from "app/utils";
 import { OAuth } from "app/store/types";
 import { ArkInput, FancyButton } from "app/components";
 import { AppTheme } from "app/theme/types";
@@ -36,10 +39,14 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const marketplaceState = useSelector(getMarketplace);
   const address = wallet?.addressInfo.byte20
   const { profile } = marketplaceState;
+  const toaster = useToaster(false)
+  const dispatch = useDispatch();
   const [profileImage, setProfileImage] = useState<string | ArrayBuffer | null>(null);
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [bannerImage, setBannerImage] = useState<string | ArrayBuffer | null>(null);
+  const [uploadFile, setUploadFile] = useState<SimpleMap<File>>({});
   const [runUpdateProfile, isLoading] = useAsyncTask("updateProfile");
   const [runUploadImage] = useAsyncTask("uploadImage");
+  const [runDeleteImage] = useAsyncTask("deleteImage", () => { toaster("Error removing image") })
   const [errors, setErrors] = useState({
     username: "",
     bio: "",
@@ -57,11 +64,10 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     websiteUrl: profile?.websiteUrl || "",
   })
   // const [enableEmailNotification, setEnableEmailNotification] = useState(false);
-  const toaster = useToaster(false)
-  const dispatch = useDispatch();
   const [loadingProfile] = useTaskSubscriber("loadProfile");
   const inputRef = useRef<HTMLDivElement | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [toRemove, setToRemove] = useState<string | null>(null);
 
   const hasChange = useMemo(() => {
     if (!profile) return true
@@ -153,7 +159,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
     reader.onloadend = () => {
       setProfileImage(reader.result);
-      setUploadFile(files[0]);
+      setUploadFile({ ...uploadFile, profile: files[0] });
     }
 
     reader.readAsDataURL(files[0]);
@@ -161,7 +167,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
   const onUpdateProfile = (goBack?: boolean) => {
     runUpdateProfile(async () => {
-      if (!hasChange && !profileImage)
+      if (!hasChange && !profileImage && !bannerImage)
         return;
 
       if (!wallet)
@@ -195,8 +201,11 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           dispatch(actions.MarketPlace.updateAccessToken(result));
           checkedOAuth = result;
         }
-        if (profileImage && uploadFile) {
-          imageUpload();
+        if (profileImage && uploadFile.profile) {
+          imageUpload(uploadFile.profile);
+        }
+        if (bannerImage && uploadFile.banner) {
+          imageUpload(uploadFile.banner, "banner");
         }
         if (hasChange) {
           await arkClient.updateProfile(address!, filteredData, checkedOAuth!);
@@ -209,7 +218,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     });
   }
 
-  const imageUpload = () => {
+  const imageUpload = (uploadFile: File, type = "profile") => {
     runUploadImage(async () => {
       if (!uploadFile || !wallet) return;
       const arkClient = new ArkClient(network);
@@ -220,14 +229,61 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         dispatch(actions.MarketPlace.updateAccessToken(result));
         checkedOAuth = result;
       }
-      const requestResult = await arkClient.requestImageUploadUrl(address!, checkedOAuth!.access_token);
+      const requestResult = await arkClient.requestImageUploadUrl(address!, checkedOAuth!.access_token, type);
 
       const blobData = new Blob([uploadFile], { type: uploadFile.type });
 
       await arkClient.putImageUpload(requestResult.result.uploadUrl, blobData);
-      await arkClient.notifyUpload(address!, oAuth!.access_token);
+      await arkClient.notifyUpload(address!, oAuth!.access_token, type);
+      dispatch(actions.MarketPlace.loadProfile());
       toaster("Image updated");
     })
+  }
+
+  const onHandleDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
+
+    if (!files.length) {
+      return setBannerImage(null);
+    }
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setBannerImage(reader.result);
+      setUploadFile({ ...uploadFile, banner: files[0] });
+    }
+
+    reader.readAsDataURL(files[0]);
+  }
+
+  const onDelete = (type: string) => {
+    runDeleteImage(async () => {
+      if (!uploadFile || !wallet || !type) return;
+      const arkClient = new ArkClient(network);
+      const { oAuth } = marketplaceState;
+      let checkedOAuth: OAuth | undefined = oAuth;
+      if (!oAuth?.access_token || oAuth.address !== wallet.addressInfo.bech32 || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
+        const { result } = await arkClient.arkLogin(wallet, window.location.hostname);
+        dispatch(actions.MarketPlace.updateAccessToken(result));
+        checkedOAuth = result;
+      }
+
+      await arkClient.removeImage(address!.toLowerCase(), checkedOAuth!.access_token, type);
+      dispatch(actions.MarketPlace.loadProfile());
+
+      toaster(`${type} removed!`);
+    })
+  }
+
+  const clearOrRemove = (type: string) => {
+    switch (type) {
+      case "banner":
+        if (bannerImage) return setBannerImage(null);
+        return setToRemove(type);
+      case "profile":
+        if (profileImage) return setProfileImage(null);
+        return setToRemove(type);
+      default: return;
+    }
   }
 
   return (
@@ -242,12 +298,13 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           </Box>
           {wallet && (
             <Box className={classes.content}>
-              <Box display="flex" justifyContent="center" paddingLeft={10} paddingRight={10}>
-                <label className={classes.uploadBox}>
+              <Box display="flex" justifyContent="center" paddingLeft={8} paddingRight={8}>
+                <Box className={classes.uploadBox}>
                   {(profileImage || profile?.profileImage?.url) && (<img alt="" className={classes.profileImage} src={profileImage?.toString() || profile?.profileImage?.url || ""} />)}
                   {!profileImage && !profile?.profileImage?.url && (<div className={classes.profileImage} />)}
                   <Button onClick={() => setOpenDialog(true)} className={classes.labelButton}>Select</Button>
-                </label>
+                  {(profileImage || profile?.profileImage?.url) && (<Button className={classes.deleteButton} onClick={() => clearOrRemove("profile")} >{profileImage ? "Clear" : "Remove"}</Button>)}
+                </Box>
                 <TextField
                   className={classes.uploadInput}
                   id="ark-profile-image"
@@ -258,6 +315,32 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                 />
               </Box>
               <Box className={classes.formDetail}>
+
+                <Typography className={classes.social}>BANNER</Typography>
+                <Box display="flex">
+                  <Typography className={classes.instruction}>Decorate your profile with a banner.&nbsp;<Tooltip placement="top" title="Note that image uploaded will be applied to both dark and light themes on ARK." ><ErrorOutlineIcon fontSize="small" /></Tooltip></Typography>
+                  <Box flexGrow={1} />
+                  {(bannerImage || profile?.bannerImage?.url) && (<Button className={classes.deleteButton} onClick={() => clearOrRemove("banner")}>{bannerImage ? "Clear" : "Remove"}</Button>)}
+                </Box>
+                <Dropzone accept='image/jpeg, image/png' onFileDialogCancel={() => setBannerImage(null)} onDrop={onHandleDrop}>
+                  {({ getRootProps, getInputProps }) => (
+                    <Box className={classes.dropBox}>
+                      <div {...getRootProps()}>
+                        <input {...getInputProps()} />
+                        <Box display="flex" flexDirection="column" justifyContent="center" height="100px">
+                          {!bannerImage && !profile?.bannerImage?.url && (
+                            <Box display="flex" flexDirection="column" alignItems="center">
+                              <PanoramaIcon fontSize="large" />
+                              <Typography>Drop a banner image here.</Typography>
+                            </Box>
+                          )}
+                          {(bannerImage || profile?.bannerImage?.url) && <img alt="" className={classes.bannerImage} src={bannerImage?.toString() || profile?.bannerImage?.url || ""} />}
+                        </Box>
+                      </div>
+                    </Box>
+                  )}
+                </Dropzone>
+                <Typography className={cls(classes.instruction, classes.footerInstruction)}>Recommended format: PNG/JPEG &nbsp;|&nbsp; Banner size: 1300 (w) x 250 (h) px</Typography>
                 <ArkInput
                   placeholder="BearCollector" error={errors.username} value={inputValues.username}
                   label="DISPLAY NAME" onValueChange={(value) => updateInputs("username")(value)}
@@ -317,13 +400,14 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                   inline={true} placeholder="https://www.example.com" error={errors.websiteUrl} value={inputValues.websiteUrl}
                   label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
                 />
+
                 <FancyButton
                   fullWidth
                   variant="contained"
                   color="primary"
                   loading={isLoading || loadingProfile}
                   onClick={() => onUpdateProfile(false)}
-                  disabled={(!hasChange && !profileImage) || hasError}
+                  disabled={(!hasChange && !profileImage && !bannerImage) || hasError}
                   className={classes.profileButton}
                 >
                   Save Profile
@@ -345,9 +429,13 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           )}
         </Box>
         <ImageDialog
-          open={openDialog}
-          onCloseDialog={() => setOpenDialog(false)}
-          onNavigateOut={() => onNavigateBack()}
+          open={openDialog || !!toRemove}
+          onCloseDialog={toRemove ? () => setToRemove(null) : () => setOpenDialog(false)}
+          onClickConfirm={toRemove ? () => onDelete(toRemove) : () => onNavigateBack()}
+          message={toRemove ? `${snakeToTitle(toRemove)} image will be remove!` : undefined}
+          buttonText={toRemove ? `Remove` : undefined}
+          header={toRemove ? "Banner Image" : undefined}
+          cancelText={toRemove ? "Cancel" : undefined}
         />
         <NavigationPrompt when={hasChange}>
           {({ onCancel, onConfirm }) => (
@@ -372,6 +460,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     justifyContent: "center",
     alignItems: "center",
     fontFamily: "'Raleway', sans-serif",
+    [theme.breakpoints.down("sm")]: {
+      alignItems: "normal",
+    }
   },
   container: {
     maxWidth: "680px",
@@ -415,9 +506,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     opacity: "50%",
     borderRadius: "12px",
-    paddingLeft: theme.spacing(1),
+    padding: theme.spacing(1, 2),
     fontFamily: "'Raleway', sans-serif",
     marginBottom: theme.spacing(3),
+    transform: "translateX(-18px)",
   },
   extraMargin: {
     marginLeft: theme.spacing(2),
@@ -429,6 +521,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     border: `5px solid ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"}`,
     borderRadius: "50%",
     backgroundColor: "#DEFFFF",
+    alignSelf: "center"
   },
   uploadInput: {
     display: "none",
@@ -439,11 +532,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontFamily: "'Raleway', sans-serif",
   },
   uploadBox: {
-    cursor: "pointer",
-    maxHeight: 200,
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
   connectionText: {
     margin: theme.spacing(1),
@@ -458,6 +550,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: theme.palette.type === "dark" ? "#DEFFFF17" : "#6BE1FF33",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
     cursor: "pointer",
+    marginBottom: theme.spacing(1),
     "&:hover": {
       opacity: 0.5,
     }
@@ -480,6 +573,49 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontFamily: "'Raleway', sans-serif",
     fontSize: 30,
     fontWeight: 700,
+  },
+  dropBox: {
+    borderRadius: 12,
+    border: `2px dotted ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"}`,
+    backgroundColor: theme.palette.type === "dark" ? "#DEFFFF17" : "#6BE1FF33",
+    overflow: "hidden",
+    cursor: "pointer",
+  },
+  bannerImage: {
+    backgroundRepeat: "no-repeat",
+    backgroundPositionY: "100%",
+    backgroundPositionX: "center",
+    borderRadius: 5,
+    backgroundColor: "#29475A",
+    width: "inherit",
+    height: "inherit",
+    objectFit: "cover",
+    cursor: "pointer",
+  },
+  instruction: {
+    color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
+    fontFamily: 'Avenir Next',
+    fontWeight: 600,
+    fontSize: 11,
+    margin: theme.spacing(0.4, 0),
+    display: "flex",
+    alignItems: "center",
+  },
+  footerInstruction: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(2),
+    color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
+    fontFamily: 'Avenir Next',
+    fontWeight: 600,
+    fontSize: 10,
+  },
+  deleteButton: {
+    color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
+    borderRadius: theme.spacing(1),
+    fontSize: 10,
+    textDecoration: "underline",
+    padding: theme.spacing(.5),
+    maxWidth: 80,
   }
 }));
 
