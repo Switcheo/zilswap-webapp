@@ -245,9 +245,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     [theme.breakpoints.down("xs")]: {
       marginBottom: theme.spacing(1),
-      '& .MuiTabs-fixed': {
-        overflow: "scroll!important",
-      },
+    },
+    '& .MuiTabs-fixed': {
+      overflow: "auto!important",
+    },
+    '& ::-webkit-scrollbar': {
+      display: "none",
     },
   },
   tab: {
