@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, BoxProps, Button, Grid, Hidden, Tabs, Tab, Menu, MenuItem } from "@material-ui/core";
+import { Box, BoxProps, Button, Grid, Hidden, Tabs, Tab, Popover } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import groupBy from "lodash/groupBy";
@@ -21,6 +21,7 @@ import { ReactComponent as Desc } from "./desc.svg";
 import { ReactComponent as Asc } from "./asc.svg";
 import { ReactComponent as SingleDesc } from "./single-desc.svg";
 import { ReactComponent as SingleAsc } from "./single-asc.svg";
+import { ReactComponent as Checkmark } from "./checkmark.svg";
 
 interface Props extends BoxProps {
   query?: string;
@@ -48,7 +49,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const currentLimit = limitArr[tabValue];
   const [sortBy, setSortBy] = useState("apr:desc");
-  const [anchorEl, setAnchorEl] = useState<EventTarget & HTMLButtonElement | null>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     setLimits(initialLimits);
@@ -220,21 +221,13 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
     return <>{sortString} {sortOrder === "asc" ? <SingleAsc /> : <SingleDesc />}</>
   }
 
-  const openSortMenu = (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const openSortMenu = (ev: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(ev.currentTarget);
   }
 
   const closeMenu = () => {
     setAnchorEl(null)
   }
-
-  // const getReverseSymbol = (type: string) => {
-  //   const [sortType, sortOrder] = sortBy.split(":");
-  //   if (type === sortType) {
-  //     return sortOrder === "desc" ? <SingleAsc /> : <SingleDesc />
-  //   }
-  // }
-
   const allTokens = [...registeredTokens, ...otherTokens];
 
   return (
@@ -248,19 +241,37 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
             <Button className={cls(classes.menuItem, classes.selectButton)} onClick={(ev) => openSortMenu(ev)}>
               Sort by: {getSortDetail()}
             </Button>
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
+            <Popover
               open={Boolean(anchorEl)}
-              onClose={closeMenu}
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
               className={classes.selectMenu}
+              onClose={closeMenu}
             >
-              <MenuItem className={classes.menuItem} onClick={() => { closeMenu(); setSortBy("apr:asc"); }}>APR <SingleAsc /></MenuItem>
-              <MenuItem className={classes.menuItem} onClick={() => { closeMenu(); setSortBy("apr:desc"); }}>APR <SingleDesc /></MenuItem>
-              <MenuItem className={classes.menuItem} onClick={() => { closeMenu(); setSortBy("dist:asc"); }}>Rewards to be Distributed <SingleAsc /></MenuItem>
-              <MenuItem className={classes.menuItem} onClick={() => { closeMenu(); setSortBy("dist:desc"); }}>Rewards to be Distributed <SingleDesc /></MenuItem>
-            </Menu>
+              <Text
+                className={cls(classes.menuItem, { [classes.selectedMenu]: sortBy === "apr:desc" })}
+                onClick={() => { closeMenu(); setSortBy("apr:desc"); }}>
+                APR&nbsp;<Text className={classes.noBold}>High - Low</Text><Box flexGrow={1} />{sortBy === "apr:desc" && <Checkmark />}
+              </Text>
+              <Text
+                className={cls(classes.menuItem, { [classes.selectedMenu]: sortBy === "apr:asc" })}
+                onClick={() => { closeMenu(); setSortBy("apr:asc"); }}>
+                APR&nbsp;<Text className={classes.noBold}>Low - High</Text><Box flexGrow={1} />{sortBy === "apr:asc" && <Checkmark />}
+              </Text>
+              <Text
+                className={cls(classes.menuItem, { [classes.selectedMenu]: sortBy === "dist:desc" })}
+                onClick={() => { closeMenu(); setSortBy("dist:desc"); }}>
+                Rewards&nbsp;<Text className={classes.noBold}>High - Low</Text> <Box flexGrow={1} />{sortBy === "dist:desc" && <Checkmark />}
+              </Text>
+              <Text
+                className={cls(classes.menuItem, { [classes.selectedMenu]: sortBy === "dist:asc" })}
+                onClick={() => { closeMenu(); setSortBy("dist:asc"); }}>
+                Rewards&nbsp;<Text className={classes.noBold}>Low - High</Text><Box flexGrow={1} />{sortBy === "dist:asc" && <Checkmark />}
+              </Text>
+            </Popover>
           </Hidden>
         </Box>
         <Box display="flex" mt={1} className={classes.tabSearchBox}>
@@ -348,7 +359,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
           </Button>
         </Box>}
       </Grid>
-    </Box>
+    </Box >
   );
 };
 
@@ -433,25 +444,38 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     cursor: "pointer",
   },
   selectMenu: {
-    "& .MuiMenu-list": {
+    "& .MuiPaper-root": {
       backgroundColor: theme.palette.background.default,
-    },
-    "& svg": {
-      "& path": {
-        fill: theme.palette.type === "dark" ? "#00FFB0" : "",
-      },
+      width: "100%",
+      maxWidth: 220,
+      borderRadius: "12px",
+      border: theme.palette.border,
+      overflow: "hidden",
+      marginTop: 8,
+      padding: theme.spacing(1),
     },
   },
   menuItem: {
-    color: theme.palette.text?.primary,
-    "& svg": {
-      "& path": {
-        fill: theme.palette.text?.primary,
-      },
-    },
+    fontSize: 16,
+    fontWeight: 'bolder',
+    padding: "5px 14px",
+    color: theme.palette.text!.primary,
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    "&:hover": {
+      background: "rgba(255,255,255,0.1)"
+    }
   },
   selectButton: {
     paddingRight: theme.spacing(0),
+  },
+  selectedMenu: {
+    color: theme.palette.primary.dark,
+  },
+  noBold: {
+    fontWeight: "bold",
+    color: "inherit",
   }
 }));
 
