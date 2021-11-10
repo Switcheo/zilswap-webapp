@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, BoxProps, Button, Grid, Hidden, Tabs, Tab } from "@material-ui/core";
+import { Box, BoxProps, Button, Grid, Hidden, Tabs, Tab, Menu, MenuItem } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import groupBy from "lodash/groupBy";
@@ -19,6 +19,8 @@ import PoolMobileInfoCard from "../PoolMobileInfoCard";
 import { ReactComponent as Unsorted } from "./sort.svg";
 import { ReactComponent as Desc } from "./desc.svg";
 import { ReactComponent as Asc } from "./asc.svg";
+import { ReactComponent as SingleDesc } from "./single-desc.svg";
+import { ReactComponent as SingleAsc } from "./single-asc.svg";
 
 interface Props extends BoxProps {
   query?: string;
@@ -46,6 +48,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const currentLimit = limitArr[tabValue];
   const [sortBy, setSortBy] = useState("apr:desc");
+  const [anchorEl, setAnchorEl] = useState<EventTarget & HTMLButtonElement | null>(null);
 
   useEffect(() => {
     setLimits(initialLimits);
@@ -200,7 +203,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
       else newOrder = "desc";
     } else {
       newSort = type;
-      newOrder = "asc";
+      newOrder = "desc";
     }
     setSortBy(newSort + ":" + newOrder);
   }
@@ -211,6 +214,26 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
     if (sortOrder === "asc") return <Asc />;
     return <Desc />;
   }
+  const getSortDetail = () => {
+    const [sortType, sortOrder] = sortBy.split(":");
+    const sortString = sortType === "apr" ? "APR" : "Rewards";
+    return <>{sortString} {sortOrder === "asc" ? <SingleAsc /> : <SingleDesc />}</>
+  }
+
+  const openSortMenu = (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    setAnchorEl(ev.currentTarget);
+  }
+
+  const closeMenu = () => {
+    setAnchorEl(null)
+  }
+
+  // const getReverseSymbol = (type: string) => {
+  //   const [sortType, sortOrder] = sortBy.split(":");
+  //   if (type === sortType) {
+  //     return sortOrder === "desc" ? <SingleAsc /> : <SingleDesc />
+  //   }
+  // }
 
   const allTokens = [...registeredTokens, ...otherTokens];
 
@@ -218,7 +241,28 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
     <Box {...rest} className={cls(classes.root, className)} mt={6} mb={2}>
 
       <Box display="flex" flexDirection="column" justifyContent="space-between" mb={3} className={classes.header}>
-        <Text variant="h2">Pools </Text>
+        <Box display="flex">
+          <Text variant="h2">Pools </Text>
+          <Box flexGrow={1} />
+          <Hidden mdUp>
+            <Button className={cls(classes.menuItem, classes.selectButton)} onClick={(ev) => openSortMenu(ev)}>
+              Sort by: {getSortDetail()}
+            </Button>
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={closeMenu}
+              className={classes.selectMenu}
+            >
+              <MenuItem className={classes.menuItem} onClick={() => { closeMenu(); setSortBy("apr:asc"); }}>APR <SingleAsc /></MenuItem>
+              <MenuItem className={classes.menuItem} onClick={() => { closeMenu(); setSortBy("apr:desc"); }}>APR <SingleDesc /></MenuItem>
+              <MenuItem className={classes.menuItem} onClick={() => { closeMenu(); setSortBy("dist:asc"); }}>Rewards to be Distributed <SingleAsc /></MenuItem>
+              <MenuItem className={classes.menuItem} onClick={() => { closeMenu(); setSortBy("dist:desc"); }}>Rewards to be Distributed <SingleDesc /></MenuItem>
+            </Menu>
+          </Hidden>
+        </Box>
         <Box display="flex" mt={1} className={classes.tabSearchBox}>
           <Box display="flex">
             <Tabs className={classes.tabs} value={tabValue} onChange={handleTabChange}>
@@ -339,11 +383,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       justifyContent: 'center',
       backgroundColor: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
     },
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("sm")]: {
       marginBottom: theme.spacing(1),
     },
     '& .MuiTabs-fixed': {
-      overflow: "auto!important",
+      overflowX: "scroll!important",
     },
     '& ::-webkit-scrollbar': {
       display: "none",
@@ -353,9 +397,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     textTransform: 'none',
     minWidth: 0,
-    [theme.breakpoints.up('sm')]: {
-      minWidth: 0,
-    },
     fontWeight: 600,
     marginRight: theme.spacing(4),
     opacity: 0.5,
@@ -381,7 +422,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   tabSearchBox: {
     display: "flex",
     flexDirection: "row",
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("sm")]: {
       flexDirection: "column",
     }
   },
@@ -390,6 +431,27 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignItems: "center",
     transform: "translateX(-10px)",
     cursor: "pointer",
+  },
+  selectMenu: {
+    "& .MuiMenu-list": {
+      backgroundColor: theme.palette.background.default,
+    },
+    "& svg": {
+      "& path": {
+        fill: theme.palette.type === "dark" ? "#00FFB0" : "",
+      },
+    },
+  },
+  menuItem: {
+    color: theme.palette.text?.primary,
+    "& svg": {
+      "& path": {
+        fill: theme.palette.text?.primary,
+      },
+    },
+  },
+  selectButton: {
+    paddingRight: theme.spacing(0),
   }
 }));
 
