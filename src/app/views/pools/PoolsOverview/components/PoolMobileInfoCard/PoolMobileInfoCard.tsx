@@ -94,7 +94,7 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
     <Card {...rest} className={cls(classes.root, className)}>
       <CardContent className={classes.title}>
         <Box display="flex" alignItems="center">
-          <PoolLogo className={classes.poolIcon} pair={[token.symbol, "ZIL"]} tokenAddress={token.address} noOverlap={true} /><Text variant="h6">{token.symbol} - ZIL</Text>
+          <PoolLogo noBg={true} className={classes.poolIcon} pair={[token.symbol, "ZIL"]} tokenAddress={token.address} noOverlap={true} /><Text variant="h6">{token.symbol} - ZIL</Text>
         </Box>
       </CardContent>
 

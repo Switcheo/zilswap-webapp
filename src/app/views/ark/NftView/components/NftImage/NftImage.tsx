@@ -56,6 +56,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     top: 0,
     height: "100%",
     width: "100%",
+    objectFit: "contain",
     '&.rounded': {
       borderRadius: 16,
     },
