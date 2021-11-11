@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Container } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import { PoolsNavigationTabs, PoolsOverviewBanner } from "app/components";
+import { PoolsOverviewBanner } from "app/components";
 import Page from "app/layouts/Page";
 import { AppTheme } from "app/theme/types";
 import { PoolsListing } from "./components";
@@ -28,13 +28,10 @@ const PoolsOverview: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
           <PoolsOverviewBanner />
         </Container>
       </Box>
-      <Box marginTop={6}>
-        <Container maxWidth="lg">
-          <PoolsNavigationTabs />
-          {/* <PoolsSearchInput onSearch={onSearch} marginY={4} /> */}
-          <PoolsListing />
-        </Container>
-      </Box>
+      <Container maxWidth="lg">
+        {/* <PoolsSearchInput onSearch={onSearch} marginY={4} /> */}
+        <PoolsListing />
+      </Container>
       {children}
     </Page>
   );

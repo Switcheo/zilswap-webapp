@@ -5,7 +5,7 @@ import { Pagination } from "@material-ui/lab";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { PoolTransaction, ZAPStats } from "core/utilities";
-import { PoolsNavigationTabs, PoolsOverviewBanner, Text, TokenFilter } from "app/components";
+import { PoolsOverviewBanner, Text, TokenFilter } from "app/components";
 import Page from "app/layouts/Page";
 import { RootState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -138,73 +138,69 @@ const PoolTransactions: React.FC<Props> = (props: Props) => {
           <PoolsOverviewBanner />
         </Container>
       </Box>
-      <Box marginTop={6.5}>
-        <Container maxWidth="lg">
-          <PoolsNavigationTabs />
-
-          <Box display="flex" marginTop={4} marginBottom={2}>
-            {/* <Button>XXX</Button>
+      <Container maxWidth="lg">
+        <Box display="flex" marginTop={4} marginBottom={2}>
+          {/* <Button>XXX</Button>
             <Button>YYY</Button> */}
 
-            <Box flex={1} />
+          <Box flex={1} />
 
-            <FormControlLabel
-              label={<Text color="textSecondary">Your Transactions Only</Text>}
-              control={(
-                <Checkbox color="primary"
-                  checked={!!queryOpts.address}
-                  onChange={onChangeShowAll} />
-              )} />
+          <FormControlLabel
+            label={<Text color="textSecondary">Your Transactions Only</Text>}
+            control={(
+              <Checkbox color="primary"
+                checked={!!queryOpts.address}
+                onChange={onChangeShowAll} />
+            )} />
+        </Box>
+
+        {!!queryError && (
+          <Text marginY={2} color="error">Query Error: {queryError.message}</Text>
+        )}
+
+        <Paper className={classes.tableSurface}>
+          <Box display="flex" justifyContent="flex-end" alignItems="center" paddingTop={2} paddingBottom={2} paddingRight={4}>
+            <TokenFilter onFilterChange={onFilterChange} />
           </Box>
+          <TableContainer>
+            {queryLoading && (
+              <Box className={classes.overlay}>
+                <CircularProgress />
+              </Box>
+            )}
+            <Table>
+              <TableHead className={classes.tableHead}>
+                <TableRow>
+                  <TableCell className={classes.placeholderCell} />
+                  <TableCell></TableCell>
+                  <TableCell>Transaction</TableCell>
+                  <TableCell>Pool / Route</TableCell>
+                  <TableCell align="right">Total Value</TableCell>
+                  <TableCell align="right">Token Amount</TableCell>
+                  <TableCell align="right">Time</TableCell>
+                  <TableCell className={classes.placeholderCell} />
+                </TableRow>
+              </TableHead>
+              <TableBody className={classes.tableBody}>
+                {transactions.map((transaction) => (
+                  <React.Fragment key={transaction.id}>
+                    {transaction.tx_type === "swap" && (
+                      <SwapTxRow transaction={transaction} />
+                    )}
+                    {transaction.tx_type === "liquidity" && (
+                      <AddRemoveLiquidityRow transaction={transaction} />
+                    )}
+                  </React.Fragment>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-          {!!queryError && (
-            <Text marginY={2} color="error">Query Error: {queryError.message}</Text>
-          )}
-
-          <Paper className={classes.tableSurface}>
-            <Box display="flex" justifyContent="flex-end" alignItems="center" paddingTop={2} paddingBottom={2} paddingRight={4}>
-              <TokenFilter onFilterChange={onFilterChange} />
-            </Box>
-            <TableContainer>
-              {queryLoading && (
-                <Box className={classes.overlay}>
-                  <CircularProgress />
-                </Box>
-              )}
-              <Table>
-                <TableHead className={classes.tableHead}>
-                  <TableRow>
-                    <TableCell className={classes.placeholderCell} />
-                    <TableCell></TableCell>
-                    <TableCell>Transaction</TableCell>
-                    <TableCell>Pool / Route</TableCell>
-                    <TableCell align="right">Total Value</TableCell>
-                    <TableCell align="right">Token Amount</TableCell>
-                    <TableCell align="right">Time</TableCell>
-                    <TableCell className={classes.placeholderCell} />
-                  </TableRow>
-                </TableHead>
-                <TableBody className={classes.tableBody}>
-                  {transactions.map((transaction) => (
-                    <React.Fragment key={transaction.id}>
-                      {transaction.tx_type === "swap" && (
-                        <SwapTxRow transaction={transaction} />
-                      )}
-                      {transaction.tx_type === "liquidity" && (
-                        <AddRemoveLiquidityRow transaction={transaction} />
-                      )}
-                    </React.Fragment>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-
-            <Box display="flex" justifyContent="flex-end" alignItems="center" paddingTop={2} paddingBottom={2} paddingRight={4}>
-              <Pagination count={pagesCount} page={queryOpts.page} onChange={onPage} showFirstButton showLastButton />
-            </Box>
-          </Paper>
-        </Container>
-      </Box>
+          <Box display="flex" justifyContent="flex-end" alignItems="center" paddingTop={2} paddingBottom={2} paddingRight={4}>
+            <Pagination count={pagesCount} page={queryOpts.page} onChange={onPage} showFirstButton showLastButton />
+          </Box>
+        </Paper>
+      </Container>
     </Page>
   );
 };
