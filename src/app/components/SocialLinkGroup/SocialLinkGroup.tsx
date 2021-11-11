@@ -2,7 +2,6 @@ import React from "react";
 import { Box, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import { hexToRGBA } from "app/utils";
 import { ReactComponent as Discord } from "./social-icons/discord.svg";
 import { ReactComponent as TwitterIcon } from "./social-icons/twitter.svg";
 
@@ -21,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
         margin: 1,
         "& path": {
           transition: "fill .2s ease-in-out",
-          fill: `rgba${hexToRGBA(theme.palette.text.primary, 0.5)}`,
+          fill: theme.palette.primary.light,
         },
       },
     },

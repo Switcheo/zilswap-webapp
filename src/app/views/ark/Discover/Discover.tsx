@@ -297,6 +297,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     alignSelf: "center",
     fontWeight: 700,
     marginRight: theme.spacing(2),
+    color: `${theme.palette.primary.light}!important`,
   },
   formControlLabel: {
     "& .MuiTypography-root": {

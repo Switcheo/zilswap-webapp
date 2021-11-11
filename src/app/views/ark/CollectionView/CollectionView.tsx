@@ -269,6 +269,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         </Box>
 
         <ArkNFTListing
+          collectionName={collection.name}
           filterComponent={<ArkFilterBar collectionAddress={collection.address} />}
         />
       </Container>
