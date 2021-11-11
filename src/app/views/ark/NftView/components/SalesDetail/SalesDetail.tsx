@@ -104,9 +104,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
               {token.collection?.name ?? ""}{" "}
               {/* <VerifiedBadge className={classes.verifiedBadge} /> */}
             </Typography>
-
-            {/* Token id */}
-            <Typography className={classes.tokenId}><span className={classes.hexSymbol}>#</span>{tokenId}</Typography>
+            {<Typography className={classes.tokenId}><span className={classes.hexSymbol}>{token.name?.replace(/#\s*\d+$/i, "")} #</span>{tokenId}</Typography>}
           </Box>
           <Box flexGrow={1} />
           <Box>
