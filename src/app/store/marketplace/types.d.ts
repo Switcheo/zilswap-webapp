@@ -207,3 +207,7 @@ export interface ArkPendingTx {
   txHash: string;
   chequeHash: string;
 }
+
+export interface QueryNftResult extends PaginatedList<Nft> {
+  traits?: SimpleMap<TraitType>;
+}

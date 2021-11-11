@@ -1,7 +1,7 @@
 import { SimpleMap } from "app/utils"
 import { ArkExchangeInfo } from "core/utilities"
 import { CollectionFilter } from "../types"
-import { ArkPendingTx, BidsTableInfo, Collection, Nft, OAuth, PaginatedList, Profile, TraitType } from "./types"
+import { ArkPendingTx, BidsTableInfo, Collection, OAuth, Profile, QueryNftResult, TraitType } from "./types"
 
 export enum SortBy {
   PriceDescending,
@@ -73,14 +73,14 @@ export function updateFilter(payload: Partial<CollectionFilter>) {
   }
 }
 
-export function updateTokens(payload: { tokens: PaginatedList<Nft>, traits?: SimpleMap<TraitType> }) {
+export function updateTokens(payload: QueryNftResult) {
   return {
     type: MarketPlaceActionTypes.UPDATE_TOKENS,
     payload
   }
 }
 
-export function appendTokens(payload: { tokens: PaginatedList<Nft>, traits?: SimpleMap<TraitType> }) {
+export function appendTokens(payload: QueryNftResult) {
   return {
     type: MarketPlaceActionTypes.APPEND_TOKENS,
     payload

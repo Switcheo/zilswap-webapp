@@ -60,7 +60,7 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
     case MarketPlaceActionTypes.UPDATE_TOKENS:
       return {
         ...state,
-        tokens: payload.tokens,
+        tokens: payload.entries,
         filteredTokensTraits: payload.traits ?? state.filteredTokensTraits,
         filter: {
           ...state.filter,
@@ -73,7 +73,7 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
     case MarketPlaceActionTypes.APPEND_TOKENS:
       return {
         ...state,
-        tokens: [...state.tokens, ...payload.tokens],
+        tokens: [...state.tokens, ...payload.entries],
         filteredTokensTraits: payload.traits ?? state.filteredTokensTraits,
         filter: {
           ...state.filter,

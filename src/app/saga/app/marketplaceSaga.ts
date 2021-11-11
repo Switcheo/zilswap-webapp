@@ -4,7 +4,7 @@ import { toBech32Address } from "@zilliqa-js/crypto";
 import { ArkClient, ArkExchangeInfo, logger, waitForTx } from "core/utilities";
 import { actions } from "app/store";
 import { SortBy } from "app/store/marketplace/actions";
-import { ArkPendingTx } from "app/store/types";
+import { ArkPendingTx, Nft, PaginatedList, QueryNftResult } from "app/store/types";
 import { getBlockchain, getMarketplace, getWallet } from "../selectors";
 
 function* loadNftList() {
@@ -85,16 +85,16 @@ function* loadNftList() {
       if (filter.owner) newQuery.owner = filter.owner;
       if (filter.likedBy) newQuery.likedBy = filter.likedBy;
 
-      const res = (yield call(arkClient.listTokens, newQuery)) as unknown as any;
+      const res = (yield call(arkClient.listTokens, newQuery)) as unknown as PaginatedList<Nft>;
 
       logger("load nft list", "result", res);
-      yield put(actions.MarketPlace.updateTokens({ tokens: res.result.entries }));
+      yield put(actions.MarketPlace.updateTokens(res));
     } else {
       if (!collectionAddress) return;
       if (wallet) {
         query.viewer = wallet.addressInfo.byte20.toLowerCase()
       }
-      const result = (yield call(arkClient.searchCollection, collectionAddress, query)) as unknown as any;
+      const result = (yield call(arkClient.searchCollection, collectionAddress, query)) as unknown as QueryNftResult;
 
       logger("load nft search", "result", result);
       if (filter?.infinite) {
