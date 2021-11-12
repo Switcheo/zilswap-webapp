@@ -288,25 +288,27 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
         </Box>
       </Box>
 
-      <Hidden smDown>
-        <Box padding={3} paddingBottom={1} display="flex" alignItems="center">
-          <Box flex={.5} mr={2} justifyContent="center" display="flex">
-            <Text>Pool</Text>
+      {Object.keys(tokenState.tokens).length > 0 && (
+        <Hidden smDown>
+          <Box padding={3} paddingBottom={1} display="flex" alignItems="center">
+            <Box flex={.5} mr={2} justifyContent="center" display="flex">
+              <Text>Pool</Text>
+            </Box>
+            <Box flex={2} justifyContent="flex-start" display="flex" flexDirection="column">
+              <Text paddingLeft="16px" >Total staked</Text>
+            </Box>
+            <Box flex={2} justifyContent="flex-start" display="flex">
+              <Text onClick={() => updateSort("dist")} className={classes.headerText}>{getLogo("dist")}Reward to be distributed</Text>
+            </Box>
+            <Box flex={1.5} display="flex" flexDirection="column" >
+              <Text onClick={() => updateSort("apr")} className={classes.headerText}>{getLogo("apr")}APR</Text>
+            </Box>
+            <Box flex={2.5}>
+              <Text></Text>
+            </Box>
           </Box>
-          <Box flex={2} justifyContent="flex-start" display="flex" flexDirection="column">
-            <Text paddingLeft="16px" >Total Staked</Text>
-          </Box>
-          <Box flex={2} justifyContent="flex-start" display="flex">
-            <Text onClick={() => updateSort("dist")} className={classes.headerText}>{getLogo("dist")}Reward to be Distributed</Text>
-          </Box>
-          <Box flex={1.5} display="flex" flexDirection="column" >
-            <Text onClick={() => updateSort("apr")} className={classes.headerText}>{getLogo("apr")}APR</Text>
-          </Box>
-          <Box flex={2.5}>
-            <Text></Text>
-          </Box>
-        </Box>
-      </Hidden>
+        </Hidden>
+      )}
 
       <Grid container spacing={2}>
         {tabValue === 0 && megaDrop.slice(0, limits[currentLimit]).map((token) => (
