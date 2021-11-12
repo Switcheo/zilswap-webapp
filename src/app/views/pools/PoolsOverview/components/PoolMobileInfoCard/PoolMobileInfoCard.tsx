@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Box, Button, Card, CardContent, CardProps, Divider, Popover } from "@material-ui/core";
+import { Box, Button, Card, CardContent, CardProps, Chip, Divider, Popover } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowDropUp, ArrowDropDown, Visibility } from "@material-ui/icons";
 import cls from "classnames";
@@ -196,7 +196,10 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
         <Box display="flex" alignItems="center" mt={2}>
           <Text variant="h4" className={cls(classes.detailSelect, { [classes.textColoured]: !!showDetail })} onClick={() => setShowDetail(!showDetail)} >Details {showDetail ? <ArrowDropUp /> : <ArrowDropDown />}</Text>
           <Box flexGrow={1} />
-          <FancyButton onClick={() => onGotoAddLiquidity()} className={classes.addLiquidity}>Add Liquidity</FancyButton>
+          <Box flex={1.5} display="flex" justifyContent="center" flexDirection="column" alignItems="center">
+            <FancyButton onClick={() => onGotoAddLiquidity()} className={classes.addLiquidity}>Add Liquidity</FancyButton>
+            {poolRewards.length > 1 && (<Chip label={`${token.whitelisted ? "CORE // " : ""} ${poolRewards.length}x Drops`} className={cls(classes.coreDropChip, { [classes.coreDrop]: token.whitelisted })} />)}
+          </Box>
         </Box>
 
         {showDetail && <Box className={classes.detailBox}>
@@ -379,6 +382,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   halfOpacity: {
     opacity: 0.5
+  },
+  coreDropChip: {
+    position: "absolute",
+    transform: "translateY(26px)",
+    minWidth: 120,
+    height: 24,
+    padding: theme.spacing(.5, 0),
+    backgroundColor: "#3290FF",
+    color: "#DEFFFF",
+    fontFamily: "Raleway"
+  },
+  coreDrop: {
+    backgroundColor: "#7B61FF",
   }
 }));
 
