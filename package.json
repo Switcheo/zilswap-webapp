@@ -32,7 +32,7 @@
     "lightweight-charts": "^3.3.0",
     "node-sass": "^6.0.0",
     "notistack": "^1.0.9",
-    "prismjs": "^1.17.1",
+    "prismjs": "^1.25.0",
     "prop-types": "^15.7.2",
     "qrcode": "^1.4.4",
     "query-string": "^6.11.0",
