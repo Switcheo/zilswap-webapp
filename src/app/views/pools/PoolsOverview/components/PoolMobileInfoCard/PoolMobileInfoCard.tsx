@@ -360,7 +360,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   currencyReward: {
     display: "flex",
-    fontSize: 16,
+    fontSize: 15,
     alignItems: "center",
   },
   rewardPopper: {
@@ -370,8 +370,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       border: theme.palette.border,
       overflow: "hidden",
       marginTop: 8,
-      padding: theme.spacing(2),
+      padding: theme.spacing(1.5),
     },
+    "& .MuiTypography-root": {
+      lineHeight: 1.3,
+      fontWeight: 500
+    }
   },
   halfOpacity: {
     opacity: 0.5
