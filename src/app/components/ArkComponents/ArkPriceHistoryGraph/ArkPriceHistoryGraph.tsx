@@ -286,6 +286,10 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
         currentUnix += unixInterval;
         continue;
       }
+      if (!data[index].value) {
+        index++;
+        continue;
+      }
       const floorsTimestamp = (Date.parse(data[index].intervalTime) / 1000);
       if (floorsTimestamp === currentUnix) {
         const latestValue = new BigNumber(data[index].value).shiftedBy(-12).toNumber();
@@ -293,9 +297,9 @@ const ArkPriceHistoryGraph: React.FC<Props> = (props: Props) => {
           value: latestValue,
           time: (currentUnix + offsetHoursUnix) as UTCTimestamp,
         })
+        currentValue = latestValue;
         currentUnix += unixInterval;
         index++;
-        currentValue = latestValue;
       } else {
         result.push({
           value: currentValue,
