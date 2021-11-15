@@ -59,7 +59,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   useEffect(() => {
     const getCollections = async () => {
       const arkClient = new ArkClient(network);
-      const result = await arkClient.listCollection();
+      const result = await arkClient.listCollection({ limit: 100 });
       setCollections(result.result.entries);
     };
 
