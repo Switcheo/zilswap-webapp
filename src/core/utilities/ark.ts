@@ -142,7 +142,8 @@ export class ArkClient {
   }
 
   listCollection = async (params?: ArkClient.ListCollectionParams) => {
-    const url = this.http.path("collection/list", null, params);
+    const { limit = 100, ...rest } = params ?? {};
+    const url = this.http.path("collection/list", null, { limit, ...rest });
     const result = await this.http.get({ url });
     const output = await result.json();
     await this.checkError(output);
@@ -404,7 +405,7 @@ export class ArkClient {
       type: "Uint128",
       value: amount.toString(),
     }];
-    
+
     const callParams = {
       amount: new BN(0),
       gasPrice: new BN(minGasPrice),
