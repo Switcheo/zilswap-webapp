@@ -11,7 +11,7 @@ import cls from "classnames"
 import { ArkBox, ArkPaginator, ArkLoadingSkeleton } from "app/components";
 import { Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useBlockTime, useValueCalculators } from "app/utils";
+import { useBlockTime, useTaskSubscriber, useValueCalculators } from "app/utils";
 import { RootState, TokenState } from "app/store/types";
 import { getMarketplace } from "app/saga/selectors";
 import { actions } from "app/store";
@@ -103,6 +103,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [blockTime, currentBlock, currentTime] = useBlockTime();
+  const [isLoading] = useTaskSubscriber("getBids");
 
   const handlePageChange = (page: number) => {
     setPageNumber(page - 1)
@@ -116,7 +117,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
     }))
   }
 
-  if (currentBlock === 0) return <ArkLoadingSkeleton type={isMobile ? "Card" : "Table"} row={5} /> // TODO: use loading gif instead
+  if (currentBlock === 0 || isLoading) return <ArkLoadingSkeleton type={isMobile ? "Card" : "Table"} row={5} />
 
   const headers = showItem ? [ITEM_HEADER, ...HEADERS] : HEADERS
 

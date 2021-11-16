@@ -45,7 +45,7 @@ const BidsReceived: React.FC<Props> = (props: Props) => {
       }));
     })
     // eslint-disable-next-line
-  }, [network, address]);
+  }, [network, address, activeOnly]);
 
   return (
     <Box className={cls(classes.root, className)}>

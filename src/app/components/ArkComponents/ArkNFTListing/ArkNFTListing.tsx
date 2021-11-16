@@ -28,7 +28,6 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
   });
 
   const handleInfiniteScroll = () => {
-    console.log("handle infinite scroll", filter, tokens);
     if (tokens.length === 0) return;
     if (filter.pagination?.count && tokens.length === filter.pagination.count) return;
     if (filter.pagination?.offset && tokens.length === filter.pagination.offset) return;

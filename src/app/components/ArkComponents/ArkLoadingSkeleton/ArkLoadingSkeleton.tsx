@@ -1,6 +1,7 @@
 import React, { Fragment } from "react";
 import {
-  Box, BoxProps, Card, CardContent, CardHeader, CardActionArea, Grid
+  Box, BoxProps, Card, CardContent, CardHeader, CardActionArea, Grid,
+  TableContainer, Table, TableBody, TableRow, TableCell,
 } from "@material-ui/core";
 import { Skeleton } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/core/styles";
@@ -60,11 +61,21 @@ const ArkLoadingSkeleton: React.FC<Props> = (props: Props) => {
         </Card>
       )
       default: return (
-        <Fragment>
-          {[...Array(row)].map(index => (
-            <Skeleton animation="wave" height="40px" width={rowWidth} className={classes.skeletonBox} />
-          ))}
-        </Fragment>
+        <ArkBox variant="base" className={classes.tableContainer}>
+          <TableContainer>
+            <Table>
+              <TableBody>
+                {[...Array(row)].map(index => (
+                  <TableRow className={classes.tableRow}>
+                    <TableCell className={classes.tableCell}>
+                      <Skeleton animation="wave" height="40px" width={rowWidth} className={classes.skeletonBox} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </ArkBox>
       )
     }
   }
@@ -123,6 +134,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("sm")]: {
       minWidth: "240px",
     },
+  },
+  tableContainer: {
+    display: "flex",
+    flexDirection: "column",
+    marginTop: theme.spacing(3),
+    padding: theme.spacing(2, 3),
+    [theme.breakpoints.down("sm")]: {
+      padding: theme.spacing(1, 2),
+    },
+  },
+  tableCell: {
+    padding: theme.spacing(.5, 1),
+    extend: ['text', 'cell'],
+    borderBottom: "none",
+  },
+  tableRow: {
   }
 }));
 
