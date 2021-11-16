@@ -19,6 +19,7 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
   const { filterComponent, className, collectionName } = props;
   const classes = useStyles();
   const { filter, tokens } = useSelector(getMarketplace);
+  const [loading] = useTaskSubscriber("reloadNftList");
   const [loadingScroll] = useTaskSubscriber("loadTokens");
   const dispatch = useDispatch();
   const loader = useRef<any>();
@@ -65,6 +66,10 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
             />
           </Grid>
         ))}
+        <Box className={clsx(classes.backdrop, { [classes.backdropActive]: loading })}>
+          <Box marginTop={10} />
+          <CircularProgress color="inherit" />
+        </Box>
       </Grid>
       {loadingScroll &&
         <Box display="flex" justifyContent="center" alignItems="center" mt={4}>
