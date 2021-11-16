@@ -163,7 +163,10 @@ const ArkTopBar: React.FC<
                 <Typography
                   className={cls(classes.navLink, {
                     [classes.selectedMenu]:
-                      location.pathname.indexOf("/ark/discover") === 0,
+                      (
+                        location.pathname.indexOf("/ark/discover") === 0
+                        || location.pathname.indexOf("/ark/collections") === 0
+                      ),
                   })}
                 >
                   Discover
@@ -178,7 +181,7 @@ const ArkTopBar: React.FC<
                 <Typography
                   className={cls(classes.navLink, {
                     [classes.selectedMenu]:
-                      location.pathname === "/ark/profile",
+                      location.pathname.indexOf("/ark/profile") === 0,
                   })}
                 >
                   My Profile
@@ -207,7 +210,7 @@ const ArkTopBar: React.FC<
           )}
         </Box>
       </Toolbar>
-    </AppBar>
+    </AppBar >
   );
 };
 

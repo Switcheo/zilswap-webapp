@@ -3,11 +3,12 @@ import { Box, Button, Checkbox, FormControlLabel, OutlinedInput, Popover, makeSt
 import cls from "classnames";
 import { useDispatch, useSelector } from 'react-redux';
 import pickBy from "lodash/pickBy";
+import { toBech32Address } from '@zilliqa-js/crypto';
 import { ArkClient } from 'core/utilities';
 import { AppTheme } from 'app/theme/types';
 import { bnOrZero, hexToRGBA, SimpleMap, useAsyncTask } from 'app/utils';
 import { Text } from "app/components";
-import { TraitTypeWithSelection, TraitValueWithSelection } from 'app/store/types';
+import { TraitType, TraitTypeWithSelection, TraitValueWithSelection } from 'app/store/types';
 import { updateFilter } from 'app/store/marketplace/actions';
 import { getBlockchain, getMarketplace } from 'app/saga/selectors';
 import { actions } from 'app/store';
@@ -254,6 +255,17 @@ const abbreviateTraitValue = (traitValue: string) => {
   else return parts.map(p => p.slice(0, 4)).join(" ")
 }
 
+const mapToSelectableTraits = (traits: SimpleMap<TraitType>): SimpleMap<TraitTypeWithSelection> => {
+  const traitWithSelection: SimpleMap<TraitTypeWithSelection> = {}
+  for (const x in traits) {
+    traitWithSelection[x] = { trait: traits[x].trait, values: {} }
+    for (const y in traits[x].values) {
+      traitWithSelection[x].values[y] = { ...traits[x].values[y], selected: false }
+    }
+  }
+  return traitWithSelection;
+}
+
 const AttributesFilter = (props: Props) => {
   const { collectionAddress } = props;
   const classes = useStyles();
@@ -264,7 +276,7 @@ const AttributesFilter = (props: Props) => {
   const [filteredTraits, setFilteredTraits] = useState<SimpleMap<TraitTypeWithSelection>>({}) // for searching
   const [search, setSearch] = useState<string>("");
   const { network } = useSelector(getBlockchain);
-  const { collections, collectionTraits, filteredTokensTraits } = useSelector(getMarketplace);
+  const { collections, collectionTraits, filteredTokensTraits, filter } = useSelector(getMarketplace);
 
   const collection = collections[collectionAddress]
   const currentCollectionTraits = collectionTraits[collectionAddress];
@@ -278,21 +290,21 @@ const AttributesFilter = (props: Props) => {
         const res = await arkClient.getCollectionTraits(collectionAddress);
         dispatch(actions.MarketPlace.updateCollectionTraits(res));
 
-        // map into initial selectable traits
-        const initial: SimpleMap<TraitTypeWithSelection> = {}
-        for (const x in res.traits) {
-          initial[x] = { trait: res.traits[x].trait, values: {} }
-          for (const y in res.traits[x].values) {
-            initial[x].values[y] = { ...res.traits[x].values[y], selected: false }
-          }
-        }
+        const initial = mapToSelectableTraits(res.traits);
         setTraits(initial)
+      } else if (collectionAddress && filter.collectionAddress === toBech32Address(collectionAddress).toLowerCase()) {
+        setTraits(filter.traits)
+      } else {
+        const initial = mapToSelectableTraits(currentCollectionTraits);
+        setTraits(initial);
       }
     })
     // eslint-disable-next-line
   }, [])
 
   useEffect(() => {
+    if (!Object.values(traits).length) return;
+
     dispatch(updateFilter({ traits }))
     // eslint-disable-next-line
   }, [traits])
@@ -320,19 +332,21 @@ const AttributesFilter = (props: Props) => {
 
   const selectedValues = useMemo(() => {
     var totalSelectCount = 0
+
     return (
       <>
         <div className={classes.filterSelectedValue}>
           {Object.values(traits).map(type => {
             const selected = Object.values(type.values).filter(value => value.selected) as ReadonlyArray<TraitValueWithSelection>
-            const selectedCount = Object.keys(selected).length
-            totalSelectCount += selectedCount
-            return selectedCount > 0 && (
+            if (!selected.length) return null;
+
+            totalSelectCount += selected.length
+            return  (
               <span key={type.trait} className={classes.filterSelectedValueContainer}>
                 <span className={classes.filterSelectedValueCategory}>{type.trait.toUpperCase()}:</span>
                 {
-                  selectedCount > 2 || totalSelectCount > 3 ?
-                    <span className={classes.filterSelectedValueValue}>{selectedCount}</span>
+                  selected.length > 2 || totalSelectCount > 3 ?
+                    <span className={classes.filterSelectedValueValue}>{selected.length}</span>
                     :
                     selected.map(selected => (<span className={classes.filterSelectedValueValue}>
                       {abbreviateTraitValue(selected.value)}
@@ -346,7 +360,7 @@ const AttributesFilter = (props: Props) => {
       </>
     )
     // eslint-disable-next-line
-  }, [traits])
+  }, [traits, filter.traits])
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);

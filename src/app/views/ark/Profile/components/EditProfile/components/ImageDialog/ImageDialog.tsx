@@ -7,30 +7,45 @@ import { AppTheme } from "app/theme/types";
 
 interface Props extends Partial<DialogProps> {
   onCloseDialog?: () => void;
-  onNavigateOut?: () => void;
+  onClickConfirm?: () => void;
+  message?: string;
+  buttonText?: string;
+  header?: string;
+  cancelText?: string;
 }
 
 const ImageDialog: React.FC<Props> = (props: Props) => {
-  const { open, onCloseDialog, onNavigateOut, children, className, ...rest } = props;
+  const {
+    message = "Select from your NFT collection or upload manually.",
+    buttonText = "Head to Collected", header = "Profile Photo", cancelText = "Upload",
+    open, onCloseDialog, onClickConfirm, children, className, ...rest
+  } = props;
   const classes = useStyles();
 
-  const onHeadToCollected = () => {
+  const onConfirm = () => {
     if (onCloseDialog) onCloseDialog();
-    if (onNavigateOut) onNavigateOut();
+    if (onClickConfirm) onClickConfirm();
   }
 
+  const onClose = () => {
+    setTimeout(() => {
+      if (onCloseDialog) onCloseDialog();
+    }, 100)
+  }
+
+  if (!open) return null;
   return (
     <DialogModal
       open={!!open}
       onClose={onCloseDialog}
-      header="Profile Photo"
+      header={header}
       {...rest} className={cls(classes.root, className)}
     >
       <DialogContent className={classes.dialogContent}>
-        <Typography className={classes.message}>Select from your NFT collection or upload manually.</Typography>
-        <Button onClick={() => onHeadToCollected()} className={classes.labelButton}>Head to Collected</Button>
-        <label htmlFor="ark-profile-image" onClick={() => { onCloseDialog && onCloseDialog(); }} className={classes.uploadButton}>
-          <Typography className={classes.collectionText}>Upload</Typography>
+        <Typography className={classes.message}>{message}</Typography>
+        <Button onClick={() => onConfirm()} className={classes.labelButton}>{buttonText}</Button>
+        <label htmlFor={cancelText === "Upload" ? "ark-profile-image" : undefined} onClick={() => onClose()} className={classes.uploadButton}>
+          <Typography className={classes.collectionText}>{cancelText}</Typography>
         </label>
       </DialogContent>
     </DialogModal>

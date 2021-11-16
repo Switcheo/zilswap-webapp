@@ -9,14 +9,16 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
 import cls from "classnames";
-import { useSelector } from "react-redux";
+import dayjs from "dayjs";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { ArkClient } from "core/utilities";
 import { ArkBanner, ArkTab } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
-import { MarketPlaceState, Profile, RootState, WalletState } from "app/store/types";
+import { actions } from "app/store";
+import { MarketPlaceState, Profile, RootState, WalletState, OAuth } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask, useNetwork } from "app/utils";
+import { useAsyncTask, useNetwork, useTaskSubscriber, useToaster } from "app/utils";
 import { truncateAddress } from "app/utils";
 import {
   BidsMade,
@@ -127,12 +129,16 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const classes = useStyles();
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
   const { wallet } = useSelector<RootState, WalletState>(state => state.wallet);
-  const { profile: connectedProfile } = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
+  const { profile: connectedProfile, oAuth } = useSelector<RootState, MarketPlaceState>(state => state.marketplace);
   const [currentTab, setCurrentTab] = useState("Collected");
   const [viewProfile, setViewProfile] = useState<Profile | null>(null);
   const [tooltipText, setTooltipText] = useState<string>('Copy address');
   const network = useNetwork();
+  const dispatch = useDispatch();
+  const toaster = useToaster(false);
   const [runQueryProfile] = useAsyncTask("queryProfile");
+  const [runBannerUpload] = useAsyncTask("uploadBanner");
+  const [isloading] = useTaskSubscriber("uploadBanner", "queryProfile", "loadProfile")
 
   const urlSearchParams = new URLSearchParams(window.location.search);
   const paramAddress = normalizeAddress(urlSearchParams.get('address'))
@@ -182,23 +188,45 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     }
   }
 
+  const bannerUpload = (uploadFile: File, type = "banner") => {
+    runBannerUpload(async () => {
+      if (!uploadFile || !wallet) return;
+
+      const arkClient = new ArkClient(network);
+      let checkedOAuth: OAuth | undefined = oAuth;
+      if (!oAuth?.access_token || oAuth.address !== wallet.addressInfo.bech32 || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
+        const { result } = await arkClient.arkLogin(wallet, window.location.hostname);
+        dispatch(actions.MarketPlace.updateAccessToken(result));
+        checkedOAuth = result;
+      }
+      const requestResult = await arkClient.requestImageUploadUrl(wallet.addressInfo.byte20, checkedOAuth!.access_token, type);
+
+      const blobData = new Blob([uploadFile], { type: uploadFile.type });
+
+      await arkClient.putImageUpload(requestResult.result.uploadUrl, blobData);
+      await arkClient.notifyUpload(wallet.addressInfo.byte20, oAuth!.access_token, type);
+      dispatch(actions.MarketPlace.loadProfile())
+      toaster("Banner updated");
+    })
+  }
+
   return (
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
-        <ArkBanner avatarImage={viewProfile?.profileImage?.url} />
+        <ArkBanner uploadBanner={bannerUpload} bannerImage={isloading ? undefined : viewProfile?.bannerImage?.url} avatarImage={isloading ? undefined : viewProfile?.profileImage?.url} />
 
         <Box className={classes.addressBox}>
           {address &&
             <Fragment>
               <Typography variant="h2">
-              {viewProfile?.username || truncateAddress(address || '')}
-              {isConnectedUser &&
-                <Box className={classes.editIcon}>
-                  <Link to={`/ark/profile/${address}/edit`}>
-                    <EditIcon />
-                  </Link>
-                </Box>
-              }
+                {viewProfile?.username || truncateAddress(address || '')}
+                {isConnectedUser &&
+                  <Box className={classes.editIcon}>
+                    <Link to={`/ark/profile/${address}/edit`}>
+                      <EditIcon />
+                    </Link>
+                  </Box>
+                }
               </Typography>
               <Tooltip title={tooltipText} placement="right" arrow>
                 <Box
@@ -224,7 +252,7 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         }
         {
           viewProfile?.bio &&
-          <Box className={cls(classes.bioBox, { border: isConnectedUser && address})} padding={3}>
+          <Box className={cls(classes.bioBox, { border: isConnectedUser && address })} padding={3}>
             <Typography>
               {viewProfile?.bio}
               {isConnectedUser && address &&

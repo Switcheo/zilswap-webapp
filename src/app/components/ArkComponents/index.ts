@@ -19,4 +19,5 @@ export { default as ArkSocialLinkGroup } from "./ArkSocialLinkGroup";
 export { default as ArkImageView } from "./ArkImageView";
 export { default as ArkBox } from "./ArkBox";
 export { default as ArkSocialShareDialog } from "./ArkSocialShareDialog";
+export { default as ArkLoadingSkeleton } from "./ArkLoadingSkeleton";
 export { default as ZapWidget } from "./ZapWidget";

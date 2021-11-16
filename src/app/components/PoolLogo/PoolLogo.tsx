@@ -8,6 +8,8 @@ import CurrencyLogo from "../CurrencyLogo";
 interface Props extends BoxProps {
   pair: [string, string];
   tokenAddress: string;
+  noOverlap?: boolean;
+  noBg?: boolean;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -17,7 +19,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   poolIcon: {
     borderRadius: '50%',
-    backgroundColor: theme.palette.type === "dark" ? "#303637": "#F7FAFA",
+    backgroundColor: theme.palette.type === "dark" ? "#303637" : "#F7FAFA",
     padding: 4
   },
   baseIcon: {
@@ -25,14 +27,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 const PoolLogo: React.FC<Props> = (props: Props) => {
-  const { children, className, pair, tokenAddress, ...rest } = props;
+  const { children, className, pair, tokenAddress, noOverlap = false, noBg, ...rest } = props;
   const [quote, base] = pair
   const classes = useStyles();
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
-      <CurrencyLogo className={cls(classes.baseIcon, classes.poolIcon)} currency={base} />
-      <CurrencyLogo className={classes.poolIcon} currency={quote} address={tokenAddress} />
+      <CurrencyLogo className={cls({ [classes.poolIcon]: !noBg, [classes.baseIcon]: !noOverlap })} currency={base} />
+      <CurrencyLogo className={cls({ [classes.poolIcon]: !noBg })} currency={quote} address={tokenAddress} />
     </Box>
   );
 };
