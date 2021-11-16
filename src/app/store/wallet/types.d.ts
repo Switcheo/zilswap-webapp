@@ -1,4 +1,4 @@
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain } from "carbon-js-sdk";
 import { ConnectedWallet } from "core/wallet";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 

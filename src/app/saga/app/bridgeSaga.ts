@@ -4,18 +4,18 @@ import { Transaction as EthTransaction, ethers } from "ethers";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
-import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK, TradeHubTx } from "tradehub-api-js";
-import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
+import { Blockchain, Models, AddressUtils, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
 import { FeesData } from "core/utilities/bridge";
 import { Bridge, logger } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
-import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL, PollIntervals } from "app/utils/constants";
-import { SimpleMap, bnOrZero, netZilToTradeHub } from "app/utils";
+import { BIG_ONE, BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL, PollIntervals } from "app/utils/constants";
+import { SimpleMap, bnOrZero, netZilToCarbon } from "app/utils";
 import { BridgeTx, BridgeableToken, BridgeableTokenMapping, RootState } from "app/store/types";
 import { actions } from "app/store";
 import { getBlockchain, getBridge } from '../selectors';
+import { BroadcastTxResponse } from "carbon-js-sdk/lib/codec/cosmos/tx/v1beta1/service";
 
 export enum Status {
   NotStarted,
@@ -69,20 +69,26 @@ function* watchDepositConfirmation() {
       const updatedTxs: SimpleMap<BridgeTx> = {};
       for (const tx of bridgeTxs) {
         try {
-          const network = netZilToTradeHub(tx.network ?? Network.TestNet);
-          const sdk = new TradeHubSDK({ network });
+          const network = netZilToCarbon(tx.network ?? Network.TestNet);
+          const sdk = (yield CarbonSDK.instance({ network })) as CarbonSDK;
 
-          const swthAddress = SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
+          const swthAddress = AddressUtils.SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
 
           // check if deposit is confirmed
           if (!tx.depositTxConfirmedAt) {
-            const extTransfers = (yield call([sdk.api, sdk.api.getTransfers], { account: swthAddress })) as RestModels.Transfer[];
+            const queryOpts = Models.QueryGetExternalTransfersRequest.fromPartial({
+              address: swthAddress,
+              blockchain: tx.srcChain,
+              status: "success",
+              transferType: "deposit",
+            });
+            const result = (yield call([sdk, sdk.query.coin.ExternalTransfers], queryOpts)) as Models.QueryGetExternalTransfersResponse;
 
-            const depositTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'deposit' && transfer.blockchain === tx.srcChain);
+            const depositTransfer = result.externalTransfers.find((transfer) => transfer.transferType === 'deposit' && transfer.blockchain === tx.srcChain);
 
             if (depositTransfer?.status === 'success') {
               if (!tx.sourceTxHash) {
-                tx.sourceTxHash = depositTransfer.transaction_hash;
+                tx.sourceTxHash = depositTransfer.transactionHash;
               }
 
               tx.depositTxConfirmedAt = dayjs();
@@ -115,8 +121,8 @@ function* watchDepositConfirmation() {
               }
             } else {
               try {
-                const tradehubNetwork = netZilToTradeHub(tx.network);
-                const sdk = new TradeHubSDK({ network: tradehubNetwork });
+                const carbonNetwork = netZilToCarbon(tx.network);
+                const sdk = (yield CarbonSDK.instance({ network: carbonNetwork })) as CarbonSDK;
                 const provider = sdk.eth.getProvider();
                 const transaction = (yield call([provider, provider.getTransactionReceipt], tx.sourceTxHash!)) as ethers.providers.TransactionReceipt
                 logger("bridge saga", tx.sourceTxHash, transaction?.confirmations);
@@ -134,30 +140,31 @@ function* watchDepositConfirmation() {
 
           // trigger withdraw tx if deposit confirmed
           if (tx.depositTxConfirmedAt) {
-
-            const connectedSDK = (yield call([sdk, sdk.connectWithMnemonic], tx.interimAddrMnemonics)) as ConnectedTradeHubSDK
-            const balance = (yield call([sdk.api, sdk.api.getWalletBalance], { account: swthAddress })) as RestModels.Balances;
-
             const bridgeTokens = tx.srcChain === Blockchain.Zilliqa ? bridgeableTokensMap.zil : bridgeableTokensMap.eth;
             const bridgeToken = bridgeTokens.find(t => t.denom === tx.srcToken);
-            const balanceDenom = bridgeToken?.balDenom;
+            const balanceDenom = bridgeToken?.balDenom ?? "";
 
-            logger("bridge saga", "detected balance to withdraw", swthAddress, balance, balanceDenom)
-            const withdrawAmount = bnOrZero(balance?.[balanceDenom ?? ""]?.available);
+            const balanceResult = (yield call([sdk.query.bank, sdk.query.bank.Balance], { address: swthAddress, denom: balanceDenom })) as Models.Bank.QueryBalanceResponse;
+
+            logger("bridge saga", "detected balance to withdraw", swthAddress, balanceResult, balanceDenom)
+            const withdrawAmount = bnOrZero(balanceResult.balance?.[balanceDenom]?.amount);
             if (withdrawAmount.isZero()) {
-              throw new Error(`tradehub address balance not found`)
+              throw new Error(`carbon address balance not found`)
             }
 
-            const withdrawResult = (yield call([connectedSDK.coin, connectedSDK.coin.withdraw], {
-              amount: withdrawAmount.toString(10),
+            const decimals = sdk.token.getDecimals(balanceDenom) ?? 0;
+            const withdrawAmountHuman = withdrawAmount.shiftedBy(-decimals);
+            const connectedSDK = (yield call([sdk, sdk.connectWithMnemonic], tx.interimAddrMnemonics)) as ConnectedCarbonSDK
+            const withdrawResult = (yield call([connectedSDK.coin, connectedSDK.coin.createWithdrawal], {
+              amount: withdrawAmountHuman,
               denom: tx.dstToken,
-              to_address: tx.dstAddr.toLowerCase().replace(/^0x/i, ""),
-              fee_address: BridgeParamConstants.SWTH_FEE_ADDRESS,
-              fee_amount: tx.withdrawFee.toString(10),
+              toAddress: tx.dstAddr.toLowerCase().replace(/^0x/i, ""),
+              feeAddress: BridgeParamConstants.SWTH_FEE_ADDRESS,
+              feeAmount: tx.withdrawFee,
               originator: swthAddress,
-            })) as TradeHubTx.TxResponse;
+            })) as BroadcastTxResponse;
 
-            tx.withdrawTxHash = withdrawResult.txhash;
+            tx.withdrawTxHash = withdrawResult.txResponse?.txhash;
             updatedTxs[tx.sourceTxHash!] = tx;
 
             logger("bridge saga", "initiated tx withdraw", tx.withdrawTxHash);
@@ -201,19 +208,26 @@ function* watchWithdrawConfirmation() {
       logger("bridge saga", "watch withdraw confirmation", bridgeTxs.length);
 
       const updatedTxs: SimpleMap<BridgeTx> = {};
-      const tradehubNetwork = netZilToTradeHub(network)
+      const carbonNetwork = netZilToCarbon(network)
       for (const tx of bridgeTxs) {
         logger("bridge saga", "checking tx withdraw", tx.withdrawTxHash);
         try {
-          const sdk = new TradeHubSDK({ network: tradehubNetwork });
-          const swthAddress = SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network: tradehubNetwork });
-          const extTransfers = (yield call([sdk.api, sdk.api.getTransfers], { account: swthAddress })) as RestModels.Transfer[];
+          const sdk = (yield CarbonSDK.instance({ network: carbonNetwork })) as CarbonSDK;
+          const swthAddress = AddressUtils.SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network: carbonNetwork });
 
-          const withdrawTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'withdrawal' && transfer.blockchain === tx.dstChain);
+          const queryOpts = Models.QueryGetExternalTransfersRequest.fromPartial({
+            address: swthAddress,
+            status: "success",
+            blockchain: tx.dstChain,
+            transferType: "withdrawal",
+          });
+          const extTransfers = (yield call([sdk.query.coin, sdk.query.coin.ExternalTransfers], queryOpts)) as Models.ExternalTransfer[];
+
+          const withdrawTransfer = extTransfers.find((transfer) => transfer.transferType === 'withdrawal' && transfer.blockchain === tx.dstChain);
 
           // update destination chain tx hash if success
           if (withdrawTransfer?.status === 'success') {
-            tx.destinationTxHash = withdrawTransfer.transaction_hash;
+            tx.destinationTxHash = withdrawTransfer.transactionHash;
             updatedTxs[tx.sourceTxHash!] = tx;
 
             logger("bridge saga", "confirmed tx withdraw", tx.withdrawTxHash);
@@ -275,8 +289,8 @@ function* watchActiveTxConfirmations() {
               break;
             };
             case Blockchain.Ethereum: {
-              const tradehubNetwork = netZilToTradeHub(network);
-              const sdk = new TradeHubSDK({ network: tradehubNetwork });
+              const carbonNetwork = netZilToCarbon(network);
+              const sdk: CarbonSDK = yield CarbonSDK.instance({ network: carbonNetwork });
 
               const sourceTx: EthTransactionResponse = yield sdk.eth.getProvider().getTransaction(bridgeTx.sourceTxHash);
               if (sourceTx.confirmations) {
@@ -289,7 +303,7 @@ function* watchActiveTxConfirmations() {
             };
           }
         } catch (error) {
-          console.error("error retrieving tradehub confirmation info");
+          console.error("error retrieving carbon confirmation info");
           console.error(error);
         }
       }
@@ -310,7 +324,7 @@ function* queryTokenFees() {
       const { formState } = getBridge(yield select());
       const { network: zilNetwork } = getBlockchain(yield select());
       const bridgeToken = formState.token;
-      const network = zilNetwork === Network.MainNet ? TradeHubSDK.Network.MainNet : TradeHubSDK.Network.DevNet;
+      const network = zilNetwork === Network.MainNet ? CarbonSDK.Network.MainNet : CarbonSDK.Network.DevNet;
       if (lastCheckedToken !== bridgeToken) {
         yield put(actions.Bridge.updateFee());
       }
@@ -318,24 +332,24 @@ function* queryTokenFees() {
       logger("bridge saga", lastCheckedToken?.toDenom, bridgeToken?.toDenom)
       if ((!lastCheckedToken || lastCheckedToken !== bridgeToken) && bridgeToken) {
         logger("bridge saga", "query", bridgeToken?.toDenom)
-        const sdk = new TradeHubSDK({ network });
+        const sdk = (yield CarbonSDK.instance({ network })) as CarbonSDK;
         yield call([sdk, sdk.initialize]);
-        const tradehubToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken.toDenom);
+        const carbonToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken.toDenom);
 
-        if (!tradehubToken) {
+        if (!carbonToken) {
           throw new Error(`token not found ${bridgeToken.toDenom}`);
         }
 
-        const retrievedFees = (yield call(Bridge.getEstimatedFees, { denom: tradehubToken.denom, network: zilNetwork })) as FeesData | undefined;
-        const feeEst = retrievedFees ?? { withdrawalFee: BN_ONE.shiftedBy(3 - tradehubToken.decimals) }; // 1000 sat to bypass min fee check
-        const price = bnOrZero(yield sdk.token.getUSDValue(tradehubToken.denom));
+        const retrievedFees = (yield call(Bridge.getEstimatedFees, { denom: carbonToken.denom, network: zilNetwork })) as FeesData | undefined;
+        const feeEst = retrievedFees ?? { withdrawalFee: BIG_ONE.shiftedBy(3 - carbonToken.decimals.toInt()) }; // 1000 sat to bypass min fee check
+        const price = bnOrZero(yield sdk.token.getUSDValue(carbonToken.denom));
 
-        logger("bridge saga", "withdraw fees", tradehubToken.denom, feeEst?.withdrawalFee?.toString(10), price.toString(10))
+        logger("bridge saga", "withdraw fees", carbonToken.denom, feeEst?.withdrawalFee?.toString(10), price.toString(10))
 
         yield put(actions.Bridge.updateFee({
-          amount: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-tradehubToken!.decimals),
-          value: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-tradehubToken!.decimals).times(price),
-          token: tradehubToken
+          amount: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-carbonToken!.decimals),
+          value: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-carbonToken!.decimals).times(price),
+          token: carbonToken
         }));
 
         lastCheckedToken = bridgeToken;

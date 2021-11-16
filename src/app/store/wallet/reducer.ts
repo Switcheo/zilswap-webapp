@@ -1,4 +1,4 @@
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain } from "carbon-js-sdk";
 import { ConnectedWallet, WalletConnectType } from "core/wallet";
 import { LocalStorageKeys } from "app/utils/constants";
 import { WalletActionTypes } from "./actions";

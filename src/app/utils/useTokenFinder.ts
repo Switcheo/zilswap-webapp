@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
+import { Blockchain } from "carbon-js-sdk";
 import { useSelector } from "react-redux";
-import { Blockchain } from "tradehub-api-js";
 import { RootState, TokenInfo } from "app/store/types";
 import { SimpleMap } from "./types";
 

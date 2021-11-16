@@ -1,16 +1,16 @@
-import { TradeHubSDK } from "tradehub-api-js";
+import { CarbonSDK } from "carbon-js-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 
-export const netTradeHubToZil = (network: TradeHubSDK.Network): Network => {
+export const netCarbonToZil = (network: CarbonSDK.Network): Network => {
   switch (network) {
-    case TradeHubSDK.Network.MainNet: return Network.MainNet;
+    case CarbonSDK.Network.MainNet: return Network.MainNet;
     default: return Network.TestNet;
   }
 }
 
-export const netZilToTradeHub = (network: Network): TradeHubSDK.Network => {
+export const netZilToCarbon = (network: Network): CarbonSDK.Network => {
   switch (network) {
-    case Network.MainNet: return TradeHubSDK.Network.MainNet;
-    default: return TradeHubSDK.Network.TestNet;
+    case Network.MainNet: return CarbonSDK.Network.MainNet;
+    default: return CarbonSDK.Network.TestNet;
   }
 }

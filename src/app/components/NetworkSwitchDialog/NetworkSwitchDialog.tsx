@@ -1,8 +1,8 @@
 import React, { useMemo } from "react";
 import { makeStyles } from "@material-ui/core";
+import { Blockchain } from "carbon-js-sdk";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
-import { Blockchain } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet, WalletConnectType } from "core/wallet";

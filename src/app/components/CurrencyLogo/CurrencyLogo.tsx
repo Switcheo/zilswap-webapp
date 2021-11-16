@@ -3,7 +3,7 @@ import { makeStyles, useTheme } from "@material-ui/core";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import cls from "classnames";
 import { useSelector } from "react-redux";
-import { Blockchain } from "tradehub-api-js/build/main/lib/tradehub/utils";
+import { Blockchain } from "carbon-js-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 import { useNetwork } from "app/utils";
 import { AppTheme } from "app/theme/types";

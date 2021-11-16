@@ -6,7 +6,7 @@ import groupBy from "lodash/groupBy";
 import dayjs from "dayjs";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { useSelector } from "react-redux";
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain } from "carbon-js-sdk";
 import { Text } from "app/components";
 import { RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";

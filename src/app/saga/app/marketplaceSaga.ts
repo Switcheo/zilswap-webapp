@@ -1,10 +1,10 @@
 import { call, fork, delay, put, select, take, takeLatest, takeEvery } from "redux-saga/effects";
-import { SimpleMap } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { ArkClient, ArkExchangeInfo, logger, waitForTx } from "core/utilities";
 import { actions } from "app/store";
 import { SortBy } from "app/store/marketplace/actions";
 import { ArkPendingTx, Nft, PaginatedList, QueryNftResult } from "app/store/types";
+import { SimpleMap } from "app/utils";
 import { getBlockchain, getMarketplace, getWallet } from "../selectors";
 
 function* loadNftList() {

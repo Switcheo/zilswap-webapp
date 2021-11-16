@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { DialogContent, Typography, makeStyles } from "@material-ui/core";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain } from "carbon-js-sdk";
 import { ZilswapConnector } from "core/zilswap";
 import { DialogModal, FancyButton } from "app/components";
 import { actions } from "app/store";

@@ -6,7 +6,7 @@ import RefreshIcon from '@material-ui/icons/RefreshRounded';
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain } from "carbon-js-sdk";
 import { BridgeMobileDialog, CurrencyLogo, HelpInfo, ResumeTransferDialog, RevealMnemonic, Text } from 'app/components';
 import BridgeCard from "app/layouts/BridgeCard";
 import { actions } from "app/store";

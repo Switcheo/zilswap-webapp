@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
-import { Blockchain, RestModels } from "tradehub-api-js";
+import { Blockchain, Models } from "carbon-js-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 
 export type BridgeableToken = {
@@ -32,7 +32,7 @@ export type BridgeableChains = Blockchain.Ethereum | Blockchain.Zilliqa;
 export interface WithdrawFee {
   amount: BigNumber;
   value: BigNumber;
-  token?: RestModels.Token;
+  token?: Models.Token;
 }
 
 export interface BridgeFormState {

@@ -5,7 +5,7 @@ import { AppState, ObservedTx, TxReceipt, TxStatus, Zilswap } from "zilswap-sdk"
 import { ZiloAppState } from "zilswap-sdk/lib/zilo"
 
 import { Network } from "zilswap-sdk/lib/constants";
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain } from "carbon-js-sdk";
 import { ConnectedWallet, WalletConnectType, connectWalletBoltX, connectWalletZilPay } from "core/wallet";
 import { ZILO_DATA } from "core/zilo/constants";
 import { ZilswapConnector, toBech32Address } from "core/zilswap";
@@ -178,8 +178,8 @@ function* stateChangeObserved(payload: StateChangeObservedPayload) {
 }
 
 type WrapperMappingsResult = { height: string, result: { [key: string]: string } }
-type TradeHubToken = { denom: string, decimals: string, blockchain: Blockchain.Zilliqa | Blockchain.Ethereum, asset_id: string, symbol: string, name: string, lockproxy_hash: string }
-type TradeHubTokensResult = { height: string, result: ReadonlyArray<TradeHubToken> }
+type CarbonToken = { denom: string, decimals: string, blockchain: Blockchain.Zilliqa | Blockchain.Ethereum, asset_id: string, symbol: string, name: string, lockproxy_hash: string }
+type CarbonTokensResult = { height: string, result: ReadonlyArray<CarbonToken> }
 type BridgeMappingResult = { [Blockchain.Zilliqa]: BridgeableToken[], [Blockchain.Ethereum]: BridgeableToken[] }
 
 const fetchJSON = async (url: string) => {
@@ -187,7 +187,7 @@ const fetchJSON = async (url: string) => {
   return res.json()
 }
 
-const addMapping = (r: BridgeMappingResult, a: TradeHubToken, b: TradeHubToken, sourceChain: Blockchain) => {
+const addMapping = (r: BridgeMappingResult, a: CarbonToken, b: CarbonToken, sourceChain: Blockchain) => {
   r[a.blockchain].push({
     blockchain: a.blockchain,
     tokenAddress: a.asset_id.toLowerCase(),
@@ -200,7 +200,7 @@ const addMapping = (r: BridgeMappingResult, a: TradeHubToken, b: TradeHubToken, 
   })
 }
 
-const addToken = (r: SimpleMap<TokenInfo>, t: TradeHubToken) => {
+const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken) => {
   const address = t.blockchain === Blockchain.Zilliqa ? toBech32Address(t.asset_id) : `0x${t.asset_id.toLowerCase()}`
   if (r[address]) {
     if (!r[address].registered)
@@ -275,10 +275,10 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
       return acc
     }, {} as SimpleMap<TokenInfo>)
 
-    // load wrapper mappings and eth tokens by fetching bridge list from tradehub
+    // load wrapper mappings and eth tokens by fetching bridge list from carbon
     const host = network === Network.MainNet ? 'tradescan.switcheo.org' : 'tradescan.switcheo.org'
     const mappings: WrapperMappingsResult = yield call(fetchJSON, `https://${host}/coin/wrapper_mappings`)
-    const data: TradeHubTokensResult = yield call(fetchJSON, `https://${host}/coin/tokens`)
+    const data: CarbonTokensResult = yield call(fetchJSON, `https://${host}/coin/tokens`)
     const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
     const bridgeableDenoms = BRIDGEABLE_WRAPPED_DENOMS[network];
     Object.entries(mappings.result).forEach(([wrappedDenom, sourceDenom]) => {

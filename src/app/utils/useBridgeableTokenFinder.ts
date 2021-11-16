@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain } from "carbon-js-sdk";
 import { BridgeableTokenMapping, RootState } from "app/store/types";
 import { useTokenFinder } from "app/utils";
 
