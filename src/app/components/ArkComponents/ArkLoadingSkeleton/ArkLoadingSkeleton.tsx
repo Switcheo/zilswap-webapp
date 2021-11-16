@@ -23,7 +23,7 @@ const ArkLoadingSkeleton: React.FC<Props> = (props: Props) => {
     switch (type) {
       case "NFT": return (
         <Fragment>
-          {[...Array(8)].map(index => (
+          {Array.from({ length: 8 }, (_, i) => i + 1).map(index => (
             <Grid item key={`loading-nft-${index}`} xs={12} lg={3} md={4} sm={6} className={classes.gridItem}>
               <Card className={classes.nftCard}>
                 <CardHeader />
@@ -49,7 +49,7 @@ const ArkLoadingSkeleton: React.FC<Props> = (props: Props) => {
               subheader={<Skeleton animation="wave" height={10} />}
             />
             <CardContent>
-              {[...Array(4)].map(index => (
+              {Array.from({ length: 4 }, (_, i) => i + 1).map(index => (
                 <Box display="flex" flexDirection="row">
                   <Skeleton width="30%" animation="wave" height="20px" className={classes.skeletonBox} />
                   <Box flexGrow={1} />
@@ -65,8 +65,8 @@ const ArkLoadingSkeleton: React.FC<Props> = (props: Props) => {
           <TableContainer>
             <Table>
               <TableBody>
-                {[...Array(row)].map(index => (
-                  <TableRow className={classes.tableRow}>
+                {Array.from({ length: row }, (_, i) => i + 1).map(index => (
+                  <TableRow key={index} className={classes.tableRow}>
                     <TableCell className={classes.tableCell}>
                       <Skeleton animation="wave" height="40px" width={rowWidth} className={classes.skeletonBox} />
                     </TableCell>
