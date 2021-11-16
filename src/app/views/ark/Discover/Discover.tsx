@@ -1,6 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, Fragment } from "react";
 import BigNumber from "bignumber.js"
-import { Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel, InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, useMediaQuery, useTheme, Popover } from "@material-ui/core";
+import {
+  Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel,
+  InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Typography, useMediaQuery, useTheme, Popover
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import cls from "classnames";
@@ -21,7 +25,7 @@ interface SearchFilters {
   [prop: string]: boolean;
 }
 
-const SEARCH_FILTERS = ["profile", "artist", "collection"]
+const SEARCH_FILTERS = ["artist", "collection"]
 
 type CellAligns = "right" | "left" | "inherit" | "center" | "justify" | undefined;
 interface HeadersProp {
@@ -76,7 +80,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    setAnchorEl(anchorEl ? null : event.currentTarget);
+    setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
@@ -85,16 +89,23 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popper' : undefined;
 
-  const filteredCollections = useMemo(() => {
+  const filteredSearch = useMemo(() => {
     const sorted = collections.sort((a, b) => bnOrZero(b.priceStat ? b.priceStat.volume : 0).comparedTo(a.priceStat ? a.priceStat.volume : 0))
 
-    if (!search.trim().length) return sorted
+    let filteredCollections: CollectionWithStats[] = sorted, filteredArtist: CollectionWithStats[] = sorted, filteredProfile: CollectionWithStats[] = [];
 
-    return sorted.filter(c => (
-      c.ownerName?.includes(search)
-      || c.name?.includes(search))
-    )
-  }, [collections, search]);
+    if (!search.trim().length) return { filteredCollections, filteredArtist, filteredProfile };
+
+    if (searchFilter.collection) {
+      filteredCollections = sorted.filter(c => c.name?.toLowerCase().includes(search));
+    }
+
+    if (searchFilter.artist) {
+      filteredArtist = sorted.filter(c => c.ownerName?.toLowerCase().includes(search));
+    }
+
+    return { filteredCollections, filteredArtist, filteredProfile };
+  }, [collections, search, searchFilter]);
 
   const isMd = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("md"));
   const isSm = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("sm"));
@@ -134,7 +145,10 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                       control={
                         <Checkbox
                           className={classes.radioButton}
-                          onChange={(e) => handleSearchFilter(filter)}
+                          onChange={(e) => {
+                            e.preventDefault();
+                            handleSearchFilter(filter)
+                          }}
                           checkedIcon={<CheckedIcon />}
                           icon={<UncheckedIcon />}
                           disableRipple
@@ -150,7 +164,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           }
         />
         <Popover
-          id={id} open={open && filteredCollections.length > 0 && search.length > 1} anchorEl={anchorEl}
+          id={id} open={open && !!search.length} anchorEl={anchorEl}
           disableAutoFocus={true}
           disableEnforceFocus={true}
           onClose={handleClose}
@@ -167,22 +181,89 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               [classes.popoverMobile]: isSm,
             })}
           >
-            <Box className={classes.searchResultHeader}>Collections</Box>
-            {filteredCollections.map((collection) => (
-              <RouterLink to={`/ark/collections/${toBech32Address(collection.address)}`}>
-                <Box className={classes.popoverRow} display="flex" justifyContent="space-between" alignItems="center">
-                  <Box className={classes.resultCollectionName} display="flex" alignItems="center">
-                    <ArkImageView
-                      imageType="avatar"
-                      className={classes.searchResultAvatar}
-                      imageUrl={collection.profileImageUrl}
+            {isMobileView && (
+              <Box padding={2} paddingBottom={0}>
+                <FormControl component="fieldset" className={classes.formControl}>
+                  <FormLabel focused className={classes.formLabel}>By</FormLabel>
+                  {SEARCH_FILTERS.map((filter) => (
+                    <FormControlLabel
+                      key={filter}
+                      className={classes.formControlLabel}
+                      value={filter}
+                      control={
+                        <Checkbox
+                          className={classes.radioButton}
+                          onChange={(e) => {
+                            e.preventDefault();
+                            handleSearchFilter(filter)
+                          }}
+                          checkedIcon={<CheckedIcon />}
+                          icon={<UncheckedIcon />}
+                          disableRipple
+                          checked={searchFilter[filter]}
+                        />
+                      }
+                      label={filter.toUpperCase()}
                     />
-                    {collection.name}
+                  ))}
+                </FormControl>
+              </Box>
+            )}
+            {searchFilter.collection && (
+              <Fragment>
+                <Box className={classes.searchResultHeader}>Collections</Box>
+                {filteredSearch?.filteredCollections.map((collection) => (
+                  <RouterLink to={`/ark/collections/${toBech32Address(collection.address)}`}>
+                    <Box className={classes.popoverRow} display="flex" justifyContent="space-between" alignItems="center">
+                      <Box className={classes.resultCollectionName} display="flex" alignItems="center">
+                        <ArkImageView
+                          imageType="avatar"
+                          className={classes.searchResultAvatar}
+                          imageUrl={collection.profileImageUrl}
+                        />
+                        {collection.name}
+                      </Box>
+                      <Typography>{new BigNumber(collection.tokenStat.tokenCount).toFormat(0)} ITEMS</Typography>
+                    </Box>
+                  </RouterLink>
+                ))}
+                {filteredSearch.filteredCollections.length === 0 && (
+                  <Box className={classes.emptyRow} display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography>No records found</Typography>
                   </Box>
-                  <Typography>{new BigNumber(collection.tokenStat.tokenCount).toFormat(0)} ITEMS</Typography>
-                </Box>
-              </RouterLink>
-            ))}
+                )}
+              </Fragment>
+            )}
+            {searchFilter.artist && (
+              <Fragment>
+                <Box className={classes.searchResultHeader}>Artist</Box>
+                {filteredSearch?.filteredArtist.map((collection) => (
+                  <RouterLink to={`/ark/collections/${toBech32Address(collection.address)}`}>
+                    <Box className={classes.popoverRow} display="flex" justifyContent="space-between" alignItems="center">
+                      <Box className={classes.resultCollectionName} display="flex" alignItems="center">
+                        <ArkImageView
+                          imageType="avatar"
+                          className={classes.searchResultAvatar}
+                          imageUrl={collection.profileImageUrl}
+                        />
+                        <Box display="flex" alignItems={isSm ? "flex-start" : "center"} flexDirection={isSm ? "column" : "row"}>
+                          <Box display="flex" alignItems="center" marginRight={1}>
+                            {collection.name}
+                          </Box>
+                          <Typography className={classes.artistName}>By&nbsp;<Typography className={classes.halfOpacity}>{collection.ownerName}</Typography></Typography>
+                        </Box>
+                      </Box>
+                      <Typography>{new BigNumber(collection.tokenStat.tokenCount).toFormat(0)} ITEMS</Typography>
+                    </Box>
+                  </RouterLink>
+                ))}
+                {filteredSearch.filteredArtist.length === 0 && (
+                  <Box className={classes.emptyRow} display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography>No records found</Typography>
+                  </Box>
+                )}
+              </Fragment>
+            )}
           </Container>
         </Popover>
 
@@ -214,7 +295,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                   >
                     <TableCell className={cls(classes.bodyCell, classes.firstCell)}>
                       <Box className={classes.collectionNameCell}>
-                        <Box className={classes.index}>{i+1}</Box>
+                        <Box className={classes.index}>{i + 1}</Box>
                         <ArkImageView
                           imageType="avatar"
                           className={classes.avatar}
@@ -248,8 +329,8 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                       </Box>
                     </TableCell>
                     {/* <TableCell align="center" className={cls(classes.percentCell, { [classes.isNegative]: mockedDaily.isNegative() })}> */}
-                      {/* {mockedDaily.isPositive() ? '+' : ''}{mockedDaily.toFormat(2)}% */}
-                      {/* {mockedWeekly.isPositive() ? '+' : ''}{mockedWeekly.toFormat(2)}% */}
+                    {/* {mockedDaily.isPositive() ? '+' : ''}{mockedDaily.toFormat(2)}% */}
+                    {/* {mockedWeekly.isPositive() ? '+' : ''}{mockedWeekly.toFormat(2)}% */}
                     {/* </TableCell> */}
                     <TableCell align="center" className={classes.numberCell}>
                       {collectionStats.holderCount ?? "-"}
@@ -413,14 +494,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     margin: "0px 14px",
   },
   collectionNameCell: {
-    display:"flex" ,
+    display: "flex",
     flexDirection: "row",
     alignItems: "center",
     minWidth: 240,
   },
   collectionNameContainer: {
     marginLeft: "14px",
-    display:"flex" ,
+    display: "flex",
     flexDirection: "column",
   },
   collectionName: {
@@ -447,12 +528,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 12,
     border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid rgba(107, 225, 255, 0.2)",
     padding: 0,
+    maxHeight: 600,
+    overflowY: "scroll",
   },
   popoverSmall: {
     width: 'calc(100vw - 98px)',
+    maxHeight: 400,
+    overflowY: "scroll",
   },
   popoverMobile: {
     width: 'calc(100vw)',
+    maxHeight: 300,
+    overflowY: "scroll",
   },
   popoverRow: {
     padding: '12px 24px',
@@ -467,6 +554,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&:hover": {
       backgroundColor: theme.palette.type === "dark" ? "#4E5A60" : "#A9CCC1",
     },
+  },
+  emptyRow: {
+    padding: '12px 24px',
+    fontFamily: 'Avenir Next',
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    borderRadius: 12,
+    fontWeight: 700,
+    [theme.breakpoints.down('sm')]: {
+      width: '92vw',
+      padding: '10px 18px',
+    },
+    opacity: 0.5,
   },
   resultCollectionName: {
     fontFamily: 'Avenir Next',
@@ -496,4 +595,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       width: 20,
     }
   },
+  halfOpacity: {
+    opacity: 0.5
+  },
+  artistName: {
+    display: "flex",
+  }
 }));
