@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Box, Button, Card, CardContent, CardProps, Divider } from "@material-ui/core";
+import { Box, Button, Card, CardContent, CardProps, Chip, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ViewHeadline, ArrowDropUp, ArrowDropDown } from "@material-ui/icons";
 import cls from "classnames";
@@ -192,8 +192,9 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
         <Box flex={1} pr={2}>
           <Button onClick={() => setShowDetail(!showDetail)} className={classes.detailButton}>Details {showDetail ? <ArrowDropUp /> : <ArrowDropDown />}</Button>
         </Box>
-        <Box flex={1.5}>
+        <Box flex={1.5} display="flex" justifyContent="center" flexDirection="column" alignItems="center">
           <FancyButton onClick={() => onGotoAddLiquidity()} className={classes.addLiquidity}>Add Liquidity</FancyButton>
+          {poolRewards.length > 1 && (<Chip label={`${token.whitelisted ? "CORE // " : ""} ${poolRewards.length}x Drops`} className={cls(classes.coreDropChip, { [classes.coreDrop]: token.whitelisted })} />)}
         </Box>
       </CardContent>
 
@@ -525,6 +526,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     fontSize: 12,
     alignItems: "center",
+  },
+  coreDropChip: {
+    position: "absolute",
+    transform: "translateY(26px)",
+    minWidth: 120,
+    height: 24,
+    padding: theme.spacing(.5, 0),
+    backgroundColor: "#3290FF",
+    color: "#DEFFFF",
+    fontFamily: "Raleway"
+  },
+  coreDrop: {
+    backgroundColor: "#7B61FF",
   }
 }));
 

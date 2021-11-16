@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { Box, Card, CardContent, CardProps, Divider } from "@material-ui/core";
+import { Box, Button, Card, CardContent, CardProps, Chip, Divider, Popover } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { ArrowDropUp, ArrowDropDown } from "@material-ui/icons";
+import { ArrowDropUp, ArrowDropDown, Visibility } from "@material-ui/icons";
 import cls from "classnames";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,7 +14,7 @@ import { EMPTY_USD_VALUE } from "app/store/token/reducer";
 import { PoolSwapVolumeMap, RewardsState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, toHumanNumber, useNetwork, useValueCalculators } from "app/utils";
-import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
+import { BIG_ONE, BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 
 interface Props extends CardProps {
   token: TokenInfo;
@@ -32,6 +32,7 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
   const network = useNetwork();
   const classes = useStyles();
   const [showDetail, setShowDetail] = useState(false);
+  const [rewardsAnchor, setRewardsAnchor] = useState<HTMLButtonElement | null>(null);
 
   const onGotoAddLiquidity = () => {
     dispatch(actions.Pool.select({ network, token }));
@@ -90,6 +91,14 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
 
   const potentialRewards = rewardsState.potentialRewardsByPool[token.address] || [];
 
+  const openRewards = (ev: React.MouseEvent<HTMLButtonElement>) => {
+    setRewardsAnchor(ev.currentTarget);
+  }
+
+  const closeRewards = () => {
+    setRewardsAnchor(null)
+  }
+
   return (
     <Card {...rest} className={cls(classes.root, className)}>
       <CardContent className={classes.title}>
@@ -121,12 +130,43 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
                   })
                   .reduce((total, [address, rewards]) =>
                     total.plus(rewards.reduce((acc, reward) =>
-                      acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).times(tokenState.prices[address])), BIG_ZERO)
+                      acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).times(tokenState.prices[address] || BIG_ONE)), BIG_ZERO)
                   .toFormat(2)
                 :
                 "-"
             }
           </Text>
+
+          {poolRewards.length > 0 && (
+            <Box display="flex" justifyContent="flex-end">
+              <Button onClick={(ev) => openRewards(ev)} className={classes.moreText}>More&nbsp;<Visibility fontSize="small" /></Button>
+              <Popover
+                open={Boolean(rewardsAnchor)}
+                anchorEl={rewardsAnchor}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                onClose={closeRewards}
+                className={classes.rewardPopper}
+              >
+                {Object.entries(groupBy(poolRewards, (reward) => reward.rewardToken.address))
+                  .filter(([address, rewards]) => {
+                    return !preStartDistributors?.find(distributor => toBech32Address(distributor.reward_token_address_hex) === address)
+                  })
+                  .map(([address, rewards]) => {
+                    return (
+                      <Text variant="body2" color="textPrimary" className={classes.currencyReward}>
+                        <Text className={classes.textColoured}>
+                          {rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO)
+                            .shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}
+                        </Text>&nbsp;{rewards[0].rewardToken.symbol}&nbsp;<Text className={classes.halfOpacity}>{(rewards[0].rewardToken.isZil || rewards[0].rewardToken.isZwap) ? "by ZilSwap" : `by ${rewards[0].rewardToken.symbol}`}</Text>
+                      </Text>
+                    )
+                  })}
+              </Popover>
+            </Box>
+          )}
         </KeyValueDisplay>
 
         {/* <Box p={3} pt={2} pb={0}>
@@ -156,7 +196,10 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
         <Box display="flex" alignItems="center" mt={2}>
           <Text variant="h4" className={cls(classes.detailSelect, { [classes.textColoured]: !!showDetail })} onClick={() => setShowDetail(!showDetail)} >Details {showDetail ? <ArrowDropUp /> : <ArrowDropDown />}</Text>
           <Box flexGrow={1} />
-          <FancyButton onClick={() => onGotoAddLiquidity()} className={classes.addLiquidity}>Add Liquidity</FancyButton>
+          <Box flex={1.5} display="flex" justifyContent="center" flexDirection="column" alignItems="center">
+            <FancyButton onClick={() => onGotoAddLiquidity()} className={classes.addLiquidity}>Add Liquidity</FancyButton>
+            {poolRewards.length > 1 && (<Chip label={`${token.whitelisted ? "CORE // " : ""} ${poolRewards.length}x Drops`} className={cls(classes.coreDropChip, { [classes.coreDrop]: token.whitelisted })} />)}
+          </Box>
         </Box>
 
         {showDetail && <Box className={classes.detailBox}>
@@ -281,7 +324,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 400
   },
   textColoured: {
-    color: theme.palette.primary.dark
+    color: theme.palette.primary.dark,
+    fontSize: "inherit",
   },
   flexText: {
     display: "flex",
@@ -310,6 +354,48 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginTop: theme.spacing(2),
     padding: theme.spacing(2),
   },
+  moreText: {
+    fontSize: 12,
+    display: "flex",
+    alignItems: "center",
+    transform: "translateX(16px)",
+    color: theme.palette.text?.primary
+  },
+  currencyReward: {
+    display: "flex",
+    fontSize: 15,
+    alignItems: "center",
+  },
+  rewardPopper: {
+    "& .MuiPaper-root": {
+      backgroundColor: theme.palette.background.default,
+      borderRadius: "12px",
+      border: theme.palette.border,
+      overflow: "hidden",
+      marginTop: 8,
+      padding: theme.spacing(1.5),
+    },
+    "& .MuiTypography-root": {
+      lineHeight: 1.3,
+      fontWeight: 500
+    }
+  },
+  halfOpacity: {
+    opacity: 0.5
+  },
+  coreDropChip: {
+    position: "absolute",
+    transform: "translateY(26px)",
+    minWidth: 120,
+    height: 24,
+    padding: theme.spacing(.5, 0),
+    backgroundColor: "#3290FF",
+    color: "#DEFFFF",
+    fontFamily: "Raleway"
+  },
+  coreDrop: {
+    backgroundColor: "#7B61FF",
+  }
 }));
 
 

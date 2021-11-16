@@ -277,8 +277,8 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
         <Box display="flex" mt={1} className={classes.tabSearchBox}>
           <Box display="flex">
             <Tabs className={classes.tabs} value={tabValue} onChange={handleTabChange}>
-              <Tab className={classes.tab} label={<Text className={classes.tabText}>Mega Drop {!!megaDrop.length && (<Text className={classes.tabLabel}>{megaDrop.length}</Text>)}</Text>} />
-              <Tab className={classes.tab} label={<Text className={classes.tabText}>Single Drop {!!singleDrop.length && (<Text className={classes.tabLabel}>{singleDrop.length}</Text>)}</Text>} />
+              <Tab className={classes.tab} label={<Text className={classes.tabText}>Mega Drops {!!megaDrop.length && (<Text className={classes.tabLabel}>{megaDrop.length}</Text>)}</Text>} />
+              <Tab className={classes.tab} label={<Text className={classes.tabText}>Single Drops {!!singleDrop.length && (<Text className={classes.tabLabel}>{singleDrop.length}</Text>)}</Text>} />
               <Tab className={classes.tab} label={<Text className={classes.tabText}>Main Pools {!!registeredTokens.length && (<Text className={classes.tabLabel}>{registeredTokens.length}</Text>)}</Text>} />
               <Tab className={classes.tab} label={<Text className={classes.tabText}>All Pools {!!allTokens.length && (<Text className={classes.tabLabel}>{allTokens.length}</Text>)}</Text>} />
             </Tabs>
@@ -288,25 +288,27 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
         </Box>
       </Box>
 
-      <Hidden smDown>
-        <Box padding={3} paddingBottom={1} display="flex" alignItems="center">
-          <Box flex={.5} mr={2} justifyContent="center" display="flex">
-            <Text>Pool</Text>
+      {Object.keys(tokenState.tokens).length > 0 && (
+        <Hidden smDown>
+          <Box padding={3} paddingBottom={1} display="flex" alignItems="center">
+            <Box flex={.5} mr={2} justifyContent="center" display="flex">
+              <Text>Pool</Text>
+            </Box>
+            <Box flex={2} justifyContent="flex-start" display="flex" flexDirection="column">
+              <Text paddingLeft="16px" >Total staked</Text>
+            </Box>
+            <Box flex={2} justifyContent="flex-start" display="flex">
+              <Text onClick={() => updateSort("dist")} className={classes.headerText}>{getLogo("dist")}Reward to be distributed</Text>
+            </Box>
+            <Box flex={1.5} display="flex" flexDirection="column" >
+              <Text onClick={() => updateSort("apr")} className={classes.headerText}>{getLogo("apr")}APR</Text>
+            </Box>
+            <Box flex={2.5}>
+              <Text></Text>
+            </Box>
           </Box>
-          <Box flex={2} justifyContent="flex-start" display="flex" flexDirection="column">
-            <Text paddingLeft="16px" >Total Staked</Text>
-          </Box>
-          <Box flex={2} justifyContent="flex-start" display="flex">
-            <Text onClick={() => updateSort("dist")} className={classes.headerText}>{getLogo("dist")}Reward to be Distributed</Text>
-          </Box>
-          <Box flex={1.5} display="flex" flexDirection="column" >
-            <Text onClick={() => updateSort("apr")} className={classes.headerText}>{getLogo("apr")}APR</Text>
-          </Box>
-          <Box flex={2.5}>
-            <Text></Text>
-          </Box>
-        </Box>
-      </Hidden>
+        </Hidden>
+      )}
 
       <Grid container spacing={2}>
         {tabValue === 0 && megaDrop.slice(0, limits[currentLimit]).map((token) => (
@@ -393,6 +395,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       display: 'flex',
       justifyContent: 'center',
       backgroundColor: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
+      border: `1px solid ${theme.palette.type === "dark" ? "#555555" : "rgba(0, 51, 64, 0.3)"}`,
+      borderRadius: "2px",
+      height: 4,
     },
     [theme.breakpoints.down("sm")]: {
       marginBottom: theme.spacing(1),
@@ -410,12 +415,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minWidth: 0,
     fontWeight: 600,
     marginRight: theme.spacing(4),
+    borderRadius: "12px",
     opacity: 0.5,
     '&:hover': {
       opacity: 1,
     },
     '&.MuiTab-root': {
-      padding: "6px 0px",
+      padding: "6px 12px",
     }
   },
   tabText: {
