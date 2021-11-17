@@ -56,7 +56,9 @@ export const toHumanNumber = (input?: string | BigNumber | number, dp: number = 
 
 export const tryGetBech32Address = (input: string | undefined | null) => {
   try {
-    return toBech32Address(normaliseAddress(input!));
+    if (input?.startsWith("zil1"))
+      return toBech32Address(normaliseAddress(input!));
+    return toBech32Address(input!);
   } catch (error) { };
   return null;
 }
