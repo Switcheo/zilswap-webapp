@@ -30,7 +30,7 @@ interface HeadersProp {
 }
 const HEADERS: HeadersProp[] = [
   { align: "left", value: "Collection" },
-  { align: "center", value: "Volume" },
+  { align: "center", value: "7-Day Volume" },
   { align: "center", value: "Floor" },
   // { align: "center", value: "% Change (24hr / 7day)" },
   { align: "center", value: "Owners" },
@@ -221,12 +221,12 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                           imageUrl={collection.profileImageUrl}
                         />
                         <Box className={classes.collectionNameContainer}>
-                          <Box display="flex">
+                          <Box display="flex" alignItems="center">
                             <Box className={classes.collectionName}>{collection.name}</Box>
+                            {collection.verifiedAt && (<VerifiedBadge className={classes.verifiedBadge} />)}
                           </Box>
                           <Typography className={classes.ownerName}>By {collection.ownerName}</Typography>
                         </Box>
-                        {collection.verifiedAt && (<VerifiedBadge className={classes.verifiedBadge} />)}
                       </Box>
                     </TableCell>
                     <TableCell align="center" className={classes.bodyCell}>
