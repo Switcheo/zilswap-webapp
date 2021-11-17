@@ -153,7 +153,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
                         overlap="circle"
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                         badgeContent={
-                          <VerifiedBadge />
+                          token.collection.verifiedAt ? <VerifiedBadge /> : undefined
                         }
                       >
                         <Avatar className={classes.avatar} sizes="medium" alt="Collection owner" src={""} />

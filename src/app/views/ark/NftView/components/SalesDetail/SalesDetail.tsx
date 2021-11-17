@@ -14,6 +14,7 @@ import { Nft } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
 import { ArkClient } from "core/utilities";
+import { ReactComponent as VerifiedBadge } from "../assets/verified-badge.svg";
 import { InfoBox, PrimaryPrice, SecondaryPrice } from "./components";
 import { PriceInfo, PriceType } from "./types";
 
@@ -102,7 +103,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           <Box>
             <Typography className={classes.collectionName}>
               {token.collection?.name ?? ""}{" "}
-              {/* <VerifiedBadge className={classes.verifiedBadge} /> */}
+              <VerifiedBadge className={classes.verifiedBadge} />
             </Typography>
             {<Typography className={classes.tokenId}><span className={classes.hexSymbol}>{token.name?.replace(/#\s*\d+$/i, "")} #</span>{tokenId}</Typography>}
           </Box>
@@ -312,7 +313,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   noPadding: {
     padding: 0,
     margin: 0,
-  }
+  },
+  verifiedBadge: {
+    marginLeft: "4px",
+    marginTop: 2,
+    width: "20px",
+    height: "20px",
+    verticalAlign: "text-top",
+    alignSelf: 'flex-start',
+    [theme.breakpoints.down('md')]: {
+      height: 14,
+      width: 14,
+    }
+  },
 }));
 
 export default SalesDetail;

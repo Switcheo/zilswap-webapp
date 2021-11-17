@@ -215,7 +215,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         <ArkBreadcrumb linkPath={breadcrumbs} />
 
         <ArkBanner
-          badgeContent={<VerifiedBadge className={classes.verifiedBadge} />}
+          badgeContent={collection.verifiedAt ? <VerifiedBadge className={classes.verifiedBadge} /> : undefined}
           avatarImage={collection.profileImageUrl}
           bannerImage={collection.bannerImageUrl}
         />

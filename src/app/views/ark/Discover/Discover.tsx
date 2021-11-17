@@ -214,7 +214,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                   >
                     <TableCell className={cls(classes.bodyCell, classes.firstCell)}>
                       <Box className={classes.collectionNameCell}>
-                        <Box className={classes.index}>{i+1}</Box>
+                        <Box className={classes.index}>{i + 1}</Box>
                         <ArkImageView
                           imageType="avatar"
                           className={classes.avatar}
@@ -226,7 +226,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                           </Box>
                           <Typography className={classes.ownerName}>By {collection.ownerName}</Typography>
                         </Box>
-                        <VerifiedBadge className={classes.verifiedBadge} />
+                        {collection.verifiedAt && (<VerifiedBadge className={classes.verifiedBadge} />)}
                       </Box>
                     </TableCell>
                     <TableCell align="center" className={classes.bodyCell}>
@@ -248,8 +248,8 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                       </Box>
                     </TableCell>
                     {/* <TableCell align="center" className={cls(classes.percentCell, { [classes.isNegative]: mockedDaily.isNegative() })}> */}
-                      {/* {mockedDaily.isPositive() ? '+' : ''}{mockedDaily.toFormat(2)}% */}
-                      {/* {mockedWeekly.isPositive() ? '+' : ''}{mockedWeekly.toFormat(2)}% */}
+                    {/* {mockedDaily.isPositive() ? '+' : ''}{mockedDaily.toFormat(2)}% */}
+                    {/* {mockedWeekly.isPositive() ? '+' : ''}{mockedWeekly.toFormat(2)}% */}
                     {/* </TableCell> */}
                     <TableCell align="center" className={classes.numberCell}>
                       {collectionStats.holderCount ?? "-"}
@@ -413,14 +413,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     margin: "0px 14px",
   },
   collectionNameCell: {
-    display:"flex" ,
+    display: "flex",
     flexDirection: "row",
     alignItems: "center",
     minWidth: 240,
   },
   collectionNameContainer: {
     marginLeft: "14px",
-    display:"flex" ,
+    display: "flex",
     flexDirection: "column",
   },
   collectionName: {
