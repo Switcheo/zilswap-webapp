@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   statsItem: {
     display: "flex",
-    padding: theme.spacing(1, 5),
+    padding: theme.spacing(1.5, 5, 1),
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
