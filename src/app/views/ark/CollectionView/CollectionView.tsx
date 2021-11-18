@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, Container, Grid } from "@material-ui/core";
+import { Box, Container, Grid, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,7 +11,7 @@ import { getBlockchain } from "app/saga/selectors";
 import { actions } from "app/store";
 import { CollectionWithStats } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, toHumanNumber } from "app/utils";
+import { bnOrZero, toHumanNumber, truncateAddress } from "app/utils";
 import { ZIL_DECIMALS } from "app/utils/constants";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
@@ -113,6 +113,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexDirection: "column",
     alignItems: "center",
   },
+  collectionContract: {
+    borderRadius: "12px",
+    padding: "8px 24px",
+    backgroundColor:
+      theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#6BE1FF40",
+    alignSelf: "center",
+    width: "fit-content",
+    cursor: "pointer",
+    margin: 'auto',
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+  },
 }));
 
 const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
@@ -126,6 +138,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   // fetch nfts in collection (to use store instead)
   const [collection, setCollection] = useState<CollectionWithStats>();
+  const [tooltipText, setTooltipText] = useState<string>('Copy address');
 
   useEffect(() => {
     if (match.params?.collection) {
@@ -199,6 +212,14 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     dispatch(updateFilter({ saleType: { fixed_price: true, timed_auction: false } }))
   }
 
+  const copyAddr = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setTooltipText("Copied!");
+    setTimeout(() => {
+      setTooltipText("Copy address");
+    }, 2000);
+  };
+
   if (!collection) return null;
 
   const breadcrumbs = [
@@ -230,6 +251,16 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
             {/* missing info */}
             <Text className={classes.collectionCreator}>by {collection.ownerName}</Text>
+            <Tooltip title={tooltipText} placement="right" arrow>
+              <Box
+                onClick={() => bech32Address && copyAddr(bech32Address)}
+                className={classes.collectionContract}
+              >
+                <Typography variant="body1">
+                  {truncateAddress(bech32Address || '')}
+                </Typography>
+              </Box>
+            </Tooltip>
           </Box>
 
           {/* Stats */}
