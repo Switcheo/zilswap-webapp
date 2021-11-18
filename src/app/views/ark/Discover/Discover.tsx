@@ -392,6 +392,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   radioButton: {
     padding: "6px",
+    '& svg > path': {
+      fill: theme.palette.type === "dark" ? undefined : "#003340",
+    },
     "&:hover": {
       background: "transparent!important",
     },
