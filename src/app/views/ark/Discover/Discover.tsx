@@ -3,20 +3,20 @@ import BigNumber from "bignumber.js"
 import {
   Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel,
   InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Typography, useMediaQuery, useTheme, Popover
+  TableHead, TableRow, Typography, useMediaQuery, useTheme, Popper, Button,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
-import { ArkImageView, CurrencyLogo } from "app/components";
+import { ArkImageView, CurrencyLogo, Text } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
 import { CollectionWithStats } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
-import { bnOrZero } from "app/utils";
+import { bnOrZero, hexToRGBA } from "app/utils";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
 import { ReactComponent as UncheckedIcon } from "./unchecked-icon.svg";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
@@ -80,14 +80,14 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    console.log("clicked");
     setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
   };
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popper' : undefined;
+
+  console.log({ open })
 
   const filteredSearch = useMemo(() => {
     const sorted = collections.sort((a, b) => bnOrZero(b.priceStat ? b.priceStat.volume : 0).comparedTo(a.priceStat ? a.priceStat.volume : 0))
@@ -107,7 +107,6 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     return { filteredCollections, filteredArtist, filteredProfile };
   }, [collections, search, searchFilter]);
 
-  const isMd = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("md"));
   const isSm = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("sm"));
 
   const fullCollections = useMemo(() => {
@@ -115,6 +114,10 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     return sorted
 
   }, [collections]);
+
+  const clearSearch = () => {
+    setSearch("");
+  }
 
   return (
     <ArkPage {...rest}>
@@ -133,8 +136,15 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           onClick={handleClick}
           onChange={(e) => setSearch(e.target.value)}
           endAdornment={
-            !isMobileView && (
-              <InputAdornment position="end">
+
+            <InputAdornment position="end">
+              {!!search.length && (
+                <Button onClick={() => clearSearch()} className={classes.closeIcon}>
+                  {/* <CloseOutlined className={classes.closeIcon} /> */}
+                  <Text>Clear</Text>
+                </Button>
+              )}
+              {!isMobileView && (
                 <FormControl component="fieldset" className={classes.formControl}>
                   <FormLabel focused className={classes.formLabel}>By</FormLabel>
                   {SEARCH_FILTERS.map((filter) => (
@@ -146,7 +156,6 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                         <Checkbox
                           className={classes.radioButton}
                           onChange={(e) => {
-                            e.preventDefault();
                             handleSearchFilter(filter)
                           }}
                           checkedIcon={<CheckedIcon />}
@@ -158,28 +167,18 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                       label={filter.toUpperCase()}
                     />
                   ))}
-                </FormControl>
-              </InputAdornment>
-            )
+                </FormControl>)}
+            </InputAdornment>
+
           }
         />
-        <Popover
+        <Popper
           id={id} open={open && !!search.length} anchorEl={anchorEl}
-          disableAutoFocus={true}
-          disableEnforceFocus={true}
-          onClose={handleClose}
           className={classes.popover}
-          getContentAnchorEl={null}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: isMd ? 'right' : 'left',
-          }}
+          placement="bottom"
         >
           <Container maxWidth="lg"
-            className={cls(classes.popoverContainer, {
-              [classes.popoverSmall]: isMd,
-              [classes.popoverMobile]: isSm,
-            })}
+            className={classes.popoverContainer}
           >
             {isMobileView && (
               <Box padding={2} paddingBottom={0}>
@@ -209,6 +208,11 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                 </FormControl>
               </Box>
             )}
+            {!searchFilter.collection && !searchFilter.artist && (
+              <Box className={classes.emptyRow} display="flex" justifyContent="space-between" alignItems="center">
+                <Typography>No filter selected</Typography>
+              </Box>
+            )}
             {searchFilter.collection && (
               <Fragment>
                 <Box className={classes.searchResultHeader}>Collections</Box>
@@ -223,7 +227,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                         />
                         {collection.name}
                       </Box>
-                      <Typography>{new BigNumber(collection.tokenStat.tokenCount).toFormat(0)} ITEMS</Typography>
+                      <Typography>{new BigNumber(collection.tokenStat.tokenCount).toFormat(0)} Arts</Typography>
                     </Box>
                   </RouterLink>
                 ))}
@@ -253,7 +257,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                           <Typography className={classes.artistName}>By&nbsp;<Typography className={classes.halfOpacity}>{collection.ownerName}</Typography></Typography>
                         </Box>
                       </Box>
-                      <Typography>{new BigNumber(collection.tokenStat.tokenCount).toFormat(0)} ITEMS</Typography>
+                      <Typography>{new BigNumber(collection.tokenStat.tokenCount).toFormat(0)} Arts</Typography>
                     </Box>
                   </RouterLink>
                 ))}
@@ -265,7 +269,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               </Fragment>
             )}
           </Container>
-        </Popover>
+        </Popper>
 
         <TableContainer>
           <Table className={classes.table}>
@@ -388,9 +392,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   radioButton: {
     padding: "6px",
-    '& svg > path': {
-      fill: theme.palette.text!.primary,
-    },
     "&:hover": {
       background: "transparent!important",
     },
@@ -530,16 +531,21 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: 0,
     maxHeight: 600,
     overflowY: "scroll",
-  },
-  popoverSmall: {
-    width: 'calc(100vw - 98px)',
-    maxHeight: 400,
-    overflowY: "scroll",
-  },
-  popoverMobile: {
-    width: 'calc(100vw)',
-    maxHeight: 300,
-    overflowY: "scroll",
+    "&::-webkit-scrollbar": {
+      width: "0.4rem"
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
+      borderRadius: 12
+    },
+    [theme.breakpoints.down("md")]: {
+      width: 'calc(100vw - 128px)',
+      maxHeight: 400,
+    },
+    [theme.breakpoints.down("xs")]: {
+      width: '100%',
+      maxHeight: 300,
+    }
   },
   popoverRow: {
     padding: '12px 24px',
@@ -600,5 +606,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   artistName: {
     display: "flex",
+  },
+  closeIcon: {
+    color: theme.palette.text?.primary,
+    // fontSize: 18,
+    marginRight: theme.spacing(.5),
   }
 }));
