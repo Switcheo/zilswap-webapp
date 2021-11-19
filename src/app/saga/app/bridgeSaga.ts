@@ -4,7 +4,7 @@ import { Transaction as EthTransaction, ethers } from "ethers";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
-import { Blockchain, Models, AddressUtils, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
+import { CarbonWallet, Blockchain, Models, AddressUtils, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
 import { FeesData } from "core/utilities/bridge";
 import { Bridge, logger } from "core/utilities";
@@ -15,7 +15,6 @@ import { SimpleMap, bnOrZero, netZilToCarbon } from "app/utils";
 import { BridgeTx, BridgeableToken, BridgeableTokenMapping, RootState } from "app/store/types";
 import { actions } from "app/store";
 import { getBlockchain, getBridge } from '../selectors';
-import { BroadcastTxResponse } from "carbon-js-sdk/lib/codec/cosmos/tx/v1beta1/service";
 
 export enum Status {
   NotStarted,
@@ -147,7 +146,7 @@ function* watchDepositConfirmation() {
             const balanceResult = (yield call([sdk.query.bank, sdk.query.bank.Balance], { address: swthAddress, denom: balanceDenom })) as Models.Bank.QueryBalanceResponse;
 
             logger("bridge saga", "detected balance to withdraw", swthAddress, balanceResult, balanceDenom)
-            const withdrawAmount = bnOrZero(balanceResult.balance?.[balanceDenom]?.amount);
+            const withdrawAmount = bnOrZero(balanceResult.balance?.amount);
             if (withdrawAmount.isZero()) {
               throw new Error(`carbon address balance not found`)
             }
@@ -161,10 +160,9 @@ function* watchDepositConfirmation() {
               toAddress: tx.dstAddr.toLowerCase().replace(/^0x/i, ""),
               feeAddress: BridgeParamConstants.SWTH_FEE_ADDRESS,
               feeAmount: tx.withdrawFee,
-              originator: swthAddress,
-            })) as BroadcastTxResponse;
+            })) as CarbonWallet.SendTxResponse;
 
-            tx.withdrawTxHash = withdrawResult.txResponse?.txhash;
+            tx.withdrawTxHash = withdrawResult.transactionHash;
             updatedTxs[tx.sourceTxHash!] = tx;
 
             logger("bridge saga", "initiated tx withdraw", tx.withdrawTxHash);

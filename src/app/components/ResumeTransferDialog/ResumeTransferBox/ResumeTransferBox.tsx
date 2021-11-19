@@ -163,6 +163,8 @@ const ResumeTransferBox = (props: any) => {
             sdk.token.reloadTokens();
             setSdk(sdk);
         });
+
+        // eslint-disable-next-line
     }, [network])
 
     const dstChain = useMemo(() => {

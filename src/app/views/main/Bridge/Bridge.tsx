@@ -515,7 +515,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   // returns true if asset is native coin, false otherwise
   const isNativeAsset = (asset: Models.Token) => {
     const zeroAddress = "0000000000000000000000000000000000000000";
-    return (asset.asset_id === zeroAddress)
+    return (asset.tokenAddress === zeroAddress)
   }
 
   const adjustedForGas = (balance: BigNumber, blockchain: Blockchain) => {

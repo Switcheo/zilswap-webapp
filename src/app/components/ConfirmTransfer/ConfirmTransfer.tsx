@@ -11,7 +11,7 @@ import { ethers } from "ethers";
 import { History } from "history";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import { Blockchain, AddressUtils, Models, CarbonSDK,ConnectedCarbonSDK } from "carbon-js-sdk";
+import { Blockchain, AddressUtils, Models, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet } from "core/wallet";
@@ -322,7 +322,7 @@ const ConfirmTransfer = (props: any) => {
     const swthAddress = AddressUtils.SWTHAddress.generateAddress(swthAddrMnemonic);
 
     const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider);
-    const signer = ethersProvider.getSigner();
+    const signer: ethers.Signer = ethersProvider.getSigner();
 
     const amount = bridgeFormState.transferAmount;
     const ethAddress = await signer.getAddress();
