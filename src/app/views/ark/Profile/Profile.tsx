@@ -78,7 +78,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginLeft: 8,
     marginRight: -31,
     padding: 7,
-    borderRadius: 3,
+    borderRadius: 8,
     '& svg': {
       width: 13,
       height: 13,
@@ -89,6 +89,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       cursor: 'pointer',
       '& svg > path': {
         stroke: "#00FFB0",
+        "stroke-opacity": 1,
       },
     }
   },

@@ -9,7 +9,7 @@ import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getMarketplace, getWallet } from "app/saga/selectors";
 import { Nft, Profile } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, useAsyncTask } from "app/utils";
+import { bnOrZero, tryGetBech32Address, useAsyncTask } from "app/utils";
 import { ArkClient, waitForTx } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import { actions } from "app/store";
@@ -117,6 +117,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     },
   ];
 
+  const ownerAddr = tryGetBech32Address(owner?.address);
   return (
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
@@ -137,7 +138,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
             </Typography>
             <Box className={classes.xsColumn} mt={4} display="flex" justifyContent="center">
               <Box flexGrow={1} marginRight={1}>
-                <MenuItem component={Link} to={`/ark/profile?address=${owner?.address}`} className={classes.aboutMenuItem} button={false}>
+                <MenuItem component={Link} to={`/ark/profile?address=${ownerAddr}`} className={classes.aboutMenuItem} button={false}>
                   <ListItemIcon><Avatar className={classes.avatar} alt="owner" src={owner?.profileImage?.url || ""} /></ListItemIcon>
                   <Box className={classes.aboutItemText}>
                     <Typography>Owner</Typography>
@@ -153,7 +154,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
                         overlap="circle"
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                         badgeContent={
-                          <VerifiedBadge />
+                          token.collection.verifiedAt ? <VerifiedBadge /> : undefined
                         }
                       >
                         <Avatar className={classes.avatar} sizes="medium" alt="Collection owner" src={""} />

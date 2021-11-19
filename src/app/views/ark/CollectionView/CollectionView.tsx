@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   statsItem: {
     display: "flex",
-    padding: theme.spacing(1, 5),
+    padding: theme.spacing(1.5, 5, 1),
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
@@ -236,7 +236,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         <ArkBreadcrumb linkPath={breadcrumbs} />
 
         <ArkBanner
-          badgeContent={<VerifiedBadge className={classes.verifiedBadge} />}
+          badgeContent={collection.verifiedAt ? <VerifiedBadge className={classes.verifiedBadge} /> : undefined}
           avatarImage={collection.profileImageUrl}
           bannerImage={collection.bannerImageUrl}
         />

@@ -1,9 +1,8 @@
 import React from "react";
-import { Typography, TypographyProps } from "@material-ui/core";
+import { Typography, TypographyProps, Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import { darken } from '@material-ui/core/styles';
 import { getWallet } from "app/saga/selectors";
 import { MarketplaceUser } from "app/store/types";
@@ -23,7 +22,6 @@ const ArkOwnerLabel: React.FC<Props> = (props: Props) => {
   const walletAddress = wallet?.addressInfo.byte20.toLowerCase();
 
   let text = "";
-  let linkAddress = address ?? user?.address;
   if (walletAddress && (address === walletAddress || user?.address === walletAddress)) {
     text = "You";
   } else if (address) {
@@ -35,14 +33,11 @@ const ArkOwnerLabel: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Link
-      className={classes.link}
-      to={`/ark/profile?address=${linkAddress}`}
-    >
+    <Box className={classes.link} >
       <Typography component="span" {...rest} className={cls(classes.root, className)}>
         {text}
       </Typography>
-    </Link>
+    </Box>
   );
 };
 
