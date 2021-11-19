@@ -8,10 +8,10 @@ import { ObservedTx } from "zilswap-sdk";
 import groupBy from "lodash/groupBy";
 import { useDispatch, useSelector } from "react-redux";
 import cls from "classnames"
-import { ArkBox, ArkPaginator } from "app/components";
+import { ArkBox, ArkPaginator, ArkLoadingSkeleton } from "app/components";
 import { Cheque } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useBlockTime, useValueCalculators } from "app/utils";
+import { useBlockTime, useTaskSubscriber, useValueCalculators } from "app/utils";
 import { RootState, TokenState } from "app/store/types";
 import { getMarketplace } from "app/saga/selectors";
 import { actions } from "app/store";
@@ -103,6 +103,7 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [blockTime, currentBlock, currentTime] = useBlockTime();
+  const [isLoading] = useTaskSubscriber("getBids");
 
   const handlePageChange = (page: number) => {
     setPageNumber(page - 1)
@@ -116,78 +117,78 @@ const ArkBidsTable: React.FC<Props> = (props: Props) => {
     }))
   }
 
-  if (currentBlock === 0) return null // TODO: use loading gif instead
+  if (currentBlock === 0 || isLoading) return <ArkLoadingSkeleton type={isMobile ? "Card" : "Table"} row={5} />
 
   const headers = showItem ? [ITEM_HEADER, ...HEADERS] : HEADERS
 
   return isMobile ?
-        bids.length === 0 ?
-          <Box className={cls(classes.emptyState, 'box')}>No bid data yet.</Box>
-          :
-          <Box className={classes.mobileContainer}>
+    bids.length === 0 ?
+      <Box className={cls(classes.emptyState, 'box')}>No bid data yet.</Box>
+      :
+      <Box className={classes.mobileContainer}>
+        {
+          Object.entries(groupBy(bids, (bid) => bid.token.collectionAddress + bid.token.id)).map(([k, v]) => {
+            const bids = v.sort((lhs, rhs) => {
+              const diff = vc.usd(tokenState, lhs.price.address, lhs.price.amount).comparedTo(vc.usd(tokenState, rhs.price.address, rhs.price.amount)) * -1
+              if (diff === 0) return lhs.expiry > rhs.expiry ? -1 : 1
+              return diff
+            })
+            return (
+              <BidCard
+                onAction={appendPendingTx}
+                bid={bids[0]}
+                relatedBids={bids.slice(1)}
+                blockTime={blockTime}
+                currentBlock={currentBlock}
+                showItem={showItem}
+                key={k}
+              />
+            )
+          })
+        }
+      </Box>
+    :
+    <ArkBox variant="base" className={classes.container}>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              {headers.map((header, index) => (
+                <TableCell
+                  key={`offers-${index}`}
+                  className={classes.headerCell}
+                  align={header.align}
+                >
+                  {header.value}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {bids.slice(pageNumber * ITEMS_PER_PAGE, (pageNumber + 1) * ITEMS_PER_PAGE).map((data) => (
+              <BidRow
+                onAction={appendPendingTx}
+                bid={data}
+                currentTime={currentTime}
+                blockTime={blockTime}
+                currentBlock={currentBlock}
+                showItem={showItem}
+                key={data.id}
+              />
+            ))}
             {
-              Object.entries(groupBy(bids, (bid) => bid.token.collectionAddress + bid.token.id)).map(([k, v]) => {
-                const bids = v.sort((lhs, rhs) => {
-                  const diff = vc.usd(tokenState, lhs.price.address, lhs.price.amount).comparedTo(vc.usd(tokenState, rhs.price.address, rhs.price.amount)) * -1
-                  if (diff === 0) return lhs.expiry > rhs.expiry ? -1 : 1
-                  return diff
-                })
-                return (
-                  <BidCard
-                    onAction={appendPendingTx}
-                    bid={bids[0]}
-                    relatedBids={bids.slice(1)}
-                    blockTime={blockTime}
-                    currentBlock={currentBlock}
-                    showItem={showItem}
-                    key={k}
-                  />
-                )
-              })
+              bids.length === 0 &&
+              <TableRow>
+                <TableCell colSpan={headers.length} className={cls(classes.emptyState, 'row')}>
+                  No bid data yet.
+                </TableCell>
+              </TableRow>
             }
-          </Box>
-        :
-        <ArkBox variant="base" className={classes.container}>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  {headers.map((header, index) => (
-                    <TableCell
-                      key={`offers-${index}`}
-                      className={classes.headerCell}
-                      align={header.align}
-                    >
-                      {header.value}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {bids.slice(pageNumber * ITEMS_PER_PAGE, (pageNumber + 1) * ITEMS_PER_PAGE).map((data) => (
-                  <BidRow
-                    onAction={appendPendingTx}
-                    bid={data}
-                    currentTime={currentTime}
-                    blockTime={blockTime}
-                    currentBlock={currentBlock}
-                    showItem={showItem}
-                    key={data.id}
-                  />
-                ))}
-                {
-                  bids.length === 0 &&
-                  <TableRow>
-                    <TableCell colSpan={headers.length} className={cls(classes.emptyState, 'row')}>
-                      No bid data yet.
-                    </TableCell>
-                  </TableRow>
-                }
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <ArkPaginator itemPerPage={ITEMS_PER_PAGE} totalItem={bids.length} onPageChange={handlePageChange} />
-        </ArkBox>
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <ArkPaginator itemPerPage={ITEMS_PER_PAGE} totalItem={bids.length} onPageChange={handlePageChange} />
+    </ArkBox>
 };
 
 export default ArkBidsTable;

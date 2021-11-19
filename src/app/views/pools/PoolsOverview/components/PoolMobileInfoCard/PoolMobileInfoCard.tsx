@@ -196,7 +196,7 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
         <Box display="flex" alignItems="center" mt={2}>
           <Text variant="h4" className={cls(classes.detailSelect, { [classes.textColoured]: !!showDetail })} onClick={() => setShowDetail(!showDetail)} >Details {showDetail ? <ArrowDropUp /> : <ArrowDropDown />}</Text>
           <Box flexGrow={1} />
-          <Box flex={1.5} display="flex" justifyContent="center" flexDirection="column" alignItems="center">
+          <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center">
             <FancyButton onClick={() => onGotoAddLiquidity()} className={classes.addLiquidity}>Add Liquidity</FancyButton>
             {poolRewards.length > 1 && (<Chip label={`${token.whitelisted ? "CORE // " : ""} ${poolRewards.length}x Drops`} className={cls(classes.coreDropChip, { [classes.coreDrop]: token.whitelisted })} />)}
           </Box>

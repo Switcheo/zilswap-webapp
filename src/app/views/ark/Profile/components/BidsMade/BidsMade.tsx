@@ -51,7 +51,7 @@ const BidsReceived: React.FC<Props> = (props: Props) => {
 
   return (
     <Box className={cls(classes.root, className)}>
-      <ArkToggle onCheck={setActiveOnly} label="Show active offers only&nbsp;"/>
+      <ArkToggle onCheck={setActiveOnly} label="Show active offers only&nbsp;" />
       <ArkBidsTable bids={bidsTable?.bids ?? []} />
     </Box>
   );

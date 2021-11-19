@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import clsx from "clsx";
-import { Box, BoxProps, CircularProgress, Grid } from "@material-ui/core";
+import { Box, BoxProps, Grid, CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useSelector, useDispatch } from "react-redux";
 import { ArkNFTCard, Text } from "app/components";
@@ -29,7 +29,6 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
   });
 
   const handleInfiniteScroll = () => {
-    console.log("handle infinite scroll", filter, tokens);
     if (tokens.length === 0) return;
     if (filter.pagination?.count && tokens.length === filter.pagination.count) return;
     if (filter.pagination?.offset && tokens.length === filter.pagination.offset) return;
@@ -47,7 +46,7 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
             {collectionName}
           </span>
         }
-        {!!filter?.pagination?.count && 
+        {!!filter?.pagination?.count &&
           <span>
             |
             <span className={classes.results}>
