@@ -197,7 +197,6 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
   };
 
   const handleTabChange = (ev: React.ChangeEvent<{}>, newValue: number) => {
-    console.log({ newValue }, "changing")
     setTabValue(newValue);
   }
 
@@ -235,7 +234,6 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
     setAnchorEl(null)
   }
   const allTokens = [...registeredTokens, ...otherTokens];
-  console.log({ allTokens }, limits[currentLimit], typeof limits[currentLimit], tabValue === 4);
 
   return (
     <Box {...rest} className={cls(classes.root, className)} mt={6} mb={2}>

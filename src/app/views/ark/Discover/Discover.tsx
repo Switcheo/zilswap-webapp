@@ -80,14 +80,11 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    console.log("clicked");
     setAnchorEl(event.currentTarget);
   };
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popper' : undefined;
-
-  console.log({ open })
 
   const filteredSearch = useMemo(() => {
     const sorted = collections.sort((a, b) => bnOrZero(b.priceStat ? b.priceStat.volume : 0).comparedTo(a.priceStat ? a.priceStat.volume : 0))
