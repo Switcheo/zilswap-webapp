@@ -41,12 +41,15 @@ function* queryDistributors() {
 
         const endTime = distribution_start_time + (total_number_of_epochs * epoch_period);
         const now = Math.floor(Date.now() / 1000)
-        if (endTime < now)
-          continue;
+        const ended = endTime < now;
 
         const epochs_completed = Math.floor(Math.max(0, now - distribution_start_time) / epoch_period)
-        const from = distribution_start_time + (epochs_completed * epoch_period)
-        const until = from + epoch_period
+        const from = ended ? -1 : distribution_start_time + (epochs_completed * epoch_period)
+        const until = ended ? -1 : from + epoch_period
+
+        distrWithTimings.push({ ...distributor, currentEpochStart: from, currentEpochEnd: until })
+        if (ended)
+          continue;
 
         // cache identical epoch ranges
         const key = `${from}-${until}`
@@ -75,8 +78,6 @@ function* queryDistributors() {
             weightedLiquidity,
           })
         }
-
-        distrWithTimings.push({ ...distributor, currentEpochStart: from, currentEpochEnd: until })
       }
 
       yield put(actions.Rewards.updatePoolRewards(rewards));
