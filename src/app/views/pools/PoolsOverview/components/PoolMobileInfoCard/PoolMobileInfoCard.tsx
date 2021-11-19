@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Box, Button, Card, CardContent, CardProps, Chip, Divider, Popover } from "@material-ui/core";
+import { Box, Button, Card, CardContent, CardProps, Chip, Divider, Popover, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowDropUp, ArrowDropDown, Visibility } from "@material-ui/icons";
 import cls from "classnames";
@@ -18,10 +18,12 @@ import { BIG_ONE, BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 
 interface Props extends CardProps {
   token: TokenInfo;
+  showCoreTag?: boolean;
+  showDropTag?: boolean;
 }
 
 const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
-  const { children, className, token, ...rest } = props;
+  const { children, className, token, showCoreTag = true, showDropTag = true, ...rest } = props;
   const dispatch = useDispatch();
   const history = useHistory();
   const valueCalculators = useValueCalculators();
@@ -72,9 +74,9 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
 
     return {
       poolRewards,
-      roi: roiPerDay.isZero() || roiPerDay.isNaN() ? "-" : `${roiPerDay.toFormat()}%`,
-      apr: apr.isZero() || apr.isNaN() ? '-' : `${toHumanNumber(apr, 1)}%`,
-      preStartDistributors
+      roi: roiPerDay.isZero() || roiPerDay.isNaN() ? "-" : `${roiPerDay.dp(2).toFormat()}%`,
+      apr: apr.isZero() || apr.isNaN() ? '-' : `${apr.dp(2).toFormat()}%`,
+      preStartDistributors,
     };
   }, [rewardsState.rewardsByPool, rewardsState.distributors, token, usdValues]);
 
@@ -90,6 +92,8 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
   const depositedValue = poolShare.times(usdValues?.poolLiquidity ?? BIG_ZERO);
 
   const potentialRewards = rewardsState.potentialRewardsByPool[token.address] || [];
+
+  const showTag = (showCoreTag && token.whitelisted) || (showDropTag && poolRewards.length > 1);
 
   const openRewards = (ev: React.MouseEvent<HTMLButtonElement>) => {
     setRewardsAnchor(ev.currentTarget);
@@ -137,7 +141,7 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
             }
           </Text>
 
-          {poolRewards.length > 0 && (
+          {poolRewards.length > 2 && (
             <Box display="flex" justifyContent="flex-end">
               <Button onClick={(ev) => openRewards(ev)} className={classes.moreText}>More&nbsp;<Visibility fontSize="small" /></Button>
               <Popover
@@ -156,11 +160,16 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
                   })
                   .map(([address, rewards]) => {
                     return (
-                      <Text variant="body2" color="textPrimary" className={classes.currencyReward}>
+                      <Text key={address} variant="body2" color="textPrimary" className={classes.currencyReward}>
                         <Text className={classes.textColoured}>
                           {rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO)
                             .shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}
-                        </Text>&nbsp;{rewards[0].rewardToken.symbol}&nbsp;<Text className={classes.halfOpacity}>{(rewards[0].rewardToken.isZil || rewards[0].rewardToken.isZwap) ? "by ZilSwap" : `by ${rewards[0].rewardToken.symbol}`}</Text>
+                        </Text>
+                        {" "}
+                        {rewards[0].rewardToken.symbol}
+                        <Text marginLeft={1} className={classes.halfOpacity}>
+                          {(rewards[0].rewardToken.isZil || rewards[0].rewardToken.isZwap) ? "by ZilSwap" : `by ${rewards[0].rewardToken.symbol}`}
+                        </Text>
                       </Text>
                     )
                   })}
@@ -169,36 +178,28 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
           )}
         </KeyValueDisplay>
 
-        {/* <Box p={3} pt={2} pb={0}>
-        <KeyValueDisplay wrapLabel={true} kkey="Rewards to be Distributed" ValueComponent="span">
-          {
-            poolRewards.length > 0 ?
-              Object.entries(groupBy(poolRewards, (reward) => reward.rewardToken.address)).map(([address, rewards]) => {
-                return (
-                  <Text variant="h4" className={classes.flexText}><Text variant="h4" className={classes.textColoured}>{rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}</Text>&nbsp;{rewards[0].rewardToken.symbol}</Text>
-                )
-              })
-              :
-              <Text color="textPrimary" className={classes.rewardValue}>
-                -
-              </Text>
-          }
-
-          <Text variant="h4" className={classes.flexText}><Text variant="h4" className={classes.textColoured}>{toHumanNumber(token.pool?.zilReserve.shiftedBy(-12), 2)}</Text>&nbsp;ZIL</Text>
-        </KeyValueDisplay>
-      </Box > */}
-
         <KeyValueDisplay wrapLabel={true} kkey="APR" ValueComponent="span" mt={2}>
-          <Text variant="h4" className={classes.flexText}><Text variant="h4" >{apr}</Text><Text variant="h4" className={classes.boldless}>(Daily ROI {roi})</Text></Text>
+          <Text variant="h4" className={classes.flexText}>
+            <Box marginRight={1}>
+              <Typography variant="h4">{apr}</Typography>
+            </Box>
+            <Typography variant="h4" className={classes.boldless}>(Daily ROI {roi})</Typography>
+          </Text>
         </KeyValueDisplay>
 
 
         <Box display="flex" alignItems="center" mt={2}>
           <Text variant="h4" className={cls(classes.detailSelect, { [classes.textColoured]: !!showDetail })} onClick={() => setShowDetail(!showDetail)} >Details {showDetail ? <ArrowDropUp /> : <ArrowDropDown />}</Text>
           <Box flexGrow={1} />
-          <Box flex={1.5} display="flex" justifyContent="center" flexDirection="column" alignItems="center">
+          <Box display="flex" justifyContent="center" flexDirection="column" alignItems="center">
             <FancyButton onClick={() => onGotoAddLiquidity()} className={classes.addLiquidity}>Add Liquidity</FancyButton>
-            {poolRewards.length > 1 && (<Chip label={`${token.whitelisted ? "CORE // " : ""} ${poolRewards.length}x Drops`} className={cls(classes.coreDropChip, { [classes.coreDrop]: token.whitelisted })} />)}
+            {showTag && (
+              <Chip label={
+                `${token.whitelisted && showCoreTag ? ((showDropTag && poolRewards.length > 1) ? "CORE // " : "CORE") : ""}
+            ${(showDropTag && poolRewards.length > 1) ? `${poolRewards.length}x Drops` : ""}`}
+                className={cls(classes.coreDropChip, { [classes.coreDrop]: token.whitelisted })}
+              />
+            )}
           </Box>
         </Box>
 
@@ -346,6 +347,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "#003340",
     padding: theme.spacing(2, 4),
     borderRadius: theme.spacing(1.5),
+    "&.MuiButtonBase-root": {
+      "&:hover": {
+        opacity: 0.8,
+        backgroundColor: "#FFDF6B",
+      }
+    }
   },
   detailBox: {
     backgroundColor: "#002A34",

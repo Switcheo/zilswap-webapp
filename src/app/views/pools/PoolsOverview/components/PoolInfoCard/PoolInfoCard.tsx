@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { Box, Button, Card, CardContent, CardProps, Chip, Divider } from "@material-ui/core";
+import { Box, Button, Card, CardContent, CardProps, Chip, Divider, Popover } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { ViewHeadline, ArrowDropUp, ArrowDropDown } from "@material-ui/icons";
+import { ViewHeadline, ArrowDropUp, ArrowDropDown, Visibility } from "@material-ui/icons";
 import cls from "classnames";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,10 +18,12 @@ import { BIG_ONE, BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 
 interface Props extends CardProps {
   token: TokenInfo;
+  showCoreTag?: boolean;
+  showDropTag?: boolean;
 }
 
 const PoolInfoCard: React.FC<Props> = (props: Props) => {
-  const { children, className, token, ...rest } = props;
+  const { children, className, token, showCoreTag = true, showDropTag = true, ...rest } = props;
   const dispatch = useDispatch();
   const history = useHistory();
   const valueCalculators = useValueCalculators();
@@ -32,6 +34,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
   const network = useNetwork();
   const classes = useStyles();
   const [showDetail, setShowDetail] = useState(false);
+  const [rewardsAnchor, setRewardsAnchor] = useState<HTMLSpanElement | null>(null);
 
   const onGotoAddLiquidity = () => {
     dispatch(actions.Pool.select({ network, token }));
@@ -90,6 +93,17 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
 
   const potentialRewards = rewardsState.potentialRewardsByPool[token.address] || [];
 
+  const showTag = (showCoreTag && token.whitelisted) || (showDropTag && poolRewards.length > 1);
+
+  const openRewards = (ev: React.MouseEvent<HTMLSpanElement>) => {
+    setRewardsAnchor(ev.currentTarget);
+  }
+
+  const closeRewards = () => {
+    setRewardsAnchor(null)
+  }
+
+
   return (
     <Card {...rest} className={cls(classes.root, className)}>
       <CardContent className={cls(classes.content, { [classes.selectedCard]: showDetail })}>
@@ -133,13 +147,14 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
                 poolRewards.length > 0 ?
                   <>
                     {Object.entries(groupBy(poolRewards, (reward) => reward.rewardToken.address))
+                      .slice(0, 2)
                       .filter(([address, rewards]) => {
                         return !preStartDistributors?.find(distributor => toBech32Address(distributor.reward_token_address_hex) === address)
                       })
                       .map(([address, rewards]) => {
                         return (
-                          <Text variant="body2" color="textPrimary" className={classes.currencyReward}>
-                            {rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}&nbsp;<Text className={classes.textColoured}>{rewards[0].rewardToken.symbol}</Text>
+                          <Text key={address} variant="body2" color="textPrimary" className={classes.currencyReward}>
+                            <Text className={classes.textColoured}>{rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}</Text>&nbsp;{rewards[0].rewardToken.symbol}
                           </Text>
                         )
                       })}
@@ -149,30 +164,33 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
                     -
                   </Text>
               }
+              {poolRewards.length > 2 && (<Text onClick={(ev) => openRewards(ev)} className={classes.more}>More&nbsp;<Visibility fontSize="small" /></Text>)}
+              <Popover
+                open={Boolean(rewardsAnchor)}
+                anchorEl={rewardsAnchor}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                onClose={closeRewards}
+                className={classes.rewardPopper}
+              >
+                {Object.entries(groupBy(poolRewards, (reward) => reward.rewardToken.address))
+                  .filter(([address, rewards]) => {
+                    return !preStartDistributors?.find(distributor => toBech32Address(distributor.reward_token_address_hex) === address)
+                  })
+                  .map(([address, rewards]) => {
+                    return (
+                      <Text key={address} variant="body2" color="textPrimary" className={classes.currencyReward}>
+                        <Text className={classes.textColoured}>
+                          {rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO)
+                            .shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}
+                        </Text>&nbsp;{rewards[0].rewardToken.symbol}&nbsp;<Text className={classes.halfOpacity}>{(rewards[0].rewardToken.isZil || rewards[0].rewardToken.isZwap) ? "by ZilSwap" : `by ${rewards[0].rewardToken.symbol}`}</Text>
+                      </Text>
+                    )
+                  })}
+              </Popover>
             </Text>
-            {/* {
-              poolRewards.length > 0 ?
-                <>
-                  {Object.entries(groupBy(poolRewards, (reward) => reward.rewardToken.address))
-                    .filter(([address, rewards]) => {
-                      return !preStartDistributors?.find(distributor => toBech32Address(distributor.reward_token_address_hex) === address)
-                    })
-                    .map(([address, rewards]) => {
-                      return (
-                        <Box display="flex" className={classes.rewardContainer} alignItems="flex-end" flexWrap="wrap" key={address}>
-                          <Text variant="h1" color="textPrimary" className={classes.rewardValue}>
-                            {rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}
-                          </Text>
-                          <CurrencyLogo className={classes.rewardTokenLogo} currency={rewards[0].rewardToken.symbol} address={address} />
-                        </Box>
-                      )
-                    })}
-                </>
-                :
-                <Text color="textPrimary" className={classes.rewardValue}>
-                  -
-                </Text>
-            } */}
           </Box>
         </Box>
 
@@ -194,7 +212,13 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
         </Box>
         <Box flex={1.5} display="flex" justifyContent="center" flexDirection="column" alignItems="center">
           <FancyButton onClick={() => onGotoAddLiquidity()} className={classes.addLiquidity}>Add Liquidity</FancyButton>
-          {poolRewards.length > 1 && (<Chip label={`${token.whitelisted ? "CORE // " : ""} ${poolRewards.length}x Drops`} className={cls(classes.coreDropChip, { [classes.coreDrop]: token.whitelisted })} />)}
+          {showTag && (
+            <Chip label={
+              `${token.whitelisted && showCoreTag ? ((showDropTag && poolRewards.length > 1) ? "CORE // " : "CORE") : ""}
+            ${(showDropTag && poolRewards.length > 1) ? `${poolRewards.length}x Drops` : ""}`}
+              className={cls(classes.coreDropChip, { [classes.coreDrop]: token.whitelisted })}
+            />
+          )}
         </Box>
       </CardContent>
 
@@ -505,6 +529,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "#003340",
     padding: theme.spacing(2, 4),
     borderRadius: theme.spacing(1.5),
+    "&.MuiButtonBase-root": {
+      "&:hover": {
+        opacity: 0.8,
+        backgroundColor: "#FFDF6B",
+      }
+    }
   },
   selectedCard: {
     backgroundColor: "#DEFFFF18",
@@ -539,7 +569,30 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   coreDrop: {
     backgroundColor: "#7B61FF",
-  }
+  },
+  more: {
+    fontSize: 12,
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+  },
+  rewardPopper: {
+    "& .MuiPaper-root": {
+      backgroundColor: theme.palette.background.default,
+      borderRadius: "12px",
+      border: theme.palette.border,
+      overflow: "hidden",
+      marginTop: 8,
+      padding: theme.spacing(1.5),
+    },
+    "& .MuiTypography-root": {
+      lineHeight: 1.6,
+      fontWeight: 500
+    }
+  },
+  halfOpacity: {
+    opacity: 0.5
+  },
 }));
 
 export default PoolInfoCard;

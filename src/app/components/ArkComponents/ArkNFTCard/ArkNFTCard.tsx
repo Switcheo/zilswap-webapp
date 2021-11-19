@@ -207,7 +207,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   {/* to truncate if too long? */}
                   <Typography className={classes.title}>
                     {token.name}
-                    <VerifiedBadge className={classes.verifiedBadge} />
+                    {token.collection.verifiedAt && (<VerifiedBadge className={classes.verifiedBadge} />)}
                   </Typography>
                   {bestAsk && (
                     <Typography className={classes.title}>
@@ -271,7 +271,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                 >
                   <Typography className={classes.dialogBody}>
                     {token.name}
-                    <VerifiedBadge className={classes.verifiedBadge} />
+                    {token.collection.verifiedAt && (<VerifiedBadge className={classes.verifiedBadge} />)}
                   </Typography>
                 </Box>
               </Fragment>

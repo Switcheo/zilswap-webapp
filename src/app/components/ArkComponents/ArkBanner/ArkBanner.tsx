@@ -39,6 +39,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   avatar: {
     height: "130px !important",
     width: "130px !important",
+    backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF",
     border: `5px solid ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"
       }`,
   },
