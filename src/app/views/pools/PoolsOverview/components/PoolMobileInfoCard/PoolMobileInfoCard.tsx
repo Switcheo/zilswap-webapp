@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Box, Button, Card, CardContent, CardProps, Chip, Divider, Popover } from "@material-ui/core";
+import { Box, Button, Card, CardContent, CardProps, Chip, Divider, Popover, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { ArrowDropUp, ArrowDropDown, Visibility } from "@material-ui/icons";
 import cls from "classnames";
@@ -74,9 +74,9 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
 
     return {
       poolRewards,
-      roi: roiPerDay.isZero() || roiPerDay.isNaN() ? "-" : `${roiPerDay.toFormat()}%`,
-      apr: apr.isZero() || apr.isNaN() ? '-' : `${toHumanNumber(apr, 1)}%`,
-      preStartDistributors
+      roi: roiPerDay.isZero() || roiPerDay.isNaN() ? "-" : `${roiPerDay.dp(2).toFormat()}%`,
+      apr: apr.isZero() || apr.isNaN() ? '-' : `${apr.dp(2).toFormat()}%`,
+      preStartDistributors,
     };
   }, [rewardsState.rewardsByPool, rewardsState.distributors, token, usdValues]);
 
@@ -141,7 +141,7 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
             }
           </Text>
 
-          {poolRewards.length > 0 && (
+          {poolRewards.length > 2 && (
             <Box display="flex" justifyContent="flex-end">
               <Button onClick={(ev) => openRewards(ev)} className={classes.moreText}>More&nbsp;<Visibility fontSize="small" /></Button>
               <Popover
@@ -160,11 +160,16 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
                   })
                   .map(([address, rewards]) => {
                     return (
-                      <Text variant="body2" color="textPrimary" className={classes.currencyReward}>
+                      <Text key={address} variant="body2" color="textPrimary" className={classes.currencyReward}>
                         <Text className={classes.textColoured}>
                           {rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO)
                             .shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}
-                        </Text>&nbsp;{rewards[0].rewardToken.symbol}&nbsp;<Text className={classes.halfOpacity}>{(rewards[0].rewardToken.isZil || rewards[0].rewardToken.isZwap) ? "by ZilSwap" : `by ${rewards[0].rewardToken.symbol}`}</Text>
+                        </Text>
+                        {" "}
+                        {rewards[0].rewardToken.symbol}
+                        <Text marginLeft={1} className={classes.halfOpacity}>
+                          {(rewards[0].rewardToken.isZil || rewards[0].rewardToken.isZwap) ? "by ZilSwap" : `by ${rewards[0].rewardToken.symbol}`}
+                        </Text>
                       </Text>
                     )
                   })}
@@ -174,7 +179,12 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
         </KeyValueDisplay>
 
         <KeyValueDisplay wrapLabel={true} kkey="APR" ValueComponent="span" mt={2}>
-          <Text variant="h4" className={classes.flexText}><Text variant="h4" >{apr}</Text><Text variant="h4" className={classes.boldless}>(Daily ROI {roi})</Text></Text>
+          <Text variant="h4" className={classes.flexText}>
+            <Box marginRight={1}>
+              <Typography variant="h4">{apr}</Typography>
+            </Box>
+            <Typography variant="h4" className={classes.boldless}>(Daily ROI {roi})</Typography>
+          </Text>
         </KeyValueDisplay>
 
 

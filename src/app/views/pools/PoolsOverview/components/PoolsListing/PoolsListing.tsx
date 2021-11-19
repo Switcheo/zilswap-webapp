@@ -358,7 +358,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
           </Grid>
         ))}
         {tabValue === 4 && allTokens.slice(0, limits[currentLimit]).map((token) => (
-          <Grid item xs={12} >
+          <Grid key={token.address} item xs={12} >
             <Hidden smDown>
               <PoolInfoCard token={token} />
             </Hidden>

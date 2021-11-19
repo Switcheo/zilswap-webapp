@@ -153,7 +153,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
                       })
                       .map(([address, rewards]) => {
                         return (
-                          <Text variant="body2" color="textPrimary" className={classes.currencyReward}>
+                          <Text key={address} variant="body2" color="textPrimary" className={classes.currencyReward}>
                             <Text className={classes.textColoured}>{rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO).shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}</Text>&nbsp;{rewards[0].rewardToken.symbol}
                           </Text>
                         )
@@ -164,7 +164,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
                     -
                   </Text>
               }
-              {poolRewards.length > 0 && (<Text onClick={(ev) => openRewards(ev)} className={classes.more}>More&nbsp;<Visibility fontSize="small" /></Text>)}
+              {poolRewards.length > 2 && (<Text onClick={(ev) => openRewards(ev)} className={classes.more}>More&nbsp;<Visibility fontSize="small" /></Text>)}
               <Popover
                 open={Boolean(rewardsAnchor)}
                 anchorEl={rewardsAnchor}
@@ -181,7 +181,7 @@ const PoolInfoCard: React.FC<Props> = (props: Props) => {
                   })
                   .map(([address, rewards]) => {
                     return (
-                      <Text variant="body2" color="textPrimary" className={classes.currencyReward}>
+                      <Text key={address} variant="body2" color="textPrimary" className={classes.currencyReward}>
                         <Text className={classes.textColoured}>
                           {rewards.reduce((acc, reward) => acc.plus(reward.amountPerEpoch), BIG_ZERO)
                             .shiftedBy(-rewards[0].rewardToken.decimals).toFormat(2)}

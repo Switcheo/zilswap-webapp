@@ -66,8 +66,8 @@ const DrawerComp: React.FC<Props> = (props: Props) => {
 
       <Box className={classes.content}>
         <List>
-          {drawerInfos.map((info) =>
-            <Fragment>
+          {drawerInfos.map((info, index) =>
+            <Fragment key={index}>
               {(!info.connectedOnly || (info.connectedOnly && walletState.wallet)) && (
                 <ListItem
                   button

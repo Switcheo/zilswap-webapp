@@ -168,8 +168,8 @@ const TopBar: React.FC<Props> = (
           <Grid container>
             <Box className={classes.brandBox}>{renderLogo}</Box>
             <Box className={classes.navLinkBox}>
-              {tabConfig.map(tab => (
-                <Fragment>
+              {tabConfig.map((tab, index) => (
+                <Fragment key={index}>
                   {(!tab.connectedOnly || (tab.connectedOnly && walletState.wallet)) && <Button
                     component={Link}
                     to={tab.navLink}
