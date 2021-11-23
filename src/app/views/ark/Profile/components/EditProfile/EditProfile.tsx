@@ -388,12 +388,12 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
                 <Typography className={classes.social}>SOCIALS</Typography>
                 <ArkInput
-                  startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
+                  startAdornment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
                   error={errors.twitterHandle} value={inputValues.twitterHandle} label="Twitter"
                   onValueChange={(value) => updateInputs("twitterHandle")(value)}
                 />
                 <ArkInput
-                  startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
+                  startAdornment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
                   error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram"
                   onValueChange={(value) => updateInputs("instagramHandle")(value)} />
                 <ArkInput

@@ -88,6 +88,11 @@ const routes: RouteConfig[] = [
         component: lazy(() => import("./views/ark/Profile/components/EditProfile")),
       },
       {
+        path: "/ark/mint",
+        exact: true,
+        component: lazy(() => import("./views/ark/Mint")),
+      },
+      {
         component: () => <Redirect to="/ark/discover"></Redirect>,
       },
     ],
