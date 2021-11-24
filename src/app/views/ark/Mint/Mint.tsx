@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { AppTheme } from "app/theme/types";
 import ArkPage from "app/layouts/ArkPage";
 import { getWallet } from "app/saga/selectors";
-import { CollectionDetail } from "./components";
+import { CollectionDetail, NftUpload } from "./components";
 
 export type CollectionInputs = {
   collectionName: string;
@@ -38,7 +38,10 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     <ArkPage {...rest}>
       <Container className={cls(classes.root, className)} maxWidth="sm">
         {wallet && (
-          <CollectionDetail setInputValues={setInputValues} inputValues={inputValues} />
+          <Box>
+            <CollectionDetail setInputValues={setInputValues} inputValues={inputValues} />
+            <NftUpload />
+          </Box>
         )}
         {!wallet && (
           <Box mt={12} display="flex" justifyContent="center">

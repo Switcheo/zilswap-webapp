@@ -1,14 +1,17 @@
 import React, { useState } from "react";
+import cls from "classnames";
 import { Box, BoxProps, IconButton, Tooltip, Typography } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
+import PanoramaIcon from '@material-ui/icons/Panorama';
+import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { AppTheme } from "app/theme/types";
 import { TWITTER_REGEX, INSTAGRAM_REGEX } from "app/utils/constants";
 import { ArkInput } from "app/components";
-import { hexToRGBA } from "app/utils";
+import { hexToRGBA, SimpleMap } from "app/utils";
 import { CollectionInputs } from "../../Mint";
 
 interface Props extends BoxProps {
@@ -32,11 +35,45 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
     twitterHandle: "",
     instagramHandle: "",
     telegramLink: "",
-  })
+  });
+
+  const [displayImage, setDisplayImage] = useState<string | ArrayBuffer | null>(null);
+  const [bannerImage, setBannerImage] = useState<string | ArrayBuffer | null>(null);
+  const [uploadFile, setUploadFile] = useState<SimpleMap<File>>({});
+
+  const onHandleDisplayDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
+
+    if (!files.length) {
+      return setDisplayImage(null);
+    }
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setDisplayImage(reader.result);
+      setUploadFile({ ...uploadFile, display: files[0] });
+    }
+
+    reader.readAsDataURL(files[0]);
+  }
+
+  const onHandleBannerDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
+
+    if (!files.length) {
+      return setBannerImage(null);
+    }
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setBannerImage(reader.result);
+      setUploadFile({ ...uploadFile, banner: files[0] });
+    }
+
+    reader.readAsDataURL(files[0]);
+  }
 
   const onNavigateBack = () => {
     history.push(`/ark/discover`);
-  }
+  };
 
   const validateInput = (type: string, input: string) => {
     switch (type) {
@@ -124,6 +161,50 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
           </Tooltip>
         </Typography>
 
+        <Box display="flex" justifyContent="space-between">
+          {/* Display Picture */}
+          <Box>
+            <Dropzone accept='image/jpeg, image/png' onFileDialogCancel={() => setDisplayImage(null)} onDrop={onHandleDisplayDrop}>
+              {({ getRootProps, getInputProps }) => (
+                <Box>
+                  <div {...getRootProps()}>
+                    <input {...getInputProps()} />
+                      {!displayImage && (
+                        <Box className={classes.displayImage}>
+                          <Typography align="center" className={classes.displayText}>Drag and drop your image here.</Typography>
+                        </Box>
+                      )}
+                      {displayImage && (<img alt="" className={classes.displayImage} src={displayImage?.toString() || ""} />)}
+                  </div>
+                </Box>
+              )}
+            </Dropzone>
+          </Box>
+
+          {/* Banner */}
+          <Box flex={.95}>
+            <Dropzone accept='image/jpeg, image/png' onFileDialogCancel={() => setBannerImage(null)} onDrop={onHandleBannerDrop}>
+              {({ getRootProps, getInputProps }) => (
+                <Box className={classes.dropBox}>
+                  <div {...getRootProps()}>
+                    <input {...getInputProps()} />
+                    {!bannerImage && (
+                      <Box display="flex" flexDirection="column" alignItems="center">
+                        <PanoramaIcon fontSize="large" />
+                        <Typography>Drop a banner image here.</Typography>
+                      </Box>
+                    )}
+                    {bannerImage && <img alt="" className={classes.bannerImage} src={bannerImage?.toString() || ""} />}
+                  </div>
+                </Box>
+              )}
+            </Dropzone>
+          </Box>
+        </Box>
+
+        <Typography className={cls(classes.instruction, classes.footerInstruction)}>
+          Recommended format: PNG/JPEG &nbsp;|&nbsp; Display Picture size: 250 (w) x 250 (h) px &nbsp;|&nbsp; Banner size: 1300 (w) x 250 (h) px
+        </Typography>
       </Box>
 
       {/* Collection Name */}
@@ -184,10 +265,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    minWidth: 400,
-  },
-  connectionText: {
-    margin: theme.spacing(1),
+    width: "100%",
   },
   backButton: {
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
@@ -275,7 +353,49 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   infoIcon: {
     verticalAlign: "text-top",
     fontSize: "1rem",
-  }
+  },
+  displayImage: {
+    height: 110,
+    width: 110,
+    border: `2px dotted ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"}`,
+    borderRadius: "50%",
+    backgroundColor: theme.palette.type === "dark" ? "#DEFFFF17" : "#6BE1FF33",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+  },
+  displayText: {
+    padding: theme.spacing(2),
+  },
+  dropBox: {
+    borderRadius: 12,
+    border: `2px dotted ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"}`,
+    backgroundColor: theme.palette.type === "dark" ? "#DEFFFF17" : "#6BE1FF33",
+    overflow: "hidden",
+    cursor: "pointer",
+    height: "110px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  bannerImage: {
+    backgroundRepeat: "no-repeat",
+    backgroundPositionY: "100%",
+    backgroundPositionX: "center",
+    borderRadius: 5,
+    backgroundColor: "#29475A",
+    width: "100%",
+    height: "inherit",
+    objectFit: "cover",
+    cursor: "pointer",
+  },
+  footerInstruction: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(2),
+    color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
+    fontWeight: 600,
+    fontSize: 10,
+  },
 }));
 
 export default CollectionDetail;
