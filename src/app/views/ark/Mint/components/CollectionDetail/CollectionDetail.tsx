@@ -1,11 +1,14 @@
 import React, { useState } from "react";
-import { Box, BoxProps, IconButton, Typography } from "@material-ui/core";
+import { Box, BoxProps, IconButton, Tooltip, Typography } from "@material-ui/core";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import InfoIcon from '@material-ui/icons/InfoOutlined';
 import { AppTheme } from "app/theme/types";
 import { TWITTER_REGEX, INSTAGRAM_REGEX } from "app/utils/constants";
 import { ArkInput } from "app/components";
+import { hexToRGBA } from "app/utils";
 import { CollectionInputs } from "../../Mint";
 
 interface Props extends BoxProps {
@@ -19,6 +22,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
   const { children, className, inputValues, setInputValues, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
+  const [currentSelection, setCurrentSelection] = useState<string>("create");
   const [errors, setErrors] = useState({
     collectionName: "",
     description: "",
@@ -90,6 +94,39 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         <Typography className={classes.pageHeader}>1. Set up Collection</Typography>
       </Box>
 
+      {/* Collection */}
+      <Box className={classes.collectionBox}>
+        <Typography className={classes.header}>
+          COLLECTION
+        </Typography>
+        <Typography className={classes.instruction}>Create a new collection or select from your existing collections.</Typography>
+        <ToggleButtonGroup className={classes.buttonGroup} exclusive value={currentSelection} onChange={(event, newSelection) => {setCurrentSelection(newSelection)}}>
+          <ToggleButton value="create" className={classes.collectionButton}>
+            <Typography>Create Collection</Typography>
+          </ToggleButton>
+
+          <ToggleButton value="select" className={classes.collectionButton}>
+            <Typography>Select Collection</Typography>
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+
+      {/* Display Picture & Banner */}
+      <Box className={classes.displayBox}>
+        <Typography className={classes.header}>
+          DISPLAY PICTURE & BANNER
+        </Typography>
+        <Typography className={classes.instruction}>
+          Customise your collection page with a display picture and banner.
+          {" "}
+          <Tooltip placement="top" title="Note that image uploaded will be applied to both dark and light themes on ARK.">
+            <InfoIcon className={classes.infoIcon} />
+          </Tooltip>
+        </Typography>
+
+      </Box>
+
+      {/* Collection Name */}
       <ArkInput
         className={classes.collectionName}
         placeholder="Beary Bare Bears" error={errors.collectionName} value={inputValues.collectionName}
@@ -97,6 +134,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         instruction="Give your collection an identifiable name." wordLimit={50}
       />
 
+      {/* Description */}
       <ArkInput
         className={classes.description}
         placeholder={DESCRIPTION_PLACEHOLDER} error={errors.description} value={inputValues.description}
@@ -104,6 +142,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         instruction="What makes your collection special?" wordLimit={300} multiline={true}
       />
 
+      {/* Royalties */}
       <ArkInput
         className={classes.royalties}
         endAdornment={<span>%</span>}
@@ -112,8 +151,9 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         instruction="Collect royalties of up to 8%."
       />
       
+      {/* Socials */}
       <Box className={classes.socialsBox}>
-        <Typography className={classes.header}>SOCIALS</Typography>
+        <Typography className={classes.socialsHeader}>SOCIALS</Typography>
         <ArkInput
           inline={true} placeholder="https://thebear.market" error={errors.websiteUrl} value={inputValues.websiteUrl}
           label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
@@ -166,7 +206,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 700,
   },
   collectionName: {
-    marginTop: theme.spacing(4),
+    marginTop: theme.spacing(3),
   },
   description: {
     marginTop: theme.spacing(1),
@@ -177,13 +217,65 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   socialsBox: {
     marginTop: theme.spacing(1),
   },
-  header: {
+  socialsHeader: {
     fontFamily: "'Raleway', sans-serif",
     fontSize: "13px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     fontWeight: 900,
     marginTop: theme.spacing(1)
   },
+  instruction: {
+    color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
+    fontWeight: 600,
+    fontSize: 12,
+    margin: theme.spacing(.4, 0),
+  },
+  header: {
+    fontFamily: "'Raleway', sans-serif",
+    fontSize: "13px",
+    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    fontWeight: 800,
+  },
+  collectionBox: {
+    marginTop: theme.spacing(4),
+  },
+  buttonGroup: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginTop: "6px",
+    "& .MuiToggleButtonGroup-groupedHorizontal:not(:last-child)": {
+      marginRight: theme.spacing(1),
+    },
+    "& .MuiToggleButtonGroup-groupedHorizontal:not(:first-child)": {
+      marginLeft: 0,
+      borderLeft: "1px solid rgba(0, 51, 64, 0.12)",
+    },
+    "& .MuiToggleButton-root.Mui-selected": {
+      backgroundColor: "#00FFB0",
+      "& .MuiTypography-root": {
+        color: "#003340",
+      }
+    }
+  },
+  collectionButton: {
+    borderRadius: "12px!important",
+    width: "100%",
+    padding: theme.spacing(2.5, 5),
+    backgroundColor: `rgba${theme.palette.type === "dark"
+    ? hexToRGBA("#DEFFFF", 0.1)
+    : hexToRGBA("#003340", 0.2)}`,
+    "& .MuiTypography-root": {
+      fontSize: "14px",
+      color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
+    }
+  },
+  displayBox: {
+    marginTop: theme.spacing(3),
+  },
+  infoIcon: {
+    verticalAlign: "text-top",
+    fontSize: "1rem",
+  }
 }));
 
 export default CollectionDetail;

@@ -23,7 +23,6 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const { wallet } = useSelector(getWallet);
-
   const [inputValues, setInputValues] = useState<CollectionInputs>({
     collectionName: "",
     description: "",
