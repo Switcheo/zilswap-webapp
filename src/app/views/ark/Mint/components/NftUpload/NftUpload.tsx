@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import cls from "classnames";
-import { Box, BoxProps, Tooltip, Typography } from "@material-ui/core";
+import { Box, BoxProps, Tooltip, Typography, Switch, FormControlLabel, FormGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from '@material-ui/icons/InfoOutlined';
-import PanoramaIcon from '@material-ui/icons/Panorama';
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { AppTheme } from "app/theme/types";
 import { ArkInput } from "app/components";
-import { SimpleMap } from "app/utils";
+import { hexToRGBA, SimpleMap } from "app/utils";
 
 interface Props extends BoxProps {
 
@@ -16,25 +15,10 @@ interface Props extends BoxProps {
 const NftUpload: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
-
-  const [displayImage, setDisplayImage] = useState<string | ArrayBuffer | null>(null);
+  const [hasAttributes, setHasAttributes] = useState<boolean>(true);
   const [bannerImage, setBannerImage] = useState<string | ArrayBuffer | null>(null);
   const [uploadFile, setUploadFile] = useState<SimpleMap<File>>({});
-
-  const onHandleDisplayDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
-
-    if (!files.length) {
-      return setDisplayImage(null);
-    }
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      setDisplayImage(reader.result);
-      setUploadFile({ ...uploadFile, display: files[0] });
-    }
-
-    reader.readAsDataURL(files[0]);
-  }
+  const [input, setInput] = useState<string>("");
 
   const onHandleBannerDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
 
@@ -77,7 +61,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 <div {...getRootProps()}>
                   <input {...getInputProps()} />
                   {!bannerImage && (
-                      <Typography>Drag and drop your files here.</Typography>
+                      <Typography className={classes.bannerText}>Drag and drop your files here.</Typography>
                   )}
                   {bannerImage && <img alt="" className={classes.bannerImage} src={bannerImage?.toString() || ""} />}
                 </div>
@@ -90,6 +74,78 @@ const NftUpload: React.FC<Props> = (props: Props) => {
           Recommended format: PNG/JPEG &nbsp;|&nbsp; Maximum number of files: 100 &nbsp;|&nbsp; Maximum size per file: 50MB
         </Typography>
       </Box>
+
+      {/* Attributes */}
+      <Box className={classes.attributesBox}>
+        <Box display="flex" justifyContent="space-between">
+          <Typography className={classes.header}>
+            ATTRIBUTES
+          </Typography>
+          <FormGroup row className={classes.formGroup}>
+            <FormControlLabel
+              control={
+                <Switch
+                  color="secondary"
+                  checked={hasAttributes}
+                  onChange={() => setHasAttributes(!hasAttributes)}
+                  {...rest}
+                  className={classes.switch}
+                />
+              }
+              label={
+                <Typography className={classes.switchLabel}>
+                  Turn this on if your collection has attributes.
+                </Typography>
+              }
+              labelPlacement="start"
+            />
+          </FormGroup>
+        </Box>
+        <Typography className={classes.instruction} style={{ marginTop: "-5px" }}>
+          Customise attributes according to your NFT collection.
+          {" "}
+          <Tooltip placement="top" title="Add all attributes that are a part of this colleciton, and assign them to specific NFTs below.">
+            <InfoIcon className={classes.infoIcon} />
+          </Tooltip>
+        </Typography>
+        
+        {hasAttributes && (
+          <TableContainer>
+            <Table>
+              <TableHead className={classes.tableHead}>
+                <TableRow>
+                  <TableCell align="left">
+                    <Typography>Attributes</Typography>
+                  </TableCell>
+                  <TableCell align="left">
+                    <Typography>Values</Typography>
+                  </TableCell>        
+                </TableRow>
+              </TableHead>
+              <TableBody className={classes.tableBody}>
+                <TableRow>
+                  <TableCell component="th" scope="row">
+                    <ArkInput
+                      value={input}
+                      onValueChange={(value) => setInput(value)}
+                    />
+                    {/* Text Field */}
+                  </TableCell>
+                  <TableCell>
+                    <ArkInput
+                      value={input}
+                      onValueChange={(value) => setInput(value)}
+                    />
+                    {/* Something */}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Box>
+
+      {/* Manage NFTs */}
     </Box>
   )
 };
@@ -127,9 +183,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   dropBox: {
     borderRadius: 12,
-    border: `2px dotted ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"}`,
-    backgroundColor: theme.palette.type === "dark" ? "#DEFFFF17" : "#6BE1FF33",
-    overflow: "hidden",
+    border: theme.palette.border,
+    background: theme.palette.type === "dark" ? "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)" : "transparent",
     cursor: "pointer",
     height: "110px",
     display: "flex",
@@ -147,12 +202,66 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     objectFit: "cover",
     cursor: "pointer",
   },
+  bannerText: {
+    color: theme.palette.primary.light,
+  },
   footerInstruction: {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(2),
     color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
     fontWeight: 600,
     fontSize: 10,
+  },
+  attributesBox: {
+    marginTop: theme.spacing(3),
+  },
+  switch: {
+    "& .MuiSwitch-track": {
+      position: "relative",
+      backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.5)}`,
+    },
+    "& .Mui-checked+.MuiSwitch-track": {
+      backgroundColor: `rgba${hexToRGBA("#00FFB0", 1)}`,
+    },
+    "& .MuiSwitch-thumb": {
+      backgroundColor: "#0D1B24",
+      width: 14,
+      height: 14,
+    },
+    "& .Mui-checked": {
+      "& .MuiSwitch-thumb": {
+        backgroundColor: "#FFFFFF",
+      },
+    },
+    "& .MuiSwitch-switchBase": {
+      padding: "6px",
+      top: "6px",
+      left: "6px",
+    },
+  },
+  switchLabel: {
+    color: theme.palette.primary.light,
+  },
+  formGroup: {
+    marginTop: "-12.5px",
+  },
+  tableHead: {
+    "& th.MuiTableCell-root": {
+      padding: theme.spacing(1, 0),
+      borderColor: theme.palette.type === "dark" ? "#29475A" : `rgba${hexToRGBA("#003340", 0.2)}`,
+    },
+    "& .MuiTypography-root": {
+      color: theme.palette.primary.light,
+    }
+  },
+  tableBody: {
+    "& .MuiTableCell-root": {
+      borderBottom: "none",
+      padding: theme.spacing(0),
+      "&:first-child": {
+        padding: theme.spacing(1, 1.5, 1, 0),
+      },
+    }
   },
 }));
 

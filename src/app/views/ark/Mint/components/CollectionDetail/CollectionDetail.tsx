@@ -6,7 +6,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
-import PanoramaIcon from '@material-ui/icons/Panorama';
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { AppTheme } from "app/theme/types";
 import { TWITTER_REGEX, INSTAGRAM_REGEX } from "app/utils/constants";
@@ -189,10 +188,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
                   <div {...getRootProps()}>
                     <input {...getInputProps()} />
                     {!bannerImage && (
-                      <Box display="flex" flexDirection="column" alignItems="center">
-                        <PanoramaIcon fontSize="large" />
-                        <Typography>Drop a banner image here.</Typography>
-                      </Box>
+                      <Typography className={classes.bannerText}>Drag and drop your banner here.</Typography>
                     )}
                     {bannerImage && <img alt="" className={classes.bannerImage} src={bannerImage?.toString() || ""} />}
                   </div>
@@ -357,20 +353,21 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   displayImage: {
     height: 110,
     width: 110,
-    border: `2px dotted ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"}`,
+    border: theme.palette.border,
+    background: theme.palette.type === "dark" ? "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)" : "transparent",
     borderRadius: "50%",
-    backgroundColor: theme.palette.type === "dark" ? "#DEFFFF17" : "#6BE1FF33",
     display: "flex",
     alignItems: "center",
     cursor: "pointer",
   },
   displayText: {
     padding: theme.spacing(2),
+    color: theme.palette.primary.light,
   },
   dropBox: {
     borderRadius: 12,
-    border: `2px dotted ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"}`,
-    backgroundColor: theme.palette.type === "dark" ? "#DEFFFF17" : "#6BE1FF33",
+    border: theme.palette.border,
+    background: theme.palette.type === "dark" ? "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)" : "transparent",
     overflow: "hidden",
     cursor: "pointer",
     height: "110px",
@@ -388,6 +385,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     height: "inherit",
     objectFit: "cover",
     cursor: "pointer",
+  },
+  bannerText: {
+    color: theme.palette.primary.light,
   },
   footerInstruction: {
     marginTop: theme.spacing(1),
