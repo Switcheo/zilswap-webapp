@@ -18,7 +18,7 @@ import { ReactComponent as MenuIcon } from "app/components/TopBar/menu.svg";
 import RewardsInfoButton from "app/layouts/RewardsInfoButton";
 import { AppTheme } from "app/theme/types";
 import { useRouter } from "app/utils";
-import ArkLogo from "./ark-logo.png";
+import ArkyLogo from "./logo-arky-small.png";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -144,14 +144,14 @@ const ArkTopBar: React.FC<
                 className={classes.brandButton}
                 disableRipple
               >
-                <img src={ArkLogo} alt="logo" className={classes.logo} />
+                <img src={ArkyLogo} alt="logo" className={classes.logo} />
               </Button>
             </Box>
           </Fragment>
         ) : (
           <Grid container>
             <Box className={classes.brandBox}>
-              <img src={ArkLogo} alt="logo" className={classes.logo} />
+              <img src={ArkyLogo} alt="logo" className={classes.logo} />
             </Box>
             <Box className={classes.navLinkBox}>
               <Button

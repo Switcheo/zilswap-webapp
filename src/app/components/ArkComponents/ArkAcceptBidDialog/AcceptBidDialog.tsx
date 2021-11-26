@@ -99,7 +99,7 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
           </CardContent>
         </Card>
         <FormControlLabel
-          label={<Typography className={classes.checkboxText}>By checking this box, I accept ARK’s terms and conditions.</Typography>}
+          label={<Typography className={classes.checkboxText}>By checking this box, I accept ARKY’s terms and conditions.</Typography>}
           control={
             <Checkbox
               icon={<UnChecked />} checkedIcon={<Checked />}

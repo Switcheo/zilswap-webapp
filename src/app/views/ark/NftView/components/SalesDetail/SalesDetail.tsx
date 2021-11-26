@@ -115,7 +115,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
 
         <Box mt={2} display="flex" flexDirection="column">
           <Box className={classes.infoBoxContainer}>
-            {/* <InfoBox topLabel="ARK Score" bottomLabel="Top 51.1%" tooltip={""} flex={1}>
+            {/* <InfoBox topLabel="ARKY Score" bottomLabel="Top 51.1%" tooltip={""} flex={1}>
               <Typography className={classes.rarityLabel} variant="h3">SUPAH RARE</Typography>
             </InfoBox> */}
 
