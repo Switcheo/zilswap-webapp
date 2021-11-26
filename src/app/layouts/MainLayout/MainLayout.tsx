@@ -52,7 +52,7 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     )
       return "bridge";
     else if (current.indexOf("/zilo") === 0) return "zilo";
-    else if (current.indexOf("/ark") === 0) return "ark";
+    else if (current.indexOf("/arky") === 0) return "ark";
     else return "main";
   }, [location.pathname]);
 

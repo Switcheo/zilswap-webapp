@@ -100,7 +100,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
 
   const onNavigateBack = () => {
-    history.push(`/ark/profile`);
+    history.push(`/arky/profile`);
   }
 
   const validateInput = (type: string, input: string) => {

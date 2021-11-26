@@ -133,7 +133,7 @@ const Collections: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
         {/* List of collections here */}
         {collections.map((collection) => (
-          <Link key={collection.address} to={`/ark/collections/${toBech32Address(collection.address)}`}>
+          <Link key={collection.address} to={`/arky/collections/${toBech32Address(collection.address)}`}>
             <Text marginTop={2} variant="h1">
               {collection.name}
             </Text>

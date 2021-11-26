@@ -72,7 +72,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
 
   const onSell = () => {
     if (!token.collection?.address) return;
-    history.push(`/ark/collections/${toBech32Address(token.collection.address)}/${token.tokenId}/sell`);
+    history.push(`/arky/collections/${toBech32Address(token.collection.address)}/${token.tokenId}/sell`);
   }
 
   const onBuy = () => {

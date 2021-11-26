@@ -140,7 +140,7 @@ const ArkTopBar: React.FC<
             <Box display="flex" justifyContent="center">
               <Button
                 component={Link}
-                to="/ark"
+                to="/arky"
                 className={classes.brandButton}
                 disableRipple
               >
@@ -156,7 +156,7 @@ const ArkTopBar: React.FC<
             <Box className={classes.navLinkBox}>
               <Button
                 component={Link}
-                to="/ark/discover"
+                to="/arky/discover"
                 className={classes.navLinkButton}
                 disableRipple
               >
@@ -164,8 +164,8 @@ const ArkTopBar: React.FC<
                   className={cls(classes.navLink, {
                     [classes.selectedMenu]:
                       (
-                        location.pathname.indexOf("/ark/discover") === 0
-                        || location.pathname.indexOf("/ark/collections") === 0
+                        location.pathname.indexOf("/arky/discover") === 0
+                        || location.pathname.indexOf("/arky/collections") === 0
                       ),
                   })}
                 >
@@ -174,14 +174,14 @@ const ArkTopBar: React.FC<
               </Button>
               <Button
                 component={Link}
-                to="/ark/profile"
+                to="/arky/profile"
                 className={classes.navLinkButton}
                 disableRipple
               >
                 <Typography
                   className={cls(classes.navLink, {
                     [classes.selectedMenu]:
-                      location.pathname.indexOf("/ark/profile") === 0,
+                      location.pathname.indexOf("/arky/profile") === 0,
                   })}
                 >
                   My Profile
