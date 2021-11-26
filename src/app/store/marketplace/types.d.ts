@@ -11,7 +11,7 @@ export interface MarketPlaceState {
   receivedBids?: any;
   bidded?: any;
   exchangeInfo?: ArkExchangeInfo;
-  collectionTraits: SimpleMap<TraitType>;
+  collectionTraits: SimpleMap<SimpleMap<TraitType>>;
   filteredTokensTraits: SimpleMap<TraitType>;
   pendingTxs: SimpleMap<ArkPendingTx>;
   bidsTable?: BidsTableInfo;
@@ -156,7 +156,10 @@ export interface Profile extends MarketplaceUser {
   email: string | null;
   profileImage?: {
     url: string;
-  }
+  };
+  bannerImage?: {
+    url: string;
+  };
 }
 
 export interface BiddedNft {
@@ -192,6 +195,7 @@ export interface CollectionFilter {
   owner: string | null;
   likedBy: string | null;
   pagination?: PaginationInfo;
+  infinite?: boolean;
 }
 
 export interface SaleType {
@@ -202,4 +206,8 @@ export interface SaleType {
 export interface ArkPendingTx {
   txHash: string;
   chequeHash: string;
+}
+
+export interface QueryNftResult extends PaginatedList<Nft> {
+  traits?: SimpleMap<TraitType>;
 }

@@ -93,7 +93,7 @@ export const WZIL_TOKEN_CONTRACT = {
 }
 
 export const BRIDGEABLE_WRAPPED_DENOMS = {
-  [Network.MainNet]: ["zusdt.z.3", "zeth.z.1", "zwbtc.z.1", "xcad.z.1"],
+  [Network.MainNet]: ["zusdt.z.3", "zeth.z.1", "zwbtc.z.1", "xcad.z.1", "port.e.1"],
   [Network.TestNet]: ["zil5.e", "zwap5.e", "eth6.z", "dai6.z"],
 }
 
@@ -132,6 +132,6 @@ export class PollIntervals {
 export const COLLECTION_NFT_PER_PAGE = 36;
 
 export const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
-export const USERNAME_REGEX = /^[A-Za-z][A-Za-z0-9_]{1,19}$/
-export const TWITTER_REGEX = /^[A-Za-z][A-Za-z0-9_]{1,14}$/
-export const INSTAGRAM_REGEX = /^[A-Za-z][A-Za-z0-9_]{1,29}$/
+export const USERNAME_REGEX = /^[A-Za-z0-9_]{1,19}$/
+export const TWITTER_REGEX = /^[A-Za-z0-9_]{1,14}$/
+export const INSTAGRAM_REGEX = /^[A-Za-z0-9_]{1,29}$/

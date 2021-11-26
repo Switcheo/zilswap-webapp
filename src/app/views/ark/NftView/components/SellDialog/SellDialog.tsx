@@ -430,7 +430,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 </Box>
                 <Box display="flex" flexDirection="column" alignItems="stretch">
                   <Text className={classes.stepLabel}>Confirm Listing</Text>
-                  <Text>Approve once, and never again. This step approves the token for trading and involves a one-off gas fee.</Text>
+                  <Text>Accept the signature request on your wallet so that we can begin processing your request.</Text>
                 </Box>
               </Box>
             </Box>
@@ -577,7 +577,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     justifyContent: "center",
     backgroundColor: "#223139",
     marginRight: 24,
-    position: "relative"
+    position: "relative",
+    maxWidth: 54.5,
+    minWidth: 53.75,
   },
   stepLabel: {
     fontWeight: "bold",
@@ -595,12 +597,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   stepBar: {
     position: "absolute",
     top: 50,
-    left: 23,
+    left: 25,
     height: 44,
     width: 6,
     backgroundColor: "#223139",
     backgroundImage: "linear-gradient(#6BE1FF, #223139)",
-    zIndex: 0
+    zIndex: 0,
   },
   stepBarFirstStepCompleted: {
     backgroundImage: "linear-gradient(#00FFB0, #6BE1FF)",

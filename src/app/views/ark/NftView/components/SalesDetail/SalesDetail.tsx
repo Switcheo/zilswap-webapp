@@ -14,6 +14,7 @@ import { Nft } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
 import { ArkClient } from "core/utilities";
+import { ReactComponent as VerifiedBadge } from "../assets/verified-badge.svg";
 import { InfoBox, PrimaryPrice, SecondaryPrice } from "./components";
 import { PriceInfo, PriceType } from "./types";
 
@@ -102,11 +103,9 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           <Box>
             <Typography className={classes.collectionName}>
               {token.collection?.name ?? ""}{" "}
-              {/* <VerifiedBadge className={classes.verifiedBadge} /> */}
+              {token.collection?.verifiedAt && <VerifiedBadge className={classes.verifiedBadge} />}
             </Typography>
-
-            {/* Token id */}
-            <Typography className={classes.tokenId}><span className={classes.hexSymbol}>#</span>{tokenId}</Typography>
+            {<Typography className={classes.tokenId}><span className={classes.hexSymbol}>{token.name?.replace(/#\s*\d+$/i, "")} #</span>{tokenId}</Typography>}
           </Box>
           <Box flexGrow={1} />
           <Box>
@@ -136,7 +135,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           <Box display="flex" className={cls(classes.buttonBox, { overlap: !!priceInfos.primaryPrice })}>
             {!isOwnToken && (
               <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onBid}>
-                Place Bid
+                Place Offer
               </FancyButton>
             )}
             {isOwnToken && token.bestAsk && (
@@ -314,7 +313,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   noPadding: {
     padding: 0,
     margin: 0,
-  }
+  },
+  verifiedBadge: {
+    marginLeft: "4px",
+    marginTop: 2,
+    width: "20px",
+    height: "20px",
+    verticalAlign: "text-top",
+    alignSelf: 'flex-start',
+    [theme.breakpoints.down('md')]: {
+      height: 14,
+      width: 14,
+    }
+  },
 }));
 
 export default SalesDetail;

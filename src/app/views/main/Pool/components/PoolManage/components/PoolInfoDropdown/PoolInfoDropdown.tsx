@@ -76,7 +76,7 @@ const PoolInfoDropdown: React.FC<Props> = (props: Props) => {
   const roiPerSecond = usdValues.rewardsPerSecond.dividedBy(usdValues.poolLiquidity);
   const secondsPerDay = 24 * 3600
   const roiPerDay = roiPerSecond.times(secondsPerDay).shiftedBy(2).decimalPlaces(2);
-  const roiLabel = roiPerDay.isZero() ? "-" : `${toHumanNumber(roiPerDay, 2)}%`
+  const roiLabel = roiPerDay.isZero() ? "-" : `${roiPerDay.dp(2).toFormat()}%`
 
   const onGotoAdd = () => {
     dispatch(actions.Pool.select({ token, network }));
