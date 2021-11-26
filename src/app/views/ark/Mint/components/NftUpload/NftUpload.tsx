@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import cls from "classnames";
-import { Box, BoxProps, Tooltip, Typography, Switch, FormControlLabel, FormGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import { Box, BoxProps, Tooltip, Typography, Switch, FormControlLabel, 
+  FormGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, OutlinedInput } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
@@ -61,7 +62,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 <div {...getRootProps()}>
                   <input {...getInputProps()} />
                   {!bannerImage && (
-                      <Typography className={classes.bannerText}>Drag and drop your files here.</Typography>
+                    <Typography className={classes.bannerText}>Drag and drop your files here.</Typography>
                   )}
                   {bannerImage && <img alt="" className={classes.bannerImage} src={bannerImage?.toString() || ""} />}
                 </div>
@@ -125,10 +126,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
               <TableBody className={classes.tableBody}>
                 <TableRow>
                   <TableCell component="th" scope="row">
-                    <ArkInput
-                      value={input}
-                      onValueChange={(value) => setInput(value)}
-                    />
+                    <OutlinedInput />
                     {/* Text Field */}
                   </TableCell>
                   <TableCell>
