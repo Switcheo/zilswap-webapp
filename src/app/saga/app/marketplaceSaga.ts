@@ -88,7 +88,11 @@ function* loadNftList() {
       const res = (yield call(arkClient.listTokens, newQuery)) as unknown as PaginatedList<Nft>;
 
       logger("load nft list", "result", res);
-      yield put(actions.MarketPlace.updateTokens(res));
+      if (filter?.infinite) {
+        yield put(actions.MarketPlace.appendTokens(res));
+      } else {
+        yield put(actions.MarketPlace.updateTokens(res));
+      }
     } else {
       if (!collectionAddress) return;
       if (wallet) {
