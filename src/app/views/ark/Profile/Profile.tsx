@@ -214,7 +214,7 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   return (
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
-        <ArkBanner uploadBanner={bannerUpload} bannerImage={isloading ? undefined : viewProfile?.bannerImage?.url} avatarImage={isloading ? undefined : viewProfile?.profileImage?.url} />
+        <ArkBanner uploadBanner={isConnectedUser ? bannerUpload : undefined} bannerImage={isloading ? undefined : viewProfile?.bannerImage?.url} avatarImage={isloading ? undefined : viewProfile?.profileImage?.url} />
 
         <Box className={classes.addressBox}>
           {address &&
