@@ -5,8 +5,9 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Box, Button, Paper } from "@material-ui/core";
+import { Box, Button, Paper, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { WarningRounded } from "@material-ui/icons";
 import cls from "classnames";
 import { PaperProps } from "material-ui";
 import { useDispatch, useSelector } from "react-redux";
@@ -234,7 +235,39 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
           )}
           <Box width={488}>
             <Paper {...{ ref: boxRef }} {...rest} className={classes.card}>
-              <Box>{children}</Box>
+              <div style={{
+                position: "relative",
+              }}>
+              <Box style={{
+                pointerEvents: "none",
+              }}>{children}</Box>
+              <div style={{
+                height: "100%",
+                width: "100%",
+                top: 0,
+                left: 0,
+                position: "absolute",
+                display: "flex",
+                flexDirection: "column",
+                background: "rgba(0,0,0,.7)",
+                borderRadius: 12,
+                justifyContent: "center",
+                alignItems: "center",
+                zIndex: 10000,
+              }}>
+                <WarningRounded />
+                <Box marginTop={1} />
+                <Typography align="center">
+                  Temporarily Suspended
+                  <br />
+                  Funds are SAFU
+                </Typography>
+                <Box marginTop={1} />
+                <Button href="https://twitter.com/ZilSwap" variant="outlined">
+                  Check Status
+                </Button>
+              </div>
+              </div>
             </Paper>
           </Box>
         </Box>

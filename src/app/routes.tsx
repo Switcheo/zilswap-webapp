@@ -5,30 +5,30 @@ import MainLayout from "./layouts/MainLayout";
 import ArkLayout from "./layouts/ArkLayout";
 
 const routes: RouteConfig[] = [
-  {
-    path: "/pools",
-    component: MainLayout,
-    routes: [
-      {
-        path: "/pools/overview",
-        exact: true,
-        component: lazy(() => import("./views/pools/PoolsOverview")),
-      },
-      {
-        path: "/pools/transactions",
-        exact: true,
-        component: lazy(() => import("./views/pools/PoolTransactions")),
-      },
-      {
-        path: "/pools/liquidity",
-        exact: true,
-        component: lazy(() => import("./views/pools/PoolLiquidity")),
-      },
-      {
-        component: () => <Redirect to="/pools/overview"></Redirect>,
-      },
-    ],
-  },
+  // {
+  //   path: "/pools",
+  //   component: MainLayout,
+  //   routes: [
+  //     {
+  //       path: "/pools/overview",
+  //       exact: true,
+  //       component: lazy(() => import("./views/pools/PoolsOverview")),
+  //     },
+  //     {
+  //       path: "/pools/transactions",
+  //       exact: true,
+  //       component: lazy(() => import("./views/pools/PoolTransactions")),
+  //     },
+  //     {
+  //       path: "/pools/liquidity",
+  //       exact: true,
+  //       component: lazy(() => import("./views/pools/PoolLiquidity")),
+  //     },
+  //     {
+  //       component: () => <Redirect to="/pools/overview"></Redirect>,
+  //     },
+  //   ],
+  // },
   {
     path: "/zilo",
     component: MainLayout,
