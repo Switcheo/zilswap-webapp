@@ -120,8 +120,9 @@ const PoolsOverviewBanner: React.FC<Props> = (props: Props) => {
   const updateCountdown = () => {
     if (rewardsState.distributors.length === 0) return
 
+    const distributors = rewardsState.distributors.filter(d => d.currentEpochEnd > 0);
     const currentTime = dayjs();
-    const endEpoch = dayjs.unix(Math.min(...rewardsState.distributors.map(d => d.currentEpochEnd)))
+    const endEpoch = dayjs.unix(Math.min(...distributors.map(d => d.currentEpochEnd)))
     const diffSeconds = Math.max(0, endEpoch.diff(currentTime, 'seconds'))
     const days = Math.floor(diffSeconds / 86400);
     const hours = Math.floor((diffSeconds % 86400) / 3600);

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, makeStyles } from '@material-ui/core';
-import { Link } from 'react-router-dom';
+import { Box, makeStyles, Link } from '@material-ui/core';
+import { Link as RouterLink, useRouteMatch } from 'react-router-dom';
 import { AppTheme } from 'app/theme/types';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -21,13 +21,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const ArkCTABanner = () => {
+  const isSwapPath = useRouteMatch("/swap");
+  const isPoolPath = useRouteMatch("/pool");
   const classes = useStyles();
 
-  return <Box className={classes.banner} maxWidth={800} margin="0 auto">
-    <Link to="/ark">
-      <img className={classes.bannerImage} src="/assets/202111-ark-webbanner.png" alt="" />
-    </Link>
-  </Box>
+  return (
+    <Box className={classes.banner} maxWidth={800} margin="0 auto">
+      {(isSwapPath || isPoolPath) ? (
+        <Link href="https://twitter.com/ZilSwap">
+          <img className={classes.bannerImage} src="/assets/202111-notice.png" alt="" />
+        </Link>
+      ) : (
+        <RouterLink to="/ark">
+          <img className={classes.bannerImage} src="/assets/202111-ark-webbanner.png" alt="" />
+        </RouterLink>
+      )}
+    </Box>
+  )
 }
 
 export default ArkCTABanner
