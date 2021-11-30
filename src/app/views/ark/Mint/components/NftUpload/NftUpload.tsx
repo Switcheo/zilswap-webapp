@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import cls from "classnames";
-import { Box, BoxProps, Tooltip, Typography, Switch, FormControlLabel, 
-  FormGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@material-ui/core";
+import { Box, BoxProps, Tooltip, Typography, Switch, FormControl, FormControlLabel, 
+  FormGroup, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import AddIcon from '@material-ui/icons/AddRounded';
+import ClearIcon from "@material-ui/icons/ClearRounded";
+import DoneIcon from "@material-ui/icons/DoneRounded";
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { AppTheme } from "app/theme/types";
 import { ArkChipInput, ArkInput } from "app/components";
@@ -23,15 +25,17 @@ const NftUpload: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const [hasAttributes, setHasAttributes] = useState<boolean>(true);
-  const [bannerImage, setBannerImage] = useState<string | ArrayBuffer | null>(null);
-  const [uploadFile, setUploadFile] = useState<SimpleMap<File>>({});
   const [attributes, setAttributes] = useState<AttributeData[]>([{
     name: "",
     values: [],
   }])
 
-  const onHandleNftDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
+  const [bannerImage, setBannerImage] = useState<string | ArrayBuffer | null>(null);
+  const [uploadFile, setUploadFile] = useState<SimpleMap<File>>({});
 
+  const [selectedValue, setSelectedValue] = useState<string>("");
+
+  const onHandleNftDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
     if (!files.length) {
       return setBannerImage(null);
     }
@@ -104,6 +108,14 @@ const NftUpload: React.FC<Props> = (props: Props) => {
 
     setAttributes(
       attributesCopy
+    );
+  }
+
+  const handleDeleteAttribute = (attributeToDelete: AttributeData) => {
+    const newAttributes = attributes.filter(attribute => attribute !== attributeToDelete);
+
+    setAttributes(
+      newAttributes
     );
   }
 
@@ -191,28 +203,32 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                   </TableCell>
                   <TableCell align="left">
                     <Typography>Values</Typography>
-                  </TableCell>        
+                  </TableCell>
+                  <TableCell width="5%"/>        
                 </TableRow>
               </TableHead>
               <TableBody className={classes.tableBody}>
-                {attributes.map((data: AttributeData, index: number) => {
+                {attributes.map((attribute: AttributeData, index: number) => {
                   return (
                     <TableRow key={index}>
                       <TableCell component="th" scope="row">
                         <ArkInput
                           placeholder="Name"
-                          value={data.name}
+                          value={attribute.name}
                           onValueChange={(value) => handleAttributeNameChange(index, value)}
                         />
                       </TableCell>
                       <TableCell>
                         <ArkChipInput
                           onKeyDown={(event) => handleKeyDown(index, event)}
-                          placeholder={data.values.length ? "" : 'Separate each value with a semi-colon ";"'}
-                          chips={data.values}
+                          placeholder={attribute.values.length ? "" : 'Separate each value with a semi-colon ";"'}
+                          chips={attribute.values}
                           onDelete={(value) => handleDeleteChip(index, value)}
                         />
                       </TableCell>
+                      <TableCell align="right">
+                        <ClearIcon className={classes.deleteAttributeIcon} fontSize="small" onClick={() => handleDeleteAttribute(attribute)} />
+                      </TableCell>                      
                     </TableRow>
                   )
                 })}
@@ -231,6 +247,86 @@ const NftUpload: React.FC<Props> = (props: Props) => {
       </Box>
 
       {/* Manage NFTs */}
+      <Box className={classes.manageNftBox}>
+        <Typography className={classes.header}>
+          MANAGE NFTs
+        </Typography>
+        <Typography className={classes.instruction}>
+          Edit names or assign attributes below.
+        </Typography>
+        <TableContainer>
+          <Table>
+            <TableHead className={classes.tableHead}>
+              <TableRow>
+                <TableCell align="left">
+                  <Typography>NFT</Typography>
+                </TableCell>
+                {/* no of attributes */}
+                {attributes.map((attribute: AttributeData) => {
+                  return (
+                    <TableCell>
+                      <Typography>{attribute.name}</Typography>
+                    </TableCell>
+                  )
+                })}
+              </TableRow>
+            </TableHead>
+            <TableBody className={classes.tableBody}>
+              {/* no. of NFTs uploaded */}
+              <TableRow>
+                <TableCell component="th" scope="row">
+
+                </TableCell>
+                {attributes.map((attribute: AttributeData) => {
+                  return (
+                    <TableCell>
+                      <FormControl className={classes.formControl} fullWidth>
+                        <Select
+                          MenuProps={{ 
+                            classes: { paper: classes.selectMenu },
+                            anchorOrigin: {
+                              vertical: "bottom",
+                              horizontal: "left"
+                            },
+                            transformOrigin: {
+                              vertical: "top",
+                              horizontal: "left"
+                            },
+                            getContentAnchorEl: null
+                          }}
+                          variant="outlined"
+                          value={selectedValue}
+                          onChange={(event) => setSelectedValue(event.target.value as string)}
+                          renderValue={(selectedValue) => {
+                            const selected = selectedValue as string;
+                            if (!selected.length) {
+                              return <Typography className={classes.selectPlaceholder}>Select</Typography>;
+                            }
+
+                            return selected;
+                          }}
+                          displayEmpty
+                        >
+                          {attribute.values.map((attributeValue: string) => {
+                            return (
+                              <MenuItem value={attributeValue}>
+                                {attributeValue}
+                                {selectedValue === attributeValue && (
+                                  <DoneIcon fontSize="small" />
+                                )}
+                              </MenuItem>
+                            )
+                          })}
+                        </Select>
+                      </FormControl>
+                    </TableCell>
+                  )
+                })}
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
     </Box>
   )
 };
@@ -365,6 +461,54 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         color: theme.palette.action?.selected,
       }
     },
+  },
+  manageNftBox: {
+    marginTop: theme.spacing(3),
+  },
+  formControl: {
+    "& .MuiSelect-root": {
+      borderRadius: 12,
+      backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#DEFFFF",
+      border: theme.palette.border,
+    },
+    "& .MuiOutlinedInput-root": {
+      border: "none",
+    },
+    "& .MuiInputBase-input": {
+      fontSize: "16px",
+      padding: "9.125px 12px",
+    },
+    "& .MuiSelect-icon": {
+      top: "calc(50% - 13px)",
+      fill: theme.palette.text?.primary,
+    },
+  },
+  selectMenu: {
+    marginTop: "6px",
+    backgroundColor: theme.palette.type === "dark" ? "#223139" : "D4FFF2",
+    "& .MuiListItem-root": {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      fontSize: "14px",
+    },
+    "& .MuiListItem-root.Mui-focusVisible": {
+      backgroundColor: theme.palette.type === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
+    },
+    "& .MuiListItem-root.Mui-selected": {
+      backgroundColor: "transparent",
+      color: "#00FFB0",
+    },
+  },
+  selectPlaceholder: {
+    fontSize: "16px",
+  },
+  deleteAttributeIcon: {
+    color: theme.palette.primary.light,
+    "&:hover": {
+      color: theme.palette.text?.primary,
+      cursor: "pointer",
+    }
   }
 }));
 
