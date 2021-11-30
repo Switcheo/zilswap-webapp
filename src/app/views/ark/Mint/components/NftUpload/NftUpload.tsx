@@ -1,13 +1,19 @@
 import React, { useState } from "react";
 import cls from "classnames";
 import { Box, BoxProps, Tooltip, Typography, Switch, FormControlLabel, 
-  FormGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, OutlinedInput } from "@material-ui/core";
+  FormGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from '@material-ui/icons/InfoOutlined';
+import AddIcon from '@material-ui/icons/AddRounded';
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { AppTheme } from "app/theme/types";
-import { ArkInput } from "app/components";
+import { ArkChipInput, ArkInput } from "app/components";
 import { hexToRGBA, SimpleMap } from "app/utils";
+
+export type AttributeData = {
+  name: string;
+  values: string[];
+}
 
 interface Props extends BoxProps {
 
@@ -19,9 +25,12 @@ const NftUpload: React.FC<Props> = (props: Props) => {
   const [hasAttributes, setHasAttributes] = useState<boolean>(true);
   const [bannerImage, setBannerImage] = useState<string | ArrayBuffer | null>(null);
   const [uploadFile, setUploadFile] = useState<SimpleMap<File>>({});
-  const [input, setInput] = useState<string>("");
+  const [attributes, setAttributes] = useState<AttributeData[]>([{
+    name: "",
+    values: [],
+  }])
 
-  const onHandleBannerDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
+  const onHandleNftDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
 
     if (!files.length) {
       return setBannerImage(null);
@@ -34,6 +43,68 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     }
 
     reader.readAsDataURL(files[0]);
+  }
+
+  const handleAttributeNameChange = (index: number, value: string) => {
+    const newAttribute = {
+      ...attributes[index],
+      name: value
+    }
+
+    const attributesCopy = attributes.slice();
+    attributesCopy[index] = newAttribute;
+
+    setAttributes(
+      attributesCopy
+    );
+  }
+
+  const handleAddAttribute = () => {
+    const newAttribute = {
+      name: "",
+      values: []
+    }
+
+    setAttributes(
+      [
+        ...attributes,
+        newAttribute
+      ]
+    );
+  }
+
+  const handleDeleteChip = (index: number, value: string) => {
+    const newAttribute = {...attributes[index]};
+    const attributeValues = newAttribute.values;
+    attributeValues.splice(attributeValues.indexOf(value), 1);
+    
+    const attributesCopy = attributes.slice();
+    attributesCopy[index] = newAttribute;
+
+    setAttributes(
+      attributesCopy
+    );
+  };
+
+  const handleKeyDown = (index: number, event: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    const newAttribute = {...attributes[index]};
+    const attributeValues = newAttribute.values;
+
+    const element = event.target as HTMLInputElement;
+    const newValue = element.value.trim();
+
+    if (attributeValues.includes(newValue)) {
+      return;
+    }
+
+    attributeValues.push(newValue);
+    
+    const attributesCopy = attributes.slice();
+    attributesCopy[index] = newAttribute;
+
+    setAttributes(
+      attributesCopy
+    );
   }
 
   return (
@@ -56,13 +127,13 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         </Typography>
 
         <Box>
-          <Dropzone accept='image/jpeg, image/png' onFileDialogCancel={() => setBannerImage(null)} onDrop={onHandleBannerDrop}>
+          <Dropzone accept='image/jpeg, image/png' onFileDialogCancel={() => setBannerImage(null)} onDrop={onHandleNftDrop}>
             {({ getRootProps, getInputProps }) => (
               <Box className={classes.dropBox}>
                 <div {...getRootProps()}>
                   <input {...getInputProps()} />
                   {!bannerImage && (
-                    <Typography className={classes.bannerText}>Drag and drop your files here.</Typography>
+                    <Typography className={classes.bannerText}>Drag and drop your folder(s) here.</Typography>
                   )}
                   {bannerImage && <img alt="" className={classes.bannerImage} src={bannerImage?.toString() || ""} />}
                 </div>
@@ -115,7 +186,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
             <Table>
               <TableHead className={classes.tableHead}>
                 <TableRow>
-                  <TableCell align="left">
+                  <TableCell align="left" width="30%">
                     <Typography>Attributes</Typography>
                   </TableCell>
                   <TableCell align="left">
@@ -124,21 +195,37 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 </TableRow>
               </TableHead>
               <TableBody className={classes.tableBody}>
-                <TableRow>
-                  <TableCell component="th" scope="row">
-                    <OutlinedInput />
-                    {/* Text Field */}
-                  </TableCell>
-                  <TableCell>
-                    <ArkInput
-                      value={input}
-                      onValueChange={(value) => setInput(value)}
-                    />
-                    {/* Something */}
-                  </TableCell>
-                </TableRow>
+                {attributes.map((data: AttributeData, index: number) => {
+                  return (
+                    <TableRow key={index}>
+                      <TableCell component="th" scope="row">
+                        <ArkInput
+                          placeholder="Name"
+                          value={data.name}
+                          onValueChange={(value) => handleAttributeNameChange(index, value)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <ArkChipInput
+                          onKeyDown={(event) => handleKeyDown(index, event)}
+                          placeholder={data.values.length ? "" : 'Separate each value with a semi-colon ";"'}
+                          chips={data.values}
+                          onDelete={(value) => handleDeleteChip(index, value)}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
+            <Button 
+              className={classes.addAttributeButton} 
+              variant="outlined" 
+              onClick={() => handleAddAttribute()} 
+              fullWidth
+            >
+              <AddIcon />
+            </Button>
           </TableContainer>
         )}
       </Box>
@@ -182,6 +269,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   dropBox: {
     borderRadius: 12,
     border: theme.palette.border,
+    borderStyle: "dashed",
     background: theme.palette.type === "dark" ? "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)" : "transparent",
     cursor: "pointer",
     height: "110px",
@@ -261,6 +349,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       },
     }
   },
+  addAttributeButton: {
+    backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#DEFFFF",
+    border: theme.palette.border,
+    borderStyle: "dashed",
+    borderRadius: 12,
+    height: "39.25px",
+    "& .MuiSvgIcon-root": {
+      color: theme.palette.primary.light,
+    },
+    "&:hover": {
+      backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#DEFFFF",
+      borderColor: theme.palette.action?.selected,
+      "& .MuiSvgIcon-root": {
+        color: theme.palette.action?.selected,
+      }
+    },
+  }
 }));
 
 export default NftUpload;

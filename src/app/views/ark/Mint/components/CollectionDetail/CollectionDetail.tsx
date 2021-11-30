@@ -7,6 +7,7 @@ import { useHistory } from "react-router";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
+import BigNumber from "bignumber.js";
 import { AppTheme } from "app/theme/types";
 import { TWITTER_REGEX, INSTAGRAM_REGEX } from "app/utils/constants";
 import { ArkInput } from "app/components";
@@ -81,14 +82,12 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         if (input.length > 300) return "Maximum of 300 characters";
         return ""
       case "discordLink":
-        if (input.length && input.length < 2) return "Minimum of 2 characters";
         if (input.length > 253) return "Maximum of 253 characters";
-        if (!input.match(/^(http|https):\/\//g)) return "Invalid URL, it should begin with http:// or https://";
+        if (input.indexOf("https://discord.gg/") !== 0) return "Invalid URL, it should begin with https://discord.gg/";
         return ""
       case "telegramLink":
-        if (input.length && input.length < 2) return "Minimum of 2 characters";
         if (input.length > 253) return "Maximum of 253 characters";
-        if (!input.match(/^(http|https):\/\//g)) return "Invalid URL, it should begin with http:// or https://";
+        if (input.indexOf("https://t.me/") !== 0) return "Invalid URL, it should begin with https://t.me/";
         return ""
       case "websiteUrl":
         if (input.length && input.length < 2) return "Minimum of 2 characters";
@@ -105,6 +104,10 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         if (input.length > 30) return "Maximum of 30 characters";
         if (input.length && !INSTAGRAM_REGEX.test(input)) return "Must only contain alphanumeric or underscore characters"
         return ""
+      case "royalties":
+        const value = Number(input);
+        if (value < 0 || value > 8 || isNaN(value)) return "Invalid amount"
+        return ""
       default: return "";
     }
   }
@@ -118,6 +121,17 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
       }
       const errorText = validateInput(type, newInput)
       setErrors({ ...errors, [type]: errorText })
+    }
+  }
+
+  const onEndEditRoyalties = () => {
+    let value = new BigNumber(inputValues["royalties"]);
+    
+    if (value.isNaN() || value.isZero()) {
+      setInputValues({
+        ...inputValues,
+        "royalties": "0"
+      })
     }
   }
 
@@ -221,6 +235,8 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
       {/* Royalties */}
       <ArkInput
+        type="number"
+        onInputBlur={onEndEditRoyalties}
         className={classes.royalties}
         endAdornment={<span>%</span>}
         placeholder="2.5" error={errors.royalties} value={inputValues.royalties}
