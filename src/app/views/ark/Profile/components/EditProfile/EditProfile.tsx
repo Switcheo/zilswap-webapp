@@ -515,7 +515,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: 110,
     border: `5px solid ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"}`,
     borderRadius: "50%",
-    backgroundColor: "#DEFFFF",
+    backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF",
     alignSelf: "center"
   },
   uploadInput: {
