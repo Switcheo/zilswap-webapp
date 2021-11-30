@@ -138,7 +138,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiChip-label": {
       paddingLeft: "8px",
       paddingRight: "8px",
-    }
+    },
+    "&:focus": {
+      background: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "rgba(107, 225, 255, 0.2)",
+    },
+    marginRight: "4px",
   },
   input: {
     maxWidth: "386.406px",
@@ -149,7 +153,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   deleteIcon: {
     padding: "3px",
-    margin: "0 px 0 -6px",
+    margin: "0 2px 0 -6px",
     color: theme.palette.text?.primary,
   }
 }));
