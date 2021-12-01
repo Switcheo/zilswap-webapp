@@ -108,6 +108,12 @@ export const TRANSAK_API_KEY = {
   PRODUCTION: process.env.REACT_APP_TRANSAK_PROD,
 }
 
+export const TIME_UNIX_PAIRS: { [interval: string]: number } = {
+  'hour': 3600,
+  'day': 86400,
+  'week': 604800,
+}
+
 // ms
 export class PollIntervals {
   public static TokenState = 30000;
