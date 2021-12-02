@@ -26,12 +26,16 @@ const BootstrapInput = withStyles(theme => ({
       borderColor: theme.palette.action.selected,
     },
     transition: theme.transitions.create(['border-color', 'box-shadow']),
-    padding: '5px 12px',
+    padding: "5px 12px",
+    maxWidth: "386.406px",
+    minHeight: "39.25px",
+    display: "flex",
+    flexWrap: "wrap",
   },
   input: {
-    position: 'relative',
+    position: "relative",
     fontSize: 12,
-    width: '100%',
+    width: "100%",
   },
 }))(InputBase);
 
@@ -81,7 +85,7 @@ const ArkChipInput: React.FC<Props> = (props: Props) => {
                 )
               })
             }
-            onFocus={() => setOnFocus(true)} onBlur={onBlur} className={cls(classes.input, { [classes.focused]: onFocus && !error, [classes.error]: error && !!inputValue })}
+            onFocus={() => setOnFocus(true)} onBlur={onBlur} className={cls({ [classes.focused]: onFocus && !error, [classes.error]: error && !!inputValue, [classes.flexBasis]: chips.length })}
             value={inputValue} onChange={(event) => setInputValue(event.target.value)} onKeyDown={(event) => handleKeyDown(event)} fullWidth defaultValue="react-bootstrap" {...rest} />
         <FormHelperText className={cls({ [classes.errorText]: true })} >{error ? error : " "}</FormHelperText>
       </FormControl>
@@ -134,6 +138,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   chip: {
     height: "22px",
+    marginBottom: "2px",
     background: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "rgba(107, 225, 255, 0.2)",
     "& .MuiChip-label": {
       paddingLeft: "8px",
@@ -144,17 +149,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     marginRight: "4px",
   },
-  input: {
-    maxWidth: "386.406px",
-    overflowX: "auto",
-    "&::-webkit-scrollbar": {
-      display: "none"
-    },
-  },
   deleteIcon: {
     padding: "3px",
     margin: "0 2px 0 -6px",
     color: theme.palette.text?.primary,
+  },
+  flexBasis: {
+    "& .MuiInputBase-input": {
+      flexBasis: "content",
+    }
   }
 }));
 

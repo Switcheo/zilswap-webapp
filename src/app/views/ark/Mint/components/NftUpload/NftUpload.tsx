@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import cls from "classnames";
 import { Box, BoxProps, Tooltip, Typography, Switch, FormControl, FormControlLabel, 
   FormGroup, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@material-ui/core";
@@ -33,6 +33,8 @@ const NftUpload: React.FC<Props> = (props: Props) => {
   const [bannerImage, setBannerImage] = useState<string | ArrayBuffer | null>(null);
   const [uploadFile, setUploadFile] = useState<SimpleMap<File>>({});
 
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+
   const [selectedValue, setSelectedValue] = useState<string>("");
 
   const onHandleNftDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
@@ -47,6 +49,26 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     }
 
     reader.readAsDataURL(files[0]);
+  }
+
+  const onHandleFileDrop = (files: File[], rejection: FileRejection[], dropEvent: DropEvent) => {
+    if (!files.length) {
+      return;
+    }
+
+    setUploadedFiles([
+      ...uploadedFiles,
+      ...files
+    ]);
+
+    // const reader = new FileReader();
+
+    // reader.onloadend = () => {
+    //   setBannerImage(reader.result);
+    //   setUploadFile({ ...uploadFile, banner: files[0] });
+    // }
+
+    // reader.readAsDataURL(files[0]);
   }
 
   const handleAttributeNameChange = (index: number, value: string) => {
@@ -139,15 +161,24 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         </Typography>
 
         <Box>
-          <Dropzone accept='image/jpeg, image/png' onFileDialogCancel={() => setBannerImage(null)} onDrop={onHandleNftDrop}>
+          <Dropzone accept='image/jpeg, image/png' onFileDialogCancel={() => {}} onDrop={onHandleFileDrop}>
             {({ getRootProps, getInputProps }) => (
               <Box className={classes.dropBox}>
                 <div {...getRootProps()}>
                   <input {...getInputProps()} />
-                  {!bannerImage && (
+                  {!!!uploadedFiles.length && (
                     <Typography className={classes.bannerText}>Drag and drop your folder(s) here.</Typography>
                   )}
-                  {bannerImage && <img alt="" className={classes.bannerImage} src={bannerImage?.toString() || ""} />}
+                  {!!uploadedFiles.length && (
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <Box className={classes.progressBox}>
+
+                      </Box>
+                      <Box>
+                        <Typography className={classes.bannerText}>Drag and drop your files here.</Typography>
+                      </Box> 
+                    </Box>
+                  )}
                 </div>
               </Box>
             )}
@@ -211,7 +242,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 {attributes.map((attribute: AttributeData, index: number) => {
                   return (
                     <TableRow key={index}>
-                      <TableCell component="th" scope="row">
+                      <TableCell component="th" scope="row" style={{ verticalAlign: "top" }}>
                         <ArkInput
                           placeholder="Name"
                           value={attribute.name}
@@ -254,7 +285,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         <Typography className={classes.instruction}>
           Edit names or assign attributes below.
         </Typography>
-        <TableContainer>
+        <TableContainer className={classes.nftTableContainer} style={{ maxWidth: "552px", maxHeight: "700px" }}>
           <Table>
             <TableHead className={classes.tableHead}>
               <TableRow>
@@ -273,56 +304,58 @@ const NftUpload: React.FC<Props> = (props: Props) => {
             </TableHead>
             <TableBody className={classes.tableBody}>
               {/* no. of NFTs uploaded */}
-              <TableRow>
-                <TableCell component="th" scope="row">
-
-                </TableCell>
-                {attributes.map((attribute: AttributeData) => {
-                  return (
-                    <TableCell>
-                      <FormControl className={classes.formControl} fullWidth>
-                        <Select
-                          MenuProps={{ 
-                            classes: { paper: classes.selectMenu },
-                            anchorOrigin: {
-                              vertical: "bottom",
-                              horizontal: "left"
-                            },
-                            transformOrigin: {
-                              vertical: "top",
-                              horizontal: "left"
-                            },
-                            getContentAnchorEl: null
-                          }}
-                          variant="outlined"
-                          value={selectedValue}
-                          onChange={(event) => setSelectedValue(event.target.value as string)}
-                          renderValue={(selectedValue) => {
-                            const selected = selectedValue as string;
-                            if (!selected.length) {
-                              return <Typography className={classes.selectPlaceholder}>Select</Typography>;
-                            }
-
-                            return selected;
-                          }}
-                          displayEmpty
-                        >
-                          {attribute.values.map((attributeValue: string) => {
-                            return (
-                              <MenuItem value={attributeValue}>
-                                {attributeValue}
-                                {selectedValue === attributeValue && (
-                                  <DoneIcon fontSize="small" />
-                                )}
-                              </MenuItem>
-                            )
-                          })}
-                        </Select>
-                      </FormControl>
+              {uploadedFiles.map((file) => {
+                return (
+                  <TableRow>
+                    <TableCell component="th" scope="row">
                     </TableCell>
-                  )
-                })}
-              </TableRow>
+                    {attributes.map((attribute: AttributeData) => {
+                      return (
+                        <TableCell>
+                          <FormControl className={classes.formControl} fullWidth>
+                            <Select
+                              MenuProps={{ 
+                                classes: { paper: classes.selectMenu },
+                                anchorOrigin: {
+                                  vertical: "bottom",
+                                  horizontal: "left"
+                                },
+                                transformOrigin: {
+                                  vertical: "top",
+                                  horizontal: "left"
+                                },
+                                getContentAnchorEl: null
+                              }}
+                              variant="outlined"
+                              value={selectedValue}
+                              onChange={(event) => setSelectedValue(event.target.value as string)}
+                              renderValue={(selectedValue) => {
+                                const selected = selectedValue as string;
+                                if (!selected.length) {
+                                  return <Typography className={classes.selectPlaceholder}>Select</Typography>;
+                                }
+
+                                return selected;
+                              }}
+                              displayEmpty
+                            >
+                              {attribute.values.map((attributeValue: string) => {
+                                return (
+                                  <MenuItem value={attributeValue}>
+                                    {attributeValue}
+                                    {selectedValue === attributeValue && (
+                                      <DoneIcon fontSize="small" />
+                                    )}
+                                  </MenuItem>
+                                )
+                              })}
+                            </Select>
+                          </FormControl>
+                        </TableCell>
+                      )
+                    })}
+                  </TableRow>
+              )})}
             </TableBody>
           </Table>
         </TableContainer>
@@ -368,7 +401,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderStyle: "dashed",
     background: theme.palette.type === "dark" ? "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)" : "transparent",
     cursor: "pointer",
-    height: "110px",
+    minHeight: "110px",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -439,10 +472,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   tableBody: {
     "& .MuiTableCell-root": {
       borderBottom: "none",
-      padding: theme.spacing(0),
-      "&:first-child": {
-        padding: theme.spacing(1, 1.5, 1, 0),
-      },
+      padding: theme.spacing(1, 1, 0, 0),
     }
   },
   addAttributeButton: {
@@ -451,6 +481,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderStyle: "dashed",
     borderRadius: 12,
     height: "39.25px",
+    marginTop: theme.spacing(2),
     "& .MuiSvgIcon-root": {
       color: theme.palette.primary.light,
     },
@@ -470,6 +501,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       borderRadius: 12,
       backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#DEFFFF",
       border: theme.palette.border,
+      "&[aria-expanded=true]": {
+        borderColor: theme.palette.action?.selected,
+      },
     },
     "& .MuiOutlinedInput-root": {
       border: "none",
@@ -481,6 +515,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiSelect-icon": {
       top: "calc(50% - 13px)",
       fill: theme.palette.text?.primary,
+    },
+    "& .MuiSelect-iconOpen": {
+      fill: theme.palette.action?.selected,
     },
   },
   selectMenu: {
@@ -502,6 +539,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   selectPlaceholder: {
     fontSize: "16px",
+    lineHeight: "16px",
   },
   deleteAttributeIcon: {
     color: theme.palette.primary.light,
@@ -509,7 +547,38 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       color: theme.palette.text?.primary,
       cursor: "pointer",
     }
-  }
+  },
+  nftTableContainer: {
+    "&::-webkit-scrollbar": {
+      width: "5px",
+      height: "5px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: theme.palette.type === "dark" ? "#DEFFFF" : "#02586D",
+      borderRadius: 12,
+    },
+    "&::-webkit-scrollbar-track": {
+      backgroundColor: theme.palette.type === "dark" ? "#29475A" : "rgba(0, 51, 64, 0.2)",
+      borderRadius: 12,
+    },
+  },
+  progressBox: {
+    backgroundColor: theme.palette.currencyInput,
+    // padding: theme.spacing(2),
+    borderRadius: 12,
+    "&::-webkit-scrollbar": {
+      width: "5px",
+      height: "5px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: theme.palette.type === "dark" ? "#DEFFFF" : "#02586D",
+      borderRadius: 12,
+    },
+    "&::-webkit-scrollbar-track": {
+      backgroundColor: theme.palette.type === "dark" ? "#29475A" : "rgba(0, 51, 64, 0.2)",
+      borderRadius: 12,
+    },
+  },
 }));
 
 export default NftUpload;
