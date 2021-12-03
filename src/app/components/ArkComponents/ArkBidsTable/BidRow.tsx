@@ -1,6 +1,8 @@
 import React, { Fragment, useState, useMemo } from "react";
-import { Avatar, Box, BoxProps, CircularProgress, IconButton,
-  ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
+import {
+  Avatar, Box, BoxProps, CircularProgress, IconButton,
+  ListItemIcon, MenuItem, TableCell, TableRow, Typography
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
@@ -17,7 +19,7 @@ import { RootState, TokenState } from "app/store/types";
 import { getChequeStatus } from "core/utilities/ark"
 import { ArkOwnerLabel } from "app/components";
 import { ZilswapConnector } from "core/zilswap";
-import { logger, ArkClient } from "core/utilities";
+import { logger, ArkClient, waitForTx } from "core/utilities";
 import { getMarketplace } from "app/saga/selectors";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
@@ -237,13 +239,27 @@ const Row: React.FC<Props> = (props: Props) => {
       const totalFeeBps = bnOrZero(exchangeInfo.baseFeeBps).plus(bid.token.collection.royaltyBps);
       const feeAmount = priceAmount.times(totalFeeBps).dividedToIntegerBy(10000).plus(1);
 
+      const walletAddress = wallet.addressInfo.byte20.toLowerCase();
+      const collectionAddress = bid.token?.collection?.address;
+      const transaction = await arkClient.approveAllowanceIfRequired(collectionAddress, walletAddress, ZilswapConnector.getSDK());
+
+      if (transaction?.id) {
+        toaster("Approve TX Submitted", { hash: transaction.id });
+        try {
+          await waitForTx(transaction.id);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 25; // blocks
       const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
         side: "Sell",
         token: {
-          address: bid.token?.collection?.address,
+          address: collectionAddress,
           id: bid.token?.tokenId.toString(10),
         },
         price,
@@ -359,7 +375,7 @@ const Row: React.FC<Props> = (props: Props) => {
                 </IconButton>
               }
               {status === 'Active' && bid.token.ownerAddress === userAddress &&
-                <IconButton onClick={() => acceptBid(bid)} className={classes.iconButton}>
+                <IconButton disabled={acceptLoading || isPendingTx} onClick={() => acceptBid(bid)} className={classes.iconButton}>
                   {(acceptLoading || isPendingTx) && (
                     <CircularProgress size={16} />
                   )}
