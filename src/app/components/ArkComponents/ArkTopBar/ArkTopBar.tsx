@@ -150,9 +150,9 @@ const ArkTopBar: React.FC<
           </Fragment>
         ) : (
           <Grid container>
-            <Box className={classes.brandBox}>
+            <Link to="/arky" className={classes.brandBox}>
               <img src={ArkyLogo} alt="logo" className={classes.logo} />
-            </Box>
+            </Link>
             <Box className={classes.navLinkBox}>
               <Button
                 component={Link}

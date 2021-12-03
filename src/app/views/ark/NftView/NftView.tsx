@@ -178,7 +178,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
         </Box>
 
 
-        {/*Ark tabs */}
+        {/*Arky tabs */}
         <ArkTab mt={3} setCurrentTab={(tab: string) => { setCurrentTab(tab) }} currentTab={currentTab} tabHeaders={["Bids", "Price History", "Event History"]} />
 
         {currentTab === "Bids" && (

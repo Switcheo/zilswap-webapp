@@ -1,11 +1,11 @@
 import React, { Fragment, useMemo } from "react";
 import {
-  AppBar, Box, Button, Hidden, IconButton,
+  AppBar, Box, Button, Hidden, IconButton, Link,
   Toolbar, useMediaQuery, AppBarProps, Typography, Grid
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import { Link, useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Brand } from "app/components/TopBar/components";
 import { ReactComponent as Logo } from "app/components/NavDrawer/logo2.svg";
@@ -118,6 +118,7 @@ const TopBar: React.FC<Props> = (
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const location = useLocation();
+  const history = useHistory();
 
   const renderLogo = useMemo(() => {
     const current = location.pathname;
@@ -133,6 +134,16 @@ const TopBar: React.FC<Props> = (
     else if (current.indexOf("/zilo") === 0) return <ZiloLogo />;
     else return <Brand />;
   }, [location.pathname]);
+
+  const onClickLogo = () => {
+    const path = location.pathname?.match(/^\/[^/]+/i)?.[0];
+    switch (path) {
+      case "/history":
+        return history.push("/bridge");
+      default:
+        return typeof path === "string" && history.push(path);
+    }
+  };
 
   const tabConfig = currentPath ? DrawerConfig[currentPath] || [] : [];
 
@@ -155,7 +166,7 @@ const TopBar: React.FC<Props> = (
             </Box>
             <Box display="flex" justifyContent="center">
               <Button
-                component={Link}
+                component={RouterLink}
                 to="/"
                 className={classes.brandButton}
                 disableRipple
@@ -166,12 +177,12 @@ const TopBar: React.FC<Props> = (
           </Fragment>
         ) : (
           <Grid container>
-            <Box className={classes.brandBox}>{renderLogo}</Box>
+            <Link onClick={onClickLogo} className={classes.brandBox}>{renderLogo}</Link>
             <Box className={classes.navLinkBox}>
               {tabConfig.map((tab, index) => (
                 <Fragment key={index}>
                   {(!tab.connectedOnly || (tab.connectedOnly && walletState.wallet)) && <Button
-                    component={Link}
+                    component={RouterLink}
                     to={tab.navLink}
                     className={classes.navLinkButton}
                     disableRipple>

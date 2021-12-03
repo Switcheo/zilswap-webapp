@@ -9,6 +9,7 @@ export { default as ArkNFTCard } from "./ArkNFTCard";
 export { default as ArkNFTListing } from "./ArkNFTListing";
 export { default as ArkFilterBar } from "./ArkFilterBar";
 export { default as ArkPaginator } from "./ArkPaginator";
+export { default as ArkRedirect } from "./ArkRedirect";
 export { default as ArkPriceHistoryGraph } from "./ArkPriceHistoryGraph";
 export { default as ArkTab } from "./ArkTab";
 export { default as ArkToggle } from "./ArkToggle"

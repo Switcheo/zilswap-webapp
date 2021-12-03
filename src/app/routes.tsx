@@ -3,7 +3,7 @@ import { RouteConfig } from "react-router-config";
 import { Redirect } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import ArkLayout from "./layouts/ArkLayout";
-import RedirectComp from "./redirect";
+import { ArkRedirect } from "./components";
 
 const routes: RouteConfig[] = [
   {
@@ -51,7 +51,7 @@ const routes: RouteConfig[] = [
   },
   {
     path: "/ark",
-    component: () => <RedirectComp />
+    component: () => <ArkRedirect />
   },
   {
     path: "/arky",
