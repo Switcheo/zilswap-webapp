@@ -104,7 +104,7 @@ export class ArkClient {
   arkLogin = async (wallet: ConnectedWallet, hostname: string) => {
     const timestamp = dayjs().format("YYYY/MM/DD HH:mm:ss Z");
     const bech32Address = wallet.addressInfo.bech32;
-    const signMessage = `[${timestamp}] ARK Authentication\nPlease issue my browser at ${hostname} an ARK API key for my address:\n${bech32Address}`;
+    const signMessage = `[${timestamp}] ARKY Authentication\nPlease issue my browser at ${hostname} an ARKY API key for my address:\n${bech32Address}`;
 
     const signResult = await (window as any).zilPay.wallet.sign(signMessage);
     const { message, publicKey, signature } = signResult

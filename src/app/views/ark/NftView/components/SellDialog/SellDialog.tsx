@@ -212,7 +212,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       logger("post trade", result);
       setHasPosted(true);
       toaster(`Successfully listed token #${id}!`);
-      history.push(`/ark/collections/${collectionId}/${tokenId}`)
+      history.push(`/arky/collections/${collectionId}/${tokenId}`)
     });
   };
 

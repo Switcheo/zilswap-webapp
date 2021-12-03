@@ -1,6 +1,8 @@
 import React, { Fragment, useState, useMemo } from "react";
-import { Avatar, Box, BoxProps, CircularProgress, IconButton,
-  ListItemIcon, MenuItem, TableCell, TableRow, Typography } from "@material-ui/core";
+import {
+  Avatar, Box, BoxProps, CircularProgress, IconButton,
+  ListItemIcon, MenuItem, TableCell, TableRow, Typography
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
@@ -315,7 +317,7 @@ const Row: React.FC<Props> = (props: Props) => {
               <TableCell align="left" className={cls(classes.bodyCell, classes.firstCell)}>
                 {
                   index === 0 &&
-                  <Link className={classes.link} to={`/ark/collections/${toBech32Address(bid.token.collection.address)}/${bid.token.tokenId}`}>
+                  <Link className={classes.link} to={`/arky/collections/${toBech32Address(bid.token.collection.address)}/${bid.token.tokenId}`}>
                     <MenuItem className={classes.item} button={false}>
                       <ListItemIcon className={classes.imageContainer}><Avatar className={classes.image} alt="NFT Image" src={bid.token.asset.url} /></ListItemIcon>
                       #{bid.token.tokenId}

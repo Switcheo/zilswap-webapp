@@ -99,7 +99,7 @@ const ArkNavDrawer: React.FC<DrawerProps> = (props: any) => {
       <Box className={classes.drawerHeader}>
         <Button
           component={Link}
-          to="/ark"
+          to="/arky"
           className={classes.brandButton}
           disableRipple
         >
@@ -115,7 +115,7 @@ const ArkNavDrawer: React.FC<DrawerProps> = (props: any) => {
           {/* <ListItem
             button
             component={Link}
-            to="/ark"
+            to="/arky"
             className={cls(classes.listItem, {[classes.buttonLeafActive]: }
           >
             <ListItemText primary="Discover" />
@@ -123,10 +123,10 @@ const ArkNavDrawer: React.FC<DrawerProps> = (props: any) => {
           <ListItem
             button
             component={Link}
-            to="/ark/discover"
+            to="/arky/discover"
             className={cls(classes.listItem, {
               [classes.buttonLeafActive]:
-                location.pathname === "/ark/discover",
+                location.pathname === "/arky/discover",
             })}
           >
             <Text variant="button">Discover</Text>
@@ -134,9 +134,9 @@ const ArkNavDrawer: React.FC<DrawerProps> = (props: any) => {
           <ListItem
             button
             component={Link}
-            to="/ark/profile"
+            to="/arky/profile"
             className={cls(classes.listItem, {
-              [classes.buttonLeafActive]: location.pathname === "/ark/profile",
+              [classes.buttonLeafActive]: location.pathname === "/arky/profile",
             })}
           >
             <Text variant="button">My Profile</Text>

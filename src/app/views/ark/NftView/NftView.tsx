@@ -106,13 +106,13 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
   const isCancelling = token?.bestAsk && !!Object.values(pendingTxs).find(tx => tx.chequeHash === token?.bestAsk?.chequeHash);
 
   const breadcrumbs = [
-    { path: "/ark/discover", value: "Discover" },
+    { path: "/arky/discover", value: "Discover" },
     {
-      path: `/ark/collections/${collectionId}`,
+      path: `/arky/collections/${collectionId}`,
       value: `${token?.collection?.name}`,
     },
     {
-      path: `/ark/collections/${collectionId}/${tokenId}`,
+      path: `/arky/collections/${collectionId}/${tokenId}`,
       value: `#${tokenId}`,
     },
   ];
@@ -138,7 +138,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
             </Typography>
             <Box className={classes.xsColumn} mt={4} display="flex" justifyContent="center">
               <Box flexGrow={1} marginRight={1}>
-                <MenuItem component={Link} to={`/ark/profile?address=${ownerAddr}`} className={classes.aboutMenuItem} button={false}>
+                <MenuItem component={Link} to={`/arky/profile?address=${ownerAddr}`} className={classes.aboutMenuItem} button={false}>
                   <ListItemIcon><Avatar className={classes.avatar} alt="owner" src={owner?.profileImage?.url || ""} /></ListItemIcon>
                   <Box className={classes.aboutItemText}>
                     <Typography>Owner</Typography>

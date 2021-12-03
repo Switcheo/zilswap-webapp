@@ -100,7 +100,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
 
   const onNavigateBack = () => {
-    history.push(`/ark/profile`);
+    history.push(`/arky/profile`);
   }
 
   const validateInput = (type: string, input: string) => {
@@ -339,7 +339,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                 <ArkInput
                   placeholder="BearCollector" error={errors.username} value={inputValues.username}
                   label="DISPLAY NAME" onValueChange={(value) => updateInputs("username")(value)}
-                  instruction="This is how other users identify you on ARK." wordLimit={20}
+                  instruction="This is how other users identify you on ARKY." wordLimit={20}
                 />
                 {/* <ArkInput
                   placeholder="bearsarecute@example.com" error={errors.email} value={inputValues.email}

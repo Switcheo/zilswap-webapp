@@ -25,7 +25,7 @@ const ArkCTABanner = () => {
 
   return (
     <Box className={classes.banner} maxWidth={800} margin="0 auto">
-      <RouterLink to="/ark">
+      <RouterLink to="/arky">
         <img className={classes.bannerImage} src="/assets/202111-ark-webbanner.png" alt="" />
       </RouterLink>
     </Box>

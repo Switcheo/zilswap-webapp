@@ -154,7 +154,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   const { bech32Address, hexAddress } = useMemo(() => {
     if (!match.params?.collection) {
-      history.push("/ark/discover");
+      history.push("/arky/discover");
       return {};
     }
 
@@ -165,7 +165,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         hexAddress: fromBech32Address(collectionAddress)?.toLowerCase(),
       };
     } else {
-      history.push(`/ark/collections/${toBech32Address(collectionAddress)}`);
+      history.push(`/arky/collections/${toBech32Address(collectionAddress)}`);
       return {};
     }
     // eslint-disable-next-line
@@ -200,7 +200,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       if (collection) {
         setCollection(collection);
       } else {
-        history.push("/ark/discover");
+        history.push("/arky/discover");
       }
     };
 
@@ -223,9 +223,9 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   if (!collection) return null;
 
   const breadcrumbs = [
-    { path: "/ark/discover", value: "Discover" },
+    { path: "/arky/discover", value: "Discover" },
     {
-      path: `/ark/collections/${bech32Address}`,
+      path: `/arky/collections/${bech32Address}`,
       value: collection?.name,
     },
   ];

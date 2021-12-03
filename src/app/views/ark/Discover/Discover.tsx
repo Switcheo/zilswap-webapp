@@ -214,7 +214,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               <Fragment>
                 <Box className={classes.searchResultHeader}>Collections</Box>
                 {filteredSearch?.filteredCollections.map((collection) => (
-                  <RouterLink to={`/ark/collections/${toBech32Address(collection.address)}`}>
+                  <RouterLink to={`/arky/collections/${toBech32Address(collection.address)}`}>
                     <Box className={classes.popoverRow} display="flex" justifyContent="space-between" alignItems="center">
                       <Box className={classes.resultCollectionName} display="flex" alignItems="center">
                         <ArkImageView
@@ -239,7 +239,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               <Fragment>
                 <Box className={classes.searchResultHeader}>Artist</Box>
                 {filteredSearch?.filteredArtist.map((collection) => (
-                  <RouterLink to={`/ark/collections/${toBech32Address(collection.address)}`}>
+                  <RouterLink to={`/arky/collections/${toBech32Address(collection.address)}`}>
                     <Box className={classes.popoverRow} display="flex" justifyContent="space-between" alignItems="center">
                       <Box className={classes.resultCollectionName} display="flex" alignItems="center">
                         <ArkImageView
@@ -292,7 +292,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                     key={collection.address}
                     className={classes.tableRow}
                     component={RouterLink}
-                    to={`/ark/collections/${toBech32Address(collection.address)}`}
+                    to={`/arky/collections/${toBech32Address(collection.address)}`}
                   >
                     <TableCell className={cls(classes.bodyCell, classes.firstCell)}>
                       <Box className={classes.collectionNameCell}>
