@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import cls from "classnames";
-import { Box, BoxProps, Tooltip, Typography, Switch, FormControl, FormControlLabel, 
-  FormGroup, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@material-ui/core";
+import { Box, BoxProps, Tooltip, Typography, FormControl, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import AddIcon from '@material-ui/icons/AddRounded';
@@ -33,7 +32,6 @@ interface Props extends BoxProps {
 const NftUpload: React.FC<Props> = (props: Props) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
-  const [hasAttributes, setHasAttributes] = useState<boolean>(true);
   const [attributes, setAttributes] = useState<AttributeData[]>([{
     name: "",
     values: [],
@@ -267,31 +265,13 @@ const NftUpload: React.FC<Props> = (props: Props) => {
 
       {/* Attributes */}
       <Box className={classes.attributesBox}>
-        <Box display="flex" justifyContent="space-between">
+        <Box>
           <Typography className={classes.header}>
             ATTRIBUTES
           </Typography>
-          <FormGroup row className={classes.formGroup}>
-            <FormControlLabel
-              control={
-                <Switch
-                  color="secondary"
-                  checked={hasAttributes}
-                  onChange={() => setHasAttributes(!hasAttributes)}
-                  {...rest}
-                  className={classes.switch}
-                />
-              }
-              label={
-                <Typography className={classes.switchLabel}>
-                  Turn this on if your collection has attributes.
-                </Typography>
-              }
-              labelPlacement="start"
-            />
-          </FormGroup>
         </Box>
-        <Typography className={classes.instruction} style={{ marginTop: "-5px" }}>
+
+        <Typography className={classes.instruction}>
           Customise attributes according to your NFT collection.
           {" "}
           <Tooltip placement="top" title="Add all attributes that are a part of this colleciton, and assign them to specific NFTs below.">
@@ -299,57 +279,55 @@ const NftUpload: React.FC<Props> = (props: Props) => {
           </Tooltip>
         </Typography>
         
-        {hasAttributes && (
-          <TableContainer>
-            <Table>
-              <TableHead className={classes.tableHead}>
-                <TableRow>
-                  <TableCell align="left" width="30%">
-                    <Typography>Attributes</Typography>
-                  </TableCell>
-                  <TableCell align="left">
-                    <Typography>Values</Typography>
-                  </TableCell>
-                  <TableCell width="5%"/>        
-                </TableRow>
-              </TableHead>
-              <TableBody className={classes.tableBody}>
-                {attributes.map((attribute, index) => {
-                  return (
-                    <TableRow key={index}>
-                      <TableCell component="th" scope="row" style={{ verticalAlign: "top" }}>
-                        <ArkInput
-                          placeholder="Name"
-                          value={attribute.name}
-                          onValueChange={(value) => handleAttributeNameChange(index, value)}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <ArkChipInput
-                          onKeyDown={(event) => handleKeyDown(index, event)}
-                          placeholder={attribute.values.length ? "" : 'Separate each value with a semi-colon ";"'}
-                          chips={attribute.values}
-                          onDelete={(value) => handleDeleteChip(index, value)}
-                        />
-                      </TableCell>
-                      <TableCell align="right">
-                        <ClearIcon className={classes.deleteAttributeIcon} fontSize="small" onClick={() => handleDeleteAttribute(attribute)} />
-                      </TableCell>                      
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-            <Button 
-              className={classes.addAttributeButton} 
-              variant="outlined" 
-              onClick={() => handleAddAttribute()} 
-              fullWidth
-            >
-              <AddIcon />
-            </Button>
-          </TableContainer>
-        )}
+        <TableContainer>
+          <Table>
+            <TableHead className={classes.tableHead}>
+              <TableRow>
+                <TableCell align="left" width="30%">
+                  <Typography>Attributes</Typography>
+                </TableCell>
+                <TableCell align="left">
+                  <Typography>Values</Typography>
+                </TableCell>
+                <TableCell width="5%"/>        
+              </TableRow>
+            </TableHead>
+            <TableBody className={classes.tableBody}>
+              {attributes.map((attribute, index) => {
+                return (
+                  <TableRow key={index}>
+                    <TableCell component="th" scope="row" style={{ verticalAlign: "top" }}>
+                      <ArkInput
+                        placeholder="Name"
+                        value={attribute.name}
+                        onValueChange={(value) => handleAttributeNameChange(index, value)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <ArkChipInput
+                        onKeyDown={(event) => handleKeyDown(index, event)}
+                        placeholder={attribute.values.length ? "" : 'Separate each value with a semi-colon ";"'}
+                        chips={attribute.values}
+                        onDelete={(value) => handleDeleteChip(index, value)}
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <ClearIcon className={classes.deleteAttributeIcon} fontSize="small" onClick={() => handleDeleteAttribute(attribute)} />
+                    </TableCell>                      
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+          <Button 
+            className={classes.addAttributeButton} 
+            variant="outlined" 
+            onClick={() => handleAddAttribute()} 
+            fullWidth
+          >
+            <AddIcon />
+          </Button>
+        </TableContainer>
       </Box>
 
       {/* Manage NFTs */}
@@ -515,33 +493,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   attributesBox: {
     marginTop: theme.spacing(3),
-  },
-  switch: {
-    "& .MuiSwitch-track": {
-      position: "relative",
-      backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.5)}`,
-    },
-    "& .Mui-checked+.MuiSwitch-track": {
-      backgroundColor: `rgba${hexToRGBA("#00FFB0", 1)}`,
-    },
-    "& .MuiSwitch-thumb": {
-      backgroundColor: "#0D1B24",
-      width: 14,
-      height: 14,
-    },
-    "& .Mui-checked": {
-      "& .MuiSwitch-thumb": {
-        backgroundColor: "#FFFFFF",
-      },
-    },
-    "& .MuiSwitch-switchBase": {
-      padding: "6px",
-      top: "6px",
-      left: "6px",
-    },
-  },
-  switchLabel: {
-    color: theme.palette.primary.light,
   },
   formGroup: {
     marginTop: "-12.5px",

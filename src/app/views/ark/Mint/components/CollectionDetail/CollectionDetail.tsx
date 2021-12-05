@@ -17,15 +17,16 @@ import { CollectionInputs } from "../../Mint";
 interface Props extends BoxProps {
   inputValues: CollectionInputs;
   setInputValues: React.Dispatch<React.SetStateAction<CollectionInputs>>;
+  mintOption: string;
+  setMintOption: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const DESCRIPTION_PLACEHOLDER = "The Bear Market is a collection of 10,000 programmatically, randomly-generated NFT bears on the Zilliqa blockchain."
 
 const CollectionDetail: React.FC<Props> = (props: Props) => {
-  const { children, className, inputValues, setInputValues, ...rest } = props;
+  const { children, className, inputValues, setInputValues, mintOption, setMintOption, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
-  const [currentSelection, setCurrentSelection] = useState<string>("create");
   const [errors, setErrors] = useState({
     collectionName: "",
     description: "",
@@ -36,13 +37,11 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
     instagramHandle: "",
     telegramLink: "",
   });
-
   const [displayImage, setDisplayImage] = useState<string | ArrayBuffer | null>(null);
   const [bannerImage, setBannerImage] = useState<string | ArrayBuffer | null>(null);
   const [uploadFile, setUploadFile] = useState<SimpleMap<File>>({});
 
   const onHandleDisplayDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
-
     if (!files.length) {
       return setDisplayImage(null);
     }
@@ -150,7 +149,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
           COLLECTION
         </Typography>
         <Typography className={classes.instruction}>Create a new collection or select from your existing collections.</Typography>
-        <ToggleButtonGroup className={classes.buttonGroup} exclusive value={currentSelection} onChange={(event, newSelection) => {setCurrentSelection(newSelection)}}>
+        <ToggleButtonGroup className={classes.buttonGroup} exclusive value={mintOption} onChange={(_, newOption) => {setMintOption(newOption)}}>
           <ToggleButton value="create" className={classes.collectionButton}>
             <Typography>Create Collection</Typography>
           </ToggleButton>
@@ -198,11 +197,13 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
           <Box flex={.95}>
             <Dropzone accept='image/jpeg, image/png' onFileDialogCancel={() => setBannerImage(null)} onDrop={onHandleBannerDrop}>
               {({ getRootProps, getInputProps }) => (
-                <Box className={classes.dropBox}>
+                <Box>
                   <div {...getRootProps()}>
                     <input {...getInputProps()} />
                     {!bannerImage && (
-                      <Typography className={classes.bannerText}>Drag and drop your banner here.</Typography>
+                      <Box className={classes.dropBox}>
+                        <Typography className={classes.bannerText}>Drag and drop your banner here.</Typography>
+                      </Box>
                     )}
                     {bannerImage && <img alt="" className={classes.bannerImage} src={bannerImage?.toString() || ""} />}
                   </div>

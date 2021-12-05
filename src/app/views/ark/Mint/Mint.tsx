@@ -26,6 +26,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const { wallet } = useSelector(getWallet);
+  const [mintOption, setMintOption] = useState<string>("create");
   const [inputValues, setInputValues] = useState<CollectionInputs>({
     collectionName: "",
     description: "",
@@ -44,7 +45,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         {wallet && (
           <Box>
             {/* Set Up Collection */}
-            <CollectionDetail setInputValues={setInputValues} inputValues={inputValues} />
+            <CollectionDetail setMintOption={setMintOption} mintOption={mintOption} setInputValues={setInputValues} inputValues={inputValues} />
 
             {/* Upload NFTs */}
             <NftUpload />
