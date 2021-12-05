@@ -100,7 +100,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
 
   const onNavigateBack = () => {
-    history.push(`/ark/profile`);
+    history.push(`/arky/profile`);
   }
 
   const validateInput = (type: string, input: string) => {
@@ -202,10 +202,10 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
           checkedOAuth = result;
         }
         if (profileImage && uploadFile.profile) {
-          imageUpload(uploadFile.profile);
+          imageUpload(uploadFile.profile, "profile", checkedOAuth!.access_token);
         }
         if (bannerImage && uploadFile.banner) {
-          imageUpload(uploadFile.banner, "banner");
+          imageUpload(uploadFile.banner, "banner", checkedOAuth!.access_token);
         }
         if (hasChange) {
           await arkClient.updateProfile(address!, filteredData, checkedOAuth!);
@@ -218,23 +218,16 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
     });
   }
 
-  const imageUpload = (uploadFile: File, type = "profile") => {
+  const imageUpload = (uploadFile: File, type = "profile", accessToken: string) => {
     runUploadImage(async () => {
       if (!uploadFile || !wallet) return;
       const arkClient = new ArkClient(network);
-      const { oAuth } = marketplaceState;
-      let checkedOAuth: OAuth | undefined = oAuth;
-      if (!oAuth?.access_token || oAuth.address !== wallet.addressInfo.bech32 || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
-        const { result } = await arkClient.arkLogin(wallet, window.location.hostname);
-        dispatch(actions.MarketPlace.updateAccessToken(result));
-        checkedOAuth = result;
-      }
-      const requestResult = await arkClient.requestImageUploadUrl(address!, checkedOAuth!.access_token, type);
+      const requestResult = await arkClient.requestImageUploadUrl(address!, accessToken, type);
 
       const blobData = new Blob([uploadFile], { type: uploadFile.type });
 
       await arkClient.putImageUpload(requestResult.result.uploadUrl, blobData);
-      await arkClient.notifyUpload(address!, oAuth!.access_token, type);
+      await arkClient.notifyUpload(address!, accessToken, type);
       dispatch(actions.MarketPlace.loadProfile());
       toaster("Image updated");
     })
@@ -285,6 +278,8 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
       default: return;
     }
   }
+
+  const disableSave = (isLoading || loadingProfile) || (!hasChange && !profileImage && !bannerImage) || hasError;
 
   return (
     <ArkPage {...rest}>
@@ -348,7 +343,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                 <ArkInput
                   placeholder="BearCollector" error={errors.username} value={inputValues.username}
                   label="DISPLAY NAME" onValueChange={(value) => updateInputs("username")(value)}
-                  instruction="This is how other users identify you on ARK." wordLimit={20}
+                  instruction="This is how other users identify you on ARKY." wordLimit={20}
                 />
                 {/* <ArkInput
                   placeholder="bearsarecute@example.com" error={errors.email} value={inputValues.email}
@@ -411,7 +406,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                   color="primary"
                   loading={isLoading || loadingProfile}
                   onClick={() => onUpdateProfile(false)}
-                  disabled={(!hasChange && !profileImage && !bannerImage) || hasError}
+                  disabled={disableSave}
                   className={classes.profileButton}
                 >
                   Save Profile
@@ -524,7 +519,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: 110,
     border: `5px solid ${theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"}`,
     borderRadius: "50%",
-    backgroundColor: "#DEFFFF",
+    backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF",
     alignSelf: "center"
   },
   uploadInput: {

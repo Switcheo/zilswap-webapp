@@ -53,7 +53,7 @@ const DrawerComp: React.FC<Props> = (props: Props) => {
       <Box className={classes.drawerHeader}>
         <Button
           component={Link}
-          to="/ark"
+          to="/arky"
           className={classes.brandButton}
           disableRipple
         >

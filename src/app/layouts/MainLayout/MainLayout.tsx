@@ -3,7 +3,7 @@ import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { renderRoutes } from "react-router-config";
 import { useLocation } from "react-router-dom";
-import { ArkCTABanner, ConnectWalletButton, NavDrawer, TopBar, DrawerComp } from "app/components";
+import { ConnectWalletButton, NavDrawer, TopBar, DrawerComp } from "app/components";
 import { AppTheme } from "app/theme/types";
 import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
@@ -52,7 +52,7 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     )
       return "bridge";
     else if (current.indexOf("/zilo") === 0) return "zilo";
-    else if (current.indexOf("/ark") === 0) return "ark";
+    else if (current.indexOf("/arky") === 0) return "ark";
     else return "main";
   }, [location.pathname]);
 
@@ -70,7 +70,6 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />
       <main className={classes.content}>
         <DevInfoBadge />
-        <ArkCTABanner />
         <Suspense fallback={<LinearProgress />}>
           {renderRoutes(route.routes)}
         </Suspense>

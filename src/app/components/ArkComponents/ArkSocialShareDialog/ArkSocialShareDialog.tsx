@@ -17,7 +17,7 @@ interface Props extends Partial<DialogProps> {
   header?: string;
 }
 
-const DEFAULT_URL = "https://zilswap.io/ark/collections/:collectionAddress/:tokenId"
+const DEFAULT_URL = "https://zilswap.io/arky/collections/:collectionAddress/:tokenId"
 
 const ArkSocialShareDialog: React.FC<Props> = (props: Props) => {
   const {

@@ -188,7 +188,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
       await waitForTx(txId);
     });
   }
-  
+
   const onExpiryChange = (expiryBlock: number) => {
     setExpiry(expiryBlock)
   }
@@ -270,7 +270,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
   const onViewCollection = () => {
     dispatch(actions.Layout.toggleShowBidNftDialog("close"));
-    history.push("/ark/profile");
+    history.push("/arky/profile");
   };
 
   const onCurrencyChange = (token: TokenInfo) => {
@@ -370,7 +370,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
                   }
                   label={
                     <Text>
-                      I accept ARK's terms and conditions.
+                      I accept ARKY's terms and conditions.
                     </Text>
                   }
                 />

@@ -3,32 +3,33 @@ import { RouteConfig } from "react-router-config";
 import { Redirect } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import ArkLayout from "./layouts/ArkLayout";
+import { ArkRedirect } from "./components";
 
 const routes: RouteConfig[] = [
-  // {
-  //   path: "/pools",
-  //   component: MainLayout,
-  //   routes: [
-  //     {
-  //       path: "/pools/overview",
-  //       exact: true,
-  //       component: lazy(() => import("./views/pools/PoolsOverview")),
-  //     },
-  //     {
-  //       path: "/pools/transactions",
-  //       exact: true,
-  //       component: lazy(() => import("./views/pools/PoolTransactions")),
-  //     },
-  //     {
-  //       path: "/pools/liquidity",
-  //       exact: true,
-  //       component: lazy(() => import("./views/pools/PoolLiquidity")),
-  //     },
-  //     {
-  //       component: () => <Redirect to="/pools/overview"></Redirect>,
-  //     },
-  //   ],
-  // },
+  {
+    path: "/pools",
+    component: MainLayout,
+    routes: [
+      {
+        path: "/pools/overview",
+        exact: true,
+        component: lazy(() => import("./views/pools/PoolsOverview")),
+      },
+      {
+        path: "/pools/transactions",
+        exact: true,
+        component: lazy(() => import("./views/pools/PoolTransactions")),
+      },
+      {
+        path: "/pools/liquidity",
+        exact: true,
+        component: lazy(() => import("./views/pools/PoolLiquidity")),
+      },
+      {
+        component: () => <Redirect to="/pools/overview"></Redirect>,
+      },
+    ],
+  },
   {
     path: "/zilo",
     component: MainLayout,
@@ -50,40 +51,44 @@ const routes: RouteConfig[] = [
   },
   {
     path: "/ark",
+    component: () => <ArkRedirect />
+  },
+  {
+    path: "/arky",
     component: ArkLayout,
     routes: [
       {
-        path: "/ark/discover",
+        path: "/arky/discover",
         exact: true,
         component: lazy(() => import("./views/ark/Discover")),
       },
       {
-        path: "/ark/collections/:collection",
+        path: "/arky/collections/:collection",
         exact: true,
         component: lazy(() => import("./views/ark/CollectionView")),
       },
       {
-        path: "/ark/collections/:collection/:id",
+        path: "/arky/collections/:collection/:id",
         exact: true,
         component: lazy(() => import("./views/ark/NftView")),
       },
       {
-        path: "/ark/collections/:collection/:id/sell",
+        path: "/arky/collections/:collection/:id/sell",
         exact: true,
         component: lazy(() => import("./views/ark/NftView/components/SellDialog")),
       },
       {
-        path: "/ark/profile",
+        path: "/arky/profile",
         exact: true,
         component: lazy(() => import("./views/ark/Profile")),
       },
       {
-        path: "/ark/profile/:address",
+        path: "/arky/profile/:address",
         exact: true,
         component: lazy(() => import("./views/ark/Profile")),
       },
       {
-        path: "/ark/profile/:address/edit",
+        path: "/arky/profile/:address/edit",
         exact: true,
         component: lazy(() => import("./views/ark/Profile/components/EditProfile")),
       },
@@ -93,7 +98,7 @@ const routes: RouteConfig[] = [
         component: lazy(() => import("./views/ark/Mint")),
       },
       {
-        component: () => <Redirect to="/ark/discover"></Redirect>,
+        component: () => <Redirect to="/arky/discover"></Redirect>,
       },
     ],
   },

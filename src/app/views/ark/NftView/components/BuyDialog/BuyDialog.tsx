@@ -204,7 +204,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
 
   const onViewCollection = () => {
     dispatch(actions.Layout.toggleShowBuyNftDialog("close"));
-    history.push("/ark/profile");
+    history.push("/arky/profile");
   };
 
   const dialogHeader = completePending
@@ -307,7 +307,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
                 }
                 label={
                   <Text>
-                    I accept ARK's terms and conditions.
+                    I accept ARKY's terms and conditions.
                   </Text>
                 }
               />

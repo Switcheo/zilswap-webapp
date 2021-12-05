@@ -18,7 +18,7 @@ import { ReactComponent as MenuIcon } from "app/components/TopBar/menu.svg";
 import RewardsInfoButton from "app/layouts/RewardsInfoButton";
 import { AppTheme } from "app/theme/types";
 import { useRouter } from "app/utils";
-import ArkLogo from "./ark-logo.png";
+import ArkyLogo from "./logo-arky-small.png";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -140,23 +140,23 @@ const ArkTopBar: React.FC<
             <Box display="flex" justifyContent="center">
               <Button
                 component={Link}
-                to="/ark"
+                to="/arky"
                 className={classes.brandButton}
                 disableRipple
               >
-                <img src={ArkLogo} alt="logo" className={classes.logo} />
+                <img src={ArkyLogo} alt="logo" className={classes.logo} />
               </Button>
             </Box>
           </Fragment>
         ) : (
           <Grid container>
-            <Box className={classes.brandBox}>
-              <img src={ArkLogo} alt="logo" className={classes.logo} />
-            </Box>
+            <Link to="/arky" className={classes.brandBox}>
+              <img src={ArkyLogo} alt="logo" className={classes.logo} />
+            </Link>
             <Box className={classes.navLinkBox}>
               <Button
                 component={Link}
-                to="/ark/discover"
+                to="/arky/discover"
                 className={classes.navLinkButton}
                 disableRipple
               >
@@ -164,8 +164,8 @@ const ArkTopBar: React.FC<
                   className={cls(classes.navLink, {
                     [classes.selectedMenu]:
                       (
-                        location.pathname.indexOf("/ark/discover") === 0
-                        || location.pathname.indexOf("/ark/collections") === 0
+                        location.pathname.indexOf("/arky/discover") === 0
+                        || location.pathname.indexOf("/arky/collections") === 0
                       ),
                   })}
                 >
@@ -174,14 +174,14 @@ const ArkTopBar: React.FC<
               </Button>
               <Button
                 component={Link}
-                to="/ark/profile"
+                to="/arky/profile"
                 className={classes.navLinkButton}
                 disableRipple
               >
                 <Typography
                   className={cls(classes.navLink, {
                     [classes.selectedMenu]:
-                      location.pathname.indexOf("/ark/profile") === 0,
+                      location.pathname.indexOf("/arky/profile") === 0,
                   })}
                 >
                   My Profile

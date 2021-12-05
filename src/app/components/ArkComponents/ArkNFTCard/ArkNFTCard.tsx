@@ -174,7 +174,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
           <CardActionArea
             className={classes.cardActionArea}
             component={RouterLink}
-            to={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
+            to={`/arky/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
           >
             <Box className={classes.imageContainer}>
               <span className={classes.imageHeight} />
@@ -291,7 +291,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                       className={classes.popperText}
                       underline="none"
                       rel="tonftpage"
-                      href={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
+                      href={`/arky/collections/${toBech32Address(collectionAddress)}/${token.tokenId}`}
                     >
                       <Typography className={classes.popperText}>View NFT</Typography>
                     </Link>
@@ -302,7 +302,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                           className={classes.popperText}
                           underline="none"
                           rel="tonftpage"
-                          href={`/ark/collections/${toBech32Address(collectionAddress)}/${token.tokenId}/sell`}
+                          href={`/arky/collections/${toBech32Address(collectionAddress)}/${token.tokenId}/sell`}
                         >
                           <Typography className={classes.popperText}>Sell</Typography>
                         </Link>

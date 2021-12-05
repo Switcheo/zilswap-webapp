@@ -214,7 +214,7 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   return (
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
-        <ArkBanner uploadBanner={bannerUpload} bannerImage={isloading ? undefined : viewProfile?.bannerImage?.url} avatarImage={isloading ? undefined : viewProfile?.profileImage?.url} />
+        <ArkBanner uploadBanner={isConnectedUser ? bannerUpload : undefined} bannerImage={isloading ? undefined : viewProfile?.bannerImage?.url} avatarImage={isloading ? undefined : viewProfile?.profileImage?.url} />
 
         <Box className={classes.addressBox}>
           {address &&
@@ -223,7 +223,7 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                 {viewProfile?.username || truncateAddress(address || '')}
                 {isConnectedUser &&
                   <Box className={classes.editIcon}>
-                    <Link to={`/ark/profile/${address}/edit`}>
+                    <Link to={`/arky/profile/${address}/edit`}>
                       <EditIcon />
                     </Link>
                   </Box>
@@ -246,7 +246,7 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         {
           isConnectedUser && address && !viewProfile?.bio &&
           <Box className={classes.bioBox} padding={3}>
-            <Link className={classes.textLink} to={`/ark/profile/${address}/edit`}>
+            <Link className={classes.textLink} to={`/arky/profile/${address}/edit`}>
               <u>Add Bio</u>
             </Link>
           </Box>
@@ -257,7 +257,7 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             <Typography>
               {viewProfile?.bio}
               {isConnectedUser && address &&
-                <Link className={classes.textLink} to={`/ark/profile/${address}/edit`} style={{ marginLeft: 8 }}>
+                <Link className={classes.textLink} to={`/arky/profile/${address}/edit`} style={{ marginLeft: 8 }}>
                   <u>Edit</u>
                 </Link>
               }
