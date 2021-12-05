@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { useState } from "react";
 import cls from "classnames";
 import { Box, BoxProps, Tooltip, Typography, Switch, FormControl, FormControlLabel, 
   FormGroup, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@material-ui/core";
@@ -11,10 +11,19 @@ import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { AppTheme } from "app/theme/types";
 import { ArkChipInput, ArkInput } from "app/components";
 import { hexToRGBA, SimpleMap } from "app/utils";
+import { ReactComponent as FileIcon } from "./assets/file.svg";
+// import { ReactComponent as FileSuccessIcon} from "./assets/file-success.svg";
+// import { ReactComponent as FileErrorIcon } from "./assets/file-error.svg";
 
 export type AttributeData = {
   name: string;
   values: string[];
+}
+
+export type NftData = {
+  id: string;
+  image: string | ArrayBuffer | null;
+  attributes: SimpleMap<string>;
 }
 
 interface Props extends BoxProps {
@@ -30,25 +39,41 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     values: [],
   }])
 
-  const [bannerImage, setBannerImage] = useState<string | ArrayBuffer | null>(null);
-  const [uploadFile, setUploadFile] = useState<SimpleMap<File>>({});
-
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [nfts, setNfts] = useState<NftData[]>([]);
 
-  const [selectedValue, setSelectedValue] = useState<string>("");
-
-  const onHandleNftDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
-    if (!files.length) {
-      return setBannerImage(null);
-    }
+  const readFiles = (files: File[]) => {
     const reader = new FileReader();
+    const size = nfts.length;
 
-    reader.onloadend = () => {
-      setBannerImage(reader.result);
-      setUploadFile({ ...uploadFile, banner: files[0] });
+    const readFile = (index: number) => {
+      if (index >= files.length) return;
+
+      const file = files[index];
+      reader.onload = function(e: ProgressEvent<FileReader>) {  
+        if (e.target?.result) {
+          const bin = e.target.result;
+
+          setNfts(prevState => (
+            [
+              ...prevState.slice(0, size + index),
+              {
+                id: file.name.substring(0, file.name.indexOf(".")),
+                image: bin,
+                attributes: {},
+              },
+              ...prevState.slice(size + index + 1)
+            ]
+          ))
+        }
+
+        readFile(index + 1);
+      }
+
+      reader.readAsDataURL(file);
     }
 
-    reader.readAsDataURL(files[0]);
+    readFile(0);
   }
 
   const onHandleFileDrop = (files: File[], rejection: FileRejection[], dropEvent: DropEvent) => {
@@ -61,14 +86,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
       ...files
     ]);
 
-    // const reader = new FileReader();
-
-    // reader.onloadend = () => {
-    //   setBannerImage(reader.result);
-    //   setUploadFile({ ...uploadFile, banner: files[0] });
-    // }
-
-    // reader.readAsDataURL(files[0]);
+    readFiles(files);
   }
 
   const handleAttributeNameChange = (index: number, value: string) => {
@@ -82,6 +100,15 @@ const NftUpload: React.FC<Props> = (props: Props) => {
 
     setAttributes(
       attributesCopy
+    );
+  }
+
+  const handleAttributeChange = (index: number, attributeName: string, value: string) => {
+    const newNfts = nfts.slice();
+    newNfts[index].attributes[attributeName] = value;
+
+    setNfts(
+      newNfts
     );
   }
 
@@ -135,9 +162,42 @@ const NftUpload: React.FC<Props> = (props: Props) => {
 
   const handleDeleteAttribute = (attributeToDelete: AttributeData) => {
     const newAttributes = attributes.filter(attribute => attribute !== attributeToDelete);
+    const newNfts = nfts.slice();
+
+    newNfts.forEach(nft => {
+      delete nft.attributes[attributeToDelete.name];
+    })
 
     setAttributes(
       newAttributes
+    );
+
+    setNfts(
+      newNfts
+    );
+  }
+
+  const handleDeleteFile = (event: React.MouseEvent<SVGSVGElement, MouseEvent>, index: number) => {
+    event.stopPropagation();
+    
+    const newFiles = uploadedFiles.filter((_, i) => i !== index);
+    const newNfts = nfts.filter((_, i) => i !== index);
+
+    setUploadedFiles(
+      newFiles
+    );
+
+    setNfts(
+      newNfts
+    );
+  }
+
+  const handleIdChange = (index: number, newId: string) => {
+    const newNfts = nfts.slice();
+    newNfts[index].id = newId;
+
+    setNfts(
+      newNfts
     );
   }
 
@@ -163,18 +223,33 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         <Box>
           <Dropzone accept='image/jpeg, image/png' onFileDialogCancel={() => {}} onDrop={onHandleFileDrop}>
             {({ getRootProps, getInputProps }) => (
-              <Box className={classes.dropBox}>
+              <Box className={cls(classes.dropBox, { [classes.justifyCenter]: !uploadedFiles.length })}>
                 <div {...getRootProps()}>
                   <input {...getInputProps()} />
-                  {!!!uploadedFiles.length && (
+                  {!uploadedFiles.length && (
                     <Typography className={classes.bannerText}>Drag and drop your folder(s) here.</Typography>
                   )}
                   {!!uploadedFiles.length && (
                     <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Box className={classes.progressBox}>
+                      <Box className={classes.progressBox} display="flex" flexDirection="column">
+                        {uploadedFiles.map((file, index) => {
+                          return (
+                            <Box display="flex" justifyContent="space-between" alignItems="center" className={classes.nftProgress}>
+                              <FileIcon className={classes.fileIcon} />
 
+                              <Box display="flex" flexDirection="column" width="260px" mr={0.5}>
+                                <Typography className={classes.fileName}>{file.name}</Typography>
+                                <Box className={classes.rarityBackground}>
+                                  <Box className={classes.rarityBar} />
+                                </Box>
+                                <Typography className={classes.nftStatusText}>Queued</Typography>
+                              </Box>
+
+                              <ClearIcon className={classes.deleteFileIcon} onClick={(event) => handleDeleteFile(event, index)} />
+                            </Box>
+                        )})}
                       </Box>
-                      <Box>
+                      <Box display="flex" justifyContent="center">
                         <Typography className={classes.bannerText}>Drag and drop your files here.</Typography>
                       </Box> 
                     </Box>
@@ -239,7 +314,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 </TableRow>
               </TableHead>
               <TableBody className={classes.tableBody}>
-                {attributes.map((attribute: AttributeData, index: number) => {
+                {attributes.map((attribute, index) => {
                   return (
                     <TableRow key={index}>
                       <TableCell component="th" scope="row" style={{ verticalAlign: "top" }}>
@@ -293,7 +368,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                   <Typography>NFT</Typography>
                 </TableCell>
                 {/* no of attributes */}
-                {attributes.map((attribute: AttributeData) => {
+                {attributes.map((attribute) => {
                   return (
                     <TableCell>
                       <Typography>{attribute.name}</Typography>
@@ -303,13 +378,23 @@ const NftUpload: React.FC<Props> = (props: Props) => {
               </TableRow>
             </TableHead>
             <TableBody className={classes.tableBody}>
-              {/* no. of NFTs uploaded */}
-              {uploadedFiles.map((file) => {
+              {/* no. of NFTs */}
+              {nfts.map((nft, index) => {
                 return (
                   <TableRow>
-                    <TableCell component="th" scope="row">
+                    <TableCell component="th" scope="row" style={{ display: "flex" }}>
+                      <img src={nft.image?.toString()} alt="NFT" height="39.25" style={{ borderRadius: "12px", verticalAlign: "bottom" }} />
+                      <ArkInput
+                        placeholder="Id"
+                        value={nft.id}
+                        onValueChange={(value) => handleIdChange(index, value)}
+                        className={classes.idInput}
+                      />
                     </TableCell>
+
                     {attributes.map((attribute: AttributeData) => {
+                      const currAttribute = nfts[index].attributes[attribute.name] ?? "";
+
                       return (
                         <TableCell>
                           <FormControl className={classes.formControl} fullWidth>
@@ -327,10 +412,10 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                                 getContentAnchorEl: null
                               }}
                               variant="outlined"
-                              value={selectedValue}
-                              onChange={(event) => setSelectedValue(event.target.value as string)}
-                              renderValue={(selectedValue) => {
-                                const selected = selectedValue as string;
+                              value={currAttribute}
+                              onChange={(event) => handleAttributeChange(index, attribute.name, event.target.value as string)}
+                              renderValue={(currAttribute) => {
+                                const selected = currAttribute as string;
                                 if (!selected.length) {
                                   return <Typography className={classes.selectPlaceholder}>Select</Typography>;
                                 }
@@ -339,11 +424,11 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                               }}
                               displayEmpty
                             >
-                              {attribute.values.map((attributeValue: string) => {
+                              {attribute.values.map((attributeValue) => {
                                 return (
                                   <MenuItem value={attributeValue}>
                                     {attributeValue}
-                                    {selectedValue === attributeValue && (
+                                    {attributeValue === currAttribute && (
                                       <DoneIcon fontSize="small" />
                                     )}
                                   </MenuItem>
@@ -403,8 +488,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     cursor: "pointer",
     minHeight: "110px",
     display: "flex",
-    justifyContent: "center",
     alignItems: "center",
+    padding: theme.spacing(2),
   },
   bannerImage: {
     backgroundRepeat: "no-repeat",
@@ -419,6 +504,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   bannerText: {
     color: theme.palette.primary.light,
+    textAlign: "center",
   },
   footerInstruction: {
     marginTop: theme.spacing(1),
@@ -564,7 +650,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   progressBox: {
     backgroundColor: theme.palette.currencyInput,
-    // padding: theme.spacing(2),
+    padding: theme.spacing(1.5),
     borderRadius: 12,
     "&::-webkit-scrollbar": {
       width: "5px",
@@ -579,6 +665,52 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       borderRadius: 12,
     },
   },
+  rarityBackground: {
+    backgroundColor: "rgba(107, 225, 255, 0.2)",
+    borderRadius: 5,
+    display: "flex",
+    padding: "3px",
+  },
+  rarityBar: {
+    display: "flex",
+    backgroundColor: "#00FFB0",
+    borderRadius: 5,
+    padding: "1.5px",
+    width: "100%",
+  },
+  nftProgress: {
+    "&:not(:first-child)": {
+      marginTop: theme.spacing(1),
+    },
+  },
+  nftStatusText: {
+    marginTop: "4px",
+    fontSize: "10px",
+    color: theme.palette.primary.light,
+  },
+  deleteFileIcon: {
+    "&:hover": {
+      color: theme.palette.icon,
+      cursor: "pointer",
+    }
+  },
+  justifyCenter: {
+    justifyContent: "center",
+  },
+  fileIcon: {
+    marginRight: "12px",
+  },
+  fileName: {
+    marginBottom: "6px", 
+    wordBreak: "break-all"
+  },
+  idInput: {
+    marginLeft: theme.spacing(1),
+    marginTop: 0,
+    "& .MuiFormHelperText-root": {
+      display: "none",
+    }
+  }
 }));
 
 export default NftUpload;
