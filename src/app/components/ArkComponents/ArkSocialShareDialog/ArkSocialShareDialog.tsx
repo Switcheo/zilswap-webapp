@@ -21,7 +21,7 @@ const DEFAULT_URL = "https://zilswap.io/arky/collections/:collectionAddress/:tok
 
 const ArkSocialShareDialog: React.FC<Props> = (props: Props) => {
   const {
-    message = "Check out this awesome NFT on #ARK! &link #nftmarketplace #nft #nonfungible #zilswap @zilswap",
+    message = "Check out this awesome NFT on #ARKY! &link #nftmarketplace #nft #nonfungible #zilswap @zilswap",
     children, className, collectionAddress, tokenId, open, onCloseDialog, header = "Share NFT", ...rest } = props;
   const classes = useStyles();
   const toaster = useToaster(false);

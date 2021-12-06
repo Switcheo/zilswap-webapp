@@ -16,7 +16,7 @@ interface Props extends BoxProps {
 
 const ArkShareLinksGroup: React.FC<Props> = (props: Props) => {
   const {
-    message = "Check out this awesome NFT on #ARK! &link #nftmarketplace #nft #nonfungible #zilswap @zilswap",
+    message = "Check out this awesome NFT on #ARKY! &link #nftmarketplace #nft #nonfungible #zilswap @zilswap",
     children, className, collection, ...rest } = props;
   const classes = useStyles();
   const toaster = useToaster(false)
