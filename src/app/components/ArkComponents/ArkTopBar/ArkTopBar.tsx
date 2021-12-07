@@ -187,6 +187,21 @@ const ArkTopBar: React.FC<
                   My Profile
                 </Typography>
               </Button>
+              <Button
+                component={Link}
+                to="/ark/mint"
+                className={classes.navLinkButton}
+                disableRipple
+              >
+                <Typography
+                  className={cls(classes.navLink, {
+                    [classes.selectedMenu]:
+                      location.pathname.indexOf("/arky/mint") === 0,
+                  })}
+                >
+                  Mint
+                </Typography>
+              </Button>
             </Box>
           </Grid>
         )}

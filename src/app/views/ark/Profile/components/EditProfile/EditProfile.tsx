@@ -8,7 +8,7 @@ import { useHistory } from "react-router";
 import dayjs from "dayjs";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import PanoramaIcon from '@material-ui/icons/Panorama';
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import InfoIcon from '@material-ui/icons/InfoOutlined';
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { ArkClient } from "core/utilities";
 import { EMAIL_REGEX, USERNAME_REGEX, TWITTER_REGEX, INSTAGRAM_REGEX } from "app/utils/constants";
@@ -313,7 +313,11 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
                 <Typography className={classes.social}>BANNER</Typography>
                 <Box display="flex">
-                  <Typography className={classes.instruction}>Decorate your profile with a banner.&nbsp;<Tooltip placement="top" title="Note that image uploaded will be applied to both dark and light themes on ARKY." ><ErrorOutlineIcon fontSize="small" /></Tooltip></Typography>
+                  <Typography className={classes.instruction}>Decorate your profile with a banner.&nbsp;
+                    <Tooltip placement="top" title="Note that image uploaded will be applied to both dark and light themes on ARK." >
+                      <InfoIcon className={classes.infoIcon} />
+                    </Tooltip>
+                  </Typography>
                   <Box flexGrow={1} />
                   {(bannerImage || profile?.bannerImage?.url) && (<Button className={classes.deleteButton} onClick={() => clearOrRemove("banner")}>{bannerImage ? "Clear" : "Remove"}</Button>)}
                 </Box>
@@ -383,12 +387,12 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
                 <Typography className={classes.social}>SOCIALS</Typography>
                 <ArkInput
-                  startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
+                  startAdornment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
                   error={errors.twitterHandle} value={inputValues.twitterHandle} label="Twitter"
                   onValueChange={(value) => updateInputs("twitterHandle")(value)}
                 />
                 <ArkInput
-                  startAdorment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
+                  startAdornment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
                   error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram"
                   onValueChange={(value) => updateInputs("instagramHandle")(value)} />
                 <ArkInput
@@ -591,7 +595,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
     fontFamily: 'Avenir Next',
     fontWeight: 600,
-    fontSize: 11,
+    fontSize: 12,
     margin: theme.spacing(0.4, 0),
     display: "flex",
     alignItems: "center",
@@ -611,6 +615,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     textDecoration: "underline",
     padding: theme.spacing(.5),
     maxWidth: 80,
+  },
+  infoIcon: {
+    verticalAlign: "text-top",
+    fontSize: "1rem",
   }
 }));
 

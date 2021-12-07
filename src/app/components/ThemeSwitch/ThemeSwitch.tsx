@@ -39,7 +39,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       height: 14,
     },
     "& .MuiSwitch-switchBase": {
-      padding: "12px 12px",
+      padding: "6px",
+      top: "6px",
+      left: "6px",
     },
   }),
   label: {
