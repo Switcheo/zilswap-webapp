@@ -6,7 +6,7 @@ import BigNumber from "bignumber.js"
 import dayjs, { Dayjs } from "dayjs";
 import { useSelector } from "react-redux";
 import { ObservedTx } from "zilswap-sdk";
-import { ArkBox, FancyButton } from "app/components";
+import { ArkBox, FancyButton, ArkAcceptBidDialog } from "app/components";
 import { Cheque, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient, getChequeStatus, logger } from "core/utilities"
@@ -43,9 +43,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexDirection: "row",
   },
   actionButton: {
-    color: "#DEFFFF",
+    color: theme.palette.text?.primary,
     borderRadius: "12px",
-    background: "rgba(222, 255, 255, 0.1)",
+    backgroundColor: theme.palette.type === "dark" ? "#003340" : "#6BE1FF",
     display: "flex",
     width: "50%",
     padding: "12px 32px",
@@ -78,6 +78,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   text: {
     color: theme.palette.text!.primary,
+  },
+  expandIcons: {
+
+    '& svg > path': {
+      stroke: theme.palette.type === "dark" ? "#0D1B24" : "#0D1B24",
+      "stroke-opacity": 1,
+    },
+    '& svg': {
+      width: 13,
+      height: 13,
+      fill: theme.palette.type === "dark" ? undefined : "#0D1B24",
+    },
   }
 }));
 
@@ -93,6 +105,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
   const [runCancelBid, cancelLoading] = useAsyncTask(`cancelBid-${bid.id}`, e => toaster(e?.message));
   const [runAcceptBid, acceptLoading] = useAsyncTask(`acceptBid-${bid.id}`, e => toaster(e?.message));
   const userAddress = walletState.wallet?.addressInfo.byte20.toLowerCase();
+  const [selectedBid, setSelectedBid] = useState<Cheque | null>(null);
 
   const isPendingTx = useMemo(() => {
     for (const pendingTx of Object.values(pendingTxs)) {
@@ -284,12 +297,22 @@ const BidCard: React.FC<Props> = (props: Props) => {
         {status === 'Active' && bid.token.ownerAddress === userAddress &&
           <Box mt={2} display="flex" justifyContent="center">
             <Box flexGrow={1}>
-              <FancyButton variant="contained" fullWidth loading={acceptLoading || isPendingTx} onClick={() => acceptBid(bid)} className={classes.actionButton}>
-                <Typography className={classes.buttonText}>Accept</Typography>
+              <FancyButton variant="contained" fullWidth loading={acceptLoading || isPendingTx} onClick={() => setSelectedBid(bid)} className={classes.actionButton}>
+                Accept
               </FancyButton>
             </Box>
           </Box>
         }
+        <ArkAcceptBidDialog
+          blocktime={blockTime}
+          currentBlock={currentBlock}
+          loading={acceptLoading}
+          onAcceptBid={acceptBid}
+          showDialog={!!selectedBid}
+          bid={selectedBid}
+          onCloseDialog={() => setSelectedBid(null)}
+          isOffer={true}
+        />
       </CardContent>
     )
   }
@@ -316,7 +339,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
               onClick={() => setExpand(!expand)}
               className={classes.arrowIcon}
             >
-              {expand ? <UpArrow /> : <DownArrow />}
+              {expand ? <UpArrow className={classes.expandIcons} /> : <DownArrow className={classes.expandIcons} />}
             </IconButton>
           </Box>
         )}

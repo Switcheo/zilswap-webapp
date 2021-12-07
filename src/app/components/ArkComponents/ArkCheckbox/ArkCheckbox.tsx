@@ -13,13 +13,14 @@ import { ReactComponent as UnCheckedLight } from "./uncheck-light.svg";
 
 interface Props extends FormControlProps {
   lineHeader: string;
-  lineFooter: string;
+  lineFooter?: string;
   isChecked?: boolean;
   onChecked?: (checked: boolean) => void;
+  headerClass?: string;
 }
 
 const ArkCheckbox: React.FC<Props> = (props: Props) => {
-  const { onChecked, isChecked, lineHeader, lineFooter, children, className, ...rest } = props;
+  const { onChecked, isChecked, lineHeader, lineFooter, headerClass, children, className, ...rest } = props;
   const classes = useStyles();
   const theme = useTheme();
   const [checked, setChecked] = useState(!!isChecked);
@@ -35,8 +36,8 @@ const ArkCheckbox: React.FC<Props> = (props: Props) => {
     <FormControl {...rest} className={cls(classes.root, className)}>
       <FormControlLabel labelPlacement="end" label={
         <>
-          <Typography className={classes.header}>{lineHeader}</Typography>
-          <Typography className={classes.footer}>{lineFooter}</Typography>
+          <Typography className={cls(classes.header, headerClass)}>{lineHeader}</Typography>
+          {lineFooter && <Typography className={classes.footer}>{lineFooter}</Typography>}
         </>
       }
         control={<Checkbox
