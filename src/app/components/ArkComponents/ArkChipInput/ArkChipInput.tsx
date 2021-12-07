@@ -27,7 +27,6 @@ const BootstrapInput = withStyles(theme => ({
     },
     transition: theme.transitions.create(['border-color', 'box-shadow']),
     padding: "5px 12px",
-    maxWidth: "386.406px",
     minHeight: "39.25px",
     display: "flex",
     flexWrap: "wrap",

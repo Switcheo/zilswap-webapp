@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { AppTheme } from "app/theme/types";
+import { SimpleMap } from "app/utils";
 import ArkPage from "app/layouts/ArkPage";
 import { getWallet } from "app/saga/selectors";
 import { FancyButton } from "app/components";
@@ -27,6 +28,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const classes = useStyles();
   const { wallet } = useSelector(getWallet);
   const [mintOption, setMintOption] = useState<string>("create");
+  const [uploadedFiles, setUploadedFiles] = useState<SimpleMap<File>>({});
   const [inputValues, setInputValues] = useState<CollectionInputs>({
     collectionName: "",
     description: "",
@@ -36,16 +38,31 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     twitterHandle: "",
     instagramHandle: "",
     telegramLink: "",
-  })
+  });
+  const [errors, setErrors] = useState<CollectionInputs>({
+    collectionName: "",
+    description: "",
+    royalties: "",
+    websiteUrl: "",
+    discordLink: "",
+    twitterHandle: "",
+    instagramHandle: "",
+    telegramLink: "",
+  });
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
 
   return (
     <ArkPage {...rest}>
-      <Container className={cls(classes.root, className)} maxWidth="sm">
+      <Container className={cls(classes.root, className)} maxWidth="md" disableGutters>
         {wallet && (
           <Box>
             {/* Set Up Collection */}
-            <CollectionDetail setMintOption={setMintOption} mintOption={mintOption} setInputValues={setInputValues} inputValues={inputValues} />
+            <CollectionDetail 
+              uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles}
+              mintOption={mintOption} setMintOption={setMintOption} 
+              inputValues={inputValues} setInputValues={setInputValues} 
+              errors={errors} setErrors={setErrors}
+            />
 
             {/* Upload NFTs */}
             <NftUpload />
@@ -147,6 +164,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   mintButton: {
     height: 46,
+    maxWidth: 600,
   },
   confirmMintText: {
     fontSize: "13px",

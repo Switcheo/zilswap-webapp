@@ -12,6 +12,10 @@ import { AppTheme } from "app/theme/types";
 import { TWITTER_REGEX, INSTAGRAM_REGEX } from "app/utils/constants";
 import { ArkInput } from "app/components";
 import { hexToRGBA, SimpleMap } from "app/utils";
+import PlaceholderLight from "app/components/ArkComponents/ArkImageView/placeholder_bear_light.png";
+import PlaceholderDark from "app/components/ArkComponents/ArkImageView/placeholder_bear_dark.png";
+import BannerLight from "app/components/ArkComponents/ArkImageView/Banner_Light.png";
+import BannerDark from "app/components/ArkComponents/ArkImageView/Banner_Dark.png";
 import { CollectionInputs } from "../../Mint";
 
 interface Props extends BoxProps {
@@ -19,27 +23,20 @@ interface Props extends BoxProps {
   setInputValues: React.Dispatch<React.SetStateAction<CollectionInputs>>;
   mintOption: string;
   setMintOption: React.Dispatch<React.SetStateAction<string>>;
+  uploadedFiles: SimpleMap<File>,
+  setUploadedFiles: React.Dispatch<React.SetStateAction<SimpleMap<File>>>;
+  errors: CollectionInputs;
+  setErrors:  React.Dispatch<React.SetStateAction<CollectionInputs>>;
 }
 
 const DESCRIPTION_PLACEHOLDER = "The Bear Market is a collection of 10,000 programmatically, randomly-generated NFT bears on the Zilliqa blockchain."
 
 const CollectionDetail: React.FC<Props> = (props: Props) => {
-  const { children, className, inputValues, setInputValues, mintOption, setMintOption, ...rest } = props;
+  const { children, className, inputValues, setInputValues, mintOption, setMintOption, uploadedFiles, setUploadedFiles, errors, setErrors, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
-  const [errors, setErrors] = useState({
-    collectionName: "",
-    description: "",
-    royalties: "",
-    websiteUrl: "",
-    discordLink: "",
-    twitterHandle: "",
-    instagramHandle: "",
-    telegramLink: "",
-  });
   const [displayImage, setDisplayImage] = useState<string | ArrayBuffer | null>(null);
   const [bannerImage, setBannerImage] = useState<string | ArrayBuffer | null>(null);
-  const [uploadFile, setUploadFile] = useState<SimpleMap<File>>({});
 
   const onHandleDisplayDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
     if (!files.length) {
@@ -49,7 +46,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
     reader.onloadend = () => {
       setDisplayImage(reader.result);
-      setUploadFile({ ...uploadFile, display: files[0] });
+      setUploadedFiles({ ...uploadedFiles, display: files[0] });
     }
 
     reader.readAsDataURL(files[0]);
@@ -64,7 +61,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
     reader.onloadend = () => {
       setBannerImage(reader.result);
-      setUploadFile({ ...uploadFile, banner: files[0] });
+      setUploadedFiles({ ...uploadedFiles, banner: files[0] });
     }
 
     reader.readAsDataURL(files[0]);
@@ -278,7 +275,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    width: "100%",
+    maxWidth: 600,
   },
   backButton: {
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
@@ -368,10 +365,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "1rem",
   },
   displayImage: {
+    backgroundImage: `url(${theme.palette.type === "dark" ? PlaceholderDark : PlaceholderLight })`,
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "contain",
+    backgroundPositionY: "center",
+    backgroundPositionX: "center",
     height: 110,
     width: 110,
-    border: theme.palette.border,
-    background: theme.palette.type === "dark" ? "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)" : "transparent",
     borderRadius: "50%",
     display: "flex",
     alignItems: "center",
@@ -382,9 +382,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.primary.light,
   },
   dropBox: {
+    backgroundImage: `url(${theme.palette.type === "dark" ? BannerDark : BannerLight })`,
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
+    backgroundPositionY: "center",
+    backgroundPositionX: "center",
     borderRadius: 12,
-    border: theme.palette.border,
-    background: theme.palette.type === "dark" ? "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)" : "transparent",
     overflow: "hidden",
     cursor: "pointer",
     height: "110px",
@@ -399,7 +402,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 5,
     backgroundColor: "#29475A",
     width: "100%",
-    height: "inherit",
+    height: "110px",
     objectFit: "cover",
     cursor: "pointer",
   },

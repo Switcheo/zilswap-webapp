@@ -196,7 +196,7 @@ const ArkTopBar: React.FC<
                 <Typography
                   className={cls(classes.navLink, {
                     [classes.selectedMenu]:
-                      location.pathname.indexOf("/ark/mint") === 0,
+                      location.pathname.indexOf("/arky/mint") === 0,
                   })}
                 >
                   Mint

@@ -23,6 +23,7 @@ export type NftData = {
   id: string;
   image: string | ArrayBuffer | null;
   attributes: SimpleMap<string>;
+  imageFile: File;
 }
 
 interface Props extends BoxProps {
@@ -59,6 +60,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 id: file.name.substring(0, file.name.indexOf(".")),
                 image: bin,
                 attributes: {},
+                imageFile: file,
               },
               ...prevState.slice(size + index + 1)
             ]
@@ -219,39 +221,43 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         </Typography>
 
         <Box>
-          <Dropzone accept='image/jpeg, image/png' onFileDialogCancel={() => {}} onDrop={onHandleFileDrop}>
+          <Dropzone accept='image/jpeg, image/png, image/gif' onFileDialogCancel={() => {}} onDrop={onHandleFileDrop}>
             {({ getRootProps, getInputProps }) => (
-              <Box className={cls(classes.dropBox, { [classes.justifyCenter]: !uploadedFiles.length })}>
+              <Box>
                 <div {...getRootProps()}>
                   <input {...getInputProps()} />
-                  {!uploadedFiles.length && (
-                    <Typography className={classes.bannerText}>Drag and drop your folder(s) here.</Typography>
-                  )}
-                  {!!uploadedFiles.length && (
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Box className={classes.progressBox} display="flex" flexDirection="column">
-                        {uploadedFiles.map((file, index) => {
-                          return (
-                            <Box display="flex" justifyContent="space-between" alignItems="center" className={classes.nftProgress}>
-                              <FileIcon className={classes.fileIcon} />
+                  <Box className={cls(classes.dropBox, { [classes.flex]: !uploadedFiles.length })}>
+                    {!uploadedFiles.length && (
+                      <Typography className={classes.bannerText}>Drag and drop your folder(s) here.</Typography>
+                    )}
+                    {!!uploadedFiles.length && (
+                      <Box className={classes.dropBoxInner}>
+                        <Box className={classes.progressBox} flex={1}>
+                          <Box className={classes.progressBoxInner}>
+                            {uploadedFiles.map((file, index) => {
+                              return (
+                                <Box display="flex" justifyContent="space-around" alignItems="center" className={classes.nftProgress}>
+                                  <FileIcon />
 
-                              <Box display="flex" flexDirection="column" width="260px" mr={0.5}>
-                                <Typography className={classes.fileName}>{file.name}</Typography>
-                                <Box className={classes.rarityBackground}>
-                                  <Box className={classes.rarityBar} />
+                                  <Box display="flex" flexDirection="column" width="270px">
+                                    <Typography className={classes.fileName}>{file.name}</Typography>
+                                    <Box className={classes.rarityBackground}>
+                                      <Box className={classes.rarityBar} />
+                                    </Box>
+                                    <Typography className={classes.nftStatusText}>Queued</Typography>
+                                  </Box>
+
+                                  <ClearIcon className={classes.deleteFileIcon} onClick={(event) => handleDeleteFile(event, index)} />
                                 </Box>
-                                <Typography className={classes.nftStatusText}>Queued</Typography>
-                              </Box>
-
-                              <ClearIcon className={classes.deleteFileIcon} onClick={(event) => handleDeleteFile(event, index)} />
-                            </Box>
-                        )})}
+                            )})}
+                          </Box>
+                        </Box>
+                        <Box display="flex" justifyContent="center" flex={1}>
+                          <Typography className={classes.bannerText}>Drag and drop your files here.</Typography>
+                        </Box> 
                       </Box>
-                      <Box display="flex" justifyContent="center">
-                        <Typography className={classes.bannerText}>Drag and drop your files here.</Typography>
-                      </Box> 
-                    </Box>
-                  )}
+                    )}
+                  </Box>
                 </div>
               </Box>
             )}
@@ -289,7 +295,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 <TableCell align="left">
                   <Typography>Values</Typography>
                 </TableCell>
-                <TableCell width="5%"/>        
+                <TableCell width="5%" />        
               </TableRow>
             </TableHead>
             <TableBody className={classes.tableBody}>
@@ -334,43 +340,49 @@ const NftUpload: React.FC<Props> = (props: Props) => {
       <Box className={classes.manageNftBox}>
         <Typography className={classes.header}>
           MANAGE NFTs
+          {" "}
+          <span className={classes.uploadedText}>({nfts.length} uploaded)</span>
         </Typography>
         <Typography className={classes.instruction}>
           Edit names or assign attributes below.
         </Typography>
-        <TableContainer className={classes.nftTableContainer} style={{ maxWidth: "552px", maxHeight: "700px" }}>
-          <Table>
+        <TableContainer className={classes.nftTableContainer}>
+          <Table stickyHeader>
             <TableHead className={classes.tableHead}>
               <TableRow>
                 <TableCell align="left">
                   <Typography>NFT</Typography>
                 </TableCell>
                 {/* no of attributes */}
-                {attributes.map((attribute) => {
+                {attributes.length
+                  ? attributes.map((attribute) => {
                   return (
                     <TableCell>
                       <Typography>{attribute.name}</Typography>
                     </TableCell>
-                  )
-                })}
+                  )})
+                  : <TableCell>
+                    <Typography>Attributes</Typography>
+                  </TableCell>
+                }
               </TableRow>
             </TableHead>
             <TableBody className={classes.tableBody}>
               {/* no. of NFTs */}
-              {nfts.map((nft, index) => {
+              {!!nfts.length && nfts.map((nft, index) => {
                 return (
                   <TableRow>
-                    <TableCell component="th" scope="row" style={{ display: "flex" }}>
-                      <img src={nft.image?.toString()} alt="NFT" height="39.25" style={{ borderRadius: "12px", verticalAlign: "bottom" }} />
-                      <ArkInput
-                        placeholder="Id"
-                        value={nft.id}
-                        onValueChange={(value) => handleIdChange(index, value)}
-                        className={classes.idInput}
-                      />
+                    <TableCell component="th" scope="row" className={classes.imageCell}>
+                        <img src={nft.image?.toString()} alt="NFT" height="39.25px" width="39.25px" className={classes.nftImage} />
+                        <ArkInput
+                          placeholder="Id"
+                          value={nft.id}
+                          onValueChange={(value) => handleIdChange(index, value)}
+                          className={classes.idInput}
+                        />
                     </TableCell>
 
-                    {attributes.map((attribute: AttributeData) => {
+                    {!!attributes.length && attributes.map((attribute: AttributeData) => {
                       const currAttribute = nfts[index].attributes[attribute.name] ?? "";
 
                       return (
@@ -417,8 +429,32 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                         </TableCell>
                       )
                     })}
+                    {!attributes.length && index === 0 &&
+                      <TableCell rowSpan={nfts.length} height={nfts.length * 39.25 + (nfts.length - 1) * 8}>
+                        <Box className={classes.emptyState}>
+                          <Typography>Add attributes via the <strong>Manage Attributes</strong> section.</Typography>
+                        </Box>
+                      </TableCell>
+                    }
                   </TableRow>
               )})}
+              {!nfts.length &&
+                <TableRow className={classes.emptyStateRow}>
+                  <TableCell component="th" scope="row" width="30%" className={classes.emptyStateCell}>
+                    <Box className={cls(classes.emptyState, classes.emptyStatePadding)}>
+                      <Typography>Upload your NFTs via the <br/><strong>Upload Files</strong> section.</Typography>
+                    </Box>
+                  </TableCell>
+
+                  {(!attributes.length) && 
+                    <TableCell className={classes.emptyStateCell}>
+                      <Box className={cls(classes.emptyState, classes.emptyStatePadding)}>
+                        <Typography>Add attributes via the <strong>Manage Attributes</strong> section.</Typography>
+                      </Box>
+                    </TableCell>
+                  }
+                </TableRow>
+              }
             </TableBody>
           </Table>
         </TableContainer>
@@ -437,7 +473,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 700,
   },
   instruction: {
-    color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
+    color: theme.palette.primary.light,
     fontWeight: 600,
     fontSize: 12,
     margin: theme.spacing(.4, 0),
@@ -465,8 +501,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     background: theme.palette.type === "dark" ? "linear-gradient(173.54deg, #12222C 42.81%, #002A34 94.91%)" : "transparent",
     cursor: "pointer",
     minHeight: "110px",
-    display: "flex",
-    alignItems: "center",
     padding: theme.spacing(2),
   },
   bannerImage: {
@@ -474,7 +508,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundPositionY: "100%",
     backgroundPositionX: "center",
     borderRadius: 5,
-    backgroundColor: "#29475A",
     width: "100%",
     height: "inherit",
     objectFit: "cover",
@@ -510,7 +543,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiTableCell-root": {
       borderBottom: "none",
       padding: theme.spacing(1, 1, 0, 0),
-    }
+    },
   },
   addAttributeButton: {
     backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#DEFFFF",
@@ -586,6 +619,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   nftTableContainer: {
+    maxHeight: 600,
+    maxWidth: 790.938,
+    backgroundColor: theme.palette.background.default,
+    "& .MuiTableCell-root": {
+      minWidth: 110,
+    },
     "&::-webkit-scrollbar": {
       width: "5px",
       height: "5px",
@@ -597,12 +636,27 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&::-webkit-scrollbar-track": {
       backgroundColor: theme.palette.type === "dark" ? "#29475A" : "rgba(0, 51, 64, 0.2)",
       borderRadius: 12,
+      marginTop: theme.spacing(5),
+      marginLeft: theme.spacing(1),
+    },
+    "&::-webkit-scrollbar-track:horizontal": {
+      marginRight: theme.spacing(1),
+      marginLeft: theme.spacing(25),
+      boxShadow: "inset 0 0 10px 10px green",
+      border: "solid 3px transparent",
+    },
+    "&::-webkit-scrollbar-corner": {
+      background: "rgba(0, 0, 0, 0)",
     },
   },
   progressBox: {
     backgroundColor: theme.palette.currencyInput,
     padding: theme.spacing(1.5),
     borderRadius: 12,
+  },
+  progressBoxInner: {
+    display: "flex",
+    flexDirection: "column",
     "&::-webkit-scrollbar": {
       width: "5px",
       height: "5px",
@@ -615,6 +669,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       backgroundColor: theme.palette.type === "dark" ? "#29475A" : "rgba(0, 51, 64, 0.2)",
       borderRadius: 12,
     },
+    maxHeight: 265,
+    overflow: "auto",
   },
   rarityBackground: {
     backgroundColor: "rgba(107, 225, 255, 0.2)",
@@ -645,11 +701,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       cursor: "pointer",
     }
   },
-  justifyCenter: {
+  flex: {
+    display: "flex",
     justifyContent: "center",
-  },
-  fileIcon: {
-    marginRight: "12px",
+    alignItems: "center",
   },
   fileName: {
     marginBottom: "6px", 
@@ -661,7 +716,52 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiFormHelperText-root": {
       display: "none",
     }
-  }
+  },
+  dropBoxInner: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  uploadedText: {
+    color: theme.palette.primary.light,
+    fontWeight: 600,
+    fontFamily: "Avenir Next",
+    fontSize: "12px",
+  },
+  emptyState: {
+    border: theme.palette.border,
+    backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#DEFFFF",
+    borderRadius: 12,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "inherit!important",
+    minHeight: "39.25px",
+    "& .MuiTypography-root": {
+      color: theme.palette.primary.light,
+      textAlign: "center",
+    }
+  },
+  emptyStatePadding: {
+    padding: theme.spacing(2),
+  },
+  emptyStateRow: {
+    height: "80px",
+  },
+  emptyStateCell: {
+    height: "inherit!important",
+  },
+  imageCell: {
+    display: "flex",
+    position: "sticky",
+    left: 0,
+    zIndex: 1,
+    minWidth: "200px!important",
+  },
+  nftImage: {
+    borderRadius: "12px", 
+    verticalAlign: "bottom",
+  },
 }));
 
 export default NftUpload;
