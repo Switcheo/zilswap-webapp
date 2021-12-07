@@ -183,7 +183,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   mintButton: {
     height: 46,
-    maxWidth: 600,
+    maxWidth: 500,
   },
   confirmMintText: {
     fontSize: "13px",
