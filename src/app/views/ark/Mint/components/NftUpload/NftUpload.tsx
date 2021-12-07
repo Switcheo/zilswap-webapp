@@ -12,7 +12,7 @@ import { ArkChipInput, ArkInput } from "app/components";
 import { hexToRGBA } from "app/utils";
 import { AttributeData, NftData } from "../../Mint";
 import { ReactComponent as FileIcon } from "./assets/file.svg";
-// import { ReactComponent as FileSuccessIcon} from "./assets/file-success.svg";
+import { ReactComponent as FileSuccessIcon} from "./assets/file-success.svg";
 // import { ReactComponent as FileErrorIcon } from "./assets/file-error.svg";
 
 interface Props extends BoxProps {
@@ -22,11 +22,14 @@ interface Props extends BoxProps {
   setAttributes: React.Dispatch<React.SetStateAction<AttributeData[]>>;
 }
 
+export type ProgressType = "queued" | "uploaded";
+
 const NftUpload: React.FC<Props> = (props: Props) => {
   const { children, className, attributes, setAttributes, nfts, setNfts, ...rest } = props;
   const classes = useStyles();
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [progress, setProgress] = useState<ProgressType[]>([]);
 
   const readFiles = (files: File[]) => {
     const reader = new FileReader();
@@ -38,20 +41,28 @@ const NftUpload: React.FC<Props> = (props: Props) => {
       const file = files[index];
       reader.onload = function(e: ProgressEvent<FileReader>) {  
         if (e.target?.result) {
-          const bin = e.target.result;
+          const image = e.target.result;
 
           setNfts(prevState => (
             [
               ...prevState.slice(0, size + index),
               {
                 id: file.name.substring(0, file.name.indexOf(".")),
-                image: bin,
+                image,
                 attributes: {},
                 imageFile: file,
               },
               ...prevState.slice(size + index + 1)
             ]
-          ))
+          ));
+
+          setProgress(prevState => (
+            [
+              ...prevState.slice(0, size + index),
+              "uploaded",
+              ...prevState.slice(size + index + 1)
+            ]
+          ));
         }
 
         readFile(index + 1);
@@ -64,13 +75,18 @@ const NftUpload: React.FC<Props> = (props: Props) => {
   }
 
   const onHandleFileDrop = (files: File[], rejection: FileRejection[], dropEvent: DropEvent) => {
-    if (!files.length) {
+    if (!files.length || uploadedFiles.length > 100) {
       return;
     }
 
     setUploadedFiles([
       ...uploadedFiles,
       ...files
+    ]);
+
+    setProgress([
+      ...progress,
+      ...Array(files.length).fill("queued"),
     ]);
 
     readFiles(files);
@@ -169,6 +185,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     
     const newFiles = uploadedFiles.filter((_, i) => i !== index);
     const newNfts = nfts.filter((_, i) => i !== index);
+    const newProgress = progress.filter((_, i) => i !== index);
 
     setUploadedFiles(
       newFiles
@@ -176,6 +193,10 @@ const NftUpload: React.FC<Props> = (props: Props) => {
 
     setNfts(
       newNfts
+    );
+
+    setProgress(
+      newProgress
     );
   }
 
@@ -224,14 +245,21 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                             {uploadedFiles.map((file, index) => {
                               return (
                                 <Box display="flex" justifyContent="space-around" alignItems="center" className={classes.nftProgress}>
-                                  <FileIcon />
-
+                                  {progress[index] === "queued"
+                                    ? <FileIcon />
+                                    : <FileSuccessIcon />
+                                  }
                                   <Box display="flex" flexDirection="column" width="270px">
                                     <Typography className={classes.fileName}>{file.name}</Typography>
-                                    <Box className={classes.rarityBackground}>
-                                      <Box className={classes.rarityBar} />
+                                    <Box className={classes.progressBackground}>
+                                      <Box className={cls({[classes.progressBar]: progress[index] === "uploaded"})} />
                                     </Box>
-                                    <Typography className={classes.nftStatusText}>Queued</Typography>
+                                    <Typography className={classes.nftStatusText}>
+                                      {progress[index] === "queued"
+                                        ? "Queued"
+                                        : "100% Uploaded"
+                                      }
+                                    </Typography>
                                   </Box>
 
                                   <ClearIcon className={classes.deleteFileIcon} onClick={(event) => handleDeleteFile(event, index)} />
@@ -360,13 +388,13 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 return (
                   <TableRow>
                     <TableCell component="th" scope="row" className={classes.imageCell}>
-                        <img src={nft.image?.toString()} alt="NFT" height="39.25px" width="39.25px" className={classes.nftImage} />
-                        <ArkInput
-                          placeholder="Id"
-                          value={nft.id}
-                          onValueChange={(value) => handleIdChange(index, value)}
-                          className={classes.idInput}
-                        />
+                      <img src={nft.image?.toString()} alt="NFT" height="39.25px" width="39.25px" className={classes.nftImage} />
+                      <ArkInput
+                        placeholder="Id"
+                        value={nft.id}
+                        onValueChange={(value) => handleIdChange(index, value)}
+                        className={classes.idInput}
+                      />
                     </TableCell>
 
                     {!!attributes.length && attributes.map((attribute: AttributeData) => {
@@ -609,6 +637,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     maxHeight: 600,
     maxWidth: 790.938,
     backgroundColor: theme.palette.background.default,
+    borderRadius: 12,
     "& .MuiTableCell-root": {
       minWidth: 110,
     },
@@ -659,13 +688,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     maxHeight: 265,
     overflow: "auto",
   },
-  rarityBackground: {
+  progressBackground: {
     backgroundColor: "rgba(107, 225, 255, 0.2)",
     borderRadius: 5,
     display: "flex",
     padding: "3px",
   },
-  rarityBar: {
+  progressBar: {
     display: "flex",
     backgroundColor: "#00FFB0",
     borderRadius: 5,
