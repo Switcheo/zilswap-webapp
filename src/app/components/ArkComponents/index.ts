@@ -1,3 +1,4 @@
+export { default as ArkAcceptBidDialog } from "./ArkAcceptBidDialog";
 export { default as ArkBanner } from "./ArkBanner";
 export { default as ArkBidsTable } from "./ArkBidsTable";
 export { default as ArkBreadcrumb } from "./ArkBreadcrumb";
