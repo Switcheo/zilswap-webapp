@@ -23,6 +23,18 @@ export type CollectionInputs = {
   telegramLink: string;
 }
 
+export type AttributeData = {
+  name: string;
+  values: string[];
+}
+
+export type NftData = {
+  id: string;
+  image: string | ArrayBuffer | null;
+  attributes: SimpleMap<string>;
+  imageFile: File;
+}
+
 const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
@@ -49,6 +61,13 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     instagramHandle: "",
     telegramLink: "",
   });
+
+  const [attributes, setAttributes] = useState<AttributeData[]>([{
+    name: "",
+    values: [],
+  }]);
+  const [nfts, setNfts] = useState<NftData[]>([]);
+
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
 
   return (
@@ -65,7 +84,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
             />
 
             {/* Upload NFTs */}
-            <NftUpload />
+            <NftUpload nfts={nfts} setNfts={setNfts} attributes={attributes} setAttributes={setAttributes} />
 
             {/* Confirm Mint */}
             <Box mt={5}>
@@ -100,7 +119,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
                 />
               </Box>
 
-              <FancyButton variant="contained" color="primary" className={classes.mintButton}>
+              <FancyButton variant="contained" color="primary" className={classes.mintButton} disabled={!acceptTerms}>
                 Mint NFTs
               </FancyButton>
             </Box>

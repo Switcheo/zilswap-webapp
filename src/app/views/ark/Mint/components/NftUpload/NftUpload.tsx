@@ -10,36 +10,23 @@ import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { AppTheme } from "app/theme/types";
 import { ArkChipInput, ArkInput } from "app/components";
 import { hexToRGBA, SimpleMap } from "app/utils";
+import { AttributeData, NftData } from "../../Mint";
 import { ReactComponent as FileIcon } from "./assets/file.svg";
 // import { ReactComponent as FileSuccessIcon} from "./assets/file-success.svg";
 // import { ReactComponent as FileErrorIcon } from "./assets/file-error.svg";
 
-export type AttributeData = {
-  name: string;
-  values: string[];
-}
-
-export type NftData = {
-  id: string;
-  image: string | ArrayBuffer | null;
-  attributes: SimpleMap<string>;
-  imageFile: File;
-}
-
 interface Props extends BoxProps {
-
+  nfts: NftData[];
+  setNfts: React.Dispatch<React.SetStateAction<NftData[]>>;
+  attributes: AttributeData[];
+  setAttributes: React.Dispatch<React.SetStateAction<AttributeData[]>>;
 }
 
 const NftUpload: React.FC<Props> = (props: Props) => {
-  const { children, className, ...rest } = props;
+  const { children, className, attributes, setAttributes, nfts, setNfts, ...rest } = props;
   const classes = useStyles();
-  const [attributes, setAttributes] = useState<AttributeData[]>([{
-    name: "",
-    values: [],
-  }])
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [nfts, setNfts] = useState<NftData[]>([]);
 
   const readFiles = (files: File[]) => {
     const reader = new FileReader();
@@ -232,7 +219,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                     )}
                     {!!uploadedFiles.length && (
                       <Box className={classes.dropBoxInner}>
-                        <Box className={classes.progressBox} flex={1}>
+                        <Box className={classes.progressBox} flex={1} onClick={(event) => event.stopPropagation()}>
                           <Box className={classes.progressBoxInner}>
                             {uploadedFiles.map((file, index) => {
                               return (
