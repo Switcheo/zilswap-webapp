@@ -65,6 +65,7 @@ function* loadNftList() {
         break
       }
     }
+    if (filter.artist) query.artist = filter.artist;
 
     if (wallet) {
       query.viewer = wallet.addressInfo.byte20.toLowerCase()

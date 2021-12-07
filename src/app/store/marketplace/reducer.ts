@@ -23,6 +23,7 @@ const initial_state: MarketPlaceState = {
       timed_auction: false,
     },
     collectionAddress: null,
+    artist: null,
     owner: null,
     likedBy: null,
     search: '',
