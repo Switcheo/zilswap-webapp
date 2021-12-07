@@ -13,7 +13,7 @@ import ArrowForwardIcon from "@material-ui/icons/ArrowForwardRounded";
 import cls from "classnames";
 import { Link } from "react-router-dom";
 import { Text } from "app/components";
-import ArkLogo from "app/components/ArkComponents/ArkTopBar/ark-logo.png";
+import ArkLogo from "app/components/ArkComponents/ArkTopBar/logo-arky-small.png";
 import { AppTheme } from "app/theme/types";
 import { useRouter } from "app/utils";
 

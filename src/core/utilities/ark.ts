@@ -160,7 +160,7 @@ export class ArkClient {
     await this.checkError(json);
 
     const traits = json.result.entries as TraitsResponse
-    return { traits: parseTraits(traits), collection: json.result.collection }
+    return { traits: parseTraits(traits), collection: { ...json.result.collection, artists: json.result.artists } }
   }
 
   getNftToken = async (address: string, tokenId: string, viewer?: string) => {
@@ -750,6 +750,7 @@ export namespace ArkClient {
     type?: string;
     sortBy?: string;
     sortDir?: string;
+    artist?: string;
   }
   export interface ListCollectionParams extends ListQueryParams {
     search?: string

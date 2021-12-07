@@ -115,6 +115,7 @@ export interface Collection {
   ownerName: string | null;
   royaltyBps: number | null;
   royaltyType: string | null;
+  artists?: SimpleMap<string>;
 }
 
 export interface CollectionWithStats extends Collection {
@@ -191,6 +192,7 @@ export interface CollectionFilter {
   sortBy: SortBy;
   saleType: SaleType;
   search: string;
+  artist: string | null;
   collectionAddress: string | null;
   owner: string | null;
   likedBy: string | null;
