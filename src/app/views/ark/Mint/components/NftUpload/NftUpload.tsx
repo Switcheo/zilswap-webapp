@@ -9,7 +9,7 @@ import DoneIcon from "@material-ui/icons/DoneRounded";
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { AppTheme } from "app/theme/types";
 import { ArkChipInput, ArkInput } from "app/components";
-import { hexToRGBA, SimpleMap } from "app/utils";
+import { hexToRGBA } from "app/utils";
 import { AttributeData, NftData } from "../../Mint";
 import { ReactComponent as FileIcon } from "./assets/file.svg";
 // import { ReactComponent as FileSuccessIcon} from "./assets/file-success.svg";
