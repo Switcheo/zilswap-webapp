@@ -341,7 +341,7 @@ const AttributesFilter = (props: Props) => {
             if (!selected.length) return null;
 
             totalSelectCount += selected.length
-            return  (
+            return (
               <span key={type.trait} className={classes.filterSelectedValueContainer}>
                 <span className={classes.filterSelectedValueCategory}>{type.trait.toUpperCase()}:</span>
                 {

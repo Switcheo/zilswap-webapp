@@ -30,8 +30,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   popover: {
     "& .MuiPaper-root": {
       backgroundColor: theme.palette.type === "dark" ? "#223139" : "D4FFF2",
-      width: '100%',
-      maxWidth: 300,
       borderRadius: "12px",
       border: theme.palette.border,
       overflow: "hidden",
