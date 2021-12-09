@@ -28,6 +28,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF",
     padding: theme.spacing(2),
     maxWidth: 450,
+    borderLeft: theme.palette.border,
+    borderRight: theme.palette.border,
+    borderBottom: theme.palette.border,
+    borderRadius: "0 0 12px 12px",
   },
   card: {
     backgroundColor: theme.palette.type === "dark" ? "#DEFFFF11" : "#6BE1FF33",
@@ -95,6 +99,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   headerClass: {
     fontSize: 12,
     fontWeight: 600,
+    margin: theme.spacing(2, 0),
+
   }
 }));
 
@@ -125,7 +131,7 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
   return (
     <DialogModal
       open={showDialog}
-      onClose={onCloseDialog}
+      onClose={!loading ? onCloseDialog : () => { }}
       header={"Accept Bid"}
       titlePadding={true}
       titleClassname={classes.titleClass}
@@ -183,19 +189,11 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
         </Card>
 
         <ArkCheckbox
-          lineHeader="By checking this box, I accept ARK’s terms and conditions."
+          lineHeader="By checking this box, I accept ARKY’s terms and conditions."
           isChecked={checked}
           onChecked={setChecked}
           headerClass={classes.headerClass}
         />
-        {/* <FormControlLabel
-          label={<Typography className={classes.checkboxText}>By checking this box, I accept ARK’s terms and conditions.</Typography>}
-          control={
-            <Checkbox
-              icon={<UnChecked />} checkedIcon={<Checked />}
-            />
-          }
-        /> */}
         <FancyButton loading={loading} onClick={() => acceptBid()} disabled={loading || !checked} variant="contained" color="primary" className={classes.button}>Accept Bid</FancyButton>
         <FancyButton
           disabled={loading}
