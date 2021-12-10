@@ -90,7 +90,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     tokenName: 'ZilChill',
     tokenDecimals: 5,
     description: '$PLAY is a utility token of ZilChill and will be used as the payment and reward token that will complement the existing $REDC governance token.',
-    contractAddress: 'zil1tlpnw5fj9xdesk2kgtcssfr2vacgn8rh8e2qty',
+    contractAddress: 'zil1nr4msut73sdsr5zfjvv29258s6eqmm8xna50v5',
     showUntil: dayjs('2021-12-15T10:00:00.000+0800'),
     usdRatio: '0.7',
     usdTarget: '$2,100,000',
