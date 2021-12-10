@@ -83,6 +83,17 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     showUntil: dayjs('2021-09-10T10:00:00.000+0800'),
     usdRatio: '0.7',
     usdTarget: '$1,200,000',
+  }, {
+    projectURL: 'https://docs.zilswap.io/zilo/launches/04-zilchill',
+    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
+    tokenSymbol: 'PLAY',
+    tokenName: 'ZilChill',
+    tokenDecimals: 5,
+    description: '$PLAY is a utility token of ZilChill and will be used as the payment and reward token that will complement the existing $REDC governance token.',
+    contractAddress: 'zil1tlpnw5fj9xdesk2kgtcssfr2vacgn8rh8e2qty',
+    showUntil: dayjs('2021-12-15T10:00:00.000+0800'),
+    usdRatio: '0.7',
+    usdTarget: '$2,100,000',
   }],
 }
 
