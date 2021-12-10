@@ -168,6 +168,7 @@ const Row: React.FC<Props> = (props: Props) => {
   const [runAcceptBid, acceptLoading] = useAsyncTask(`acceptBid-${baseBid.id}`, e => toaster(e?.message));
   const userAddress = walletState.wallet?.addressInfo.byte20.toLowerCase();
   const [selectedBid, setSelectedBid] = useState<Cheque | null>(null);
+  const [awaitTxApproval, setAwaitTxApproval] = useState(false);
 
   const isPendingTx = useMemo(() => {
     for (const pendingTx of Object.values(pendingTxs)) {
@@ -247,10 +248,13 @@ const Row: React.FC<Props> = (props: Props) => {
 
       if (transaction?.id) {
         toaster("Approve TX Submitted", { hash: transaction.id });
+        setAwaitTxApproval(true)
         try {
           await waitForTx(transaction.id);
         } catch (e) {
           console.error(e);
+        } finally {
+          setAwaitTxApproval(false)
         }
       }
 
@@ -405,6 +409,7 @@ const Row: React.FC<Props> = (props: Props) => {
         blocktime={blockTime}
         currentBlock={currentBlock}
         loading={acceptLoading}
+        awaitApproval={awaitTxApproval}
         onAcceptBid={acceptBid}
         showDialog={!!selectedBid}
         bid={selectedBid}

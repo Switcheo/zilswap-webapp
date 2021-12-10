@@ -5,7 +5,7 @@ import { toBech32Address } from "@zilliqa-js/crypto";
 import { useSelector } from "react-redux";
 import cls from "classnames";
 import dayjs from "dayjs";
-import { Avatar, Box, BoxProps, Card, CardContent, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
+import { Avatar, Box, BoxProps, Card, CardContent, CircularProgress, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
 import { ArkCheckbox, CurrencyLogo, DialogModal, FancyButton } from "app/components";
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 import { Cheque, RootState, TokenState } from "app/store/types";
@@ -20,7 +20,8 @@ interface Props extends BoxProps {
   onAcceptBid: (bid: Cheque) => void;
   loading: boolean;
   blocktime: dayjs.Dayjs;
-  currentBlock: number
+  currentBlock: number;
+  awaitApproval: boolean;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -60,6 +61,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: "18px 32px",
     backgroundColor: theme.palette.type === "dark" ? "#003340" : "#6BE1FF",
     color: theme.palette.text?.primary,
+    alignItems: "center"
   },
   buttonText: {
     padding: "8px, 16px",
@@ -100,12 +102,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: 12,
     fontWeight: 600,
     margin: theme.spacing(2, 0),
-
+  },
+  loadingIcon: {
+    color: "rgba(255,255,255,.8)",
+    marginLeft: 12,
   }
 }));
 
 const AcceptBidDialog: React.FC<Props> = (props: Props) => {
-  const { blocktime, currentBlock, onAcceptBid, loading, bid, isOffer, showDialog, onCloseDialog, children, className, ...rest } = props;
+  const { awaitApproval, blocktime, currentBlock, onAcceptBid, loading, bid, isOffer, showDialog, onCloseDialog, children, className, ...rest } = props;
   const classes = useStyles();
   const [checked, setChecked] = useState(false);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
@@ -128,6 +133,13 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
       onAcceptBid(bid);
     }
   }
+
+  const getButtonText = () => {
+    if (!loading) return "Accept Bid";
+    if (awaitApproval) return "Await Tx Approval";
+    return "Processing"
+  }
+
   return (
     <DialogModal
       open={showDialog}
@@ -194,7 +206,14 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
           onChecked={setChecked}
           headerClass={classes.headerClass}
         />
-        <FancyButton loading={loading} onClick={() => acceptBid()} disabled={loading || !checked} variant="contained" color="primary" className={classes.button}>Accept Bid</FancyButton>
+        <FancyButton
+          onClick={() => acceptBid()}
+          disabled={loading || !checked}
+          variant="contained" color="primary"
+          className={classes.button}
+        >
+          {getButtonText()}{loading && (<CircularProgress size={24} className={classes.loadingIcon} />)}
+        </FancyButton>
         <FancyButton
           disabled={loading}
           variant="contained" fullWidth onClick={() => onCloseDialog()}
