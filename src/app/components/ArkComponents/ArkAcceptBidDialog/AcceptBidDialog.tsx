@@ -136,7 +136,7 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
 
   const getButtonText = () => {
     if (!loading) return "Accept Bid";
-    if (awaitApproval) return "Await Tx Approval";
+    if (awaitApproval) return "Confirming Approval Tx";
     return "Processing"
   }
 
