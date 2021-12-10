@@ -212,6 +212,16 @@ const ArtistFilter = (props: Props) => {
     dispatch(updateFilter({ artist: text }));
   }
 
+  const sortByName = (cur: string, next: string) => {
+    let a = cur.trim().replaceAll(/^"|"$/g, "");
+    let b = next.trim().replaceAll(/^"|"$/g, "");
+    if (a < b) return -1
+    if (a > b) return 1
+    return 0
+  }
+
+  const sortedArtist = Object.entries(artists).sort(([key, value], [key2, value2]) => sortByName(key, key2))
+
   return (
     <ClickAwayListener onClickAway={() => { setShowPopper(false) }}>
       <>
@@ -265,7 +275,7 @@ const ArtistFilter = (props: Props) => {
             )}
             {artists && <Fragment>
               <Typography className={classes.searchResultHeader}>Artists</Typography>
-              {Object.entries(artists).map(([key, value]) => (
+              {sortedArtist.map(([key, value]) => (
                 <Box onClick={() => handleSelect(key)} className={classes.popoverRow} display="flex" justifyContent="space-between" alignItems="center">
                   <Box className={classes.resultCollectionName} display="flex" alignItems="center">
                     <ArkImageView
@@ -279,7 +289,7 @@ const ArtistFilter = (props: Props) => {
                       </Box>
                     </Box>
                   </Box>
-                  <Typography>{new BigNumber(value).toFormat(0)} Arts</Typography>
+                  <Typography>{new BigNumber(value).toFormat(0)} Art</Typography>
                 </Box>
               ))}
             </Fragment>}
