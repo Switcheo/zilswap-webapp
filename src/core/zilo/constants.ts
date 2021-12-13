@@ -17,7 +17,7 @@ export type ILOData = {
 
 export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
   [Network.MainNet]: [{
-    projectURL: 'https://docs.zilswap.io/how-to/zilo/launches/01-zilstream',
+    projectURL: 'https://docs.zilswap.io/zilo/overview/01-zilstream',
     imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
     tokenSymbol: 'STREAM',
     tokenName: 'ZilStream',
@@ -28,7 +28,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     usdRatio: '0.7',
     usdTarget: '$342,867',
   }, {
-    projectURL: 'https://docs.zilswap.io/how-to/zilo/launches/02-zilliqaroyale',
+    projectURL: 'https://docs.zilswap.io/zilo/overview/02-zilliqaroyale',
     imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/1ZILO-2-BLOX-banner.png',
     tokenSymbol: 'BLOX',
     tokenName: 'ZilliqaRoyale',
@@ -39,7 +39,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     usdRatio: '0.7',
     usdTarget: '$550,000',
   }, {
-    projectURL: 'https://docs.zilswap.io/zilo/launches/03-demons',
+    projectURL: 'https://docs.zilswap.io/zilo/overview/03-demons',
     imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-3-DMZ-banner2x.png',
     tokenSymbol: 'DMZ',
     tokenName: 'DeMons',
@@ -49,9 +49,21 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     showUntil: dayjs('2021-09-12T10:00:00.000+0800'),
     usdRatio: '0.7',
     usdTarget: '$1,200,000',
+  }, {
+    projectURL: 'https://docs.zilswap.io/zilo/overview/04-zilchill',
+    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-4-PLAY-banner.png',
+    tokenSymbol: 'PLAY',
+    tokenName: 'ZilChill',
+    tokenDecimals: 5,
+    description: '$PLAY is a utility token of ZilChill and will be used as the payment and reward token that will complement the existing $REDC governance token.',
+    comingSoon: true,
+    contractAddress: 'zil1ptfqm52nfmw3t99slwzydczejr544amdy587pr',
+    showUntil: dayjs('2021-12-21T10:00:00.000+0800'),
+    usdRatio: '0.7',
+    usdTarget: '$2,100,000',
   }],
   [Network.TestNet]: [{
-    projectURL: 'https://docs.zilswap.io/how-to/zilo/launches/01-zilstream',
+    projectURL: 'https://docs.zilswap.io/zilo/overview/01-zilstream',
     imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
     tokenSymbol: 'STREAM',
     tokenName: 'ZilStream',
@@ -62,7 +74,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     usdRatio: '0.7',
     usdTarget: '$342,867',
   }, {
-    projectURL: 'https://docs.zilswap.io/how-to/zilo/launches/02-zilliqaroyale',
+    projectURL: 'https://docs.zilswap.io/zilo/overview/02-zilliqaroyale',
     imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/1ZILO-2-BLOX-banner.png',
     tokenSymbol: 'BLOX',
     tokenName: 'ZilliqaRoyale',
@@ -73,7 +85,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     usdRatio: '0.7',
     usdTarget: '$550,000',
   }, {
-    projectURL: 'https://docs.zilswap.io/zilo/launches/03-demons',
+    projectURL: 'https://docs.zilswap.io/zilo/overview/03-demons',
     imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-3-DMZ-banner2x.png',
     tokenSymbol: 'DMZ',
     tokenName: 'DeMons',
@@ -84,8 +96,8 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     usdRatio: '0.7',
     usdTarget: '$1,200,000',
   }, {
-    projectURL: 'https://docs.zilswap.io/zilo/launches/04-zilchill',
-    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
+    projectURL: 'https://docs.zilswap.io/zilo/overview/04-zilchill',
+    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-4-PLAY-banner.png',
     tokenSymbol: 'PLAY',
     tokenName: 'ZilChill',
     tokenDecimals: 5,
