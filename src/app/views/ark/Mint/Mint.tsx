@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Checkbox, Container, FormControlLabel, Typography } from "@material-ui/core";
+import { Box, Checkbox, Container, Divider, FormControlLabel, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useSelector } from "react-redux";
@@ -74,54 +74,58 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     <ArkPage {...rest}>
       <Container className={cls(classes.root, className)} maxWidth="md" disableGutters>
         {wallet && (
-          <Box>
-            {/* Set Up Collection */}
-            <CollectionDetail 
-              uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles}
-              mintOption={mintOption} setMintOption={setMintOption} 
-              inputValues={inputValues} setInputValues={setInputValues} 
-              errors={errors} setErrors={setErrors}
-            />
+          <Box display="flex">
+            <Divider orientation="vertical" className={classes.nav} flexItem/>
 
-            {/* Upload NFTs */}
-            <NftUpload nfts={nfts} setNfts={setNfts} attributes={attributes} setAttributes={setAttributes} />
+            <Box>
+              {/* Set Up Collection */}
+              <CollectionDetail 
+                uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles}
+                mintOption={mintOption} setMintOption={setMintOption} 
+                inputValues={inputValues} setInputValues={setInputValues} 
+                errors={errors} setErrors={setErrors}
+              />
 
-            {/* Confirm Mint */}
-            <Box mt={5}>
-              <Box mb={4}>
-                <Typography className={classes.pageHeader}>3. Confirm Mint</Typography>
+              {/* Upload NFTs */}
+              <NftUpload nfts={nfts} setNfts={setNfts} attributes={attributes} setAttributes={setAttributes} />
+
+              {/* Confirm Mint */}
+              <Box mt={5}>
+                <Box mb={4}>
+                  <Typography className={classes.pageHeader}>3. Confirm Mint</Typography>
+                </Box>
+
+                <Typography className={classes.confirmMintText}>
+                  Please ensure that all information is correct before minting your collection.
+                  {" "}
+                  <span className={classes.warningText}>Your NFTs cannot be edited once they have been minted.</span>
+                </Typography>
+
+                {/* Terms */}
+                <Box className={classes.termsBox}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        className={classes.radioButton}
+                        checkedIcon={<CheckedIcon />}
+                        icon={<UncheckedIcon fontSize="small" />}
+                        checked={acceptTerms}
+                        onChange={() => setAcceptTerms(!acceptTerms)}
+                        disableRipple
+                      />
+                    }
+                    label={
+                      <Typography className={classes.confirmMintText}>
+                        By checking this box, I accept ARKY's terms and conditions.
+                      </Typography>
+                    }
+                  />
+                </Box>
+
+                <FancyButton variant="contained" color="primary" className={classes.mintButton} disabled={!acceptTerms}>
+                  Mint NFTs
+                </FancyButton>
               </Box>
-
-              <Typography className={classes.confirmMintText}>
-                Please ensure that all information is correct before minting your collection.
-                {" "}
-                <span className={classes.warningText}>Your NFTs cannot be edited once they have been minted.</span>
-              </Typography>
-
-              {/* Terms */}
-              <Box className={classes.termsBox}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      className={classes.radioButton}
-                      checkedIcon={<CheckedIcon />}
-                      icon={<UncheckedIcon fontSize="small" />}
-                      checked={acceptTerms}
-                      onChange={() => setAcceptTerms(!acceptTerms)}
-                      disableRipple
-                    />
-                  }
-                  label={
-                    <Typography className={classes.confirmMintText}>
-                      By checking this box, I accept ARKY's terms and conditions.
-                    </Typography>
-                  }
-                />
-              </Box>
-
-              <FancyButton variant="contained" color="primary" className={classes.mintButton} disabled={!acceptTerms}>
-                Mint NFTs
-              </FancyButton>
             </Box>
           </Box>
         )}
@@ -188,6 +192,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   confirmMintText: {
     fontSize: "13px",
     lineHeight: "16px",
+  },
+  nav: {
+    marginRight: theme.spacing(4),
+    [theme.breakpoints.down("sm")]: {
+      display: "none",
+    }
   },
 }));
 
