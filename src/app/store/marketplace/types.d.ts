@@ -125,6 +125,7 @@ export interface CollectionWithStats extends Collection {
 
 export interface CollectionPriceStat {
   volume: string;
+  allTimeVolume: string;
   floorPrice: string;
 }
 
