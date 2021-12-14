@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Container, Divider, Typography } from "@material-ui/core";
+import { Box, Container, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useSelector } from "react-redux";
@@ -77,8 +77,8 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     <ArkPage {...rest}>
       <Container className={cls(classes.root, className)} maxWidth="md" disableGutters>
         {wallet && (
-          <Box display="flex">
-            <Divider orientation="vertical" className={classes.nav} flexItem/>
+          <Box>
+            {/* <Divider orientation="vertical" className={classes.nav} flexItem/> */}
 
             <Box>
               {/* Set Up Collection */}

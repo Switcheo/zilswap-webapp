@@ -57,7 +57,6 @@ const ConfirmMint: React.FC<Props> = (props: Props) => {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    maxWidth: 600,
     marginTop: theme.spacing(5),
   },
   pageHeader: {
