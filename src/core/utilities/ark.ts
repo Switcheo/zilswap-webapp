@@ -621,12 +621,14 @@ export class ArkClient {
   static parseCollectionStats(collection: CollectionWithStats) {
     const floorPrice = bnOrZero(collection.priceStat?.floorPrice).shiftedBy(-ZIL_DECIMALS)
     const volume = bnOrZero(collection.priceStat?.volume).shiftedBy(-ZIL_DECIMALS);
+    const allTimeVolume = bnOrZero(collection.priceStat?.allTimeVolume).shiftedBy(-ZIL_DECIMALS);
     const holderCount = bnOrZero(collection.tokenStat.holderCount);
     const tokenCount = bnOrZero(collection.tokenStat.tokenCount);
 
     return {
       floorPrice: floorPrice.gt(0) ? toHumanNumber(floorPrice, 2) : undefined,
       volume: volume.gt(0) ? toHumanNumber(volume, 2) : undefined,
+      allTimeVolume: allTimeVolume.gt(0) ? toHumanNumber(allTimeVolume, 2) : undefined,
       holderCount: holderCount.gt(0) ? holderCount.toString(10) : undefined,
       tokenCount: tokenCount.gt(0) ? tokenCount.toString(10) : undefined,
     }
