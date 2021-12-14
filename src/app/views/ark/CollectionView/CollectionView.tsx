@@ -289,7 +289,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
             <Grid item xs={6} sm={3}>
               <Box className={classes.statsItem}>
-                <Text className={classes.statsHeader}>Volume Traded</Text>
+                <Text className={classes.statsHeader}>7-Day Volume</Text>
                 <Text className={classes.statsContent}>{volume ? `${volume} ZIL` : "-"}</Text>
               </Box>
             </Grid>
