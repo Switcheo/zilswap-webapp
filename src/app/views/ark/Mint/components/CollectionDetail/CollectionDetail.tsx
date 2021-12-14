@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import cls from "classnames";
-import { Box, BoxProps, IconButton, Tooltip, Typography } from "@material-ui/core";
+import { Box, BoxProps, FormControl, IconButton, Tooltip, Typography, Select, MenuItem } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import DoneIcon from "@material-ui/icons/DoneRounded";
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import BigNumber from "bignumber.js";
@@ -16,27 +17,29 @@ import PlaceholderLight from "app/components/ArkComponents/ArkImageView/placehol
 import PlaceholderDark from "app/components/ArkComponents/ArkImageView/placeholder_bear_dark.png";
 import BannerLight from "app/components/ArkComponents/ArkImageView/Banner_Light.png";
 import BannerDark from "app/components/ArkComponents/ArkImageView/Banner_Dark.png";
-import { CollectionInputs } from "../../Mint";
+import { CollectionInputs, MintOptionType } from "../../Mint";
 
 interface Props extends BoxProps {
   inputValues: CollectionInputs;
   setInputValues: React.Dispatch<React.SetStateAction<CollectionInputs>>;
   mintOption: string;
-  setMintOption: React.Dispatch<React.SetStateAction<string>>;
+  setMintOption: React.Dispatch<React.SetStateAction<MintOptionType>>;
   uploadedFiles: SimpleMap<File>,
   setUploadedFiles: React.Dispatch<React.SetStateAction<SimpleMap<File>>>;
   errors: CollectionInputs;
   setErrors:  React.Dispatch<React.SetStateAction<CollectionInputs>>;
+  existingCollections: string[];
 }
 
 const DESCRIPTION_PLACEHOLDER = "The Bear Market is a collection of 10,000 programmatically, randomly-generated NFT bears on the Zilliqa blockchain."
 
 const CollectionDetail: React.FC<Props> = (props: Props) => {
-  const { children, className, inputValues, setInputValues, mintOption, setMintOption, uploadedFiles, setUploadedFiles, errors, setErrors, ...rest } = props;
+  const { children, className, inputValues, setInputValues, existingCollections, mintOption, setMintOption, uploadedFiles, setUploadedFiles, errors, setErrors, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
   const [displayImage, setDisplayImage] = useState<string | ArrayBuffer | null>(null);
   const [bannerImage, setBannerImage] = useState<string | ArrayBuffer | null>(null);
+  const [collection, setCollection] = useState<string>("");
 
   const onHandleDisplayDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
     if (!files.length) {
@@ -131,6 +134,11 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
     }
   }
 
+  const handleSelectCollection = (collection: string) => {
+    setCollection(collection);
+    setInputValues({ ...inputValues, "collectionName": collection });
+  }
+
   return (
     <Box className={classes.root} {...rest}>
       <Box mb={3}>
@@ -146,15 +154,62 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
           COLLECTION
         </Typography>
         <Typography className={classes.instruction}>Create a new collection or select from your existing collections.</Typography>
-        <ToggleButtonGroup className={classes.buttonGroup} exclusive value={mintOption} onChange={(_, newOption) => {setMintOption(newOption)}}>
+        <ToggleButtonGroup className={classes.buttonGroup} exclusive value={mintOption} onChange={(_, newOption) => {newOption !== null && setMintOption(newOption)}}>
           <ToggleButton value="create" className={classes.collectionButton}>
             <Typography>Create Collection</Typography>
           </ToggleButton>
 
-          <ToggleButton value="select" className={classes.collectionButton}>
+          <ToggleButton value="select" className={classes.collectionButton} disabled={existingCollections.length === 0}>
             <Typography>Select Collection</Typography>
           </ToggleButton>
         </ToggleButtonGroup>
+
+        {mintOption === "select" && (
+          <Box mt={3}>
+            <Typography className={classes.header}>
+              SELECT EXISTING COLLECTION
+            </Typography>
+            <FormControl className={classes.formControl} fullWidth>
+              <Select
+                MenuProps={{ 
+                  classes: { paper: classes.selectMenu },
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left"
+                  },
+                  transformOrigin: {
+                    vertical: "top",
+                    horizontal: "left"
+                  },
+                  getContentAnchorEl: null
+                }}
+                variant="outlined"
+                value={collection}
+                onChange={(event) => handleSelectCollection(event.target.value as string)}
+                renderValue={(currCollection) => {
+                  const selected = currCollection as string;
+                  if (!selected.length) {
+                    return <Typography className={classes.selectPlaceholder}>Select Collection</Typography>;
+                  }
+
+                  return selected;
+                }}
+                displayEmpty
+              >
+                {existingCollections.map((currCollection) => {
+                  return (
+                    <MenuItem value={currCollection}>
+                      {currCollection}
+                      {collection === currCollection && (
+                        <DoneIcon fontSize="small" />
+                      )}
+                    </MenuItem>
+                  )
+                })}
+              </Select>
+            </FormControl>
+          </Box>
+        )}
       </Box>
 
       {/* Display Picture & Banner */}
@@ -221,6 +276,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         placeholder="Beary Bare Bears" error={errors.collectionName} value={inputValues.collectionName}
         label="COLLECTION NAME" onValueChange={(value) => updateInputs("collectionName")(value)}
         instruction="Give your collection an identifiable name." wordLimit={50}
+        disabled={mintOption === "select"}
       />
 
       {/* Description */}
@@ -276,6 +332,12 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     maxWidth: 600,
+    "& .MuiToggleButton-root.Mui-disabled": {
+      "& .MuiTypography-root": {
+        color: theme.palette.text?.disabled,
+      },
+      backgroundColor: theme.palette.action?.disabledBackground,
+    }
   },
   backButton: {
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
@@ -322,7 +384,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontFamily: "'Raleway', sans-serif",
     fontSize: "13px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
-    fontWeight: 800,
+    fontWeight: 900,
   },
   collectionBox: {
     marginTop: theme.spacing(4),
@@ -355,7 +417,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiTypography-root": {
       fontSize: "14px",
       color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
-    }
+    },
   },
   displayBox: {
     marginTop: theme.spacing(3),
@@ -415,6 +477,55 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
     fontWeight: 600,
     fontSize: 10,
+  },
+  formControl: {
+    "& .MuiSelect-root": {
+      borderRadius: 12,
+      backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#DEFFFF",
+      border: theme.palette.border,
+      marginTop: theme.spacing(1),
+      height: "19px",
+      "&[aria-expanded=true]": {
+        borderColor: theme.palette.action?.selected,
+      },
+    },
+    "& .MuiOutlinedInput-root": {
+      border: "none",
+    },
+    "& .MuiInputBase-input": {
+      fontSize: "12px",
+      lineHeight: "18px",
+      padding: "9.125px 12px",
+    },
+    "& .MuiSelect-icon": {
+      top: "calc(50% - 8px)",
+      fill: theme.palette.text?.primary,
+    },
+    "& .MuiSelect-iconOpen": {
+      fill: theme.palette.action?.selected,
+    },
+  },
+  selectMenu: {
+    marginTop: "6px",
+    backgroundColor: theme.palette.type === "dark" ? "#223139" : "D4FFF2",
+    "& .MuiListItem-root": {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      fontSize: "14px",
+    },
+    "& .MuiListItem-root.Mui-focusVisible": {
+      backgroundColor: theme.palette.type === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
+    },
+    "& .MuiListItem-root.Mui-selected": {
+      backgroundColor: "transparent",
+      color: "#00FFB0",
+    },
+  },
+  selectPlaceholder: {
+    color: theme.palette.primary.light,
+    fontSize: "12px",
+    lineHeight: "18px",
   },
 }));
 

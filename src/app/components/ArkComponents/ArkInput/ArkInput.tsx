@@ -18,6 +18,7 @@ interface Props extends BoxProps {
   hideInput?: boolean;
   type?: string;
   onInputBlur?: () => void;
+  disabled?: boolean;
 }
 
 const BootstrapInput = withStyles(theme => ({
@@ -48,7 +49,7 @@ const BootstrapInput = withStyles(theme => ({
 }))(InputBase);
 
 const ArkInput: React.FC<Props> = (props: Props) => {
-  const { hideInput, wordLimit, inline, startAdornment, endAdornment, instruction, error = "", label, multiline, value, onValueChange, onInputBlur, className, type, ...rest } = props;
+  const { disabled, hideInput, wordLimit, inline, startAdornment, endAdornment, instruction, error = "", label, multiline, value, onValueChange, onInputBlur, className, type, ...rest } = props;
   const classes = useStyles();
   const [onFocus, setOnFocus] = useState(false)
 
@@ -78,6 +79,7 @@ const ArkInput: React.FC<Props> = (props: Props) => {
         {!hideInput && (
           <BootstrapInput
             type={type ?? "string"}
+            disabled={disabled}
             startAdornment={startAdornment ? <InputAdornment className={cls({ [classes.focusAdornment]: onFocus && !error })} position="start">{startAdornment}</InputAdornment> : undefined}
             endAdornment={endAdornment ? <InputAdornment className={cls({ [classes.focusAdornment]: onFocus && !error })} position="end">{endAdornment}</InputAdornment> : undefined}
             onFocus={() => setOnFocus(true)} onBlur={onBlur} className={cls({ [classes.focused]: onFocus && !error, [classes.multiline]: multiline, [classes.error]: error && !!value })}

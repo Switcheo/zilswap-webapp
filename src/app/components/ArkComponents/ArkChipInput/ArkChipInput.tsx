@@ -97,7 +97,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginTop: theme.spacing(1),
     width: "100%",
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
+    "& .MuiChip-root": {
+      color: theme.palette.text?.primary,
+    },
   },
   error: {
     border: '1px solid #FF5252',
@@ -137,7 +140,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   chip: {
     height: "22px",
-    marginBottom: "2px",
+    margin: theme.spacing(0.25, 0),
     background: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "rgba(107, 225, 255, 0.2)",
     "& .MuiChip-label": {
       paddingLeft: "8px",
