@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import BigNumber from "bignumber.js";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
@@ -10,7 +10,10 @@ import { ArkCheckbox, CurrencyLogo, DialogModal, FancyButton } from "app/compone
 import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 import { Cheque, RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { toSignificantNumber, valueCalculators } from "app/utils";
+import { toSignificantNumber, tryGetBech32Address, useAsyncTask, valueCalculators } from "app/utils";
+import { getBlockchain, getWallet } from "app/saga/selectors";
+import { ArkClient } from "core/utilities";
+import { ZilswapConnector } from "core/zilswap";
 
 interface Props extends BoxProps {
   showDialog: boolean;
@@ -113,7 +116,11 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
   const { awaitApproval, blocktime, currentBlock, onAcceptBid, loading, bid, isOffer, showDialog, onCloseDialog, children, className, ...rest } = props;
   const classes = useStyles();
   const [checked, setChecked] = useState(false);
+  const { network } = useSelector(getBlockchain);
+  const { wallet } = useSelector(getWallet);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const [txApproved, setTxApproved] = useState(false);
+  const [runCheckTxApproved, checkingApproved] = useAsyncTask("checkApproveTx");
 
   const bidRecord = useMemo(() => {
     if (!bid) return null;
@@ -126,6 +133,28 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
     return { priceAmount, usdValue, expiry, priceToken };
   }, [bid, blocktime, currentBlock, tokenState])
 
+  const priceToken = useMemo(() => {
+    if (!bid) return null;
+    return tokenState.tokens[toBech32Address(bid.price.address)];
+  }, [tokenState.tokens, bid])
+
+  useEffect(() => {
+    runCheckTxApproved(async () => {
+      if (!bid || !priceToken || !wallet) return false;
+
+      const arkClient = new ArkClient(network);
+      const walletAddress = wallet.addressInfo.byte20.toLowerCase();
+      const collectionAddress = bid.token?.collection?.address;
+
+      const zilswap = ZilswapConnector.getSDK();
+      const response = await zilswap.zilliqa.blockchain.getSmartContractSubState(collectionAddress, "operator_approvals");
+      const approvalState = response.result.operator_approvals;
+      const userApprovals = approvalState?.[walletAddress];
+      setTxApproved(!!userApprovals?.[arkClient.brokerAddress]);
+    })
+    // eslint-disable-next-line
+  }, [tokenState.tokens, bid, wallet])
+
   if (!bid) return null;
 
   const acceptBid = () => {
@@ -135,9 +164,11 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
   }
 
   const getButtonText = () => {
-    if (!loading) return "Accept Bid";
+    if (checkingApproved) return "Checking Approval";
+    if (!loading && !txApproved) return "Approve NFT for Sale";
+    if (!loading && txApproved) return "Accept Bid";
     if (awaitApproval) return "Confirming Approval Tx";
-    return "Processing"
+    return "Confirming"
   }
 
   return (
@@ -187,7 +218,7 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
             </MenuItem>
             <Box mt={1} display="flex" justifyContent="space-between">
               <Typography className={classes.header}>From</Typography>
-              <Typography>{bid.initiator?.username ?? bid.initiator?.email ?? bid.initiatorAddress}</Typography>
+              <Typography>{bid.initiator?.username ?? tryGetBech32Address(bid.initiatorAddress)}</Typography>
             </Box>
             <Box mt={1} display="flex" justifyContent="space-between">
               <Typography className={classes.header}>Received on</Typography>
@@ -212,7 +243,7 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
           variant="contained" color="primary"
           className={classes.button}
         >
-          {getButtonText()}{loading && (<CircularProgress size={24} className={classes.loadingIcon} />)}
+          {getButtonText()}{loading ? (<CircularProgress size={24} className={classes.loadingIcon} />) : ""}
         </FancyButton>
         <FancyButton
           disabled={loading}
