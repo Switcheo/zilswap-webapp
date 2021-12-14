@@ -75,7 +75,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
   }
 
   const onHandleFileDrop = (files: File[], rejection: FileRejection[], dropEvent: DropEvent) => {
-    if (!files.length || uploadedFiles.length > 100) {
+    if (!files.length || uploadedFiles.length > 200) {
       return;
     }
 
@@ -280,7 +280,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         </Box>
 
         <Typography className={cls(classes.instruction, classes.footerInstruction)}>
-          Recommended format: PNG/JPEG &nbsp;|&nbsp; Maximum number of files: 100 &nbsp;|&nbsp; Maximum size per file: 50MB
+          Recommended format: PNG/JPEG &nbsp;|&nbsp; Maximum number of files: 200 &nbsp;|&nbsp; Maximum size per file: 50MB
         </Typography>
       </Box>
 
@@ -497,7 +497,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontFamily: "'Raleway', sans-serif",
     fontSize: "13px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
-    fontWeight: 800,
+    fontWeight: 900,
   },
   collectionBox: {
     marginTop: theme.spacing(4),
@@ -628,6 +628,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   deleteAttributeIcon: {
     color: theme.palette.primary.light,
+    marginBottom: "4px",
     "&:hover": {
       color: theme.palette.text?.primary,
       cursor: "pointer",
