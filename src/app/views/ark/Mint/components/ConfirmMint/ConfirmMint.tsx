@@ -58,6 +58,7 @@ const ConfirmMint: React.FC<Props> = (props: Props) => {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     marginTop: theme.spacing(5),
+    marginBottom: theme.spacing(33),
   },
   pageHeader: {
     fontFamily: "'Raleway', sans-serif",

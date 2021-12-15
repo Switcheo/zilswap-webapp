@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import cls from "classnames";
-import { Box, BoxProps, Tooltip, Typography, FormControl, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@material-ui/core";
+import { Box, BoxProps, Typography, FormControl, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import AddIcon from '@material-ui/icons/AddRounded';
@@ -8,7 +8,7 @@ import ClearIcon from "@material-ui/icons/ClearRounded";
 import DoneIcon from "@material-ui/icons/DoneRounded";
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { AppTheme } from "app/theme/types";
-import { ArkChipInput, ArkInput } from "app/components";
+import { ArkChipInput, ArkInput, HelpInfo } from "app/components";
 import { hexToRGBA } from "app/utils";
 import { AttributeData, NftData } from "../../Mint";
 import { ReactComponent as FileIcon } from "./assets/file.svg";
@@ -223,9 +223,12 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         <Typography className={classes.instruction}>
           Your NFTs will be named according to their file names by default. You may edit them below.
           {" "}
-          <Tooltip placement="top" title="We recommend naming your files prior to uploading them for better collection management.">
-            <InfoIcon className={classes.infoIcon} />
-          </Tooltip>
+          <HelpInfo 
+            className={classes.infoIcon}
+            icon={<InfoIcon />}
+            placement="top"
+            title="We recommend naming your files prior to uploading them for better collection management."
+          />
         </Typography>
 
         <Box>
@@ -295,9 +298,12 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         <Typography className={classes.instruction}>
           Customise attributes according to your NFT collection.
           {" "}
-          <Tooltip placement="top" title="Add all attributes that are a part of this colleciton, and assign them to specific NFTs below.">
-            <InfoIcon className={classes.infoIcon} />
-          </Tooltip>
+          <HelpInfo 
+            className={classes.infoIcon}
+            icon={<InfoIcon />}
+            placement="top"
+            title="Add all attributes that are a part of this colleciton, and assign them to specific NFTs below."
+          />
         </Typography>
         
         <TableContainer>

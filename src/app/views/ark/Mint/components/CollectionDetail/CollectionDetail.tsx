@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import cls from "classnames";
-import { Box, BoxProps, FormControl, IconButton, Tooltip, Typography, Select, MenuItem } from "@material-ui/core";
+import { Box, BoxProps, FormControl, IconButton, Typography, Select, MenuItem } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router";
@@ -11,7 +11,7 @@ import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import BigNumber from "bignumber.js";
 import { AppTheme } from "app/theme/types";
 import { TWITTER_REGEX, INSTAGRAM_REGEX } from "app/utils/constants";
-import { ArkInput } from "app/components";
+import { ArkInput, HelpInfo } from "app/components";
 import { hexToRGBA, SimpleMap } from "app/utils";
 import PlaceholderLight from "app/components/ArkComponents/ArkImageView/placeholder_bear_light.png";
 import PlaceholderDark from "app/components/ArkComponents/ArkImageView/placeholder_bear_dark.png";
@@ -220,9 +220,12 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         <Typography className={classes.instruction}>
           Customise your collection page with a display picture and banner.
           {" "}
-          <Tooltip placement="top" title="Note that image uploaded will be applied to both dark and light themes on ARK.">
-            <InfoIcon className={classes.infoIcon} />
-          </Tooltip>
+          <HelpInfo 
+            className={classes.infoIcon}
+            icon={<InfoIcon />}
+            placement="top"
+            title="Note that image uploaded will be applied to both dark and light themes on ARKY."
+          />
         </Typography>
 
         <Box display="flex" justifyContent="space-between">

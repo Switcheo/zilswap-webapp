@@ -1,10 +1,14 @@
 import React, { useState } from "react";
-import { Box, Container, Typography } from "@material-ui/core";
+import {
+  Box,
+  Container,
+  Typography,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { AppTheme } from "app/theme/types";
-import { SimpleMap } from "app/utils";
+import { hexToRGBA, SimpleMap } from "app/utils";
 import ArkPage from "app/layouts/ArkPage";
 import { getWallet } from "app/saga/selectors";
 import { CollectionDetail, ConfirmMint, NftUpload } from "./components";
@@ -18,25 +22,25 @@ export type CollectionInputs = {
   twitterHandle: string;
   instagramHandle: string;
   telegramLink: string;
-}
+};
 
 export type MintOptionType = "create" | "select";
 
 export type AttributeData = {
   name: string;
   values: string[];
-}
+};
 
 export type NftData = {
   id: string;
   image: string | ArrayBuffer | null;
   attributes: SimpleMap<string>;
   imageFile: File;
-}
+};
 
-const collections: string[] = [
-  "The Bear Market",
-]
+const collections = ["The Bear Market"];
+
+// const NAV_ITEMS = ["SET UP COLLECTION", "UPLOAD NFTs", "CONFIRM & MINT"];
 
 const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
@@ -65,36 +69,69 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     telegramLink: "",
   });
 
-  const [attributes, setAttributes] = useState<AttributeData[]>([{
-    name: "",
-    values: [],
-  }]);
+  const [attributes, setAttributes] = useState<AttributeData[]>([
+    {
+      name: "",
+      values: [],
+    },
+  ]);
   const [nfts, setNfts] = useState<NftData[]>([]);
 
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
 
   return (
     <ArkPage {...rest}>
-      <Container className={cls(classes.root, className)} maxWidth="md" disableGutters>
+      <Container
+        className={cls(classes.root, className)}
+        maxWidth="md"
+        disableGutters
+      >
         {wallet && (
           <Box>
-            {/* <Divider orientation="vertical" className={classes.nav} flexItem/> */}
+            {/* <List className={classes.nav}>
+              <Box className={classes.navBox}>
+                {NAV_ITEMS.map((item, index) => (
+                  <li key={`section-${index + 1}`}>
+                    <ul>
+                      <ListSubheader className={classes.navItem}>
+                        {item}
+                      </ListSubheader>
+                    </ul>
+                  </li>
+                ))}
+              </Box>
+            </List> */}
 
             <Box>
               {/* Set Up Collection */}
-              <CollectionDetail 
-                existingCollections={collections} 
-                uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles}
-                mintOption={mintOption} setMintOption={setMintOption} 
-                inputValues={inputValues} setInputValues={setInputValues} 
-                errors={errors} setErrors={setErrors}
+              <CollectionDetail
+                id="section-1"
+                existingCollections={collections}
+                uploadedFiles={uploadedFiles}
+                setUploadedFiles={setUploadedFiles}
+                mintOption={mintOption}
+                setMintOption={setMintOption}
+                inputValues={inputValues}
+                setInputValues={setInputValues}
+                errors={errors}
+                setErrors={setErrors}
               />
 
               {/* Upload NFTs */}
-              <NftUpload nfts={nfts} setNfts={setNfts} attributes={attributes} setAttributes={setAttributes} />
+              <NftUpload
+                id="section-2"
+                nfts={nfts}
+                setNfts={setNfts}
+                attributes={attributes}
+                setAttributes={setAttributes}
+              />
 
               {/* Confirm Mint */}
-              <ConfirmMint acceptTerms={acceptTerms} setAcceptTerms={setAcceptTerms} />
+              <ConfirmMint
+                id="section-3"
+                acceptTerms={acceptTerms}
+                setAcceptTerms={setAcceptTerms}
+              />
             </Box>
           </Box>
         )}
@@ -125,7 +162,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontFamily: "'Raleway', sans-serif",
     [theme.breakpoints.down("sm")]: {
       alignItems: "normal",
-    }
+    },
   },
   connectionText: {
     margin: theme.spacing(1),
@@ -136,11 +173,28 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 700,
   },
   nav: {
+    marginTop: theme.spacing(6),
+    paddingTop: 0,
+    borderRight: `1px solid rgba${theme.palette.type === "dark" ? hexToRGBA("#29475A", 1): hexToRGBA("#003340", 0.5)}`,
     marginRight: theme.spacing(4),
     [theme.breakpoints.down("sm")]: {
       display: "none",
-    }
+    },
   },
+  navBox: {
+    position: "sticky",
+    top: 0,
+  },
+  navItem: {
+    paddingLeft: 0, 
+    paddingRight: theme.spacing(2),
+    whiteSpace: "nowrap",
+    fontFamily: "'Raleway', sans-serif",
+    fontWeight: 900,
+  },
+  navCurrent: {
+    color: theme.palette.text?.primary,
+  }
 }));
 
 export default Mint;
