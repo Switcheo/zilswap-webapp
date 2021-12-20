@@ -8,6 +8,7 @@ import { Network } from "zilswap-sdk/lib/constants";
 import { useNetwork } from "app/utils";
 import { AppTheme } from "app/theme/types";
 import { BridgeableTokenMapping, RootState } from "app/store/types";
+import legacySvg from "./legacy-zil.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -26,11 +27,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const CurrencyLogo = (props: any) => {
-  const { currency, address, className, blockchain }: {
+  const { currency, address, className, blockchain, legacy }: {
     currency: string | false;
     address: string;
     className: string;
     blockchain?: Blockchain;
+    legacy?: boolean;
   } = props;
   const classes = useStyles();
   const bridgeTokens = useSelector<RootState, BridgeableTokenMapping>((state) => state.bridge.tokens);
@@ -69,13 +71,21 @@ const CurrencyLogo = (props: any) => {
 
   return (
     <div className={cls(classes.root, className)}>
-      <img
-        className={classes.svg}
-        src={error ? fallbackImg : tokenIconUrl}
-        alt={`${currency} Token Logo`}
-        loading="lazy"
-        onError={(() => setError(true))}
-      />
+      {legacy
+        ? <img
+          className={classes.svg}
+          src={legacySvg}
+          alt={`${currency} Token Logo`}
+          loading="lazy"
+          onError={(() => setError(true))}
+        />
+        : <img
+          className={classes.svg}
+          src={error ? fallbackImg : tokenIconUrl}
+          alt={`${currency} Token Logo`}
+          loading="lazy"
+          onError={(() => setError(true))}
+        />}
     </div>
   )
 };

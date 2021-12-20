@@ -123,8 +123,8 @@ const TopBar: React.FC<Props> = (
   const renderLogo = useMemo(() => {
     const current = location.pathname;
 
-    if (current.indexOf("/swap") === 0) return <SwapLogo />;
-    else if (current.indexOf("/pool") === 0 || current.indexOf("/pools") === 0)
+    if (current.indexOf("/swap") === 0 || current.indexOf("/pool") === 0) return <SwapLogo />;
+    else if (current.indexOf("/pools") === 0)
       return <PoolLogo />;
     else if (
       current.indexOf("/bridge") === 0 ||
@@ -146,6 +146,8 @@ const TopBar: React.FC<Props> = (
   };
 
   const tabConfig = currentPath ? DrawerConfig[currentPath] || [] : [];
+
+  console.log({ tabConfig }, { currentPath });
 
   return (
     <AppBar
@@ -206,7 +208,7 @@ const TopBar: React.FC<Props> = (
           alignItems="center"
         >
           {/* TODO temperory add drawer to only pool */}
-          {(currentPath === "pool" && isXs) ? (
+          {(isXs) ? (
             <div className={classes.menuIcon}>
               <IconButton onClick={() => onToggleTabDrawer && onToggleTabDrawer()}>
                 <MenuIcon />

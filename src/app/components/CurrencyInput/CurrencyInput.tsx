@@ -134,6 +134,21 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       padding: "56px 18px 12px 5px",
     },
   },
+
+
+  legacy: {
+    width: 30,
+    height: 30,
+    display: "flex",
+    borderRadius: 14,
+    padding: 2,
+  },
+  legacySvg: {
+    maxWidth: "100%",
+    width: "unset",
+    height: "unset",
+    flex: 1,
+  },
 }));
 
 export interface CurrencyInputProps
@@ -152,6 +167,9 @@ export interface CurrencyInputProps
   showContribution?: boolean;
   highestBid?: BigNumber;
   dialogOpts?: Partial<CurrencyDialogProps>;
+  legacyZil?: boolean;
+  legacyBalance?: BigNumber;
+  balanceLabel?: string;
 
   onCurrencyChange?: (token: TokenInfo) => void;
   onAmountChange?: (value: string) => void;
@@ -186,6 +204,9 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
     showMaxButton,
     onEnterKeyPress,
     tokenList = "zil",
+    legacyZil = false,
+    legacyBalance,
+    balanceLabel = "Balance"
   } = props;
   const classes = useStyles();
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5 });
@@ -267,14 +288,14 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
           className={cls(classes.balance)}
           variant="body1"
         >
-          Balance:{" "}
+          {balanceLabel}:{" "}
           {tokenBalance
             ? moneyFormat(tokenBalance, {
-                symbol: token?.symbol,
-                compression: token?.decimals,
-                showCurrency: false,
-              })
-            : "-"}
+              symbol: token?.symbol,
+              compression: token?.decimals,
+              showCurrency: false,
+            })
+            : (legacyBalance ? legacyBalance.toString() : "-")}
         </Typography>
       )}
 
@@ -301,19 +322,48 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
         endAdornment={
           <InputAdornment className={classes.endAdornment} position="end">
             {fixedToken ? (
-              <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
-                <Box display="flex" alignItems="center">
-                  <CurrencyLogo
-                    currency={token?.symbol}
-                    address={token?.address}
-                    blockchain={token?.blockchain}
-                    className={classes.currencyLogo}
-                  />
-                  <Typography variant="button" className={classes.currencyText}>
-                    {token?.symbol}
-                  </Typography>
+              legacyZil ? (
+                <Box display="flex">
+                  {showMaxButton && (
+                    <Button
+                      className={classes.maxButton}
+                      disabled={disabled}
+                      onClick={onSelectMax}
+                      disableRipple
+                    >
+                      <Typography>MAX</Typography>
+                    </Button>
+                  )}
+                  <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
+                    <Box display="flex" alignItems="center">
+                      <CurrencyLogo
+                        legacy="true"
+                        currency={token?.symbol}
+                        address={token?.address}
+                        blockchain={token?.blockchain}
+                        className={classes.currencyLogo}
+                      />
+                      <Typography variant="button" className={classes.currencyText}>
+                        ZIL
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
-              </Box>
+              ) : (
+                <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
+                  <Box display="flex" alignItems="center">
+                    <CurrencyLogo
+                      currency={token?.symbol}
+                      address={token?.address}
+                      blockchain={token?.blockchain}
+                      className={classes.currencyLogo}
+                    />
+                    <Typography variant="button" className={classes.currencyText}>
+                      {token?.symbol}
+                    </Typography>
+                  </Box>
+                </Box>
+              )
             ) : (
               <Box display="flex">
                 {showMaxButton && (

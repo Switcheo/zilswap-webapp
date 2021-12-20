@@ -142,6 +142,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
       tokens = tokens.filter(t => t.blockchain === Blockchain.Zilliqa && exchangeDenoms && exchangeDenoms.includes(t.address))
     } else if (tokenList === 'bridge-eth') {
       tokens = tokens.filter(t => t.blockchain === Blockchain.Ethereum)
+      console.log({ tokens });
     } else if (tokenList === 'bridge-zil') {
       tokens = tokens.filter(t => bridgeState.tokens[Blockchain.Zilliqa].findIndex(b => toBech32Address(b.tokenAddress) === t.address) >= 0)
     }
