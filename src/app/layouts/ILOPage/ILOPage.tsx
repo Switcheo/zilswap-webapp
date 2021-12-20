@@ -1,15 +1,7 @@
-import React, { forwardRef } from 'react'
-import { Box, Button, makeStyles } from '@material-ui/core'
+import React from 'react'
+import { Box, makeStyles } from '@material-ui/core'
 import { PaperProps } from 'material-ui';
-import { NavLink as RouterLink } from "react-router-dom";
-import cls from "classnames";
 import { AppTheme } from 'app/theme/types'
-
-const CustomRouterLink = forwardRef((props: any, ref: any) => (
-  <div ref={ref} style={{ flexGrow: 1, flexBasis: 1 }} >
-    <RouterLink {...props} />
-  </div>
-));
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -75,7 +67,7 @@ const ILOPage: React.FC<PaperProps> = (props: PaperProps) => {
 
   return (
     <Box className={classes.root}>
-      <Box display="flex" justifyContent="center" marginBottom="2em">
+      {/* <Box display="flex" justifyContent="center" marginBottom="2em">
         <Box className={classes.tabs}>
           <Button
             disableElevation
@@ -94,7 +86,7 @@ const ILOPage: React.FC<PaperProps> = (props: PaperProps) => {
             component={CustomRouterLink}
             to="/zilo/past">Past</Button>
         </Box>
-      </Box>
+      </Box> */}
       {children}
     </Box>
   )
