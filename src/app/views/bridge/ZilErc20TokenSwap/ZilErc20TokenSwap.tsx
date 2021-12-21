@@ -1,60 +1,80 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Box, BoxProps, makeStyles, Typography } from "@material-ui/core";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
-import Web3Modal from 'web3modal';
 import { ethers } from "ethers";
 import { useDispatch, useSelector } from "react-redux";
-import { Box, BoxProps, makeStyles, Typography } from "@material-ui/core";
-import { Blockchain, SWTHAddress, } from "tradehub-api-js";
+import { Blockchain } from "tradehub-api-js";
+import Web3Modal from 'web3modal';
 import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectETHPopper, CurrencyInput, FancyButton, Text } from 'app/components';
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useAsyncTask, useNetwork, useToaster } from "app/utils";
-import { ERC20_TOKENSWAP_CONTRACT, LEGACY_ZIL_CONTRACT } from "app/utils/constants";
+import { bnOrZero, hexToRGBA, useAsyncTask, useNetwork, useToaster } from "app/utils";
+import { BIG_ZERO, ERC20_LEGACY_ZIL_CONTRACT, ERC20_ZIL_TOKENSWAP_CONTRACT, ZIL_DECIMALS } from "app/utils/constants";
 import { ConnectButton } from "app/views/main/Bridge/components";
 import { providerOptions } from "core/ethereum";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ReactComponent as ArrowDown } from "./arrow-down.svg";
 import { ReactComponent as SuccessSVG } from "./check.svg";
+import legacyZilAbi from "./legacy-zil-abi.json";
 import { ReactComponent as SwapSVG } from "./swap.svg";
 import tokenswapAbi from "./tokenswap-abi.json";
-import legacyZilAbi from "./legacy-zil-abi.json";
 
 interface Props extends BoxProps {
 }
 
 const GAS_LIMIT = 175000;
 
-const BridgableZil = (props: Props) => {
+const ZilErc20TokenSwap = (props: Props) => {
   const { className, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const network = useNetwork();
   const toaster = useToaster();
   const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets.eth);
-  const [ethAddress, setEthAddress] = useState<string | null>(null);
-  const [transferAmount, setTransferAmount] = useState<BigNumber>(new BigNumber(0));
-  const [swthAddrMnemonic, setSwthAddrMnemonic] = useState<string | undefined>();
-  // const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK");
-  const [runGetLegacyContract] = useAsyncTask("getLegacyContract");
+  const [transferAmount, setTransferAmount] = useState(BIG_ZERO);
 
   const [runSwapToken, isLoading] = useAsyncTask("swapToken");
+  const [runInitializeAddress, isLoadingAddress] = useAsyncTask("initializeAddress");
 
-  const [legacyContract, setLegacyContract] = useState<ethers.Contract | undefined>();
-  const [legacyBalance, setLegacyBalance] = useState<BigNumber>(new BigNumber(0));
-  const [legacyDecimal, setLegacyDecimal] = useState<number>(0);
+  const [legacyBalance, setLegacyBalance] = useState(BIG_ZERO);
+  const [allowance, setAllowance] = useState(BIG_ZERO);
   // eslint-disable-next-line
   const [pendingApproval, setPendingApproval] = useState(false);
   const [swappedTx, setSwappedTx] = useState<any>();
   const [disconnectMenu, setDisconnectMenu] = useState<any>();
   const connectButtonRef = useRef();
 
+  const {
+    legacyZilContract,
+    tokenSwapContract,
+  } = useMemo(() => {
+    const provider = ethWallet?.provider ? new ethers.providers.Web3Provider(ethWallet.provider) : undefined;
+    return {
+      legacyZilContract: new ethers.Contract(ERC20_LEGACY_ZIL_CONTRACT[network], legacyZilAbi, provider),
+      tokenSwapContract: new ethers.Contract(ERC20_ZIL_TOKENSWAP_CONTRACT[network], tokenswapAbi, provider),
+    }
+  }, [network, ethWallet]);
+
   useEffect(() => {
-    if (!swthAddrMnemonic)
-      setSwthAddrMnemonic(SWTHAddress.newMnemonic());
-  }, [swthAddrMnemonic])
+    if (!ethWallet?.address) {
+      setAllowance(BIG_ZERO);
+      setLegacyBalance(BIG_ZERO);
+      return;
+    };
+
+    runInitializeAddress(async () => {
+      const allowance = await legacyZilContract.allowance(ethWallet.address, tokenSwapContract.address);
+      setAllowance(bnOrZero(allowance?.toString()));
+
+      const balance = await legacyZilContract.balanceOf(ethWallet.address);
+      setLegacyBalance(bnOrZero(balance?.toString()).shiftedBy(-ZIL_DECIMALS))
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [legacyZilContract, tokenSwapContract, ethWallet?.address]);
 
   const onClickConnectETH = async (bypass?: boolean) => {
     if (!bypass && ethWallet) return setDisconnectMenu(connectButtonRef);
@@ -74,21 +94,6 @@ const BridgableZil = (props: Props) => {
 
     dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: { provider: provider, address: ethAddress, chainId: chainId } }));
     dispatch(actions.Token.refetchState());
-    setEthAddress(ethAddress);
-    await getLegacyContract(ethAddress, ethersProvider);
-  }
-
-  const getLegacyContract = (ethAddr: string, provider: any) => {
-    runGetLegacyContract(async () => {
-      const legacyContr = new ethers.Contract(LEGACY_ZIL_CONTRACT[Network.TestNet], legacyZilAbi, provider);
-
-      setLegacyContract(legacyContr);
-
-      const bal = await legacyContr.balanceOf(ethAddr);
-      const decimal = await legacyContr.decimals();
-      setLegacyDecimal(parseInt(decimal));
-      setLegacyBalance(new BigNumber(bal.toString()).shiftedBy(-decimal));
-    })
   }
 
   const onSelectMax = () => {
@@ -99,24 +104,19 @@ const BridgableZil = (props: Props) => {
     setTransferAmount(new BigNumber(rawAmount));
   }
 
-  const checkAllowance = async (ethAddr: string) => {
-    const allowance = await legacyContract!.allowance(ethAddr, ERC20_TOKENSWAP_CONTRACT[Network.TestNet]);
-
-    return new BigNumber(allowance.toString()).gte(legacyBalance.shiftedBy(legacyDecimal));
-  }
-
   const getApproval = async () => {
-    if (!legacyContract || !ethWallet) return null;
+    if (!ethWallet) return null;
 
-    const approval = await checkAllowance(ethWallet.address);
-    if (!approval) {
+    const allowance = await legacyZilContract.allowance(ethWallet.address, tokenSwapContract.address);
+
+    if (!allowance) {
       try {
         setPendingApproval(true);
 
         const ethersProvider = new ethers.providers.Web3Provider(ethWallet.provider)
         const signer = ethersProvider.getSigner();
 
-        await legacyContract.connect(signer).approve(ERC20_TOKENSWAP_CONTRACT[Network.TestNet], 100000);
+        await legacyZilContract.connect(signer).approve(ERC20_ZIL_TOKENSWAP_CONTRACT[Network.TestNet], 100000);
       } catch (error) {
         console.error(error);
         throw error;
@@ -138,7 +138,6 @@ const BridgableZil = (props: Props) => {
       web3Modal.clearCachedProvider();
     }
     setDisconnectMenu(null);
-    setEthAddress(null);
     dispatch(actions.Bridge.updateForm(disconnectForm));
     dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: null }));
   }
@@ -149,7 +148,7 @@ const BridgableZil = (props: Props) => {
       const signer = ethersProvider.getSigner();
 
       await getApproval()
-      const ercSwapContract = new ethers.Contract(ERC20_TOKENSWAP_CONTRACT[Network.TestNet], tokenswapAbi);
+      const ercSwapContract = new ethers.Contract(ERC20_ZIL_TOKENSWAP_CONTRACT[Network.TestNet], tokenswapAbi);
       const tx = await ercSwapContract.connect(signer).swap(10000, { gasLimit: GAS_LIMIT });
 
       toaster("Swap completed!")
@@ -169,7 +168,7 @@ const BridgableZil = (props: Props) => {
           <ConnectButton
             buttonRef={connectButtonRef}
             chain={Blockchain.Ethereum}
-            address={ethAddress || ""}
+            address={ethWallet?.address ?? ""}
             onClick={() => onClickConnectETH()}
           />
         </Box>
@@ -194,26 +193,35 @@ const BridgableZil = (props: Props) => {
             <Box display="flex" justifyContent="center" mt={-.6} mb={-.6}>
               <ArrowDown />
             </Box>
-            {/* TODO: GET BRIDGEABLE ZIL TOKEN */}
             <CurrencyInput
               label="Amount"
               disabled={true}
               tokenList={"bridge-eth"}
-              amount={transferAmount.toString()}
+              amount={transferAmount.toString(10)}
               token={null}
               fixedToken={true}
               balanceLabel="Bridgeable Balance"
             />
           </Box>
           <FancyButton
-            disabled={!ethAddress || !transferAmount || transferAmount.lte(0) || transferAmount.gt(legacyBalance)}
+            disabled={!ethWallet?.address || !transferAmount.gt(0) || transferAmount.gt(legacyBalance)}
             color="primary"
             variant="contained"
             className={classes.actionButton}
             onClick={() => onSwap()}
-            loading={isLoading}
+            loading={isLoading || isLoadingAddress}
           >
-            {(transferAmount.gt(legacyBalance) || (ethWallet && legacyBalance.eq(0))) ? "Insufficient Legacy ZIL Balance" : "Swap"}
+            {!ethWallet?.address ? (
+              "Connect Wallet"
+            ) : (
+              transferAmount.gt(legacyBalance) ?
+                "Insufficient Legacy ZIL Balance"
+                : (
+                  transferAmount.gt(allowance) ?
+                    "Unlock Legacy ZIL"
+                    : "Swap"
+                )
+            )}
           </FancyButton>
 
           {swappedTx && (
@@ -325,4 +333,4 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-export default BridgableZil;
+export default ZilErc20TokenSwap;

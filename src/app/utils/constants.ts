@@ -97,13 +97,13 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
   [Network.TestNet]: ["zil5.e", "zwap5.e", "eth6.z", "dai6.z"],
 }
 
-export const ERC20_TOKENSWAP_CONTRACT = {
-  [Network.MainNet]: "",
+export const ERC20_ZIL_TOKENSWAP_CONTRACT = {
+  [Network.MainNet]: "0xa5E6e035daa1B85383f36f36D22562F552591df9",
   [Network.TestNet]: "0xa5E6e035daa1B85383f36f36D22562F552591df9",
 }
 
-export const LEGACY_ZIL_CONTRACT = {
-  [Network.MainNet]: "",
+export const ERC20_LEGACY_ZIL_CONTRACT = {
+  [Network.MainNet]: "0x2024cb47191db8a8f2961a9d9dff9e11999fe8c7",
   [Network.TestNet]: "0x2024cb47191db8a8f2961a9d9dff9e11999fe8c7",
 }
 
