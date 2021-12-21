@@ -104,19 +104,20 @@ const ZilErc20TokenSwap = (props: Props) => {
     setTransferAmount(new BigNumber(rawAmount));
   }
 
-  const getApproval = async () => {
+  const approveIfNecessary = async () => {
     if (!ethWallet) return null;
 
     const allowance = await legacyZilContract.allowance(ethWallet.address, tokenSwapContract.address);
 
-    if (!allowance) {
+    if (!bnOrZero(allowance.toString()).shiftedBy(-ZIL_DECIMALS).gte(transferAmount)) {
       try {
         setPendingApproval(true);
 
         const ethersProvider = new ethers.providers.Web3Provider(ethWallet.provider)
         const signer = ethersProvider.getSigner();
 
-        await legacyZilContract.connect(signer).approve(ERC20_ZIL_TOKENSWAP_CONTRACT[Network.TestNet], 100000);
+        const tx = await legacyZilContract.connect(signer).approve(ERC20_ZIL_TOKENSWAP_CONTRACT[Network.TestNet], 100000);
+        await ethersProvider.waitForTransaction(tx.hash);
       } catch (error) {
         console.error(error);
         throw error;
@@ -147,7 +148,7 @@ const ZilErc20TokenSwap = (props: Props) => {
       const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider);
       const signer = ethersProvider.getSigner();
 
-      await getApproval()
+      await approveIfNecessary()
       const ercSwapContract = new ethers.Contract(ERC20_ZIL_TOKENSWAP_CONTRACT[Network.TestNet], tokenswapAbi);
       const tx = await ercSwapContract.connect(signer).swap(10000, { gasLimit: GAS_LIMIT });
 
