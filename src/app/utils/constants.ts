@@ -98,18 +98,18 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
 }
 
 export const ERC20_ZIL_TOKENSWAP_CONTRACT = {
-  [Network.MainNet]: "0xa5E6e035daa1B85383f36f36D22562F552591df9",
+  [Network.MainNet]: "0xef1efb7f22fb728820d4952b33012a7115e87687",
   [Network.TestNet]: "0xa5E6e035daa1B85383f36f36D22562F552591df9",
 }
 
 export const ERC20_LEGACY_ZIL_CONTRACT = {
-  [Network.MainNet]: "0x2024cb47191db8a8f2961a9d9dff9e11999fe8c7",
+  [Network.MainNet]: "0x05f4a42e251f2d52b8ed15e9fedaacfcef1fad27",
   [Network.TestNet]: "0x2024cb47191db8a8f2961a9d9dff9e11999fe8c7",
 }
 
 export const ERC20_BRIDGEABLE_ZIL_CONTRACT = {
-  [Network.MainNet]: "0x6EeB539D662bB971a4a01211c67CB7f65B09b802",
-  [Network.TestNet]: "0x92774E23EdAA2927f3938Ab4b690C076095cda0A",
+  [Network.MainNet]: "0x6eeb539d662bb971a4a01211c67cb7f65b09b802",
+  [Network.TestNet]: "0x92774e23edaa2927f3938ab4b690c076095cda0a",
 }
 
 export const TOKEN_SYMBOLS = {
