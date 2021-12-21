@@ -42,6 +42,8 @@ const ZilErc20TokenSwap = (props: Props) => {
   const [runSwapToken, isLoading] = useAsyncTask("swapToken");
   const [runInitializeAddress, isLoadingAddress] = useAsyncTask("initializeAddress");
 
+  // legacy = interim
+  // bridgeable = bridged
   const [legacyBalance, setLegacyBalance] = useState(BIG_ZERO);
   const [bridgeableBalance, setBridgeableBalance] = useState(BIG_ZERO);
   const [allowance, setAllowance] = useState(BIG_ZERO);
@@ -201,7 +203,17 @@ const ZilErc20TokenSwap = (props: Props) => {
       <Box className={classes.container}>
         <Box display="flex" flexDirection="column" alignItems="center">
           <Text variant="h1" className={classes.headerText}><SwapSVG className={classes.swapIcon} />ERC20 Zil Token Swap</Text>
-          <Text className={classes.subHeaderText}>Swap your legacy ERC20 ZIL to a bridgeable ERC20 ZIL below. After swapping, you will need to use the <b>Zil<b className={classes.textColoured}>Bridge</b></b> to bridge your ERC20 ZIL from Ethereum to the Zilliqa network.</Text>
+          <Text className={classes.subHeaderText}>
+            Swap your Interim ERC20 ZIL to a Bridged ERC20 ZIL below. After swapping, you will need to use the
+            <Link
+              className={classes.here}
+              rel="ZilBridge"
+              href={`/bridge`}>
+              <b className={classes.unColorText}>Zil<span className={classes.textColoured}>Bridge</span></b>
+            </Link>
+            {" "}
+            to bridge your ERC20 ZIL from Ethereum to the Zilliqa network.
+          </Text>
         </Box>
         <Box display="flex" flexDirection="column" textAlign="center" mt={3}>
           <Text><b>Step 1</b>: Connect Wallet</Text>
@@ -220,7 +232,7 @@ const ZilErc20TokenSwap = (props: Props) => {
               rel="noopener noreferrer"
               target="_blank"
               href={getExplorerLink(ERC20_LEGACY_ZIL_CONTRACT[network])}>
-              Legacy ERC20 ZIL <OpenInNewIcon className={classes.linkIcon} />
+              Interim ERC20 ZIL <OpenInNewIcon className={classes.linkIcon} />
             </Link>
             to
             <Link
@@ -229,7 +241,7 @@ const ZilErc20TokenSwap = (props: Props) => {
               rel="noopener noreferrer"
               target="_blank"
               href={getExplorerLink(ERC20_BRIDGEABLE_ZIL_CONTRACT[network])}>
-              Bridgeable ERC20 ZIL <OpenInNewIcon className={classes.linkIcon} />
+              Bridged ERC20 ZIL <OpenInNewIcon className={classes.linkIcon} />
             </Link>
           </Text>
           <Box mt={1.5} display="flex" flexDirection="column">
@@ -246,7 +258,7 @@ const ZilErc20TokenSwap = (props: Props) => {
               legacyZil
               fixedToken
               overrideBalance={legacyBalance}
-              balanceLabel="Legacy ZIL Balance"
+              balanceLabel="Interim ZIL Balance"
             />
             <Box display="flex" justifyContent="center" mt={-.6} mb={-.6}>
               <ArrowDown />
@@ -259,7 +271,7 @@ const ZilErc20TokenSwap = (props: Props) => {
               token={bridgeZil}
               fixedToken
               overrideBalance={bridgeableBalance}
-              balanceLabel="Bridgeable Balance"
+              balanceLabel="Bridged ZIL Balance"
             />
           </Box>
           <FancyButton
@@ -275,7 +287,7 @@ const ZilErc20TokenSwap = (props: Props) => {
               "Connect Wallet"
             ) : (
               transferAmount.gt(legacyBalance) ?
-                "Insufficient Legacy ZIL Balance"
+                "Insufficient Interim ZIL Balance"
                 : (
                   transferAmount.gt(allowance) ?
                     "Unlock and Swap"
@@ -293,10 +305,10 @@ const ZilErc20TokenSwap = (props: Props) => {
                 <Typography variant="body1" className={classes.textColoured}>
                   Swap success.
                   <br />
-                  Bridge your ZIL back to ZIlliqa via the
+                  Send your Bridged ZIL back to Zilliqa via the
                   <Link
                     className={classes.here}
-                    rel="tonftpage"
+                    rel="ZilBridge"
                     href={`/bridge`}>
                     <b className={classes.unColorText}>Zil<span className={classes.textColoured}>Bridge</span></b>
                   </Link>.
