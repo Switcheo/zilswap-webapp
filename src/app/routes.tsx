@@ -117,6 +117,11 @@ const routes: RouteConfig[] = [
         component: lazy(() => import("./views/main/Bridge")),
       },
       {
+        path: "/bridge/bridgable-zil",
+        exact: true,
+        component: lazy(() => import("./views/bridge/BridgableZil")),
+      },
+      {
         path: "/history",
         exact: true,
         component: lazy(() => import("./views/bridge/TransferHistory")),

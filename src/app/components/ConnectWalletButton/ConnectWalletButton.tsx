@@ -57,6 +57,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.tab.selected,
     border: theme.palette.border,
     justifyContent: "space-between",
+    position: "sticky",
     "&:hover": {
       backgroundColor: theme.palette.type === "dark" ? "" : `rgba${hexToRGBA("#003340", 0.8)}`
     }
@@ -91,7 +92,7 @@ const ConnectWalletButton: React.FC<Props> = (props: Props) => {
                 variant="outlined"
                 onClick={onConnectWallet}
                 className={classes.mobileButton}>
-                Connect Wallet
+                Connect Walletz
               </Button>
             </Box>
             : <Button className={classes.button} onClick={onConnectWallet}>{connectText}</Button>
