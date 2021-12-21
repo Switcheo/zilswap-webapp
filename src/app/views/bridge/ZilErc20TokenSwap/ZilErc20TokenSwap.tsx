@@ -229,7 +229,7 @@ const ZilErc20TokenSwap = (props: Props) => {
               rel="noopener noreferrer"
               target="_blank"
               href={getExplorerLink(ERC20_BRIDGEABLE_ZIL_CONTRACT[network])}>
-              Brigeable ERC20 ZIL <OpenInNewIcon className={classes.linkIcon} />
+              Bridgeable ERC20 ZIL <OpenInNewIcon className={classes.linkIcon} />
             </Link>
           </Text>
           <Box mt={1.5} display="flex" flexDirection="column">
