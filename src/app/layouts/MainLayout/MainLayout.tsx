@@ -2,8 +2,8 @@ import React, { Suspense, useState, useMemo } from "react";
 import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { renderRoutes } from "react-router-config";
-import { useLocation } from "react-router-dom";
-import { ConnectWalletButton, NavDrawer, TopBar, DrawerComp } from "app/components";
+import { useLocation, useRouteMatch } from "react-router-dom";
+import { ConnectWalletButton, NavDrawer, TopBar, DrawerComp, ZilTokenSwapCTABanner } from "app/components";
 import { AppTheme } from "app/theme/types";
 import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
@@ -43,8 +43,8 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const currentPath: "swap" | "pool" | "bridge" | "zilo" | "ark" | "main" = useMemo(() => {
     const current = location.pathname;
 
-    if (current.indexOf("/swap") === 0) return "swap";
-    else if (current.indexOf("/pool") === 0 || current.indexOf("/pools") === 0)
+    if (current.indexOf("/swap") === 0 || (current.indexOf("/pool") === 0 && current.indexOf("/pools") !== 0)) return "swap";
+    else if (current.indexOf("/pools") === 0)
       return "pool";
     else if (
       current.indexOf("/bridge") === 0 ||
@@ -55,6 +55,8 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     else if (current.indexOf("/arky") === 0) return "ark";
     else return "main";
   }, [location.pathname]);
+
+  const isZilTokenSwap = useRouteMatch("/bridge/erc20-zil-swap");
 
   const onToggleDrawer = (override?: boolean) => {
     setShowDrawer(typeof override === "boolean" ? override : !showDrawer);
@@ -70,6 +72,7 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />
       <main className={classes.content}>
         <DevInfoBadge />
+        {!isZilTokenSwap && <ZilTokenSwapCTABanner />}
         <Suspense fallback={<LinearProgress />}>
           {renderRoutes(route.routes)}
         </Suspense>
