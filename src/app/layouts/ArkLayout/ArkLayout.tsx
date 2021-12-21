@@ -2,8 +2,9 @@ import React, { Suspense, useEffect, useState } from "react";
 import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { useDispatch, useSelector } from "react-redux";
+import { useRouteMatch } from "react-router-dom";
 import { renderRoutes } from "react-router-config";
-import { ArkNavDrawer, ArkTopBar, NavDrawer } from "app/components";
+import { ArkNavDrawer, ArkTopBar, NavDrawer, ZilTokenSwapCTABanner } from "app/components";
 import ConnectWalletButton from "app/components/ConnectWalletButton";
 import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
@@ -59,6 +60,8 @@ const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     // eslint-disable-next-line
   }, [blockchainState.ready, walletState.wallet?.addressInfo.bech32]);
 
+  const isZilTokenSwap = useRouteMatch("/bridge/erc20-zil-upgrade");
+
   const onToggleDrawer = (override?: boolean) => {
     setShowDrawer(typeof override === "boolean" ? override : !showDrawer);
   };
@@ -77,9 +80,10 @@ const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       <NavDrawer onClose={() => onToggleDrawer(false)} open={showDrawer} />
       <main className={classes.content}>
         <DevInfoBadge />
+        {!isZilTokenSwap && <ZilTokenSwapCTABanner />}
         <Suspense fallback={<LinearProgress />}>
           {renderRoutes(route.routes)}
-          <Box marginBottom={30}/>
+          <Box marginBottom={30} />
         </Suspense>
       </main>
       <Hidden smUp>
