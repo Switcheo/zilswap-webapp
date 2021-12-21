@@ -107,6 +107,11 @@ export const ERC20_LEGACY_ZIL_CONTRACT = {
   [Network.TestNet]: "0x2024cb47191db8a8f2961a9d9dff9e11999fe8c7",
 }
 
+export const ERC20_BRIDGEABLE_ZIL_CONTRACT = {
+  [Network.MainNet]: "0x6EeB539D662bB971a4a01211c67CB7f65B09b802",
+  [Network.TestNet]: "0x92774E23EdAA2927f3938Ab4b690C076095cda0A",
+}
+
 export const TOKEN_SYMBOLS = {
   "ZETH": "zETH",
   "ZWBTC": "zWBTC",
