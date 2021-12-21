@@ -25,6 +25,8 @@ import legacyZilAbi from "./legacy-zil-abi.json";
 interface Props extends BoxProps {
 }
 
+const GAS_LIMIT = 175000;
+
 const BridgableZil = (props: Props) => {
   const { className, ...rest } = props;
   const classes = useStyles();
@@ -53,40 +55,6 @@ const BridgableZil = (props: Props) => {
     if (!swthAddrMnemonic)
       setSwthAddrMnemonic(SWTHAddress.newMnemonic());
   }, [swthAddrMnemonic])
-
-  // async function initTradehubSDK(mnemonic: string, network: Network) {
-  //   let attempts = 0;
-  //   const tradehubNetwork = netZilToTradeHub(network);
-  //   while (attempts++ < 10) {
-  //     try {
-  //       const sdk = new TradeHubSDK({
-  //         network: tradehubNetwork,
-  //         debugMode: isDebug(),
-  //       });
-  //       return await sdk.connectWithMnemonic(mnemonic);
-  //     } catch (error) {
-  //       console.error("init tradehub sdk error");
-  //       console.error(error);
-
-  //       // delay <2 ^ attempts> seconds if error occurs
-  //       let delay = Math.pow(2, attempts) * 1000;
-  //       await new Promise(res => setTimeout(res, delay));
-  //     }
-  //   }
-  //   throw new Error("failed to initialize TradeHubSDK")
-  // }
-
-  // useEffect(() => {
-  //   if (!swthAddrMnemonic) return;
-
-  //   runInitTradeHubSDK(async () => {
-  //     const sdk = await initTradehubSDK(swthAddrMnemonic, network);
-  //     await sdk.initialize();
-  //     setSdk(sdk);
-  //   })
-
-  //   // eslint-disable-next-line
-  // }, [swthAddrMnemonic, network])
 
   const onClickConnectETH = async (bypass?: boolean) => {
     if (!bypass && ethWallet) return setDisconnectMenu(connectButtonRef);
@@ -148,7 +116,7 @@ const BridgableZil = (props: Props) => {
         const ethersProvider = new ethers.providers.Web3Provider(ethWallet.provider)
         const signer = ethersProvider.getSigner();
 
-        await legacyContract.connect(signer).approve(legacyContract.address, 100000);
+        await legacyContract.connect(signer).approve(ERC20_TOKENSWAP_CONTRACT[Network.TestNet], 100000);
       } catch (error) {
         console.error(error);
         throw error;
@@ -179,16 +147,11 @@ const BridgableZil = (props: Props) => {
     runSwapToken(async () => {
       const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider);
       const signer = ethersProvider.getSigner();
-      // const ethAddress = await signer.getAddress();
-      // const gasPrice = await ethersProvider.getGasPrice();
-      // const gasPriceGwei = new BigNumber(ethers.utils.formatUnits(gasPrice, "gwei"));
 
       await getApproval()
       const ercSwapContract = new ethers.Contract(ERC20_TOKENSWAP_CONTRACT[Network.TestNet], tokenswapAbi);
-      const preTx = await ercSwapContract.populateTransaction.swap(100000, { gasLimit: 21000 });
-      const signedTx = await signer.sendUncheckedTransaction(preTx)
+      const tx = await ercSwapContract.connect(signer).swap(10000, { gasLimit: GAS_LIMIT });
 
-      const tx = await ethersProvider.send("eth_sendRawTransaction", [signedTx]);
       toaster("Swap completed!")
       setSwappedTx(tx);
     })
@@ -260,7 +223,7 @@ const BridgableZil = (props: Props) => {
               </Box>
               <Box textAlign="left">
                 <Typography variant="body1" className={classes.textColoured}>
-                  Swap success. Bridge your ZIL back to ZIlliqa via the <b className={classes.unColorText}>Zil<b className={classes.textColoured}>Bridge</b></b> here.
+                  Swap success. Bridge your ZIL back to ZIlliqa via the <b className={classes.unColorText}>Zil<b className={classes.textColoured}>Bridge</b></b> <u >here.</u>
                 </Typography>
               </Box>
             </Box>
