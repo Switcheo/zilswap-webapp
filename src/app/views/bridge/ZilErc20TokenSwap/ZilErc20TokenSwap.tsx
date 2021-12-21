@@ -146,7 +146,7 @@ const ZilErc20TokenSwap = (props: Props) => {
 
         const increaseAllowance = new BigNumber(2).pow(128).minus(1).minus(bnOrZero(allowance.toString()))
 
-        const tx = await legacyZilContract.connect(signer).approve(ERC20_ZIL_TOKENSWAP_CONTRACT[Network.TestNet], increaseAllowance.toString());
+        const tx = await legacyZilContract.connect(signer).approve(tokenSwapContract.address, increaseAllowance.toString());
         toaster(`Submitted: ERC20 Approval`, { hash: tx.hash.replace(/^0x/i, ""), sourceBlockchain: "eth" });
         await ethersProvider.waitForTransaction(tx.hash);
       } catch (error) {
@@ -179,8 +179,7 @@ const ZilErc20TokenSwap = (props: Props) => {
       const signer = ethersProvider.getSigner();
 
       await approveIfNecessary()
-      const ercSwapContract = new ethers.Contract(ERC20_ZIL_TOKENSWAP_CONTRACT[Network.TestNet], tokenswapAbi);
-      const tx = await ercSwapContract.connect(signer).swap(transferAmount.shiftedBy(ZIL_DECIMALS).toString(), { gasLimit: GAS_LIMIT });
+      const tx = await tokenSwapContract.connect(signer).swap(transferAmount.shiftedBy(ZIL_DECIMALS).toString(), { gasLimit: GAS_LIMIT });
 
       toaster(`Submitted: Token Swap`, { hash: tx.hash.replace(/^0x/i, ""), sourceBlockchain: "eth" });
       await ethersProvider.waitForTransaction(tx.hash);
