@@ -147,8 +147,6 @@ const TopBar: React.FC<Props> = (
 
   const tabConfig = currentPath ? DrawerConfig[currentPath] || [] : [];
 
-  console.log({ tabConfig }, { currentPath });
-
   return (
     <AppBar
       {...rest}

@@ -42,8 +42,6 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   const currentPath: "swap" | "pool" | "bridge" | "zilo" | "ark" | "main" = useMemo(() => {
     const current = location.pathname;
-    console.log({ current })
-
 
     if (current.indexOf("/swap") === 0 || (current.indexOf("/pool") === 0 && current.indexOf("/pools") !== 0)) return "swap";
     else if (current.indexOf("/pools") === 0)
@@ -65,8 +63,6 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const onToggleTabDrawer = (override?: boolean) => {
     setShowTabDrawer(typeof override === "boolean" ? override : !showTabDrawer);
   };
-
-  console.log({ currentPath })
 
   return (
     <Box className={classes.root}>

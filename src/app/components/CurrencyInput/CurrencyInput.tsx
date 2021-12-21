@@ -168,7 +168,7 @@ export interface CurrencyInputProps
   highestBid?: BigNumber;
   dialogOpts?: Partial<CurrencyDialogProps>;
   legacyZil?: boolean;
-  legacyBalance?: BigNumber;
+  overrideBalance?: BigNumber;
   balanceLabel?: string;
 
   onCurrencyChange?: (token: TokenInfo) => void;
@@ -205,7 +205,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
     onEnterKeyPress,
     tokenList = "zil",
     legacyZil = false,
-    legacyBalance,
+    overrideBalance,
     balanceLabel = "Balance"
   } = props;
   const classes = useStyles();
@@ -295,7 +295,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
               compression: token?.decimals,
               showCurrency: false,
             })
-            : (legacyBalance ? legacyBalance.toString() : "-")}
+            : (overrideBalance ? overrideBalance.toString() : "-")}
         </Typography>
       )}
 
