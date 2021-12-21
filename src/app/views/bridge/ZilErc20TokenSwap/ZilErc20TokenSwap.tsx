@@ -50,7 +50,7 @@ const ZilErc20TokenSwap = (props: Props) => {
   const [disconnectMenu, setDisconnectMenu] = useState<any>();
   const connectButtonRef = useRef();
 
-  const network = ethWallet?.chainId === 1 ? Network.MainNet : Network.TestNet;
+  const network = (!ethWallet || ethWallet.chainId === 1) ? Network.MainNet : Network.TestNet;
 
   const {
     legacyZilContract,
