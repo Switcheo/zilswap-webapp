@@ -32,8 +32,8 @@ const DrawerConfig: SimpleMap<DrawerInfo[]> = {
     highlightPaths: ["/history"],
   }, {
     drawerText: "ERC20 ZIL Token Swap",
-    navLink: "/bridge/erc20-zil-upgrade",
-    highlightPaths: ["/bridge/erc20-zil-upgrade"],
+    navLink: "/bridge/erc20-zil-swap",
+    highlightPaths: ["/bridge/erc20-zil-swap"],
   }],
   swap: [{
     drawerText: "Swap",
