@@ -56,7 +56,7 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     else return "main";
   }, [location.pathname]);
 
-  const isZilTokenSwap = useRouteMatch("/bridge/erc20-zil-upgrade");
+  const isZilTokenSwap = useRouteMatch("/bridge/erc20-zil-swap");
 
   const onToggleDrawer = (override?: boolean) => {
     setShowDrawer(typeof override === "boolean" ? override : !showDrawer);

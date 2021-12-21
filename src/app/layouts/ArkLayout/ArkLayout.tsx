@@ -60,7 +60,7 @@ const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     // eslint-disable-next-line
   }, [blockchainState.ready, walletState.wallet?.addressInfo.bech32]);
 
-  const isZilTokenSwap = useRouteMatch("/bridge/erc20-zil-upgrade");
+  const isZilTokenSwap = useRouteMatch("/bridge/erc20-zil-swap");
 
   const onToggleDrawer = (override?: boolean) => {
     setShowDrawer(typeof override === "boolean" ? override : !showDrawer);

@@ -24,7 +24,7 @@ const ZilTokenSwapCTABanner = () => {
 
   return (
     <Box className={classes.banner} maxWidth={800} margin="0 auto">
-      <RouterLink to="/bridge/erc20-zil-upgrade">
+      <RouterLink to="/bridge/erc20-zil-swap">
         <img className={classes.bannerImage} src="/assets/202112-erc20-zil-swap.png" alt="" />
       </RouterLink>
     </Box>
