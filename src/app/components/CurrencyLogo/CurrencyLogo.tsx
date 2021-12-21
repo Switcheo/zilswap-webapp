@@ -41,7 +41,8 @@ const CurrencyLogo = (props: any) => {
   const network = useNetwork();
 
   const urlSuffix = theme.palette.type === "dark" ? '?t=dark' : '';
-  var tokenIconUrl: string
+  const isZil = typeof currency === "string" && ["eZIL", "ZIL"].includes(currency);
+  let tokenIconUrl: string
 
   const logoAddress = useMemo(() => {
     if (blockchain === Blockchain.Ethereum) {
@@ -57,13 +58,13 @@ const CurrencyLogo = (props: any) => {
   }, [blockchain, address, bridgeTokens.eth])
 
   if (network === Network.TestNet) {
-    if (currency === "ZIL")
+    if (isZil)
       tokenIconUrl = `https://meta.viewblock.io/ZIL/logo${urlSuffix}`
     else
       tokenIconUrl = `https://dr297zt0qngbx.cloudfront.net/tokens/testnet/${logoAddress}`
   } else {
-    let tokenKey = currency === 'ZIL' ? '' : `.${logoAddress}`
-    if (logoAddress?.startsWith("0x") && currency !== "ZIL")
+    let tokenKey = isZil ? '' : `.${logoAddress}`
+    if (logoAddress?.startsWith("0x") && !isZil)
       tokenKey = `ZIL.${toBech32Address(logoAddress)}`;
     tokenIconUrl = `https://meta.viewblock.io/ZIL${tokenKey}/logo${urlSuffix}`
   }
