@@ -124,7 +124,7 @@ const routes: RouteConfig[] = [
       {
         path: "/bridge/bridgable-zil",
         exact: true,
-        component: lazy(() => import("./views/bridge/BridgableZil")),
+        component: lazy(() => import("./views/bridge/ZilErc20TokenSwap")),
       },
       {
         path: "/history",
