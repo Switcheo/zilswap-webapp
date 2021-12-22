@@ -8,6 +8,7 @@ import { ConnectedWallet, WalletConnectType } from "core/wallet";
 import { FancyButton } from "app/components";
 import { ReactComponent as CopyIcon } from "app/components/copy.svg";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
+import RewardsInfoButton from "app/layouts/RewardsInfoButton"
 import { actions } from "app/store";
 import { RootState } from "app/store/types";
 import { hexToRGBA, truncate, useNetwork, useTaskSubscriber } from "app/utils";
@@ -71,6 +72,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: "16px",
     marginBottom: 14,
     minHeight: "50px"
+  },
+  rewardButton: {
+    padding: "16px",
+    marginBottom: 14,
+    minHeight: "50px",
+    backgroundColor: "#FFDF6B",
+    color: "#003340",
+    borderRadius: theme.spacing(1.5),
+    "&.MuiButtonBase-root": {
+      "&:hover": {
+        opacity: 0.8,
+        backgroundColor: "#FFDF6B",
+      }
+    }
   },
   zilpayWallet: {
     marginTop: theme.spacing(1),
@@ -140,18 +155,19 @@ const ConnectedWalletBox = (props: any) => {
         <Typography variant="h3">{isMediaXS ? truncate(humanAddress, 10, 10) : humanAddress}</Typography>
         <Tooltip placement="top" onOpen={() => { }} onClose={() => { }} onClick={() => onCopy(humanAddress)} open={!!copyMap[humanAddress]} title="Copied!">
           <IconButton className={classes.copy} size="small">
-            <CopyIcon className={classes.icons}/>
+            <CopyIcon className={classes.icons} />
             <Typography color="textSecondary" className={classes.iconText}>Copy Address</Typography>
           </IconButton>
         </Tooltip>
         <IconButton target="_blank" href={`https://viewblock.io/zilliqa/address/${address}?network=${network.toLowerCase()}`} className={classes.newLink} size="small">
-          <NewLinkIcon className={classes.icons}/>
+          <NewLinkIcon className={classes.icons} />
           <Typography color="textSecondary" className={classes.iconText}>View on Explorer</Typography>
         </IconButton>
       </Box>
 
       <Box display="flex" flexDirection="column" className={classes.buttonBox}>
-        <FancyButton onClick={() => {dispatch(actions.Layout.toggleShowWallet()); dispatch(actions.Layout.toggleShowTransactions())}} className={classes.button} variant="contained" color="primary">
+        {isMediaXS && (<RewardsInfoButton buttonMode={true} />)}
+        <FancyButton onClick={() => { dispatch(actions.Layout.toggleShowWallet()); dispatch(actions.Layout.toggleShowTransactions()) }} className={classes.button} variant="contained" color="primary">
           View Past Transactions
         </FancyButton>
         <FancyButton fullWidth loading={isLoading} onClick={onDisconnect} className={classes.button} variant="contained" color="primary">

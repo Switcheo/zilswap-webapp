@@ -92,7 +92,7 @@ const ConnectWalletButton: React.FC<Props> = (props: Props) => {
                 variant="outlined"
                 onClick={onConnectWallet}
                 className={classes.mobileButton}>
-                Connect Walletz
+                Connect Wallet
               </Button>
             </Box>
             : <Button className={classes.button} onClick={onConnectWallet}>{connectText}</Button>
