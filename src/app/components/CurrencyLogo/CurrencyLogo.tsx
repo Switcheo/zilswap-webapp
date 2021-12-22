@@ -70,9 +70,6 @@ const CurrencyLogo = (props: any) => {
   }
   const fallbackImg = `https://meta.viewblock.io/ZIL.notfound/logo${urlSuffix}`;
 
-  if (currency === "SWTH")
-    tokenIconUrl = "https://assets.coingecko.com/coins/images/3645/small/SWTH_Token_Primary.png"
-
   return (
     <div className={cls(classes.root, className)}>
       {legacy
