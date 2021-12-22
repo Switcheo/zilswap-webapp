@@ -156,7 +156,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
           accum.otherTokens.push(token);
         }
 
-        if (token.whitelisted) {
+        if (token.whitelisted || token.address === "zil1yk93f957fanapf0yszgm84p62xrxxfytj4d2tl") {
           accum.coreDrop.push(token);
         }
 

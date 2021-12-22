@@ -258,7 +258,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
       const tkn = zilswapTokens[addr]
       acc[tkn.address] = {
         initialized: false,
-        registered: tkn.registered,
+        registered: tkn.address === "zil1yk93f957fanapf0yszgm84p62xrxxfytj4d2tl" || tkn.registered,
         whitelisted: tkn.whitelisted,
         isWzil: tkn.address === WZIL_TOKEN_CONTRACT[network],
         isZil: tkn.address === ZIL_ADDRESS,
