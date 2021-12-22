@@ -70,7 +70,7 @@ const CurrencyLogo = (props: any) => {
   }
   const fallbackImg = `https://meta.viewblock.io/ZIL.notfound/logo${urlSuffix}`;
 
-  if (currency === "SWTH")
+  if (currency === "SWTH" || address === "zil1yk93f957fanapf0yszgm84p62xrxxfytj4d2tl")
     tokenIconUrl = "https://assets.coingecko.com/coins/images/3645/small/SWTH_Token_Primary.png"
 
   return (
