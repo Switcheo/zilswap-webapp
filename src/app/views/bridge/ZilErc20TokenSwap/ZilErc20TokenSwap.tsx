@@ -147,7 +147,7 @@ const ZilErc20TokenSwap = (props: Props) => {
         const increaseAllowance = new BigNumber(2).pow(128).minus(1).minus(bnOrZero(allowance.toString()))
 
         const tx = await legacyZilContract.connect(signer).approve(tokenSwapContract.address, increaseAllowance.toString());
-        toaster(`Submitted: ERC20 Approval`, { hash: tx.hash.replace(/^0x/i, ""), sourceBlockchain: "eth" });
+        toaster(`Submitted: ERC-20 Approval`, { hash: tx.hash.replace(/^0x/i, ""), sourceBlockchain: "eth" });
         await ethersProvider.waitForTransaction(tx.hash);
       } catch (error) {
         console.error(error);
@@ -202,9 +202,9 @@ const ZilErc20TokenSwap = (props: Props) => {
     <Box {...rest} className={cls(classes.root, className)}>
       <Box className={classes.container}>
         <Box display="flex" flexDirection="column" alignItems="center">
-          <Text variant="h1" className={classes.headerText}><SwapSVG className={classes.swapIcon} />ERC20 Zil Token Swap</Text>
+          <Text variant="h1" className={classes.headerText}><SwapSVG className={classes.swapIcon} />ERC-20 Zil Token Swap</Text>
           <Text className={classes.subHeaderText}>
-            Swap your Interim ERC20 ZIL to a Bridged ERC20 ZIL below. After swapping, you will need to use the
+            Swap your Interim ERC-20 ZIL ($ZIL) to a Bridged ERC-20 ZIL ($eZIL) below. After swapping, you will need to use the
             <Link
               className={classes.here}
               rel="ZilBridge"
@@ -212,11 +212,11 @@ const ZilErc20TokenSwap = (props: Props) => {
               <b className={classes.unColorText}>Zil<span className={classes.textColoured}>Bridge</span></b>
             </Link>
             {" "}
-            to bridge your ERC20 ZIL from Ethereum to the Zilliqa network.
+            to bridge $eZIL from Ethereum to the Zilliqa network.
           </Text>
         </Box>
         <Box display="flex" flexDirection="column" textAlign="center" mt={3}>
-          <Text><b>Step 1</b>: Connect Wallet</Text>
+          <Text className={classes.stepText}><b>Step 1</b>: Connect Wallet</Text>
           <ConnectButton
             buttonRef={connectButtonRef}
             chain={Blockchain.Ethereum}
@@ -225,25 +225,29 @@ const ZilErc20TokenSwap = (props: Props) => {
           />
         </Box>
         <Box display="flex" flexDirection="column" textAlign="center" mt={3}>
-          <Text className={classes.stepText}><b>Step 2</b>: Swap
-            <Link
-              className={classes.link}
-              underline="hover"
-              rel="noopener noreferrer"
-              target="_blank"
-              href={getExplorerLink(ERC20_LEGACY_ZIL_CONTRACT[network])}>
-              Interim ERC20 ZIL <OpenInNewIcon className={classes.linkIcon} />
-            </Link>
-            to
-            <Link
-              className={classes.link}
-              underline="hover"
-              rel="noopener noreferrer"
-              target="_blank"
-              href={getExplorerLink(ERC20_BRIDGEABLE_ZIL_CONTRACT[network])}>
-              Bridged ERC20 ZIL <OpenInNewIcon className={classes.linkIcon} />
-            </Link>
-          </Text>
+          <Box className={classes.stepBox}>
+            <Text className={classes.stepText}><b>Step 2</b>: Swap
+              <Link
+                className={classes.link}
+                underline="hover"
+                rel="noopener noreferrer"
+                target="_blank"
+                href={getExplorerLink(ERC20_LEGACY_ZIL_CONTRACT[network])}>
+                Interim ERC-20 $ZIL <OpenInNewIcon className={classes.linkIcon} />
+              </Link>
+            </Text>
+            <Text className={cls(classes.stepText, classes.noGap)}>
+              to
+              <Link
+                className={classes.link}
+                underline="hover"
+                rel="noopener noreferrer"
+                target="_blank"
+                href={getExplorerLink(ERC20_BRIDGEABLE_ZIL_CONTRACT[network])}>
+                Bridged ERC-20 $eZIL <OpenInNewIcon className={classes.linkIcon} />
+              </Link>
+            </Text>
+          </Box>
           <Box mt={1.5} display="flex" flexDirection="column">
             <CurrencyInput
               label="Amount"
@@ -258,7 +262,7 @@ const ZilErc20TokenSwap = (props: Props) => {
               legacyZil
               fixedToken
               overrideBalance={legacyBalance}
-              balanceLabel="Interim ZIL Balance"
+              balanceLabel="Interim $ZIL"
             />
             <Box display="flex" justifyContent="center" mt={-.6} mb={-.6}>
               <ArrowDown />
@@ -271,7 +275,7 @@ const ZilErc20TokenSwap = (props: Props) => {
               token={bridgeZil}
               fixedToken
               overrideBalance={bridgeableBalance}
-              balanceLabel="Bridged ZIL Balance"
+              balanceLabel="Bridged $eZIL"
             />
           </Box>
           <FancyButton
@@ -281,13 +285,13 @@ const ZilErc20TokenSwap = (props: Props) => {
             className={classes.actionButton}
             onClick={onSwap}
             loading={isLoading || isLoadingAddress}
-            loadingText={pendingApproval ? "Confirming ERC20 Approval" : (isLoading ? "Swap in progress" : undefined)}
+            loadingText={pendingApproval ? "Confirming ERC-20 Approval" : (isLoading ? "Swap in progress" : undefined)}
           >
             {!ethWallet?.address ? (
               "Connect Wallet"
             ) : (
               transferAmount.gt(legacyBalance) ?
-                "Insufficient Interim ZIL Balance"
+                "Insufficient Interim $ZIL Balance"
                 : (
                   transferAmount.gt(allowance) ?
                     "Unlock and Swap"
@@ -303,9 +307,7 @@ const ZilErc20TokenSwap = (props: Props) => {
               </Box>
               <Box textAlign="left">
                 <Typography variant="body1" className={classes.textColoured}>
-                  Swap success.
-                  <br />
-                  Send your Bridged ZIL back to Zilliqa via the
+                  Swap success! Bridge your $eZIL back to the Zilliqa network via the
                   <Link
                     className={classes.here}
                     rel="ZilBridge"
@@ -386,6 +388,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "30px",
     display: "flex",
     alignItems: "center",
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "24px",
+    }
   },
   subHeaderText: {
     alignItems: "center",
@@ -393,6 +398,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "17px",
     lineHeight: 1.2,
     marginTop: theme.spacing(1),
+    [theme.breakpoints.down("xs")]: {
+      fontSize: "15px",
+      lineHeight: 1.1,
+    },
   },
   actionButton: {
     marginTop: theme.spacing(3),
@@ -415,6 +424,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: "center",
+    flexDirection: "row",
+    lineHeight: 1.2,
+    [theme.breakpoints.down("xs")]: {
+      lineHeight: 1.1,
+    },
   },
   linkIcon: {
     marginLeft: theme.spacing(0.5),
@@ -432,6 +446,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   here: {
     textDecoration: "underline",
     marginLeft: theme.spacing(0.5),
+  },
+  stepBox: {
+    display: 'flex',
+    justifyContent: "center",
+    [theme.breakpoints.down("xs")]: {
+      flexDirection: "column",
+    },
+  },
+  noGap: {
+    [theme.breakpoints.down("xs")]: {
+      transform: "translateY(-8px)",
+      marginBottom: "-8px",
+    },
   }
 }));
 
