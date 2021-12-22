@@ -31,7 +31,7 @@ const DrawerConfig: SimpleMap<DrawerInfo[]> = {
     navLink: "/history",
     highlightPaths: ["/history"],
   }, {
-    drawerText: "ERC20 ZIL Token Swap",
+    drawerText: "ERC-20 ZIL Token Swap",
     navLink: "/bridge/erc20-zil-swap",
     highlightPaths: ["/bridge/erc20-zil-swap"],
   }],
