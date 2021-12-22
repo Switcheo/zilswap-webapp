@@ -46,6 +46,8 @@ const Notifications: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: an
   else if (isSwap && outToken && !outToken.isZil && !outToken.whitelisted)
     userToken = outToken;
 
+  if (userToken?.address === "zil1yk93f957fanapf0yszgm84p62xrxxfytj4d2tl") return null;
+
   if (!userToken) return null;
 
   return (
