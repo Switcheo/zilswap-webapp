@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderLeft: theme.palette.border,
     borderRight: theme.palette.border,
     borderBottom: theme.palette.border,
-    borderRadius: "0 0 12px 12px"
+    borderRadius: "0 0 12px 12px",
   },
   container: {
     padding: theme.spacing(4.5, 6),
@@ -39,7 +39,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   submitButton: {
     minWidth: 240,
     alignSelf: "center",
-    height: 46
+    height: 46,
+    [theme.breakpoints.down("sm")]: {
+      minWidth: 200,
+    },
   },
   extraSpacious: {
     display: "flex",

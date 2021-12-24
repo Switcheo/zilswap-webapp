@@ -444,7 +444,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   } as const;
 
   return (
-    <Box {...rest} className={cls(classes.root, className)}>
+    <Box {...rest} className={cls({ [classes.root]: !buttonMode }, className)}>
       <Fragment>
         {
           isMobileView
