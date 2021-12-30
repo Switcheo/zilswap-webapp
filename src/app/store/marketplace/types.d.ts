@@ -162,6 +162,7 @@ export interface Profile extends MarketplaceUser {
   bannerImage?: {
     url: string;
   };
+  admin?: boolean;
 }
 
 export interface BiddedNft {
