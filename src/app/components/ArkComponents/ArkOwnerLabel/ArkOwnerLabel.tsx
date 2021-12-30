@@ -3,6 +3,7 @@ import { Typography, TypographyProps, Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { darken } from '@material-ui/core/styles';
 import { getWallet } from "app/saga/selectors";
 import { MarketplaceUser } from "app/store/types";
@@ -34,9 +35,11 @@ const ArkOwnerLabel: React.FC<Props> = (props: Props) => {
 
   return (
     <Box className={classes.link} >
-      <Typography component="span" {...rest} className={cls(classes.root, className)}>
-        {text}
-      </Typography>
+      <Link to={`/arky/profile?address=${user?.address}`}>
+        <Typography component="span" {...rest} className={cls(classes.root, className)}>
+          {text}
+        </Typography>
+      </Link>
     </Box>
   );
 };
