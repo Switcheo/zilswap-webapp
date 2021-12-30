@@ -11,6 +11,6 @@ export const netCarbonToZil = (network: CarbonSDK.Network): Network => {
 export const netZilToCarbon = (network: Network): CarbonSDK.Network => {
   switch (network) {
     case Network.MainNet: return CarbonSDK.Network.MainNet;
-    default: return CarbonSDK.Network.TestNet;
+    default: return CarbonSDK.Network.DevNet;
   }
 }

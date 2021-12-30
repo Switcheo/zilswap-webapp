@@ -4,8 +4,9 @@ import { call, cancelled, fork, put, select, take, takeEvery } from "redux-saga/
 import { AppState, ObservedTx, TxReceipt, TxStatus, Zilswap } from "zilswap-sdk";
 import { ZiloAppState } from "zilswap-sdk/lib/zilo"
 
-import { Network } from "zilswap-sdk/lib/constants";
-import { Blockchain } from "carbon-js-sdk";
+import { Blockchain, CarbonSDK } from "carbon-js-sdk";
+import { Token as CarbonToken } from "carbon-js-sdk/lib/codec";
+import { blockchainForChainId } from "carbon-js-sdk/lib/util/blockchain";
 import { ConnectedWallet, WalletConnectType, connectWalletBoltX, connectWalletZilPay } from "core/wallet";
 import { ZILO_DATA } from "core/zilo/constants";
 import { ZilswapConnector, toBech32Address } from "core/zilswap";
@@ -15,7 +16,7 @@ import { getConnectedZilPay } from "core/utilities/zilpay";
 import { PoolTransaction, PoolTransactionResult, ZAPStats } from "core/utilities/zap-stats";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { getConnectedBoltX } from "core/utilities/boltx";
-import { SimpleMap } from "app/utils";
+import { netZilToCarbon, SimpleMap } from "app/utils";
 import { BridgeableToken } from "app/store/bridge/types";
 import { detachedToast } from "app/utils/useToaster";
 import { BRIDGEABLE_WRAPPED_DENOMS, BoltXNetworkMap, RPCEndpoints, ZIL_ADDRESS, WZIL_TOKEN_CONTRACT } from "app/utils/constants";
@@ -177,31 +178,29 @@ function* stateChangeObserved(payload: StateChangeObservedPayload) {
   yield put(actions.Blockchain.setZiloState(payload.state.contractInit!._this_address, payload.state))
 }
 
-type WrapperMappingsResult = { height: string, result: { [key: string]: string } }
-type CarbonToken = { denom: string, decimals: string, blockchain: Blockchain.Zilliqa | Blockchain.Ethereum, asset_id: string, symbol: string, name: string, lockproxy_hash: string }
-type CarbonTokensResult = { height: string, result: ReadonlyArray<CarbonToken> }
-type BridgeMappingResult = { [Blockchain.Zilliqa]: BridgeableToken[], [Blockchain.Ethereum]: BridgeableToken[] }
-
-const fetchJSON = async (url: string) => {
-  const res = await fetch(url)
-  return res.json()
-}
+interface BridgeMappingResult {
+  [Blockchain.Zilliqa]: BridgeableToken[],
+  [Blockchain.Ethereum]: BridgeableToken[],
+};
 
 const addMapping = (r: BridgeMappingResult, a: CarbonToken, b: CarbonToken, sourceChain: Blockchain) => {
-  r[a.blockchain].push({
-    blockchain: a.blockchain,
-    tokenAddress: a.asset_id.toLowerCase(),
-    lockproxyAddress: a.lockproxy_hash,
+  const aChain = blockchainForChainId(a.chainId.toNumber()) as Blockchain.Zilliqa | Blockchain.Ethereum;
+  const bChain = blockchainForChainId(b.chainId.toNumber()) as Blockchain.Zilliqa | Blockchain.Ethereum;
+  r[aChain].push({
+    blockchain: aChain,
+    tokenAddress: a.tokenAddress.toLowerCase(),
+    lockproxyAddress: a.bridgeAddress,
     denom: a.denom,
-    toBlockchain: b.blockchain,
-    toTokenAddress: b.asset_id.toLowerCase(),
+    toBlockchain: bChain,
+    toTokenAddress: b.tokenAddress.toLowerCase(),
     toDenom: b.denom,
-    balDenom: sourceChain === a.blockchain ? a.denom : b.denom,
+    balDenom: sourceChain === aChain ? a.denom : b.denom,
   })
 }
 
 const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken) => {
-  const address = t.blockchain === Blockchain.Zilliqa ? toBech32Address(t.asset_id) : `0x${t.asset_id.toLowerCase()}`
+  const blockchain = blockchainForChainId(t.chainId.toNumber());
+  const address = blockchain === Blockchain.Zilliqa ? toBech32Address(t.tokenAddress) : `0x${t.tokenAddress.toLowerCase()}`
   if (r[address]) {
     if (!r[address].registered)
       r[address].registered = true;
@@ -211,17 +210,17 @@ const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken) => {
     initialized: false,
     registered: true,
     whitelisted: true,
-    isWzil: false, // TODO: maybe true?
-    isZil: false, // TODO: maybe true?
-    isZwap: false, // TODO: maybe true?
+    isWzil: false,
+    isZil: false,
+    isZwap: false,
     address,
-    decimals: parseInt(t.decimals, 10),
+    decimals: t.decimals.toNumber(),
     symbol: t.symbol,
     name: `${t.name} (${t.denom})`,
     balance: undefined,
     allowances: {},
     pool: undefined,
-    blockchain: t.blockchain,
+    blockchain,
   }
 }
 
@@ -276,27 +275,32 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     }, {} as SimpleMap<TokenInfo>)
 
     // load wrapper mappings and eth tokens by fetching bridge list from carbon
-    const host = network === Network.MainNet ? 'tradescan.switcheo.org' : 'tradescan.switcheo.org'
-    const mappings: WrapperMappingsResult = yield call(fetchJSON, `https://${host}/coin/wrapper_mappings`)
-    const data: CarbonTokensResult = yield call(fetchJSON, `https://${host}/coin/tokens`)
+    const carbonSdk: CarbonSDK = yield call(CarbonSDK.instance, {
+      network: netZilToCarbon(network),
+    });
+    const mappings = carbonSdk.token.wrapperMap;
+    const carbonTokens = Object.values(carbonSdk.token.tokens);
     const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
     const bridgeableDenoms = BRIDGEABLE_WRAPPED_DENOMS[network];
-    Object.entries(mappings.result).forEach(([wrappedDenom, sourceDenom]) => {
+    Object.entries(mappings).forEach(([wrappedDenom, sourceId]) => {
       if (!bridgeableDenoms.includes(wrappedDenom)) {
         return;
       }
 
-      const wrappedToken = data.result.find(d => d.denom === wrappedDenom)!
-      const sourceToken = data.result.find(d => d.denom === sourceDenom)!
+      const wrappedToken = carbonTokens.find(d => d.denom === wrappedDenom)!
+      const sourceToken = carbonTokens.find(d => d.id === sourceId)!
 
-      if ((wrappedToken.blockchain !== Blockchain.Zilliqa && wrappedToken.blockchain !== Blockchain.Ethereum) ||
-        (sourceToken.blockchain !== Blockchain.Zilliqa && sourceToken.blockchain !== Blockchain.Ethereum)) {
+      const wrappedChain = blockchainForChainId(wrappedToken.chainId.toNumber());
+      const sourceChain = blockchainForChainId(sourceToken.chainId.toNumber());
+
+      if ((wrappedChain !== Blockchain.Zilliqa && wrappedChain !== Blockchain.Ethereum) ||
+        (sourceChain !== Blockchain.Zilliqa && sourceChain !== Blockchain.Ethereum)) {
         return
       }
       addToken(tokens, sourceToken)
       addToken(tokens, wrappedToken)
-      addMapping(result, wrappedToken, sourceToken, sourceToken.blockchain)
-      addMapping(result, sourceToken, wrappedToken, sourceToken.blockchain)
+      addMapping(result, wrappedToken, sourceToken, sourceChain)
+      addMapping(result, sourceToken, wrappedToken, sourceChain)
     })
 
     logger('init chain set tokens')

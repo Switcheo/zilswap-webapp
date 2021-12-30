@@ -74,6 +74,7 @@ function* watchDepositConfirmation() {
           const swthAddress = AddressUtils.SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
 
           // check if deposit is confirmed
+          tx.depositTxConfirmedAt = dayjs();
           if (!tx.depositTxConfirmedAt) {
             const queryOpts = Models.QueryGetExternalTransfersRequest.fromPartial({
               address: swthAddress,

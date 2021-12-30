@@ -489,10 +489,10 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
-    if (!withdrawFee) {
-      toaster("Transfer fee not loaded", { overridePersist: false });
-      return null;
-    }
+    // if (!withdrawFee) {
+    //   toaster("Transfer fee not loaded", { overridePersist: false });
+    //   return null;
+    // }
 
     if (withdrawFee?.amount.gte(bridgeFormState.transferAmount)) {
       toaster("Transfer amount too low", { overridePersist: false });
