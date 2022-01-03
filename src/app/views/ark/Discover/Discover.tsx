@@ -35,6 +35,7 @@ interface HeadersProp {
 const HEADERS: HeadersProp[] = [
   { align: "left", value: "Collection" },
   { align: "center", value: "7-Day Volume" },
+  { align: "center", value: "All-Time Volume" },
   { align: "center", value: "Floor" },
   // { align: "center", value: "% Change (24hr / 7day)" },
   { align: "center", value: "Owners" },
@@ -312,14 +313,20 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                       </Box>
                     </TableCell>
                     <TableCell align="center" className={classes.bodyCell}>
-
                       <Box display="flex" alignItems="center" justifyContent="center">
                         <strong className={classes.amount}>
                           {collectionStats.volume ?? "-"}
                         </strong>
                         <CurrencyLogo currency="ZIL" className={classes.currencyLogo} />
                       </Box>
-
+                    </TableCell>
+                    <TableCell align="center" className={classes.bodyCell}>
+                      <Box display="flex" alignItems="center" justifyContent="center">
+                        <strong className={classes.amount}>
+                          {collectionStats.allTimeVolume ?? "-"}
+                        </strong>
+                        <CurrencyLogo currency="ZIL" className={classes.currencyLogo} />
+                      </Box>
                     </TableCell>
                     <TableCell align="center" className={classes.bodyCell}>
                       <Box display="flex" alignItems="center" justifyContent="center">

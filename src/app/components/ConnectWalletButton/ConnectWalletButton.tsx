@@ -57,6 +57,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.tab.selected,
     border: theme.palette.border,
     justifyContent: "space-between",
+    position: "sticky",
     "&:hover": {
       backgroundColor: theme.palette.type === "dark" ? "" : `rgba${hexToRGBA("#003340", 0.8)}`
     }

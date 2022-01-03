@@ -17,7 +17,7 @@ import { Cheque, WalletState } from "app/store/types";
 import { bnOrZero, toSignificantNumber, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
 import { RootState, TokenState } from "app/store/types";
 import { getChequeStatus } from "core/utilities/ark"
-import { ArkOwnerLabel } from "app/components";
+import { ArkOwnerLabel, ArkAcceptBidDialog } from "app/components";
 import { ZilswapConnector } from "core/zilswap";
 import { logger, ArkClient, waitForTx } from "core/utilities";
 import { getMarketplace } from "app/saga/selectors";
@@ -166,7 +166,9 @@ const Row: React.FC<Props> = (props: Props) => {
   const valueCalculators = useValueCalculators();
   const [runCancelBid, cancelLoading] = useAsyncTask(`cancelBid-${baseBid.id}`, e => toaster(e?.message));
   const [runAcceptBid, acceptLoading] = useAsyncTask(`acceptBid-${baseBid.id}`, e => toaster(e?.message));
-  const userAddress = walletState.wallet?.addressInfo.byte20.toLowerCase()
+  const userAddress = walletState.wallet?.addressInfo.byte20.toLowerCase();
+  const [selectedBid, setSelectedBid] = useState<Cheque | null>(null);
+  const [awaitTxApproval, setAwaitTxApproval] = useState(false);
 
   const isPendingTx = useMemo(() => {
     for (const pendingTx of Object.values(pendingTxs)) {
@@ -221,6 +223,7 @@ const Row: React.FC<Props> = (props: Props) => {
     });
   }
 
+
   const acceptBid = (bid: Cheque) => {
     // TODO: refactor
     runAcceptBid(async () => {
@@ -245,10 +248,13 @@ const Row: React.FC<Props> = (props: Props) => {
 
       if (transaction?.id) {
         toaster("Approve TX Submitted", { hash: transaction.id });
+        setAwaitTxApproval(true)
         try {
           await waitForTx(transaction.id);
         } catch (e) {
           console.error(e);
+        } finally {
+          setAwaitTxApproval(false)
         }
       }
 
@@ -375,7 +381,7 @@ const Row: React.FC<Props> = (props: Props) => {
                 </IconButton>
               }
               {status === 'Active' && bid.token.ownerAddress === userAddress &&
-                <IconButton disabled={acceptLoading || isPendingTx} onClick={() => acceptBid(bid)} className={classes.iconButton}>
+                <IconButton disabled={acceptLoading || isPendingTx} onClick={() => setSelectedBid(bid)} className={classes.iconButton}>
                   {(acceptLoading || isPendingTx) && (
                     <CircularProgress size={16} />
                   )}
@@ -398,6 +404,18 @@ const Row: React.FC<Props> = (props: Props) => {
           </TableRow>
         })
       }
+
+      <ArkAcceptBidDialog
+        blocktime={blockTime}
+        currentBlock={currentBlock}
+        loading={acceptLoading}
+        awaitApproval={awaitTxApproval}
+        onAcceptBid={acceptBid}
+        showDialog={!!selectedBid}
+        bid={selectedBid}
+        onCloseDialog={() => setSelectedBid(null)}
+        isOffer={true}
+      />
       {relatedBids && relatedBids.length > 0 && (
         <TableRow className={cls(classes.row, classes.lastRow)}>
           <TableCell className={classes.expandCell} colSpan={8}>

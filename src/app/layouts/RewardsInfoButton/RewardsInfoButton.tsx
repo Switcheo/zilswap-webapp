@@ -13,7 +13,7 @@ import groupBy from "lodash/groupBy";
 import { useDispatch, useSelector } from "react-redux";
 import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import { claimMulti } from "core/rewards";
-import { CurrencyLogo, HelpInfo, Text } from "app/components";
+import { CurrencyLogo, FancyButton, HelpInfo, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
 import { DistributionWithStatus, DistributorWithTimings, RewardsState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
@@ -23,7 +23,7 @@ import { BIG_ZERO } from "app/utils/constants";
 import { ReactComponent as IconSVG } from './icon.svg';
 
 interface Props extends BoxProps {
-
+  buttonMode?: boolean;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -219,6 +219,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   progress: {
     marginRight: theme.spacing(1)
+  },
+  rewardButton: {
+    padding: "16px",
+    marginBottom: 14,
+    minHeight: "50px",
+    backgroundColor: "#FFDF6B",
+    color: "#003340",
+    borderRadius: theme.spacing(1.5),
+    "&.MuiButtonBase-root": {
+      "&:hover": {
+        opacity: 0.8,
+        backgroundColor: "#FFDF6B",
+      }
+    }
   }
 }));
 
@@ -228,7 +242,7 @@ type ClaimableRewards = DistributionWithStatus & {
 }
 
 const RewardsInfoButton: React.FC<Props> = (props: Props) => {
-  const { children, className, ...rest } = props;
+  const { buttonMode = false, children, className, ...rest } = props;
   const classes = useStyles();
   const valueCalculators = useValueCalculators();
   const network = useNetwork();
@@ -435,9 +449,13 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         {
           isMobileView
             ? (
-              <IconButton onClick={() => setActive(!active)} buttonRef={buttonRef}>
-                <IconSVG />
-              </IconButton>
+              buttonMode
+                ? <FancyButton onClick={() => setActive(!active)} buttonRef={buttonRef} className={classes.rewardButton} variant="contained" >
+                  Claim Reward
+                </FancyButton>
+                : <IconButton onClick={() => setActive(!active)} buttonRef={buttonRef}>
+                  <IconSVG />
+                </IconButton>
             ) : (
               <Button
                 size="small"

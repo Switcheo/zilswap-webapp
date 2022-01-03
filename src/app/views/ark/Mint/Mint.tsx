@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Container,
-  Typography,
-} from "@material-ui/core";
+import { Box, Container, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useSelector } from "react-redux";
@@ -40,7 +36,7 @@ export type NftData = {
 
 const collections = ["The Bear Market"];
 
-// const NAV_ITEMS = ["SET UP COLLECTION", "UPLOAD NFTs", "CONFIRM & MINT"];
+const NAV_ITEMS = ["SET UP COLLECTION", "UPLOAD NFTs", "CONFIRM & MINT"];
 
 const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
@@ -175,7 +171,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   nav: {
     marginTop: theme.spacing(6),
     paddingTop: 0,
-    borderRight: `1px solid rgba${theme.palette.type === "dark" ? hexToRGBA("#29475A", 1): hexToRGBA("#003340", 0.5)}`,
+    borderRight: `1px solid rgba${
+      theme.palette.type === "dark"
+        ? hexToRGBA("#29475A", 1)
+        : hexToRGBA("#003340", 0.5)
+    }`,
     marginRight: theme.spacing(4),
     [theme.breakpoints.down("sm")]: {
       display: "none",
@@ -186,7 +186,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     top: 0,
   },
   navItem: {
-    paddingLeft: 0, 
+    paddingLeft: 0,
     paddingRight: theme.spacing(2),
     whiteSpace: "nowrap",
     fontFamily: "'Raleway', sans-serif",
@@ -194,7 +194,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   navCurrent: {
     color: theme.palette.text?.primary,
-  }
+  },
 }));
 
 export default Mint;

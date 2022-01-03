@@ -36,6 +36,8 @@ const apiPaths = {
   "collection/traits": "/nft/collection/:address/traits",
   "collection/token/detail": "/nft/collection/:address/:tokenId/detail",
   "collection/resync/metadata": "/nft/collection/:collectionAddress/:tokenId/resync",
+  "collection/image/request": "/admin/collection/:address/upload/request",
+  "collection/update": "/admin/collection/:address/update",
   "token/favourite": "/nft/collection/:address/:tokenId/favourite",
   "history/floor": "/nft/history/floor",
   "history/saleprice": "/nft/history/saleprice",
@@ -203,9 +205,13 @@ export class ArkClient {
     return output;
   }
 
-  getProfile = async (address?: string) => {
+  getProfile = async (address: string, oAuth?: OAuth) => {
+    const headers: SimpleMap = {};
+    if (oAuth?.access_token) {
+      headers.authorization = "Bearer " + oAuth.access_token;
+    }
     const url = this.http.path("user/detail", { address });
-    const result = await this.http.get({ url });
+    const result = await this.http.get({ url, headers });
     const output = await result.json();
     await this.checkError(output);
     return output;
@@ -276,6 +282,24 @@ export class ArkClient {
     await this.checkError(output);
     return output;
   }
+
+  requestCollectionImageUploadUrl = async (address: string, access_token: string, type = "profile") => {
+    const headers = { Authorization: "Bearer " + access_token };
+    const url = this.http.path("collection/image/request", { address }, { type });
+    const result = await this.http.get({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  updateCollection = async (address: string, data: Omit<Collection, "address">, oAuth: OAuth) => {
+    const headers = { "authorization": "Bearer " + oAuth.access_token };
+    const url = this.http.path("collection/update", { address })
+    const result = await this.http.post({ url, data, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  };
 
   putImageUpload = async (url: string, data: Blob) => {
     await this.http.put({ url, data });
@@ -621,12 +645,14 @@ export class ArkClient {
   static parseCollectionStats(collection: CollectionWithStats) {
     const floorPrice = bnOrZero(collection.priceStat?.floorPrice).shiftedBy(-ZIL_DECIMALS)
     const volume = bnOrZero(collection.priceStat?.volume).shiftedBy(-ZIL_DECIMALS);
+    const allTimeVolume = bnOrZero(collection.priceStat?.allTimeVolume).shiftedBy(-ZIL_DECIMALS);
     const holderCount = bnOrZero(collection.tokenStat.holderCount);
     const tokenCount = bnOrZero(collection.tokenStat.tokenCount);
 
     return {
       floorPrice: floorPrice.gt(0) ? toHumanNumber(floorPrice, 2) : undefined,
       volume: volume.gt(0) ? toHumanNumber(volume, 2) : undefined,
+      allTimeVolume: allTimeVolume.gt(0) ? toHumanNumber(allTimeVolume, 2) : undefined,
       holderCount: holderCount.gt(0) ? holderCount.toString(10) : undefined,
       tokenCount: tokenCount.gt(0) ? tokenCount.toString(10) : undefined,
     }

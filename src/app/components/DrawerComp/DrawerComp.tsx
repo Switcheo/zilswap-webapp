@@ -52,8 +52,6 @@ const DrawerComp: React.FC<Props> = (props: Props) => {
     >
       <Box className={classes.drawerHeader}>
         <Button
-          component={Link}
-          to="/arky"
           className={classes.brandButton}
           disableRipple
         >
@@ -150,7 +148,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   logo: {
     height: "28px"
-  }
+  },
+  footer: {
+    display: "flex",
+    flexDirection: "column",
+    padding: theme.spacing(2),
+  },
 }));
 
 export default DrawerComp;

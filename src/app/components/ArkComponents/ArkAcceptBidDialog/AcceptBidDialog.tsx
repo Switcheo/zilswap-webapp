@@ -1,28 +1,44 @@
-import React from "react";
-import { Avatar, Box, BoxProps, Card, CardContent, Checkbox, FormControlLabel, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
+import React, { useEffect, useMemo, useState } from "react";
+import BigNumber from "bignumber.js";
 import { makeStyles } from "@material-ui/core/styles";
+import { toBech32Address } from "@zilliqa-js/crypto";
+import { useSelector } from "react-redux";
 import cls from "classnames";
-import { DialogModal, FancyButton } from "app/components";
-import { Cheque } from "app/store/types";
+import dayjs from "dayjs";
+import { Avatar, Box, BoxProps, Card, CardContent, CircularProgress, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
+import { ArkCheckbox, CurrencyLogo, DialogModal, FancyButton } from "app/components";
+import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
+import { Cheque, RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { ReactComponent as Checked } from "../assets/checked.svg";
-import { ReactComponent as UnChecked } from "../assets/uncheck.svg";
+import { toSignificantNumber, tryGetBech32Address, useAsyncTask, valueCalculators } from "app/utils";
+import { getBlockchain, getWallet } from "app/saga/selectors";
+import { ArkClient } from "core/utilities";
+import { ZilswapConnector } from "core/zilswap";
 
 interface Props extends BoxProps {
   showDialog: boolean;
   onCloseDialog: () => void;
-  bid: Cheque;
+  bid: Cheque | null;
   isOffer: boolean;
+  onAcceptBid: (bid: Cheque) => void;
+  loading: boolean;
+  blocktime: dayjs.Dayjs;
+  currentBlock: number;
+  awaitApproval: boolean;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    backgroundColor: "#0D1B24",
+    backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF",
     padding: theme.spacing(2),
-    minWidth: 320,
+    maxWidth: 450,
+    borderLeft: theme.palette.border,
+    borderRight: theme.palette.border,
+    borderBottom: theme.palette.border,
+    borderRadius: "0 0 12px 12px",
   },
   card: {
-    background: "rgba(222, 255, 255, 0.1)",
+    backgroundColor: theme.palette.type === "dark" ? "#DEFFFF11" : "#6BE1FF33",
   },
   header: {
     opacity: 0.5,
@@ -36,7 +52,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   item: {
     padding: "0",
-    maxWidth: 200,
+    width: "100%",
     margin: 0
   },
   checkboxText: {
@@ -46,72 +62,195 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px",
     display: "flex",
     padding: "18px 32px",
+    backgroundColor: theme.palette.type === "dark" ? "#003340" : "#6BE1FF",
+    color: theme.palette.text?.primary,
+    alignItems: "center"
   },
   buttonText: {
-    color: "#DEFFFF",
     padding: "8px, 16px",
   },
   backButton: {
-    color: "#DEFFFF",
-    background: "rgba(222, 255, 255, 0.1)",
+    color: theme.palette.text?.primary,
+    backgroundColor: theme.palette.type === "dark" ? "rgba(222, 255, 255, 0.1)" : "#6BE1FF88",
     marginTop: theme.spacing(2),
+    "&:hover": {
+      opacity: 0.5
+    }
+  },
+  doubleInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    '& > span:last-child': {
+      fontSize: 10,
+      opacity: 0.6,
+      '&.large': {
+        fontSize: 12,
+      }
+    }
+  },
+  amount: {
+    fontWeight: 700,
+    fontSize: 18,
+  },
+  tokenIcon: {
+    width: 20,
+    height: 20,
+  },
+  titleClass: {
+    padding: `${theme.spacing(2, 3)}!important`,
+  },
+  headerClass: {
+    fontSize: 12,
+    fontWeight: 600,
+    margin: theme.spacing(2, 0),
+  },
+  loadingIcon: {
+    color: "rgba(255,255,255,.8)",
+    marginLeft: 12,
   }
 }));
 
 const AcceptBidDialog: React.FC<Props> = (props: Props) => {
-  const { bid, isOffer, showDialog, onCloseDialog, children, className, ...rest } = props;
+  const { awaitApproval, blocktime, currentBlock, onAcceptBid, loading, bid, isOffer, showDialog, onCloseDialog, children, className, ...rest } = props;
   const classes = useStyles();
+  const [checked, setChecked] = useState(false);
+  const { network } = useSelector(getBlockchain);
+  const { wallet } = useSelector(getWallet);
+  const tokenState = useSelector<RootState, TokenState>(state => state.token);
+  const [txApproved, setTxApproved] = useState(false);
+  const [runCheckTxApproved, checkingApproved] = useAsyncTask("checkApproveTx");
+
+  const bidRecord = useMemo(() => {
+    if (!bid) return null;
+    const expiry = blocktime.add((bid.expiry - currentBlock) * BLOCKS_PER_MINUTE, 'minutes')
+    const priceToken = tokenState.tokens[toBech32Address(bid.price.address)]
+
+    if (!priceToken) return null
+    const priceAmount = new BigNumber(bid.price.amount).shiftedBy(-priceToken.decimals)
+    const usdValue = valueCalculators.amount(tokenState.prices, priceToken, new BigNumber(bid.price.amount));
+    return { priceAmount, usdValue, expiry, priceToken };
+  }, [bid, blocktime, currentBlock, tokenState])
+
+  const priceToken = useMemo(() => {
+    if (!bid) return null;
+    return tokenState.tokens[toBech32Address(bid.price.address)];
+  }, [tokenState.tokens, bid])
+
+  useEffect(() => {
+    runCheckTxApproved(async () => {
+      if (!bid || !priceToken || !wallet) return false;
+
+      const arkClient = new ArkClient(network);
+      const walletAddress = wallet.addressInfo.byte20.toLowerCase();
+      const collectionAddress = bid.token?.collection?.address;
+
+      const zilswap = ZilswapConnector.getSDK();
+      const response = await zilswap.zilliqa.blockchain.getSmartContractSubState(collectionAddress, "operator_approvals");
+      const approvalState = response.result.operator_approvals;
+      const userApprovals = approvalState?.[walletAddress];
+      setTxApproved(!!userApprovals?.[arkClient.brokerAddress]);
+    })
+    // eslint-disable-next-line
+  }, [tokenState.tokens, bid, wallet])
+
+  if (!bid) return null;
+
+  const acceptBid = () => {
+    if (typeof onAcceptBid === "function") {
+      onAcceptBid(bid);
+    }
+  }
+
+  const getButtonText = () => {
+    if (checkingApproved) return "Checking Approval";
+    if (!loading && !txApproved) return "Approve NFT for Sale";
+    if (!loading && txApproved) return "Accept Bid";
+    if (awaitApproval) return "Confirming Approval Tx";
+    return "Confirming"
+  }
 
   return (
     <DialogModal
       open={showDialog}
-      onClose={onCloseDialog}
+      onClose={!loading ? onCloseDialog : () => { }}
       header={"Accept Bid"}
+      titlePadding={true}
+      titleClassname={classes.titleClass}
       {...rest}
     >
       <Box
         className={cls(classes.root, className)}
       >
+        <Box mb={2} textAlign="center">
+          <Typography variant="body1">Please review the bid before accepting it. Once accepted, the sale is final and cannot be undone.</Typography>
+        </Box>
         <Card className={classes.card}>
           <CardContent>
             <MenuItem className={classes.item} button={false}>
-              <ListItemIcon>
-                <Avatar alt="NFT Image" src={bid.token.assetId} />
-              </ListItemIcon>
-              <Typography>{bid.token.tokenId}</Typography>
+              <Box width="100%" display="flex" alignItems="center">
+                <Box display="flex" alignItems="center">
+                  <ListItemIcon>
+                    <Avatar alt="NFT Image" src={bid.token.asset.sourceUrl} />
+                  </ListItemIcon>
+                  <Box>
+                    <Typography>{bid.token.tokenId}</Typography>
+                    <Typography>{bid.token.collection.name}</Typography>
+                  </Box>
+                </Box>
+                <Box flexGrow={1} />
+                <Box>
+                  <Box className={classes.doubleInfo}>
+                    {bidRecord?.priceAmount && (
+                      <Box display="flex" alignItems="center" component="span">
+                        <strong className={classes.amount}>
+                          {toSignificantNumber(bidRecord.priceAmount)}
+                        </strong> <CurrencyLogo className={classes.tokenIcon} currency={bidRecord.priceToken.symbol} address={bidRecord.priceToken.address} />
+                      </Box>
+                    )}
+                    {bidRecord?.usdValue && (
+                      <Box className="large" component="span">${bidRecord.usdValue.toFormat(2)}</Box>
+                    )}
+                  </Box>
+                </Box>
+              </Box>
             </MenuItem>
             <Box mt={1} display="flex" justifyContent="space-between">
-              <Typography className={classes.header}>Amount</Typography>
-              <Typography>{bid.price.amount}</Typography>
+              <Typography className={classes.header}>From</Typography>
+              <Typography>{bid.initiator?.username ?? tryGetBech32Address(bid.initiatorAddress)}</Typography>
             </Box>
             <Box mt={1} display="flex" justifyContent="space-between">
-              <Typography className={classes.header}>{isOffer ? "Buyer" : "Seller"}</Typography>
-              <Typography>{bid.initiatorAddress}</Typography>
+              <Typography className={classes.header}>Received on</Typography>
+              <Typography>{dayjs(bid.createdAt).format("DD MMM YYYY, HH:mm:ss")}</Typography>
             </Box>
             <Box mt={1} display="flex" justifyContent="space-between">
               <Typography className={classes.header}>Expiration</Typography>
-              <Typography className={classes.dateText}>{bid.expiry}&nbsp;
-                <Typography
-                  className={classes.activeGreen}
-                >Status</Typography>
-              </Typography>
+              {bidRecord?.expiry && <Typography className={cls(classes.dateText, classes.activeGreen)}>{dayjs(bidRecord.expiry).fromNow()}</Typography>}
             </Box>
           </CardContent>
         </Card>
-        <FormControlLabel
-          label={<Typography className={classes.checkboxText}>By checking this box, I accept ARKY’s terms and conditions.</Typography>}
-          control={
-            <Checkbox
-              icon={<UnChecked />} checkedIcon={<Checked />}
-            />
-          }
+
+        <ArkCheckbox
+          lineHeader="By checking this box, I accept ARKY’s terms and conditions."
+          isChecked={checked}
+          onChecked={setChecked}
+          headerClass={classes.headerClass}
         />
-        <FancyButton variant="contained" color="primary" className={classes.button}>Accept Bid</FancyButton>
-        {/* <FancyButton
-          variant="contained" fullWidth onClick={() => bid.actions?.decline.action ? bid.actions?.decline.action(bid) : null}
+        <FancyButton
+          onClick={() => acceptBid()}
+          disabled={loading || !checked}
+          variant="contained" color="primary"
+          className={classes.button}
+        >
+          {getButtonText()}{loading ? (<CircularProgress size={24} className={classes.loadingIcon} />) : ""}
+        </FancyButton>
+        <FancyButton
+          disabled={loading}
+          variant="contained" fullWidth onClick={() => onCloseDialog()}
           className={cls(classes.button, classes.backButton)}>
-          <Typography className={classes.buttonText}>{bid.actions?.decline.label}</Typography>
-        </FancyButton> */}
+          Back
+        </FancyButton>
       </Box>
     </DialogModal>
   );

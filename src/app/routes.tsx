@@ -68,6 +68,11 @@ const routes: RouteConfig[] = [
         component: lazy(() => import("./views/ark/CollectionView")),
       },
       {
+        path: "/arky/mod/:collection/modify",
+        exact: true,
+        component: lazy(() => import("./views/ark/EditCollection")),
+      },
+      {
         path: "/arky/collections/:collection/:id",
         exact: true,
         component: lazy(() => import("./views/ark/NftView")),
@@ -122,9 +127,18 @@ const routes: RouteConfig[] = [
         component: lazy(() => import("./views/main/Bridge")),
       },
       {
+        path: "/bridge/erc20-zil-swap",
+        exact: true,
+        component: lazy(() => import("./views/bridge/ZilErc20TokenSwap")),
+      },
+      {
         path: "/history",
         exact: true,
         component: lazy(() => import("./views/bridge/TransferHistory")),
+      },
+      {
+        path: "/bridge/erc20-zil-upgrade",
+        component: () => <Redirect to="/bridge/erc20-zil-swap"></Redirect>,
       },
       {
         component: () => <Redirect to="/swap"></Redirect>,

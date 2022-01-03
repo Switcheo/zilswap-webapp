@@ -9,6 +9,7 @@ export interface DialogModalProps extends DialogProps {
   header?: string;
   hideCloseButton?: boolean;
   titlePadding?: boolean;
+  titleClassname?: string;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -41,6 +42,7 @@ const DialogModal: React.FC<DialogModalProps> = (props: DialogModalProps) => {
     hideCloseButton,
     onClose,
     titlePadding,
+    titleClassname,
     ...rest
   } = props;
   const classes = useStyles();
@@ -63,7 +65,7 @@ const DialogModal: React.FC<DialogModalProps> = (props: DialogModalProps) => {
         disableTypography
         className={cls(classes.dialogTitle, {
           [classes.titlePadding]: titlePadding,
-        })}
+        }, titleClassname)}
       >
         <Typography variant="h3">{header}</Typography>
         {!hideCloseButton && (

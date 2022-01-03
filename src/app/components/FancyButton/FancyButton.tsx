@@ -11,6 +11,7 @@ import { LoadingKeys } from "app/utils/constants";
 
 export interface FancyButtonProps extends ButtonProps {
   loading?: boolean;
+  loadingText?: string;
   containerClass?: string;
   walletRequired?: boolean;
   loadingTxApprove?: boolean;
@@ -26,6 +27,10 @@ const useStyles = makeStyles(theme => ({
     left: "50%",
     marginTop: -12,
     marginLeft: -12,
+  },
+  withText: {
+    color: "rgba(255,255,255,.8)",
+    marginRight: "8px",
   },
   unlockButton: {
     flexGrow: 1,
@@ -69,7 +74,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 const FancyButton: React.FC<FancyButtonProps> = (props: any) => {
-  const { children, loading, className, containerClass, walletRequired, disabled, loadingTxApprove, showTxApprove, onClickTxApprove, onClick, ...rest } = props;
+  const { children, loading, loadingText, className, containerClass, walletRequired, disabled, loadingTxApprove, showTxApprove, onClickTxApprove, onClick, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
   const network = useNetwork();
@@ -101,7 +106,7 @@ const FancyButton: React.FC<FancyButtonProps> = (props: any) => {
   // override buttons disabled state if wallet required
   // but not connected.
   if (walletRequired && !walletState.wallet) {
-    buttonDisabled = approveButtonDisabled =  false
+    buttonDisabled = approveButtonDisabled = false
   }
 
   // override button loading state if wallet required
@@ -130,7 +135,10 @@ const FancyButton: React.FC<FancyButtonProps> = (props: any) => {
         )}
         {!buttonLoading && buttonContent}
         {!!buttonLoading && (
-          <CircularProgress size={24} className={classes.progress} />
+          <Box display="flex" alignItems="center">
+            <CircularProgress size={24} className={cls({ [classes.progress]: !loadingText, [classes.withText]: !!loadingText })} />
+            {loadingText && (<Typography component="span">{loadingText}</Typography>)}
+          </Box>
         )}
       </Button>
     </Box>
