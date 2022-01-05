@@ -74,7 +74,7 @@ function* watchDepositConfirmation() {
           const swthAddress = AddressUtils.SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
 
           // check if deposit is confirmed
-          tx.depositTxConfirmedAt = dayjs();
+          tx.depositTxConfirmedAt = dayjs(); // TODO: remove deposit confirm bypass
           if (!tx.depositTxConfirmedAt) {
             const queryOpts = Models.QueryGetExternalTransfersRequest.fromPartial({
               address: swthAddress,
@@ -138,12 +138,16 @@ function* watchDepositConfirmation() {
             }
           }
 
+          logger("bridge saga", "tx", tx)
+
           // trigger withdraw tx if deposit confirmed
           if (tx.depositTxConfirmedAt) {
             const bridgeTokens = tx.srcChain === Blockchain.Zilliqa ? bridgeableTokensMap.zil : bridgeableTokensMap.eth;
             const bridgeToken = bridgeTokens.find(t => t.denom === tx.srcToken);
             const balanceDenom = bridgeToken?.balDenom ?? "";
 
+            logger("bridge saga", "bridgeTokens", bridgeTokens)
+            logger("bridge saga", "balance denom", swthAddress, balanceDenom)
             const balanceResult = (yield call([sdk.query.bank, sdk.query.bank.Balance], { address: swthAddress, denom: balanceDenom })) as Models.Bank.QueryBalanceResponse;
 
             logger("bridge saga", "detected balance to withdraw", swthAddress, balanceResult, balanceDenom)

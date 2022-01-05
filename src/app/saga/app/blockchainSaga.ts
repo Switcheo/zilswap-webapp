@@ -279,16 +279,16 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
       network: netZilToCarbon(network),
     });
     const mappings = carbonSdk.token.wrapperMap;
-    const carbonTokens = Object.values(carbonSdk.token.tokens);
+    const carbonTokens: CarbonToken[] = Object.values(carbonSdk.token.tokens);
     const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
     const bridgeableDenoms = BRIDGEABLE_WRAPPED_DENOMS[network];
-    Object.entries(mappings).forEach(([wrappedDenom, sourceId]) => {
+    Object.entries(mappings).forEach(([wrappedDenom, sourceDenom]) => {
       if (!bridgeableDenoms.includes(wrappedDenom)) {
         return;
       }
 
       const wrappedToken = carbonTokens.find(d => d.denom === wrappedDenom)!
-      const sourceToken = carbonTokens.find(d => d.id === sourceId)!
+      const sourceToken = carbonTokens.find(d => d.denom === sourceDenom)!
 
       const wrappedChain = blockchainForChainId(wrappedToken.chainId.toNumber());
       const sourceChain = blockchainForChainId(sourceToken.chainId.toNumber());
