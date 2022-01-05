@@ -407,7 +407,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                       const currAttribute = nfts[index].attributes[attribute.name] ?? "";
 
                       return (
-                        <TableCell>
+                        <TableCell className={classes.removePaddingRight}>
                           <FormControl className={classes.formControl} fullWidth>
                             <Select
                               MenuProps={{ 
@@ -451,7 +451,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                       )
                     })}
                     {!attributes.length && index === 0 &&
-                      <TableCell rowSpan={nfts.length} height={nfts.length * 39.25 + (nfts.length - 1) * 8}>
+                      <TableCell className={classes.removePaddingRight} rowSpan={nfts.length} height={nfts.length * 39.25 + (nfts.length - 1) * 8}>
                         <Box className={classes.emptyState}>
                           <Typography>Add attributes via the <strong>Manage Attributes</strong> section.</Typography>
                         </Box>
@@ -785,6 +785,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px", 
     verticalAlign: "bottom",
   },
+  removePaddingRight: {
+    // "&:last-child": {
+    //   paddingRight: 0
+    // }
+  }
 }));
 
 export default NftUpload;
