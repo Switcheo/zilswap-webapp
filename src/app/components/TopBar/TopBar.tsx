@@ -32,6 +32,11 @@ const useStyles = makeStyles((theme) => ({
     "& .MuiGrid-container": {
       flexWrap: "nowrap",
     },
+    "& .MuiButton-root.Mui-disabled": {
+      "& .MuiButton-label": {
+        opacity: 0.5, 
+      }
+    },
   },
   toolBar: {
     justifyContent: "space-between",
@@ -185,6 +190,7 @@ const TopBar: React.FC<Props> = (
                     component={RouterLink}
                     to={tab.navLink}
                     className={classes.navLinkButton}
+                    disabled={tab.disabled}
                     disableRipple>
                     <Typography
                       className={cls(classes.navLink, {

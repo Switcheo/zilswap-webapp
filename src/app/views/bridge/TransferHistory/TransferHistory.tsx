@@ -1,5 +1,5 @@
-import React, { Fragment } from "react";
-import { Box, Button, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, makeStyles } from "@material-ui/core";
+import React, { Fragment, useState } from "react";
+import { Box, Button, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, makeStyles, useMediaQuery, useTheme } from "@material-ui/core";
 import AddIcon from '@material-ui/icons/AddRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import RefreshIcon from '@material-ui/icons/RefreshRounded';
@@ -7,7 +7,7 @@ import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Blockchain } from "tradehub-api-js";
-import { CurrencyLogo, HelpInfo, ResumeTransferDialog, RevealMnemonic, Text } from 'app/components';
+import { BridgeMobileDialog, CurrencyLogo, HelpInfo, ResumeTransferDialog, RevealMnemonic, Text } from 'app/components';
 import BridgeCard from "app/layouts/BridgeCard";
 import { actions } from "app/store";
 import { BridgeState, BridgeTx, RootState } from "app/store/types";
@@ -17,6 +17,248 @@ import { toHumanNumber } from "app/utils";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
 import { ReactComponent as EthereumLogo } from "../../main/Bridge/ethereum-logo.svg";
 import { ReactComponent as ZilliqaLogo } from "../../main/Bridge/zilliqa-logo.svg";
+
+const CHAIN_NAMES = {
+    [Blockchain.Zilliqa]: "Zilliqa",
+    [Blockchain.Ethereum]: "Ethereum",
+    [Blockchain.Neo]: "Neo",
+    [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
+}
+
+// TODO: remove any, type the props properly
+const TransferHistory = (props: any) => {
+    const { className, ...rest } = props;
+    const classes = useStyles();
+    const dispatch = useDispatch();
+    const bridgeableTokenFinder = useBridgeableTokenFinder();
+
+    const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
+    const previewTx = useSelector<RootState, BridgeTx | undefined>(state => state.bridge.previewBridgeTx);
+    const bridgeTxs = bridgeState.bridgeTxs;
+    const pendingBridgeTx = bridgeState.activeBridgeTx;
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"), { noSsr: true });
+
+    const [showMobileDialog, setShowMobileDialog] = useState<boolean>(isMobile);
+
+    const handleNewTransfer = () => {
+        if (pendingBridgeTx) {
+            dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
+        }
+        dispatch(actions.Layout.showTransferConfirmation(false));
+    }
+
+    const handleResumeTransfer = () => {
+        dispatch(actions.Layout.toggleShowResumeTransfer("open"));
+    }
+
+    const getTransferStage = (tx: BridgeTx) => {
+        if (tx?.withdrawTxHash) {
+            return "Stage 3.1"
+        }
+
+        if (tx?.depositTxConfirmedAt) {
+            return "Stage 2.2"
+        }
+
+        if (tx?.sourceTxHash) {
+            return "Stage 2.1"
+        }
+
+        return "Stage 1.2"
+    }
+
+    const getTransferStatus = (tx: BridgeTx) => {
+        // Failed tx
+        if (tx?.depositFailedAt) {
+            return (
+                <Chip
+                    className={cls(classes.chip, classes.failedChip)}
+                    label={
+                        <Fragment>
+                            <Typography align="center"><strong>Failed</strong></Typography>
+                            <Typography align="center" variant="body1">{getTransferStage(tx)}</Typography>
+                        </Fragment>
+                    }
+                />
+            )
+        }
+
+        // Completed tx
+        if (tx?.destinationTxHash) {
+            return (
+                <Chip
+                    className={cls(classes.chip, classes.completeChip)}
+                    label={
+                        <Typography align="center"><strong>Complete</strong></Typography>
+                    }
+                />
+            )
+        }
+
+        // Ongoing tx
+        return (
+            <Chip
+                className={cls(classes.chip, classes.ongoingChip)}
+                label={
+                    <Fragment>
+                        <Typography align="center"><strong>Ongoing</strong></Typography>
+                        <Typography align="center" variant="body1">{getTransferStage(tx)}</Typography>
+                    </Fragment>
+                }
+            />
+        )
+    }
+
+    const setDisplayTx = (tx: BridgeTx) => {
+        dispatch(actions.Bridge.setPreviewBridgeTx(tx));
+    }
+
+    const clearPreview = () => {
+        dispatch(actions.Bridge.setPreviewBridgeTx(undefined));
+    }
+
+    const getLogoToken = (tx: BridgeTx) => {
+        return bridgeableTokenFinder(tx.srcChain === Blockchain.Zilliqa ? tx.srcToken : tx.dstToken, Blockchain.Zilliqa);
+    }
+
+    return (
+        <BridgeCard {...rest} className={cls(classes.root, className)}>
+            {!previewTx && (
+                <Box overflow="hidden" display="flex" flexDirection="column" className={classes.container}>
+                    <Box display="flex" justifyContent="space-between" mt={2} pl={2} className={classes.headerBox}>
+                        <Box display="flex" flexDirection="column" className={classes.titleBox}>
+                            <Text variant="h2">
+                                Zil<span className={classes.textColoured}>Bridge</span>
+                            </Text>
+
+                            <Text variant="h3">
+                                Your Transfer History
+                            </Text>
+                        </Box>
+
+                        <Box display="flex" pt={0} pb={0} className={classes.buttonBox}>
+                            <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.newTransferButton} onClick={handleNewTransfer} disabled={isMobile}>
+                                <AddIcon fontSize="small" className={classes.addIcon} />
+                                <Text variant="button" className={classes.newTransferText}>New Transfer</Text>
+                            </Button>
+
+                            <Button color="primary" variant="contained" className={classes.resumeTransferButton} onClick={handleResumeTransfer} disabled={isMobile}>
+                                <RefreshIcon fontSize="small" className={classes.refreshIcon} />
+                                <Text variant="button" className={classes.resumeTransferText}>Resume Transfer</Text>
+                            </Button>
+                        </Box>
+                    </Box>
+
+                    <TableContainer className={classes.tableContainer}>
+                        <Table className={classes.table}>
+                            <TableHead className={classes.tableHead}>
+                                <TableRow>
+                                    <TableCell>
+                                        <Box display="flex" flexDirection="column">
+                                            <Text variant="h6">Transfer</Text>
+                                            <Text>Date</Text>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        <Box display="flex" flexDirection="column">
+                                            <Text variant="h6">Network</Text>
+                                            <Text>From - To</Text>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Box display="flex" flexDirection="column">
+                                            <Text variant="h6">Transfer</Text>
+                                            <Text>Amount</Text>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Box display="flex" flexDirection="column">
+                                            <Text variant="h6">Transfer</Text>
+                                            <Text>Status</Text>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Box display="flex" flexDirection="column">
+                                            <Text variant="h6">Transfer</Text>
+                                            <Text>Key <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Transfer Key to recover failed transfers that failed in Stage 2." /></Text>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Box display="flex" flexDirection="column">
+                                            <Text variant="h6">Transfer</Text>
+                                            <Text>Status</Text>
+                                        </Box>
+                                    </TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {bridgeTxs.slice().reverse().map((tx: BridgeTx, index: number) => (
+                                    <TableRow key={index} className={classes.tableRow}>
+                                        <TableCell component="th" scope="row">
+                                            <Text>
+                                                {tx.depositDispatchedAt?.format('DD MMM YYYY')}
+                                            </Text>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Text className={classes.transferNetwork}>
+                                                {tx.srcChain === Blockchain.Zilliqa
+                                                    ? <ZilliqaLogo className={cls(classes.chainLogo, classes.zilLogo)} />
+                                                    : <EthereumLogo className={classes.chainLogo} />
+                                                }
+                                                {CHAIN_NAMES[tx.srcChain]}
+                                                {" "}
+                                                &mdash;
+
+                                                {tx.dstChain === Blockchain.Ethereum
+                                                    ? <EthereumLogo className={classes.chainLogo} />
+                                                    : <ZilliqaLogo className={cls(classes.chainLogo, classes.zilLogo)} />
+                                                }
+                                                {CHAIN_NAMES[tx.dstChain]}
+                                            </Text>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Text className={classes.transferAmount}>
+                                                {toHumanNumber(tx.inputAmount)}
+                                                <CurrencyLogo className={classes.currencyLogo} address={getLogoToken(tx)?.address} />
+                                            </Text>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            {getTransferStatus(tx)}
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <RevealMnemonic mnemonic={tx.interimAddrMnemonics} />
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Button
+                                                className={classes.button}
+                                                onClick={() => setDisplayTx(tx)}
+                                                endIcon={<ArrowRightRoundedIcon className={classes.arrowRightIcon} />}
+                                            >
+                                                <Text>Show Details</Text>
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+
+                        {!bridgeTxs.length && (
+                            <Typography align="center" variant="body2" className={classes.noTransaction}>No transactions found.</Typography>
+                        )}
+                    </TableContainer>
+                </Box>
+            )}
+            {previewTx && (
+                <TransactionDetail onBack={clearPreview} currentTx={previewTx} approvalHash="" isHistory={true} />
+            )}
+
+            <BridgeMobileDialog open={showMobileDialog} onCloseDialog={setShowMobileDialog} />
+            <ResumeTransferDialog />
+        </BridgeCard>
+    )
+}
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -214,241 +456,5 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         marginRight: "2px"
     }
 }));
-
-const CHAIN_NAMES = {
-    [Blockchain.Zilliqa]: "Zilliqa",
-    [Blockchain.Ethereum]: "Ethereum",
-    [Blockchain.Neo]: "Neo",
-    [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
-}
-
-// TODO: remove any, type the props properly
-const TransferHistory = (props: any) => {
-    const { className, ...rest } = props;
-    const classes = useStyles();
-    const dispatch = useDispatch();
-    const bridgeableTokenFinder = useBridgeableTokenFinder();
-
-    const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
-    const previewTx = useSelector<RootState, BridgeTx | undefined>(state => state.bridge.previewBridgeTx);
-    const bridgeTxs = bridgeState.bridgeTxs;
-    const pendingBridgeTx = bridgeState.activeBridgeTx;
-
-    const handleNewTransfer = () => {
-        if (pendingBridgeTx) {
-            dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
-        }
-        dispatch(actions.Layout.showTransferConfirmation(false));
-    }
-
-    const handleResumeTransfer = () => {
-        dispatch(actions.Layout.toggleShowResumeTransfer("open"));
-    }
-
-    const getTransferStage = (tx: BridgeTx) => {
-        if (tx?.withdrawTxHash) {
-            return "Stage 3.1"
-        }
-
-        if (tx?.depositTxConfirmedAt) {
-            return "Stage 2.2"
-        }
-
-        if (tx?.sourceTxHash) {
-            return "Stage 2.1"
-        }
-
-        return "Stage 1.2"
-    }
-
-    const getTransferStatus = (tx: BridgeTx) => {
-        // Failed tx
-        if (tx?.depositFailedAt) {
-            return (
-                <Chip
-                    className={cls(classes.chip, classes.failedChip)}
-                    label={
-                        <Fragment>
-                            <Typography align="center"><strong>Failed</strong></Typography>
-                            <Typography align="center" variant="body1">{getTransferStage(tx)}</Typography>
-                        </Fragment>
-                    }
-                />
-            )
-        }
-
-        // Completed tx
-        if (tx?.destinationTxHash) {
-            return (
-                <Chip
-                    className={cls(classes.chip, classes.completeChip)}
-                    label={
-                        <Typography align="center"><strong>Complete</strong></Typography>
-                    }
-                />
-            )
-        }
-
-        // Ongoing tx
-        return (
-            <Chip
-                className={cls(classes.chip, classes.ongoingChip)}
-                label={
-                    <Fragment>
-                        <Typography align="center"><strong>Ongoing</strong></Typography>
-                        <Typography align="center" variant="body1">{getTransferStage(tx)}</Typography>
-                    </Fragment>
-                }
-            />
-        )
-    }
-
-    const setDisplayTx = (tx: BridgeTx) => {
-        dispatch(actions.Bridge.setPreviewBridgeTx(tx));
-    }
-
-    const clearPreview = () => {
-        dispatch(actions.Bridge.setPreviewBridgeTx(undefined));
-    }
-
-    const getLogoToken = (tx: BridgeTx) => {
-        return bridgeableTokenFinder(tx.srcChain === Blockchain.Zilliqa ? tx.srcToken : tx.dstToken, Blockchain.Zilliqa);
-    }
-
-    return (
-        <BridgeCard {...rest} className={cls(classes.root, className)}>
-            {!previewTx && (
-                <Box overflow="hidden" display="flex" flexDirection="column" className={classes.container}>
-                    <Box display="flex" justifyContent="space-between" mt={2} pl={2} className={classes.headerBox}>
-                        <Box display="flex" flexDirection="column" className={classes.titleBox}>
-                            <Text variant="h2">
-                                Zil<span className={classes.textColoured}>Bridge</span>
-                            </Text>
-
-                            <Text variant="h3">
-                                Your Transfer History
-                            </Text>
-                        </Box>
-
-                        <Box display="flex" pt={0} pb={0} className={classes.buttonBox}>
-                            <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.newTransferButton} onClick={handleNewTransfer}>
-                                <AddIcon fontSize="small" className={classes.addIcon} />
-                                <Text variant="button" className={classes.newTransferText}>New Transfer</Text>
-                            </Button>
-
-                            <Button color="primary" variant="contained" className={classes.resumeTransferButton} onClick={handleResumeTransfer}>
-                                <RefreshIcon fontSize="small" className={classes.refreshIcon} />
-                                <Text variant="button" className={classes.resumeTransferText}>Resume Transfer</Text>
-                            </Button>
-                        </Box>
-                    </Box>
-
-                    <TableContainer className={classes.tableContainer}>
-                        <Table className={classes.table}>
-                            <TableHead className={classes.tableHead}>
-                                <TableRow>
-                                    <TableCell>
-                                        <Box display="flex" flexDirection="column">
-                                            <Text variant="h6">Transfer</Text>
-                                            <Text>Date</Text>
-                                        </Box>
-                                    </TableCell>
-                                    <TableCell align="left">
-                                        <Box display="flex" flexDirection="column">
-                                            <Text variant="h6">Network</Text>
-                                            <Text>From - To</Text>
-                                        </Box>
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        <Box display="flex" flexDirection="column">
-                                            <Text variant="h6">Transfer</Text>
-                                            <Text>Amount</Text>
-                                        </Box>
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        <Box display="flex" flexDirection="column">
-                                            <Text variant="h6">Transfer</Text>
-                                            <Text>Status</Text>
-                                        </Box>
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        <Box display="flex" flexDirection="column">
-                                            <Text variant="h6">Transfer</Text>
-                                            <Text>Key <HelpInfo className={classes.helpInfo} placement="top" title="You may use your Transfer Key to recover failed transfers that failed in Stage 2." /></Text>
-                                        </Box>
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        <Box display="flex" flexDirection="column">
-                                            <Text variant="h6">Transfer</Text>
-                                            <Text>Status</Text>
-                                        </Box>
-                                    </TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {bridgeTxs.slice().reverse().map((tx: BridgeTx, index: number) => (
-                                    <TableRow key={index} className={classes.tableRow}>
-                                        <TableCell component="th" scope="row">
-                                            <Text>
-                                                {tx.depositDispatchedAt?.format('DD MMM YYYY')}
-                                            </Text>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Text className={classes.transferNetwork}>
-                                                {tx.srcChain === Blockchain.Zilliqa
-                                                    ? <ZilliqaLogo className={cls(classes.chainLogo, classes.zilLogo)} />
-                                                    : <EthereumLogo className={classes.chainLogo} />
-                                                }
-                                                {CHAIN_NAMES[tx.srcChain]}
-                                                {" "}
-                                                &mdash;
-
-                                                {tx.dstChain === Blockchain.Ethereum
-                                                    ? <EthereumLogo className={classes.chainLogo} />
-                                                    : <ZilliqaLogo className={cls(classes.chainLogo, classes.zilLogo)} />
-                                                }
-                                                {CHAIN_NAMES[tx.dstChain]}
-                                            </Text>
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Text className={classes.transferAmount}>
-                                                {toHumanNumber(tx.inputAmount)}
-                                                <CurrencyLogo className={classes.currencyLogo} address={getLogoToken(tx)?.address} />
-                                            </Text>
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            {getTransferStatus(tx)}
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <RevealMnemonic mnemonic={tx.interimAddrMnemonics} />
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Button
-                                                className={classes.button}
-                                                onClick={() => setDisplayTx(tx)}
-                                                endIcon={<ArrowRightRoundedIcon className={classes.arrowRightIcon} />}
-                                            >
-                                                <Text>Show Details</Text>
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-
-                        {!bridgeTxs.length && (
-                            <Typography align="center" variant="body2" className={classes.noTransaction}>No transactions found.</Typography>
-                        )}
-                    </TableContainer>
-                </Box>
-            )}
-            {previewTx && (
-                <TransactionDetail onBack={clearPreview} currentTx={previewTx} approvalHash="" isHistory={true} />
-            )}
-
-            <ResumeTransferDialog />
-        </BridgeCard>
-    )
-}
 
 export default TransferHistory;

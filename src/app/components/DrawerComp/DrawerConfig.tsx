@@ -4,7 +4,8 @@ interface DrawerInfo {
   drawerText: string;
   navLink: string;
   highlightPaths: string[];
-  connectedOnly?: boolean,
+  connectedOnly?: boolean;
+  disabled?: boolean;
 }
 
 const DrawerConfig: SimpleMap<DrawerInfo[]> = {
@@ -16,7 +17,7 @@ const DrawerConfig: SimpleMap<DrawerInfo[]> = {
     drawerText: "Your Liquidity",
     navLink: "/pools/liquidity",
     highlightPaths: ["/pools/liquidity"],
-    connectedOnly: true
+    connectedOnly: true,
   }, {
     drawerText: "Transactions",
     navLink: "/pools/transactions",
@@ -26,6 +27,7 @@ const DrawerConfig: SimpleMap<DrawerInfo[]> = {
     drawerText: "New Transfer",
     navLink: "/bridge",
     highlightPaths: ["/bridge"],
+    disabled: true,
   }, {
     drawerText: "Transfer History",
     navLink: "/history",
