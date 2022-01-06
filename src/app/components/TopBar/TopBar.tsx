@@ -1,8 +1,5 @@
 import React, { Fragment, useMemo } from "react";
-import {
-  AppBar, Box, Button, Hidden, IconButton, Link,
-  Toolbar, useMediaQuery, AppBarProps, Typography, Grid
-} from "@material-ui/core";
+import { AppBar, Box, Button, Hidden, IconButton, Link, Toolbar, useMediaQuery, useTheme, AppBarProps, Typography, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { Link as RouterLink, useLocation, useHistory } from "react-router-dom";
@@ -125,6 +122,15 @@ const TopBar: React.FC<Props> = (
   const location = useLocation();
   const history = useHistory();
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"), { noSsr: true });
+
+  const disableTab = useMemo(() => {
+    return isMobile;
+
+    // eslint-disable-next-line
+  }, [])
+
   const renderLogo = useMemo(() => {
     const current = location.pathname;
 
@@ -190,7 +196,7 @@ const TopBar: React.FC<Props> = (
                     component={RouterLink}
                     to={tab.navLink}
                     className={classes.navLinkButton}
-                    disabled={tab.disabled}
+                    disabled={disableTab && tab.disabled}
                     disableRipple>
                     <Typography
                       className={cls(classes.navLink, {
