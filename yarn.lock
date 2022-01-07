@@ -2475,16 +2475,16 @@
   dependencies:
     "@json-rpc-tools/types" "^1.6.1"
 
-"@keplr-wallet/types@^0.9.0-alpha.10":
-  version "0.9.6"
-  resolved "https://registry.yarnpkg.com/@keplr-wallet/types/-/types-0.9.6.tgz#a317c3532dd8c0973b5b03c9078ac0741d079d27"
-  integrity sha512-3X8hqU0VMCv9BBmyTztiOUwbmglJhUqjUWfErCfudsjBCMJmhv+M3rVYuXO4c+I4xdswQvqtnOhAE64WMULXkA==
+"@keplr-wallet/types@~0.8.13":
+  version "0.8.13"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/types/-/types-0.8.13.tgz#c4ea5e5f08af3c8b2708c786b2e85f9aa4c24a4e"
+  integrity sha512-UaVATHmGaC5REyprLahyNIC3pZZQV+VTxMz10X3+hD6w2YgyLKimmqVg7ndVQhZrNZrVmMqgATl/UCCFgE6hlQ==
   dependencies:
     "@cosmjs/launchpad" "^0.24.0-alpha.25"
     "@cosmjs/proto-signing" "^0.24.0-alpha.25"
     axios "^0.21.0"
     long "^4.0.0"
-    secretjs "^0.17.0"
+    secretjs "^0.16.0"
 
 "@ledgerhq/cryptoassets@^6.14.0":
   version "6.14.0"
@@ -5623,17 +5623,17 @@ capture-exit@^2.0.0:
   dependencies:
     rsvp "^4.8.4"
 
-carbon-js-sdk@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/carbon-js-sdk/-/carbon-js-sdk-0.0.2.tgz#59b507998e3cf80baa5e784962565f68be68401a"
-  integrity sha512-ubQHmTVk9XbaGPJ1OpAga48gzXqT+ZXbF2MuCrw/xSsEs9FD3WchiB0xZTPFP5PxqJDtMPmq5YvwqAxBra/5+Q==
+carbon-js-sdk@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/carbon-js-sdk/-/carbon-js-sdk-0.0.3.tgz#ae28b408aeb97ad20c0774d8d51be817945a3998"
+  integrity sha512-DJ2eqpYYZZ7PpBpeucn6K4+XI0OPxNP4eoblX14PHtrCTVMhZ/uBPvXHXGz+7JykOWi2qIeGBge9tXgkip7M8Q==
   dependencies:
     "@cityofzion/neon-core" "^4.9.0"
     "@cityofzion/neon-js" "^4.9.0"
     "@cosmjs/proto-signing" "^0.25.4"
     "@cosmjs/stargate" "^0.25.4"
     "@grpc/grpc-js" "^1.3.2"
-    "@keplr-wallet/types" "^0.9.0-alpha.10"
+    "@keplr-wallet/types" "~0.8.13"
     "@ledgerhq/hw-app-eth" "^6.11.2"
     "@ledgerhq/hw-transport" "^6.3.0"
     "@ledgerhq/hw-transport-webhid" "^6.4.1"
@@ -13310,7 +13310,7 @@ prop-types@^15.5.4, prop-types@^15.6.1, prop-types@^15.6.2, prop-types@^15.7.2:
     object-assign "^4.1.1"
     react-is "^16.8.1"
 
-protobufjs@^6.10.0, protobufjs@^6.11.2, protobufjs@^6.8.8:
+protobufjs@^6.10.0, protobufjs@^6.8.8:
   version "6.11.2"
   resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-6.11.2.tgz#de39fabd4ed32beaa08e9bb1e30d08544c1edf8b"
   integrity sha512-4BQJoPooKJl2G9j3XftkIXjoC9C0Av2NOrWmbLWT1vH32GcSUHjM0Arra6UfTsVyfMAuFzaLucXn1sadxJydAw==
@@ -14654,10 +14654,10 @@ secp256r1@^0.0.3:
     nan "^2.2.1"
     safe-buffer "^5.1.0"
 
-secretjs@^0.17.0:
-  version "0.17.3"
-  resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.17.3.tgz#99483472a000b2feb946a2a9bc18561f2041a002"
-  integrity sha512-eB2+eKkGUdjoR+sBRbtJUglEaB3jwlcz69c28xT5+Y65d1cxMJzdx3cBR7cLnqWayyERidhzZL+idu9TrwQR9g==
+secretjs@^0.16.0:
+  version "0.16.7"
+  resolved "https://registry.yarnpkg.com/secretjs/-/secretjs-0.16.7.tgz#8c816ddef476a1d7ac877f86807a037c249cedf0"
+  integrity sha512-HL2Ekui0TFQhWrzQ5IenI3a54IaD9UdXwdyYMMLhisQCm5/quMw/v4CxmjEro+b5FxlEYvWcgzFO6nntduywDg==
   dependencies:
     "@iov/crypto" "2.1.0"
     "@iov/encoding" "2.1.0"
@@ -14668,7 +14668,6 @@ secretjs@^0.17.0:
     js-crypto-hkdf "0.7.3"
     miscreant "0.3.2"
     pako "1.0.11"
-    protobufjs "^6.11.2"
     secure-random "1.1.2"
 
 secure-random@1.1.2:
