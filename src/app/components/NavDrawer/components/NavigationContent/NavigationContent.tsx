@@ -274,6 +274,7 @@ const NavigationContent: React.FC<NavigationContentProps> = (
         component={CustomRouterLink}
         to={navigation.disabled ? "/disabled-path" : navigation.href}
         exact={false}
+        onClick={onClose}
       >
         <Icon width="20px" className={cls(classes.icon, {
           [classes.iconMargin]: showDrawer

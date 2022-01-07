@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useMemo, useState } from "react";
 import { Box, Button, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, makeStyles, useMediaQuery, useTheme } from "@material-ui/core";
 import AddIcon from '@material-ui/icons/AddRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
@@ -39,6 +39,13 @@ const TransferHistory = (props: any) => {
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"), { noSsr: true });
+
+    // prevent disabling for users resizing on desktop
+    const disableButton = useMemo(() => {
+        return isMobile;
+
+        // eslint-disable-next-line
+    }, []);
 
     const [showMobileDialog, setShowMobileDialog] = useState<boolean>(isMobile);
 
@@ -139,12 +146,12 @@ const TransferHistory = (props: any) => {
                         </Box>
 
                         <Box display="flex" pt={0} pb={0} className={classes.buttonBox}>
-                            <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.newTransferButton} onClick={handleNewTransfer} disabled={isMobile}>
+                            <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.newTransferButton} onClick={handleNewTransfer} disabled={disableButton}>
                                 <AddIcon fontSize="small" className={classes.addIcon} />
                                 <Text variant="button" className={classes.newTransferText}>New Transfer</Text>
                             </Button>
 
-                            <Button color="primary" variant="contained" className={classes.resumeTransferButton} onClick={handleResumeTransfer} disabled={isMobile}>
+                            <Button color="primary" variant="contained" className={classes.resumeTransferButton} onClick={handleResumeTransfer} disabled={disableButton}>
                                 <RefreshIcon fontSize="small" className={classes.refreshIcon} />
                                 <Text variant="button" className={classes.resumeTransferText}>Resume Transfer</Text>
                             </Button>
@@ -262,6 +269,14 @@ const TransferHistory = (props: any) => {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
+        "&.Mui-disabled": {
+            "& .MuiButton-label": {
+                opacity: 0.5,
+                "& .MuiTypography-colorTextPrimary": {
+                    opacity: 0.5,
+                }
+            }
+        },
     },
     container: {
         margin: "0 auto",
@@ -297,7 +312,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         },
         "& .MuiTypography-body1": {
             fontSize: "14px"
-        }
+        },
     },
     headerBox: {
         [theme.breakpoints.down("xs")]: {
@@ -336,6 +351,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         [theme.breakpoints.down("xs")]: {
             height: 46
         },
+        "&.Mui-disabled": {
+            "& .MuiButton-label": {
+                opacity: 0.5,
+            }
+        },
     },
     resumeTransferText: {
         color: theme.palette.primary.contrastText,
@@ -353,6 +373,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             marginRight: 0,
             marginBottom: theme.spacing(1),
             height: 46
+        },
+        "&.Mui-disabled": {
+            "& .MuiButton-label": {
+                opacity: 0.5,
+            }
         },
     },
     newTransferText: {
