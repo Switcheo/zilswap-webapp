@@ -38,7 +38,9 @@ const DIALOG_HEADERS: { [key in ConnectOptionType]: string } = {
 };
 
 const useStyles = makeStyles((theme) => ({
-  root: {},
+  root: {
+    width: "100%"
+  },
 }));
 
 const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
