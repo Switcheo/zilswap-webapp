@@ -35,6 +35,7 @@ const apiPaths = {
   "collection/search": "/nft/collection/:address/search",
   "collection/traits": "/nft/collection/:address/traits",
   "collection/token/detail": "/nft/collection/:address/:tokenId/detail",
+  "collection/token/history": "/nft/collection/:address/:tokenId/history",
   "collection/resync/metadata": "/nft/collection/:collectionAddress/:tokenId/resync",
   "token/favourite": "/nft/collection/:address/:tokenId/favourite",
   "history/floor": "/nft/history/floor",
@@ -165,6 +166,14 @@ export class ArkClient {
 
   getNftToken = async (address: string, tokenId: string, viewer?: string) => {
     const url = this.http.path("collection/token/detail", { address, tokenId }, { viewer });
+    const result = await this.http.get({ url });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  getNftTokenHistory = async (address: string, tokenId: string, viewer?: string) => {
+    const url = this.http.path("collection/token/history", { address, tokenId }, { viewer });
     const result = await this.http.get({ url });
     const output = await result.json();
     await this.checkError(output);
