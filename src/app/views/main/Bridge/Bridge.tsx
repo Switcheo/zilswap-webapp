@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Button, FormControl, MenuItem, Select, Tooltip } from "@material-ui/core";
+import { Box, Button, FormControl, MenuItem, Select, Tooltip, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { ethers } from "ethers";
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from "react-router-dom";
 import { Blockchain, RestModels, TradeHubSDK } from "tradehub-api-js";
 import Web3Modal from 'web3modal';
 import { Network } from "zilswap-sdk/lib/constants";
@@ -165,6 +166,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const dispatch = useDispatch();
   const network = useNetwork();
   const tokenFinder = useTokenFinder();
+  const history = useHistory();
   const [ethConnectedAddress, setEthConnectedAddress] = useState('');
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
   const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]); // eth wallet
@@ -184,6 +186,18 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const disconnectSrcButtonRef = useRef();
   const disconnectDestButtonRef = useRef();
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"), { noSsr: true });
+
+  // redirect to transfer history on mobile
+  useEffect(() => {
+    if (isMobile) {
+      history.push("/history");
+    }
+
+    // eslint-disable-next-line
+  }, []);
+
   useEffect(() => {
     if (gasPrice?.gt(0) || !sdk) return;
 
@@ -193,7 +207,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     })
 
     // eslint-disable-next-line
-  }, [sdk, gasPrice])
+  }, [sdk, gasPrice]);
 
   useEffect(() => {
     runInitTradeHubSDK(async () => {
@@ -491,9 +505,11 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       return false;
     if (fromToken && bridgeFormState.transferAmount.isGreaterThan(bnOrZero(fromToken.balance).shiftedBy(-fromToken.decimals)))
       return false;
+    if (isMobile)
+      return false;
 
     return true
-  }, [formState, bridgeFormState.transferAmount, fromToken])
+  }, [formState, bridgeFormState.transferAmount, fromToken, isMobile])
 
   // returns true if asset is native coin, false otherwise
   const isNativeAsset = (asset: RestModels.Token) => {

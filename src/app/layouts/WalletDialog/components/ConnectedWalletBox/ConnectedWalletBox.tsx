@@ -22,7 +22,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderLeft: theme.palette.border,
     borderRight: theme.palette.border,
     borderBottom: theme.palette.border,
-    borderRadius: "0 0 12px 12px"
+    borderRadius: "0 0 12px 12px",
+    [theme.breakpoints.down("sm")]: {
+      overflowY: "scroll",
+    },
   },
   walletDetail: {
     margin: theme.spacing(8, 8, 0),

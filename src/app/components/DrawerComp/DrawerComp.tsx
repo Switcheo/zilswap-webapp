@@ -1,8 +1,5 @@
 import React, { Fragment, useMemo } from "react";
-import {
-  Box, Button, Drawer, DrawerProps, IconButton,
-  List, ListItem, makeStyles,
-} from "@material-ui/core";
+import { Box, Button, Drawer, DrawerProps, IconButton, List, ListItem, makeStyles } from "@material-ui/core";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForwardRounded";
 import cls from "classnames";
 import { Link, useLocation } from "react-router-dom";
@@ -40,8 +37,6 @@ const DrawerComp: React.FC<Props> = (props: Props) => {
 
   if (!drawerInfos) return null;
 
-
-
   return (
     <Drawer
       anchor="right"
@@ -74,6 +69,7 @@ const DrawerComp: React.FC<Props> = (props: Props) => {
                   className={cls(classes.listItem, {
                     [classes.buttonLeafActive]: info.highlightPaths.indexOf(location.pathname) > -1
                   })}
+                  disabled={info.disabled}
                 >
                   <Text variant="button">{info.drawerText}</Text>
                 </ListItem>

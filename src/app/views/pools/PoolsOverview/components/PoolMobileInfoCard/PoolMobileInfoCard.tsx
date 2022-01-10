@@ -125,7 +125,7 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
         </KeyValueDisplay>
 
         <KeyValueDisplay wrapLabel={true} kkey="Rewards to be Distributed" ValueComponent="span" mt={2}>
-          <Text variant="h4" color="textPrimary">
+          <Text align="right" variant="h4" color="textPrimary">
             {
               poolRewards.length > 0 ?
                 "$" + Object.entries(groupBy(poolRewards, (reward) => reward.rewardToken.address))
@@ -141,7 +141,7 @@ const PoolMobileInfoCard: React.FC<Props> = (props: Props) => {
             }
           </Text>
 
-          {poolRewards.length > 2 && (
+          {!!poolRewards.length && (
             <Box display="flex" justifyContent="flex-end">
               <Button onClick={(ev) => openRewards(ev)} className={classes.moreText}>More&nbsp;<Visibility fontSize="small" /></Button>
               <Popover

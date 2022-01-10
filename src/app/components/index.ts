@@ -1,4 +1,5 @@
 export { default as AmountLabel } from "./AmountLabel";
+export { default as BridgeMobileDialog } from "./BridgeMobileDialog";
 export { default as ConfirmTransfer } from "./ConfirmTransfer";
 export { default as ConnectETHPopper } from "./ConnectETHPopper";
 export { default as ConnectWalletButton } from "./ConnectWalletButton";
