@@ -323,9 +323,9 @@ const TransactionDetail = (props: TransactionDetailProps) => {
 
   const getCarbonExplorerLink = (hash: string) => {
     if (network === Network.MainNet) {
-      return `https://switcheo.org/transaction/${hash}`;
+      return `https://scan.carbon.network/transaction/${hash}`;
     } else {
-      return `https://switcheo.org/transaction/${hash}?net=dev`;
+      return `https://scan.carbon.network/transaction/${hash}?net=dev`;
     }
   };
   const getExplorerLink = (hash: string, blockchain: Blockchain) => {
