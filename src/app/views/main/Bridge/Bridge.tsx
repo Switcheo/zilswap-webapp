@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Button, FormControl, Link, MenuItem, Select, Tooltip, useMediaQuery, useTheme } from "@material-ui/core";
-import WarningRoundedIcon from "@material-ui/icons/WarningRounded"
+import { Box, Button, FormControl, MenuItem, Select, Tooltip, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { fromBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from 'bignumber.js';
@@ -642,18 +641,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             </Box>
           </Box>
 
-          <Box marginBottom={2} padding={1} display="flex" style={{ verticalAlign: "center" }}>
-            <WarningRoundedIcon fontSize="large" style={{ marginRight: 8, color: "#FFDF6B" }} />
-            <Text variant="body1" margin="auto">
-              ZilBridge is <Link target="_blank" href="https://twitter.com/ZilSwap/status/1480408832056516609">temporarily disabled</Link> to
-              facilitate the Carbon Stargate upgrade. Visit <Link target="_blank" href="https://twitter.com/ZilSwap">ZilSwap's Twitter</Link> for updates.
-            </Text>
-          </Box>
-
           <CurrencyInput
             label="Transfer Amount"
-            // disabled={!bridgeFormState.sourceAddress || !bridgeFormState.destAddress}
-            disabled
+            disabled={!bridgeFormState.sourceAddress || !bridgeFormState.destAddress}
             token={fromToken ?? null}
             amount={formState.transferAmount}
             onEditorBlur={onEndEditTransferAmount}
@@ -667,8 +657,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
           <Button
             onClick={showTransfer}
-            // disabled={!isSubmitEnabled}
-            disabled
+            disabled={!isSubmitEnabled}
             className={classes.actionButton}
             color="primary"
             variant="contained">
