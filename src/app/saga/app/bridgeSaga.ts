@@ -74,7 +74,6 @@ function* watchDepositConfirmation() {
           const swthAddress = AddressUtils.SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
 
           // check if deposit is confirmed
-          tx.depositTxConfirmedAt = dayjs(); // TODO: remove deposit confirm bypass
           if (!tx.depositTxConfirmedAt) {
             const queryOpts = Models.QueryGetExternalTransfersRequest.fromPartial({
               address: swthAddress,
@@ -82,7 +81,7 @@ function* watchDepositConfirmation() {
               status: "success",
               transferType: "deposit",
             });
-            const result = (yield call([sdk, sdk.query.coin.ExternalTransfers], queryOpts)) as Models.QueryGetExternalTransfersResponse;
+            const result = (yield call([sdk.query.coin, sdk.query.coin.ExternalTransfers], queryOpts)) as Models.QueryGetExternalTransfersResponse;
 
             const depositTransfer = result.externalTransfers.find((transfer) => transfer.transferType === 'deposit' && transfer.blockchain === tx.srcChain);
 
@@ -224,9 +223,9 @@ function* watchWithdrawConfirmation() {
             blockchain: tx.dstChain,
             transferType: "withdrawal",
           });
-          const extTransfers = (yield call([sdk.query.coin, sdk.query.coin.ExternalTransfers], queryOpts)) as Models.ExternalTransfer[];
+          const result = (yield call([sdk.query.coin, sdk.query.coin.ExternalTransfers], queryOpts)) as Models.QueryGetExternalTransfersResponse;
 
-          const withdrawTransfer = extTransfers.find((transfer) => transfer.transferType === 'withdrawal' && transfer.blockchain === tx.dstChain);
+          const withdrawTransfer = result.externalTransfers.find((transfer) => transfer.transferType === 'withdrawal' && transfer.blockchain === tx.dstChain);
 
           // update destination chain tx hash if success
           if (withdrawTransfer?.status === 'success') {
