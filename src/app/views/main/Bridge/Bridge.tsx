@@ -646,7 +646,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             <WarningRoundedIcon fontSize="large" style={{ marginRight: 8, color: "#FFDF6B" }} />
             <Text variant="body1" margin="auto">
               ZilBridge is <Link target="_blank" href="https://twitter.com/ZilSwap/status/1480408832056516609">temporarily disabled</Link> to
-              facilitate Carbon Stargate upgrade. Get updates from <Link target="_blank" href="https://twitter.com/ZilSwap">ZilSwap twitter</Link>.
+              facilitate the Carbon Stargate upgrade. Visit <Link target="_blank" href="https://twitter.com/ZilSwap">ZilSwap's Twitter</Link> for updates.
             </Text>
           </Box>
 
