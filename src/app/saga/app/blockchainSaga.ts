@@ -274,39 +274,46 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
       return acc
     }, {} as SimpleMap<TokenInfo>)
 
-    // load wrapper mappings and eth tokens by fetching bridge list from carbon
-    const carbonSdk: CarbonSDK = yield call(CarbonSDK.instance, {
-      network: netZilToCarbon(network),
-    });
-    const mappings = carbonSdk.token.wrapperMap;
-    const carbonTokens: CarbonToken[] = Object.values(carbonSdk.token.tokens);
-    const result: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
-    const bridgeableDenoms = BRIDGEABLE_WRAPPED_DENOMS[network];
-    Object.entries(mappings).forEach(([wrappedDenom, sourceDenom]) => {
-      if (!bridgeableDenoms.includes(wrappedDenom)) {
-        return;
-      }
+    const bridgeTokenResult: BridgeMappingResult = { [Blockchain.Zilliqa]: [], [Blockchain.Ethereum]: [] }
 
-      const wrappedToken = carbonTokens.find(d => d.denom === wrappedDenom)!
-      const sourceToken = carbonTokens.find(d => d.denom === sourceDenom)!
-
-      const wrappedChain = blockchainForChainId(wrappedToken.chainId.toNumber());
-      const sourceChain = blockchainForChainId(sourceToken.chainId.toNumber());
-
-      if ((wrappedChain !== Blockchain.Zilliqa && wrappedChain !== Blockchain.Ethereum) ||
-        (sourceChain !== Blockchain.Zilliqa && sourceChain !== Blockchain.Ethereum)) {
-        return
-      }
-      addToken(tokens, sourceToken)
-      addToken(tokens, wrappedToken)
-      addMapping(result, wrappedToken, sourceToken, sourceChain)
-      addMapping(result, sourceToken, wrappedToken, sourceChain)
-    })
+    try {
+      // load wrapper mappings and eth tokens by fetching bridge list from carbon
+      const carbonSdk: CarbonSDK = yield call(CarbonSDK.instance, {
+        network: netZilToCarbon(network),
+      });
+      const mappings = carbonSdk.token.wrapperMap;
+      const carbonTokens: CarbonToken[] = Object.values(carbonSdk.token.tokens);
+      const bridgeableDenoms = BRIDGEABLE_WRAPPED_DENOMS[network];
+      Object.entries(mappings).forEach(([wrappedDenom, sourceDenom]) => {
+        if (!bridgeableDenoms.includes(wrappedDenom)) {
+          return;
+        }
+  
+        const wrappedToken = carbonTokens.find(d => d.denom === wrappedDenom)!
+        const sourceToken = carbonTokens.find(d => d.denom === sourceDenom)!
+  
+        const wrappedChain = blockchainForChainId(wrappedToken.chainId.toNumber());
+        const sourceChain = blockchainForChainId(sourceToken.chainId.toNumber());
+  
+        if ((wrappedChain !== Blockchain.Zilliqa && wrappedChain !== Blockchain.Ethereum) ||
+          (sourceChain !== Blockchain.Zilliqa && sourceChain !== Blockchain.Ethereum)) {
+          return
+        }
+        addToken(tokens, sourceToken)
+        addToken(tokens, wrappedToken)
+        addMapping(bridgeTokenResult, wrappedToken, sourceToken, sourceChain)
+        addMapping(bridgeTokenResult, sourceToken, wrappedToken, sourceChain)
+      })
+    } catch (error) {
+      console.error("could not load bridge tokens");
+      console.error(error);
+    }
 
     logger('init chain set tokens')
-    yield put(actions.Bridge.setTokens(result))
+    yield put(actions.Bridge.setTokens(bridgeTokenResult))
     yield put(actions.Token.init({ tokens }));
     yield put(actions.Wallet.update({ wallet }))
+
     if (network !== prevNetwork) yield put(actions.Blockchain.setNetwork(network))
 
     yield put(actions.Stats.reloadPoolTx());
