@@ -93,7 +93,11 @@ export const WZIL_TOKEN_CONTRACT = {
 }
 
 export const BRIDGEABLE_WRAPPED_DENOMS = {
-  [Network.MainNet]: ["zusdt.z.3", "zeth.z.1", "zwbtc.z.1", "xcad.z.1", "port.e.1", "fees.e.1", "lunr.e.1", "zil.e.1", "dxcad.e.1"],
+  [Network.MainNet]: [
+    "zusdt.1.18.1728e9", "zeth.1.18.54437c", "zwbtc.1.18.a9cb60",
+    "zxcad.1.18.35137d", "eport.1.2.7d4912", "efees.1.2.586fb5",
+    "elunr.1.2.e2121e", "ezil.1.2.f1b7e4", "dxcad.1.2.67dde7"
+  ],
   [Network.TestNet]: ["zeth.1.111.eaa57f", "zdai.1.111.f9a752", "zwap.0.111.227030", "zil.0.2.6b2a39"],
 }
 
