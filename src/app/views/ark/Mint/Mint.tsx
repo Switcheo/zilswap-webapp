@@ -3,10 +3,12 @@ import { Box, Container, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useSelector } from "react-redux";
+import * as pinataSDK from "@pinata/sdk";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, SimpleMap } from "app/utils";
+import { hexToRGBA, SimpleMap, useAsyncTask, useNetwork } from "app/utils";
 import ArkPage from "app/layouts/ArkPage";
 import { getWallet } from "app/saga/selectors";
+import { ArkClient } from "core/utilities";
 import { CollectionDetail, ConfirmMint, NftUpload } from "./components";
 
 export type CollectionInputs = {
@@ -14,10 +16,10 @@ export type CollectionInputs = {
   description: string;
   royalties: string;
   websiteUrl: string;
-  discordLink: string;
+  discordUrl: string;
   twitterHandle: string;
   instagramHandle: string;
-  telegramLink: string;
+  telegramUrl: string;
 };
 
 export type MintOptionType = "create" | "select";
@@ -42,6 +44,8 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
   const { wallet } = useSelector(getWallet);
+  const address = wallet?.addressInfo.byte20;
+  const network = useNetwork();
   const [mintOption, setMintOption] = useState<MintOptionType>("create");
   const [uploadedFiles, setUploadedFiles] = useState<SimpleMap<File>>({});
   const [inputValues, setInputValues] = useState<CollectionInputs>({
@@ -49,20 +53,20 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     description: "",
     royalties: "2.5",
     websiteUrl: "",
-    discordLink: "",
+    discordUrl: "",
     twitterHandle: "",
     instagramHandle: "",
-    telegramLink: "",
+    telegramUrl: "",
   });
   const [errors, setErrors] = useState<CollectionInputs>({
     collectionName: "",
     description: "",
     royalties: "",
     websiteUrl: "",
-    discordLink: "",
+    discordUrl: "",
     twitterHandle: "",
     instagramHandle: "",
-    telegramLink: "",
+    telegramUrl: "",
   });
 
   const [attributes, setAttributes] = useState<AttributeData[]>([
@@ -74,6 +78,85 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [nfts, setNfts] = useState<NftData[]>([]);
 
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
+
+  const [runDeployCollection] = useAsyncTask("deployCollection");
+
+  const onDeployCollection = () => {
+    runDeployCollection(async () => {
+      const arkClient = new ArkClient(network);
+
+      // upload nft image
+      const pinata = pinataSDK.default(process.env.REACT_APP_API_KEY as string, process.env.REACT_APP_SECRET_API_KEY as string);
+      const uploadedNfts = [];
+
+      console.log("api key: ", process.env.REACT_APP_API_KEY);
+      console.log("secret api key: ", process.env.REACT_APP_SECRET_API_KEY);
+
+      for (const nft of nfts) {
+        try {
+          await pinata.testAuthentication();
+          console.log("hello world");
+          const attributes = [];
+
+          // upload image
+          console.log("uploading image...");
+
+          const response = await pinata.pinFileToIPFS(nft.imageFile);
+          console.log("hash: ", response.IpfsHash);
+
+          for (const [traitType, value] of Object.entries(nft.attributes)) {
+            attributes.push({
+              "trait_type": traitType,
+              "value": value,
+            })
+          }
+
+          uploadedNfts.push({
+            id: nft.id,
+            image: response.IpfsHash,
+            attributes
+          })
+        } catch (err) {
+          console.log(err);
+        }  
+      }
+
+
+      const collection = {
+        name: inputValues.collectionName,
+        description: inputValues.description,
+        address: "",
+        verifiedAt: null,
+        websiteUrl: inputValues.websiteUrl,
+        discordUrl: inputValues.discordUrl,
+        telegramUrl: inputValues.websiteUrl,
+        twitterUrl: inputValues.twitterHandle,
+        instagramUrl: inputValues.instagramHandle,
+
+        bannerImageUrl: "https://arkstatic.s3.ap-southeast-1.amazonaws.com/prod/tbm-banner.png",
+        profileImageUrl: "https://pbs.twimg.com/profile_images/1432977604563193858/z01O7Sey_400x400.jpg",
+
+        ownerName: "test",
+        royaltyBps: (parseInt(inputValues.royalties) * 100).toString(),
+        royaltyType: "default",
+      }
+
+      const params = {
+        collection,
+        nfts: uploadedNfts,
+      }
+
+      console.log("deploying collection...");
+
+      console.log("params: ", JSON.stringify(params));
+
+      const result = await arkClient.deployCollection(address!, params);
+
+      console.log("deployed collection");
+
+      console.log("token uris: ", result);
+    })
+  }
 
   return (
     <ArkPage {...rest}>
@@ -127,6 +210,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
                 id="section-3"
                 acceptTerms={acceptTerms}
                 setAcceptTerms={setAcceptTerms}
+                onDeployCollection={onDeployCollection}
               />
             </Box>
           </Box>

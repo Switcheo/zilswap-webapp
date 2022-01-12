@@ -80,11 +80,11 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         if (input.length && input.length < 2) return "Minimum of 2 characters";
         if (input.length > 300) return "Maximum of 300 characters";
         return ""
-      case "discordLink":
+      case "discordUrl":
         if (input.length > 253) return "Maximum of 253 characters";
         if (input.indexOf("https://discord.gg/") !== 0) return "Invalid URL, it should begin with https://discord.gg/";
         return ""
-      case "telegramLink":
+      case "telegramUrl":
         if (input.length > 253) return "Maximum of 253 characters";
         if (input.indexOf("https://t.me/") !== 0) return "Invalid URL, it should begin with https://t.me/";
         return ""
@@ -310,8 +310,8 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         />
         <ArkInput
           inline={true} placeholder="https://discord.gg/example"
-          error={errors.discordLink} value={inputValues.discordLink} label="Discord"
-          onValueChange={(value) => updateInputs("discordLink")(value)}
+          error={errors.discordUrl} value={inputValues.discordUrl} label="Discord"
+          onValueChange={(value) => updateInputs("discordUrl")(value)}
         />
         <ArkInput
           startAdornment={<Typography>@</Typography>} inline={true} placeholder="bearycute"
@@ -325,8 +325,8 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         />
         <ArkInput
           inline={true} placeholder="https://t.me/example"
-          error={errors.telegramLink} value={inputValues.telegramLink} label="Telegram"
-          onValueChange={(value) => updateInputs("telegramLink")(value)} />
+          error={errors.telegramUrl} value={inputValues.telegramUrl} label="Telegram"
+          onValueChange={(value) => updateInputs("telegramUrl")(value)} />
       </Box>
     </Box>
   )

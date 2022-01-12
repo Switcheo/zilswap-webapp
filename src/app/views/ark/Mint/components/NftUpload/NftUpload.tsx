@@ -22,6 +22,7 @@ interface Props extends BoxProps {
   setAttributes: React.Dispatch<React.SetStateAction<AttributeData[]>>;
 }
 
+// need to settle failed as well
 export type ProgressType = "queued" | "uploaded";
 
 const NftUpload: React.FC<Props> = (props: Props) => {

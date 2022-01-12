@@ -9,10 +9,11 @@ import { FancyButton } from "app/components";
 interface Props extends BoxProps {
   acceptTerms: boolean;
   setAcceptTerms: React.Dispatch<React.SetStateAction<boolean>>;
+  onDeployCollection: () => void;
 }
 
 const ConfirmMint: React.FC<Props> = (props: Props) => {
-  const { acceptTerms, setAcceptTerms, children, className, ...rest } = props;
+  const { acceptTerms, setAcceptTerms, onDeployCollection, children, className, ...rest } = props;
   const classes = useStyles();
 
   return (
@@ -48,7 +49,7 @@ const ConfirmMint: React.FC<Props> = (props: Props) => {
         />
       </Box>
 
-      <FancyButton variant="contained" color="primary" className={classes.mintButton} disabled={!acceptTerms}>
+      <FancyButton variant="contained" color="primary" className={classes.mintButton} disabled={!acceptTerms} onClick={onDeployCollection}>
         Mint NFTs
       </FancyButton>
     </Box>

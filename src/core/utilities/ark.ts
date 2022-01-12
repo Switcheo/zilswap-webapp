@@ -31,6 +31,7 @@ const apiPaths = {
   "exchange/status": "/exchange/status",
   "exchange/info": "/exchange/info",
   "collection/list": "/nft/collection/list",
+  "collection/deploy": "/nft/collection/deploy",
   "collection/detail": "/nft/collection/:address/detail",
   "collection/search": "/nft/collection/:address/search",
   "collection/traits": "/nft/collection/:address/traits",
@@ -298,6 +299,20 @@ export class ArkClient {
     const result = await this.http.post({ url, data, headers });
     const output = await result.json();
     await this.checkError(output);
+    return output;
+  };
+
+  deployCollection = async (address: string, params: ArkClient.DeployCollectionParams) => {
+    const url = this.http.path("collection/deploy");
+
+    const data = {
+      collection: params.collection,
+      nfts: params.nfts,
+    };
+
+    const result = await this.http.post({ url, data });
+    const output = await result.json();
+    // await this.checkError(output);
     return output;
   };
 
@@ -767,6 +782,11 @@ export namespace ArkClient {
     owner?: string;
     likedBy?: string;
     collection?: string;
+  }
+
+  export interface DeployCollectionParams {
+    collection: Collection;
+    nfts: Array<any>;
   }
 
   export interface SearchCollectionParams extends ListQueryParams {
