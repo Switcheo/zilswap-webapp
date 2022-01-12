@@ -1,10 +1,8 @@
-import { Readable } from "stream";
 import React, { useState } from "react";
 import { Box, Container, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useSelector } from "react-redux";
-import * as pinataSDK from "@pinata/sdk";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, SimpleMap, useAsyncTask, useNetwork } from "app/utils";
 import ArkPage from "app/layouts/ArkPage";
