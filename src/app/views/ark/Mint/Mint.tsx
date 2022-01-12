@@ -1,3 +1,4 @@
+import { Readable } from "stream";
 import React, { useState } from "react";
 import { Box, Container, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -85,43 +86,6 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     runDeployCollection(async () => {
       const arkClient = new ArkClient(network);
 
-      // upload nft image
-      const pinata = pinataSDK.default(process.env.REACT_APP_API_KEY as string, process.env.REACT_APP_SECRET_API_KEY as string);
-      const uploadedNfts = [];
-
-      console.log("api key: ", process.env.REACT_APP_API_KEY);
-      console.log("secret api key: ", process.env.REACT_APP_SECRET_API_KEY);
-
-      for (const nft of nfts) {
-        try {
-          await pinata.testAuthentication();
-          console.log("hello world");
-          const attributes = [];
-
-          // upload image
-          console.log("uploading image...");
-
-          const response = await pinata.pinFileToIPFS(nft.imageFile);
-          console.log("hash: ", response.IpfsHash);
-
-          for (const [traitType, value] of Object.entries(nft.attributes)) {
-            attributes.push({
-              "trait_type": traitType,
-              "value": value,
-            })
-          }
-
-          uploadedNfts.push({
-            id: nft.id,
-            image: response.IpfsHash,
-            attributes
-          })
-        } catch (err) {
-          console.log(err);
-        }  
-      }
-
-
       const collection = {
         name: inputValues.collectionName,
         description: inputValues.description,
@@ -143,7 +107,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
       const params = {
         collection,
-        nfts: uploadedNfts,
+        nfts,
       }
 
       console.log("deploying collection...");
@@ -165,7 +129,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         maxWidth="md"
         disableGutters
       >
-        {wallet && (
+        {(
           <Box>
             {/* <List className={classes.nav}>
               <Box className={classes.navBox}>
@@ -216,7 +180,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           </Box>
         )}
 
-        {!wallet && (
+        {wallet && (
           <Box mt={12} display="flex" justifyContent="center">
             <Box display="flex" flexDirection="column" textAlign="center">
               <Typography className={classes.connectionText} variant="h1">
