@@ -388,11 +388,46 @@ export class ArkClient {
     const response = await zilswap.zilliqa.blockchain.getSmartContractSubState(tokenAddress, "operator_approvals");
     const approvalState = response.result.operator_approvals;
 
+    // if no operator_approvals, check for operators
+    if (!approvalState) {
+      const zrc6Response = await zilswap.zilliqa.blockchain.getSmartContractSubState(tokenAddress, "operators");
+      const zrc6ApprovalState = zrc6Response.result.operators;
+      if (zrc6ApprovalState?.[this.brokerAddress]) return null;
+      // use zrc6 transition
+      return await this.zrc6ApproveAllowance(tokenAddress, zilswap);
+    }
+
     const userApprovals = approvalState?.[ownerAddress.toLowerCase()];
     logger("ark contract approvals", ownerAddress, this.brokerAddress, userApprovals);
     if (userApprovals?.[this.brokerAddress]) return null;
 
     return await this.approveAllowance(tokenAddress, zilswap);
+  }
+
+  async zrc6ApproveAllowance(tokenAddress: string, zilswap: Zilswap) {
+    const args = [{
+      vname: "operator",
+      type: "ByStr20",
+      value: this.brokerAddress,
+    }];
+
+    const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
+    const callParams = {
+      amount: new BN("0"),
+      gasPrice: new BN(minGasPrice),
+      gasLimit: Long.fromNumber(20000),
+      version: bytes.pack(CHAIN_IDS[this.network], MSG_VERSION),
+    };
+
+    const result = await zilswap.callContract(
+      zilswap.getContract(tokenAddress),
+      "AddOperator",
+      args as any,
+      callParams,
+      true,
+    );
+
+    return result;
   }
 
   // TODO: Refactor zilswap SDK as instance member;
