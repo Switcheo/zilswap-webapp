@@ -127,7 +127,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         maxWidth="md"
         disableGutters
       >
-        {(
+        {wallet && (
           <Box>
             {/* <List className={classes.nav}>
               <Box className={classes.navBox}>
@@ -178,7 +178,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           </Box>
         )}
 
-        {wallet && (
+        {!wallet && (
           <Box mt={12} display="flex" justifyContent="center">
             <Box display="flex" flexDirection="column" textAlign="center">
               <Typography className={classes.connectionText} variant="h1">
