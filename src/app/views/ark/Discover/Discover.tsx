@@ -108,7 +108,11 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const isSm = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("sm"));
 
   const fullCollections = useMemo(() => {
-    const sorted = collections.sort((a, b) => bnOrZero(b.priceStat ? b.priceStat.volume : 0).comparedTo(a.priceStat ? a.priceStat.volume : 0))
+    const sorted = collections.sort((a, b) => {
+      const volDiff = bnOrZero(b.priceStat?.volume ?? 0).comparedTo(a.priceStat?.volume ?? 0)
+      if (volDiff !== 0) return volDiff
+      return bnOrZero(b.priceStat?.allTimeVolume ?? 0).comparedTo(a.priceStat?.allTimeVolume ?? 0)
+    })
     return sorted
 
   }, [collections]);
