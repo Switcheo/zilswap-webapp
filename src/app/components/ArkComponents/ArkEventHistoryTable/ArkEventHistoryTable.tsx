@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { BoxProps, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { useSelector } from "react-redux";
-import cls from "classnames"
 import { toBech32Address } from "@zilliqa-js/zilliqa";
-import { BIG_ZERO } from "app/utils/constants";
-
-import { AppTheme } from "app/theme/types";
+import cls from "classnames";
+import dayjs from "dayjs";
+import { useSelector } from "react-redux";
 import { ArkBox, ArkPaginator } from "app/components";
 import { getBlockchain, getTokens } from "app/saga/selectors";
+import { AppTheme } from "app/theme/types";
 import { bnOrZero, toHumanNumber, useAsyncTask } from "app/utils";
+import { BIG_ZERO } from "app/utils/constants";
 import { ArkClient } from "core/utilities";
-import { ArkOwnerLabel } from "..";
+import ArkOwnerLabel from "../ArkOwnerLabel";
+
 
 const ITEMS_PER_PAGE = 10
 
@@ -77,6 +78,7 @@ interface HeadersProp {
 }
 
 const HEADERS: HeadersProp[] = [
+  { align: "left", value: "Date" },
   { align: "right", value: "Type" },
   { align: "right", value: "Price" },
   { align: "center", value: "From" },
@@ -114,7 +116,7 @@ const ArkEventHistoryTable: React.FC<Props> = (props: Props) => {
     <ArkBox variant="base" className={classes.container}>
       <TableContainer>
         <Table>
-         <TableHead>
+          <TableHead>
             <TableRow>
               {headers.map((header, index) => (
                 <TableCell
@@ -131,11 +133,12 @@ const ArkEventHistoryTable: React.FC<Props> = (props: Props) => {
             {history.map(event => {
               const token = event['additionalData']['priceDenom'] ? tokens[toBech32Address(event.additionalData.priceDenom)] : null
               var amount = BIG_ZERO
-              if(event['additionalData']['priceAmount'] && token) {
+              if (event['additionalData']['priceAmount'] && token) {
                 amount = bnOrZero(event['additionalData']['priceAmount']).shiftedBy(-token.decimals)
               }
               return (
                 <TableRow>
+                  <TableCell align="right">{event.chainEvent?.timestamp ? dayjs(event.chainEvent.timestamp).format("YYYY MMM DD") : "-"}</TableCell>
                   <TableCell align="right">{event.historyType}</TableCell>
                   <TableCell align="right">
                     {amount.isGreaterThan(0) ? (
