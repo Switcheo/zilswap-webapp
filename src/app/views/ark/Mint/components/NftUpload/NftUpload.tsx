@@ -51,7 +51,6 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 id: file.name.substring(0, file.name.indexOf(".")),
                 image,
                 attributes: {},
-                imageFile: file,
               },
               ...prevState.slice(size + index + 1)
             ]
@@ -644,7 +643,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   nftTableContainer: {
     maxHeight: 600,
     maxWidth: 790.938,
-    backgroundColor: theme.palette.background.default,
+    // backgroundColor: theme.palette.background.default,
     borderRadius: 12,
     "& .MuiTableCell-root": {
       minWidth: 110,

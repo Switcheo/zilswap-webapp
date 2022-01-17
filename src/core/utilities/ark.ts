@@ -31,7 +31,7 @@ const apiPaths = {
   "exchange/status": "/exchange/status",
   "exchange/info": "/exchange/info",
   "collection/list": "/nft/collection/list",
-  "collection/deploy": "/nft/collection/deploy",
+  "collection/deploy": "/nft/collection/:address/deploy",
   "collection/detail": "/nft/collection/:address/detail",
   "collection/search": "/nft/collection/:address/search",
   "collection/traits": "/nft/collection/:address/traits",
@@ -302,14 +302,8 @@ export class ArkClient {
     return output;
   };
 
-  deployCollection = async (address: string, params: ArkClient.DeployCollectionParams) => {
-    const url = this.http.path("collection/deploy");
-
-    const data = {
-      collection: params.collection,
-      nfts: params.nfts,
-    };
-
+  deployCollection = async (address: string, data: ArkClient.DeployCollectionParams) => {
+    const url = this.http.path("collection/deploy", { address });
     const result = await this.http.post({ url, data });
     const output = await result.json();
     // await this.checkError(output);
@@ -435,6 +429,26 @@ export class ArkClient {
       zilswap.getContract(tokenAddress),
       "SetApprovalForAll",
       args as any,
+      callParams,
+      true,
+    );
+
+    return result;
+  }
+
+  async acceptContractOwnership(contractAddress: string, zilswap: Zilswap) {
+    const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
+    const callParams = {
+      amount: new BN("0"),
+      gasPrice: new BN(minGasPrice),
+      gasLimit: Long.fromNumber(20000),
+      version: bytes.pack(CHAIN_IDS[this.network], MSG_VERSION),
+    };
+
+    const result = await zilswap.callContract(
+      zilswap.getContract(contractAddress),
+      "AcceptContractOwnership",
+      [],
       callParams,
       true,
     );

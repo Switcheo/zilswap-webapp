@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import { Box, Container, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useSelector } from "react-redux";
+import { toBech32Address } from "@zilliqa-js/crypto";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, SimpleMap, useAsyncTask, useNetwork } from "app/utils";
 import ArkPage from "app/layouts/ArkPage";
 import { getWallet } from "app/saga/selectors";
 import { ArkClient } from "core/utilities";
-import { CollectionDetail, ConfirmMint, NftUpload } from "./components";
+import { ZilswapConnector } from "core/zilswap";
+import { CollectionDetail, ConfirmMint, LoadingMint, NftUpload } from "./components";
 
 export type CollectionInputs = {
   collectionName: string;
@@ -32,7 +34,6 @@ export type NftData = {
   id: string;
   image: string | ArrayBuffer | null;
   attributes: SimpleMap<string>;
-  imageFile: File;
 };
 
 const collections = ["The Bear Market"];
@@ -78,11 +79,16 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
 
+  const [showLoadingMint, setShowLoadingMint] = useState<boolean>(false);
+
   const [runDeployCollection] = useAsyncTask("deployCollection");
 
   const onDeployCollection = () => {
+    setShowLoadingMint(true);
+    
     runDeployCollection(async () => {
       const arkClient = new ArkClient(network);
+      const zilswap = ZilswapConnector.getSDK();
 
       const collection = {
         name: inputValues.collectionName,
@@ -112,11 +118,20 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
       console.log("params: ", JSON.stringify(params));
 
-      const result = await arkClient.deployCollection(address!, params);
+      console.log("address: ", address);
+
+      const requestResult = await arkClient.deployCollection(address!, params);
 
       console.log("deployed collection");
 
-      console.log("token uris: ", result);
+      console.log("contract address: ", requestResult.result.contractAddress);
+
+      console.log("contract address 2: ", requestResult.result.contractAddress.address);
+
+      console.log("token uris: ", requestResult.result.tokenUris);
+
+      console.log("calling accept ownership...");
+      await arkClient.acceptContractOwnership(toBech32Address(requestResult.result.contract.address), zilswap);
     })
   }
 
@@ -143,38 +158,44 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
               </Box>
             </List> */}
 
-            <Box>
-              {/* Set Up Collection */}
-              <CollectionDetail
-                id="section-1"
-                existingCollections={collections}
-                uploadedFiles={uploadedFiles}
-                setUploadedFiles={setUploadedFiles}
-                mintOption={mintOption}
-                setMintOption={setMintOption}
-                inputValues={inputValues}
-                setInputValues={setInputValues}
-                errors={errors}
-                setErrors={setErrors}
-              />
+            {!showLoadingMint && 
+              <Fragment>
+                {/* Set Up Collection */}
+                <CollectionDetail
+                  id="section-1"
+                  existingCollections={collections}
+                  uploadedFiles={uploadedFiles}
+                  setUploadedFiles={setUploadedFiles}
+                  mintOption={mintOption}
+                  setMintOption={setMintOption}
+                  inputValues={inputValues}
+                  setInputValues={setInputValues}
+                  errors={errors}
+                  setErrors={setErrors}
+                />
 
-              {/* Upload NFTs */}
-              <NftUpload
-                id="section-2"
-                nfts={nfts}
-                setNfts={setNfts}
-                attributes={attributes}
-                setAttributes={setAttributes}
-              />
+                {/* Upload NFTs */}
+                <NftUpload
+                  id="section-2"
+                  nfts={nfts}
+                  setNfts={setNfts}
+                  attributes={attributes}
+                  setAttributes={setAttributes}
+                />
 
-              {/* Confirm Mint */}
-              <ConfirmMint
-                id="section-3"
-                acceptTerms={acceptTerms}
-                setAcceptTerms={setAcceptTerms}
-                onDeployCollection={onDeployCollection}
-              />
-            </Box>
+                {/* Confirm Mint */}
+                <ConfirmMint
+                  id="section-3"
+                  acceptTerms={acceptTerms}
+                  setAcceptTerms={setAcceptTerms}
+                  onDeployCollection={onDeployCollection}
+                />
+              </Fragment>
+            }
+
+            {showLoadingMint && (
+              <LoadingMint setShowLoadingMint={setShowLoadingMint} />
+            )}
           </Box>
         )}
 
@@ -190,6 +211,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
             </Box>
           </Box>
         )}
+
       </Container>
     </ArkPage>
   );
