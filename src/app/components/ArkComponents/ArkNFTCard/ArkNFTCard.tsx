@@ -101,8 +101,6 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
       }
 
       setPopAnchor(null);
-      const image = await fetch(token.asset.url, { method: "GET" })
-      const blobFile = await image.blob();
       const arkClient = new ArkClient(wallet!.network)
       let checkedOAuth: OAuth | undefined = oAuth;
       if (!oAuth?.access_token || (oAuth && dayjs(oAuth?.expires_at * 1000).isBefore(dayjs()))) {
@@ -111,10 +109,8 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
         checkedOAuth = result;
       }
       const address = wallet!.addressInfo.byte20.toLowerCase()
-      const requestResult = await arkClient.requestImageUploadUrl(address, checkedOAuth!.access_token);
 
-      await arkClient.putImageUpload(requestResult.result.uploadUrl, blobFile);
-      await arkClient.notifyUpload(address, checkedOAuth!.access_token);
+      await arkClient.setNFTAsProfile(address, checkedOAuth!.access_token, token.collection.address, token.tokenId + "");
       dispatch(actions.MarketPlace.loadProfile());
       toaster(`Set ${token.tokenId} as profile image`);
     })
