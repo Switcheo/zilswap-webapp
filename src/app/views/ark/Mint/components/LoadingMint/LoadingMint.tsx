@@ -1,4 +1,5 @@
 import React from "react";
+import { useHistory } from "react-router";
 import cls from "classnames";
 import { Box, BoxProps, makeStyles, Typography } from "@material-ui/core";
 import { AppTheme } from "app/theme/types";
@@ -14,9 +15,10 @@ interface Props extends BoxProps {
 const LoadingMint: React.FC<Props> = (props: Props) => {
   const { children, className, setShowLoadingMint, ...rest } = props;
   const classes = useStyles();
+  const history = useHistory();
 
   const onViewCollection = () => {
-    setShowLoadingMint(false);
+    history.push("/arky/discover");
   }
 
   return (

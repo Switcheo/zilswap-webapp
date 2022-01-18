@@ -69,12 +69,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     telegramUrl: "",
   });
 
-  const [attributes, setAttributes] = useState<AttributeData[]>([
-    {
-      name: "",
-      values: [],
-    },
-  ]);
+  const [attributes, setAttributes] = useState<AttributeData[]>([]);
   const [nfts, setNfts] = useState<NftData[]>([]);
 
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
@@ -124,9 +119,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
       console.log("deployed collection");
 
-      console.log("contract address: ", requestResult.result.contractAddress);
-
-      console.log("contract address 2: ", requestResult.result.contractAddress.address);
+      console.log("contract address: ", requestResult.result.contract.address);
 
       console.log("token uris: ", requestResult.result.tokenUris);
 

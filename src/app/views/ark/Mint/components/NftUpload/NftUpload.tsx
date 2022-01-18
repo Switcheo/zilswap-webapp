@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import cls from "classnames";
-import { Box, BoxProps, Typography, FormControl, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from "@material-ui/core";
+import { Box, BoxProps, Button, Typography, FormControl, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, useMediaQuery } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import AddIcon from '@material-ui/icons/AddRounded';
@@ -28,6 +28,7 @@ export type ProgressType = "queued" | "uploaded";
 const NftUpload: React.FC<Props> = (props: Props) => {
   const { children, className, attributes, setAttributes, nfts, setNfts, ...rest } = props;
   const classes = useStyles();
+  const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [progress, setProgress] = useState<ProgressType[]>([]);
@@ -271,7 +272,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                           </Box>
                         </Box>
                         <Box display="flex" justifyContent="center" flex={1}>
-                          <Typography className={classes.bannerText}>Drag and drop your files here.</Typography>
+                          <Typography className={classes.dropBoxText}>{isXs ? "Upload Files" : "Drag and drop your files here."}</Typography>
                         </Box> 
                       </Box>
                     )}
@@ -538,6 +539,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.primary.light,
     textAlign: "center",
   },
+  dropBoxText: {
+    color: theme.palette.primary.light,
+    textAlign: "center",
+    [theme.breakpoints.down("xs")]: {
+      marginTop: theme.spacing(2),
+      marginBottom: theme.spacing(2),
+    },
+  },
   footerInstruction: {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(2),
@@ -643,10 +652,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   nftTableContainer: {
     maxHeight: 600,
     maxWidth: 790.938,
-    // backgroundColor: theme.palette.background.default,
     borderRadius: 12,
     "& .MuiTableCell-root": {
       minWidth: 110,
+    },
+    "& .MuiTableCell-stickyHeader": {
+      backgroundColor: "transparent",
     },
     "&::-webkit-scrollbar": {
       width: "5px",
@@ -676,6 +687,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: theme.palette.currencyInput,
     padding: theme.spacing(1.5),
     borderRadius: 12,
+    width: "100%",
   },
   progressBoxInner: {
     display: "flex",
@@ -744,6 +756,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    [theme.breakpoints.down("xs")]: {
+      flexDirection: "column-reverse",
+    }
   },
   uploadedText: {
     color: theme.palette.primary.light,
@@ -780,6 +795,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     left: 0,
     zIndex: 1,
     minWidth: "200px!important",
+    // fix background here
   },
   nftImage: {
     borderRadius: "12px", 

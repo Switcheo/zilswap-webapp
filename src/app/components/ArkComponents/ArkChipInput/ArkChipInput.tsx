@@ -96,6 +96,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     marginTop: theme.spacing(1),
     width: "100%",
+    maxWidth: "506px",
     display: "flex",
     alignItems: "center",
     "& .MuiChip-root": {
