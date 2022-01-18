@@ -50,6 +50,7 @@ const apiPaths = {
   "user/image/request": "/user/:address/upload/request",
   "user/image/notify": "/user/:address/upload/notify",
   "user/image/remove": "/user/:address/upload/remove",
+  "user/image/profile": "/user/:address/upload/profile",
 };
 
 const getHttpClient = (network: Network) => {
@@ -295,6 +296,15 @@ export class ArkClient {
     const headers = { Authorization: "Bearer " + access_token };
     const url = this.http.path("user/image/notify", { address }, { type });
     const result = await this.http.post({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  setNFTAsProfile = async (address: string, access_token: string, collection: string, token: string) => {
+    const headers = { Authorization: "Bearer " + access_token };
+    const url = this.http.path("user/image/profile", { address });
+    const result = await this.http.post({ url, headers, data: { collection, token } });
     const output = await result.json();
     await this.checkError(output);
     return output;
