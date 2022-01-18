@@ -5635,10 +5635,10 @@ capture-exit@^2.0.0:
   dependencies:
     rsvp "^4.8.4"
 
-carbon-js-sdk@^0.1.14:
-  version "0.1.14"
-  resolved "https://registry.yarnpkg.com/carbon-js-sdk/-/carbon-js-sdk-0.1.14.tgz#2aae0de084d9f9b9623604220d87301747f989bf"
-  integrity sha512-pH5Wiw96ELG6Jgkto+h6SM+FHQr6SO/AXm17jtGfBY/CABQRY4c/mYBgQp5qVxb8TZ9nlIzEiu/JwIUBKPPrvA==
+carbon-js-sdk@^0.1.17:
+  version "0.1.17"
+  resolved "https://registry.yarnpkg.com/carbon-js-sdk/-/carbon-js-sdk-0.1.17.tgz#45769c0d16cbf4a9821edf68ea8708da344046bb"
+  integrity sha512-Ny9inNvxrPMXDktgyrFgj5btAy+9cub/xOYgGutbkJhW6XCquH8yNKh2i3gwMOgsCaTupNDedTBoo/lHmFCbIg==
   dependencies:
     "@cityofzion/neon-core" "^4.9.0"
     "@cityofzion/neon-js" "^4.9.0"
