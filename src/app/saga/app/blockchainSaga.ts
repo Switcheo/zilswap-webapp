@@ -209,7 +209,7 @@ const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken) => {
   r[address] = {
     initialized: false,
     registered: true,
-    whitelisted: true,
+    whitelisted: false,
     isWzil: false,
     isZil: false,
     isZwap: false,
@@ -288,13 +288,13 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
         if (!bridgeableDenoms.includes(wrappedDenom)) {
           return;
         }
-  
+
         const wrappedToken = carbonTokens.find(d => d.denom === wrappedDenom)!
         const sourceToken = carbonTokens.find(d => d.denom === sourceDenom)!
-  
+
         const wrappedChain = blockchainForChainId(wrappedToken.chainId.toNumber());
         const sourceChain = blockchainForChainId(sourceToken.chainId.toNumber());
-  
+
         if ((wrappedChain !== Blockchain.Zilliqa && wrappedChain !== Blockchain.Ethereum) ||
           (sourceChain !== Blockchain.Zilliqa && sourceChain !== Blockchain.Ethereum)) {
           return
