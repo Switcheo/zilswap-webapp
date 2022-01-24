@@ -19,6 +19,7 @@ interface Props extends BoxProps {
   type?: string;
   onInputBlur?: () => void;
   disabled?: boolean;
+  errorBorder?: boolean;
 }
 
 const BootstrapInput = withStyles(theme => ({
@@ -49,7 +50,7 @@ const BootstrapInput = withStyles(theme => ({
 }))(InputBase);
 
 const ArkInput: React.FC<Props> = (props: Props) => {
-  const { disabled, hideInput, wordLimit, inline, startAdornment, endAdornment, instruction, error = "", label, multiline, value, onValueChange, onInputBlur, className, type, ...rest } = props;
+  const { disabled, hideInput, wordLimit, inline, startAdornment, endAdornment, instruction, error = "", errorBorder, label, multiline, value, onValueChange, onInputBlur, className, type, ...rest } = props;
   const classes = useStyles();
   const [onFocus, setOnFocus] = useState(false)
 
@@ -82,7 +83,8 @@ const ArkInput: React.FC<Props> = (props: Props) => {
             disabled={disabled}
             startAdornment={startAdornment ? <InputAdornment className={cls({ [classes.focusAdornment]: onFocus && !error })} position="start">{startAdornment}</InputAdornment> : undefined}
             endAdornment={endAdornment ? <InputAdornment className={cls({ [classes.focusAdornment]: onFocus && !error })} position="end">{endAdornment}</InputAdornment> : undefined}
-            onFocus={() => setOnFocus(true)} onBlur={onBlur} className={cls({ [classes.focused]: onFocus && !error, [classes.multiline]: multiline, [classes.error]: error && !!value })}
+            onFocus={() => setOnFocus(true)} onBlur={onBlur} 
+            className={cls({ [classes.focused]: onFocus && !error, [classes.multiline]: multiline, [classes.error]: error && !!value, [classes.errorBorder]: errorBorder })}
             multiline={multiline} value={value} onChange={(e) => onValueChange(e.target.value)} fullWidth defaultValue="react-bootstrap" {...rest} />
         )}
         <FormHelperText className={cls({ [classes.errorText]: true })} >{error ? error : " "}</FormHelperText>
@@ -110,16 +112,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   error: {
-    border: '1px solid #FF5252',
+    border: "1px solid #FF5252",
     color: "#FF5252",
     '&:focus': {
       borderColor: "#FF5252",
       color: "#FF5252",
     },
   },
+  errorBorder: {
+    border: "1px solid #FF5252",
+  },
   errorText: {
     color: "#FF5252",
     fontSize: 10,
+    marginTop: "2px",
     margin: 0
   },
   instruction: {

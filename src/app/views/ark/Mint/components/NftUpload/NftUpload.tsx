@@ -49,7 +49,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
             [
               ...prevState.slice(0, size + index),
               {
-                id: file.name.substring(0, file.name.indexOf(".")),
+                name: file.name.substring(0, file.name.indexOf(".")),
                 image,
                 attributes: {},
               },
@@ -201,9 +201,9 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     );
   }
 
-  const handleIdChange = (index: number, newId: string) => {
+  const handleNameChange = (index: number, newName: string) => {
     const newNfts = nfts.slice();
-    newNfts[index].id = newId;
+    newNfts[index].name = newName;
 
     setNfts(
       newNfts
@@ -284,7 +284,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         </Box>
 
         <Typography className={cls(classes.instruction, classes.footerInstruction)}>
-          Recommended format: PNG/JPEG &nbsp;|&nbsp; Maximum number of files: 200 &nbsp;|&nbsp; Maximum size per file: 50MB
+          Recommended format: PNG, JPEG, GIF &nbsp;|&nbsp; Maximum number of files: 200 &nbsp;|&nbsp; Maximum size per file: 50MB
         </Typography>
       </Box>
 
@@ -303,7 +303,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
             className={classes.infoIcon}
             icon={<InfoIcon />}
             placement="top"
-            title="Add all attributes that are a part of this colleciton, and assign them to specific NFTs below."
+            title="Add all attributes that are a part of this collection, and assign them to specific NFTs below."
           />
         </Typography>
         
@@ -329,14 +329,17 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                         placeholder="Name"
                         value={attribute.name}
                         onValueChange={(value) => handleAttributeNameChange(index, value)}
+                        error={!attribute.name ? "Add attribute name." : ""}
+                        errorBorder={!attribute.name}
                       />
                     </TableCell>
                     <TableCell>
                       <ArkChipInput
                         onKeyDown={(event) => handleKeyDown(index, event)}
-                        placeholder={attribute.values.length ? "" : 'Separate each value with a semi-colon ";"'}
+                        placeholder={!attribute.values ? 'Separate each value with a semi-colon ";"' : ""}
                         chips={attribute.values}
                         onDelete={(value) => handleDeleteChip(index, value)}
+                        error={!attribute.values.length ? "Add attribute values." : ""}
                       />
                     </TableCell>
                     <TableCell align="right">
@@ -353,7 +356,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
             onClick={() => handleAddAttribute()} 
             fullWidth
           >
-            <AddIcon />
+            <AddIcon className={classes.addIcon} />
           </Button>
         </TableContainer>
       </Box>
@@ -397,10 +400,12 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                     <TableCell component="th" scope="row" className={classes.imageCell}>
                       <img src={nft.image?.toString()} alt="NFT" height="39.25px" width="39.25px" className={classes.nftImage} />
                       <ArkInput
-                        placeholder="Id"
-                        value={nft.id}
-                        onValueChange={(value) => handleIdChange(index, value)}
-                        className={classes.idInput}
+                        placeholder="Name"
+                        value={nft.name}
+                        onValueChange={(value) => handleNameChange(index, value)}
+                        className={classes.nameInput}
+                        error={!nft.name ? "Add a name for this NFT" : ""}
+                        errorBorder={!nft.name}
                       />
                     </TableCell>
 
@@ -408,8 +413,8 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                       const currAttribute = nfts[index].attributes[attribute.name] ?? "";
 
                       return (
-                        <TableCell className={classes.removePaddingRight}>
-                          <FormControl className={classes.formControl} fullWidth>
+                        <TableCell className={classes.removePaddingRightLast}>
+                          <FormControl className={cls(classes.formControl, { [classes.error]: !currAttribute.length })} fullWidth>
                             <Select
                               MenuProps={{ 
                                 classes: { paper: classes.selectMenu },
@@ -452,7 +457,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                       )
                     })}
                     {!attributes.length && index === 0 &&
-                      <TableCell className={classes.removePaddingRight} rowSpan={nfts.length} height={nfts.length * 39.25 + (nfts.length - 1) * 8}>
+                      <TableCell rowSpan={nfts.length} height={nfts.length * 39.25 + (nfts.length - 1) * 8} className={classes.removePaddingRight}>
                         <Box className={classes.emptyState}>
                           <Typography>Add attributes via the <strong>Manage Attributes</strong> section.</Typography>
                         </Box>
@@ -469,7 +474,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                   </TableCell>
 
                   {(!attributes.length) && 
-                    <TableCell className={classes.emptyStateCell}>
+                    <TableCell className={cls(classes.emptyStateCell, classes.removePaddingRight)}>
                       <Box className={cls(classes.emptyState, classes.emptyStatePadding)}>
                         <Typography>Add attributes via the <strong>Manage Attributes</strong> section.</Typography>
                       </Box>
@@ -592,6 +597,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         color: theme.palette.action?.selected,
       }
     },
+  },
+  addIcon: {
+    transition: "color 0.2s" // in sync with border
   },
   manageNftBox: {
     marginTop: theme.spacing(3),
@@ -745,7 +753,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: "6px", 
     wordBreak: "break-all"
   },
-  idInput: {
+  nameInput: {
     marginLeft: theme.spacing(1),
     marginTop: 0,
     "& .MuiFormHelperText-root": {
@@ -802,9 +810,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     verticalAlign: "bottom",
   },
   removePaddingRight: {
-    // "&:last-child": {
-    //   paddingRight: 0
-    // }
+    paddingRight: "0px!important",
+  },
+  removePaddingRightLast: {
+    "&:last-child": {
+      paddingRight: "0px!important",
+    }
+  },
+  error: {
+    "& .MuiSelect-root": {
+      border: "1px solid #FF5252",
+    },
   }
 }));
 

@@ -25,11 +25,12 @@ const LoadingMint: React.FC<Props> = (props: Props) => {
     <Box className={classes.root} {...rest} display="flex" flexDirection="column">
       <Typography className={classes.header}>Minting NFTs</Typography>
 
-      <Box display="flex" alignItems="center" marginTop={4} marginBottom={5} position="relative">
+      {/* Deploy Contract */}
+      <Box display="flex" marginTop={4} marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, {
           [classes.stepBarActive]: true,
           [classes.stepBarCompleted]: false
-        })}></Box>
+        })}/>
         <Box className={cls(classes.step, {
           [classes.stepActive]: true,
           [classes.stepCompleted]: false
@@ -41,16 +42,17 @@ const LoadingMint: React.FC<Props> = (props: Props) => {
           )}
         </Box>
         <Box display="flex" flexDirection="column" alignItems="stretch">
-          <Text className={classes.stepLabel}>Approve Transaction</Text>
-          <Text className={classes.stepDescription}>Approve the transaction on your wallet to start minting.</Text>
+          <Text className={classes.stepLabel}>Deploy Contract</Text>
+          <Text className={classes.stepDescription}>Some backend magic is happening to lay some ground work for minting.</Text>
         </Box>
       </Box>
 
+      {/* Mint NFTs */}
       <Box display="flex" marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, classes.stepBarSecond, {
           [classes.stepBarActive]: false,
           [classes.stepBarCompleted]: false
-        })}></Box>
+        })}/>
         <Box className={cls(classes.step, {
           [classes.stepActive]: false,
           [classes.stepCompleted]: false
@@ -61,9 +63,9 @@ const LoadingMint: React.FC<Props> = (props: Props) => {
             <span className={classes.stepNumber}>2</span>
           )}
         </Box>
-        <Box display="flex" flexDirection="column" alignItems="stretch">
-          <Text className={classes.stepLabel}>Minting NFTs</Text>
-          <Text className={classes.stepDescription}>You've done your job, now leave the rest to us. Some <br/> backend magic is happening to make sure your minting is smooth sailing.</Text>
+        <Box display="flex" flexDirection="column" alignItems="stretch" width="100%">
+          <Text className={classes.stepLabel}>Mint NFTs</Text>
+          <Text className={classes.stepDescription}>Your NFTs are now minting...</Text>
 
           {/* progress bar */}
           <Box mt={2} display="flex">
@@ -82,7 +84,12 @@ const LoadingMint: React.FC<Props> = (props: Props) => {
         </Box>
       </Box>
 
-      <Box display="flex" alignItems="center">
+      {/* Assign Ownership */}
+      <Box display="flex" marginBottom={5} position="relative">
+        <Box className={cls(classes.stepBar, classes.stepBarThird, {
+          [classes.stepBarActive]: false,
+          [classes.stepBarCompleted]: false
+        })}/>
         <Box className={cls(classes.step, {
           [classes.stepActive]: false,
           [classes.stepCompleted]: false
@@ -94,8 +101,26 @@ const LoadingMint: React.FC<Props> = (props: Props) => {
           )}
         </Box>
         <Box display="flex" flexDirection="column" alignItems="stretch">
+          <Text className={classes.stepLabel}>Assign Ownership</Text>
+          <Text className={classes.stepDescription}>Check your wallet and approve the transaction so that you can become the proud owner of your collection.</Text>
+        </Box>
+      </Box>
+
+      {/* Complete */}
+      <Box display="flex">
+        <Box className={cls(classes.step, {
+          [classes.stepActive]: false,
+          [classes.stepCompleted]: false
+        })}>
+          {false ? (
+            <Checkmark />
+          ) : (
+            <span className={classes.stepNumber}>4</span>
+          )}
+        </Box>
+        <Box display="flex" flexDirection="column" alignItems="stretch">
           <Text className={classes.stepLabel}>Complete</Text>
-          <Text className={classes.stepDescription}>Minting is complete! Check it out on ARKY.</Text>
+          <Text className={classes.stepDescription}>Congratulations on minting your very own NFT collection! <br /> Hit the button below to check it out :)</Text>
         </Box>
       </Box>
 
@@ -110,7 +135,7 @@ const LoadingMint: React.FC<Props> = (props: Props) => {
         </Text>
       </Box>
 
-      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onViewCollection} fullWidth>
+      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onViewCollection} disabled fullWidth>
         View Collection
       </FancyButton>
     </Box>
@@ -125,6 +150,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 12,
     background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
     border: theme.palette.border,
+    [theme.breakpoints.up("md")]: {
+      maxWidth: "600px",
+    }
   },
   header: {
     fontFamily: "'Raleway', sans-serif",
@@ -219,6 +247,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   stepBarSecond: {
     height: 130,
+  },
+  stepBarThird: {
+    height: 70,
   },
   stepBarActive: {
     backgroundImage: "linear-gradient(#6BE1FF, #223139)",

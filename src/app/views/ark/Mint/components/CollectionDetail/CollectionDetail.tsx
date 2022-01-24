@@ -43,8 +43,9 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
   const onHandleDisplayDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
     if (!files.length) {
-      return setDisplayImage(null);
+      return;
     }
+
     const reader = new FileReader();
 
     reader.onloadend = () => {
@@ -56,9 +57,8 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
   }
 
   const onHandleBannerDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
-
     if (!files.length) {
-      return setBannerImage(null);
+      return;
     }
     const reader = new FileReader();
 
@@ -76,6 +76,10 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
   const validateInput = (type: string, input: string) => {
     switch (type) {
+      case "collectionName":
+        if (input.length && input.length < 2) return "Minimum of 2 characters";
+        if (input.length > 50) return "Maximum of 50 characters";
+        return ""
       case "description":
         if (input.length && input.length < 2) return "Minimum of 2 characters";
         if (input.length > 300) return "Maximum of 300 characters";
@@ -237,7 +241,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
                   <div {...getRootProps()}>
                     <input {...getInputProps()} />
                       {!displayImage && (
-                        <Box className={classes.displayImage}>
+                        <Box className={cls(classes.displayImage, classes.displayImagePlaceholder)}>
                           <Typography align="center" className={classes.displayText}>Drag and drop your image here.</Typography>
                         </Box>
                       )}
@@ -288,6 +292,14 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         placeholder={DESCRIPTION_PLACEHOLDER} error={errors.description} value={inputValues.description}
         label="DESCRIPTION" onValueChange={(value) => updateInputs("description")(value)}
         instruction="What makes your collection special?" wordLimit={300} multiline={true}
+      />
+
+      {/* Artist Name */}
+      <ArkInput
+        className={classes.artistName} value={inputValues.artistName}
+        label="ARTIST NAME" onValueChange={() => {}}
+        instruction="Your collection will be minted under this artist name."
+        disabled
       />
 
       {/* Royalties */}
@@ -364,6 +376,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   description: {
     marginTop: theme.spacing(1),
   },
+  artistName: {
+    marginTop: theme.spacing(1),
+  },
   royalties: {
     marginTop: theme.spacing(1),
   },
@@ -430,7 +445,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "1rem",
   },
   displayImage: {
-    backgroundImage: `url(${theme.palette.type === "dark" ? PlaceholderDark : PlaceholderLight })`,
     backgroundRepeat: "no-repeat",
     backgroundSize: "contain",
     backgroundPositionY: "center",
@@ -441,6 +455,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     alignItems: "center",
     cursor: "pointer",
+  },
+  displayImagePlaceholder: {
+    backgroundImage: `url(${theme.palette.type === "dark" ? PlaceholderDark : PlaceholderLight })`,
   },
   displayText: {
     padding: theme.spacing(2),

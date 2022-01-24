@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { Box, Container, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
@@ -11,10 +11,12 @@ import { getWallet } from "app/saga/selectors";
 import { ArkClient } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { CollectionDetail, ConfirmMint, LoadingMint, NftUpload } from "./components";
+import { Network } from "zilswap-sdk/lib/constants";
 
 export type CollectionInputs = {
   collectionName: string;
   description: string;
+  artistName: string;
   royalties: string;
   websiteUrl: string;
   discordUrl: string;
@@ -31,10 +33,16 @@ export type AttributeData = {
 };
 
 export type NftData = {
-  id: string;
+  name: string;
   image: string | ArrayBuffer | null;
   attributes: SimpleMap<string>;
 };
+
+export type MintProgressType = {
+  hasDeployed: boolean;
+  hasMinted: boolean;
+  hasAcceptOwnership: boolean;
+}
 
 const collections = ["The Bear Market"];
 
@@ -51,6 +59,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [inputValues, setInputValues] = useState<CollectionInputs>({
     collectionName: "",
     description: "",
+    artistName: "",
     royalties: "2.5",
     websiteUrl: "",
     discordUrl: "",
@@ -61,6 +70,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [errors, setErrors] = useState<CollectionInputs>({
     collectionName: "",
     description: "",
+    artistName: "",
     royalties: "",
     websiteUrl: "",
     discordUrl: "",
@@ -74,9 +84,32 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
 
+  const [mintProgress, setMintProgress] = useState<MintProgressType>({
+    hasDeployed: false,
+    hasMinted: false,
+    hasAcceptOwnership: false,
+  })
+
   const [showLoadingMint, setShowLoadingMint] = useState<boolean>(false);
 
+  const [runQueryProfile] = useAsyncTask("queryProfile");
   const [runDeployCollection] = useAsyncTask("deployCollection");
+
+  useEffect(() => {
+    if (address) {
+      runQueryProfile(async () => {
+        const arkClient = new ArkClient(network);
+  
+        const { result: { model } } = await arkClient.getProfile(address.toLowerCase());
+        setInputValues({ 
+          ...inputValues, 
+          "artistName": model?.username ?? toBech32Address(address)
+        })
+      })
+    }
+
+    // eslint-disable-next-line
+  }, [address, network])
 
   const onDeployCollection = () => {
     setShowLoadingMint(true);
@@ -99,8 +132,8 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         bannerImageUrl: "https://arkstatic.s3.ap-southeast-1.amazonaws.com/prod/tbm-banner.png",
         profileImageUrl: "https://pbs.twimg.com/profile_images/1432977604563193858/z01O7Sey_400x400.jpg",
 
-        ownerName: "test",
-        royaltyBps: (parseInt(inputValues.royalties) * 100).toString(),
+        ownerName: inputValues.artistName,
+        royaltyBps: parseFloat(inputValues.royalties) * 100,
         royaltyType: "default",
       }
 
@@ -111,22 +144,47 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
       console.log("deploying collection...");
 
-      console.log("params: ", JSON.stringify(params));
+      const deployResult = await arkClient.deployCollection(address!, params);
 
-      console.log("address: ", address);
+      const contract = deployResult.result.contract;
 
-      const requestResult = await arkClient.deployCollection(address!, params);
-
-      console.log("deployed collection");
-
-      console.log("contract address: ", requestResult.result.contract.address);
-
-      console.log("token uris: ", requestResult.result.tokenUris);
+      console.log("contract: ", contract);
 
       console.log("calling accept ownership...");
-      await arkClient.acceptContractOwnership(toBech32Address(requestResult.result.contract.address), zilswap);
+      await arkClient.acceptContractOwnership(toBech32Address(contract.address), zilswap);
     })
   }
+
+  const isMintEnabled = useMemo(() => {
+    // t&c unchecked
+    if (!acceptTerms)
+      return false;
+    
+    // compulsory fields
+    if (!inputValues.collectionName || !inputValues.royalties)
+      return false;
+
+    // no nft uploaded
+    if (nfts.length === 0)
+      return false;
+    
+    // unfilled attribute data
+    for (const attribute of attributes) {
+      if (!attribute.name || !attribute.values.length)
+        return false;
+    }
+
+    // unfilled nft attributes
+    for (const nft of nfts) {
+      if (!nft.name)
+        return false;
+    
+      if (Object.keys(nft.attributes).length !== attributes.length)
+        return false;
+    }
+
+    return true;
+  }, [acceptTerms, inputValues.collectionName, inputValues.royalties, nfts, attributes])
 
   return (
     <ArkPage {...rest}>
@@ -182,6 +240,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
                   acceptTerms={acceptTerms}
                   setAcceptTerms={setAcceptTerms}
                   onDeployCollection={onDeployCollection}
+                  isMintEnabled={isMintEnabled}
                 />
               </Fragment>
             }

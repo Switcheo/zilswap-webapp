@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { CallParams } from '@zilliqa-js/contract'
+import { CallParams, Contract } from '@zilliqa-js/contract'
 import { BN, bytes, Long } from '@zilliqa-js/util';
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
@@ -33,6 +33,7 @@ const apiPaths = {
   "collection/list": "/nft/collection/list",
   "collection/deploy": "/nft/collection/:address/deploy",
   "collection/detail": "/nft/collection/:address/detail",
+  "collection/mint": "/nft/collection/:address/mint",
   "collection/search": "/nft/collection/:address/search",
   "collection/traits": "/nft/collection/:address/traits",
   "collection/token/detail": "/nft/collection/:address/:tokenId/detail",
@@ -309,6 +310,14 @@ export class ArkClient {
     // await this.checkError(output);
     return output;
   };
+
+  mintCollection = async (address: string, data: ArkClient.MintCollectionParams) => {
+    const url = this.http.path("collection/mint", { address });
+    const result = await this.http.post({ url, data });
+    const output = await result.json();
+    // await this.checkError(output);
+    return output;
+  }
 
   putImageUpload = async (url: string, data: Blob) => {
     await this.http.put({ url, data });
@@ -801,6 +810,11 @@ export namespace ArkClient {
   export interface DeployCollectionParams {
     collection: Collection;
     nfts: Array<any>;
+  }
+
+  export interface MintCollectionParams {
+    contract: Contract;
+    tokenUris: Array<string>;
   }
 
   export interface SearchCollectionParams extends ListQueryParams {

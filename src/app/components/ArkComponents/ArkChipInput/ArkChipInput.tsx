@@ -84,7 +84,7 @@ const ArkChipInput: React.FC<Props> = (props: Props) => {
                 )
               })
             }
-            onFocus={() => setOnFocus(true)} onBlur={onBlur} className={cls({ [classes.focused]: onFocus && !error, [classes.error]: error && !!inputValue, [classes.flexBasis]: chips.length })}
+            onFocus={() => setOnFocus(true)} onBlur={onBlur} className={cls({ [classes.focused]: onFocus && !error, [classes.error]: error, [classes.flexBasis]: chips.length })}
             value={inputValue} onChange={(event) => setInputValue(event.target.value)} onKeyDown={(event) => handleKeyDown(event)} fullWidth defaultValue="react-bootstrap" {...rest} />
         <FormHelperText className={cls({ [classes.errorText]: true })} >{error ? error : " "}</FormHelperText>
       </FormControl>
@@ -104,16 +104,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   error: {
-    border: '1px solid #FF5252',
-    color: "#FF5252",
-    '&:focus': {
-      borderColor: "#FF5252",
-      color: "#FF5252",
-    },
+    border: "1px solid #FF5252",
   },
   errorText: {
     color: "#FF5252",
     fontSize: 10,
+    marginTop: "2px",
     margin: 0
   },
   instruction: {

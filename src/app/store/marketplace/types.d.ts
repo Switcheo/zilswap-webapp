@@ -109,8 +109,6 @@ export interface Collection {
   instagramUrl: string | null;
   bannerImageUrl: string | null;
   profileImageUrl: string | null;
-  royaltyBps: string | null;
-  royaltyType: string | null;
 
   ownerName: string | null;
   royaltyBps: number | null;
