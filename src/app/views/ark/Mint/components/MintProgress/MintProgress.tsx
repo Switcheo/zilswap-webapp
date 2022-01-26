@@ -44,13 +44,13 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       <Box display="flex" marginTop={4} marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, {
           [classes.stepBarActive]: true,
-          [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.status === "created"
+          [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.status === "minting"
         })}/>
         <Box className={cls(classes.step, {
           [classes.stepActive]: true,
-          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "created"
+          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "minting"
         })}>
-          {pendingMintContract && pendingMintContract.status === "created" ? (
+          {pendingMintContract && pendingMintContract.status === "minting" ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>1</span>
@@ -65,11 +65,11 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       {/* Mint NFTs */}
       <Box display="flex" marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, classes.stepBarSecond, {
-          [classes.stepBarActive]: pendingMintContract && pendingMintContract.status === "created",
+          [classes.stepBarActive]: pendingMintContract && pendingMintContract.status === "minting",
           [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount
         })}/>
         <Box className={cls(classes.step, {
-          [classes.stepActive]: pendingMintContract && pendingMintContract.status === "created",
+          [classes.stepActive]: pendingMintContract && pendingMintContract.status === "minting",
           [classes.stepCompleted]: pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount
         })}>
           {pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount ? (
@@ -105,11 +105,11 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       {/* Assign Ownership */}
       <Box display="flex" marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, classes.stepBarThird, {
-          [classes.stepBarActive]: pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount,
+          [classes.stepBarActive]: pendingMintContract && pendingMintContract.status === "transferring",
           [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.status === "completed"
         })}/>
         <Box className={cls(classes.step, {
-          [classes.stepActive]: pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount,
+          [classes.stepActive]: pendingMintContract && pendingMintContract.status === "transferring",
           [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "completed"
         })}>
           {pendingMintContract && pendingMintContract.status === "completed" ? (
