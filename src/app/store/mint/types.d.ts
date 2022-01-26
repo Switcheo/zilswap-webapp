@@ -13,10 +13,10 @@ export enum Status {
 }
 
 export interface MintContract {
-  id: string
+  id: string;
 
-  creator: string,
-  status: Status,
+  creator: string;
+  status: Status;
   contractAddress: string | null;
 
   collectionName: string;
