@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useHistory } from "react-router";
 import cls from "classnames";
 import { Box, BoxProps, makeStyles, Typography } from "@material-ui/core";
@@ -43,6 +43,10 @@ const MintProgress: React.FC<Props> = (props: Props) => {
   const onViewCollection = () => {
     history.push("/arky/discover");
   }
+
+  const isViewCollectionEnabled = useMemo(() => {
+    return pendingMintContract?.contractAddress && pendingMintContract.status === "completed";
+  }, [pendingMintContract, pendingMintContract?.contractAddress]) 
 
   const getProgress = () => {
     if (pendingMintContract) {
@@ -175,7 +179,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
         </Text>
       </Box>
 
-      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onViewCollection} disabled fullWidth>
+      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onViewCollection} disabled={!isViewCollectionEnabled} fullWidth>
         View Collection
       </FancyButton>
     </Box>

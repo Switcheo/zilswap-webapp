@@ -618,6 +618,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "& .MuiInputBase-input": {
       fontSize: "16px",
+      lineHeight: "18px",
       padding: "9.125px 12px",
     },
     "& .MuiSelect-icon": {
@@ -647,7 +648,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   selectPlaceholder: {
     fontSize: "16px",
-    lineHeight: "16px",
+    lineHeight: "18px",
   },
   deleteAttributeIcon: {
     color: theme.palette.primary.light,
@@ -804,6 +805,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     zIndex: 1,
     minWidth: "200px!important",
     // fix background here
+    // background: theme.palette.background.gradient,
   },
   nftImage: {
     borderRadius: "12px", 
