@@ -1,13 +1,15 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useHistory } from "react-router";
 import cls from "classnames";
-import { Box, BoxProps, CircularProgress, makeStyles, Typography } from "@material-ui/core";
+import { Box, BoxProps, CircularProgress, Link, makeStyles, Typography } from "@material-ui/core";
 import { useSelector } from "react-redux";
 import { toBech32Address } from "@zilliqa-js/crypto";
+import LaunchIcon from "@material-ui/icons/Launch";
+import { Network } from "zilswap-sdk/lib/constants";
 import { AppTheme } from "app/theme/types";
 import { FancyButton, KeyValueDisplay, Text } from "app/components";
 import { ZilswapConnector } from "core/zilswap";
-import { ArkClient } from "core/utilities/ark";
+import { ArkClient, waitForTx } from "core/utilities";
 import { getMint } from "app/saga/selectors";
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg";
 import { hexToRGBA, useAsyncTask, useNetwork, useToaster } from "app/utils";
@@ -25,35 +27,69 @@ const MintProgress: React.FC<Props> = (props: Props) => {
   const network = useNetwork();
   const mintState = useSelector(getMint);
 
+  const [acceptTxId, setAcceptTxId] = useState<string | null>(null);
+  const [loadingTx, setLoadingTx] = useState<boolean>(false);
+  const [acceptOwnership, setAcceptOwnership] = useState<boolean>(false);
+
   const [runAcceptOwnership, loadingAcceptOwnership] = useAsyncTask("acceptOwnership", (error) => toaster(error.message, { overridePersist: false }));
 
   const pendingMintContract = mintState.activeMintContract;
 
   const onViewCollection = () => {
-    history.push("/arky/discover");
+    history.push(`/arky/collections/${toBech32Address(pendingMintContract?.contractAddress!)}`);
   }
 
   const isViewCollectionEnabled = useMemo(() => {
     return pendingMintContract?.contractAddress && pendingMintContract.status === "completed";
-
-    // eslint-disable-next-line
-  }, [pendingMintContract, pendingMintContract?.contractAddress])
+  }, [pendingMintContract])
 
   const isAcceptOwnershipEnabled = useMemo(() => {
     return pendingMintContract?.contractAddress && pendingMintContract.status === "transferring";
+  }, [pendingMintContract])
 
-    // eslint-disable-next-line
-  }, [pendingMintContract, pendingMintContract?.contractAddress])
+  // statuses
+  const hasDeployed = useMemo(() => {
+    return !!pendingMintContract?.contractAddress;
+  }, [pendingMintContract])
+
+  const hasMinted = useMemo(() => {
+    return pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount;
+  }, [pendingMintContract])
+
+  const hasCompleted = useMemo(() => {
+    // return pendingMintContract && pendingMintContract.status === "completed";
+    return acceptOwnership;
+  }, [acceptOwnership])
+
+  const explorerLink = useMemo(() => {
+    if (network === Network.MainNet) {
+      return `https://viewblock.io/zilliqa/tx/0x${acceptTxId}`;
+    } else {
+      return `https://viewblock.io/zilliqa/tx/0x${acceptTxId}?network=testnet`;
+    }
+  }, [network, acceptTxId]);
 
   // call accept contract ownership
   const onAcceptOwnership = () => {
-
     runAcceptOwnership(async () => {
       if (pendingMintContract?.contractAddress && pendingMintContract.status === "transferring") {
         const arkClient = new ArkClient(network);
         const zilswap = ZilswapConnector.getSDK();
   
-        await arkClient.acceptContractOwnership(toBech32Address(pendingMintContract.contractAddress), zilswap);
+        const transaction = await arkClient.acceptContractOwnership(toBech32Address(pendingMintContract.contractAddress), zilswap);
+
+        if (transaction?.id) {
+          setAcceptTxId(transaction.id);
+          setLoadingTx(true);
+          try {
+            await waitForTx(transaction.id);
+            setAcceptOwnership(true);
+          } catch (e) {
+            console.error(e);
+          } finally {
+            setLoadingTx(false);
+          }
+        }
       }
     })
   }
@@ -68,10 +104,6 @@ const MintProgress: React.FC<Props> = (props: Props) => {
     return 0;
   }
 
-  const checkContractStatus = (status: string) => {
-    return pendingMintContract?.status === status;
-  }
-
   return (
     <Box className={classes.root} {...rest} display="flex" flexDirection="column">
       <Typography className={classes.header}>Minting NFTs</Typography>
@@ -80,13 +112,13 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       <Box display="flex" marginTop={4} marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, {
           [classes.stepBarActive]: true,
-          [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.status === "minting"
+          [classes.stepBarCompleted]: hasDeployed
         })}/>
         <Box className={cls(classes.step, {
           [classes.stepActive]: true,
-          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "minting"
+          [classes.stepCompleted]: hasDeployed
         })}>
-          {checkContractStatus("minting") ? (
+          {hasDeployed ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>1</span>
@@ -101,14 +133,14 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       {/* Mint NFTs */}
       <Box display="flex" marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, classes.stepBarSecond, {
-          [classes.stepBarActive]: checkContractStatus("minting"),
-          [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount
+          [classes.stepBarActive]: hasDeployed,
+          [classes.stepBarCompleted]: hasMinted
         })}/>
         <Box className={cls(classes.step, {
-          [classes.stepActive]: checkContractStatus("minting"),
-          [classes.stepCompleted]: pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount
+          [classes.stepActive]: hasDeployed,
+          [classes.stepCompleted]: hasMinted
         })}>
-          {pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount ? (
+          {hasMinted ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>2</span>
@@ -141,21 +173,37 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       {/* Assign Ownership */}
       <Box display="flex" marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, classes.stepBarThird, {
-          [classes.stepBarActive]: pendingMintContract && pendingMintContract.status === "transferring",
-          [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.status === "completed"
+          [classes.stepBarActive]: hasMinted,
+          [classes.stepBarCompleted]: hasCompleted
         })}/>
         <Box className={cls(classes.step, {
-          [classes.stepActive]: pendingMintContract && pendingMintContract.status === "transferring",
-          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "completed"
+          [classes.stepActive]: hasMinted,
+          [classes.stepCompleted]: hasCompleted
         })}>
-          {pendingMintContract && pendingMintContract.status === "completed" ? (
+          {hasCompleted ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>3</span>
           )}
         </Box>
         <Box display="flex" flexDirection="column" alignItems="stretch">
-          <Text className={classes.stepLabel}>Accept Ownership</Text>
+          <Box display="flex" justifyContent="space-between">
+            <Text className={classes.stepLabel}>Accept Ownership</Text>
+            {acceptTxId && 
+              <Link
+                className={classes.link}
+                underline="hover"
+                rel="noopener noreferrer"
+                target="_blank"
+                href={explorerLink}
+              >
+                <Typography>
+                  View on explorer
+                  <LaunchIcon className={classes.linkIcon} />
+                </Typography>
+              </Link>
+            }
+          </Box>
           <Text className={classes.stepDescription}>Check your wallet and approve the transaction so that you can become the proud owner of your collection.</Text>
         </Box>
       </Box>
@@ -163,10 +211,10 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       {/* Complete */}
       <Box display="flex">
         <Box className={cls(classes.step, {
-          [classes.stepActive]: pendingMintContract && pendingMintContract.status === "completed",
-          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "completed"
+          [classes.stepActive]: hasCompleted,
+          [classes.stepCompleted]: hasCompleted
         })}>
-          {pendingMintContract && pendingMintContract.status === "completed" ? (
+          {hasCompleted? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>4</span>
@@ -189,14 +237,14 @@ const MintProgress: React.FC<Props> = (props: Props) => {
         </Text>
       </Box>
 
-      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onViewCollection} disabled={!isAcceptOwnershipEnabled}>
-        {loadingAcceptOwnership &&
+      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onAcceptOwnership} disabled={!isAcceptOwnershipEnabled || loadingAcceptOwnership || loadingTx || acceptOwnership}>
+        {(loadingAcceptOwnership || loadingTx) &&
           <CircularProgress size={20} className={classes.circularProgress} />
         }
         Accept Ownership
       </FancyButton>
 
-      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onAcceptOwnership} disabled={!isViewCollectionEnabled}>
+      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onViewCollection} disabled={!isViewCollectionEnabled}>
         View Collection
       </FancyButton>
     </Box>
@@ -362,8 +410,24 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   circularProgress: {
-    color: "rgba(255,255,255,.5)",
+    color: "rgba(255, 255, 255, .5)",
     marginRight: theme.spacing(1)
+  },
+  link: {
+    color: theme.palette.text?.primary,
+    "& .MuiTypography-root": {
+      fontSize: "14px",
+      lineHeight: "18px",
+    }
+  },
+  linkIcon: {
+    marginLeft: theme.spacing(0.5),
+    fontSize: "14px",
+    marginTop: "1.5px",
+    verticalAlign: "top",
+    "& path": {
+      fill: theme.palette.text?.primary,
+    },
   },
 }))
 

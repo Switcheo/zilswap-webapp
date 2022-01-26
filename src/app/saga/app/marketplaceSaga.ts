@@ -1,4 +1,4 @@
-import { call, fork, delay, put, select, take, takeLatest, takeEvery } from "redux-saga/effects";
+import { call, fork, delay, put, select, takeLatest, takeEvery } from "redux-saga/effects";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import dayjs from "dayjs";
 import { ArkClient, ArkExchangeInfo, logger, waitForTx } from "core/utilities";

@@ -69,6 +69,7 @@ export const waitForTx = async (txHash: string, maxAttempts: number = 33, interv
   const zilswap = ZilswapConnector.getSDK();
   for (let attempt = 0; attempt < maxAttempts; ++attempt) {
     try {
+      console.log("logging wait for tx");
       // wait 1s before getting tx
       const delay = interval * attempt;
       await new Promise((resolve) => setTimeout(resolve, delay));

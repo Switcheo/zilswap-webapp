@@ -84,7 +84,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
 
-  const [showMintProgress, setShowMintProgress] = useState<boolean>(true);
+  const [showMintProgress, setShowMintProgress] = useState<boolean>(false);
 
   const [runQueryProfile] = useAsyncTask("queryProfile");
   const [runDeployCollection, loadingDeployCollection] = useAsyncTask("deployCollection", (error) => toaster(error.message, { overridePersist: false }));
