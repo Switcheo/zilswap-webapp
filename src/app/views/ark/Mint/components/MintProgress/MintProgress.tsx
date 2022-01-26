@@ -2,23 +2,38 @@ import React from "react";
 import { useHistory } from "react-router";
 import cls from "classnames";
 import { Box, BoxProps, makeStyles, Typography } from "@material-ui/core";
+import { useSelector } from "react-redux";
 import { AppTheme } from "app/theme/types";
 import { FancyButton, KeyValueDisplay, Text } from "app/components";
+import { getMint } from "app/saga/selectors";
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg";
 import { hexToRGBA } from "app/utils";
 import { ReactComponent as Checkmark } from "app/views/ark/NftView/components/SellDialog/checkmark.svg";
 
 interface Props extends BoxProps {
-  setShowLoadingMint: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowMintProgress: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const LoadingMint: React.FC<Props> = (props: Props) => {
-  const { children, className, setShowLoadingMint, ...rest } = props;
+const MintProgress: React.FC<Props> = (props: Props) => {
+  const { children, className, setShowMintProgress, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
+  const mintState = useSelector(getMint);
+
+  const pendingMintContract = mintState.activeMintContract;
 
   const onViewCollection = () => {
     history.push("/arky/discover");
+  }
+
+  const getProgress = () => {
+    if (pendingMintContract) {
+      const { mintedCount, tokenCount } = pendingMintContract;
+
+      return (mintedCount / tokenCount) * 100;
+    }
+
+    return 0;
   }
 
   return (
@@ -29,13 +44,13 @@ const LoadingMint: React.FC<Props> = (props: Props) => {
       <Box display="flex" marginTop={4} marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, {
           [classes.stepBarActive]: true,
-          [classes.stepBarCompleted]: false
+          [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.status === "created"
         })}/>
         <Box className={cls(classes.step, {
           [classes.stepActive]: true,
-          [classes.stepCompleted]: false
+          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "created"
         })}>
-          {false ? (
+          {pendingMintContract && pendingMintContract.status === "created" ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>1</span>
@@ -50,14 +65,14 @@ const LoadingMint: React.FC<Props> = (props: Props) => {
       {/* Mint NFTs */}
       <Box display="flex" marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, classes.stepBarSecond, {
-          [classes.stepBarActive]: false,
-          [classes.stepBarCompleted]: false
+          [classes.stepBarActive]: pendingMintContract && pendingMintContract.status === "created",
+          [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount
         })}/>
         <Box className={cls(classes.step, {
-          [classes.stepActive]: false,
-          [classes.stepCompleted]: false
+          [classes.stepActive]: pendingMintContract && pendingMintContract.status === "created",
+          [classes.stepCompleted]: pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount
         })}>
-          {false ? (
+          {pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>2</span>
@@ -73,13 +88,16 @@ const LoadingMint: React.FC<Props> = (props: Props) => {
               <Box className={classes.defaultBar} />
             </Box>
 
-            <Box className={classes.progressBackground} width="50%">
+            <Box className={classes.progressBackground} width={`${getProgress()}%`}>
               <Box className={classes.progressBar} />
             </Box>
           </Box>
 
           <KeyValueDisplay kkey="NFTs minted" mt="6px" className={classes.nftsMinted}>
-            <span>25/50</span>
+            {pendingMintContract
+              ? <span>{pendingMintContract.mintedCount}/{pendingMintContract.tokenCount}</span>
+              : <span>-</span>
+            }
           </KeyValueDisplay>
         </Box>
       </Box>
@@ -87,14 +105,14 @@ const LoadingMint: React.FC<Props> = (props: Props) => {
       {/* Assign Ownership */}
       <Box display="flex" marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, classes.stepBarThird, {
-          [classes.stepBarActive]: false,
-          [classes.stepBarCompleted]: false
+          [classes.stepBarActive]: pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount,
+          [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.status === "completed"
         })}/>
         <Box className={cls(classes.step, {
-          [classes.stepActive]: false,
-          [classes.stepCompleted]: false
+          [classes.stepActive]: pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount,
+          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "completed"
         })}>
-          {false ? (
+          {pendingMintContract && pendingMintContract.status === "completed" ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>3</span>
@@ -109,10 +127,10 @@ const LoadingMint: React.FC<Props> = (props: Props) => {
       {/* Complete */}
       <Box display="flex">
         <Box className={cls(classes.step, {
-          [classes.stepActive]: false,
-          [classes.stepCompleted]: false
+          [classes.stepActive]: pendingMintContract && pendingMintContract.status === "completed",
+          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "completed"
         })}>
-          {false ? (
+          {pendingMintContract && pendingMintContract.status === "completed" ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>4</span>
@@ -302,4 +320,4 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }))
 
-export default LoadingMint;
+export default MintProgress;

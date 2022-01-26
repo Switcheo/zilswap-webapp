@@ -53,6 +53,9 @@ const apiPaths = {
   "user/image/request": "/user/:address/upload/request",
   "user/image/notify": "/user/:address/upload/notify",
   "user/image/remove": "/user/:address/upload/remove",
+  "mint/deploy": "/nft/mint/deploy",
+  "mint/check": "/nft/mint/check",
+  "mint/detail": "/nft/mint/:mintContractId/detail",
 };
 
 const getHttpClient = (network: Network) => {
@@ -303,21 +306,39 @@ export class ArkClient {
     return output;
   };
 
-  deployCollection = async (address: string, data: ArkClient.DeployCollectionParams) => {
-    const url = this.http.path("collection/deploy", { address });
-    const result = await this.http.post({ url, data });
-    const output = await result.json();
-    // await this.checkError(output);
-    return output;
-  };
-
-  mintCollection = async (address: string, data: ArkClient.MintCollectionParams) => {
-    const url = this.http.path("collection/mint", { address });
-    const result = await this.http.post({ url, data });
+  deployCollection = async (data: ArkClient.DeployCollectionParams, access_token: string) => {
+    const headers = { "authorization": "Bearer " + access_token };
+    const url = this.http.path("mint/deploy");
+    const result = await this.http.post({ url, data, headers });
     const output = await result.json();
     // await this.checkError(output);
     return output;
   }
+
+  mintDetail = async (mintContractId: string, access_token: string) => {
+    const headers = { "authorization": "Bearer " + access_token };
+    const url = this.http.path("mint/detail", { mintContractId });
+    const result = await this.http.get({ url, headers });
+    const output = await result.json();
+    // await this.checkError(output);
+    return output;
+  }
+
+  // deployCollection = async (address: string, data: ArkClient.DeployCollectionParams) => {
+  //   const url = this.http.path("collection/deploy", { address });
+  //   const result = await this.http.post({ url, data });
+  //   const output = await result.json();
+  //   // await this.checkError(output);
+  //   return output;
+  // };
+
+  // mintCollection = async (address: string, data: ArkClient.MintCollectionParams) => {
+  //   const url = this.http.path("collection/mint", { address });
+  //   const result = await this.http.post({ url, data });
+  //   const output = await result.json();
+  //   // await this.checkError(output);
+  //   return output;
+  // }
 
   putImageUpload = async (url: string, data: Blob) => {
     await this.http.put({ url, data });
@@ -807,9 +828,25 @@ export namespace ArkClient {
     collection?: string;
   }
 
+  export interface TokenTrait {
+    trait_type: string;
+    value: string;
+  }
+
+  export interface TokenMetadata {
+    attributes: TokenTrait[];
+    name: string;
+    description?: string;
+  }
+
+  export interface TokenParam {
+    resourceIpfsHash: string;
+    metadata: TokenMetadata;
+  }
+
   export interface DeployCollectionParams {
     collection: Collection;
-    nfts: Array<any>;
+    tokens: TokenParam[];
   }
 
   export interface MintCollectionParams {
