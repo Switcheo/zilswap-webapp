@@ -26,6 +26,7 @@
     "decimal.js": "^10.2.0",
     "ethers": "^5.3.1",
     "fortmatic": "^2.2.1",
+    "ipfs": "^0.61.0",
     "ipfs-http-client": "^55.0.0",
     "jss": "10.5.1",
     "jss-plugin-compose": "10.5.1",

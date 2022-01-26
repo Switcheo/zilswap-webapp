@@ -12,7 +12,6 @@ import { getMint } from "app/saga/selectors";
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg";
 import { hexToRGBA, useAsyncTask, useNetwork, useToaster } from "app/utils";
 import { ReactComponent as Checkmark } from "app/views/ark/NftView/components/SellDialog/checkmark.svg";
-import { Network } from "zilswap-sdk/lib/constants";
 
 interface Props extends BoxProps {
   setShowMintProgress: React.Dispatch<React.SetStateAction<boolean>>;
@@ -23,7 +22,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const history = useHistory();
   const toaster = useToaster();
-  const network = Network.TestNet;
+  const network = useNetwork();
   const mintState = useSelector(getMint);
 
   const [runAcceptOwnership, loadingAcceptOwnership] = useAsyncTask("acceptOwnership", (error) => toaster(error.message, { overridePersist: false }));
@@ -81,11 +80,11 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       <Box display="flex" marginTop={4} marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, {
           [classes.stepBarActive]: true,
-          [classes.stepBarCompleted]: checkContractStatus("minting")
+          [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.status === "minting"
         })}/>
         <Box className={cls(classes.step, {
           [classes.stepActive]: true,
-          [classes.stepCompleted]: checkContractStatus("minting")
+          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "minting"
         })}>
           {checkContractStatus("minting") ? (
             <Checkmark />
@@ -142,39 +141,32 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       {/* Assign Ownership */}
       <Box display="flex" marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, classes.stepBarThird, {
-          [classes.stepBarActive]: checkContractStatus("transferring"),
-          [classes.stepBarCompleted]: checkContractStatus("completed")
+          [classes.stepBarActive]: pendingMintContract && pendingMintContract.status === "transferring",
+          [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.status === "completed"
         })}/>
         <Box className={cls(classes.step, {
-          [classes.stepActive]: checkContractStatus("transferring"),
-          [classes.stepCompleted]: checkContractStatus("completed")
+          [classes.stepActive]: pendingMintContract && pendingMintContract.status === "transferring",
+          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "completed"
         })}>
-          {checkContractStatus("completed") ? (
+          {pendingMintContract && pendingMintContract.status === "completed" ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>3</span>
           )}
         </Box>
         <Box display="flex" flexDirection="column" alignItems="stretch">
-          <Text className={classes.stepLabel}>Assign Ownership</Text>
+          <Text className={classes.stepLabel}>Accept Ownership</Text>
           <Text className={classes.stepDescription}>Check your wallet and approve the transaction so that you can become the proud owner of your collection.</Text>
-
-          <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onViewCollection} disabled={!isAcceptOwnershipEnabled}>
-            {loadingAcceptOwnership &&
-              <CircularProgress size={20} className={classes.circularProgress} />
-            }
-            Accept Ownership
-          </FancyButton>
         </Box>
       </Box>
 
       {/* Complete */}
       <Box display="flex">
         <Box className={cls(classes.step, {
-          [classes.stepActive]: checkContractStatus("completed"),
-          [classes.stepCompleted]: checkContractStatus("completed")
+          [classes.stepActive]: pendingMintContract && pendingMintContract.status === "completed",
+          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "completed"
         })}>
-          {checkContractStatus("completed") ? (
+          {pendingMintContract && pendingMintContract.status === "completed" ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>4</span>
@@ -197,7 +189,14 @@ const MintProgress: React.FC<Props> = (props: Props) => {
         </Text>
       </Box>
 
-      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onAcceptOwnership} disabled={!isViewCollectionEnabled} fullWidth>
+      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onViewCollection} disabled={!isAcceptOwnershipEnabled}>
+        {loadingAcceptOwnership &&
+          <CircularProgress size={20} className={classes.circularProgress} />
+        }
+        Accept Ownership
+      </FancyButton>
+
+      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onAcceptOwnership} disabled={!isViewCollectionEnabled}>
         View Collection
       </FancyButton>
     </Box>
@@ -311,7 +310,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     height: 130,
   },
   stepBarThird: {
-    height: 130,
+    height: 70,
   },
   stepBarActive: {
     backgroundImage: "linear-gradient(#6BE1FF, #223139)",

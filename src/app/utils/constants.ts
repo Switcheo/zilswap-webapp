@@ -146,7 +146,7 @@ export class PollIntervals {
   public static BridgeWithdrawWatcher = 10000;
   public static BridgeTokenFee = 60000;
 
-  public static MintPollStatus = 10000;
+  public static MintPollStatus = 5000;
 }
 
 export const COLLECTION_NFT_PER_PAGE = 36;

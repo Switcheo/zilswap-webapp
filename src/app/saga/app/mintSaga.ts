@@ -15,18 +15,22 @@ function* pollMintStatus() {
         const { wallet } = getWallet(yield select());
         const { network } = getBlockchain(yield select());
         let { oAuth } = getMarketplace(yield select());
+        let newOAuth = oAuth;
     
         const arkClient = new ArkClient(network);
         if (!wallet) throw new Error("invalid wallet");
         
-        // need to check
-        const accessTokenValid = oAuth?.expires_at && dayjs.unix(oAuth.expires_at).isAfter(dayjs().add(30, "second"));
-        if (wallet.addressInfo.bech32 !== oAuth?.address || !accessTokenValid)
-          oAuth = undefined;
+        if (!newOAuth?.access_token || (newOAuth?.expires_at && dayjs(newOAuth.expires_at * 1000).isBefore(dayjs()))) {
+          const { result } = (yield call(arkClient.arkLogin, wallet!, window.location.hostname));
+          yield put(actions.MarketPlace.updateAccessToken(result));
+          newOAuth = result;
+        }
     
-        const { result: { mint } } = (yield call(arkClient.mintDetail, activeMintContract.id, oAuth?.access_token as string));
+        const { result } = (yield call(arkClient.mintDetail, activeMintContract.id, newOAuth?.access_token as string));
 
-        yield put(actions.Mint.updateMintContract(mint));
+        logger("mint result: ", result);
+
+        if (result?.mint) yield put(actions.Mint.updateMintContract(result.mint));
       }
     } catch (error) {
       console.error("poll mint status failed, Error:")
@@ -39,7 +43,7 @@ function* pollMintStatus() {
 
       // need to check
       const { activeMintContract } = getMint(yield select());
-      if (!activeMintContract || activeMintContract.status === "completed") {
+      if (activeMintContract && activeMintContract.status === "completed") {
         yield take(actions.Mint.MintActionTypes.UPDATE_MINT_CONTRACT);
       }
     }

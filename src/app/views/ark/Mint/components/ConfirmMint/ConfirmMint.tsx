@@ -11,10 +11,11 @@ interface Props extends BoxProps {
   setAcceptTerms: React.Dispatch<React.SetStateAction<boolean>>;
   onDeployCollection: () => void;
   isMintEnabled: boolean;
+  loadingDeployCollection: boolean;
 }
 
 const ConfirmMint: React.FC<Props> = (props: Props) => {
-  const { acceptTerms, isMintEnabled, setAcceptTerms, onDeployCollection, children, className, ...rest } = props;
+  const { acceptTerms, isMintEnabled, setAcceptTerms, onDeployCollection, loadingDeployCollection, children, className, ...rest } = props;
   const classes = useStyles();
 
   return (
@@ -50,7 +51,7 @@ const ConfirmMint: React.FC<Props> = (props: Props) => {
         />
       </Box>
 
-      <FancyButton variant="contained" color="primary" className={classes.mintButton} disabled={!isMintEnabled} onClick={onDeployCollection}>
+      <FancyButton variant="contained" color="primary" className={classes.mintButton} disabled={!isMintEnabled || loadingDeployCollection} onClick={onDeployCollection}>
         Mint NFTs
       </FancyButton>
     </Box>

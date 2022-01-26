@@ -5,16 +5,16 @@ import cls from "classnames";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { toBech32Address } from "@zilliqa-js/crypto";
-import { create } from "ipfs-http-client";
+// import { create } from "ipfs-http-client";
+import * as IPFS from "ipfs";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, SimpleMap, useAsyncTask, useNetwork } from "app/utils";
+import { hexToRGBA, SimpleMap, useAsyncTask, useNetwork, useToaster } from "app/utils";
 import ArkPage from "app/layouts/ArkPage";
 import { getMarketplace, getWallet } from "app/saga/selectors";
 import { OAuth } from "app/store/types";
 import { actions } from "app/store";
 import { ArkClient } from "core/utilities";
 import { CollectionDetail, ConfirmMint, MintProgress, NftUpload } from "./components";
-import { Network } from "zilswap-sdk/lib/constants";
 
 export type CollectionInputs = {
   collectionName: string;
@@ -48,11 +48,12 @@ const collections = ["The Bear Market"];
 const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
+  const toaster = useToaster();
   const dispatch = useDispatch();
   const { oAuth } = useSelector(getMarketplace);
   const { wallet } = useSelector(getWallet);
   const address = wallet?.addressInfo.byte20;
-  const network = Network.TestNet;
+  const network = useNetwork();
   const [mintOption, setMintOption] = useState<MintOptionType>("create");
   const [uploadedFiles, setUploadedFiles] = useState<SimpleMap<File>>({});
   const [inputValues, setInputValues] = useState<CollectionInputs>({
@@ -83,10 +84,10 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
 
-  const [showMintProgress, setShowMintProgress] = useState<boolean>(false);
+  const [showMintProgress, setShowMintProgress] = useState<boolean>(true);
 
   const [runQueryProfile] = useAsyncTask("queryProfile");
-  const [runDeployCollection] = useAsyncTask("deployCollection");
+  const [runDeployCollection, loadingDeployCollection] = useAsyncTask("deployCollection", (error) => toaster(error.message, { overridePersist: false }));
 
   useEffect(() => {
     if (address) {
@@ -117,7 +118,9 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
       setShowMintProgress(true);
 
-      const ipfsClient = create();
+      // const ipfsClient = create();
+
+      const node = await IPFS.create({ repo: 'ok' + Math.random() });
 
       // upload image to ipfs
       const tokens = await Promise.all(nfts.map(async nft => {
@@ -127,7 +130,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           const data = image.split(",")[1];
           const buffer = Buffer.from(data, "base64");
   
-          const fileAdded = await ipfsClient.add(buffer);
+          const fileAdded = await node.add(buffer);
 
           // to clean up
           for (const [traitType, value] of Object.entries(nft.attributes)) {
@@ -179,6 +182,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
       const deployResult = await arkClient.deployCollection(params, newOAuth!.access_token);
 
+      // error handling here
       const mintContract = deployResult.result.mint;
 
       console.log("contract: ", mintContract);
@@ -273,6 +277,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
                   setAcceptTerms={setAcceptTerms}
                   onDeployCollection={onDeployCollection}
                   isMintEnabled={isMintEnabled}
+                  loadingDeployCollection={loadingDeployCollection}
                 />
               </Fragment>
             }

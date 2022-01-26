@@ -311,7 +311,7 @@ export class ArkClient {
     const url = this.http.path("mint/deploy");
     const result = await this.http.post({ url, data, headers });
     const output = await result.json();
-    // await this.checkError(output);
+    await this.checkError(output);
     return output;
   }
 
@@ -320,25 +320,9 @@ export class ArkClient {
     const url = this.http.path("mint/detail", { mintContractId });
     const result = await this.http.get({ url, headers });
     const output = await result.json();
-    // await this.checkError(output);
+    await this.checkError(output);
     return output;
   }
-
-  // deployCollection = async (address: string, data: ArkClient.DeployCollectionParams) => {
-  //   const url = this.http.path("collection/deploy", { address });
-  //   const result = await this.http.post({ url, data });
-  //   const output = await result.json();
-  //   // await this.checkError(output);
-  //   return output;
-  // };
-
-  // mintCollection = async (address: string, data: ArkClient.MintCollectionParams) => {
-  //   const url = this.http.path("collection/mint", { address });
-  //   const result = await this.http.post({ url, data });
-  //   const output = await result.json();
-  //   // await this.checkError(output);
-  //   return output;
-  // }
 
   putImageUpload = async (url: string, data: Blob) => {
     await this.http.put({ url, data });
