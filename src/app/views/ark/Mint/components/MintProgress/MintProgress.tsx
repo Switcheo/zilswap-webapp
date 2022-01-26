@@ -12,6 +12,7 @@ import { getMint } from "app/saga/selectors";
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg";
 import { hexToRGBA, useAsyncTask, useNetwork, useToaster } from "app/utils";
 import { ReactComponent as Checkmark } from "app/views/ark/NftView/components/SellDialog/checkmark.svg";
+import { Network } from "zilswap-sdk/lib/constants";
 
 interface Props extends BoxProps {
   setShowMintProgress: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,7 +23,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const history = useHistory();
   const toaster = useToaster();
-  const network = useNetwork();
+  const network = Network.TestNet;
   const mintState = useSelector(getMint);
 
   const [runAcceptOwnership, loadingAcceptOwnership] = useAsyncTask("acceptOwnership", (error) => toaster(error.message, { overridePersist: false }));

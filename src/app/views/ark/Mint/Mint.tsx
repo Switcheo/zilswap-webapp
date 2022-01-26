@@ -14,6 +14,7 @@ import { OAuth } from "app/store/types";
 import { actions } from "app/store";
 import { ArkClient } from "core/utilities";
 import { CollectionDetail, ConfirmMint, MintProgress, NftUpload } from "./components";
+import { Network } from "zilswap-sdk/lib/constants";
 
 export type CollectionInputs = {
   collectionName: string;
@@ -51,7 +52,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { oAuth } = useSelector(getMarketplace);
   const { wallet } = useSelector(getWallet);
   const address = wallet?.addressInfo.byte20;
-  const network = useNetwork();
+  const network = Network.TestNet;
   const [mintOption, setMintOption] = useState<MintOptionType>("create");
   const [uploadedFiles, setUploadedFiles] = useState<SimpleMap<File>>({});
   const [inputValues, setInputValues] = useState<CollectionInputs>({
