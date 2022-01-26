@@ -209,7 +209,7 @@ const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken) => {
   r[address] = {
     initialized: false,
     registered: true,
-    whitelisted: true,
+    whitelisted: false,
     isWzil: false,
     isZil: false,
     isZwap: false,
