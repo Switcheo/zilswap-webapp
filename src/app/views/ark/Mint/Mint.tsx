@@ -103,9 +103,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     // eslint-disable-next-line
   }, [address, network])
 
-  const onDeployCollection = () => {
-    setShowMintProgress(true);
-    
+  const onDeployCollection = () => {    
     runDeployCollection(async () => {
       let newOAuth: OAuth | undefined = oAuth;
       const arkClient = new ArkClient(network);
@@ -115,6 +113,8 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         dispatch(actions.MarketPlace.updateAccessToken(result));
         newOAuth = result;
       }
+
+      setShowMintProgress(true);
 
       const ipfsClient = create();
 

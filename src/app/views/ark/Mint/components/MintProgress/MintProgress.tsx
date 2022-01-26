@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useHistory } from "react-router";
 import cls from "classnames";
-import { Box, BoxProps, makeStyles, Typography } from "@material-ui/core";
+import { Box, BoxProps, CircularProgress, makeStyles, Typography } from "@material-ui/core";
 import { useSelector } from "react-redux";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { AppTheme } from "app/theme/types";
@@ -10,7 +10,7 @@ import { ZilswapConnector } from "core/zilswap";
 import { ArkClient } from "core/utilities/ark";
 import { getMint } from "app/saga/selectors";
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg";
-import { hexToRGBA, useNetwork } from "app/utils";
+import { hexToRGBA, useAsyncTask, useNetwork, useToaster } from "app/utils";
 import { ReactComponent as Checkmark } from "app/views/ark/NftView/components/SellDialog/checkmark.svg";
 
 interface Props extends BoxProps {
@@ -21,24 +21,13 @@ const MintProgress: React.FC<Props> = (props: Props) => {
   const { children, className, setShowMintProgress, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
+  const toaster = useToaster();
   const network = useNetwork();
   const mintState = useSelector(getMint);
 
+  const [runAcceptOwnership, loadingAcceptOwnership] = useAsyncTask("acceptOwnership", (error) => toaster(error.message, { overridePersist: false }));
+
   const pendingMintContract = mintState.activeMintContract;
-
-  // call accept contract ownership
-  useEffect(() => {
-    const acceptContractOwnership = async () => {
-      if (pendingMintContract?.contractAddress && pendingMintContract.status === "transferring") {
-        const arkClient = new ArkClient(network);
-        const zilswap = ZilswapConnector.getSDK();
-  
-        await arkClient.acceptContractOwnership(toBech32Address(pendingMintContract.contractAddress), zilswap)
-      }
-    }
-
-    acceptContractOwnership();
-  }, [pendingMintContract, pendingMintContract?.status, network])
 
   const onViewCollection = () => {
     history.push("/arky/discover");
@@ -46,7 +35,28 @@ const MintProgress: React.FC<Props> = (props: Props) => {
 
   const isViewCollectionEnabled = useMemo(() => {
     return pendingMintContract?.contractAddress && pendingMintContract.status === "completed";
-  }, [pendingMintContract, pendingMintContract?.contractAddress]) 
+
+    // eslint-disable-next-line
+  }, [pendingMintContract, pendingMintContract?.contractAddress])
+
+  const isAcceptOwnershipEnabled = useMemo(() => {
+    return pendingMintContract?.contractAddress && pendingMintContract.status === "transferring";
+
+    // eslint-disable-next-line
+  }, [pendingMintContract, pendingMintContract?.contractAddress])
+
+  // call accept contract ownership
+  const onAcceptOwnership = () => {
+
+    runAcceptOwnership(async () => {
+      if (pendingMintContract?.contractAddress && pendingMintContract.status === "transferring") {
+        const arkClient = new ArkClient(network);
+        const zilswap = ZilswapConnector.getSDK();
+  
+        await arkClient.acceptContractOwnership(toBech32Address(pendingMintContract.contractAddress), zilswap);
+      }
+    })
+  }
 
   const getProgress = () => {
     if (pendingMintContract) {
@@ -147,6 +157,13 @@ const MintProgress: React.FC<Props> = (props: Props) => {
         <Box display="flex" flexDirection="column" alignItems="stretch">
           <Text className={classes.stepLabel}>Assign Ownership</Text>
           <Text className={classes.stepDescription}>Check your wallet and approve the transaction so that you can become the proud owner of your collection.</Text>
+
+          <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onViewCollection} disabled={!isAcceptOwnershipEnabled}>
+            {loadingAcceptOwnership &&
+              <CircularProgress size={20} className={classes.circularProgress} />
+            }
+            Accept Ownership
+          </FancyButton>
         </Box>
       </Box>
 
@@ -179,7 +196,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
         </Text>
       </Box>
 
-      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onViewCollection} disabled={!isViewCollectionEnabled} fullWidth>
+      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onAcceptOwnership} disabled={!isViewCollectionEnabled} fullWidth>
         View Collection
       </FancyButton>
     </Box>
@@ -293,7 +310,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     height: 130,
   },
   stepBarThird: {
-    height: 70,
+    height: 130,
   },
   stepBarActive: {
     backgroundImage: "linear-gradient(#6BE1FF, #223139)",
@@ -343,6 +360,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fontSize: "14px",
       lineHeight: "18px",
     }
+  },
+  circularProgress: {
+    color: "rgba(255,255,255,.5)",
+    marginRight: theme.spacing(1)
   },
 }))
 
