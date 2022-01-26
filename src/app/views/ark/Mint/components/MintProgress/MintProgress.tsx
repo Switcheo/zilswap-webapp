@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useHistory } from "react-router";
 import cls from "classnames";
 import { Box, BoxProps, makeStyles, Typography } from "@material-ui/core";
 import { useSelector } from "react-redux";
+import { toBech32Address } from "@zilliqa-js/crypto";
 import { AppTheme } from "app/theme/types";
 import { FancyButton, KeyValueDisplay, Text } from "app/components";
+import { ZilswapConnector } from "core/zilswap";
+import { ArkClient } from "core/utilities/ark";
+// import { Status } from "app/store/types";
 import { getMint } from "app/saga/selectors";
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg";
-import { hexToRGBA } from "app/utils";
+import { hexToRGBA, useNetwork } from "app/utils";
 import { ReactComponent as Checkmark } from "app/views/ark/NftView/components/SellDialog/checkmark.svg";
 
 interface Props extends BoxProps {
@@ -18,9 +22,24 @@ const MintProgress: React.FC<Props> = (props: Props) => {
   const { children, className, setShowMintProgress, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
+  const network = useNetwork();
   const mintState = useSelector(getMint);
 
   const pendingMintContract = mintState.activeMintContract;
+
+  // call accept contract ownership
+  useEffect(() => {
+    const acceptContractOwnership = async () => {
+      if (pendingMintContract && pendingMintContract.contractAddress && pendingMintContract.status === "transferring") {
+        const arkClient = new ArkClient(network);
+        const zilswap = ZilswapConnector.getSDK();
+  
+        await arkClient.acceptContractOwnership(toBech32Address(pendingMintContract.contractAddress), zilswap)
+      }
+    }
+
+    acceptContractOwnership();
+  }, [pendingMintContract, pendingMintContract?.status, network])
 
   const onViewCollection = () => {
     history.push("/arky/discover");
@@ -36,6 +55,14 @@ const MintProgress: React.FC<Props> = (props: Props) => {
     return 0;
   }
 
+  const checkContractStatus = (status: string) => {
+    if (pendingMintContract) {
+      return pendingMintContract.status === status;
+    }
+
+    return false;
+  }
+
   return (
     <Box className={classes.root} {...rest} display="flex" flexDirection="column">
       <Typography className={classes.header}>Minting NFTs</Typography>
@@ -44,13 +71,13 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       <Box display="flex" marginTop={4} marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, {
           [classes.stepBarActive]: true,
-          [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.status === "minting"
+          [classes.stepBarCompleted]: checkContractStatus("minting")
         })}/>
         <Box className={cls(classes.step, {
           [classes.stepActive]: true,
-          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "minting"
+          [classes.stepCompleted]: checkContractStatus("minting")
         })}>
-          {pendingMintContract && pendingMintContract.status === "minting" ? (
+          {checkContractStatus("minting") ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>1</span>
@@ -65,11 +92,11 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       {/* Mint NFTs */}
       <Box display="flex" marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, classes.stepBarSecond, {
-          [classes.stepBarActive]: pendingMintContract && pendingMintContract.status === "minting",
+          [classes.stepBarActive]: checkContractStatus("minting"),
           [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount
         })}/>
         <Box className={cls(classes.step, {
-          [classes.stepActive]: pendingMintContract && pendingMintContract.status === "minting",
+          [classes.stepActive]: checkContractStatus("minting"),
           [classes.stepCompleted]: pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount
         })}>
           {pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount ? (
@@ -105,14 +132,14 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       {/* Assign Ownership */}
       <Box display="flex" marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, classes.stepBarThird, {
-          [classes.stepBarActive]: pendingMintContract && pendingMintContract.status === "transferring",
-          [classes.stepBarCompleted]: pendingMintContract && pendingMintContract.status === "completed"
+          [classes.stepBarActive]: checkContractStatus("transferring"),
+          [classes.stepBarCompleted]: checkContractStatus("completed")
         })}/>
         <Box className={cls(classes.step, {
-          [classes.stepActive]: pendingMintContract && pendingMintContract.status === "transferring",
-          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "completed"
+          [classes.stepActive]: checkContractStatus("transferring"),
+          [classes.stepCompleted]: checkContractStatus("completed")
         })}>
-          {pendingMintContract && pendingMintContract.status === "completed" ? (
+          {checkContractStatus("completed") ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>3</span>
@@ -127,10 +154,10 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       {/* Complete */}
       <Box display="flex">
         <Box className={cls(classes.step, {
-          [classes.stepActive]: pendingMintContract && pendingMintContract.status === "completed",
-          [classes.stepCompleted]: pendingMintContract && pendingMintContract.status === "completed"
+          [classes.stepActive]: checkContractStatus("completed"),
+          [classes.stepCompleted]: checkContractStatus("completed")
         })}>
-          {pendingMintContract && pendingMintContract.status === "completed" ? (
+          {checkContractStatus("completed") ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>4</span>
