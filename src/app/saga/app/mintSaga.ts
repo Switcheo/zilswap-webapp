@@ -39,7 +39,7 @@ function* pollMintStatus() {
 
       // need to check
       const { activeMintContract } = getMint(yield select());
-      if (!activeMintContract || (activeMintContract && activeMintContract.status === "completed")) {
+      if (!activeMintContract || activeMintContract.status === "completed") {
         yield take(actions.Mint.MintActionTypes.UPDATE_MINT_CONTRACT);
       }
     }

@@ -8,7 +8,6 @@ import { AppTheme } from "app/theme/types";
 import { FancyButton, KeyValueDisplay, Text } from "app/components";
 import { ZilswapConnector } from "core/zilswap";
 import { ArkClient } from "core/utilities/ark";
-// import { Status } from "app/store/types";
 import { getMint } from "app/saga/selectors";
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg";
 import { hexToRGBA, useNetwork } from "app/utils";
@@ -30,7 +29,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
   // call accept contract ownership
   useEffect(() => {
     const acceptContractOwnership = async () => {
-      if (pendingMintContract && pendingMintContract.contractAddress && pendingMintContract.status === "transferring") {
+      if (pendingMintContract?.contractAddress && pendingMintContract.status === "transferring") {
         const arkClient = new ArkClient(network);
         const zilswap = ZilswapConnector.getSDK();
   
@@ -49,18 +48,14 @@ const MintProgress: React.FC<Props> = (props: Props) => {
     if (pendingMintContract) {
       const { mintedCount, tokenCount } = pendingMintContract;
 
-      return (mintedCount / tokenCount) * 100;
+      return ((mintedCount / tokenCount) * 100).toFixed(0);
     }
 
     return 0;
   }
 
   const checkContractStatus = (status: string) => {
-    if (pendingMintContract) {
-      return pendingMintContract.status === status;
-    }
-
-    return false;
+    return pendingMintContract?.status === status;
   }
 
   return (
