@@ -6,7 +6,6 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { useHistory, useRouteMatch } from "react-router";
-import { BN_ZERO } from "tradehub-api-js/build/main/lib/tradehub/utils";
 import { ArkExpiry, ArkNFTCard, CurrencyInput, DialogModal, FancyButton, Text } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getWallet, getTokens, getMarketplace } from "app/saga/selectors";
@@ -15,7 +14,7 @@ import { AppTheme } from "app/theme/types";
 import { useAsyncTask, bnOrZero, useToaster, useValueCalculators, toHumanNumber } from "app/utils";
 import { ArkClient, logger, waitForTx } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
-import { ZIL_ADDRESS } from "app/utils/constants";
+import { BIG_ZERO, ZIL_ADDRESS } from "app/utils/constants";
 import { ReactComponent as Checkmark } from "./checkmark.svg";
 
 interface SellForm {
@@ -217,7 +216,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   };
 
   const sellUsdValue = useMemo(() => {
-    if (!inputValues.sellToken) return BN_ZERO;
+    if (!inputValues.sellToken) return BIG_ZERO;
     const input = bnOrZero(inputValues.buyNowPrice).shiftedBy(inputValues.sellToken.decimals);
 
     return valueCalculators.usd(tokenState, inputValues.sellToken.address, input.toString(10));

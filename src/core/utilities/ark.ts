@@ -37,6 +37,7 @@ const apiPaths = {
   "collection/search": "/nft/collection/:address/search",
   "collection/traits": "/nft/collection/:address/traits",
   "collection/token/detail": "/nft/collection/:address/:tokenId/detail",
+  "collection/token/history": "/nft/collection/:address/:tokenId/history",
   "collection/resync/metadata": "/nft/collection/:collectionAddress/:tokenId/resync",
   "collection/image/request": "/admin/collection/:address/upload/request",
   "collection/update": "/admin/collection/:address/update",
@@ -56,6 +57,7 @@ const apiPaths = {
   "mint/deploy": "/nft/mint/deploy",
   "mint/check": "/nft/mint/check",
   "mint/detail": "/nft/mint/:mintContractId/detail",
+  "user/image/profile": "/user/:address/upload/profile",
 };
 
 const getHttpClient = (network: Network) => {
@@ -172,6 +174,14 @@ export class ArkClient {
 
   getNftToken = async (address: string, tokenId: string, viewer?: string) => {
     const url = this.http.path("collection/token/detail", { address, tokenId }, { viewer });
+    const result = await this.http.get({ url });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  getNftTokenHistory = async (address: string, tokenId: string, viewer?: string) => {
+    const url = this.http.path("collection/token/history", { address, tokenId }, { viewer });
     const result = await this.http.get({ url });
     const output = await result.json();
     await this.checkError(output);
@@ -338,6 +348,15 @@ export class ArkClient {
     return output;
   }
 
+  setNFTAsProfile = async (address: string, access_token: string, collection: string, token: string) => {
+    const headers = { Authorization: "Bearer " + access_token };
+    const url = this.http.path("user/image/profile", { address });
+    const result = await this.http.post({ url, headers, data: { collection, token } });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
   removeImage = async (address: string, access_token: string, type: string) => {
     const headers = { Authorization: "Bearer " + access_token };
     const url = this.http.path("user/image/remove", { address }, { type });
@@ -414,13 +433,48 @@ export class ArkClient {
   // TODO: Refactor zilswap SDK as instance member;
   async approveAllowanceIfRequired(tokenAddress: string, ownerAddress: string, zilswap: Zilswap) {
     const response = await zilswap.zilliqa.blockchain.getSmartContractSubState(tokenAddress, "operator_approvals");
-    const approvalState = response.result.operator_approvals;
+    const approvalState = response.result?.operator_approvals;
+
+    // if no operator_approvals, check for operators
+    if (!approvalState) {
+      const zrc6Response = await zilswap.zilliqa.blockchain.getSmartContractSubState(tokenAddress, "operators");
+      const zrc6ApprovalState = zrc6Response.result?.operators;
+      if (zrc6ApprovalState?.[this.brokerAddress]) return null;
+      // use zrc6 transition
+      return await this.zrc6ApproveAllowance(tokenAddress, zilswap);
+    }
 
     const userApprovals = approvalState?.[ownerAddress.toLowerCase()];
     logger("ark contract approvals", ownerAddress, this.brokerAddress, userApprovals);
     if (userApprovals?.[this.brokerAddress]) return null;
 
     return await this.approveAllowance(tokenAddress, zilswap);
+  }
+
+  async zrc6ApproveAllowance(tokenAddress: string, zilswap: Zilswap) {
+    const args = [{
+      vname: "operator",
+      type: "ByStr20",
+      value: this.brokerAddress,
+    }];
+
+    const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
+    const callParams = {
+      amount: new BN("0"),
+      gasPrice: new BN(minGasPrice),
+      gasLimit: Long.fromNumber(20000),
+      version: bytes.pack(CHAIN_IDS[this.network], MSG_VERSION),
+    };
+
+    const result = await zilswap.callContract(
+      zilswap.getContract(tokenAddress),
+      "AddOperator",
+      args as any,
+      callParams,
+      true,
+    );
+
+    return result;
   }
 
   // TODO: Refactor zilswap SDK as instance member;

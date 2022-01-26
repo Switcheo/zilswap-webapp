@@ -8,7 +8,7 @@ import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
 import cls from "classnames";
 import { useDispatch } from "react-redux";
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain } from "carbon-js-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, MnemonicDialog, Text } from "app/components";
 import { ReactComponent as StraightLine } from "app/components/ConfirmTransfer/straight-line.svg";
@@ -321,11 +321,11 @@ const TransactionDetail = (props: TransactionDetailProps) => {
     }
   }, [currentBridgeTx]);
 
-  const getTradeHubExplorerLink = (hash: string) => {
+  const getCarbonExplorerLink = (hash: string) => {
     if (network === Network.MainNet) {
-      return `https://switcheo.org/transaction/${hash}`;
+      return `https://scan.carbon.network/transaction/${hash}`;
     } else {
-      return `https://switcheo.org/transaction/${hash}?net=dev`;
+      return `https://scan.carbon.network/transaction/${hash}?net=dev`;
     }
   };
   const getExplorerLink = (hash: string, blockchain: Blockchain) => {
@@ -594,7 +594,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                           underline="hover"
                           rel="noopener noreferrer"
                           target="_blank"
-                          href={getTradeHubExplorerLink(currentBridgeTx.withdrawTxHash)}>
+                          href={getCarbonExplorerLink(currentBridgeTx.withdrawTxHash)}>
                           View on Carbon <NewLinkIcon className={classes.linkIcon} />
                         </Link>
                         : "-"

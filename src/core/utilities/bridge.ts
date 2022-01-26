@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import BigNumber from "bignumber.js";
 import { Network } from "zilswap-sdk/lib/constants";
+import { NetworkConfigs } from "carbon-js-sdk/lib/constant";
 import { bnOrZero } from "app/utils";
 import { HTTP } from "./http";
 
@@ -8,8 +9,8 @@ const FEE_PATHS = {
   getFee: "/fees",
 }
 
-const httpDevnet = new HTTP("https://dev-fees.switcheo.org", FEE_PATHS);
-const httpMainnet = new HTTP("https://fees.switcheo.org", FEE_PATHS);
+const httpDevnet = new HTTP(NetworkConfigs.devnet.feeURL, FEE_PATHS);
+const httpMainnet = new HTTP(NetworkConfigs.mainnet.feeURL, FEE_PATHS);
 
 export interface FeesData {
   prevUpdateTime: dayjs.Dayjs;

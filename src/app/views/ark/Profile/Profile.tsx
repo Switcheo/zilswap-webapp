@@ -150,6 +150,13 @@ const ProfilePage: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const isConnectedUser = hasParam ? connectedAddress === address : true
 
   useEffect(() => {
+    if (!connectedProfile && !isloading) {
+      dispatch(actions.MarketPlace.loadProfile());
+    }
+    // eslint-disable-next-line
+  }, [])
+
+  useEffect(() => {
     if (isConnectedUser && connectedProfile) {
       setViewProfile(connectedProfile)
     } else if (address) {

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Box, Button, makeStyles } from "@material-ui/core";
 import { useDispatch, useSelector } from "react-redux";
-import { Blockchain } from "tradehub-api-js/build/main/lib/tradehub/utils";
+import { Blockchain } from "carbon-js-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 import cls from "classnames";
 import { DialogModal, Text } from "app/components";

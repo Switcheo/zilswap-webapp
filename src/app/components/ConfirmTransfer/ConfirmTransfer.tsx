@@ -11,16 +11,15 @@ import { ethers } from "ethers";
 import { History } from "history";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import { Blockchain, ConnectedTradeHubSDK, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
-import { BN_ONE } from "tradehub-api-js/build/main/lib/tradehub/utils";
+import { Blockchain, AddressUtils, Models, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet } from "core/wallet";
-import { isDebug, logger } from "core/utilities";
+import { logger } from "core/utilities";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
-import { truncateAddress } from "app/utils";
-import { hexToRGBA, netZilToTradeHub, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
+import { BIG_ONE, truncateAddress } from "app/utils";
+import { hexToRGBA, netZilToCarbon, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
 import { AppTheme } from "app/theme/types";
 import { RootState } from "app/store/types";
 import { BridgeFormState, BridgeState, BridgeTx, BridgeableToken } from "app/store/bridge/types";
@@ -168,20 +167,20 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-// initialize a tradehub sdk client
+// initialize a carbon sdk client
 // @param mnemonic initialize the sdk with an account
-async function initTradehubSDK(mnemonic: string, network: Network) {
+async function initCarbonSDK(mnemonic: string, network: Network) {
   let attempts = 0;
-  const tradehubNetwork = netZilToTradeHub(network);
+  const carbonNetwork = netZilToCarbon(network);
   while (attempts++ < 10) {
     try {
-      const sdk = new TradeHubSDK({
-        network: tradehubNetwork,
-        debugMode: isDebug(),
+      const sdk = await CarbonSDK.instanceWithMnemonic(mnemonic, {
+        network: carbonNetwork,
+        // debug: isDebug(),
       });
-      return await sdk.connectWithMnemonic(mnemonic);
+      return sdk;
     } catch (error) {
-      console.error("init tradehub sdk error");
+      console.error("init carbon sdk error");
       console.error(error);
 
       // delay <2 ^ attempts> seconds if error occurs
@@ -189,7 +188,7 @@ async function initTradehubSDK(mnemonic: string, network: Network) {
       await new Promise(res => setTimeout(res, delay));
     }
   }
-  throw new Error("failed to initialize TradeHubSDK")
+  throw new Error("failed to initialize CarbonSDK")
 }
 
 const clearNavigationHook = (history: History<unknown>) => {
@@ -208,12 +207,16 @@ const addNavigationHook = (history: History<unknown>) => {
   };
 }
 
-const CHAIN_NAMES = {
+const CHAIN_NAMES: {
+  [key in Blockchain]: string
+} = {
   [Blockchain.Zilliqa]: "Zilliqa",
   [Blockchain.Ethereum]: "Ethereum",
   [Blockchain.Neo]: "Neo",
   [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
-}
+  [Blockchain.Native]: "Carbon",
+  [Blockchain.Btc]: "Bitcoin",
+} as const
 
 const ConfirmTransfer = (props: any) => {
   const { showTransfer } = props;
@@ -224,13 +227,13 @@ const ConfirmTransfer = (props: any) => {
   const tokenFinder = useTokenFinder();
   const network = useNetwork();
 
-  const [sdk, setSdk] = useState<ConnectedTradeHubSDK | null>(null);
+  const [sdk, setSdk] = useState<ConnectedCarbonSDK | null>(null);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
   const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets.eth);
   const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
   const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
   const bridgeToken = useSelector<RootState, BridgeableToken | undefined>(state => state.bridge.formState.token);
-  const [runInitTradeHubSDK] = useAsyncTask("initTradeHubSDK")
+  const [runInitCarbonSDK] = useAsyncTask("initCarbonSDK")
 
   const [tokenApproval, setTokenApproval] = useState<boolean>(false);
   const [approvalHash, setApprovalHash] = useState<string>("");
@@ -246,7 +249,7 @@ const ConfirmTransfer = (props: any) => {
 
   useEffect(() => {
     if (!swthAddrMnemonic)
-      setSwthAddrMnemonic(SWTHAddress.newMnemonic());
+      setSwthAddrMnemonic(AddressUtils.SWTHAddress.newMnemonic());
   }, [swthAddrMnemonic])
 
   useEffect(() => {
@@ -281,8 +284,8 @@ const ConfirmTransfer = (props: any) => {
   useEffect(() => {
     if (!swthAddrMnemonic) return;
 
-    runInitTradeHubSDK(async () => {
-      const sdk = await initTradehubSDK(swthAddrMnemonic, network);
+    runInitCarbonSDK(async () => {
+      const sdk = await initCarbonSDK(swthAddrMnemonic, network);
       await sdk.initialize();
       setSdk(sdk);
     })
@@ -293,9 +296,9 @@ const ConfirmTransfer = (props: any) => {
   if (!showTransfer) return null;
 
   // returns true if asset is native coin, false otherwise
-  const isNativeAsset = (asset: RestModels.Token) => {
+  const isNativeAsset = (asset: Models.Token) => {
     const zeroAddress = "0000000000000000000000000000000000000000";
-    return (asset.asset_id === zeroAddress)
+    return (asset.tokenAddress === zeroAddress)
   }
 
   // remove 0x and lowercase
@@ -303,30 +306,29 @@ const ConfirmTransfer = (props: any) => {
     return address.replace("0x", "").toLowerCase();
   }
 
-  const isApprovalRequired = async (asset: RestModels.Token, amount: BigNumber) => {
+  const isApprovalRequired = async (asset: Models.Token, amount: BigNumber) => {
     return !isNativeAsset(asset)
   }
 
   /**
     * Lock the asset on Ethereum chain
     * returns the txn hash if lock txn is successful, otherwise return null
-    * @param asset         details of the asset being locked; retrieved from tradehub
+    * @param asset         details of the asset being locked; retrieved from carbon
     */
-  async function lockAssetOnEth(asset: RestModels.Token, tradehubMnemonics: string) {
+  async function lockAssetOnEth(asset: Models.Token, carbonMnemonics: string) {
     if (!bridgeToken || !fromToken || !sdk || !swthAddrMnemonic) return null;
 
-    const lockProxy = asset.lock_proxy_hash;
-    sdk.eth.configProvider.getConfig().Eth.LockProxyAddr = `0x${lockProxy}`;
-    const swthAddress = SWTHAddress.generateAddress(swthAddrMnemonic);
+    const lockProxy = asset.bridgeAddress;
+    const swthAddress = AddressUtils.SWTHAddress.generateAddress(swthAddrMnemonic);
 
     const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider);
-    const signer = ethersProvider.getSigner();
+    const signer: ethers.Signer = ethersProvider.getSigner();
 
     const amount = bridgeFormState.transferAmount;
     const ethAddress = await signer.getAddress();
     const gasPrice = await sdk.eth.getProvider().getGasPrice();
     const gasPriceGwei = new BigNumber(ethers.utils.formatUnits(gasPrice, "gwei"));
-    const depositAmt = amount.shiftedBy(asset.decimals);
+    const depositAmt = amount.shiftedBy(asset.decimals.toInt());
 
     // approve token
     const approvalRequired = await isApprovalRequired(asset, depositAmt);
@@ -357,7 +359,7 @@ const ConfirmTransfer = (props: any) => {
 
     toaster(`Locking asset (Ethereum)`, { overridePersist: false });
 
-    const swthAddressBytes = SWTHAddress.getAddressBytes(swthAddress, sdk.network);
+    const swthAddressBytes = AddressUtils.SWTHAddress.getAddressBytes(swthAddress, sdk.network);
     const lock_tx = await sdk.eth.lockDeposit({
       token: asset,
       address: swthAddressBytes,
@@ -377,24 +379,24 @@ const ConfirmTransfer = (props: any) => {
   /**
     * Lock the asset on Zilliqa chain
     * returns the txn hash if lock txn is successful, otherwise return null
-    * @param asset         details of the asset being locked; retrieved from tradehub
+    * @param asset         details of the asset being locked; retrieved from carbon
     */
-  async function lockAssetOnZil(asset: RestModels.Token, tradehubMnemonics: string) {
+  async function lockAssetOnZil(asset: Models.Token, carbonMnemonics: string) {
     if (wallet === null) {
       console.error("Zilliqa wallet not connected");
       return null;
     }
     if (!sdk) {
-      console.error("TradeHubSDK not initialized");
+      console.error("CarbonSDK not initialized");
       return null;
     }
 
-    const lockProxy = asset.lock_proxy_hash;
+    const lockProxy = asset.bridgeAddress;
     const amount = bridgeFormState.transferAmount;
     const zilAddress = santizedAddress(wallet.addressInfo.byte20);
-    const swthAddress = SWTHAddress.generateAddress(tradehubMnemonics);
-    const swthAddressBytes = SWTHAddress.getAddressBytes(swthAddress, sdk.network);
-    const depositAmt = amount.shiftedBy(asset.decimals)
+    const swthAddress = AddressUtils.SWTHAddress.generateAddress(carbonMnemonics);
+    const swthAddressBytes = AddressUtils.SWTHAddress.getAddressBytes(swthAddress, sdk.network);
+    const depositAmt = amount.shiftedBy(asset.decimals.toInt())
 
     if (!isNativeAsset(asset)) {
       // not native zils
@@ -457,7 +459,7 @@ const ConfirmTransfer = (props: any) => {
     const element = document.createElement("a");
     const file = new Blob([`${TRANSFER_KEY_MESSAGE}\n${key}`], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
-    const swthAddress = SWTHAddress.generateAddress(key);
+    const swthAddress = AddressUtils.SWTHAddress.generateAddress(key);
     element.download = `private-recovery-key-${swthAddress}.txt`;
     document.body.appendChild(element); // Required for this to work in FireFox
     element.click();
@@ -471,7 +473,7 @@ const ConfirmTransfer = (props: any) => {
     }
 
     if (!sdk) {
-      console.error("TradeHubSDK not initialized")
+      console.error("CarbonSDK not initialized")
       return null;
     }
 
@@ -483,7 +485,7 @@ const ConfirmTransfer = (props: any) => {
     }
 
     if (!swthAddrMnemonic) {
-      console.error("tradehub mnemonic not initialized");
+      console.error("carbon mnemonic not initialized");
       return null;
     }
 
@@ -527,7 +529,7 @@ const ConfirmTransfer = (props: any) => {
         sourceTxHash: sourceTxHash,
         inputAmount: bridgeFormState.transferAmount,
         interimAddrMnemonics: swthAddrMnemonic!,
-        withdrawFee: withdrawFee?.amount ?? BN_ONE.shiftedBy(3 - fromToken.decimals), // 1000 sat bypass withdraw fee check,
+        withdrawFee: withdrawFee?.amount ?? BIG_ONE.shiftedBy(3 - fromToken.decimals), // 1000 sat bypass withdraw fee check,
         depositDispatchedAt: dayjs(),
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
@@ -539,7 +541,7 @@ const ConfirmTransfer = (props: any) => {
   const conductAnotherTransfer = () => {
     if (pendingBridgeTx)
       dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
-    setSwthAddrMnemonic(SWTHAddress.newMnemonic());
+    setSwthAddrMnemonic(AddressUtils.SWTHAddress.newMnemonic());
     dispatch(actions.Layout.showTransferConfirmation(false));
   }
 
@@ -547,7 +549,7 @@ const ConfirmTransfer = (props: any) => {
     if (pendingBridgeTx)
       dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
     dispatch(actions.Layout.showTransferConfirmation(false));
-    setSwthAddrMnemonic(SWTHAddress.newMnemonic());
+    setSwthAddrMnemonic(AddressUtils.SWTHAddress.newMnemonic());
   }
 
   const formatAddress = (address: string | undefined | null, chain: Blockchain) => {

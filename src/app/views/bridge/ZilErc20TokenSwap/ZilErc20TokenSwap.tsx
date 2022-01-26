@@ -5,7 +5,7 @@ import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { ethers } from "ethers";
 import { useDispatch, useSelector } from "react-redux";
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain } from "carbon-js-sdk";
 import Web3Modal from 'web3modal';
 import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectETHPopper, CurrencyInput, FancyButton, Text } from 'app/components';

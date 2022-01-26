@@ -70,17 +70,17 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
   const [toRemove, setToRemove] = useState<string | null>(null);
 
   const hasChange = useMemo(() => {
-    if (!profile) return true
+    if (!wallet) return false;
     let change = false;
     Object.entries(inputValues).forEach(([key, value]) => {
-      const profileValue = (profile as any)[key];
+      const profileValue = profile ? (profile as any)[key] : undefined;
       if (!profileValue && !value) return;
       if (profileValue !== value) {
         change = true;
       }
     })
     return change;
-  }, [inputValues, profile])
+  }, [inputValues, profile, wallet])
 
   const hasError = useMemo(() => {
     const errorString = Object.values(errors).reduce((prev, curr) => prev + curr);

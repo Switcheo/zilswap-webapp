@@ -4,7 +4,7 @@ import { Network } from "zilswap-sdk/lib/constants";
 import { Task } from "redux-saga";
 import { all, call, cancel, delay, fork, put, race, select, take } from "redux-saga/effects";
 
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain } from "carbon-js-sdk";
 import { logger } from "core/utilities";
 import {
   BatchRequestType, ZilswapConnector, balanceBatchRequest,

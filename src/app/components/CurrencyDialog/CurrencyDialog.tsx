@@ -5,7 +5,7 @@ import { toBech32Address } from "@zilliqa-js/zilliqa";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
 import { useDispatch, useSelector } from "react-redux";
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain } from "carbon-js-sdk";
 import CloseIcon from "@material-ui/icons/CloseOutlined";
 import { DialogModal } from "app/components";
 import { BridgeState } from "app/store/bridge/types";

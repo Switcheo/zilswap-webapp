@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Transaction } from "@zilliqa-js/account";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ArkBidsTable, ArkBreadcrumb, ArkPriceHistoryGraph, ArkTab, ArkOwnerLabel, ArkBox } from "app/components";
+import { ArkBidsTable, ArkEventHistoryTable, ArkBreadcrumb, ArkPriceHistoryGraph, ArkTab, ArkOwnerLabel, ArkBox } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getMarketplace, getWallet } from "app/saga/selectors";
 import { Nft, Profile } from "app/store/types";
@@ -188,7 +188,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
           <ArkPriceHistoryGraph collectionId={collectionId} tokenId={tokenId} />
         )}
         {currentTab === "Event History" && (
-          <ArkBox variant="base" className={classes.comingSoon}>Coming Soon.</ArkBox>
+          <ArkEventHistoryTable collectionId={collectionId} tokenId={tokenId} />
         )}
         {/* Price History */}
         {/* Event History */}

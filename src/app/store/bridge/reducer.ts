@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain } from "carbon-js-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 import { logger } from "core/utilities";
 import { DataCoder, bnOrZero } from "app/utils";

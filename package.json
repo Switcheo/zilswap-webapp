@@ -24,7 +24,7 @@
     "crypto-js": "^3.1.9-1",
     "dayjs": "^1.10.4",
     "decimal.js": "^10.2.0",
-    "ethers": "^5.3.1",
+    "ethers": "^5.5.1",
     "fortmatic": "^2.2.1",
     "ipfs": "^0.61.0",
     "ipfs-http-client": "^55.0.0",
@@ -55,12 +55,12 @@
     "redux-logger": "^3.0.6",
     "redux-saga": "^1.1.3",
     "redux-thunk": "^2.3.0",
-    "tradehub-api-js": "^1.0.16",
+    "carbon-js-sdk": "^0.1.22",
     "uuid": "^3.3.3",
     "validate.js": "^0.13.1",
     "web3modal": "^1.9.4",
     "zeeves-auth-sdk-js": "^2.0.12",
-    "zilswap-sdk": "^1.3.20"
+    "zilswap-sdk": "^1.3.21"
   },
   "scripts": {
     "start": "react-scripts start",

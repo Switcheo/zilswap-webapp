@@ -224,6 +224,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: "16px",
     marginBottom: 14,
     minHeight: "50px",
+    marginRight: theme.spacing(-1),
     backgroundColor: "#FFDF6B",
     color: "#003340",
     borderRadius: theme.spacing(1.5),

@@ -9,14 +9,14 @@ import dayjs from "dayjs";
 import { ethers } from "ethers";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import { Blockchain, RestModels, SWTHAddress, TradeHubSDK } from "tradehub-api-js";
+import { Blockchain, CarbonSDK, Models, AddressUtils } from "carbon-js-sdk";
 import Web3Modal from 'web3modal';
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet } from "core/wallet";
 import { Bridge } from "core/utilities";
 import { providerOptions } from "core/ethereum";
 import { ConnectButton } from "app/views/main/Bridge/components";
-import { hexToRGBA, netZilToTradeHub, useAsyncTask, useNetwork } from "app/utils";
+import { hexToRGBA, netZilToCarbon, useAsyncTask, useNetwork } from "app/utils";
 import { AppTheme } from "app/theme/types";
 import { RootState } from "app/store/types";
 import { BridgeState, BridgeTx, BridgeableTokenMapping } from "app/store/bridge/types";
@@ -142,9 +142,10 @@ const ResumeTransferBox = (props: any) => {
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
     const pendingBridgeTx = bridgeState.activeBridgeTx;
 
-    const [depositTransfer, setDepositTransfer] = useState<RestModels.Transfer | null>(null);
-    const [sdk, setSdk] = useState<TradeHubSDK | null>(null);
+    const [depositTransfer, setDepositTransfer] = useState<Models.ExternalTransfer | null>(null);
+    const [sdk, setSdk] = useState<CarbonSDK | null>(null);
 
+    const [runInitCarbonSDK] = useAsyncTask("initCarbonSDK");
     const [runGetTransfer, loading, error] = useAsyncTask("getTransfer");
     const [runResumeTransfer, loadingResume] = useAsyncTask("resumeTransfer", (error) => setErrorMsg(error?.message));
     const [showMenu, setShowMenu] = useState<MutableRefObject<undefined>>();
@@ -156,10 +157,14 @@ const ResumeTransferBox = (props: any) => {
     }, [mnemonic])
 
     useEffect(() => {
-        const tradehubNetwork = netZilToTradeHub(network);
-        const sdk = new TradeHubSDK({ network: tradehubNetwork });
-        sdk.token.reloadTokens();
-        setSdk(sdk);
+        runInitCarbonSDK(async () => {
+            const carbonNetwork = netZilToCarbon(network);
+            const sdk = await CarbonSDK.instance({ network: carbonNetwork });
+            sdk.token.reloadTokens();
+            setSdk(sdk);
+        });
+
+        // eslint-disable-next-line
     }, [network])
 
     const dstChain = useMemo(() => {
@@ -217,12 +222,17 @@ const ResumeTransferBox = (props: any) => {
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
             const mnemonicString = mnemonic.join(" ");
-            const tradehubNetwork = sdk.network;
-            const swthAddress = SWTHAddress.generateAddress(mnemonicString, undefined, { network: tradehubNetwork });
+            const carbonNetwork = sdk.network;
+            const swthAddress = AddressUtils.SWTHAddress.generateAddress(mnemonicString, undefined, { network: carbonNetwork });
 
             // find deposit confirmation tx
-            const extTransfers = await sdk.api.getTransfers({ account: swthAddress }) as RestModels.Transfer[];
-            const depositTransfer = extTransfers.find((transfer) => transfer.transfer_type === 'deposit');
+            const queryOpts = Models.QueryGetExternalTransfersRequest.fromPartial({
+                address: swthAddress,
+                status: "success",
+                transferType: "deposit",
+            });
+            const result = await sdk.query.coin.ExternalTransfers(queryOpts);
+            const depositTransfer = result.externalTransfers.find((transfer) => transfer.transferType === 'deposit');
 
             if (depositTransfer) {
                 setErrorMsg("");
@@ -263,7 +273,7 @@ const ResumeTransferBox = (props: any) => {
                     inputAmount: new BigNumber(depositTransfer.amount),
                     interimAddrMnemonics: mnemonic.join(" "),
                     withdrawFee: feeAmount, // need to check
-                    sourceTxHash: depositTransfer.transaction_hash,
+                    sourceTxHash: depositTransfer.transactionHash,
                     depositDispatchedAt: dayjs(),
                     network,
                 }

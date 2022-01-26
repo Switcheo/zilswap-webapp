@@ -3,7 +3,7 @@ import { Box, Button, ButtonProps, Tooltip, Typography } from "@material-ui/core
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useSelector } from "react-redux";
-import { Blockchain } from "tradehub-api-js";
+import { Blockchain } from "carbon-js-sdk";
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { FancyButton, Text } from "app/components";

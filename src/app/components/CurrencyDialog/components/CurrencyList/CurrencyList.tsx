@@ -5,7 +5,7 @@ import { toBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useSelector } from "react-redux";
-import { Blockchain } from "tradehub-api-js/build/main/lib/tradehub/utils";
+import { Blockchain } from "carbon-js-sdk";
 import ContrastBox from "app/components/ContrastBox";
 import CurrencyLogo from "app/components/CurrencyLogo";
 import { BridgeState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";

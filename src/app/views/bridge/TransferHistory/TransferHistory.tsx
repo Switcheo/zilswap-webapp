@@ -1,13 +1,13 @@
-import React, { Fragment } from "react";
-import { Box, Button, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, makeStyles } from "@material-ui/core";
+import React, { Fragment, useMemo, useState } from "react";
+import { Box, Button, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, makeStyles, useMediaQuery, useTheme } from "@material-ui/core";
 import AddIcon from '@material-ui/icons/AddRounded';
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
 import RefreshIcon from '@material-ui/icons/RefreshRounded';
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { Blockchain } from "tradehub-api-js";
-import { CurrencyLogo, HelpInfo, ResumeTransferDialog, RevealMnemonic, Text } from 'app/components';
+import { Blockchain } from "carbon-js-sdk";
+import { BridgeMobileDialog, CurrencyLogo, HelpInfo, ResumeTransferDialog, RevealMnemonic, Text } from 'app/components';
 import BridgeCard from "app/layouts/BridgeCard";
 import { actions } from "app/store";
 import { BridgeState, BridgeTx, RootState } from "app/store/types";
@@ -17,203 +17,6 @@ import { toHumanNumber } from "app/utils";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
 import { ReactComponent as EthereumLogo } from "../../main/Bridge/ethereum-logo.svg";
 import { ReactComponent as ZilliqaLogo } from "../../main/Bridge/zilliqa-logo.svg";
-
-const useStyles = makeStyles((theme: AppTheme) => ({
-    root: {
-    },
-    container: {
-        margin: "0 auto",
-        boxShadow: theme.palette.mainBoxShadow,
-        borderRadius: 12,
-        background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
-        border: theme.palette.border,
-        backgroundColor: theme.palette.background.default,
-        padding: theme.spacing(2, 8, 2),
-        maxWidth: 1100,
-        [theme.breakpoints.down("sm")]: {
-            padding: theme.spacing(2, 3, 2),
-        },
-        [theme.breakpoints.down("xs")]: {
-            maxWidth: 450,
-        },
-        "& .MuiChip-root": {
-            borderRadius: 12,
-            color: theme.palette.primary.main
-        },
-        "& .MuiChip-label": {
-            paddingLeft: 0,
-            paddingRight: 0
-        },
-        "& .MuiChip-label>p:first-child": {
-            fontSize: "12px"
-        },
-        "& .MuiChip-label>p:not(:first-child)": {
-            fontSize: "11px"
-        },
-        "& .MuiTableCell-stickyHeader": {
-            backgroundColor: "transparent"
-        },
-        "& .MuiTypography-body1": {
-            fontSize: "14px"
-        }
-    },
-    headerBox: {
-        [theme.breakpoints.down("xs")]: {
-            flexDirection: "column",
-        },
-    },
-    titleBox: {
-        [theme.breakpoints.down("xs")]: {
-            alignItems: "center",
-            marginBottom: theme.spacing(2)
-        },
-    },
-    buttonBox: {
-        [theme.breakpoints.down("xs")]: {
-            flexDirection: "column",
-        },
-    },
-    textColoured: {
-        color: theme.palette.primary.dark
-    },
-    refreshIcon: {
-        marginRight: theme.spacing(0.5),
-        verticalAlign: "middle",
-    },
-    addIcon: {
-        marginRight: theme.spacing(0.5),
-        verticalAlign: "middle",
-    },
-    resumeTransferButton: {
-        color: theme.palette.action?.disabled,
-        backgroundColor: theme.palette.action?.disabledBackground,
-        textAlign: "center",
-        "&:hover": {
-            backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#003340" : "rgba(0, 51, 64, 0.5)", 0.8)}`,
-        },
-        [theme.breakpoints.down("xs")]: {
-            height: 46
-        },
-    },
-    resumeTransferText: {
-        color: theme.palette.primary.contrastText,
-        paddingRight: theme.spacing(0.5),
-    },
-    newTransferButton: {
-        color: theme.palette.action?.disabled,
-        backgroundColor: theme.palette.action?.disabledBackground,
-        textAlign: "center",
-        "&:hover": {
-            backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#003340" : "rgba(0, 51, 64, 0.5)", 0.8)}`,
-        },
-        marginRight: theme.spacing(1),
-        [theme.breakpoints.down("xs")]: {
-            marginRight: 0,
-            marginBottom: theme.spacing(1),
-            height: 46
-        },
-    },
-    newTransferText: {
-        color: theme.palette.primary.contrastText,
-        paddingRight: theme.spacing(0.5),
-    },
-    tableContainer: {
-        '&::-webkit-scrollbar': {
-            width: '0.4rem',
-            height: '0.4rem'
-        },
-        '&::-webkit-scrollbar-thumb': {
-            backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
-            borderRadius: 12,
-        },
-        // if vertical scrollbar present
-        // padding: theme.spacing(0, 0.5),
-    },
-    table: {
-        borderCollapse: "separate",
-        borderSpacing: theme.spacing(0, 1)
-    },
-    tableHead: {
-        "& th.MuiTableCell-root": {
-            borderBottom: "none",
-        },
-    },
-    tableRow: {
-        "& .MuiTableCell-root": {
-            whiteSpace: "nowrap",
-            border: "1px transparent",
-            borderRadius: 12,
-            "&:first-child": {
-                borderTopRightRadius: 0,
-                borderBottomRightRadius: 0
-            },
-            "&:not(:first-child):not(:last-child)": {
-                borderRadius: 0
-            },
-            "&:last-child": {
-                borderTopLeftRadius: 0,
-                borderBottomLeftRadius: 0
-            }
-        },
-        backgroundColor: theme.palette.background?.contrast,
-    },
-    helpInfo: {
-        verticalAlign: "top!important",
-        marginLeft: "2px!important"
-    },
-    arrowRightIcon: {
-        color: theme.palette.label,
-        marginLeft: "-8px",
-        marginRight: "-4px"
-    },
-    button: {
-        borderRadius: 12,
-        height: "32px",
-        "& .MuiButton-text": {
-            padding: "6px 16px"
-        }
-    },
-    chip: {
-        width: "75px"
-    },
-    failedChip: {
-        backgroundColor: "#FF5252"
-    },
-    ongoingChip: {
-        backgroundColor: "#FFDF6B"
-    },
-    completeChip: {
-        backgroundColor: "#00FFB0"
-    },
-    currencyLogo: {
-        height: "20px",
-        width: "20px",
-        marginLeft: theme.spacing(0.5),
-        marginRight: theme.spacing(0.5),
-        marginBottom: theme.spacing(0.2)
-    },
-    transferAmount: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    transferNetwork: {
-        display: "flex",
-        alignItems: "center"
-    },
-    noTransaction: {
-        color: theme.palette?.label,
-        marginBottom: theme.spacing(4)
-    },
-    chainLogo: {
-        height: "16px",
-        width: "16px",
-        marginBottom: theme.spacing(0.2)
-    },
-    zilLogo: {
-        marginRight: "2px"
-    }
-}));
 
 const CHAIN_NAMES = {
     [Blockchain.Zilliqa]: "Zilliqa",
@@ -233,6 +36,18 @@ const TransferHistory = (props: any) => {
     const previewTx = useSelector<RootState, BridgeTx | undefined>(state => state.bridge.previewBridgeTx);
     const bridgeTxs = bridgeState.bridgeTxs;
     const pendingBridgeTx = bridgeState.activeBridgeTx;
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"), { noSsr: true });
+
+    // prevent disabling for users resizing on desktop
+    const disableButton = useMemo(() => {
+        return isMobile;
+
+        // eslint-disable-next-line
+    }, []);
+
+    const [showMobileDialog, setShowMobileDialog] = useState<boolean>(isMobile);
 
     const handleNewTransfer = () => {
         if (pendingBridgeTx) {
@@ -331,12 +146,12 @@ const TransferHistory = (props: any) => {
                         </Box>
 
                         <Box display="flex" pt={0} pb={0} className={classes.buttonBox}>
-                            <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.newTransferButton} onClick={handleNewTransfer}>
+                            <Button component={Link} to="/bridge" color="primary" variant="contained" className={classes.newTransferButton} onClick={handleNewTransfer} disabled={disableButton}>
                                 <AddIcon fontSize="small" className={classes.addIcon} />
                                 <Text variant="button" className={classes.newTransferText}>New Transfer</Text>
                             </Button>
 
-                            <Button color="primary" variant="contained" className={classes.resumeTransferButton} onClick={handleResumeTransfer}>
+                            <Button color="primary" variant="contained" className={classes.resumeTransferButton} onClick={handleResumeTransfer} disabled={disableButton}>
                                 <RefreshIcon fontSize="small" className={classes.refreshIcon} />
                                 <Text variant="button" className={classes.resumeTransferText}>Resume Transfer</Text>
                             </Button>
@@ -446,9 +261,225 @@ const TransferHistory = (props: any) => {
                 <TransactionDetail onBack={clearPreview} currentTx={previewTx} approvalHash="" isHistory={true} />
             )}
 
+            <BridgeMobileDialog open={showMobileDialog} onCloseDialog={setShowMobileDialog} />
             <ResumeTransferDialog />
         </BridgeCard>
     )
 }
+
+const useStyles = makeStyles((theme: AppTheme) => ({
+    root: {
+        "&.Mui-disabled": {
+            "& .MuiButton-label": {
+                opacity: 0.5,
+                "& .MuiTypography-colorTextPrimary": {
+                    opacity: 0.5,
+                }
+            }
+        },
+    },
+    container: {
+        margin: "0 auto",
+        boxShadow: theme.palette.mainBoxShadow,
+        borderRadius: 12,
+        background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
+        border: theme.palette.border,
+        backgroundColor: theme.palette.background.default,
+        padding: theme.spacing(2, 8, 2),
+        maxWidth: 1100,
+        [theme.breakpoints.down("sm")]: {
+            padding: theme.spacing(2, 3, 2),
+        },
+        [theme.breakpoints.down("xs")]: {
+            maxWidth: 450,
+        },
+        "& .MuiChip-root": {
+            borderRadius: 12,
+            color: theme.palette.primary.main
+        },
+        "& .MuiChip-label": {
+            paddingLeft: 0,
+            paddingRight: 0
+        },
+        "& .MuiChip-label>p:first-child": {
+            fontSize: "12px"
+        },
+        "& .MuiChip-label>p:not(:first-child)": {
+            fontSize: "11px"
+        },
+        "& .MuiTableCell-stickyHeader": {
+            backgroundColor: "transparent"
+        },
+        "& .MuiTypography-body1": {
+            fontSize: "14px"
+        },
+    },
+    headerBox: {
+        [theme.breakpoints.down("xs")]: {
+            flexDirection: "column",
+        },
+    },
+    titleBox: {
+        [theme.breakpoints.down("xs")]: {
+            alignItems: "center",
+            marginBottom: theme.spacing(2)
+        },
+    },
+    buttonBox: {
+        [theme.breakpoints.down("xs")]: {
+            flexDirection: "column",
+        },
+    },
+    textColoured: {
+        color: theme.palette.primary.dark
+    },
+    refreshIcon: {
+        marginRight: theme.spacing(0.5),
+        verticalAlign: "middle",
+    },
+    addIcon: {
+        marginRight: theme.spacing(0.5),
+        verticalAlign: "middle",
+    },
+    resumeTransferButton: {
+        color: theme.palette.action?.disabled,
+        backgroundColor: theme.palette.action?.disabledBackground,
+        textAlign: "center",
+        "&:hover": {
+            backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#003340" : "rgba(0, 51, 64, 0.5)", 0.8)}`,
+        },
+        [theme.breakpoints.down("xs")]: {
+            height: 46
+        },
+        "&.Mui-disabled": {
+            "& .MuiButton-label": {
+                opacity: 0.5,
+            }
+        },
+    },
+    resumeTransferText: {
+        color: theme.palette.primary.contrastText,
+        paddingRight: theme.spacing(0.5),
+    },
+    newTransferButton: {
+        color: theme.palette.action?.disabled,
+        backgroundColor: theme.palette.action?.disabledBackground,
+        textAlign: "center",
+        "&:hover": {
+            backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#003340" : "rgba(0, 51, 64, 0.5)", 0.8)}`,
+        },
+        marginRight: theme.spacing(1),
+        [theme.breakpoints.down("xs")]: {
+            marginRight: 0,
+            marginBottom: theme.spacing(1),
+            height: 46
+        },
+        "&.Mui-disabled": {
+            "& .MuiButton-label": {
+                opacity: 0.5,
+            }
+        },
+    },
+    newTransferText: {
+        color: theme.palette.primary.contrastText,
+        paddingRight: theme.spacing(0.5),
+    },
+    tableContainer: {
+        '&::-webkit-scrollbar': {
+            width: '0.4rem',
+            height: '0.4rem'
+        },
+        '&::-webkit-scrollbar-thumb': {
+            backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
+            borderRadius: 12,
+        },
+        // if vertical scrollbar present
+        // padding: theme.spacing(0, 0.5),
+    },
+    table: {
+        borderCollapse: "separate",
+        borderSpacing: theme.spacing(0, 1)
+    },
+    tableHead: {
+        "& th.MuiTableCell-root": {
+            borderBottom: "none",
+        },
+    },
+    tableRow: {
+        "& .MuiTableCell-root": {
+            whiteSpace: "nowrap",
+            border: "1px transparent",
+            borderRadius: 12,
+            "&:first-child": {
+                borderTopRightRadius: 0,
+                borderBottomRightRadius: 0
+            },
+            "&:not(:first-child):not(:last-child)": {
+                borderRadius: 0
+            },
+            "&:last-child": {
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0
+            }
+        },
+        backgroundColor: theme.palette.background?.contrast,
+    },
+    helpInfo: {
+        verticalAlign: "top!important",
+        marginLeft: "2px!important"
+    },
+    arrowRightIcon: {
+        color: theme.palette.label,
+        marginLeft: "-8px",
+        marginRight: "-4px"
+    },
+    button: {
+        borderRadius: 12,
+        height: "32px",
+        "& .MuiButton-text": {
+            padding: "6px 16px"
+        }
+    },
+    chip: {
+        width: "75px"
+    },
+    failedChip: {
+        backgroundColor: "#FF5252"
+    },
+    ongoingChip: {
+        backgroundColor: "#FFDF6B"
+    },
+    completeChip: {
+        backgroundColor: "#00FFB0"
+    },
+    currencyLogo: {
+        height: "20px",
+        width: "20px",
+        marginLeft: theme.spacing(0.5),
+        marginRight: theme.spacing(0.5),
+        marginBottom: theme.spacing(0.2)
+    },
+    transferAmount: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    transferNetwork: {
+        display: "flex",
+        alignItems: "center"
+    },
+    noTransaction: {
+        color: theme.palette?.label,
+        marginBottom: theme.spacing(4)
+    },
+    chainLogo: {
+        height: "16px",
+        width: "16px",
+        marginBottom: theme.spacing(0.2)
+    },
+    zilLogo: {
+        marginRight: "2px"
+    }
+}));
 
 export default TransferHistory;

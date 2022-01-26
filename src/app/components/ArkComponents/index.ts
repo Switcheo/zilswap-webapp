@@ -4,6 +4,7 @@ export { default as ArkBidsTable } from "./ArkBidsTable";
 export { default as ArkBreadcrumb } from "./ArkBreadcrumb";
 export { default as ArkCheckbox } from "./ArkCheckbox";
 export { default as ArkChipInput } from "./ArkChipInput";
+export { default as ArkEventHistoryTable } from "./ArkEventHistoryTable";
 export { default as ArkExpiry } from "./ArkExpiry";
 export { default as ArkInput } from "./ArkInput";
 export { default as ArkNavDrawer } from "./ArkNavDrawer";
