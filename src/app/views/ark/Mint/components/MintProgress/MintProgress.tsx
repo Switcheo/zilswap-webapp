@@ -78,10 +78,11 @@ const MintProgress: React.FC<Props> = (props: Props) => {
           setAcceptTxId(transaction.id);
           setLoadingTx(true);
           try {
+            console.log("waitForTx", transaction.id)
             await waitForTx(transaction.id);
             setHasAcceptOwnership(true);
           } catch (e) {
-            console.error(e);
+            console.log("waitForTx", e);
           } finally {
             setLoadingTx(false);
           }

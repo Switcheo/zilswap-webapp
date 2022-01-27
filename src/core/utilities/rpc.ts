@@ -1,6 +1,8 @@
 import { RPCResponse } from "@zilliqa-js/core";
 import { Value } from "@zilliqa-js/contract";
 import { ZilswapConnector } from "core/zilswap";
+import { logger } from "./logger";
+import { Zilliqa } from "@zilliqa-js/zilliqa";
 
 export class RPCResultError extends Error {
   rpcResponse?: RPCResponse<any, string>;
@@ -69,11 +71,14 @@ export const waitForTx = async (txHash: string, maxAttempts: number = 33, interv
   const zilswap = ZilswapConnector.getSDK();
   for (let attempt = 0; attempt < maxAttempts; ++attempt) {
     try {
-      console.log("logging wait for tx");
+      logger("waitForTx", txHash);
       // wait 1s before getting tx
       const delay = interval * attempt;
       await new Promise((resolve) => setTimeout(resolve, delay));
-      return await zilswap.zilliqa.blockchain.getTransaction(txHash);
+      // motivation: bypass faulty zilliqa.provider provided from wallet extensions.
+      const rpcEndpoint = (zilswap as any).rpcEndpoint;
+      const zilliqa = new Zilliqa(rpcEndpoint)
+      return await zilliqa.blockchain.getTransaction(txHash);
     } catch (error) {
       if (error?.message === "Txn Hash not Present")
         continue;
