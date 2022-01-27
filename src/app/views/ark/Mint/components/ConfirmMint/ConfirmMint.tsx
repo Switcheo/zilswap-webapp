@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, BoxProps, Typography, Checkbox, FormControlLabel } from "@material-ui/core";
+import { Box, BoxProps, CircularProgress, Typography, Checkbox, FormControlLabel } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
@@ -52,6 +52,9 @@ const ConfirmMint: React.FC<Props> = (props: Props) => {
       </Box>
 
       <FancyButton variant="contained" color="primary" className={classes.mintButton} disabled={!isMintEnabled || loadingDeployCollection} onClick={onDeployCollection}>
+        {loadingDeployCollection &&
+          <CircularProgress size={20} className={classes.circularProgress} />
+        }
         Mint NFTs
       </FancyButton>
     </Box>
@@ -94,6 +97,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   confirmMintText: {
     fontSize: "13px",
     lineHeight: "16px",
+  },
+  circularProgress: {
+    color: "rgba(255, 255, 255, .5)",
+    marginRight: theme.spacing(1)
   },
 }));
 

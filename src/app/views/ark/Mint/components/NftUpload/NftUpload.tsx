@@ -336,7 +336,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                     <TableCell>
                       <ArkChipInput
                         onKeyDown={(event) => handleKeyDown(index, event)}
-                        placeholder={!attribute.values ? 'Separate each value with a semi-colon ";"' : ""}
+                        placeholder={!attribute.values.length ? 'Separate each value with a semi-colon ";"' : ""}
                         chips={attribute.values}
                         onDelete={(value) => handleDeleteChip(index, value)}
                         error={!attribute.values.length ? "Add attribute values." : ""}

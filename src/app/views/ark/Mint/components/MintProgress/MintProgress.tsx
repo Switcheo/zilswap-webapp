@@ -2,38 +2,34 @@ import React, { useMemo, useState } from "react";
 import { useHistory } from "react-router";
 import cls from "classnames";
 import { Box, BoxProps, CircularProgress, Link, makeStyles, Typography } from "@material-ui/core";
-import { useSelector } from "react-redux";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import LaunchIcon from "@material-ui/icons/Launch";
 import { Network } from "zilswap-sdk/lib/constants";
 import { AppTheme } from "app/theme/types";
+import { MintContract } from "app/store/mint/types";
 import { FancyButton, KeyValueDisplay, Text } from "app/components";
 import { ZilswapConnector } from "core/zilswap";
 import { ArkClient, waitForTx } from "core/utilities";
-import { getMint } from "app/saga/selectors";
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg";
 import { hexToRGBA, useAsyncTask, useNetwork, useToaster } from "app/utils";
 import { ReactComponent as Checkmark } from "app/views/ark/NftView/components/SellDialog/checkmark.svg";
 
 interface Props extends BoxProps {
-  setShowMintProgress: React.Dispatch<React.SetStateAction<boolean>>;
+  pendingMintContract: MintContract;
 }
 
 const MintProgress: React.FC<Props> = (props: Props) => {
-  const { children, className, setShowMintProgress, ...rest } = props;
+  const { children, className, pendingMintContract, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
   const toaster = useToaster();
   const network = useNetwork();
-  const mintState = useSelector(getMint);
 
   const [acceptTxId, setAcceptTxId] = useState<string | null>(null);
   const [loadingTx, setLoadingTx] = useState<boolean>(false);
-  const [acceptOwnership, setAcceptOwnership] = useState<boolean>(false);
+  const [hasAcceptOwnership, setHasAcceptOwnership] = useState<boolean>(false);
 
   const [runAcceptOwnership, loadingAcceptOwnership] = useAsyncTask("acceptOwnership", (error) => toaster(error.message, { overridePersist: false }));
-
-  const pendingMintContract = mintState.activeMintContract;
 
   const onViewCollection = () => {
     history.push(`/arky/collections/${toBech32Address(pendingMintContract?.contractAddress!)}`);
@@ -44,6 +40,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
   }, [pendingMintContract])
 
   const isAcceptOwnershipEnabled = useMemo(() => {
+    if (hasAcceptOwnership) return false;
     return pendingMintContract?.contractAddress && pendingMintContract.status === "transferring";
   }, [pendingMintContract])
 
@@ -53,13 +50,12 @@ const MintProgress: React.FC<Props> = (props: Props) => {
   }, [pendingMintContract])
 
   const hasMinted = useMemo(() => {
-    return pendingMintContract && pendingMintContract.mintedCount === pendingMintContract.tokenCount;
+    return pendingMintContract.mintedCount === pendingMintContract.tokenCount;
   }, [pendingMintContract])
 
   const hasCompleted = useMemo(() => {
-    // return pendingMintContract && pendingMintContract.status === "completed";
-    return acceptOwnership;
-  }, [acceptOwnership])
+    return hasAcceptOwnership;
+  }, [hasAcceptOwnership])
 
   const explorerLink = useMemo(() => {
     if (network === Network.MainNet) {
@@ -83,7 +79,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
           setLoadingTx(true);
           try {
             await waitForTx(transaction.id);
-            setAcceptOwnership(true);
+            setHasAcceptOwnership(true);
           } catch (e) {
             console.error(e);
           } finally {
@@ -237,7 +233,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
         </Text>
       </Box>
 
-      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onAcceptOwnership} disabled={!isAcceptOwnershipEnabled || loadingAcceptOwnership || loadingTx || acceptOwnership}>
+      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onAcceptOwnership} disabled={!isAcceptOwnershipEnabled || loadingAcceptOwnership || loadingTx}>
         {(loadingAcceptOwnership || loadingTx) &&
           <CircularProgress size={20} className={classes.circularProgress} />
         }

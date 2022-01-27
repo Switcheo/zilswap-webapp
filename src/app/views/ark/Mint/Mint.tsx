@@ -10,7 +10,7 @@ import * as IPFS from "ipfs";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, SimpleMap, useAsyncTask, useNetwork, useToaster } from "app/utils";
 import ArkPage from "app/layouts/ArkPage";
-import { getMarketplace, getWallet } from "app/saga/selectors";
+import { getMarketplace, getMint, getWallet } from "app/saga/selectors";
 import { OAuth } from "app/store/types";
 import { actions } from "app/store";
 import { ArkClient } from "core/utilities";
@@ -52,6 +52,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const dispatch = useDispatch();
   const { oAuth } = useSelector(getMarketplace);
   const { wallet } = useSelector(getWallet);
+  const mintState = useSelector(getMint);
   const address = wallet?.addressInfo.byte20;
   const network = useNetwork();
   const [mintOption, setMintOption] = useState<MintOptionType>("create");
@@ -84,10 +85,10 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
 
-  const [showMintProgress, setShowMintProgress] = useState<boolean>(false);
-
   const [runQueryProfile] = useAsyncTask("queryProfile");
   const [runDeployCollection, loadingDeployCollection] = useAsyncTask("deployCollection", (error) => toaster(error.message, { overridePersist: false }));
+
+  const pendingMintContract = mintState.activeMintContract;
 
   useEffect(() => {
     if (address) {
@@ -115,8 +116,6 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         dispatch(actions.MarketPlace.updateAccessToken(result));
         newOAuth = result;
       }
-
-      setShowMintProgress(true);
 
       // const ipfsClient = create();
 
@@ -245,7 +244,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
               </Box>
             </List> */}
 
-            {!showMintProgress && 
+            {!pendingMintContract && 
               <Fragment>
                 {/* Set Up Collection */}
                 <CollectionDetail
@@ -282,8 +281,8 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
               </Fragment>
             }
 
-            {showMintProgress && (
-              <MintProgress setShowMintProgress={setShowMintProgress} />
+            {pendingMintContract && (
+              <MintProgress pendingMintContract={pendingMintContract} />
             )}
           </Box>
         )}
