@@ -42,7 +42,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
   const isAcceptOwnershipEnabled = useMemo(() => {
     if (hasAcceptOwnership) return false;
     return pendingMintContract?.contractAddress && pendingMintContract.status === "transferring";
-  }, [pendingMintContract])
+  }, [hasAcceptOwnership, pendingMintContract])
 
   // statuses
   const hasDeployed = useMemo(() => {

@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useMemo, useState } from "react";
-import { Box, Container, Typography } from "@material-ui/core";
+import { Box, Container, Typography, CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import dayjs from "dayjs";
@@ -86,27 +86,49 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
 
   const [runQueryProfile] = useAsyncTask("queryProfile");
+  const [runQueryMint, loadingQueryMint] = useAsyncTask("queryMint");
   const [runDeployCollection, loadingDeployCollection] = useAsyncTask("deployCollection", (error) => toaster(error.message, { overridePersist: false }));
 
   const pendingMintContract = mintState.activeMintContract;
 
   useEffect(() => {
     if (address) {
-      runQueryProfile(async () => {
+      runQueryMint(async () => {
         const arkClient = new ArkClient(network);
-  
-        const { result: { model } } = await arkClient.getProfile(address.toLowerCase());
-        setInputValues({ 
-          ...inputValues, 
-          "artistName": model?.username ?? toBech32Address(address)
-        })
+
+        let newOAuth = oAuth;
+        if (!newOAuth?.access_token || (newOAuth?.expires_at && dayjs(newOAuth.expires_at * 1000).isBefore(dayjs()))) {
+          const { result } = await arkClient.arkLogin(wallet!, window.location.hostname);
+          dispatch(actions.MarketPlace.updateAccessToken(result));
+          newOAuth = result;
+        }
+        const response = await arkClient.getOngoingMint(newOAuth!.access_token);
+
+        if (response?.result?.mint)
+          dispatch(actions.Mint.addMintContract(response.result.mint));
       })
     }
 
     // eslint-disable-next-line
   }, [address, network])
 
-  const onDeployCollection = () => {    
+  useEffect(() => {
+    if (address) {
+      runQueryProfile(async () => {
+        const arkClient = new ArkClient(network);
+
+        const { result: { model } } = await arkClient.getProfile(address.toLowerCase());
+        setInputValues({
+          ...inputValues,
+          "artistName": model?.username ?? toBech32Address(address)
+        })
+      })
+    }
+
+    // eslint-disable-next-line
+  }, [])
+
+  const onDeployCollection = () => {
     runDeployCollection(async () => {
       let newOAuth: OAuth | undefined = oAuth;
       const arkClient = new ArkClient(network);
@@ -128,7 +150,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           const image = nft.image as string;
           const data = image.split(",")[1];
           const buffer = Buffer.from(data, "base64");
-  
+
           const fileAdded = await node.add(buffer);
 
           // to clean up
@@ -138,7 +160,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
               value: value,
             })
           }
-  
+
           return {
             resourceIpfsHash: fileAdded.path,
             metadata: {
@@ -146,8 +168,8 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
               name: nft.name,
             }
           }
-        } catch(err) {
-           throw err;
+        } catch (err) {
+          throw err;
         }
       }));
 
@@ -194,7 +216,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     // t&c unchecked
     if (!acceptTerms)
       return false;
-    
+
     // compulsory fields
     if (!inputValues.collectionName || !inputValues.royalties)
       return false;
@@ -202,7 +224,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     // no nft uploaded
     if (nfts.length === 0)
       return false;
-    
+
     // unfilled attribute data
     for (const attribute of attributes) {
       if (!attribute.name || !attribute.values.length)
@@ -213,13 +235,16 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     for (const nft of nfts) {
       if (!nft.name)
         return false;
-    
+
       if (Object.keys(nft.attributes).length !== attributes.length)
         return false;
     }
 
     return true;
-  }, [acceptTerms, inputValues.collectionName, inputValues.royalties, nfts, attributes])
+  }, [acceptTerms, inputValues.collectionName, inputValues.royalties, nfts, attributes]);
+
+  if (loadingQueryMint)
+    return <CircularProgress />
 
   return (
     <ArkPage {...rest}>
@@ -244,7 +269,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
               </Box>
             </List> */}
 
-            {!pendingMintContract && 
+            {!pendingMintContract &&
               <Fragment>
                 {/* Set Up Collection */}
                 <CollectionDetail
@@ -327,11 +352,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   nav: {
     marginTop: theme.spacing(6),
     paddingTop: 0,
-    borderRight: `1px solid rgba${
-      theme.palette.type === "dark"
-        ? hexToRGBA("#29475A", 1)
-        : hexToRGBA("#003340", 0.5)
-    }`,
+    borderRight: `1px solid rgba${theme.palette.type === "dark"
+      ? hexToRGBA("#29475A", 1)
+      : hexToRGBA("#003340", 0.5)
+      }`,
     marginRight: theme.spacing(4),
     [theme.breakpoints.down("sm")]: {
       display: "none",

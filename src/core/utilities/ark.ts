@@ -334,6 +334,15 @@ export class ArkClient {
     return output;
   }
 
+  getOngoingMint = async (access_token: string) => {
+    const headers = { "authorization": "Bearer " + access_token };
+    const url = this.http.path("mint/check");
+    const result = await this.http.get({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
   putImageUpload = async (url: string, data: Blob) => {
     await this.http.put({ url, data });
     return

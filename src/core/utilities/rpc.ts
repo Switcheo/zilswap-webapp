@@ -1,8 +1,8 @@
 import { RPCResponse } from "@zilliqa-js/core";
 import { Value } from "@zilliqa-js/contract";
+import { Zilliqa } from "@zilliqa-js/zilliqa";
 import { ZilswapConnector } from "core/zilswap";
 import { logger } from "./logger";
-import { Zilliqa } from "@zilliqa-js/zilliqa";
 
 export class RPCResultError extends Error {
   rpcResponse?: RPCResponse<any, string>;
