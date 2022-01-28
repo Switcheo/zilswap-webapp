@@ -667,6 +667,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "& .MuiTableCell-stickyHeader": {
       backgroundColor: "transparent",
+      top: "",
+      left: "",
     },
     "&::-webkit-scrollbar": {
       width: "5px",

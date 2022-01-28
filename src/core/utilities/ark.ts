@@ -54,10 +54,12 @@ const apiPaths = {
   "user/image/request": "/user/:address/upload/request",
   "user/image/notify": "/user/:address/upload/notify",
   "user/image/remove": "/user/:address/upload/remove",
+  "user/image/profile": "/user/:address/upload/profile",
   "mint/deploy": "/nft/mint/deploy",
   "mint/check": "/nft/mint/check",
   "mint/detail": "/nft/mint/:mintContractId/detail",
-  "user/image/profile": "/user/:address/upload/profile",
+  "mint/image/request": "/nft/mint/:mintContractId/upload/request",
+  "mint/image/notify": "/nft/mint/:mintContractId/upload/notify",
 };
 
 const getHttpClient = (network: Network) => {
@@ -338,6 +340,24 @@ export class ArkClient {
     const headers = { "authorization": "Bearer " + access_token };
     const url = this.http.path("mint/check");
     const result = await this.http.get({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  requestMintImageUploadUrl = async (mintContractId: string, access_token: string, type: string) => {
+    const headers = { "authorization": "Bearer " + access_token };
+    const url = this.http.path("mint/image/request", { mintContractId }, { type });
+    const result = await this.http.get({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  notifyMintImageUpload = async (mintContractId: string, access_token: string, type: string) => {
+    const headers = { "authorization": "Bearer " + access_token };
+    const url = this.http.path("mint/image/notify", { mintContractId }, { type });
+    const result = await this.http.post({ url, headers });
     const output = await result.json();
     await this.checkError(output);
     return output;

@@ -41,6 +41,11 @@ export type NftData = {
   attributes: SimpleMap<string>;
 };
 
+export type MintImageFiles = {
+  profile?: File;
+  banner?: File;
+}
+
 const collections = ["The Bear Market"];
 
 // const NAV_ITEMS = ["SET UP COLLECTION", "UPLOAD NFTs", "CONFIRM & MINT"];
@@ -56,7 +61,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const address = wallet?.addressInfo.byte20;
   const network = useNetwork();
   const [mintOption, setMintOption] = useState<MintOptionType>("create");
-  const [uploadedFiles, setUploadedFiles] = useState<SimpleMap<File>>({});
+  const [uploadedFiles, setUploadedFiles] = useState<MintImageFiles>({});
   const [inputValues, setInputValues] = useState<CollectionInputs>({
     collectionName: "",
     description: "",
@@ -88,6 +93,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [runQueryProfile] = useAsyncTask("queryProfile");
   const [runQueryMint, loadingQueryMint] = useAsyncTask("queryMint");
   const [runDeployCollection, loadingDeployCollection] = useAsyncTask("deployCollection", (error) => toaster(error.message, { overridePersist: false }));
+  const [runUploadImage] = useAsyncTask("uploadImage");
 
   const pendingMintContract = mintState.activeMintContract;
 
@@ -186,8 +192,8 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         twitterUrl: inputValues.twitterHandle,
         instagramUrl: inputValues.instagramHandle,
 
-        bannerImageUrl: "https://arkstatic.s3.ap-southeast-1.amazonaws.com/prod/tbm-banner.png",
-        profileImageUrl: "https://pbs.twimg.com/profile_images/1432977604563193858/z01O7Sey_400x400.jpg",
+        bannerImageUrl: "",
+        profileImageUrl: "",
 
         ownerName: inputValues.artistName,
         royaltyBps: parseFloat(inputValues.royalties) * 100,
@@ -203,12 +209,35 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
       const deployResult = await arkClient.deployCollection(params, newOAuth!.access_token);
 
-      // error handling here
-      const mintContract = deployResult.result.mint;
+      if (deployResult?.result?.mint) {
+        const mintContract = deployResult.result.mint;
 
-      console.log("contract: ", mintContract);
+        console.log("contract: ", mintContract);
 
-      dispatch(actions.Mint.addMintContract(mintContract));
+        if (uploadedFiles?.profile) {
+          imageUpload(mintContract.id, uploadedFiles.profile, newOAuth!.access_token, "profile", arkClient);
+        }
+
+        if (uploadedFiles?.banner) {
+          imageUpload(mintContract.id, uploadedFiles.banner, newOAuth!.access_token, "banner", arkClient);
+        }
+  
+        dispatch(actions.Mint.addMintContract(mintContract));
+      }
+    })
+  }
+
+  const imageUpload = (mintContractId: string, uploadFile: File, accessToken: string, type: string, arkClient: ArkClient) => {
+    runUploadImage(async () => {
+      const requestResult = await arkClient.requestMintImageUploadUrl(mintContractId, accessToken, type);
+
+      const blobData = new Blob([uploadFile], { type: uploadFile.type });
+    
+      console.log("data: ", blobData);
+      console.log("url: ", requestResult.result.uploadUrl);
+
+      await arkClient.putImageUpload(requestResult.result.uploadUrl, blobData);
+      await arkClient.notifyMintImageUpload(mintContractId, accessToken, type);
     })
   }
 
