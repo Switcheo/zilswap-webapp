@@ -12,20 +12,20 @@ import BigNumber from "bignumber.js";
 import { AppTheme } from "app/theme/types";
 import { TWITTER_REGEX, INSTAGRAM_REGEX } from "app/utils/constants";
 import { ArkInput, HelpInfo } from "app/components";
-import { hexToRGBA, SimpleMap } from "app/utils";
+import { hexToRGBA } from "app/utils";
 import PlaceholderLight from "app/components/ArkComponents/ArkImageView/placeholder_bear_light.png";
 import PlaceholderDark from "app/components/ArkComponents/ArkImageView/placeholder_bear_dark.png";
 import BannerLight from "app/components/ArkComponents/ArkImageView/Banner_Light.png";
 import BannerDark from "app/components/ArkComponents/ArkImageView/Banner_Dark.png";
-import { CollectionInputs, MintOptionType } from "../../Mint";
+import { CollectionInputs, MintImageFiles, MintOptionType } from "../../Mint";
 
 interface Props extends BoxProps {
   inputValues: CollectionInputs;
   setInputValues: React.Dispatch<React.SetStateAction<CollectionInputs>>;
   mintOption: string;
   setMintOption: React.Dispatch<React.SetStateAction<MintOptionType>>;
-  uploadedFiles: SimpleMap<File>,
-  setUploadedFiles: React.Dispatch<React.SetStateAction<SimpleMap<File>>>;
+  uploadedFiles: MintImageFiles,
+  setUploadedFiles: React.Dispatch<React.SetStateAction<MintImageFiles>>;
   errors: CollectionInputs;
   setErrors:  React.Dispatch<React.SetStateAction<CollectionInputs>>;
   existingCollections: string[];
@@ -50,7 +50,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
     reader.onloadend = () => {
       setDisplayImage(reader.result);
-      setUploadedFiles({ ...uploadedFiles, display: files[0] });
+      setUploadedFiles({ ...uploadedFiles, profile: files[0] });
     }
 
     reader.readAsDataURL(files[0]);

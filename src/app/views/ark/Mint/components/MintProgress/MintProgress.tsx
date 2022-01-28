@@ -27,22 +27,13 @@ const MintProgress: React.FC<Props> = (props: Props) => {
 
   const [acceptTxId, setAcceptTxId] = useState<string | null>(null);
   const [loadingTx, setLoadingTx] = useState<boolean>(false);
-  const [hasAcceptOwnership, setHasAcceptOwnership] = useState<boolean>(false);
+  const [acceptOwnership, setAcceptOwnership] = useState<boolean>(false);
 
   const [runAcceptOwnership, loadingAcceptOwnership] = useAsyncTask("acceptOwnership", (error) => toaster(error.message, { overridePersist: false }));
 
   const onViewCollection = () => {
     history.push(`/arky/collections/${toBech32Address(pendingMintContract?.contractAddress!)}`);
   }
-
-  const isViewCollectionEnabled = useMemo(() => {
-    return pendingMintContract?.contractAddress && pendingMintContract.status === "completed";
-  }, [pendingMintContract])
-
-  const isAcceptOwnershipEnabled = useMemo(() => {
-    if (hasAcceptOwnership) return false;
-    return pendingMintContract?.contractAddress && pendingMintContract.status === "transferring";
-  }, [hasAcceptOwnership, pendingMintContract])
 
   // statuses
   const hasDeployed = useMemo(() => {
@@ -53,9 +44,23 @@ const MintProgress: React.FC<Props> = (props: Props) => {
     return pendingMintContract.mintedCount === pendingMintContract.tokenCount;
   }, [pendingMintContract])
 
+  // add field in MintContract to indicate?
+  const hasAcceptOwnership = useMemo(() => {
+    return acceptOwnership || pendingMintContract.status === "completed";
+  }, [acceptOwnership, pendingMintContract])
+
   const hasCompleted = useMemo(() => {
-    return hasAcceptOwnership;
-  }, [hasAcceptOwnership])
+    return pendingMintContract.status === "completed";
+  }, [pendingMintContract])
+
+  const isViewCollectionEnabled = useMemo(() => {
+    return pendingMintContract?.contractAddress && pendingMintContract.status === "completed";
+  }, [pendingMintContract])
+
+  const isAcceptOwnershipEnabled = useMemo(() => {
+    if (hasAcceptOwnership) return false;
+    return pendingMintContract?.contractAddress && pendingMintContract.status === "transferring";
+  }, [hasAcceptOwnership, pendingMintContract])
 
   const explorerLink = useMemo(() => {
     if (network === Network.MainNet) {
@@ -80,7 +85,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
           try {
             console.log("waitForTx", transaction.id)
             await waitForTx(transaction.id);
-            setHasAcceptOwnership(true);
+            setAcceptOwnership(true);
           } catch (e) {
             console.log("waitForTx", e);
           } finally {
@@ -171,13 +176,13 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       <Box display="flex" marginBottom={5} position="relative">
         <Box className={cls(classes.stepBar, classes.stepBarThird, {
           [classes.stepBarActive]: hasMinted,
-          [classes.stepBarCompleted]: hasCompleted
+          [classes.stepBarCompleted]: hasAcceptOwnership
         })}/>
         <Box className={cls(classes.step, {
           [classes.stepActive]: hasMinted,
-          [classes.stepCompleted]: hasCompleted
+          [classes.stepCompleted]: hasAcceptOwnership
         })}>
-          {hasCompleted ? (
+          {hasAcceptOwnership ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>3</span>
