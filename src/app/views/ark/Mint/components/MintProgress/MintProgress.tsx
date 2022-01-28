@@ -213,7 +213,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       {/* Complete */}
       <Box display="flex">
         <Box className={cls(classes.step, {
-          [classes.stepActive]: hasCompleted,
+          [classes.stepActive]: hasAcceptOwnership,
           [classes.stepCompleted]: hasCompleted
         })}>
           {hasCompleted? (
