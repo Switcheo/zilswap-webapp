@@ -444,6 +444,14 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     },
   } as const;
 
+  const displayRewardAmount = (amount: BigNumber) => {
+    return amount.isLessThan(0.001)
+      ? amount.toFormat(4)
+      : amount.isLessThan(0.01)
+        ? amount.toFormat(3)
+        : amount.toFormat(2)
+  }
+
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <Fragment>
@@ -575,8 +583,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                         }
                                         label={
                                           <Text className={classes.epochReward}>
-                                            {/* Need toHumanNumber? */}
-                                            {reward.info.amount.shiftedBy(-token.decimals).toFormat(2)}
+                                            {displayRewardAmount(reward.info.amount.shiftedBy(-token.decimals))}
                                             <CurrencyLogo address={token.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)} />
                                             <span className={classes.currency}>
                                               {token.symbol}
