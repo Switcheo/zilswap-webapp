@@ -16,14 +16,7 @@ export const valueCalculators = {
 
   amount: (prices: { [index: string]: BigNumber }, token: TokenInfo, amount: BigNumber) => {
     if (!token) return BIG_ZERO;
-    let tokenPrice;
-
-    if (token.isWzil) {
-      tokenPrice = prices[ZIL_ADDRESS];
-    } else {
-      tokenPrice = prices[token.address] ?? BIG_ZERO;
-    }
-    
+    const tokenPrice = prices[token.address] ?? BIG_ZERO;
     const tokenValue = amount.shiftedBy(-token.decimals).times(tokenPrice) ?? BIG_ZERO;
     return tokenValue;
   },
