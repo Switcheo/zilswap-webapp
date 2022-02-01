@@ -512,8 +512,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                         const token = tokenFinder(tokenAddress)!
                         return (
                           <Text variant="h4" className={classes.totalReward} key={tokenAddress}>
-                            {/* toHumanNumber? */}
-                            {claimableAmountsByToken[tokenAddress].shiftedBy(-token!.decimals).toFormat(2)}
+                            {displayRewardAmount(claimableAmountsByToken[tokenAddress].shiftedBy(-token!.decimals))}
                             <CurrencyLogo address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoMd)} />
                             <span className={classes.currency}>
                               {token.symbol}
