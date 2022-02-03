@@ -79,6 +79,7 @@ export interface Distributor {
 	reward_token_symbol: string;
 	reward_token_address_hex: string;
 	distributor_address_hex: string;
+	token_balance?: BigNumber;
 	emission_info: EmissionInfo;
   incentivized_pools: {
     [pool: string]: number;

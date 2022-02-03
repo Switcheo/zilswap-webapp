@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js'
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
-import { Distribution, Distributor, EstimatedRewards, ZAPStats, logger } from "core/utilities";
+import { Distribution, Distributor, EstimatedRewards, ZAPStats, logger, zilParamsToMap } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { actions } from "app/store";
 import { BlockchainActionTypes } from "app/store/blockchain/actions";
@@ -31,7 +31,8 @@ function* queryDistributors() {
       for (const distributor of distributors) {
         const {
           incentivized_pools, distributor_name,
-          reward_token_address_hex, emission_info
+          reward_token_address_hex, emission_info,
+          distributor_address_hex
         } = distributor
         const {
           distribution_start_time, epoch_period,
@@ -46,6 +47,16 @@ function* queryDistributors() {
         const epochs_completed = Math.floor(Math.max(0, now - distribution_start_time) / epoch_period)
         const from = ended ? -1 : distribution_start_time + (epochs_completed * epoch_period)
         const until = ended ? -1 : from + epoch_period
+
+        const zilswap = ZilswapConnector.getSDK();
+        const contract = zilswap.getContract(reward_token_address_hex);
+
+        const contractInitRaw = yield call([contract, contract.getInit]);
+        const decimals = zilParamsToMap(contractInitRaw).decimals;
+        const balances = yield call([contract, contract.getSubState], "balances");
+        const tokenBalance = new BigNumber(balances[distributor_address_hex]).shiftedBy(-decimals);
+
+        console.log("token balance: ", tokenBalance);
 
         distrWithTimings.push({ ...distributor, currentEpochStart: from, currentEpochEnd: until })
         if (ended)
