@@ -6,6 +6,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import CheckBoxIcon from "@material-ui/icons/CheckBoxRounded";
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBoxRounded";
+import ErrorIcon from '@material-ui/icons/ErrorOutlineOutlined';
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import dayjs from "dayjs";
@@ -236,6 +237,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         opacity: 0.8,
         backgroundColor: "#FFDF6B",
       }
+    }
+  },
+  errorIcon: {
+    fontSize: "1rem",
+    verticalAlign: "bottom!important",
+    color: theme.palette.text?.secondary,
+    marginLeft: "4px",
+    marginRight: "-1px",
+    "&:hover": {
+      color: "#FF5252",
     }
   }
 }));
@@ -570,14 +581,15 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                 </Box>
                                 <Divider />
                                 {rewardsByDate[date].map(reward => {
-                                  const token = reward.rewardToken
+                                  const token = reward.rewardToken;
+                                  const isDisabled = !reward?.funded || claimedDistributions.includes(reward.info.id);
 
                                   return (
                                     <Box mt={0.5} key={reward.info.id}>
                                       <FormControlLabel
                                         control={
                                           <Checkbox
-                                            disabled={!reward?.funded || claimedDistributions.includes(reward.info.id)}
+                                            disabled={isDisabled}
                                             className={classes.checkbox}
                                             checked={isDistributionSelected(reward)}
                                             onChange={handleSelect(reward)}
@@ -589,7 +601,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                             <CurrencyLogo address={token.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)} />
                                             <span className={classes.currency}>
                                               {token.symbol}
-                                              <HelpInfo placement="top" title={`${reward.rewardDistributor.name} from ${reward.rewardDistributor.distributor_name} at ${reward.rewardDistributor.distributor_address_hex} for epoch ${reward.info.epoch_number}.`} className={classes.tooltip} />
+                                              <HelpInfo placement="top" title={`${reward.rewardDistributor.name} from ${reward.rewardDistributor.distributor_name} at ${reward.rewardDistributor.distributor_address_hex} for epoch ${reward.info.epoch_number}.`} className={classes.tooltip} icon={isDisabled ? <ErrorIcon className={classes.errorIcon} /> : undefined} />
                                             </span>
                                           </Text>
                                         }
