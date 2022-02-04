@@ -22,6 +22,7 @@ export type PoolRewards = ReadonlyArray<PoolReward>;
 export interface DistributionWithStatus {
   info: Distribution;
   readyToClaim: boolean;
+  funded?: boolean;
   claimed?: boolean;
   claimTx?: any;
 }

@@ -1,14 +1,14 @@
 import { BigNumber } from 'bignumber.js'
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
-import { Distribution, Distributor, EstimatedRewards, ZAPStats, logger, zilParamsToMap } from "core/utilities";
+import { Distribution, Distributor, EstimatedRewards, ZAPStats, logger } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { actions } from "app/store";
 import { BlockchainActionTypes } from "app/store/blockchain/actions";
 import { RewardsActionTypes } from "app/store/rewards/actions";
 import { DistributionWithStatus, DistributorWithTimings, PoolReward, PotentialRewards } from "app/store/types";
 import { WalletActionTypes } from "app/store/wallet/actions";
-import { SimpleMap } from "app/utils";
+import { bnOrZero, SimpleMap } from "app/utils";
 import { PollIntervals } from "app/utils/constants";
 import { getBlockchain, getRewards, getTokens, getWallet } from "../selectors";
 
@@ -32,7 +32,6 @@ function* queryDistributors() {
         const {
           incentivized_pools, distributor_name,
           reward_token_address_hex, emission_info,
-          distributor_address_hex
         } = distributor
         const {
           distribution_start_time, epoch_period,
@@ -47,16 +46,6 @@ function* queryDistributors() {
         const epochs_completed = Math.floor(Math.max(0, now - distribution_start_time) / epoch_period)
         const from = ended ? -1 : distribution_start_time + (epochs_completed * epoch_period)
         const until = ended ? -1 : from + epoch_period
-
-        const zilswap = ZilswapConnector.getSDK();
-        const contract = zilswap.getContract(reward_token_address_hex);
-
-        const contractInitRaw = yield call([contract, contract.getInit]);
-        const decimals = zilParamsToMap(contractInitRaw).decimals;
-        const balances = yield call([contract, contract.getSubState], "balances");
-        const tokenBalance = new BigNumber(balances[distributor_address_hex]).shiftedBy(-decimals);
-
-        console.log("token balance: ", tokenBalance);
 
         distrWithTimings.push({ ...distributor, currentEpochStart: from, currentEpochEnd: until })
         if (ended)
@@ -113,6 +102,7 @@ function* queryDistribution() {
       logger("zap saga", "query distributions");
 
       const { network } = getBlockchain(yield select())
+      const { distributors } = getRewards(yield select())
       const walletState = getWallet(yield select())
 
       if (!walletState.wallet) {
@@ -138,9 +128,26 @@ function* queryDistribution() {
           uploadStates[addr] = uploadState = yield call([contract, contract.getSubState], "merkle_roots");
         }
         const merkleRoots = uploadState?.merkle_roots ?? {};
+
+        let funded;
+        const distributor = distributors.find(d => d.distributor_address_hex === addr);
+        if (distributor) {
+          const distributorContract = zilswap.getContract(distributor.reward_token_address_hex);
+          const balances = yield call([distributorContract, distributorContract.getSubState], "balances");
+
+          const tokenBalance = balances[addr];
+
+          if (tokenBalance) {
+            funded = bnOrZero(tokenBalance).isGreaterThan(info.amount);
+          } else {
+            funded = true;
+          }
+        }
+
         distributions.push({
           info,
           readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
+          funded,
         })
       }
 

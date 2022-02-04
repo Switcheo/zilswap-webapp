@@ -20,7 +20,7 @@ import { DistributionWithStatus, DistributorWithTimings, RewardsState, RootState
 import { AppTheme } from "app/theme/types";
 import { formatZWAPLabel, hexToRGBA, useAsyncTask, useNetwork, useTokenFinder, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
-import { ReactComponent as IconSVG } from './icon.svg';
+import { ReactComponent as IconSVG } from "./icon.svg";
 
 interface Props extends BoxProps {
   buttonMode?: boolean;
@@ -176,6 +176,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginLeft: "2px"
   },
   checkbox: {
+    "&.Mui-disabled": {
+      color: theme.palette.background.contrast,
+    },
     "& .MuiSvgIcon-root": {
       fontSize: "1rem",
     },
@@ -405,7 +408,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     // if checked, selectedDistributions should contain all claimable distributions
     if (event.target.checked) {
-      setSelectedDistributions(claimableRewards.filter(r => !claimedDistributions.includes(r.info.id)));
+      setSelectedDistributions(claimableRewards.filter(r => r.funded && !claimedDistributions.includes(r.info.id)));
     } else {
       setSelectedDistributions([]);
     }
@@ -574,7 +577,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                       <FormControlLabel
                                         control={
                                           <Checkbox
-                                            disabled={claimedDistributions.includes(reward.info.id)}
+                                            disabled={!reward?.funded || claimedDistributions.includes(reward.info.id)}
                                             className={classes.checkbox}
                                             checked={isDistributionSelected(reward)}
                                             onChange={handleSelect(reward)}
