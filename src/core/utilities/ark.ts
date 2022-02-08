@@ -390,9 +390,9 @@ export class ArkClient {
 
     // if no operator_approvals, check for operators
     if (!approvalState) {
-      const zrc6Response = await zilswap.zilliqa.blockchain.getSmartContractSubState(tokenAddress, "operators");
+      const zrc6Response = await zilswap.zilliqa.blockchain.getSmartContractSubState(tokenAddress, "operators", [ownerAddress.toLowerCase()]);
       const zrc6ApprovalState = zrc6Response.result?.operators;
-      if (zrc6ApprovalState?.[this.brokerAddress]) return null;
+      if (zrc6ApprovalState?.[ownerAddress.toLowerCase()]?.[this.brokerAddress]) return null;
       // use zrc6 transition
       return await this.zrc6ApproveAllowance(tokenAddress, zilswap);
     }
