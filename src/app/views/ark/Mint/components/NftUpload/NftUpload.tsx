@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import cls from "classnames";
-import { Box, BoxProps, Button, Typography, FormControl, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, useMediaQuery } from "@material-ui/core";
+import { Box, BoxProps, Button, Typography, FormControl, FormHelperText, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, useMediaQuery } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import AddIcon from '@material-ui/icons/AddRounded';
@@ -10,7 +10,7 @@ import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { AppTheme } from "app/theme/types";
 import { ArkChipInput, ArkInput, HelpInfo } from "app/components";
 import { hexToRGBA } from "app/utils";
-import { AttributeData, NftData } from "../../Mint";
+import { AttributeData, Errors, NftData } from "../../Mint";
 import { ReactComponent as FileIcon } from "./assets/file.svg";
 import { ReactComponent as FileSuccessIcon} from "./assets/file-success.svg";
 // import { ReactComponent as FileErrorIcon } from "./assets/file-error.svg";
@@ -20,13 +20,15 @@ interface Props extends BoxProps {
   setNfts: React.Dispatch<React.SetStateAction<NftData[]>>;
   attributes: AttributeData[];
   setAttributes: React.Dispatch<React.SetStateAction<AttributeData[]>>;
+  errors: Errors;
+  setErrors:  React.Dispatch<React.SetStateAction<Errors>>;
 }
 
 // need to settle failed as well
 export type ProgressType = "queued" | "uploaded";
 
 const NftUpload: React.FC<Props> = (props: Props) => {
-  const { children, className, attributes, setAttributes, nfts, setNfts, ...rest } = props;
+  const { children, className, attributes, setAttributes, nfts, setNfts, errors, setErrors, ...rest } = props;
   const classes = useStyles();
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
 
@@ -64,6 +66,12 @@ const NftUpload: React.FC<Props> = (props: Props) => {
               ...prevState.slice(size + index + 1)
             ]
           ));
+
+          if (errors.nfts)
+            setErrors({
+              ...errors,
+              nfts: "",
+            })
         }
 
         readFile(index + 1);
@@ -248,7 +256,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                           <Box className={classes.progressBoxInner}>
                             {uploadedFiles.map((file, index) => {
                               return (
-                                <Box display="flex" justifyContent="space-around" alignItems="center" className={classes.nftProgress}>
+                                <Box key={index} display="flex" justifyContent="space-around" alignItems="center" className={classes.nftProgress}>
                                   {progress[index] === "queued"
                                     ? <FileIcon />
                                     : <FileSuccessIcon />
@@ -286,6 +294,10 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         <Typography className={cls(classes.instruction, classes.footerInstruction)}>
           Recommended format: PNG, JPEG, GIF &nbsp;|&nbsp; Maximum number of files: 200 &nbsp;|&nbsp; Maximum size per file: 50MB
         </Typography>
+        
+        {errors.nfts && (
+          <FormHelperText className={classes.errorText}>{errors.nfts}</FormHelperText>
+        )}
       </Box>
 
       {/* Attributes */}
@@ -396,7 +408,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
               {/* no. of NFTs */}
               {!!nfts.length && nfts.map((nft, index) => {
                 return (
-                  <TableRow>
+                  <TableRow key={index}>
                     <TableCell component="th" scope="row" className={classes.imageCell}>
                       <img src={nft.image?.toString()} alt="NFT" height="39.25px" width="39.25px" className={classes.nftImage} />
                       <ArkInput
@@ -664,9 +676,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 12,
     "& .MuiTableCell-root": {
       minWidth: 110,
+      backgroundColor: theme.palette.background.default,
     },
     "& .MuiTableCell-stickyHeader": {
-      backgroundColor: "transparent",
+      backgroundColor: theme.palette.background.default,
       top: "",
       left: "",
     },
@@ -806,8 +819,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     left: 0,
     zIndex: 1,
     minWidth: "200px!important",
-    // fix background here
-    // background: theme.palette.background.gradient,
   },
   nftImage: {
     borderRadius: "12px", 
@@ -825,6 +836,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiSelect-root": {
       border: "1px solid #FF5252",
     },
+  },
+  errorText: {
+    color: "#FF5252",
+    marginTop: "-12px",
+    fontSize: 10,
+    fontWeight: 600,
   }
 }));
 

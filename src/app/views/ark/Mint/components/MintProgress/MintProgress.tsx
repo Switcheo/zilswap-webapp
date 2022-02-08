@@ -44,9 +44,8 @@ const MintProgress: React.FC<Props> = (props: Props) => {
     return pendingMintContract.mintedCount === pendingMintContract.tokenCount;
   }, [pendingMintContract])
 
-  // add field in MintContract to indicate?
   const hasAcceptOwnership = useMemo(() => {
-    return acceptOwnership || pendingMintContract.status === "completed";
+    return acceptOwnership || pendingMintContract.status === "accepted" || pendingMintContract.status === "completed";
   }, [acceptOwnership, pendingMintContract])
 
   const hasCompleted = useMemo(() => {
@@ -59,7 +58,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
 
   const isAcceptOwnershipEnabled = useMemo(() => {
     if (hasAcceptOwnership) return false;
-    return pendingMintContract?.contractAddress && pendingMintContract.status === "transferring";
+    return pendingMintContract?.contractAddress && pendingMintContract.status === "transferred";
   }, [hasAcceptOwnership, pendingMintContract])
 
   const explorerLink = useMemo(() => {
@@ -73,7 +72,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
   // call accept contract ownership
   const onAcceptOwnership = () => {
     runAcceptOwnership(async () => {
-      if (pendingMintContract?.contractAddress && pendingMintContract.status === "transferring") {
+      if (pendingMintContract?.contractAddress && pendingMintContract.status === "transferred") {
         const arkClient = new ArkClient(network);
         const zilswap = ZilswapConnector.getSDK();
   
@@ -104,6 +103,26 @@ const MintProgress: React.FC<Props> = (props: Props) => {
     }
 
     return 0;
+  }
+
+  const getEstimatedTime = () => {
+    if (pendingMintContract.status === "completed") {
+      return 0;
+    }
+
+    if (pendingMintContract.status === "accepted") {
+      return 5;
+    }
+
+    if (pendingMintContract.mintedCount === pendingMintContract.tokenCount) {
+      return 10;
+    }
+
+    if (pendingMintContract.contractAddress) {
+      return 20;
+    }
+
+    return 25;
   }
 
   return (
@@ -229,7 +248,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       </Box>
 
       <KeyValueDisplay kkey="Estimated Time" mt="24px" mb="24px" className={classes.estimatedTime}>
-        <span>~ 27 Minutes Left</span>
+        <span>~ {getEstimatedTime()} Minutes Left</span>
       </KeyValueDisplay>
 
       <Box className={classes.warningBox}>

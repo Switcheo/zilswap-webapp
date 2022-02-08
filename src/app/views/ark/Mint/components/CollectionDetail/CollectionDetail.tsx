@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import cls from "classnames";
-import { Box, BoxProps, FormControl, IconButton, Typography, Select, MenuItem } from "@material-ui/core";
+import { Box, BoxProps, IconButton, Typography } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import DoneIcon from "@material-ui/icons/DoneRounded";
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import BigNumber from "bignumber.js";
@@ -17,7 +16,7 @@ import PlaceholderLight from "app/components/ArkComponents/ArkImageView/placehol
 import PlaceholderDark from "app/components/ArkComponents/ArkImageView/placeholder_bear_dark.png";
 import BannerLight from "app/components/ArkComponents/ArkImageView/Banner_Light.png";
 import BannerDark from "app/components/ArkComponents/ArkImageView/Banner_Dark.png";
-import { CollectionInputs, MintImageFiles, MintOptionType } from "../../Mint";
+import { CollectionInputs, Errors, MintImageFiles, MintOptionType } from "../../Mint";
 
 interface Props extends BoxProps {
   inputValues: CollectionInputs;
@@ -26,20 +25,19 @@ interface Props extends BoxProps {
   setMintOption: React.Dispatch<React.SetStateAction<MintOptionType>>;
   uploadedFiles: MintImageFiles,
   setUploadedFiles: React.Dispatch<React.SetStateAction<MintImageFiles>>;
-  errors: CollectionInputs;
-  setErrors:  React.Dispatch<React.SetStateAction<CollectionInputs>>;
-  existingCollections: string[];
+  errors: Errors;
+  setErrors:  React.Dispatch<React.SetStateAction<Errors>>;
 }
 
 const DESCRIPTION_PLACEHOLDER = "The Bear Market is a collection of 10,000 programmatically, randomly-generated NFT bears on the Zilliqa blockchain."
 
 const CollectionDetail: React.FC<Props> = (props: Props) => {
-  const { children, className, inputValues, setInputValues, existingCollections, mintOption, setMintOption, uploadedFiles, setUploadedFiles, errors, setErrors, ...rest } = props;
+  const { children, className, inputValues, setInputValues, mintOption, setMintOption, uploadedFiles, setUploadedFiles, errors, setErrors, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
   const [displayImage, setDisplayImage] = useState<string | ArrayBuffer | null>(null);
   const [bannerImage, setBannerImage] = useState<string | ArrayBuffer | null>(null);
-  const [collection, setCollection] = useState<string>("");
+  // const [collection, setCollection] = useState<string>("");
 
   const onHandleDisplayDrop = (files: any, rejection: FileRejection[], dropEvent: DropEvent) => {
     if (!files.length) {
@@ -138,10 +136,10 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
     }
   }
 
-  const handleSelectCollection = (collection: string) => {
-    setCollection(collection);
-    setInputValues({ ...inputValues, "collectionName": collection });
-  }
+  // const handleSelectCollection = (collection: string) => {
+  //   setCollection(collection);
+  //   setInputValues({ ...inputValues, "collectionName": collection });
+  // }
 
   return (
     <Box className={classes.root} {...rest}>
@@ -163,12 +161,12 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
             <Typography>Create Collection</Typography>
           </ToggleButton>
 
-          <ToggleButton value="select" className={classes.collectionButton} disabled={existingCollections.length === 0}>
+          {/* <ToggleButton value="select" className={classes.collectionButton}>
             <Typography>Select Collection</Typography>
-          </ToggleButton>
+          </ToggleButton> */}
         </ToggleButtonGroup>
 
-        {mintOption === "select" && (
+        {/* {mintOption === "select" && (
           <Box mt={3}>
             <Typography className={classes.header}>
               SELECT EXISTING COLLECTION
@@ -200,20 +198,10 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
                 }}
                 displayEmpty
               >
-                {existingCollections.map((currCollection) => {
-                  return (
-                    <MenuItem value={currCollection}>
-                      {currCollection}
-                      {collection === currCollection && (
-                        <DoneIcon fontSize="small" />
-                      )}
-                    </MenuItem>
-                  )
-                })}
               </Select>
             </FormControl>
           </Box>
-        )}
+        )} */}
       </Box>
 
       {/* Display Picture & Banner */}
@@ -427,7 +415,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   collectionButton: {
     borderRadius: "12px!important",
-    width: "100%",
+    width: "50%",
     padding: theme.spacing(2.5, 5),
     backgroundColor: `rgba${theme.palette.type === "dark"
     ? hexToRGBA("#DEFFFF", 0.1)

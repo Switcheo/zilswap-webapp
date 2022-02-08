@@ -39,6 +39,13 @@ const reducer = (state: MintState = initial_state, action: any) => {
       }
     }
 
+    case MintActionTypes.DISMISS_MINT_CONTRACT: {
+      return {
+        ...state,
+        activeMintContract: undefined,
+      }
+    }
+
     case MintActionTypes.UPDATE_MINT_CONTRACT: {
       return {
         ...state,

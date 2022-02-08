@@ -7,8 +7,12 @@ export enum Status {
   Created = "created",
   Queued = "queued",
   Deploying = "deploying",
+  Deployed = "deployed",
   Minting = "minting",
+  Minted = "minted",
   Transferring = "transferring",
+  Transferred = "transferred",
+  Accepted = "accepted",
   Completed = "completed",
 }
 
