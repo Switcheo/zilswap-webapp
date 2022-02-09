@@ -60,6 +60,18 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     showUntil: dayjs('2021-12-21T10:00:00.000+0800'),
     usdRatio: '0.7',
     usdTarget: '$2,100,000',
+  }, {
+    projectURL: 'https://docs.zilswap.io/zilo/overview/05-zilwatch',
+    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-5-ZWT-banner.png',
+    tokenSymbol: 'ZWT',
+    tokenName: 'ZilWatch',
+    tokenDecimals: 8,
+    description: 'ZilWatch is a free-to-use comprehensive smart dashboard that aims to be the one-stop solution for all things in Zilliqa.',
+    comingSoon: true,
+    contractAddress: 'zil1pvu8jfs5p5l2w6c0qrqxcv7t6lmzd4mvlh6ull',
+    showUntil: dayjs('2022-02-17T10:00:00.000+0800'),
+    usdRatio: '0.7',
+    usdTarget: '$660,000',
   }],
   [Network.TestNet]: [{
     projectURL: 'https://docs.zilswap.io/zilo/overview/01-zilstream',
@@ -107,7 +119,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     usdTarget: '$2,100,000',
   }, {
     projectURL: 'https://docs.zilswap.io/zilo/overview/05-zilwatch',
-    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-0-banner.png',
+    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-5-ZWT-banner.png',
     tokenSymbol: 'ZWT',
     tokenName: 'ZilWatch',
     tokenDecimals: 8,
