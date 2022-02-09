@@ -71,7 +71,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     contractAddress: 'zil1pvu8jfs5p5l2w6c0qrqxcv7t6lmzd4mvlh6ull',
     showUntil: dayjs('2022-02-17T10:00:00.000+0800'),
     usdRatio: '0.7',
-    usdTarget: '$2,100,000',
+    usdTarget: '$660,000',
   }],
   [Network.TestNet]: [{
     projectURL: 'https://docs.zilswap.io/zilo/overview/01-zilstream',
