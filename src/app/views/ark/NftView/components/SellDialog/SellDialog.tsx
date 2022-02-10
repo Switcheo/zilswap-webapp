@@ -169,7 +169,8 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
       const walletAddress = wallet.addressInfo.byte20.toLowerCase();
       const hexTokenAddress = fromBech32Address(address).toLowerCase();
-      const transaction = await arkClient.approveAllowanceIfRequired(hexTokenAddress, walletAddress, ZilswapConnector.getSDK());
+      const brokerAddress = token.collection.brokerAddress;
+      const transaction = await arkClient.approveAllowanceIfRequired(hexTokenAddress, walletAddress, brokerAddress, ZilswapConnector.getSDK());
 
       if (transaction?.id) {
         toaster("Approve TX Submitted", { hash: transaction.id });
@@ -191,7 +192,8 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         feeAmount,
         expiry,
         nonce,
-      }))
+        brokerAddress,
+      }), brokerAddress)
 
       const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
 

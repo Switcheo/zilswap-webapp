@@ -116,6 +116,8 @@ export interface Collection {
   royaltyBps: number | null;
   royaltyType: string | null;
   artists?: SimpleMap<string>;
+
+  brokerAddress: string;
 }
 
 export interface CollectionWithStats extends Collection {
