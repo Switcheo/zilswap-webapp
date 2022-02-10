@@ -14,3 +14,11 @@ export const netZilToCarbon = (network: Network): CarbonSDK.Network => {
     default: return CarbonSDK.Network.DevNet;
   }
 }
+
+export const getZilChainId = (network: Network) => {
+  switch (network) {
+    case Network.MainNet: return 1;
+    case Network.TestNet: return 333;
+    default: return 222;
+  }
+}

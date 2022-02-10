@@ -75,7 +75,8 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
   const showTxApprove = useMemo(() => {
     if (!bestAsk || !priceToken || priceToken?.isZil) return false;
     const arkClient = new ArkClient(network);
-    const tokenProxyAddr = arkClient.tokenProxyAddress;
+    const brokerAddress = bestAsk.brokerAddress;
+    const tokenProxyAddr = arkClient.getTokenProxyForBrokerAddress(brokerAddress);
 
     const priceAmount = bnOrZero(bestAsk.price.amount);
     const unitlessInAmount = priceAmount.shiftedBy(priceToken!.decimals);
@@ -96,10 +97,11 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       const arkClient = new ArkClient(network);
       const tokenAddress = priceToken.address;
       const tokenAmount = new BigNumber(bestAsk.price.amount);
+      const tokenProxyAddress = arkClient.getTokenProxyForBrokerAddress(bestAsk.brokerAddress);
       const observedTx = await ZilswapConnector.approveTokenTransfer({
         tokenAmount: tokenAmount.shiftedBy(priceToken.decimals),
         tokenID: tokenAddress,
-        spenderAddress: arkClient.tokenProxyAddress
+        spenderAddress: tokenProxyAddress,
       });
 
       if (observedTx) {
@@ -139,6 +141,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 25; // blocks
+      const brokerAddress = bestAsk.brokerAddress;
       const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
         side: "Buy",
         token: { address, id, },
@@ -146,7 +149,8 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         feeAmount,
         expiry,
         nonce,
-      }))
+        brokerAddress,
+      }), brokerAddress)
 
       const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
 
@@ -165,6 +169,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         sellCheque: bestAsk,
         nftAddress: address,
         tokenId: id,
+        brokerAddress: bestAsk.brokerAddress,
       }, zilswap);
 
       zilswap.observeTx({
