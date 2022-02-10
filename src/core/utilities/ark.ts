@@ -27,7 +27,7 @@ export const ARK_CONTRACTS_V1: { [key in Network]: { broker: string, tokenProxy:
 }
 export const ARK_CONTRACTS_V2: { [key in Network]: { broker: string, tokenProxy: string } } = {
   [Network.MainNet]: { broker: 'zil1jna6pq6fsjsxdkvkz2wyt6tg80p762neqkz2qh', tokenProxy: 'zil1yrqlm8cxpqt8wq5y6axejvcs2h350ykj9cc758' },
-  [Network.TestNet]: { broker: 'zil136cl56q34qy5u6s04l5f763hg756x7a5f5kwrm', tokenProxy: 'zil1z5w3l52fvcknff3x9l4gmpq5y6ndkejhaj2nkh' },
+  [Network.TestNet]: { broker: 'zil1hapz8zfuq5lhhvwah5s6pu3gg9f044jsfz4n5e', tokenProxy: 'zil1l66xztqzpg5mshw6a3ulw9ue40w8gksgmmay6g' },
 }
 
 const apiPaths = {
