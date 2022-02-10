@@ -626,7 +626,7 @@ export class ArkClient {
    * @param tokenAddress hex address of zrc1 contract starting with 0x
    * @param tokenId token ID
    */
-  toAdtNft(nftAddress: string, tokenId: string, brokerAddress: string) {
+  toAdtNft(brokerAddress: string, nftAddress: string, tokenId: string) {
     if (nftAddress.startsWith("zil"))
       nftAddress = fromBech32Address(nftAddress).toLowerCase();
     return {
