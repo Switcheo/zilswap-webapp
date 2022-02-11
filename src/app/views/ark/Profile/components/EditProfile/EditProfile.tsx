@@ -341,6 +341,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                 </Dropzone>
                 <Typography className={cls(classes.instruction, classes.footerInstruction)}>Recommended format: PNG/JPEG &nbsp;|&nbsp; Banner size: 1300 (w) x 250 (h) px</Typography>
                 <ArkInput
+                  className={classes.input}
                   placeholder="BearCollector" error={errors.username} value={inputValues.username}
                   label="DISPLAY NAME" onValueChange={(value) => updateInputs("username")(value)}
                   instruction="This is how other users identify you on ARKY." wordLimit={20}
@@ -380,6 +381,7 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
                 </Collapse> */}
 
                 <ArkInput
+                  className={classes.input}
                   placeholder="My spirit animal's a bear" error={errors.bio} value={inputValues.bio}
                   label="BIO" onValueChange={(value) => updateInputs("bio")(value)} multiline={true}
                   instruction="Write a little about yourself." wordLimit={160}
@@ -387,15 +389,18 @@ const EditProfile: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
 
                 <Typography className={classes.social}>SOCIALS</Typography>
                 <ArkInput
+                  className={classes.input}
                   startAdornment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
                   error={errors.twitterHandle} value={inputValues.twitterHandle} label="Twitter"
                   onValueChange={(value) => updateInputs("twitterHandle")(value)}
                 />
                 <ArkInput
+                  className={classes.input}
                   startAdornment={<Typography>@</Typography>} inline={true} placeholder="nftsforlife"
                   error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram"
                   onValueChange={(value) => updateInputs("instagramHandle")(value)} />
                 <ArkInput
+                  className={classes.input}
                   inline={true} placeholder="https://www.example.com" error={errors.websiteUrl} value={inputValues.websiteUrl}
                   label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
                 />
@@ -619,6 +624,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   infoIcon: {
     verticalAlign: "text-top",
     fontSize: "1rem",
+  },
+  input: {
+    "& .MuiFormControl-root": {
+      marginBottom: theme.spacing(2),
+    }
   }
 }));
 

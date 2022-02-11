@@ -87,7 +87,9 @@ const ArkInput: React.FC<Props> = (props: Props) => {
             className={cls({ [classes.focused]: onFocus && !error, [classes.multiline]: multiline, [classes.error]: error && !!value, [classes.errorBorder]: errorBorder })}
             multiline={multiline} value={value} onChange={(e) => onValueChange(e.target.value)} fullWidth defaultValue="react-bootstrap" {...rest} />
         )}
-        <FormHelperText className={cls({ [classes.errorText]: true })} >{error ? error : " "}</FormHelperText>
+        {error &&
+          <FormHelperText className={classes.errorText} >{error}</FormHelperText>
+        }
       </FormControl>
     </Box >
   );

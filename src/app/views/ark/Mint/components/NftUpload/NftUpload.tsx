@@ -519,9 +519,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   header: {
     fontFamily: "'Raleway', sans-serif",
-    fontSize: "13px",
+    fontSize: "15px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     fontWeight: 900,
+    [theme.breakpoints.down("xs")]: {
+      fontSize: "13px",
+    }
   },
   collectionBox: {
     marginTop: theme.spacing(4),
@@ -677,6 +680,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiTableCell-root": {
       minWidth: 110,
       backgroundColor: theme.palette.background.default,
+    },
+    "& .MuiTableCell-alignLeft": {
+      zIndex: 3,
     },
     "& .MuiTableCell-stickyHeader": {
       backgroundColor: theme.palette.background.default,

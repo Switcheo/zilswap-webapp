@@ -362,18 +362,21 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
                 </Dropzone>
                 <Typography className={cls(classes.instruction, classes.footerInstruction)}>Recommended format: PNG/JPEG &nbsp;|&nbsp; Banner size: 1300 (w) x 250 (h) px</Typography>
                 <ArkInput
+                  className={classes.input}
                   placeholder="The Bear Market" error={errors.name} value={inputValues.name}
                   label="COLLECTION NAME" onValueChange={(value) => updateInputs("name")(value)}
                   instruction="This is how other users identify you on ARKY." wordLimit={20}
                 />
 
                 <ArkInput
+                  className={classes.input}
                   placeholder="Switcheo Labs" error={errors.ownerName} value={inputValues.ownerName}
                   label="OWNER NAME" onValueChange={(value) => updateInputs("ownerName")(value)}
                   instruction="The collection owner's name." wordLimit={20}
                 />
 
                 <ArkInput
+                  className={classes.input}
                   placeholder="My spirit animal's a bear" error={errors.description} value={inputValues.description}
                   label="DESCRIPTION" onValueChange={(value) => updateInputs("description")(value)} multiline={true}
                   instruction="Write a little about the collection." wordLimit={160}
@@ -381,22 +384,27 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
 
                 <Typography className={classes.social}>SOCIALS</Typography>
                 <ArkInput
+                  className={classes.input}
                   inline={true} placeholder="https://www.example.com" error={errors.websiteUrl} value={inputValues.websiteUrl}
                   label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
                 />
                 <ArkInput
+                  className={classes.input}
                   inline={true} placeholder="https://www.example.com" error={errors.discordUrl} value={inputValues.discordUrl}
                   label="Discord" onValueChange={(value) => updateInputs("discordUrl")(value)}
                 />
                 <ArkInput
+                  className={classes.input}
                   inline={true} placeholder="https://www.example.com" error={errors.instagramUrl} value={inputValues.instagramUrl}
                   label="Instagram" onValueChange={(value) => updateInputs("instagramUrl")(value)}
                 />
                 <ArkInput
+                  className={classes.input}
                   inline={true} placeholder="https://www.example.com" error={errors.twitterUrl} value={inputValues.twitterUrl}
                   label="Twitter" onValueChange={(value) => updateInputs("twitterUrl")(value)}
                 />
                 <ArkInput
+                  className={classes.input}
                   inline={true} placeholder="https://www.example.com" error={errors.telegramUrl} value={inputValues.telegramUrl}
                   label="Telegram" onValueChange={(value) => updateInputs("telegramUrl")(value)}
                 />
@@ -607,6 +615,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   infoIcon: {
     verticalAlign: "text-top",
     fontSize: "1rem",
+  },
+  input: {
+    "& .MuiFormControl-root": {
+      marginBottom: theme.spacing(2),
+    }
   }
 }));
 

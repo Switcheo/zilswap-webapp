@@ -152,7 +152,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
       {/* Collection */}
       <Box className={classes.collectionBox}>
-        <Typography className={classes.header}>
+        {/* <Typography className={classes.header}>
           COLLECTION
         </Typography>
         <Typography className={classes.instruction}>Create a new collection or select from your existing collections.</Typography>
@@ -161,10 +161,10 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
             <Typography>Create Collection</Typography>
           </ToggleButton>
 
-          {/* <ToggleButton value="select" className={classes.collectionButton}>
+          <ToggleButton value="select" className={classes.collectionButton}>
             <Typography>Select Collection</Typography>
-          </ToggleButton> */}
-        </ToggleButtonGroup>
+          </ToggleButton>
+        </ToggleButtonGroup> */}
 
         {/* {mintOption === "select" && (
           <Box mt={3}>
@@ -267,7 +267,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
       {/* Collection Name */}
       <ArkInput
-        className={classes.collectionName}
+        className={cls(classes.collectionName, classes.inputHeader, classes.input)}
         placeholder="Beary Bare Bears" error={errors.collectionName} value={inputValues.collectionName}
         label="COLLECTION NAME" onValueChange={(value) => updateInputs("collectionName")(value)}
         instruction="Give your collection an identifiable name." wordLimit={50}
@@ -276,7 +276,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
       {/* Description */}
       <ArkInput
-        className={classes.description}
+        className={cls(classes.description, classes.inputHeader, classes.input)}
         placeholder={DESCRIPTION_PLACEHOLDER} error={errors.description} value={inputValues.description}
         label="DESCRIPTION" onValueChange={(value) => updateInputs("description")(value)}
         instruction="What makes your collection special?" wordLimit={300} multiline={true}
@@ -284,7 +284,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
       {/* Artist Name */}
       <ArkInput
-        className={classes.artistName} value={inputValues.artistName}
+        className={cls(classes.artistName, classes.inputHeader, classes.input)} value={inputValues.artistName}
         label="ARTIST NAME" onValueChange={() => {}}
         instruction="Your collection will be minted under this artist name."
         disabled
@@ -294,7 +294,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
       <ArkInput
         type="number"
         onInputBlur={onEndEditRoyalties}
-        className={classes.royalties}
+        className={cls(classes.royalties, classes.inputHeader, classes.input)}
         endAdornment={<span>%</span>}
         placeholder="2.5" error={errors.royalties} value={inputValues.royalties}
         label="ROYALTIES" onValueChange={(value) => updateInputs("royalties")(value)}
@@ -305,25 +305,30 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
       <Box className={classes.socialsBox}>
         <Typography className={classes.socialsHeader}>SOCIALS</Typography>
         <ArkInput
+          className={classes.input}
           inline={true} placeholder="https://thebear.market" error={errors.websiteUrl} value={inputValues.websiteUrl}
           label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
         />
         <ArkInput
+          className={classes.input}
           inline={true} placeholder="https://discord.gg/example"
           error={errors.discordUrl} value={inputValues.discordUrl} label="Discord"
           onValueChange={(value) => updateInputs("discordUrl")(value)}
         />
         <ArkInput
+          className={classes.input}
           startAdornment={<Typography>@</Typography>} inline={true} placeholder="bearycute"
           error={errors.twitterHandle} value={inputValues.twitterHandle} label="Twitter"
           onValueChange={(value) => updateInputs("twitterHandle")(value)}
         />
         <ArkInput
+          className={classes.input}
           startAdornment={<Typography>@</Typography>} inline={true} placeholder="bearycute"
           error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram"
           onValueChange={(value) => updateInputs("instagramHandle")(value)}
         />
         <ArkInput
+          className={classes.input}
           inline={true} placeholder="https://t.me/example"
           error={errors.telegramUrl} value={inputValues.telegramUrl} label="Telegram"
           onValueChange={(value) => updateInputs("telegramUrl")(value)} />
@@ -358,6 +363,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: 30,
     fontWeight: 700,
   },
+  inputHeader: {
+    "& div:first-child>p:first-child": {
+      fontSize: "15px",
+      fontWeight: 900,
+      [theme.breakpoints.down("xs")]: {
+        fontSize: "13px",
+      }
+    },
+  },
   collectionName: {
     marginTop: theme.spacing(3),
   },
@@ -375,10 +389,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   socialsHeader: {
     fontFamily: "'Raleway', sans-serif",
-    fontSize: "13px",
+    fontSize: "15px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     fontWeight: 900,
-    marginTop: theme.spacing(1)
+    marginTop: theme.spacing(1),
+    [theme.breakpoints.down("xs")]: {
+      fontSize: "13px",
+    }
   },
   instruction: {
     color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
@@ -388,9 +405,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   header: {
     fontFamily: "'Raleway', sans-serif",
-    fontSize: "13px",
+    fontSize: "15px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     fontWeight: 900,
+    [theme.breakpoints.down("xs")]: {
+      fontSize: "13px",
+    }
   },
   collectionBox: {
     marginTop: theme.spacing(4),
@@ -535,6 +555,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: "12px",
     lineHeight: "18px",
   },
+  input: {
+    "& .MuiFormControl-root": {
+      marginBottom: theme.spacing(2),
+    }
+  }
 }));
 
 export default CollectionDetail;
