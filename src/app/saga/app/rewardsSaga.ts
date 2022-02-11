@@ -132,13 +132,13 @@ function* queryDistribution() {
         let funded;
         const distributor = distributors.find(d => d.distributor_address_hex === addr);
         if (distributor) {
-          const distributorContract = zilswap.getContract(distributor.reward_token_address_hex);
-          const balances = yield call([distributorContract, distributorContract.getSubState], "balances");
+          const tokenContract = zilswap.getContract(distributor.reward_token_address_hex);
+          const balances = yield call([tokenContract, tokenContract.getSubState], "balances");
 
           const tokenBalance = balances[addr];
 
           if (tokenBalance) {
-            funded = bnOrZero(tokenBalance).isGreaterThan(info.amount);
+            funded = bnOrZero(tokenBalance).gte(info.amount);
           } else {
             funded = true;
           }
