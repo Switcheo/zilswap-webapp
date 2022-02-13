@@ -58,7 +58,7 @@ const ConfirmMint: React.FC<Props> = (props: Props) => {
       {displayErrorBox && (
         <Box className={classes.errorBox}>
           <WarningIcon className={classes.warningIcon} />
-          <Text color="error">
+          <Text>
             Please complete the relevant field(s) before minting.
           </Text>
         </Box>
@@ -133,6 +133,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     alignItems: "center",
     "& .MuiTypography-root": {
+      color: `rgba${hexToRGBA("#FF5252", 0.8)}`,
       fontSize: "14px",
       lineHeight: "17px",
       [theme.breakpoints.down("xs")]: {

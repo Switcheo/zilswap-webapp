@@ -66,7 +66,7 @@ const ArkInput: React.FC<Props> = (props: Props) => {
       {inline && (<Typography className={cls(classes.label, 'inline')}>
         {label}
       </Typography>)}
-      <FormControl fullWidth className={cls({ [classes.inline]: inline })}>
+      <FormControl fullWidth className={cls({ [classes.removeErrorMargin]: inline && error })}>
         {!inline && (
           <Fragment>
             {typeof label === "string" ? (<Typography className={classes.label}>{label}</Typography>) : label}
@@ -128,7 +128,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "#FF5252",
     fontSize: 10,
     marginTop: "2px",
-    margin: 0
+    lineHeight: "14px",
+    margin: 0,
   },
   instruction: {
     color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
@@ -148,9 +149,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minHeight: 60,
     alignItems: "flex-start",
   },
-  inline: {
-    // display: "flex",
-    // justifyContent: "space-between",
+  removeErrorMargin: {
+    marginBottom: "0px!important",
   },
   focusAdornment: {
     color: theme.palette.action?.selected

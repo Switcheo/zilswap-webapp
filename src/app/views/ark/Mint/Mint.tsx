@@ -108,6 +108,9 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const pendingMintContract = mintState.activeMintContract;
 
   const isMintEnabled = useMemo(() => {
+    // errors
+    
+
     // t&c unchecked
     if (!acceptTerms)
       return false;

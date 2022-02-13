@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import cls from "classnames";
 import { Box, BoxProps, IconButton, Typography } from "@material-ui/core";
-import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -268,7 +267,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
       {/* Collection Name */}
       <ArkInput
         className={cls(classes.collectionName, classes.inputHeader, classes.input)}
-        placeholder="Beary Bare Bears" error={errors.collectionName} value={inputValues.collectionName}
+        placeholder="Beary Bare Bears" error={errors.collectionName} errorBorder={!!errors.collectionName} value={inputValues.collectionName}
         label="COLLECTION NAME" onValueChange={(value) => updateInputs("collectionName")(value)}
         instruction="Give your collection an identifiable name." wordLimit={50}
         disabled={mintOption === "select"}
@@ -305,30 +304,30 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
       <Box className={classes.socialsBox}>
         <Typography className={classes.socialsHeader}>SOCIALS</Typography>
         <ArkInput
-          className={classes.input}
+          className={classes.socialInput}
           inline={true} placeholder="https://thebear.market" error={errors.websiteUrl} value={inputValues.websiteUrl}
           label="Website" onValueChange={(value) => updateInputs("websiteUrl")(value)}
         />
         <ArkInput
-          className={classes.input}
+          className={classes.socialInput}
           inline={true} placeholder="https://discord.gg/example"
           error={errors.discordUrl} value={inputValues.discordUrl} label="Discord"
           onValueChange={(value) => updateInputs("discordUrl")(value)}
         />
         <ArkInput
-          className={classes.input}
+          className={classes.socialInput}
           startAdornment={<Typography>@</Typography>} inline={true} placeholder="bearycute"
           error={errors.twitterHandle} value={inputValues.twitterHandle} label="Twitter"
           onValueChange={(value) => updateInputs("twitterHandle")(value)}
         />
         <ArkInput
-          className={classes.input}
+          className={classes.socialInput}
           startAdornment={<Typography>@</Typography>} inline={true} placeholder="bearycute"
           error={errors.instagramHandle} value={inputValues.instagramHandle} label="Instagram"
           onValueChange={(value) => updateInputs("instagramHandle")(value)}
         />
         <ArkInput
-          className={classes.input}
+          className={classes.socialInput}
           inline={true} placeholder="https://t.me/example"
           error={errors.telegramUrl} value={inputValues.telegramUrl} label="Telegram"
           onValueChange={(value) => updateInputs("telegramUrl")(value)} />
@@ -365,10 +364,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   inputHeader: {
     "& div:first-child>p:first-child": {
-      fontSize: "15px",
+      fontSize: "16px",
       fontWeight: 900,
       [theme.breakpoints.down("xs")]: {
-        fontSize: "13px",
+        fontSize: "14px",
       }
     },
   },
@@ -389,12 +388,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   socialsHeader: {
     fontFamily: "'Raleway', sans-serif",
-    fontSize: "15px",
+    fontSize: "16px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     fontWeight: 900,
     marginTop: theme.spacing(1),
     [theme.breakpoints.down("xs")]: {
-      fontSize: "13px",
+      fontSize: "14px",
     }
   },
   instruction: {
@@ -405,11 +404,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   header: {
     fontFamily: "'Raleway', sans-serif",
-    fontSize: "15px",
+    fontSize: "16px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     fontWeight: 900,
     [theme.breakpoints.down("xs")]: {
-      fontSize: "13px",
+      fontSize: "14px",
     }
   },
   collectionBox: {
@@ -556,6 +555,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "18px",
   },
   input: {
+    "& .MuiFormControl-root": {
+      marginBottom: theme.spacing(3),
+      [theme.breakpoints.down("xs")]: {
+        marginBottom: theme.spacing(2),
+      }
+    }
+  },
+  socialInput: {
     "& .MuiFormControl-root": {
       marginBottom: theme.spacing(2),
     }

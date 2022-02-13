@@ -336,7 +336,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
               {attributes.map((attribute, index) => {
                 return (
                   <TableRow key={index}>
-                    <TableCell component="th" scope="row" style={{ verticalAlign: "top" }}>
+                    <TableCell component="th" scope="row" className={classes.alignTop}>
                       <ArkInput
                         placeholder="Name"
                         value={attribute.name}
@@ -345,7 +345,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                         errorBorder={!attribute.name}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className={classes.alignTop}>
                       <ArkChipInput
                         onKeyDown={(event) => handleKeyDown(index, event)}
                         placeholder={!attribute.values.length ? 'Separate each value with a semi-colon ";"' : ""}
@@ -393,11 +393,14 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 {/* no of attributes */}
                 {attributes.length
                   ? attributes.map((attribute) => {
-                  return (
-                    <TableCell>
-                      <Typography>{attribute.name}</Typography>
-                    </TableCell>
-                  )})
+                    return (
+                      !!attribute.values.length && (
+                        <TableCell>
+                          <Typography>{attribute.name}</Typography>
+                        </TableCell>
+                      )
+                    )
+                  })
                   : <TableCell>
                     <Typography>Attributes</Typography>
                   </TableCell>
@@ -410,7 +413,9 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 return (
                   <TableRow key={index}>
                     <TableCell component="th" scope="row" className={classes.imageCell}>
-                      <img src={nft.image?.toString()} alt="NFT" height="39.25px" width="39.25px" className={classes.nftImage} />
+                      <Box className={classes.nftImageBox}>
+                        <img src={nft.image?.toString()} alt="NFT" className={classes.nftImage} />
+                      </Box>
                       <ArkInput
                         placeholder="Name"
                         value={nft.name}
@@ -425,47 +430,49 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                       const currAttribute = nfts[index].attributes[attribute.name] ?? "";
 
                       return (
-                        <TableCell className={classes.removePaddingRightLast}>
-                          <FormControl className={cls(classes.formControl, { [classes.error]: !currAttribute.length })} fullWidth>
-                            <Select
-                              MenuProps={{ 
-                                classes: { paper: classes.selectMenu },
-                                anchorOrigin: {
-                                  vertical: "bottom",
-                                  horizontal: "left"
-                                },
-                                transformOrigin: {
-                                  vertical: "top",
-                                  horizontal: "left"
-                                },
-                                getContentAnchorEl: null
-                              }}
-                              variant="outlined"
-                              value={currAttribute}
-                              onChange={(event) => handleAttributeChange(index, attribute.name, event.target.value as string)}
-                              renderValue={(currAttribute) => {
-                                const selected = currAttribute as string;
-                                if (!selected.length) {
-                                  return <Typography className={classes.selectPlaceholder}>Select</Typography>;
-                                }
+                        !!attribute.values.length && (
+                          <TableCell className={classes.cellWidth}>
+                            <FormControl className={cls(classes.formControl, { [classes.error]: !currAttribute.length })} fullWidth>
+                              <Select
+                                MenuProps={{ 
+                                  classes: { paper: classes.selectMenu },
+                                  anchorOrigin: {
+                                    vertical: "bottom",
+                                    horizontal: "left"
+                                  },
+                                  transformOrigin: {
+                                    vertical: "top",
+                                    horizontal: "left"
+                                  },
+                                  getContentAnchorEl: null
+                                }}
+                                variant="outlined"
+                                value={currAttribute}
+                                onChange={(event) => handleAttributeChange(index, attribute.name, event.target.value as string)}
+                                renderValue={(currAttribute) => {
+                                  const selected = currAttribute as string;
+                                  if (!selected.length) {
+                                    return <Typography className={classes.selectPlaceholder}>Select</Typography>;
+                                  }
 
-                                return selected;
-                              }}
-                              displayEmpty
-                            >
-                              {attribute.values.map((attributeValue) => {
-                                return (
-                                  <MenuItem value={attributeValue}>
-                                    {attributeValue}
-                                    {attributeValue === currAttribute && (
-                                      <DoneIcon fontSize="small" />
-                                    )}
-                                  </MenuItem>
-                                )
-                              })}
-                            </Select>
-                          </FormControl>
-                        </TableCell>
+                                  return selected;
+                                }}
+                                displayEmpty
+                              >
+                                {attribute.values.map((attributeValue) => {
+                                  return (
+                                    <MenuItem value={attributeValue}>
+                                      {attributeValue}
+                                      {attributeValue === currAttribute && (
+                                        <DoneIcon fontSize="small" />
+                                      )}
+                                    </MenuItem>
+                                  )
+                                })}
+                              </Select>
+                            </FormControl>
+                          </TableCell>
+                        )
                       )
                     })}
                     {!attributes.length && index === 0 &&
@@ -674,9 +681,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   nftTableContainer: {
-    maxHeight: 600,
+    maxHeight: 503.5,
     maxWidth: 790.938,
     borderRadius: 12,
+    backgroundColor: theme.palette.background.default,
     "& .MuiTableCell-root": {
       minWidth: 110,
       backgroundColor: theme.palette.background.default,
@@ -705,7 +713,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "&::-webkit-scrollbar-track:horizontal": {
       marginRight: theme.spacing(1),
-      marginLeft: theme.spacing(25),
+      marginLeft: theme.spacing(29.4),
       boxShadow: "inset 0 0 10px 10px green",
       border: "solid 3px transparent",
     },
@@ -776,6 +784,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     wordBreak: "break-all"
   },
   nameInput: {
+    minWidth: "180px",
     marginLeft: theme.spacing(1),
     marginTop: 0,
     "& .MuiFormHelperText-root": {
@@ -826,17 +835,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     zIndex: 1,
     minWidth: "200px!important",
   },
+  nftImageBox: {
+    height: "39.25px",
+    width: "39.25px",
+    overflow: "hidden",
+    borderRadius: "12px",
+    minWidth: "39.25px",
+    backgroundColor: "#002A34",
+  },
   nftImage: {
-    borderRadius: "12px", 
+    width: "100%",
+    height: "100%",
+    objectFit: "contain",
     verticalAlign: "bottom",
   },
   removePaddingRight: {
     paddingRight: "0px!important",
-  },
-  removePaddingRightLast: {
-    "&:last-child": {
-      paddingRight: "0px!important",
-    }
   },
   error: {
     "& .MuiSelect-root": {
@@ -847,7 +861,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "#FF5252",
     marginTop: "-12px",
     fontSize: 10,
-    fontWeight: 600,
+  },
+  alignTop: {
+    verticalAlign: "top",
+  },
+  cellWidth: {
+    minWidth: "180px!important",
   }
 }));
 
