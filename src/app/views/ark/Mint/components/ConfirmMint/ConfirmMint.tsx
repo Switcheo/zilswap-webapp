@@ -1,6 +1,6 @@
 import React from "react";
 import cls from "classnames";
-import { Box, BoxProps, CircularProgress, Typography, Checkbox, FormControlLabel } from "@material-ui/core";
+import { Box, BoxProps, CircularProgress, Typography, Checkbox, FormControlLabel, Link } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
@@ -49,7 +49,16 @@ const ConfirmMint: React.FC<Props> = (props: Props) => {
           }
         label={
           <Typography className={classes.confirmMintText}>
-          By checking this box, I accept ARKY's Terms and Conditions.
+            By checking this box, I accept ARKY's
+            {" "}
+            <Link
+              className={classes.link}
+              underline="always"
+              rel="noopener noreferrer"
+              target="_blank"
+              href="https://docs.zilswap.io/arky/terms">
+              Terms and Conditions
+            </Link>.
           </Typography>
           }
         />
@@ -148,6 +157,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flex: "none",
     marginRight: theme.spacing(1),
   },
+  link: {
+    color: theme.palette.text?.primary,
+  }
 }));
 
 export default ConfirmMint;
