@@ -109,8 +109,8 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const isMintEnabled = useMemo(() => {
     // errors
-    
 
+    
     // t&c unchecked
     if (!acceptTerms)
       return false;
