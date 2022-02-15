@@ -588,7 +588,9 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                     <Box mt={0.5} key={reward.info.id}>
                                       <FormControlLabel
                                         control={
-                                          <Checkbox
+                                          reward.funded === null 
+                                          ? <CircularProgress size={16} />
+                                          : <Checkbox
                                             disabled={isDisabled}
                                             className={classes.checkbox}
                                             checked={isDistributionSelected(reward)}
@@ -605,7 +607,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                                 placement="top" 
                                                 title={reward.funded === false ? "Reward pending distribution from project owner." : `${reward.rewardDistributor.name} from ${reward.rewardDistributor.distributor_name} at ${reward.rewardDistributor.distributor_address_hex} for epoch ${reward.info.epoch_number}.`}
                                                 className={classes.tooltip} 
-                                                icon={isDisabled ? <ErrorIcon className={classes.errorIcon} /> : undefined} 
+                                                icon={reward.funded === false ? <ErrorIcon className={classes.errorIcon} /> : undefined} 
                                               />
                                             </span>
                                           </Text>
