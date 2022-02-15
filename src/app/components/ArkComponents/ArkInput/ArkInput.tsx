@@ -3,6 +3,7 @@ import { BoxProps, FormControl, FormHelperText, InputAdornment, InputBase, Box, 
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import cls from "classnames"
 import { AppTheme } from "app/theme/types";
+import { hexToRGBA} from "app/utils";
 
 interface Props extends BoxProps {
   label?: React.ReactNode;
@@ -41,6 +42,9 @@ const BootstrapInput = withStyles(theme => ({
         "-webkit-appearance": "none",
       },
     },
+    "&.Mui-disabled": {
+      color: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.5)}` : `rgba${hexToRGBA("#003340", 0.35)}`
+    }
   },
   input: {
     position: 'relative',
