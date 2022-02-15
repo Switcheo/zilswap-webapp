@@ -582,7 +582,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                 <Divider />
                                 {rewardsByDate[date].map(reward => {
                                   const token = reward.rewardToken;
-                                  const isDisabled = !reward?.funded || claimedDistributions.includes(reward.info.id);
+                                  const isDisabled = !reward.funded || claimedDistributions.includes(reward.info.id);
 
                                   return (
                                     <Box mt={0.5} key={reward.info.id}>
@@ -601,7 +601,12 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                             <CurrencyLogo address={token.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)} />
                                             <span className={classes.currency}>
                                               {token.symbol}
-                                              <HelpInfo placement="top" title={`${reward.rewardDistributor.name} from ${reward.rewardDistributor.distributor_name} at ${reward.rewardDistributor.distributor_address_hex} for epoch ${reward.info.epoch_number}.`} className={classes.tooltip} icon={isDisabled ? <ErrorIcon className={classes.errorIcon} /> : undefined} />
+                                              <HelpInfo 
+                                                placement="top" 
+                                                title={reward.funded === false ? "Reward pending distribution from project owner." : `${reward.rewardDistributor.name} from ${reward.rewardDistributor.distributor_name} at ${reward.rewardDistributor.distributor_address_hex} for epoch ${reward.info.epoch_number}.`}
+                                                className={classes.tooltip} 
+                                                icon={isDisabled ? <ErrorIcon className={classes.errorIcon} /> : undefined} 
+                                              />
                                             </span>
                                           </Text>
                                         }

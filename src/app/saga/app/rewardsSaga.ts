@@ -129,7 +129,7 @@ function* queryDistribution() {
         }
         const merkleRoots = uploadState?.merkle_roots ?? {};
 
-        let funded;
+        let funded = null;
         const distributor = distributors.find(d => d.distributor_address_hex === addr);
         if (distributor) {
           const tokenContract = zilswap.getContract(distributor.reward_token_address_hex);
