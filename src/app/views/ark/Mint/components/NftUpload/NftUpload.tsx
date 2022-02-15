@@ -685,6 +685,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     maxWidth: 790.938,
     borderRadius: 12,
     backgroundColor: theme.palette.background.default,
+    paddingBottom: theme.spacing(1),
     "& .MuiTableCell-root": {
       minWidth: 110,
       backgroundColor: theme.palette.background.default,

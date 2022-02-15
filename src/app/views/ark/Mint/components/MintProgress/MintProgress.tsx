@@ -210,13 +210,13 @@ const MintProgress: React.FC<Props> = (props: Props) => {
         <Box display="flex" flexDirection="column" alignItems="stretch" className={cls({ [classes.textCompleted]: hasAcceptOwnership })}>
           <Box display="flex" justifyContent="space-between">
             <Text className={classes.stepLabel}>Accept Ownership</Text>
-            {true && 
+            {acceptTxId && 
               <Link
                 className={classes.link}
                 underline="hover"
                 rel="noopener noreferrer"
                 target="_blank"
-                href={"hello"}
+                href={explorerLink}
               >
                 <Typography>
                   View on explorer
