@@ -10,7 +10,7 @@ import { validation as ZilValidation } from "@zilliqa-js/util";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation } from "react-router";
+import { useHistory, useLocation } from "react-router";
 import { CONTRACTS } from "zilswap-sdk/lib/constants";
 import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import { ZilswapConnector, toBasisPoints } from "core/zilswap";
@@ -203,7 +203,9 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const enableChangeRecipient = useSearchParam("enableChangeRecipient") === "true";
   const [buttonRotate, setButtonRotate] = useState(false);
   const [formState, setFormState] = useState<typeof initialFormState>(initialFormState);
-  const network = useNetwork()
+  const network = useNetwork();
+  const history = useHistory();
+  const location = useLocation();
   const swapFormState: SwapFormState = useSelector<RootState, SwapFormState>(store => store.swap);
   const dispatch = useDispatch();
   const tokenState = useSelector<RootState, TokenState>(store => store.token);
@@ -214,7 +216,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [isBlacklisted] = useBlacklistAddress();
   const [runApproveTx, loadingApproveTx, errorApproveTx, clearApproveError] = useAsyncTask("approveTx");
   const [errorRecipientAddress, setErrorRecipientAddress] = useState<string | undefined>();
-  const queryParams = new URLSearchParams(useLocation().search);
+  const queryParams = new URLSearchParams(location.search);
   const [recipientAddrBlacklisted, setRecipientAddrBlacklisted] = useState(false);
   const toaster = useToaster();
 
@@ -245,21 +247,34 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (queryInput === queryOutput && queryOutput) {
       return;
     }
-    const newIntoken = queryInput ? tokenState.tokens[queryInput] : null;
-    const newOuttoken = queryOutput ? tokenState.tokens[queryOutput] : null;
+    const newInToken = queryInput ? tokenState.tokens[queryInput] : null;
+    const newOutToken = queryOutput ? tokenState.tokens[queryOutput] : null;
 
     initNewToken({
-      ...newIntoken && {
-        inToken: newIntoken,
+      ...newInToken && {
+        inToken: newInToken,
       },
 
-      ...newOuttoken && {
-        outToken: newOuttoken,
+      ...newOutToken && {
+        outToken: newOutToken,
       },
     });
 
     // eslint-disable-next-line
   }, [tokenState.tokens, network]);
+
+  useEffect(() => {
+    const { inToken, outToken } = swapFormState;
+    const params = new URLSearchParams(location.search);
+
+    if (inToken) params.set("tokenIn", inToken.address);
+
+    if (outToken) params.set("tokenOut", outToken.address);
+
+    history.replace({ pathname: location.pathname, search: params.toString() });
+    
+    // eslint-disable-next-line
+  }, [swapFormState.inToken, swapFormState.outToken, network]);
 
   useEffect(() => {
     const blacklisted = !!swapFormState.recipientAddress ? isBlacklisted(swapFormState.recipientAddress) : false;
