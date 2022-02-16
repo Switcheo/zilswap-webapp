@@ -66,7 +66,6 @@ const BidDialog: React.FC<Props> = (props: Props) => {
   const toaster = useToaster();
 
   const bestBid = token.bestBid;
-  const brokerAddress = token.collection.brokerAddress;
   const txIsPending = loadingApproveTx || observingTxs.findIndex(tx => tx.hash.toLowerCase() === pendingTxHash) >= 0;
 
   const wrappingRequired = bidToken && bidToken.isWzil &&
@@ -90,7 +89,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     if (!bidToken || bidToken.isZil) return false;
     setBidToken(tokenState.tokens[bidToken.address]);
     const arkClient = new ArkClient(network);
-    const tokenProxyAddr = arkClient.getTokenProxyForBrokerAddress(brokerAddress);
+    const tokenProxyAddr = arkClient.tokenProxyAddressV2;
 
     const priceAmount = bnOrZero(formState.bidAmount);
     const unitlessInAmount = priceAmount.shiftedBy(bidToken.decimals);
@@ -130,7 +129,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
     runApproveTx(async () => {
       const arkClient = new ArkClient(network);
-      const tokenProxyAddr = arkClient.getTokenProxyForBrokerAddress(brokerAddress);
+      const tokenProxyAddr = arkClient.tokenProxyAddressV2;
       const tokenAddress = bidToken.address;
       const tokenAmount = bnOrZero(formState.bidAmount);
       const observedTx = await ZilswapConnector.approveTokenTransfer({
@@ -226,6 +225,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         .times(2147483647)
         .decimalPlaces(0)
         .toString(10); // int32 max 2147483647
+      const brokerAddress = arkClient.brokerAddressV2;
       const message = arkClient.arkMessage(
         "Execute",
         arkClient.arkChequeHash({
