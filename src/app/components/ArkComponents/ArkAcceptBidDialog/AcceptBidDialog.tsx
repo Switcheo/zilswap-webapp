@@ -142,7 +142,7 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
 
       const walletAddress = wallet.addressInfo.byte20.toLowerCase();
       const collectionAddress = bid.token?.collection?.address;
-      const brokerAddress = bid.token?.collection?.brokerAddress;
+      const brokerAddress = bid.brokerAddress;
 
       const zilswap = ZilswapConnector.getSDK();
       const response = await zilswap.zilliqa.blockchain.getSmartContractSubState(collectionAddress, "operator_approvals");
