@@ -11,8 +11,9 @@ import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
 import { Cheque, RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { toSignificantNumber, tryGetBech32Address, useAsyncTask, valueCalculators } from "app/utils";
-import { getWallet } from "app/saga/selectors";
+import { getBlockchain, getWallet } from "app/saga/selectors";
 import { ZilswapConnector } from "core/zilswap";
+import { ArkClient } from "core/utilities";
 
 interface Props extends BoxProps {
   showDialog: boolean;
@@ -115,6 +116,7 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
   const { awaitApproval, blocktime, currentBlock, onAcceptBid, loading, bid, isOffer, showDialog, onCloseDialog, children, className, ...rest } = props;
   const classes = useStyles();
   const [checked, setChecked] = useState(false);
+  const { network } = useSelector(getBlockchain);
   const { wallet } = useSelector(getWallet);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const [txApproved, setTxApproved] = useState(false);
@@ -140,9 +142,11 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
     runCheckTxApproved(async () => {
       if (!bid || !priceToken || !wallet) return false;
 
+      const arkClient = new ArkClient(network);
+
       const walletAddress = wallet.addressInfo.byte20.toLowerCase();
       const collectionAddress = bid.token?.collection?.address;
-      const brokerAddress = bid.token?.collection?.brokerAddress;
+      const brokerAddress = arkClient.brokerAddressV2;
 
       const zilswap = ZilswapConnector.getSDK();
       const response = await zilswap.zilliqa.blockchain.getSmartContractSubState(collectionAddress, "operator_approvals");

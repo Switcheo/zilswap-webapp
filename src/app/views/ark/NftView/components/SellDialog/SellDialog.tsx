@@ -169,7 +169,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
       const walletAddress = wallet.addressInfo.byte20.toLowerCase();
       const hexTokenAddress = fromBech32Address(address).toLowerCase();
-      const brokerAddress = token.collection.brokerAddress;
+      const brokerAddress = arkClient.brokerAddressV2;
       const transaction = await arkClient.approveAllowanceIfRequired(hexTokenAddress, walletAddress, brokerAddress, ZilswapConnector.getSDK());
 
       if (transaction?.id) {
