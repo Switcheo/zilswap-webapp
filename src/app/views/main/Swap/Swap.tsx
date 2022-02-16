@@ -265,6 +265,12 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   useEffect(() => {
     const { inToken, outToken } = swapFormState;
+
+    if (!inToken && !outToken) {
+      history.replace({ search: "" });
+      return;
+    }
+
     const params = new URLSearchParams(location.search);
 
     if (inToken) params.set("tokenIn", inToken.address);
@@ -274,7 +280,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     history.replace({ pathname: location.pathname, search: params.toString() });
     
     // eslint-disable-next-line
-  }, [swapFormState.inToken, swapFormState.outToken, network]);
+  }, [swapFormState.inToken, swapFormState.outToken]);
 
   useEffect(() => {
     const blacklisted = !!swapFormState.recipientAddress ? isBlacklisted(swapFormState.recipientAddress) : false;
