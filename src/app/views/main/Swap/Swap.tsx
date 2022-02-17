@@ -266,8 +266,9 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   useEffect(() => {
     const { inToken, outToken } = swapFormState;
 
+    // if network changed, clear params for default tokens
     if (!inToken && !outToken) {
-      history.replace({ search: "" });
+      // history.replace({ search: "" });
       return;
     }
 
@@ -277,7 +278,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
     if (outToken) params.set("tokenOut", outToken.address);
 
-    history.replace({ pathname: location.pathname, search: params.toString() });
+    history.replace({ search: params.toString() });
     
     // eslint-disable-next-line
   }, [swapFormState.inToken, swapFormState.outToken]);
