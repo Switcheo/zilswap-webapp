@@ -186,6 +186,7 @@ const Row: React.FC<Props> = (props: Props) => {
       const wallet = walletState.wallet;
 
       const arkClient = new ArkClient(wallet.network);
+      const brokerAddress = bid.brokerAddress;
       const chequeHash = arkClient.arkChequeHash({
         expiry: bid.expiry,
         feeAmount: bnOrZero(bid.feeAmount),
@@ -199,9 +200,10 @@ const Row: React.FC<Props> = (props: Props) => {
           address: bid.token?.collection?.address,
           id: bid.token?.tokenId,
         },
+        brokerAddress,
       });
 
-      const message = await arkClient.arkMessage("Void", chequeHash);
+      const message = await arkClient.arkMessage("Void", chequeHash, brokerAddress);
 
       const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
 
@@ -210,6 +212,7 @@ const Row: React.FC<Props> = (props: Props) => {
         publicKey,
         signature,
         chequeHash,
+        brokerAddress,
       }, zilswap);
 
       const observedTx = {
@@ -231,6 +234,7 @@ const Row: React.FC<Props> = (props: Props) => {
       const wallet = walletState.wallet;
       const priceAmount = new BigNumber(bid.price.amount);
       const price = { amount: priceAmount, address: bid.price.address };
+      const brokerAddress = bid.brokerAddress;
 
       const arkClient = new ArkClient(wallet.network);
       const result = await arkClient.getNftToken(bid.token!.collection!.address, bid.token!.tokenId);
@@ -244,7 +248,7 @@ const Row: React.FC<Props> = (props: Props) => {
 
       const walletAddress = wallet.addressInfo.byte20.toLowerCase();
       const collectionAddress = bid.token?.collection?.address;
-      const transaction = await arkClient.approveAllowanceIfRequired(collectionAddress, walletAddress, ZilswapConnector.getSDK());
+      const transaction = await arkClient.approveAllowanceIfRequired(collectionAddress, walletAddress, brokerAddress, ZilswapConnector.getSDK());
 
       if (transaction?.id) {
         toaster("Approve TX Submitted", { hash: transaction.id });
@@ -262,7 +266,7 @@ const Row: React.FC<Props> = (props: Props) => {
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647
       const currentBlock = ZilswapConnector.getCurrentBlock();
       const expiry = currentBlock + 25; // blocks
-      const message = arkClient.arkMessage("Execute", arkClient.arkChequeHash({
+      const chequeHash = arkClient.arkChequeHash({
         side: "Sell",
         token: {
           address: collectionAddress,
@@ -272,7 +276,9 @@ const Row: React.FC<Props> = (props: Props) => {
         feeAmount,
         expiry,
         nonce,
-      }));
+        brokerAddress,
+      });
+      const message = arkClient.arkMessage("Execute", chequeHash, bid.brokerAddress);
 
       const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any
 
@@ -296,6 +302,7 @@ const Row: React.FC<Props> = (props: Props) => {
         sellCheque,
         nftAddress: bid.token.collection.address,
         tokenId: bid.token.tokenId.toString(10),
+        brokerAddress,
       }, zilswap);
 
       const observedTx = {
