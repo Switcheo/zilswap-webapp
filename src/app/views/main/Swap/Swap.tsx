@@ -231,6 +231,9 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         outAmount: "0",
       });
       dispatch(actions.Swap.clearForm());
+
+      // revert to zil-zwap default
+      history.replace({ search: "" });
     }
 
     // eslint-disable-next-line
@@ -263,22 +266,14 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     // eslint-disable-next-line
   }, [tokenState.tokens, network]);
 
+  // update query params from state
   useEffect(() => {
     const { inToken, outToken } = swapFormState;
 
-    // if network changed, clear params for default tokens
-    if (!inToken && !outToken) {
-      // history.replace({ search: "" });
-      return;
-    }
+    if (inToken) queryParams.set("tokenIn", inToken.address);
+    if (outToken) queryParams.set("tokenOut", outToken.address);
 
-    const params = new URLSearchParams(location.search);
-
-    if (inToken) params.set("tokenIn", inToken.address);
-
-    if (outToken) params.set("tokenOut", outToken.address);
-
-    history.replace({ search: params.toString() });
+    history.replace({ search: queryParams.toString() });
     
     // eslint-disable-next-line
   }, [swapFormState.inToken, swapFormState.outToken]);
