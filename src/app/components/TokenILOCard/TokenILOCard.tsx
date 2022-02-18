@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import BigNumber from 'bignumber.js'
 import { ZiloAppState } from 'zilswap-sdk/lib/zilo';
@@ -15,7 +15,7 @@ import { CurrencyInputILO, FancyButton, Text } from 'app/components'
 import ProgressBar from 'app/components/ProgressBar'
 import { actions } from "app/store";
 import { RootState, TokenState, TransactionState, WalletObservedTx, WalletState } from "app/store/types"
-import { useAsyncTask, useNetwork, useToaster } from "app/utils"
+import { BIG_ZERO, bnOrZero, useAsyncTask, useNetwork, useToaster } from "app/utils"
 import { ZIL_ADDRESS } from 'app/utils/constants';
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 
@@ -124,7 +124,25 @@ const TokenILOCard = (props: Props) => {
   const classes = useStyles();
   const toaster = useToaster();
 
-  const zwapToken = Object.values(tokenState.tokens).filter(token => token.isZwap)[0]
+  const [zwapToken] = Object.values(tokenState.tokens).filter(token => token.isZwap)
+  const zilToken = tokenState.tokens[ZIL_ADDRESS]
+
+  const insufficientBalanceError = useMemo(() => {
+    // not initialized
+    if (!zilToken || !zwapToken) return null;
+
+    // check zil balance
+    const zilAmount = bnOrZero(formState.zilAmount).shiftedBy(zilToken.decimals).integerValue();
+    if (zilAmount.isZero()) return "Enter amount to commit";
+    if (zilAmount.gt(zilToken.balance ?? BIG_ZERO)) return "Insufficient ZIL Balance";
+
+    // check zwap balance
+    const zwapAmount = bnOrZero(formState.zwapAmount).shiftedBy(zwapToken.decimals).integerValue();
+    if (zwapAmount.gt(zwapToken.balance ?? BIG_ZERO)) return "Insufficient ZWAP Balance";
+
+    // balance is sufficient
+    return null;
+  }, [zwapToken, zilToken, formState]);
 
   if (!zwapToken || !ziloState) {
     return <Box display="flex" padding={3} flex={1} alignItems="center" justifyContent="center">
@@ -132,7 +150,6 @@ const TokenILOCard = (props: Props) => {
     </Box>
   }
 
-  const zilToken = tokenState.tokens[ZIL_ADDRESS]
   const unitlessInAmount = new BigNumber(formState.zwapAmount).shiftedBy(zwapToken.decimals).integerValue();
   const approved = new BigNumber(zwapToken.allowances![contractAddrHex] || '0')
   const showTxApprove = approved.isZero() || approved.comparedTo(unitlessInAmount) < 0;
@@ -341,12 +358,22 @@ const TokenILOCard = (props: Props) => {
                   showTxApprove={showTxApprove}
                   loadingTxApprove={txIsPending}
                   onClickTxApprove={onApprove}
-                  disabled={!showTxApprove && !iloStarted}
+                  disabled={!showTxApprove && (!iloStarted || !!insufficientBalanceError)}
                   variant="contained"
                   color="primary"
                   onClick={onCommit}
                 >
-                  {iloStarted ? 'Commit' : (currentTime.isAfter(startTime) ? 'Waiting for start block...' : 'Waiting to begin')}
+                  {!!iloStarted && (
+                    <>
+                      {insufficientBalanceError ?? 'Commit'}
+                    </>
+                  )}
+                  {!iloStarted && (
+                    <>
+                      {currentTime.isAfter(startTime) ? 'Waiting for start block...' : 'Waiting to begin...'}
+                    </>
+                  )}
+
                 </FancyButton>
                 <Typography className={classes.errorMessage} color="error">{txError?.message}</Typography>
               </Box>
