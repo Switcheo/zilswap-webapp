@@ -22,17 +22,18 @@ interface Props extends BoxProps {
   setAttributes: React.Dispatch<React.SetStateAction<AttributeData[]>>;
   errors: Errors;
   setErrors:  React.Dispatch<React.SetStateAction<Errors>>;
+  displayErrorBox: boolean;
 }
 
 // need to settle failed as well
 export type ProgressType = "queued" | "uploaded";
 
 const NftUpload: React.FC<Props> = (props: Props) => {
-  const { children, className, attributes, setAttributes, nfts, setNfts, errors, setErrors, ...rest } = props;
+  const { children, className, attributes, setAttributes, nfts, setNfts, errors, setErrors, displayErrorBox, ...rest } = props;
   const classes = useStyles();
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
 
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [progress, setProgress] = useState<ProgressType[]>([]);
 
   const readFiles = (files: File[]) => {
@@ -90,7 +91,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
 
     setUploadedFiles([
       ...uploadedFiles,
-      ...files
+      ...files.map(file => file.name)
     ]);
 
     setProgress([
@@ -218,6 +219,15 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     );
   }
 
+  const repeatedAttribute = (index: number) => {
+    for (let i = 0; i < index; i++) {
+      if (attributes[i].name !== "" && attributes[i].name === attributes[index].name)
+        return true;
+    }
+
+    return false;
+  }
+
   return (
     <Box className={classes.root} {...rest}>
       <Box mt={5} mb={3}>
@@ -262,7 +272,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                                     : <FileSuccessIcon />
                                   }
                                   <Box display="flex" flexDirection="column" width="270px">
-                                    <Typography className={classes.fileName}>{file.name}</Typography>
+                                    <Typography className={classes.fileName}>{file}</Typography>
                                     <Box className={classes.progressBackground}>
                                       <Box className={cls({[classes.progressBar]: progress[index] === "uploaded"})} />
                                     </Box>
@@ -341,8 +351,8 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                         placeholder="Name"
                         value={attribute.name}
                         onValueChange={(value) => handleAttributeNameChange(index, value)}
-                        error={!attribute.name ? "Add attribute name." : ""}
-                        errorBorder={!attribute.name}
+                        error={repeatedAttribute(index) ? "Please rename this attribute." : (!attribute.name && displayErrorBox) ? "Add attribute name." : ""}
+                        errorBorder={repeatedAttribute(index) || (!attribute.name && displayErrorBox)}
                       />
                     </TableCell>
                     <TableCell className={classes.alignTop}>
@@ -351,7 +361,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                         placeholder={!attribute.values.length ? 'Separate each value with a semi-colon ";"' : ""}
                         chips={attribute.values}
                         onDelete={(value) => handleDeleteChip(index, value)}
-                        error={!attribute.values.length ? "Add attribute values." : ""}
+                        error={(!attribute.values.length && displayErrorBox) ? "Add attribute values." : ""}
                       />
                     </TableCell>
                     <TableCell align="right">
@@ -432,7 +442,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                       return (
                         !!attribute.values.length && (
                           <TableCell className={classes.cellWidth}>
-                            <FormControl className={cls(classes.formControl, { [classes.error]: !currAttribute.length })} fullWidth>
+                            <FormControl className={cls(classes.formControl, { [classes.error]: !currAttribute.length && displayErrorBox })} fullWidth>
                               <Select
                                 MenuProps={{ 
                                   classes: { paper: classes.selectMenu },
@@ -526,11 +536,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   header: {
     fontFamily: "'Raleway', sans-serif",
-    fontSize: "15px",
+    fontSize: "16px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     fontWeight: 900,
     [theme.breakpoints.down("xs")]: {
-      fontSize: "13px",
+      fontSize: "14px",
     }
   },
   collectionBox: {

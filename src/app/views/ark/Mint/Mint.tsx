@@ -108,8 +108,9 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const pendingMintContract = mintState.activeMintContract;
 
   const isMintEnabled = useMemo(() => {
-    // errors
-
+    // errors not empty
+    if (Object.values(errors).some(err => !!err))
+      return false;
     
     // t&c unchecked
     if (!acceptTerms)
@@ -121,6 +122,11 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
     // no nft uploaded
     if (nfts.length === 0)
+      return false;
+
+    // duplicate attribute name
+    const attributeNames = new Set(attributes.map(attribute => attribute.name));
+    if (attributeNames.size < attributes.length)
       return false;
 
     // unfilled attribute data
@@ -139,7 +145,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }
 
     return true;
-  }, [acceptTerms, inputValues.collectionName, inputValues.royalties, nfts, attributes]);
+  }, [acceptTerms, inputValues.collectionName, inputValues.royalties, nfts, attributes, errors]);
 
   useEffect(() => {
     if (isMintEnabled) setDisplayErrorBox(false);
@@ -351,6 +357,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
                   setAttributes={setAttributes}
                   errors={errors}
                   setErrors={setErrors}
+                  displayErrorBox={displayErrorBox}
                 />
 
                 {/* Confirm Mint */}
