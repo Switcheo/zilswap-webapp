@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useHistory } from "react-router";
 import cls from "classnames";
 import { Box, BoxProps, CircularProgress, Link, makeStyles, Typography } from "@material-ui/core";
+import CheckCircleIcon from "@material-ui/icons/CheckCircleOutlineRounded";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import LaunchIcon from "@material-ui/icons/Launch";
 import { Network } from "zilswap-sdk/lib/constants";
@@ -123,6 +124,14 @@ const MintProgress: React.FC<Props> = (props: Props) => {
     }
 
     return 25;
+  }
+
+  const getOwnershipButtonText = () => {
+    if (hasAcceptOwnership) return "Ownership Accepted";
+
+    if (loadingAcceptOwnership || loadingTx) return "Accepting Ownership...";
+
+    return "Accept Ownership";
   }
 
   return (
@@ -258,11 +267,14 @@ const MintProgress: React.FC<Props> = (props: Props) => {
         </Text>
       </Box>
 
-      <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onAcceptOwnership} disabled={!isAcceptOwnershipEnabled || loadingAcceptOwnership || loadingTx}>
+      <FancyButton variant="contained" color="primary" className={cls(classes.actionButton, { [classes.accepted]: hasAcceptOwnership })} onClick={onAcceptOwnership} disabled={!isAcceptOwnershipEnabled || loadingAcceptOwnership || loadingTx}>
+        {hasAcceptOwnership &&
+          <CheckCircleIcon className={classes.checkIcon} />
+        }
         {(loadingAcceptOwnership || loadingTx) &&
           <CircularProgress size={20} className={classes.circularProgress} />
         }
-        Accept Ownership
+        <span>{getOwnershipButtonText()}</span>
       </FancyButton>
 
       <FancyButton variant="contained" color="primary" className={classes.actionButton} onClick={onViewCollection} disabled={!isViewCollectionEnabled}>
@@ -380,6 +392,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   stepBarThird: {
     height: 70,
+    [theme.breakpoints.down("xs")]: {
+      height: 90,
+    }
   },
   stepBarActive: {
     backgroundImage: "linear-gradient(#6BE1FF, #223139)",
@@ -463,6 +478,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   linkIconCompleted: {
     "& path": {
       fill: theme.palette.text?.secondary,
+    }
+  },
+  checkIcon: {
+    color: theme.palette.primary.dark,
+    marginBottom: "1.5px",
+    marginRight: "6px",
+    fontSize: "1.2rem"
+  },
+  accepted: {
+    backgroundColor: "transparent",
+    border: `1px solid ${theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : "#D2E5DF"}`,
+    "&.Mui-disabled": {
+      backgroundColor: "transparent",
+    },
+    "& span": {
+      color: theme.palette.text?.primary,
     }
   }
 }))

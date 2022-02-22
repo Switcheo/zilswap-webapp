@@ -30,6 +30,8 @@ interface Props extends BoxProps {
 
 const DESCRIPTION_PLACEHOLDER = "The Bear Market is a collection of 10,000 programmatically, randomly-generated NFT bears on the Zilliqa blockchain."
 
+const MAX_ROYALTIES = 20;
+
 const CollectionDetail: React.FC<Props> = (props: Props) => {
   const { children, className, inputValues, setInputValues, mintOption, setMintOption, uploadedFiles, setUploadedFiles, errors, setErrors, ...rest } = props;
   const classes = useStyles();
@@ -106,7 +108,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         return ""
       case "royalties":
         const value = Number(input);
-        if (value < 0 || value > 8 || isNaN(value)) return "Invalid amount"
+        if (value < 0 || value > MAX_ROYALTIES || isNaN(value)) return "Invalid amount"
         return ""
       default: return "";
     }
@@ -297,7 +299,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         endAdornment={<span>%</span>}
         placeholder="2.5" error={errors.royalties} value={inputValues.royalties}
         label="ROYALTIES" onValueChange={(value) => updateInputs("royalties")(value)}
-        instruction="Collect royalties of up to 8%."
+        instruction={`Collect royalties of up to ${MAX_ROYALTIES}%.`}
       />
       
       {/* Socials */}
