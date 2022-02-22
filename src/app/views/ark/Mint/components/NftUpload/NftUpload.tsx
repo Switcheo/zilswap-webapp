@@ -365,7 +365,12 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                       />
                     </TableCell>
                     <TableCell align="right">
-                      <ClearIcon className={cls(classes.deleteAttributeIcon, { [classes.marginTop]: attribute.name && attribute.values.length })} fontSize="small" onClick={() => handleDeleteAttribute(attribute)} />
+                      <ClearIcon
+                        // to clean up
+                        className={cls(classes.deleteAttributeIcon, { [classes.marginTop]: !(repeatedAttribute(index) || ((!attribute.name || !attribute.values.length) && displayErrorBox)) })} 
+                        fontSize="small" 
+                        onClick={() => handleDeleteAttribute(attribute)} 
+                      />
                     </TableCell>                      
                   </TableRow>
                 )
@@ -684,7 +689,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   deleteAttributeIcon: {
     color: theme.palette.primary.light,
-    marginBottom: "4px",
     "&:hover": {
       color: theme.palette.text?.primary,
       cursor: "pointer",
@@ -880,7 +884,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minWidth: "180px!important",
   },
   marginTop: {
-    marginTop: "18.5px",
+    marginTop: "14px",
   }
 }));
 
