@@ -145,7 +145,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
             <span className={classes.stepNumber}>1</span>
           )}
         </Box>
-        <Box display="flex" flexDirection="column" alignItems="stretch">
+        <Box display="flex" flexDirection="column" alignItems="stretch" className={cls({ [classes.textCompleted]: hasDeployed })}>
           <Text className={classes.stepLabel}>Deploy Contract</Text>
           <Text className={classes.stepDescription}>Some backend magic is happening to lay some ground work for minting.</Text>
         </Box>
@@ -167,7 +167,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
             <span className={classes.stepNumber}>2</span>
           )}
         </Box>
-        <Box display="flex" flexDirection="column" alignItems="stretch" width="100%">
+        <Box display="flex" flexDirection="column" alignItems="stretch" width="100%" className={cls({ [classes.textCompleted]: hasMinted })}>
           <Text className={classes.stepLabel}>Mint NFTs</Text>
           <Text className={classes.stepDescription}>Your NFTs are now minting...</Text>
 
@@ -182,7 +182,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
 
-          <KeyValueDisplay kkey="NFTs minted" mt="6px" className={classes.nftsMinted}>
+          <KeyValueDisplay kkey="NFTs minted" mt="6px" className={cls(classes.nftsMinted, { [classes.mintedTextCompleted]: hasMinted })}>
             {pendingMintContract
               ? <span>{pendingMintContract.mintedCount}/{pendingMintContract.tokenCount}</span>
               : <span>-</span>
@@ -207,7 +207,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
             <span className={classes.stepNumber}>3</span>
           )}
         </Box>
-        <Box display="flex" flexDirection="column" alignItems="stretch">
+        <Box display="flex" flexDirection="column" alignItems="stretch" className={cls({ [classes.textCompleted]: hasAcceptOwnership })}>
           <Box display="flex" justifyContent="space-between">
             <Text className={classes.stepLabel}>Accept Ownership</Text>
             {acceptTxId && 
@@ -220,7 +220,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
               >
                 <Typography>
                   View on explorer
-                  <LaunchIcon className={classes.linkIcon} />
+                  <LaunchIcon className={cls(classes.linkIcon, { [classes.linkIconCompleted]: hasAcceptOwnership })} />
                 </Typography>
               </Link>
             }
@@ -450,6 +450,21 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fill: theme.palette.text?.primary,
     },
   },
+  textCompleted: {
+    "& .MuiTypography-root": {
+      color: theme.palette.text?.secondary,
+    }
+  },
+  mintedTextCompleted: {
+    "& .MuiTypography-root": {
+      color: theme.palette.primary.dark,
+    }
+  },
+  linkIconCompleted: {
+    "& path": {
+      fill: theme.palette.text?.secondary,
+    }
+  }
 }))
 
 export default MintProgress;

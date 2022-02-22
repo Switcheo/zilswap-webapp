@@ -22,17 +22,18 @@ interface Props extends BoxProps {
   setAttributes: React.Dispatch<React.SetStateAction<AttributeData[]>>;
   errors: Errors;
   setErrors:  React.Dispatch<React.SetStateAction<Errors>>;
+  displayErrorBox: boolean;
 }
 
 // need to settle failed as well
 export type ProgressType = "queued" | "uploaded";
 
 const NftUpload: React.FC<Props> = (props: Props) => {
-  const { children, className, attributes, setAttributes, nfts, setNfts, errors, setErrors, ...rest } = props;
+  const { children, className, attributes, setAttributes, nfts, setNfts, errors, setErrors, displayErrorBox, ...rest } = props;
   const classes = useStyles();
   const isXs = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("xs"));
 
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [progress, setProgress] = useState<ProgressType[]>([]);
 
   const readFiles = (files: File[]) => {
@@ -90,7 +91,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
 
     setUploadedFiles([
       ...uploadedFiles,
-      ...files
+      ...files.map(file => file.name)
     ]);
 
     setProgress([
@@ -218,6 +219,15 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     );
   }
 
+  const repeatedAttribute = (index: number) => {
+    for (let i = 0; i < index; i++) {
+      if (attributes[i].name !== "" && attributes[i].name === attributes[index].name)
+        return true;
+    }
+
+    return false;
+  }
+
   return (
     <Box className={classes.root} {...rest}>
       <Box mt={5} mb={3}>
@@ -262,7 +272,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                                     : <FileSuccessIcon />
                                   }
                                   <Box display="flex" flexDirection="column" width="270px">
-                                    <Typography className={classes.fileName}>{file.name}</Typography>
+                                    <Typography className={classes.fileName}>{file}</Typography>
                                     <Box className={classes.progressBackground}>
                                       <Box className={cls({[classes.progressBar]: progress[index] === "uploaded"})} />
                                     </Box>
@@ -336,26 +346,26 @@ const NftUpload: React.FC<Props> = (props: Props) => {
               {attributes.map((attribute, index) => {
                 return (
                   <TableRow key={index}>
-                    <TableCell component="th" scope="row" style={{ verticalAlign: "top" }}>
+                    <TableCell component="th" scope="row" className={classes.alignTop}>
                       <ArkInput
                         placeholder="Name"
                         value={attribute.name}
                         onValueChange={(value) => handleAttributeNameChange(index, value)}
-                        error={!attribute.name ? "Add attribute name." : ""}
-                        errorBorder={!attribute.name}
+                        error={repeatedAttribute(index) ? "Please rename this attribute." : (!attribute.name && displayErrorBox) ? "Add attribute name." : ""}
+                        errorBorder={repeatedAttribute(index) || (!attribute.name && displayErrorBox)}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className={classes.alignTop}>
                       <ArkChipInput
                         onKeyDown={(event) => handleKeyDown(index, event)}
                         placeholder={!attribute.values.length ? 'Separate each value with a semi-colon ";"' : ""}
                         chips={attribute.values}
                         onDelete={(value) => handleDeleteChip(index, value)}
-                        error={!attribute.values.length ? "Add attribute values." : ""}
+                        error={(!attribute.values.length && displayErrorBox) ? "Add attribute values." : ""}
                       />
                     </TableCell>
                     <TableCell align="right">
-                      <ClearIcon className={classes.deleteAttributeIcon} fontSize="small" onClick={() => handleDeleteAttribute(attribute)} />
+                      <ClearIcon className={cls(classes.deleteAttributeIcon, { [classes.marginTop]: attribute.name && attribute.values.length })} fontSize="small" onClick={() => handleDeleteAttribute(attribute)} />
                     </TableCell>                      
                   </TableRow>
                 )
@@ -393,11 +403,14 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 {/* no of attributes */}
                 {attributes.length
                   ? attributes.map((attribute) => {
-                  return (
-                    <TableCell>
-                      <Typography>{attribute.name}</Typography>
-                    </TableCell>
-                  )})
+                    return (
+                      !!attribute.values.length && (
+                        <TableCell>
+                          <Typography>{attribute.name}</Typography>
+                        </TableCell>
+                      )
+                    )
+                  })
                   : <TableCell>
                     <Typography>Attributes</Typography>
                   </TableCell>
@@ -410,7 +423,9 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 return (
                   <TableRow key={index}>
                     <TableCell component="th" scope="row" className={classes.imageCell}>
-                      <img src={nft.image?.toString()} alt="NFT" height="39.25px" width="39.25px" className={classes.nftImage} />
+                      <Box className={classes.nftImageBox}>
+                        <img src={nft.image?.toString()} alt="NFT" className={classes.nftImage} />
+                      </Box>
                       <ArkInput
                         placeholder="Name"
                         value={nft.name}
@@ -425,47 +440,49 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                       const currAttribute = nfts[index].attributes[attribute.name] ?? "";
 
                       return (
-                        <TableCell className={classes.removePaddingRightLast}>
-                          <FormControl className={cls(classes.formControl, { [classes.error]: !currAttribute.length })} fullWidth>
-                            <Select
-                              MenuProps={{ 
-                                classes: { paper: classes.selectMenu },
-                                anchorOrigin: {
-                                  vertical: "bottom",
-                                  horizontal: "left"
-                                },
-                                transformOrigin: {
-                                  vertical: "top",
-                                  horizontal: "left"
-                                },
-                                getContentAnchorEl: null
-                              }}
-                              variant="outlined"
-                              value={currAttribute}
-                              onChange={(event) => handleAttributeChange(index, attribute.name, event.target.value as string)}
-                              renderValue={(currAttribute) => {
-                                const selected = currAttribute as string;
-                                if (!selected.length) {
-                                  return <Typography className={classes.selectPlaceholder}>Select</Typography>;
-                                }
+                        !!attribute.values.length && (
+                          <TableCell className={classes.cellWidth}>
+                            <FormControl className={cls(classes.formControl, { [classes.error]: !currAttribute.length && displayErrorBox })} fullWidth>
+                              <Select
+                                MenuProps={{ 
+                                  classes: { paper: classes.selectMenu },
+                                  anchorOrigin: {
+                                    vertical: "bottom",
+                                    horizontal: "left"
+                                  },
+                                  transformOrigin: {
+                                    vertical: "top",
+                                    horizontal: "left"
+                                  },
+                                  getContentAnchorEl: null
+                                }}
+                                variant="outlined"
+                                value={currAttribute}
+                                onChange={(event) => handleAttributeChange(index, attribute.name, event.target.value as string)}
+                                renderValue={(currAttribute) => {
+                                  const selected = currAttribute as string;
+                                  if (!selected.length) {
+                                    return <Typography className={classes.selectPlaceholder}>Select</Typography>;
+                                  }
 
-                                return selected;
-                              }}
-                              displayEmpty
-                            >
-                              {attribute.values.map((attributeValue) => {
-                                return (
-                                  <MenuItem value={attributeValue}>
-                                    {attributeValue}
-                                    {attributeValue === currAttribute && (
-                                      <DoneIcon fontSize="small" />
-                                    )}
-                                  </MenuItem>
-                                )
-                              })}
-                            </Select>
-                          </FormControl>
-                        </TableCell>
+                                  return selected;
+                                }}
+                                displayEmpty
+                              >
+                                {attribute.values.map((attributeValue) => {
+                                  return (
+                                    <MenuItem value={attributeValue}>
+                                      {attributeValue}
+                                      {attributeValue === currAttribute && (
+                                        <DoneIcon fontSize="small" />
+                                      )}
+                                    </MenuItem>
+                                  )
+                                })}
+                              </Select>
+                            </FormControl>
+                          </TableCell>
+                        )
                       )
                     })}
                     {!attributes.length && index === 0 &&
@@ -519,9 +536,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   header: {
     fontFamily: "'Raleway', sans-serif",
-    fontSize: "13px",
+    fontSize: "16px",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     fontWeight: 900,
+    [theme.breakpoints.down("xs")]: {
+      fontSize: "14px",
+    }
   },
   collectionBox: {
     marginTop: theme.spacing(4),
@@ -671,12 +691,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   nftTableContainer: {
-    maxHeight: 600,
+    maxHeight: 503.5,
     maxWidth: 790.938,
     borderRadius: 12,
+    backgroundColor: theme.palette.background.default,
+    paddingBottom: theme.spacing(1),
     "& .MuiTableCell-root": {
       minWidth: 110,
       backgroundColor: theme.palette.background.default,
+    },
+    "& .MuiTableCell-alignLeft": {
+      zIndex: 3,
     },
     "& .MuiTableCell-stickyHeader": {
       backgroundColor: theme.palette.background.default,
@@ -699,7 +724,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "&::-webkit-scrollbar-track:horizontal": {
       marginRight: theme.spacing(1),
-      marginLeft: theme.spacing(25),
+      marginLeft: theme.spacing(29.4),
       boxShadow: "inset 0 0 10px 10px green",
       border: "solid 3px transparent",
     },
@@ -770,6 +795,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     wordBreak: "break-all"
   },
   nameInput: {
+    minWidth: "180px",
     marginLeft: theme.spacing(1),
     marginTop: 0,
     "& .MuiFormHelperText-root": {
@@ -820,17 +846,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     zIndex: 1,
     minWidth: "200px!important",
   },
+  nftImageBox: {
+    height: "39.25px",
+    width: "39.25px",
+    overflow: "hidden",
+    borderRadius: "12px",
+    minWidth: "39.25px",
+    backgroundColor: "#002A34",
+  },
   nftImage: {
-    borderRadius: "12px", 
+    width: "100%",
+    height: "100%",
+    objectFit: "contain",
     verticalAlign: "bottom",
   },
   removePaddingRight: {
     paddingRight: "0px!important",
-  },
-  removePaddingRightLast: {
-    "&:last-child": {
-      paddingRight: "0px!important",
-    }
   },
   error: {
     "& .MuiSelect-root": {
@@ -841,7 +872,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "#FF5252",
     marginTop: "-12px",
     fontSize: 10,
-    fontWeight: 600,
+  },
+  alignTop: {
+    verticalAlign: "top",
+  },
+  cellWidth: {
+    minWidth: "180px!important",
+  },
+  marginTop: {
+    marginTop: "18.5px",
   }
 }));
 

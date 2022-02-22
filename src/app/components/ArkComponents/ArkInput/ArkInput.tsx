@@ -3,6 +3,7 @@ import { BoxProps, FormControl, FormHelperText, InputAdornment, InputBase, Box, 
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import cls from "classnames"
 import { AppTheme } from "app/theme/types";
+import { hexToRGBA} from "app/utils";
 
 interface Props extends BoxProps {
   label?: React.ReactNode;
@@ -41,6 +42,9 @@ const BootstrapInput = withStyles(theme => ({
         "-webkit-appearance": "none",
       },
     },
+    "&.Mui-disabled": {
+      color: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.5)}` : `rgba${hexToRGBA("#003340", 0.35)}`
+    }
   },
   input: {
     position: 'relative',
@@ -66,7 +70,7 @@ const ArkInput: React.FC<Props> = (props: Props) => {
       {inline && (<Typography className={cls(classes.label, 'inline')}>
         {label}
       </Typography>)}
-      <FormControl fullWidth className={cls({ [classes.inline]: inline })}>
+      <FormControl fullWidth className={cls({ [classes.removeErrorMargin]: inline && error })}>
         {!inline && (
           <Fragment>
             {typeof label === "string" ? (<Typography className={classes.label}>{label}</Typography>) : label}
@@ -87,7 +91,9 @@ const ArkInput: React.FC<Props> = (props: Props) => {
             className={cls({ [classes.focused]: onFocus && !error, [classes.multiline]: multiline, [classes.error]: error && !!value, [classes.errorBorder]: errorBorder })}
             multiline={multiline} value={value} onChange={(e) => onValueChange(e.target.value)} fullWidth defaultValue="react-bootstrap" {...rest} />
         )}
-        <FormHelperText className={cls({ [classes.errorText]: true })} >{error ? error : " "}</FormHelperText>
+        {error &&
+          <FormHelperText className={classes.errorText} >{error}</FormHelperText>
+        }
       </FormControl>
     </Box >
   );
@@ -126,7 +132,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "#FF5252",
     fontSize: 10,
     marginTop: "2px",
-    margin: 0
+    lineHeight: "14px",
+    margin: 0,
   },
   instruction: {
     color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
@@ -146,9 +153,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     minHeight: 60,
     alignItems: "flex-start",
   },
-  inline: {
-    // display: "flex",
-    // justifyContent: "space-between",
+  removeErrorMargin: {
+    marginBottom: "0px!important",
   },
   focusAdornment: {
     color: theme.palette.action?.selected

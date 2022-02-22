@@ -64,29 +64,31 @@ const ArkChipInput: React.FC<Props> = (props: Props) => {
   return (
     <Box className={cls(classes.root, className)}>
       <FormControl fullWidth>
-          <BootstrapInput
-            startAdornment={
-              chips.map((value: string, index: number) => {
-                return (
-                  <Chip
-                    key={index}
-                    label={
-                      <Typography>
-                        {value}
-                      </Typography>
-                    }
-                    deleteIcon={
-                      <ClearIcon className={classes.deleteIcon} />
-                    }
-                    className={classes.chip}
-                    onDelete={() => onDelete(value)}
-                  />
-                )
-              })
-            }
-            onFocus={() => setOnFocus(true)} onBlur={onBlur} className={cls({ [classes.focused]: onFocus && !error, [classes.error]: error, [classes.flexBasis]: chips.length })}
-            value={inputValue} onChange={(event) => setInputValue(event.target.value)} onKeyDown={(event) => handleKeyDown(event)} fullWidth defaultValue="react-bootstrap" {...rest} />
-        <FormHelperText className={cls({ [classes.errorText]: true })} >{error ? error : " "}</FormHelperText>
+        <BootstrapInput
+          startAdornment={
+            chips.map((value: string, index: number) => {
+              return (
+                <Chip
+                  key={index}
+                  label={
+                    <Typography>
+                      {value}
+                    </Typography>
+                  }
+                  deleteIcon={
+                    <ClearIcon className={classes.deleteIcon} />
+                  }
+                  className={classes.chip}
+                  onDelete={() => onDelete(value)}
+                />
+              )
+            })
+          }
+          onFocus={() => setOnFocus(true)} onBlur={onBlur} className={cls({ [classes.focused]: onFocus && !error, [classes.error]: error, [classes.flexBasis]: chips.length })}
+          value={inputValue} onChange={(event) => setInputValue(event.target.value)} onKeyDown={(event) => handleKeyDown(event)} fullWidth defaultValue="react-bootstrap" {...rest} />
+        {error &&
+          <FormHelperText className={classes.errorText} >{error}</FormHelperText>
+        }
       </FormControl>
     </Box >
   );
