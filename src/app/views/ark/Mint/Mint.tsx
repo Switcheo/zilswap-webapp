@@ -50,7 +50,6 @@ export type AttributeData = {
 export type NftData = {
   name: string;
   image: string | ArrayBuffer | null;
-  // attributes: SimpleMap<string>;
   attributes: ArkClient.TokenTrait[];
 };
 
@@ -136,13 +135,19 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         return false;
     }
 
-    // unfilled nft attributes
+    // unfilled nft data
     for (const nft of nfts) {
       if (!nft.name)
         return false;
 
-      if (Object.keys(nft.attributes).length !== attributes.length)
+      if (Object.values(nft.attributes).length !== attributes.length)
         return false;
+
+      for (const attr of nft.attributes) {
+        if (Object.values(attr).some(data => !data)) {
+          return false;
+        }
+      }
     }
 
     return true;
@@ -220,14 +225,6 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           const buffer = Buffer.from(data, "base64");
 
           const fileAdded = await node.add(buffer);
-
-          // to clean up
-          // for (const [traitType, value] of Object.entries(nft.attributes)) {
-          //   attributes.push({
-          //     trait_type: traitType,
-          //     value: value,
-          //   })
-          // }
 
           return {
             resourceIpfsHash: fileAdded.path,

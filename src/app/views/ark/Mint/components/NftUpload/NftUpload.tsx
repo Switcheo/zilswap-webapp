@@ -159,7 +159,6 @@ const NftUpload: React.FC<Props> = (props: Props) => {
 
   const handleDeleteChip = (index: number, valueToDelete: string) => {
     const newAttribute = { ...attributes[index] };
-    // const attributeName = newAttribute.name;
     const attributeValues = newAttribute.values;
     attributeValues.splice(attributeValues.indexOf(valueToDelete), 1);
     
@@ -177,12 +176,6 @@ const NftUpload: React.FC<Props> = (props: Props) => {
       if (attributes[index]?.value === valueToDelete) {
         attributes[index].value = "";
       }
-
-      // Object.entries(attributes).forEach(([name, value]) => {
-      //   if (name === attributeName && value === valueToDelete) {
-      //     delete attributes[name];
-      //   }
-      // })
     })
 
     setNfts(
@@ -218,8 +211,6 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     newNfts.forEach(nft => {
       const newNftAttributes = nft.attributes.splice(attributeIndex, 1);
       nft.attributes = newNftAttributes;
-      
-      // delete nft.attributes[attributeToDelete.name];
     })
 
     setAttributes(
