@@ -54,7 +54,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
               {
                 name: file.name.substring(0, file.name.indexOf(".")),
                 image,
-                attributes: {},
+                attributes: [],
               },
               ...prevState.slice(size + index + 1)
             ]
@@ -114,11 +114,29 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     setAttributes(
       attributesCopy
     );
+
+    const newNfts = nfts.slice();
+    newNfts.forEach(nft => {
+      const attributes = nft.attributes;
+
+      if (attributes[index]) {
+        attributes[index].trait_type = value;
+      }
+    })
+
+    setNfts(
+      newNfts
+    );
   }
 
-  const handleAttributeChange = (index: number, attributeName: string, value: string) => {
+  const handleAttributeChange = (index: number, attributeIndex: number, attributeName: string, value: string) => {
     const newNfts = nfts.slice();
-    newNfts[index].attributes[attributeName] = value;
+    const newAttribute = { 
+      trait_type: attributeName,
+      value
+    };
+
+    newNfts[index].attributes[attributeIndex] = newAttribute;
 
     setNfts(
       newNfts
@@ -140,8 +158,8 @@ const NftUpload: React.FC<Props> = (props: Props) => {
   }
 
   const handleDeleteChip = (index: number, valueToDelete: string) => {
-    const newAttribute = {...attributes[index]};
-    const attributeName = newAttribute.name;
+    const newAttribute = { ...attributes[index] };
+    // const attributeName = newAttribute.name;
     const attributeValues = newAttribute.values;
     attributeValues.splice(attributeValues.indexOf(valueToDelete), 1);
     
@@ -156,11 +174,15 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     newNfts.forEach(nft => {
       const attributes = nft.attributes;
 
-      Object.entries(attributes).forEach(([name, value]) => {
-        if (name === attributeName && value === valueToDelete) {
-          delete attributes[name];
-        }
-      })
+      if (attributes[index]?.value === valueToDelete) {
+        attributes[index].value = "";
+      }
+
+      // Object.entries(attributes).forEach(([name, value]) => {
+      //   if (name === attributeName && value === valueToDelete) {
+      //     delete attributes[name];
+      //   }
+      // })
     })
 
     setNfts(
@@ -189,12 +211,15 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     );
   }
 
-  const handleDeleteAttribute = (attributeToDelete: AttributeData) => {
+  const handleDeleteAttribute = (attributeToDelete: AttributeData, attributeIndex: number) => {
     const newAttributes = attributes.filter(attribute => attribute !== attributeToDelete);
     const newNfts = nfts.slice();
 
     newNfts.forEach(nft => {
-      delete nft.attributes[attributeToDelete.name];
+      const newNftAttributes = nft.attributes.splice(attributeIndex, 1);
+      nft.attributes = newNftAttributes;
+      
+      // delete nft.attributes[attributeToDelete.name];
     })
 
     setAttributes(
@@ -385,7 +410,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                         // to clean up
                         className={cls(classes.deleteAttributeIcon, { [classes.marginTop]: !(repeatedAttribute(index) || ((!attribute.name || !attribute.values.length) && displayErrorBox)) })} 
                         fontSize="small" 
-                        onClick={() => handleDeleteAttribute(attribute)} 
+                        onClick={() => handleDeleteAttribute(attribute, index)} 
                       />
                     </TableCell>                      
                   </TableRow>
@@ -457,8 +482,8 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                       />
                     </TableCell>
 
-                    {!!attributes.length && attributes.map((attribute: AttributeData) => {
-                      const currAttribute = nfts[index].attributes[attribute.name] ?? "";
+                    {!!attributes.length && attributes.map((attribute, attributeIndex) => {
+                      const currAttribute = nfts[index].attributes[attributeIndex]?.value ?? "";
 
                       return (
                         !!attribute.values.length && (
@@ -482,7 +507,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                                 }}
                                 variant="outlined"
                                 value={currAttribute}
-                                onChange={(event) => handleAttributeChange(index, attribute.name, event.target.value as string)}
+                                onChange={(event) => handleAttributeChange(index, attributeIndex, attribute.name, event.target.value as string)}
                                 renderValue={(currAttribute) => {
                                   const selected = currAttribute as string;
                                   if (!selected.length) {

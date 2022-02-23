@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import * as IPFS from "ipfs";
 import { AppTheme } from "app/theme/types";
-import { SimpleMap, useAsyncTask, useNetwork, useToaster } from "app/utils";
+import { useAsyncTask, useNetwork, useToaster } from "app/utils";
 import ArkPage from "app/layouts/ArkPage";
 import { getMarketplace, getMint, getWallet } from "app/saga/selectors";
 import { OAuth } from "app/store/types";
@@ -50,7 +50,8 @@ export type AttributeData = {
 export type NftData = {
   name: string;
   image: string | ArrayBuffer | null;
-  attributes: SimpleMap<string>;
+  // attributes: SimpleMap<string>;
+  attributes: ArkClient.TokenTrait[];
 };
 
 export type MintImageFiles = {
@@ -213,7 +214,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       // upload image to ipfs
       const tokens = await Promise.all(nfts.map(async nft => {
         try {
-          const attributes = [];
+          // const attributes = [];
           const image = nft.image as string;
           const data = image.split(",")[1];
           const buffer = Buffer.from(data, "base64");
@@ -221,17 +222,17 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           const fileAdded = await node.add(buffer);
 
           // to clean up
-          for (const [traitType, value] of Object.entries(nft.attributes)) {
-            attributes.push({
-              trait_type: traitType,
-              value: value,
-            })
-          }
+          // for (const [traitType, value] of Object.entries(nft.attributes)) {
+          //   attributes.push({
+          //     trait_type: traitType,
+          //     value: value,
+          //   })
+          // }
 
           return {
             resourceIpfsHash: fileAdded.path,
             metadata: {
-              attributes,
+              attributes: nft.attributes,
               name: nft.name,
             }
           }
