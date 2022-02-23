@@ -127,12 +127,18 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
   }
 
   const onEndEditRoyalties = () => {
-    let value = new BigNumber(inputValues["royalties"]);
+    let royalties = inputValues["royalties"];
+    let value = new BigNumber(royalties);
     
     if (value.isNaN() || value.isZero()) {
       setInputValues({
         ...inputValues,
         "royalties": "0"
+      })
+    } else {
+      setInputValues({
+        ...inputValues,
+        "royalties": parseFloat(royalties).toString()
       })
     }
   }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import cls from "classnames";
 import { Box, BoxProps, Button, Typography, FormControl, FormHelperText, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, useMediaQuery } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -35,6 +35,14 @@ const NftUpload: React.FC<Props> = (props: Props) => {
 
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [progress, setProgress] = useState<ProgressType[]>([]);
+
+  const filesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    if (filesEndRef?.current) {
+      filesEndRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" })
+    }
+  }
 
   const readFiles = (files: File[]) => {
     const reader = new FileReader();
@@ -74,6 +82,8 @@ const NftUpload: React.FC<Props> = (props: Props) => {
               nfts: "",
             })
         }
+
+        scrollToBottom();
 
         readFile(index + 1);
       }
@@ -318,6 +328,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                                   <ClearIcon className={classes.deleteFileIcon} onClick={(event) => handleDeleteFile(event, index)} />
                                 </Box>
                             )})}
+                            <div ref={filesEndRef} />
                           </Box>
                         </Box>
                         <Box display="flex" justifyContent="center" flex={1}>

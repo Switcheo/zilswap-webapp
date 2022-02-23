@@ -294,7 +294,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     border: theme.palette.border,
     [theme.breakpoints.up("md")]: {
       maxWidth: "600px",
-    }
+    },
+    marginBottom: "-200px",
   },
   header: {
     fontFamily: "'Raleway', sans-serif",
