@@ -139,16 +139,32 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     );
   }
 
-  const handleDeleteChip = (index: number, value: string) => {
+  const handleDeleteChip = (index: number, valueToDelete: string) => {
     const newAttribute = {...attributes[index]};
+    const attributeName = newAttribute.name;
     const attributeValues = newAttribute.values;
-    attributeValues.splice(attributeValues.indexOf(value), 1);
+    attributeValues.splice(attributeValues.indexOf(valueToDelete), 1);
     
     const attributesCopy = attributes.slice();
     attributesCopy[index] = newAttribute;
 
     setAttributes(
       attributesCopy
+    );
+
+    const newNfts = nfts.slice();
+    newNfts.forEach(nft => {
+      const attributes = nft.attributes;
+
+      Object.entries(attributes).forEach(([name, value]) => {
+        if (name === attributeName && value === valueToDelete) {
+          delete attributes[name];
+        }
+      })
+    })
+
+    setNfts(
+      newNfts
     );
   };
 
@@ -239,7 +255,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         <Typography className={classes.header}>
           UPLOAD FILES
         </Typography>
-        <Typography className={classes.instruction}>
+        <Typography className={cls(classes.instruction, classes.lineHeight)}>
           Your NFTs will be named according to their file names by default. You may edit them below.
           {" "}
           <HelpInfo 
@@ -897,6 +913,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   marginTop: {
     marginTop: "14px",
+  },
+  lineHeight: {
+    lineHeight: 1.66,
   }
 }));
 

@@ -11,7 +11,7 @@ interface Props extends BoxProps {
   onValueChange: (value: string) => void;
   multiline?: boolean;
   error?: string;
-  instruction?: string;
+  instruction?: string | JSX.Element;
   startAdornment?: JSX.Element;
   endAdornment?: JSX.Element;
   inline?: boolean;
@@ -170,4 +170,4 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 
 
-export default ArkInput;
+export default React.memo(ArkInput);

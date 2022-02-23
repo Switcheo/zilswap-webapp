@@ -108,7 +108,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         return ""
       case "royalties":
         const value = Number(input);
-        if (value < 0 || value > MAX_ROYALTIES || isNaN(value)) return "Invalid amount"
+        if (value < 0 || value > MAX_ROYALTIES || isNaN(value)) return "ARKY supports up to 20% royalties, charged to sellers"
         return ""
       default: return "";
     }
@@ -210,7 +210,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         <Typography className={classes.header}>
           DISPLAY PICTURE & BANNER
         </Typography>
-        <Typography className={classes.instruction}>
+        <Typography className={cls(classes.instruction, classes.lineHeight)}>
           Customise your collection page with a display picture and banner.
           {" "}
           <HelpInfo 
@@ -262,7 +262,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         </Box>
 
         <Typography className={cls(classes.instruction, classes.footerInstruction)}>
-          Recommended format: PNG/JPEG &nbsp;|&nbsp; Display Picture size: 250 (w) x 250 (h) px &nbsp;|&nbsp; Banner size: 1300 (w) x 250 (h) px
+          Recommended format: PNG/JPEG &nbsp;|&nbsp; Display picture size: 250 (w) x 250 (h) px &nbsp;|&nbsp; Banner size: 1300 (w) x 250 (h) px
         </Typography>
       </Box>
 
@@ -287,7 +287,16 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
       <ArkInput
         className={cls(classes.artistName, classes.inputHeader, classes.input)} value={inputValues.artistName}
         label="ARTIST NAME" onValueChange={() => {}}
-        instruction="Your collection will be minted under this artist name."
+        instruction={
+          <span>
+            Your collection will be minted under this profile.
+            {" "}
+            <HelpInfo 
+              className={classes.infoIcon}
+              icon={<InfoIcon />}
+              placement="top"
+              title="You may edit your name via your profile settings."/>
+          </span>}
         disabled
       />
 
@@ -568,6 +577,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiFormControl-root": {
       marginBottom: theme.spacing(2),
     }
+  },
+  lineHeight: {
+    lineHeight: 1.66,
   }
 }));
 
