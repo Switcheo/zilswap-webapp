@@ -219,7 +219,6 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       // upload image to ipfs
       const tokens = await Promise.all(nfts.map(async nft => {
         try {
-          // const attributes = [];
           const image = nft.image as string;
           const data = image.split(",")[1];
           const buffer = Buffer.from(data, "base64");

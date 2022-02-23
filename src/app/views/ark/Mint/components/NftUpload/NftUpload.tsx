@@ -209,8 +209,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     const newNfts = nfts.slice();
 
     newNfts.forEach(nft => {
-      const newNftAttributes = nft.attributes.splice(attributeIndex, 1);
-      nft.attributes = newNftAttributes;
+      nft.attributes.splice(attributeIndex, 1);
     })
 
     setAttributes(
