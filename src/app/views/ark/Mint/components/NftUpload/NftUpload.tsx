@@ -447,7 +447,10 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                       return (
                         !!attribute.values.length && (
                           <TableCell className={classes.cellWidth}>
-                            <FormControl className={cls(classes.formControl, { [classes.error]: !currAttribute.length && displayErrorBox })} fullWidth>
+                            <FormControl 
+                              className={cls(classes.formControl, { [classes.error]: !currAttribute.length && displayErrorBox, [classes.light]: !currAttribute.length })} 
+                              fullWidth
+                            >
                               <Select
                                 MenuProps={{ 
                                   classes: { paper: classes.selectMenu },
@@ -686,6 +689,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   selectPlaceholder: {
     fontSize: "16px",
     lineHeight: "18px",
+    color: theme.palette.primary.light,
+  },
+  light: {
+    "& .MuiSelect-icon": {
+      fill: theme.palette.primary.light,
+    },
+    "& .MuiSelect-iconOpen": {
+      fill: theme.palette.action?.selected,
+    },
   },
   deleteAttributeIcon: {
     color: theme.palette.primary.light,

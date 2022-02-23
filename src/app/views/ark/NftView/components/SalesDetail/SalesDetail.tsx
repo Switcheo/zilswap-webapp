@@ -190,6 +190,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   hexSymbol: {
     fontSize: '30px',
+    overflowWrap: "anywhere",
   },
   buttonBox: {
     display: "flex",

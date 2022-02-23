@@ -201,7 +201,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   justifyContent="space-between"
                 >
                   {/* to truncate if too long? */}
-                  <Typography className={classes.title}>
+                  <Typography className={cls(classes.title, classes.overflowWrap)}>
                     {token.name}
                     {token.collection.verifiedAt && (<VerifiedBadge className={classes.verifiedBadge} />)}
                   </Typography>
@@ -548,6 +548,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   extraMargin: {
     marginLeft: 6,
+  },
+  overflowWrap: {
+    overflowWrap: "anywhere",
   }
 }));
 
