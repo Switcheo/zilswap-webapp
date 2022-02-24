@@ -21,7 +21,7 @@ interface Props extends BoxProps {
   attributes: AttributeData[];
   setAttributes: React.Dispatch<React.SetStateAction<AttributeData[]>>;
   errors: Errors;
-  setErrors:  React.Dispatch<React.SetStateAction<Errors>>;
+  setErrors: React.Dispatch<React.SetStateAction<Errors>>;
   displayErrorBox: boolean;
 }
 
@@ -945,4 +945,4 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   }
 }));
 
-export default NftUpload;
+export default React.memo(NftUpload);

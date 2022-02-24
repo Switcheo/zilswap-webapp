@@ -589,4 +589,4 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   }
 }));
 
-export default CollectionDetail;
+export default React.memo(CollectionDetail);

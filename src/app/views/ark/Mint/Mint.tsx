@@ -237,8 +237,6 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         }
       }));
 
-      console.log("tokens: ", tokens);
-
       const collection = {
         name: inputValues.collectionName,
         description: inputValues.description,
@@ -261,16 +259,12 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       const params = {
         collection,
         tokens,
-      }
-
-      console.log("deploying collection...");
+      };
 
       const deployResult = await arkClient.deployCollection(params, newOAuth!.access_token);
 
       if (deployResult?.result?.mint) {
         const mintContract = deployResult.result.mint;
-
-        console.log("contract: ", mintContract);
 
         if (uploadedFiles?.profile) {
           imageUpload(mintContract.id, uploadedFiles.profile, newOAuth!.access_token, "profile", arkClient);
@@ -290,9 +284,6 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       const requestResult = await arkClient.requestMintImageUploadUrl(mintContractId, accessToken, type);
 
       const blobData = new Blob([uploadFile], { type: uploadFile.type });
-    
-      console.log("data: ", blobData);
-      console.log("url: ", requestResult.result.uploadUrl);
 
       await arkClient.putImageUpload(requestResult.result.uploadUrl, blobData);
       await arkClient.notifyMintImageUpload(mintContractId, accessToken, type);
