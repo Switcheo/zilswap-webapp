@@ -1,7 +1,7 @@
 import React from "react";
 import cls from "classnames";
 import { Box, BoxProps, CircularProgress, Typography, Checkbox, FormControlLabel, Link } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { darken, makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { AppTheme } from "app/theme/types";
@@ -29,9 +29,9 @@ const ConfirmMint: React.FC<Props> = (props: Props) => {
       </Box>
 
       <Typography className={classes.confirmMintText}>
-        Please ensure that all information is correct before minting your collection.
+        <span className={classes.fontWeight}>Please review and ensure that all information provided above is accurate prior to minting.</span>
         {" "}
-        <span className={classes.warningText}>Your NFTs cannot be edited once they have been minted.</span>
+        Contract and NFT-related data will not be editable via ARKY once it has been minted and transferred under your ownership.
       </Typography>
 
       {/* Terms */}
@@ -53,7 +53,7 @@ const ConfirmMint: React.FC<Props> = (props: Props) => {
             {" "}
             <Link
               className={classes.link}
-              underline="always"
+              underline="none"
               rel="noopener noreferrer"
               target="_blank"
               href="https://docs.zilswap.io/arky/terms">
@@ -93,7 +93,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 700,
   },
   warningText: {
-    color: "#FF5252",
+    color: `rgba${hexToRGBA("#FF5252", 0.8)}`,
   },
   radioButton: {
     padding: "6px",
@@ -106,7 +106,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     justifyContent: "flex-start",
     marginLeft: 2,
     marginTop: theme.spacing(0.5),
-    marginBottom: theme.spacing(1),
+    marginBottom: theme.spacing(2),
     "& .MuiFormControlLabel-root": {
       marginLeft: "-8px",
       marginRight: 0,
@@ -126,6 +126,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   confirmMintText: {
     fontSize: "13px",
     lineHeight: "16px",
+    maxWidth: "790px",
   },
   circularProgress: {
     color: "rgba(255, 255, 255, .5)",
@@ -158,8 +159,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginRight: theme.spacing(1),
   },
   link: {
-    color: theme.palette.text?.primary,
-  }
+    fontWeight: 800,
+    color: "#6BE1FF",
+    '&:hover': {
+      color: darken('#6BE1FF', 0.1),
+    }
+  },
+  fontWeight: {
+    fontWeight: 800,
+  },
 }));
 
 export default ConfirmMint;

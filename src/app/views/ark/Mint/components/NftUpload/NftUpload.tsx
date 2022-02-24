@@ -28,6 +28,8 @@ interface Props extends BoxProps {
 // need to settle failed as well
 export type ProgressType = "queued" | "uploaded";
 
+const MAX_FILE_SIZE = 50 * Math.pow(1024, 2);
+
 const NftUpload: React.FC<Props> = (props: Props) => {
   const { children, className, attributes, setAttributes, nfts, setNfts, errors, setErrors, displayErrorBox, ...rest } = props;
   const classes = useStyles();
@@ -292,14 +294,14 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         </Typography>
 
         <Box>
-          <Dropzone accept='image/jpeg, image/png, image/gif' onFileDialogCancel={() => {}} onDrop={onHandleFileDrop}>
+          <Dropzone accept='image/jpeg, image/png, image/gif' maxSize={MAX_FILE_SIZE}  onFileDialogCancel={() => {}} onDrop={onHandleFileDrop}>
             {({ getRootProps, getInputProps }) => (
               <Box>
                 <div {...getRootProps()}>
                   <input {...getInputProps()} />
                   <Box className={cls(classes.dropBox, { [classes.flex]: !uploadedFiles.length })}>
                     {!uploadedFiles.length && (
-                      <Typography className={classes.bannerText}>Drag and drop your folder(s) here.</Typography>
+                      <Typography className={classes.bannerText}>Drag and drop your file(s) here.</Typography>
                     )}
                     {!!uploadedFiles.length && (
                       <Box className={classes.dropBoxInner}>
@@ -344,7 +346,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         </Box>
 
         <Typography className={cls(classes.instruction, classes.footerInstruction)}>
-          Recommended format: PNG, JPEG, GIF &nbsp;|&nbsp; Maximum number of files: 200 &nbsp;|&nbsp; Maximum size per file: 50MB
+          Recommended Format: PNG/JPEG/GIF &nbsp;|&nbsp; Maximum Number of Files: 200 &nbsp;|&nbsp; Maximum File Size: 50MB
         </Typography>
         
         {errors.nfts && (
@@ -356,7 +358,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
       <Box className={classes.attributesBox}>
         <Box>
           <Typography className={classes.header}>
-            ATTRIBUTES
+            SET ATTRIBUTES
           </Typography>
         </Box>
 
@@ -435,9 +437,11 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         <Typography className={classes.header}>
           MANAGE NFTs
           {" "}
-          <span className={classes.uploadedText}>({nfts.length} uploaded)</span>
+          |
+          {" "}
+          <span>{nfts.length} Uploaded</span>
         </Typography>
-        <Typography className={classes.instruction}>
+        <Typography className={cls(classes.instruction, classes.lineHeight)}>
           Edit names or assign attributes below.
         </Typography>
         <TableContainer className={classes.nftTableContainer}>
@@ -538,7 +542,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                     {!attributes.length && index === 0 &&
                       <TableCell rowSpan={nfts.length} height={nfts.length * 39.25 + (nfts.length - 1) * 8} className={classes.removePaddingRight}>
                         <Box className={classes.emptyState}>
-                          <Typography>Add attributes via the <strong>Manage Attributes</strong> section.</Typography>
+                          <Typography>Add attributes via the <strong>Set Attributes</strong> section.</Typography>
                         </Box>
                       </TableCell>
                     }
@@ -555,7 +559,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                   {(!attributes.length) && 
                     <TableCell className={cls(classes.emptyStateCell, classes.removePaddingRight)}>
                       <Box className={cls(classes.emptyState, classes.emptyStatePadding)}>
-                        <Typography>Add attributes via the <strong>Manage Attributes</strong> section.</Typography>
+                        <Typography>Add attributes via the <strong>Set Attributes</strong> section.</Typography>
                       </Box>
                     </TableCell>
                   }
@@ -581,8 +585,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   instruction: {
     color: theme.palette.primary.light,
     fontWeight: 600,
-    fontSize: 12,
+    fontSize: 13,
     margin: theme.spacing(.4, 0),
+    marginBottom: "4px",
+    [theme.breakpoints.down("xs")]: {
+      fontSize: 12,
+    },
   },
   header: {
     fontFamily: "'Raleway', sans-serif",
@@ -639,7 +647,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: theme.spacing(2),
     color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
     fontWeight: 600,
-    fontSize: 10,
+    fontSize: 11,
   },
   attributesBox: {
     marginTop: theme.spacing(3),
@@ -699,9 +707,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       border: "none",
     },
     "& .MuiInputBase-input": {
-      fontSize: "16px",
-      lineHeight: "18px",
-      padding: "9.125px 12px",
+      fontSize: "13px",
+      padding: "10.9px 12px",
     },
     "& .MuiSelect-icon": {
       top: "calc(50% - 13px)",
@@ -718,7 +725,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
-      fontSize: "14px",
+      fontSize: "13px",
+      paddingLeft: "12.5px",
+      paddingRight: "10px",
     },
     "& .MuiListItem-root.Mui-focusVisible": {
       backgroundColor: theme.palette.type === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
@@ -729,8 +738,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   selectPlaceholder: {
-    fontSize: "16px",
-    lineHeight: "18px",
+    fontSize: "13px",
     color: theme.palette.primary.light,
   },
   light: {
@@ -867,12 +875,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("xs")]: {
       flexDirection: "column-reverse",
     }
-  },
-  uploadedText: {
-    color: theme.palette.primary.light,
-    fontWeight: 600,
-    fontFamily: "Avenir Next",
-    fontSize: "12px",
   },
   emptyState: {
     border: theme.palette.border,

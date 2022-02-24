@@ -54,7 +54,7 @@ const ArkChipInput: React.FC<Props> = (props: Props) => {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const element = event.currentTarget as HTMLInputElement;
 
-    if (event.key === ";" && element.value.length > 0) {
+    if ((event.key === ";" || event.key === "Enter") && element.value.length > 0) {
       event.preventDefault();
       setInputValue("");
       onKeyDown(event);
