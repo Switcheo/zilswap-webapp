@@ -153,6 +153,9 @@ const MintProgress: React.FC<Props> = (props: Props) => {
           ) : (
             <span className={classes.stepNumber}>1</span>
           )}
+          {!hasDeployed && (
+            <CircularProgress className={classes.progress} color="inherit" />
+          )}
         </Box>
         <Box display="flex" flexDirection="column" alignItems="stretch" className={cls({ [classes.textCompleted]: hasDeployed })}>
           <Text className={classes.stepLabel}>Deploy Contract</Text>
@@ -174,6 +177,9 @@ const MintProgress: React.FC<Props> = (props: Props) => {
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>2</span>
+          )}
+          {(hasDeployed && !hasMinted) && (
+            <CircularProgress className={classes.progress} color="inherit" />
           )}
         </Box>
         <Box display="flex" flexDirection="column" alignItems="stretch" width="100%" className={cls({ [classes.textCompleted]: hasMinted })}>
@@ -215,6 +221,9 @@ const MintProgress: React.FC<Props> = (props: Props) => {
           ) : (
             <span className={classes.stepNumber}>3</span>
           )}
+          {(loadingAcceptOwnership || loadingTx) && (
+            <CircularProgress className={classes.progress} color="inherit" />
+          )}
         </Box>
         <Box display="flex" flexDirection="column" alignItems="stretch" className={cls({ [classes.textCompleted]: hasAcceptOwnership })}>
           <Box display="flex" justifyContent="space-between">
@@ -248,6 +257,9 @@ const MintProgress: React.FC<Props> = (props: Props) => {
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>4</span>
+          )}
+          {(hasAcceptOwnership && !hasCompleted) && (
+            <CircularProgress className={classes.progress} color="inherit" />
           )}
         </Box>
         <Box display="flex" flexDirection="column" alignItems="stretch">
@@ -493,7 +505,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&.Mui-disabled": {
       backgroundColor: "transparent",
     },
-    "& span": {
+    "& svg + span": {
       color: theme.palette.text?.primary,
     }
   }
