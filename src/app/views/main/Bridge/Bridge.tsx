@@ -542,6 +542,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               </Box>
 
               <ConnectButton
+                className={classes.connectButton}
                 buttonRef={disconnectSrcButtonRef}
                 chain={fromBlockchain}
                 address={bridgeFormState.sourceAddress || ''}
@@ -574,6 +575,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 </FormControl>
               </Box>
               <ConnectButton
+                className={classes.connectButton}
                 buttonRef={disconnectDestButtonRef}
                 chain={toBlockchain}
                 address={bridgeFormState.destAddress || ''}
@@ -650,9 +652,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: theme.spacing(4),
     height: 46
   },
-  connectWalletButton: {
-    marginTop: theme.spacing(2),
-    height: 46,
+  connectButton: {
+    marginTop: theme.spacing(1),
   },
   connectedWalletButton: {
     backgroundColor: "transparent",
@@ -673,7 +674,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     flexDirection: "column",
     border: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "#D2E5DF"}`,
     borderRadius: 12,
-    padding: theme.spacing(1)
+    padding: theme.spacing(2, 1)
   },
   formControl: {
     margin: theme.spacing(1),
