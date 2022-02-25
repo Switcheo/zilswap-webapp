@@ -11,7 +11,7 @@ interface Props extends BoxProps {
   onValueChange: (value: string) => void;
   multiline?: boolean;
   error?: string;
-  instruction?: string;
+  instruction?: string | JSX.Element;
   startAdornment?: JSX.Element;
   endAdornment?: JSX.Element;
   inline?: boolean;
@@ -75,7 +75,7 @@ const ArkInput: React.FC<Props> = (props: Props) => {
           <Fragment>
             {typeof label === "string" ? (<Typography className={classes.label}>{label}</Typography>) : label}
             {instruction && (
-              <FormHelperText className={cls(classes.instruction)}>{instruction}
+              <FormHelperText id="instruction" className={cls(classes.instruction)}>{instruction}
                 {wordLimit && (<Typography className={cls(classes.wordLimit)}> {value.length || "0"}/{wordLimit}</Typography>)}
               </FormHelperText>
             )}
@@ -170,4 +170,4 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 
 
-export default ArkInput;
+export default React.memo(ArkInput);

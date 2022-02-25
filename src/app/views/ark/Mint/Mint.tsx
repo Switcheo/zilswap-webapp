@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import * as IPFS from "ipfs";
 import { AppTheme } from "app/theme/types";
-import { SimpleMap, useAsyncTask, useNetwork, useToaster } from "app/utils";
+import { useAsyncTask, useNetwork, useToaster } from "app/utils";
 import ArkPage from "app/layouts/ArkPage";
 import { getMarketplace, getMint, getWallet } from "app/saga/selectors";
 import { OAuth } from "app/store/types";
@@ -50,7 +50,7 @@ export type AttributeData = {
 export type NftData = {
   name: string;
   image: string | ArrayBuffer | null;
-  attributes: SimpleMap<string>;
+  attributes: ArkClient.TokenTrait[];
 };
 
 export type MintImageFiles = {
@@ -135,13 +135,19 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         return false;
     }
 
-    // unfilled nft attributes
+    // unfilled nft data
     for (const nft of nfts) {
       if (!nft.name)
         return false;
 
-      if (Object.keys(nft.attributes).length !== attributes.length)
+      if (Object.values(nft.attributes).length !== attributes.length)
         return false;
+
+      for (const attr of nft.attributes) {
+        if (Object.values(attr).some(data => !data)) {
+          return false;
+        }
+      }
     }
 
     return true;
@@ -213,25 +219,16 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       // upload image to ipfs
       const tokens = await Promise.all(nfts.map(async nft => {
         try {
-          const attributes = [];
           const image = nft.image as string;
           const data = image.split(",")[1];
           const buffer = Buffer.from(data, "base64");
 
           const fileAdded = await node.add(buffer);
 
-          // to clean up
-          for (const [traitType, value] of Object.entries(nft.attributes)) {
-            attributes.push({
-              trait_type: traitType,
-              value: value,
-            })
-          }
-
           return {
             resourceIpfsHash: fileAdded.path,
             metadata: {
-              attributes,
+              attributes: nft.attributes,
               name: nft.name,
             }
           }
@@ -239,8 +236,6 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           throw err;
         }
       }));
-
-      console.log("tokens: ", tokens);
 
       const collection = {
         name: inputValues.collectionName,
@@ -264,16 +259,12 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       const params = {
         collection,
         tokens,
-      }
-
-      console.log("deploying collection...");
+      };
 
       const deployResult = await arkClient.deployCollection(params, newOAuth!.access_token);
 
       if (deployResult?.result?.mint) {
         const mintContract = deployResult.result.mint;
-
-        console.log("contract: ", mintContract);
 
         if (uploadedFiles?.profile) {
           imageUpload(mintContract.id, uploadedFiles.profile, newOAuth!.access_token, "profile", arkClient);
@@ -293,9 +284,6 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       const requestResult = await arkClient.requestMintImageUploadUrl(mintContractId, accessToken, type);
 
       const blobData = new Blob([uploadFile], { type: uploadFile.type });
-    
-      console.log("data: ", blobData);
-      console.log("url: ", requestResult.result.uploadUrl);
 
       await arkClient.putImageUpload(requestResult.result.uploadUrl, blobData);
       await arkClient.notifyMintImageUpload(mintContractId, accessToken, type);

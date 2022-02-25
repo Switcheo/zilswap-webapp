@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import cls from "classnames";
 import { Box, BoxProps, Button, Typography, FormControl, FormHelperText, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, useMediaQuery } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -21,12 +21,14 @@ interface Props extends BoxProps {
   attributes: AttributeData[];
   setAttributes: React.Dispatch<React.SetStateAction<AttributeData[]>>;
   errors: Errors;
-  setErrors:  React.Dispatch<React.SetStateAction<Errors>>;
+  setErrors: React.Dispatch<React.SetStateAction<Errors>>;
   displayErrorBox: boolean;
 }
 
 // need to settle failed as well
 export type ProgressType = "queued" | "uploaded";
+
+const MAX_FILE_SIZE = 50 * Math.pow(1024, 2);
 
 const NftUpload: React.FC<Props> = (props: Props) => {
   const { children, className, attributes, setAttributes, nfts, setNfts, errors, setErrors, displayErrorBox, ...rest } = props;
@@ -35,6 +37,14 @@ const NftUpload: React.FC<Props> = (props: Props) => {
 
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [progress, setProgress] = useState<ProgressType[]>([]);
+
+  const filesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    if (filesEndRef?.current) {
+      filesEndRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" })
+    }
+  }
 
   const readFiles = (files: File[]) => {
     const reader = new FileReader();
@@ -54,7 +64,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
               {
                 name: file.name.substring(0, file.name.indexOf(".")),
                 image,
-                attributes: {},
+                attributes: [],
               },
               ...prevState.slice(size + index + 1)
             ]
@@ -74,6 +84,8 @@ const NftUpload: React.FC<Props> = (props: Props) => {
               nfts: "",
             })
         }
+
+        scrollToBottom();
 
         readFile(index + 1);
       }
@@ -114,11 +126,29 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     setAttributes(
       attributesCopy
     );
+
+    const newNfts = nfts.slice();
+    newNfts.forEach(nft => {
+      const attributes = nft.attributes;
+
+      if (attributes[index]) {
+        attributes[index].trait_type = value;
+      }
+    })
+
+    setNfts(
+      newNfts
+    );
   }
 
-  const handleAttributeChange = (index: number, attributeName: string, value: string) => {
+  const handleAttributeChange = (index: number, attributeIndex: number, attributeName: string, value: string) => {
     const newNfts = nfts.slice();
-    newNfts[index].attributes[attributeName] = value;
+    const newAttribute = { 
+      trait_type: attributeName,
+      value
+    };
+
+    newNfts[index].attributes[attributeIndex] = newAttribute;
 
     setNfts(
       newNfts
@@ -139,16 +169,29 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     );
   }
 
-  const handleDeleteChip = (index: number, value: string) => {
-    const newAttribute = {...attributes[index]};
+  const handleDeleteChip = (index: number, valueToDelete: string) => {
+    const newAttribute = { ...attributes[index] };
     const attributeValues = newAttribute.values;
-    attributeValues.splice(attributeValues.indexOf(value), 1);
+    attributeValues.splice(attributeValues.indexOf(valueToDelete), 1);
     
     const attributesCopy = attributes.slice();
     attributesCopy[index] = newAttribute;
 
     setAttributes(
       attributesCopy
+    );
+
+    const newNfts = nfts.slice();
+    newNfts.forEach(nft => {
+      const attributes = nft.attributes;
+
+      if (attributes[index]?.value === valueToDelete) {
+        attributes[index].value = "";
+      }
+    })
+
+    setNfts(
+      newNfts
     );
   };
 
@@ -173,12 +216,12 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     );
   }
 
-  const handleDeleteAttribute = (attributeToDelete: AttributeData) => {
+  const handleDeleteAttribute = (attributeToDelete: AttributeData, attributeIndex: number) => {
     const newAttributes = attributes.filter(attribute => attribute !== attributeToDelete);
     const newNfts = nfts.slice();
 
     newNfts.forEach(nft => {
-      delete nft.attributes[attributeToDelete.name];
+      nft.attributes.splice(attributeIndex, 1);
     })
 
     setAttributes(
@@ -239,7 +282,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         <Typography className={classes.header}>
           UPLOAD FILES
         </Typography>
-        <Typography className={classes.instruction}>
+        <Typography className={cls(classes.instruction, classes.lineHeight)}>
           Your NFTs will be named according to their file names by default. You may edit them below.
           {" "}
           <HelpInfo 
@@ -251,14 +294,14 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         </Typography>
 
         <Box>
-          <Dropzone accept='image/jpeg, image/png, image/gif' onFileDialogCancel={() => {}} onDrop={onHandleFileDrop}>
+          <Dropzone accept='image/jpeg, image/png, image/gif' maxSize={MAX_FILE_SIZE}  onFileDialogCancel={() => {}} onDrop={onHandleFileDrop}>
             {({ getRootProps, getInputProps }) => (
               <Box>
                 <div {...getRootProps()}>
                   <input {...getInputProps()} />
                   <Box className={cls(classes.dropBox, { [classes.flex]: !uploadedFiles.length })}>
                     {!uploadedFiles.length && (
-                      <Typography className={classes.bannerText}>Drag and drop your folder(s) here.</Typography>
+                      <Typography className={classes.bannerText}>Drag and drop your file(s) here.</Typography>
                     )}
                     {!!uploadedFiles.length && (
                       <Box className={classes.dropBoxInner}>
@@ -287,6 +330,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                                   <ClearIcon className={classes.deleteFileIcon} onClick={(event) => handleDeleteFile(event, index)} />
                                 </Box>
                             )})}
+                            <div ref={filesEndRef} />
                           </Box>
                         </Box>
                         <Box display="flex" justifyContent="center" flex={1}>
@@ -302,7 +346,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         </Box>
 
         <Typography className={cls(classes.instruction, classes.footerInstruction)}>
-          Recommended format: PNG, JPEG, GIF &nbsp;|&nbsp; Maximum number of files: 200 &nbsp;|&nbsp; Maximum size per file: 50MB
+          Recommended Format: PNG/JPEG/GIF &nbsp;|&nbsp; Maximum Number of Files: 200 &nbsp;|&nbsp; Maximum File Size: 50MB
         </Typography>
         
         {errors.nfts && (
@@ -314,7 +358,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
       <Box className={classes.attributesBox}>
         <Box>
           <Typography className={classes.header}>
-            ATTRIBUTES
+            SET ATTRIBUTES
           </Typography>
         </Box>
 
@@ -369,7 +413,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                         // to clean up
                         className={cls(classes.deleteAttributeIcon, { [classes.marginTop]: !(repeatedAttribute(index) || ((!attribute.name || !attribute.values.length) && displayErrorBox)) })} 
                         fontSize="small" 
-                        onClick={() => handleDeleteAttribute(attribute)} 
+                        onClick={() => handleDeleteAttribute(attribute, index)} 
                       />
                     </TableCell>                      
                   </TableRow>
@@ -393,9 +437,11 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         <Typography className={classes.header}>
           MANAGE NFTs
           {" "}
-          <span className={classes.uploadedText}>({nfts.length} uploaded)</span>
+          |
+          {" "}
+          <span>{nfts.length} Uploaded</span>
         </Typography>
-        <Typography className={classes.instruction}>
+        <Typography className={cls(classes.instruction, classes.lineHeight)}>
           Edit names or assign attributes below.
         </Typography>
         <TableContainer className={classes.nftTableContainer}>
@@ -441,13 +487,16 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                       />
                     </TableCell>
 
-                    {!!attributes.length && attributes.map((attribute: AttributeData) => {
-                      const currAttribute = nfts[index].attributes[attribute.name] ?? "";
+                    {!!attributes.length && attributes.map((attribute, attributeIndex) => {
+                      const currAttribute = nfts[index].attributes[attributeIndex]?.value ?? "";
 
                       return (
                         !!attribute.values.length && (
                           <TableCell className={classes.cellWidth}>
-                            <FormControl className={cls(classes.formControl, { [classes.error]: !currAttribute.length && displayErrorBox })} fullWidth>
+                            <FormControl 
+                              className={cls(classes.formControl, { [classes.error]: !currAttribute.length && displayErrorBox, [classes.light]: !currAttribute.length })} 
+                              fullWidth
+                            >
                               <Select
                                 MenuProps={{ 
                                   classes: { paper: classes.selectMenu },
@@ -463,7 +512,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                                 }}
                                 variant="outlined"
                                 value={currAttribute}
-                                onChange={(event) => handleAttributeChange(index, attribute.name, event.target.value as string)}
+                                onChange={(event) => handleAttributeChange(index, attributeIndex, attribute.name, event.target.value as string)}
                                 renderValue={(currAttribute) => {
                                   const selected = currAttribute as string;
                                   if (!selected.length) {
@@ -493,7 +542,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                     {!attributes.length && index === 0 &&
                       <TableCell rowSpan={nfts.length} height={nfts.length * 39.25 + (nfts.length - 1) * 8} className={classes.removePaddingRight}>
                         <Box className={classes.emptyState}>
-                          <Typography>Add attributes via the <strong>Manage Attributes</strong> section.</Typography>
+                          <Typography>Add attributes via the <strong>Set Attributes</strong> section.</Typography>
                         </Box>
                       </TableCell>
                     }
@@ -510,7 +559,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                   {(!attributes.length) && 
                     <TableCell className={cls(classes.emptyStateCell, classes.removePaddingRight)}>
                       <Box className={cls(classes.emptyState, classes.emptyStatePadding)}>
-                        <Typography>Add attributes via the <strong>Manage Attributes</strong> section.</Typography>
+                        <Typography>Add attributes via the <strong>Set Attributes</strong> section.</Typography>
                       </Box>
                     </TableCell>
                   }
@@ -536,8 +585,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   instruction: {
     color: theme.palette.primary.light,
     fontWeight: 600,
-    fontSize: 12,
+    fontSize: 13,
     margin: theme.spacing(.4, 0),
+    marginBottom: "4px",
+    [theme.breakpoints.down("xs")]: {
+      fontSize: 12,
+    },
   },
   header: {
     fontFamily: "'Raleway', sans-serif",
@@ -594,7 +647,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: theme.spacing(2),
     color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
     fontWeight: 600,
-    fontSize: 10,
+    fontSize: 11,
   },
   attributesBox: {
     marginTop: theme.spacing(3),
@@ -654,9 +707,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       border: "none",
     },
     "& .MuiInputBase-input": {
-      fontSize: "16px",
-      lineHeight: "18px",
-      padding: "9.125px 12px",
+      fontSize: "13px",
+      padding: "10.9px 12px",
     },
     "& .MuiSelect-icon": {
       top: "calc(50% - 13px)",
@@ -673,7 +725,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
-      fontSize: "14px",
+      fontSize: "13px",
+      paddingLeft: "12.5px",
+      paddingRight: "10px",
     },
     "& .MuiListItem-root.Mui-focusVisible": {
       backgroundColor: theme.palette.type === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
@@ -684,8 +738,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   selectPlaceholder: {
-    fontSize: "16px",
-    lineHeight: "18px",
+    fontSize: "13px",
+    color: theme.palette.primary.light,
+  },
+  light: {
+    "& .MuiSelect-icon": {
+      fill: theme.palette.primary.light,
+    },
+    "& .MuiSelect-iconOpen": {
+      fill: theme.palette.action?.selected,
+    },
   },
   deleteAttributeIcon: {
     color: theme.palette.primary.light,
@@ -814,12 +876,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       flexDirection: "column-reverse",
     }
   },
-  uploadedText: {
-    color: theme.palette.primary.light,
-    fontWeight: 600,
-    fontFamily: "Avenir Next",
-    fontSize: "12px",
-  },
   emptyState: {
     border: theme.palette.border,
     backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#DEFFFF",
@@ -885,7 +941,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   marginTop: {
     marginTop: "14px",
+  },
+  lineHeight: {
+    lineHeight: 1.66,
   }
 }));
 
-export default NftUpload;
+export default React.memo(NftUpload);

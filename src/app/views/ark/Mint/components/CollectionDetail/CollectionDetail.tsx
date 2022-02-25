@@ -30,6 +30,8 @@ interface Props extends BoxProps {
 
 const DESCRIPTION_PLACEHOLDER = "The Bear Market is a collection of 10,000 programmatically, randomly-generated NFT bears on the Zilliqa blockchain."
 
+const MAX_ROYALTIES = 20;
+
 const CollectionDetail: React.FC<Props> = (props: Props) => {
   const { children, className, inputValues, setInputValues, mintOption, setMintOption, uploadedFiles, setUploadedFiles, errors, setErrors, ...rest } = props;
   const classes = useStyles();
@@ -106,7 +108,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         return ""
       case "royalties":
         const value = Number(input);
-        if (value < 0 || value > 8 || isNaN(value)) return "Invalid amount"
+        if (value < 0 || value > MAX_ROYALTIES || isNaN(value)) return "ARKY supports up to 20% royalties, charged to sellers"
         return ""
       default: return "";
     }
@@ -125,12 +127,18 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
   }
 
   const onEndEditRoyalties = () => {
-    let value = new BigNumber(inputValues["royalties"]);
+    let royalties = inputValues["royalties"];
+    let value = new BigNumber(royalties);
     
     if (value.isNaN() || value.isZero()) {
       setInputValues({
         ...inputValues,
         "royalties": "0"
+      })
+    } else {
+      setInputValues({
+        ...inputValues,
+        "royalties": parseFloat(royalties).toString()
       })
     }
   }
@@ -208,7 +216,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         <Typography className={classes.header}>
           DISPLAY PICTURE & BANNER
         </Typography>
-        <Typography className={classes.instruction}>
+        <Typography className={cls(classes.instruction, classes.lineHeight)}>
           Customise your collection page with a display picture and banner.
           {" "}
           <HelpInfo 
@@ -229,7 +237,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
                     <input {...getInputProps()} />
                       {!displayImage && (
                         <Box className={cls(classes.displayImage, classes.displayImagePlaceholder)}>
-                          <Typography align="center" className={classes.displayText}>Drag and drop your image here.</Typography>
+                          <Typography align="center" className={classes.displayText}>Drag and drop image here.</Typography>
                         </Box>
                       )}
                       {displayImage && (<img alt="" className={classes.displayImage} src={displayImage?.toString() || ""} />)}
@@ -248,7 +256,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
                     <input {...getInputProps()} />
                     {!bannerImage && (
                       <Box className={classes.dropBox}>
-                        <Typography className={classes.bannerText}>Drag and drop your banner here.</Typography>
+                        <Typography className={classes.bannerText}>Drag and drop banner here.</Typography>
                       </Box>
                     )}
                     {bannerImage && <img alt="" className={classes.bannerImage} src={bannerImage?.toString() || ""} />}
@@ -260,7 +268,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         </Box>
 
         <Typography className={cls(classes.instruction, classes.footerInstruction)}>
-          Recommended format: PNG/JPEG &nbsp;|&nbsp; Display Picture size: 250 (w) x 250 (h) px &nbsp;|&nbsp; Banner size: 1300 (w) x 250 (h) px
+          Recommended Format: PNG/JPEG &nbsp;|&nbsp; DP Size: 250 (w) x 250 (h) px &nbsp;|&nbsp; Banner Size: 1300 (w) x 250 (h) px
         </Typography>
       </Box>
 
@@ -285,7 +293,16 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
       <ArkInput
         className={cls(classes.artistName, classes.inputHeader, classes.input)} value={inputValues.artistName}
         label="ARTIST NAME" onValueChange={() => {}}
-        instruction="Your collection will be minted under this artist name."
+        instruction={
+          <span>
+            Your collection will be minted under this profile.
+            {" "}
+            <HelpInfo 
+              className={classes.infoIcon}
+              icon={<InfoIcon />}
+              placement="top"
+              title="You may edit your name via your profile settings."/>
+          </span>}
         disabled
       />
 
@@ -297,7 +314,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         endAdornment={<span>%</span>}
         placeholder="2.5" error={errors.royalties} value={inputValues.royalties}
         label="ROYALTIES" onValueChange={(value) => updateInputs("royalties")(value)}
-        instruction="Collect royalties of up to 8%."
+        instruction={`Collect royalties of up to ${MAX_ROYALTIES}%.`}
       />
       
       {/* Socials */}
@@ -399,8 +416,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   instruction: {
     color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
     fontWeight: 600,
-    fontSize: 12,
+    fontSize: 13,
     margin: theme.spacing(.4, 0),
+    marginBottom: "4px",
+    [theme.breakpoints.down("xs")]: {
+      fontSize: "12px",
+    },
   },
   header: {
     fontFamily: "'Raleway', sans-serif",
@@ -409,7 +430,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 900,
     [theme.breakpoints.down("xs")]: {
       fontSize: "14px",
-    }
+    },
   },
   collectionBox: {
     marginTop: theme.spacing(4),
@@ -503,7 +524,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: theme.spacing(2),
     color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
     fontWeight: 600,
-    fontSize: 10,
+    fontSize: 11,
   },
   formControl: {
     "& .MuiSelect-root": {
@@ -560,13 +581,39 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       [theme.breakpoints.down("xs")]: {
         marginBottom: theme.spacing(2),
       }
+    },
+    "& .MuiInputBase-root": {
+      "& input, & textarea": {
+        fontSize: "13px",
+        [theme.breakpoints.down("xs")]: {
+          fontSize: "12px",
+        }
+      }
+    },
+    "& #instruction": {
+      fontSize: "13px",
+      marginBottom: "4px",
+      [theme.breakpoints.down("xs")]: {
+        fontSize: "12px",
+      }
     }
   },
   socialInput: {
     "& .MuiFormControl-root": {
       marginBottom: theme.spacing(2),
-    }
+    },
+    "& .MuiInputBase-root": {
+      "& input": {
+        fontSize: "13px",
+        [theme.breakpoints.down("xs")]: {
+          fontSize: "12px",
+        }
+      }
+    },
+  },
+  lineHeight: {
+    lineHeight: 1.66,
   }
 }));
 
-export default CollectionDetail;
+export default React.memo(CollectionDetail);
