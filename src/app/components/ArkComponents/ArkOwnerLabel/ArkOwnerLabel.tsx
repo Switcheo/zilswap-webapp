@@ -35,7 +35,7 @@ const ArkOwnerLabel: React.FC<Props> = (props: Props) => {
 
   return (
     <Box className={classes.link} >
-      <Link to={`/arky/profile?address=${user?.address}`}>
+      <Link to={`/arky/profile?address=${user?.address ?? address}`}>
         <Typography component="span" {...rest} className={cls(classes.root, className)}>
           {text}
         </Typography>
