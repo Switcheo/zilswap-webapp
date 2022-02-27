@@ -17197,10 +17197,10 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-zeeves-auth-sdk-js@^2.0.24:
-  version "2.0.24"
-  resolved "https://registry.yarnpkg.com/zeeves-auth-sdk-js/-/zeeves-auth-sdk-js-2.0.24.tgz#15025c8291a80770e1377fa2c49c3e98fb599b54"
-  integrity sha512-chW8+Xp2y3TDTqPRjduXUuhiTwdEH1NsByMM53uSoGezZbARNhzeL7Lix1fKViulYBcsdY0HQ0m7q6+zwnh5nw==
+zeeves-auth-sdk-js@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/zeeves-auth-sdk-js/-/zeeves-auth-sdk-js-3.0.0.tgz#7e14229e207e5ef622f6bb51ac91a77527c57b1a"
+  integrity sha512-DxubezJsgJXKurlCyK3Z/y9DUSauEWQ11bdsF17fiRa1E/oDIgyJgSdtsV8scUwWcjSFVtX3s1dBOkH83DIaMg==
   dependencies:
     "@zilliqa-js/zilliqa" "^3.0.0"
     buffer "^6.0.3"
