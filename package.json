@@ -30,7 +30,7 @@
     "fortmatic": "^2.2.1",
     "ipfs": "^0.61.0",
     "ipfs-http-client": "^55.0.0",
-    "jss": "10.5.1",
+    "jss": "10.9.0",
     "jss-plugin-compose": "^10.9.0",
     "jss-plugin-extend": "^10.9.0",
     "lightweight-charts": "^3.3.0",
