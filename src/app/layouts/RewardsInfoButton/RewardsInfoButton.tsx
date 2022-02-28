@@ -6,6 +6,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
 import CheckBoxIcon from "@material-ui/icons/CheckBoxRounded";
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
 import IndeterminateCheckBoxIcon from "@material-ui/icons/IndeterminateCheckBoxRounded";
+import ErrorIcon from '@material-ui/icons/ErrorOutlineOutlined';
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import dayjs from "dayjs";
@@ -20,7 +21,7 @@ import { DistributionWithStatus, DistributorWithTimings, RewardsState, RootState
 import { AppTheme } from "app/theme/types";
 import { formatZWAPLabel, hexToRGBA, useAsyncTask, useNetwork, useTokenFinder, useValueCalculators } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
-import { ReactComponent as IconSVG } from './icon.svg';
+import { ReactComponent as IconSVG } from "./icon.svg";
 
 interface Props extends BoxProps {
   buttonMode?: boolean;
@@ -176,6 +177,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginLeft: "2px"
   },
   checkbox: {
+    "&.Mui-disabled": {
+      color: theme.palette.background.contrast,
+    },
     "& .MuiSvgIcon-root": {
       fontSize: "1rem",
     },
@@ -233,6 +237,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         opacity: 0.8,
         backgroundColor: "#FFDF6B",
       }
+    }
+  },
+  errorIcon: {
+    fontSize: "1rem",
+    verticalAlign: "bottom!important",
+    color: theme.palette.text?.secondary,
+    marginLeft: "4px",
+    marginRight: "-1px",
+    "&:hover": {
+      color: "#FF5252",
     }
   }
 }));
@@ -405,7 +419,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     // if checked, selectedDistributions should contain all claimable distributions
     if (event.target.checked) {
-      setSelectedDistributions(claimableRewards.filter(r => !claimedDistributions.includes(r.info.id)));
+      setSelectedDistributions(claimableRewards.filter(r => r.funded && !claimedDistributions.includes(r.info.id)));
     } else {
       setSelectedDistributions([]);
     }
@@ -443,6 +457,14 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       element: buttonRef?.current,
     },
   } as const;
+
+  const displayRewardAmount = (amount: BigNumber) => {
+    return amount.isLessThan(0.001)
+      ? amount.toFormat(4)
+      : amount.isLessThan(0.01)
+        ? amount.toFormat(3)
+        : amount.toFormat(2)
+  }
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
@@ -504,8 +526,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                         const token = tokenFinder(tokenAddress)!
                         return (
                           <Text variant="h4" className={classes.totalReward} key={tokenAddress}>
-                            {/* toHumanNumber? */}
-                            {claimableAmountsByToken[tokenAddress].shiftedBy(-token!.decimals).toFormat(2)}
+                            {displayRewardAmount(claimableAmountsByToken[tokenAddress].shiftedBy(-token!.decimals))}
                             <CurrencyLogo address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoMd)} />
                             <span className={classes.currency}>
                               {token.symbol}
@@ -560,14 +581,17 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                 </Box>
                                 <Divider />
                                 {rewardsByDate[date].map(reward => {
-                                  const token = reward.rewardToken
+                                  const token = reward.rewardToken;
+                                  const isDisabled = !reward.funded || claimedDistributions.includes(reward.info.id);
 
                                   return (
                                     <Box mt={0.5} key={reward.info.id}>
                                       <FormControlLabel
                                         control={
-                                          <Checkbox
-                                            disabled={claimedDistributions.includes(reward.info.id)}
+                                          reward.funded === null 
+                                          ? <CircularProgress size={16} />
+                                          : <Checkbox
+                                            disabled={isDisabled}
                                             className={classes.checkbox}
                                             checked={isDistributionSelected(reward)}
                                             onChange={handleSelect(reward)}
@@ -575,12 +599,16 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                         }
                                         label={
                                           <Text className={classes.epochReward}>
-                                            {/* Need toHumanNumber? */}
-                                            {reward.info.amount.shiftedBy(-token.decimals).toFormat(2)}
+                                            {displayRewardAmount(reward.info.amount.shiftedBy(-token.decimals))}
                                             <CurrencyLogo address={token.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)} />
                                             <span className={classes.currency}>
                                               {token.symbol}
-                                              <HelpInfo placement="top" title={`${reward.rewardDistributor.name} from ${reward.rewardDistributor.distributor_name} at ${reward.rewardDistributor.distributor_address_hex} for epoch ${reward.info.epoch_number}.`} className={classes.tooltip} />
+                                              <HelpInfo 
+                                                placement="top" 
+                                                title={reward.funded === false ? "Reward pending distribution from project owner." : `${reward.rewardDistributor.name} from ${reward.rewardDistributor.distributor_name} at ${reward.rewardDistributor.distributor_address_hex} for epoch ${reward.info.epoch_number}.`}
+                                                className={classes.tooltip} 
+                                                icon={reward.funded === false ? <ErrorIcon className={classes.errorIcon} /> : undefined} 
+                                              />
                                             </span>
                                           </Text>
                                         }

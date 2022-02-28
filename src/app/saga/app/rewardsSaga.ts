@@ -8,7 +8,7 @@ import { BlockchainActionTypes } from "app/store/blockchain/actions";
 import { RewardsActionTypes } from "app/store/rewards/actions";
 import { DistributionWithStatus, DistributorWithTimings, PoolReward, PotentialRewards } from "app/store/types";
 import { WalletActionTypes } from "app/store/wallet/actions";
-import { SimpleMap } from "app/utils";
+import { bnOrZero, SimpleMap } from "app/utils";
 import { PollIntervals } from "app/utils/constants";
 import { getBlockchain, getRewards, getTokens, getWallet } from "../selectors";
 
@@ -31,7 +31,7 @@ function* queryDistributors() {
       for (const distributor of distributors) {
         const {
           incentivized_pools, distributor_name,
-          reward_token_address_hex, emission_info
+          reward_token_address_hex, emission_info,
         } = distributor
         const {
           distribution_start_time, epoch_period,
@@ -102,6 +102,7 @@ function* queryDistribution() {
       logger("zap saga", "query distributions");
 
       const { network } = getBlockchain(yield select())
+      const { distributors } = getRewards(yield select())
       const walletState = getWallet(yield select())
 
       if (!walletState.wallet) {
@@ -127,9 +128,26 @@ function* queryDistribution() {
           uploadStates[addr] = uploadState = yield call([contract, contract.getSubState], "merkle_roots");
         }
         const merkleRoots = uploadState?.merkle_roots ?? {};
+
+        let funded = null;
+        const distributor = distributors.find(d => d.distributor_address_hex === addr);
+        if (distributor) {
+          const tokenContract = zilswap.getContract(distributor.reward_token_address_hex);
+          const balances = yield call([tokenContract, tokenContract.getSubState], "balances");
+
+          const tokenBalance = balances[addr];
+
+          if (tokenBalance) {
+            funded = bnOrZero(tokenBalance).gte(info.amount);
+          } else {
+            funded = true;
+          }
+        }
+
         distributions.push({
           info,
           readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
+          funded,
         })
       }
 

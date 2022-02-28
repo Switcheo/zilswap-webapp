@@ -89,7 +89,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
     if (!bidToken || bidToken.isZil) return false;
     setBidToken(tokenState.tokens[bidToken.address]);
     const arkClient = new ArkClient(network);
-    const tokenProxyAddr = arkClient.tokenProxyAddress;
+    const tokenProxyAddr = arkClient.tokenProxyAddressV2;
 
     const priceAmount = bnOrZero(formState.bidAmount);
     const unitlessInAmount = priceAmount.shiftedBy(bidToken.decimals);
@@ -129,7 +129,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
     runApproveTx(async () => {
       const arkClient = new ArkClient(network);
-      const tokenProxyAddr = arkClient.tokenProxyAddress;
+      const tokenProxyAddr = arkClient.tokenProxyAddressV2;
       const tokenAddress = bidToken.address;
       const tokenAmount = bnOrZero(formState.bidAmount);
       const observedTx = await ZilswapConnector.approveTokenTransfer({
@@ -225,6 +225,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         .times(2147483647)
         .decimalPlaces(0)
         .toString(10); // int32 max 2147483647
+      const brokerAddress = arkClient.brokerAddressV2;
       const message = arkClient.arkMessage(
         "Execute",
         arkClient.arkChequeHash({
@@ -234,7 +235,9 @@ const BidDialog: React.FC<Props> = (props: Props) => {
           feeAmount,
           expiry,
           nonce,
-        })
+          brokerAddress,
+        }),
+        brokerAddress,
       );
 
       const { signature, publicKey } = (await wallet.provider!.wallet.sign(

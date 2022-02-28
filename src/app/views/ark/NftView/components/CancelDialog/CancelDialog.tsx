@@ -72,11 +72,12 @@ const CancelDialog: React.FC<Props> = (props: Props) => {
       for (const cheque of sellCheques) {
         const { chequeHash } = cheque;
 
-        const message = arkClient.arkMessage("Void", chequeHash.replace(/^0x/i, ""));
+        const brokerAddress = cheque.brokerAddress;
+        const message = arkClient.arkMessage("Void", chequeHash.replace(/^0x/i, ""), brokerAddress);
         const { signature, publicKey } = (await wallet.provider!.wallet.sign(message as any)) as any;
 
         const voidChequeResult = await arkClient.voidCheque({
-          publicKey, signature, chequeHash,
+          publicKey, signature, chequeHash, brokerAddress,
         }, zilswap);
 
         zilswap.observeTx({

@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Button, FormControl, MenuItem, Select, Tooltip, useMediaQuery, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { fromBech32Address } from "@zilliqa-js/crypto";
+import { fromBech32Address, toBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from 'bignumber.js';
 import cls from "classnames";
 import { ethers } from "ethers";
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { Blockchain, Models, CarbonSDK } from "carbon-js-sdk";
 import Web3Modal from 'web3modal';
 import { Network } from "zilswap-sdk/lib/constants";
@@ -29,126 +29,6 @@ import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "./wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "./zilliqa-logo.svg";
 
-const useStyles = makeStyles((theme: AppTheme) => ({
-  root: {
-  },
-  container: {
-    maxWidth: 488,
-    margin: "0 auto",
-    boxShadow: theme.palette.mainBoxShadow,
-    borderRadius: 12,
-    background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
-    border: theme.palette.border,
-    [theme.breakpoints.down("sm")]: {
-      maxWidth: 450,
-      padding: theme.spacing(2, 2, 0),
-    },
-    padding: theme.spacing(4, 4, 0),
-    marginBottom: 12
-  },
-  actionButton: {
-    marginTop: theme.spacing(4),
-    marginBottom: theme.spacing(4),
-    height: 46
-  },
-  connectWalletButton: {
-    marginTop: theme.spacing(2),
-    height: 46,
-  },
-  connectedWalletButton: {
-    backgroundColor: "transparent",
-    border: `1px solid ${theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : "#D2E5DF"}`,
-    "&:hover": {
-      backgroundColor: theme.palette.label
-    }
-  },
-  textColoured: {
-    color: theme.palette.primary.dark
-  },
-  textSpacing: {
-    letterSpacing: "0.5px"
-  },
-  box: {
-    display: "flex",
-    flex: "1 1 0",
-    flexDirection: "column",
-    border: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "#D2E5DF"}`,
-    borderRadius: 12,
-    padding: theme.spacing(1)
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120,
-    display: "contents",
-    "& .MuiSelect-select:focus": {
-      backgroundColor: "transparent"
-    },
-    "& .MuiSelect-root": {
-      borderRadius: 12,
-      "&:hover": {
-        backgroundColor: theme.palette.type === "dark" ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)"
-      }
-    },
-    "& .MuiOutlinedInput-root": {
-      border: "none",
-    },
-    "& .MuiInputBase-input": {
-      fontWeight: "bold",
-      fontSize: "16px"
-    },
-    "& .MuiSelect-icon": {
-      top: "calc(50% - 14px)",
-      fill: theme.palette.label
-    },
-    "& .MuiSelect-selectMenu": {
-      minHeight: 0
-    },
-  },
-  selectMenu: {
-    backgroundColor: theme.palette.background.default,
-    "& .MuiListItem-root": {
-      borderRadius: "12px",
-      padding: theme.spacing(1.5),
-      justifyContent: "center",
-    },
-    "& .MuiListItem-root.Mui-focusVisible": {
-      backgroundColor: theme.palette.type === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
-    },
-    "& .MuiListItem-root.Mui-selected": {
-      backgroundColor: theme.palette.label,
-      color: theme.palette.primary.contrastText,
-    },
-    "& .MuiList-padding": {
-      padding: "2px"
-    }
-  },
-  wavyLine: {
-    cursor: "pointer",
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginLeft: "-80px",
-    marginTop: "-80px",
-    width: "160px",
-    [theme.breakpoints.down("xs")]: {
-      width: "110px",
-      marginLeft: "-55px",
-    },
-  },
-  closeIcon: {
-    float: "right",
-    right: 0,
-    position: "absolute",
-    padding: 5,
-  },
-  priority: {
-    zIndex: 10,
-  },
-  extraPadding: {
-    padding: theme.spacing(1)
-  }
-}))
-
 const initialFormState = {
   sourceAddress: '',
   destAddress: '',
@@ -167,6 +47,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const network = useNetwork();
   const tokenFinder = useTokenFinder();
   const history = useHistory();
+  const location = useLocation();
   const [ethConnectedAddress, setEthConnectedAddress] = useState('');
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet); // zil wallet
   const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]); // eth wallet
@@ -188,6 +69,67 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"), { noSsr: true });
+
+  const queryParams = new URLSearchParams(location.search);
+
+  const tokenList: 'bridge-zil' | 'bridge-eth' = bridgeFormState.fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth';
+
+  const { token: bridgeToken, fromBlockchain, toBlockchain } = bridgeFormState;
+
+  // update state from param
+  useEffect(() => {
+    let queryTokenAddress = queryParams.get("token");
+
+    if (!queryTokenAddress || !bridgeState.tokens) return;
+
+    let queryToken;
+
+    if (queryTokenAddress.startsWith("zil")) {
+      try {
+        queryTokenAddress = fromBech32Address(queryTokenAddress).toLowerCase();
+      } catch { 
+        return;
+      }
+    }
+    queryTokenAddress = queryTokenAddress.replace(/^0x/, '');
+
+    bridgeState.tokens[fromBlockchain].forEach(token => {
+      if (token.tokenAddress === queryTokenAddress) {
+        queryToken = token;
+        return;
+      } else if (token.toTokenAddress === queryTokenAddress) {
+        queryToken = bridgeState.tokens[toBlockchain].find(token => token.tokenAddress === queryTokenAddress);
+        swapBridgeChains();
+        return;
+      }
+    })
+    
+    if (queryToken) {
+      dispatch(actions.Bridge.updateForm({
+        token: queryToken
+      }));
+    }
+
+    // eslint-disable-next-line
+  }, [bridgeState.tokens]);
+
+  // update param from state
+  useEffect(() => {
+    if (!bridgeToken) {
+      return;
+    }
+
+    let tokenAddress = "0x" + bridgeToken.tokenAddress;
+
+    if (fromBlockchain === Blockchain.Zilliqa) {
+      tokenAddress = toBech32Address(tokenAddress).toLowerCase();
+    }
+
+    queryParams.set("token", tokenAddress);
+    history.replace({ search: queryParams.toString() });
+
+    // eslint-disable-next-line
+  }, [bridgeToken]);
 
   // redirect to transfer history on mobile
   useEffect(() => {
@@ -219,10 +161,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
     // eslint-disable-next-line
   }, [network]);
-
-  const tokenList: 'bridge-zil' | 'bridge-eth' = bridgeFormState.fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth';
-
-  const { token: bridgeToken, fromBlockchain, toBlockchain } = bridgeFormState;
 
   const { fromToken } = useMemo(() => {
     if (!bridgeToken) return {};
@@ -431,6 +369,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
       token: undefined,
     }))
+
+    // clear query param
+    history.replace({ search: "" });
   };
 
   const showTransfer = () => {
@@ -601,6 +542,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               </Box>
 
               <ConnectButton
+                className={classes.connectButton}
                 buttonRef={disconnectSrcButtonRef}
                 chain={fromBlockchain}
                 address={bridgeFormState.sourceAddress || ''}
@@ -633,6 +575,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 </FormControl>
               </Box>
               <ConnectButton
+                className={classes.connectButton}
                 buttonRef={disconnectDestButtonRef}
                 chain={toBlockchain}
                 address={bridgeFormState.destAddress || ''}
@@ -686,4 +629,124 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     </BridgeCard >
   )
 }
+
+const useStyles = makeStyles((theme: AppTheme) => ({
+  root: {
+  },
+  container: {
+    maxWidth: 488,
+    margin: "0 auto",
+    boxShadow: theme.palette.mainBoxShadow,
+    borderRadius: 12,
+    background: theme.palette.type === "dark" ? "linear-gradient(#13222C, #002A34)" : "#F6FFFC",
+    border: theme.palette.border,
+    [theme.breakpoints.down("sm")]: {
+      maxWidth: 450,
+      padding: theme.spacing(2, 2, 0),
+    },
+    padding: theme.spacing(4, 4, 0),
+    marginBottom: 12
+  },
+  actionButton: {
+    marginTop: theme.spacing(4),
+    marginBottom: theme.spacing(4),
+    height: 46
+  },
+  connectButton: {
+    marginTop: theme.spacing(1),
+  },
+  connectedWalletButton: {
+    backgroundColor: "transparent",
+    border: `1px solid ${theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.1)}` : "#D2E5DF"}`,
+    "&:hover": {
+      backgroundColor: theme.palette.label
+    }
+  },
+  textColoured: {
+    color: theme.palette.primary.dark
+  },
+  textSpacing: {
+    letterSpacing: "0.5px"
+  },
+  box: {
+    display: "flex",
+    flex: "1 1 0",
+    flexDirection: "column",
+    border: `1px solid ${theme.palette.type === "dark" ? "#29475A" : "#D2E5DF"}`,
+    borderRadius: 12,
+    padding: theme.spacing(2, 1)
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+    display: "contents",
+    "& .MuiSelect-select:focus": {
+      backgroundColor: "transparent"
+    },
+    "& .MuiSelect-root": {
+      borderRadius: 12,
+      "&:hover": {
+        backgroundColor: theme.palette.type === "dark" ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)"
+      }
+    },
+    "& .MuiOutlinedInput-root": {
+      border: "none",
+    },
+    "& .MuiInputBase-input": {
+      fontWeight: "bold",
+      fontSize: "16px"
+    },
+    "& .MuiSelect-icon": {
+      top: "calc(50% - 14px)",
+      fill: theme.palette.label
+    },
+    "& .MuiSelect-selectMenu": {
+      minHeight: 0
+    },
+  },
+  selectMenu: {
+    backgroundColor: theme.palette.background.default,
+    "& .MuiListItem-root": {
+      borderRadius: "12px",
+      padding: theme.spacing(1.5),
+      justifyContent: "center",
+    },
+    "& .MuiListItem-root.Mui-focusVisible": {
+      backgroundColor: theme.palette.type === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
+    },
+    "& .MuiListItem-root.Mui-selected": {
+      backgroundColor: theme.palette.label,
+      color: theme.palette.primary.contrastText,
+    },
+    "& .MuiList-padding": {
+      padding: "2px"
+    }
+  },
+  wavyLine: {
+    cursor: "pointer",
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginLeft: "-80px",
+    marginTop: "-80px",
+    width: "160px",
+    [theme.breakpoints.down("xs")]: {
+      width: "110px",
+      marginLeft: "-55px",
+    },
+  },
+  closeIcon: {
+    float: "right",
+    right: 0,
+    position: "absolute",
+    padding: 5,
+  },
+  priority: {
+    zIndex: 10,
+  },
+  extraPadding: {
+    padding: theme.spacing(1)
+  }
+}))
+
 export default BridgeView
