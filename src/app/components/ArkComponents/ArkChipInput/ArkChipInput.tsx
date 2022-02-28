@@ -9,7 +9,7 @@ interface Props extends BoxProps {
   chips: string[];
   error?: string;
   startAdornment?: JSX.Element;
-  onInputBlur?: () => void;
+  onInputBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onDelete: (value: string) => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => void;
 }
@@ -44,10 +44,15 @@ const ArkChipInput: React.FC<Props> = (props: Props) => {
   const [onFocus, setOnFocus] = useState<boolean>(false);
   const [inputValue, setInputValue] = useState<string>("");
 
-  const onBlur = () => {
-    if (onInputBlur) {
-      onInputBlur();
+  const onBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    const element = event.currentTarget as HTMLInputElement;
+
+    if (onInputBlur && element.value.length > 0) {
+      event.preventDefault();
+      setInputValue("");
+      onInputBlur(event);
     }
+    
     setOnFocus(false);
   }
 

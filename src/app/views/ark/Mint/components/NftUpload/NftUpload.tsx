@@ -233,6 +233,27 @@ const NftUpload: React.FC<Props> = (props: Props) => {
     );
   }
 
+  const handleEndEditChipInput = (index: number, event: React.FocusEvent<HTMLInputElement>) => {
+    const newAttribute = {...attributes[index]};
+    const attributeValues = newAttribute.values;
+
+    const element = event.target as HTMLInputElement;
+    const newValue = element.value.trim();
+
+    if (attributeValues.includes(newValue) || !newValue.length) {
+      return;
+    }
+
+    attributeValues.push(newValue);
+    
+    const attributesCopy = attributes.slice();
+    attributesCopy[index] = newAttribute;
+
+    setAttributes(
+      attributesCopy
+    );
+  }
+
   const handleDeleteFile = (event: React.MouseEvent<SVGSVGElement, MouseEvent>, index: number) => {
     event.stopPropagation();
     
@@ -402,6 +423,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                     <TableCell className={classes.alignTop}>
                       <ArkChipInput
                         onKeyDown={(event) => handleKeyDown(index, event)}
+                        onInputBlur={(event) => handleEndEditChipInput(index, event)}
                         placeholder={!attribute.values.length ? 'Separate each value with a semi-colon ";"' : ""}
                         chips={attribute.values}
                         onDelete={(value) => handleDeleteChip(index, value)}

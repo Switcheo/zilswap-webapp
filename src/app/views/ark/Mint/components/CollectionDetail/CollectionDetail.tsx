@@ -596,6 +596,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       [theme.breakpoints.down("xs")]: {
         fontSize: "12px",
       }
+    },
+    "& #instruction > p": {
+      lineHeight: 2,
     }
   },
   socialInput: {
