@@ -127,7 +127,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
       return 15;
     }
 
-    return 25;
+    return 20 + Math.ceil((pendingMintContract.tokenCount - pendingMintContract.pinnedCount) / 10); // pinning rate: ~ 10/min
   }
 
   const getOwnershipButtonText = () => {
