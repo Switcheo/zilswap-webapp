@@ -2310,7 +2310,7 @@
     react-transition-group "^4.0.0"
     rifm "^0.7.0"
 
-"@material-ui/styles@^4.11.4":
+"@material-ui/styles@^4.11.4", "@material-ui/styles@~4.11.4":
   version "4.11.4"
   resolved "https://registry.yarnpkg.com/@material-ui/styles/-/styles-4.11.4.tgz#eb9dfccfcc2d208243d986457dff025497afa00d"
   integrity sha512-KNTIZcnj/zprG5LW0Sao7zw+yG3O35pviHzejMdcSGCdWbiO8qzRgOYL8JAxAsWBKOKYwVZxXtHWaB5T2Kvxew==
@@ -5465,7 +5465,7 @@ capture-exit@^2.0.0:
   dependencies:
     rsvp "^4.8.4"
 
-carbon-js-sdk@^0.1.22:
+carbon-js-sdk@^0.1.39:
   version "0.1.39"
   resolved "https://registry.yarnpkg.com/carbon-js-sdk/-/carbon-js-sdk-0.1.39.tgz#6ce11225f89647bef427245aadd5754d5e4dfd9a"
   integrity sha512-lvKSlQiB/SLIRt8YkqmH2oBHy4+pfbp9UipplMUyKuY9BkWrn1CrVayxY8jYwY82lC/grq+Dj0V67iu/REnoDg==
@@ -9138,13 +9138,6 @@ imurmurhash@^0.1.4:
   resolved "https://registry.yarnpkg.com/imurmurhash/-/imurmurhash-0.1.4.tgz#9218b9b2b928a238b13dc4fb6b6d576f231453ea"
   integrity sha1-khi5srkoojixPcT7a21XbyMUU+o=
 
-indefinite-observable@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/indefinite-observable/-/indefinite-observable-2.0.1.tgz#574af29bfbc17eb5947793797bddc94c9d859400"
-  integrity sha512-G8vgmork+6H9S8lUAg1gtXEj2JxIQTo0g2PbFiYOdjkziSI0F7UYBiVwhZRuixhBCNGczAls34+5HJPyZysvxQ==
-  dependencies:
-    symbol-observable "1.2.0"
-
 indent-string@^3.0.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/indent-string/-/indent-string-3.2.0.tgz#4a5fd6d27cc332f37e5419a504dbb837105c9289"
@@ -10465,13 +10458,13 @@ jss-plugin-camel-case@^10.5.1:
     hyphenate-style-name "^1.0.3"
     jss "10.9.0"
 
-jss-plugin-compose@10.5.1:
-  version "10.5.1"
-  resolved "https://registry.yarnpkg.com/jss-plugin-compose/-/jss-plugin-compose-10.5.1.tgz#26e049e8ad3e053d84c785b15e2214c39aa55f02"
-  integrity sha512-CMVJ7JAZL9nbZoDqlA3uBmpGy5T+WteTUsuHrJBf1vPb3U23JESsyte1PGmZQNmji/NM21sdTsHM8+4+XYX7kg==
+jss-plugin-compose@^10.9.0:
+  version "10.9.0"
+  resolved "https://registry.yarnpkg.com/jss-plugin-compose/-/jss-plugin-compose-10.9.0.tgz#4954583227db9b49bd2e29cd055dcc65b12cb19d"
+  integrity sha512-Q/0FEZhDwGUpf3/b7+PspmMi6MVSlN3YlTDmvrft7I6N346jUpd8MYkYP/6qM1ZMuVj4v8ky/XYqr1v2ganLLg==
   dependencies:
     "@babel/runtime" "^7.3.1"
-    jss "10.5.1"
+    jss "10.9.0"
     tiny-warning "^1.0.2"
 
 jss-plugin-default-unit@^10.5.1:
@@ -10482,13 +10475,13 @@ jss-plugin-default-unit@^10.5.1:
     "@babel/runtime" "^7.3.1"
     jss "10.9.0"
 
-jss-plugin-extend@10.5.1:
-  version "10.5.1"
-  resolved "https://registry.yarnpkg.com/jss-plugin-extend/-/jss-plugin-extend-10.5.1.tgz#da95ec2e42818eda7179a1be28569b00f835ab1d"
-  integrity sha512-bDMYNCpdBgDoJG/AW7aYGTAl9GSxKWmb/+JT8v7IIp7eNZ2YTcwEIMo2A7wGTbMpNEprsfL6E/lyd9Gs163j5w==
+jss-plugin-extend@^10.9.0:
+  version "10.9.0"
+  resolved "https://registry.yarnpkg.com/jss-plugin-extend/-/jss-plugin-extend-10.9.0.tgz#b1163ceb25d908888b326e5b5fa780aaaed4884d"
+  integrity sha512-xvmosUh3RsKVsm9L14ml6PL3i0Ejj5gB6eo/jTMkGW1kIy42gNXV1EthR8cD5xiowWstnvugQ3JF0pI5+QkPMg==
   dependencies:
     "@babel/runtime" "^7.3.1"
-    jss "10.5.1"
+    jss "10.9.0"
     tiny-warning "^1.0.2"
 
 jss-plugin-global@^10.5.1:
@@ -10533,17 +10526,6 @@ jss-plugin-vendor-prefixer@^10.5.1:
     "@babel/runtime" "^7.3.1"
     css-vendor "^2.0.8"
     jss "10.9.0"
-
-jss@10.5.1:
-  version "10.5.1"
-  resolved "https://registry.yarnpkg.com/jss/-/jss-10.5.1.tgz#93e6b2428c840408372d8b548c3f3c60fa601c40"
-  integrity sha512-hbbO3+FOTqVdd7ZUoTiwpHzKXIo5vGpMNbuXH1a0wubRSWLWSBvwvaq4CiHH/U42CmjOnp6lVNNs/l+Z7ZdDmg==
-  dependencies:
-    "@babel/runtime" "^7.3.1"
-    csstype "^3.0.2"
-    indefinite-observable "^2.0.1"
-    is-in-browser "^1.1.3"
-    tiny-warning "^1.0.2"
 
 jss@10.9.0, jss@^10.5.1:
   version "10.9.0"
@@ -15424,11 +15406,6 @@ svgo@^1.0.0, svgo@^1.2.2:
     stable "^0.1.8"
     unquote "~1.1.1"
     util.promisify "~1.0.0"
-
-symbol-observable@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"
-  integrity sha512-e900nM8RRtGhlV36KGEU9k65K3mPb1WV70OdjfxlG2EAuM1noi/E/BaW/uMhL7bPEssK8QV57vN3esixjUvcXQ==
 
 symbol-observable@^2.0.3:
   version "2.0.3"
