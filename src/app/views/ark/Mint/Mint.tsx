@@ -117,7 +117,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       return false;
 
     // compulsory fields
-    if (!inputValues.collectionName || !inputValues.royalties)
+    if (!inputValues.collectionName || !inputValues.royalties || !inputValues.artistName)
       return false;
 
     // no nft uploaded
@@ -151,7 +151,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }
 
     return true;
-  }, [acceptTerms, inputValues.collectionName, inputValues.royalties, nfts, attributes, errors]);
+  }, [acceptTerms, inputValues.collectionName, inputValues.royalties, inputValues.artistName, nfts, attributes, errors]);
 
   useEffect(() => {
     if (isMintEnabled) setDisplayErrorBox(false);
