@@ -57,7 +57,7 @@ const ConfirmMint: React.FC<Props> = (props: Props) => {
               rel="noopener noreferrer"
               target="_blank"
               href="https://docs.zilswap.io/arky/terms">
-              Terms and Conditions
+              Terms of Use
             </Link>.
           </Typography>
           }
