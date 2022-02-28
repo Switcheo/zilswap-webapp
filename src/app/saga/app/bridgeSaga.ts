@@ -5,6 +5,7 @@ import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { CarbonWallet, Blockchain, Models, AddressUtils, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
+import { GetDetailedTransfersResponse, GetTransfersRequest } from "carbon-js-sdk/lib/hydrogen";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
 import { FeesData } from "core/utilities/bridge";
 import { Bridge, logger } from "core/utilities";
@@ -75,19 +76,19 @@ function* watchDepositConfirmation() {
 
           // check if deposit is confirmed
           if (!tx.depositTxConfirmedAt) {
-            const queryOpts = Models.QueryGetExternalTransfersRequest.fromPartial({
-              address: swthAddress,
-              blockchain: tx.srcChain,
-              status: "success",
-              transferType: "deposit",
-            });
-            const result = (yield call([sdk.query.coin, sdk.query.coin.ExternalTransfers], queryOpts)) as Models.QueryGetExternalTransfersResponse;
+            const queryOpts: GetTransfersRequest = {
+              to_address: swthAddress,
+              limit: 100,
+            };
+            const result = (yield call([sdk.hydrogen, sdk.hydrogen.getDetailedTransfers], queryOpts)) as GetDetailedTransfersResponse;
 
-            const depositTransfer = result.externalTransfers.find((transfer) => transfer.transferType === 'deposit' && transfer.blockchain === tx.srcChain);
+            console.log("bridge saga", result)
 
-            if (depositTransfer?.status === 'success') {
+            const depositTransfer = result.data.find((transfer) => transfer.from_address?.toLowerCase() === tx.srcAddr && transfer.source_blockchain === tx.srcChain);
+
+            if (depositTransfer?.destination_transaction !== null) {
               if (!tx.sourceTxHash) {
-                tx.sourceTxHash = depositTransfer.transactionHash;
+                tx.sourceTxHash = depositTransfer?.source_transaction?.tx_hash;
               }
 
               tx.depositTxConfirmedAt = dayjs();
