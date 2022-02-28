@@ -6,6 +6,8 @@ export interface MintState {
 export enum Status {
   Created = "created",
   Queued = "queued",
+  Pinning = "pinning",
+  Pinned = "pinned",
   Deploying = "deploying",
   Deployed = "deployed",
   Minting = "minting",
@@ -28,6 +30,7 @@ export interface MintContract {
   royaltyBps: number;
   royaltyType: string;
 
+  pinnedCount: number;
   tokenCount: number;
   mintedCount: number;
 }

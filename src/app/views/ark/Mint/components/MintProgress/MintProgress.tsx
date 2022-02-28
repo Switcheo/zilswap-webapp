@@ -37,8 +37,12 @@ const MintProgress: React.FC<Props> = (props: Props) => {
   }
 
   // statuses
+  const hasPinned = useMemo(() => {
+    return pendingMintContract.pinnedCount === pendingMintContract.tokenCount;
+  }, [pendingMintContract])
+
   const hasDeployed = useMemo(() => {
-    return !!pendingMintContract?.contractAddress;
+    return !!pendingMintContract?.contractAddress || pendingMintContract.status === "deployed";
   }, [pendingMintContract])
 
   const hasMinted = useMemo(() => {
@@ -98,9 +102,9 @@ const MintProgress: React.FC<Props> = (props: Props) => {
 
   const getProgress = () => {
     if (pendingMintContract) {
-      const { mintedCount, tokenCount } = pendingMintContract;
+      const { pinnedCount, tokenCount } = pendingMintContract;
 
-      return ((mintedCount / tokenCount) * 100).toFixed(0);
+      return ((pinnedCount / tokenCount) * 100).toFixed(0);
     }
 
     return 0;
@@ -120,7 +124,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
     }
 
     if (pendingMintContract.contractAddress) {
-      return 20;
+      return 15;
     }
 
     return 25;
@@ -138,53 +142,28 @@ const MintProgress: React.FC<Props> = (props: Props) => {
     <Box className={classes.root} {...rest} display="flex" flexDirection="column">
       <Typography className={classes.header}>Minting NFTs</Typography>
 
-      {/* Deploy Contract */}
+      {/* Pin to IPFS */}
       <Box display="flex" marginTop={4} marginBottom={5} position="relative">
-        <Box className={cls(classes.stepBar, {
+        <Box className={cls(classes.stepBar, classes.stepBarIpfs, {
           [classes.stepBarActive]: true,
-          [classes.stepBarCompleted]: hasDeployed
+          [classes.stepBarCompleted]: hasPinned
         })}/>
         <Box className={cls(classes.step, {
           [classes.stepActive]: true,
-          [classes.stepCompleted]: hasDeployed
+          [classes.stepCompleted]: hasPinned
         })}>
-          {hasDeployed ? (
+          {hasPinned ? (
             <Checkmark />
           ) : (
             <span className={classes.stepNumber}>1</span>
           )}
-          {!hasDeployed && (
+          {(!hasPinned) && (
             <CircularProgress className={classes.progress} color="inherit" />
           )}
         </Box>
-        <Box display="flex" flexDirection="column" alignItems="stretch" className={cls({ [classes.textCompleted]: hasDeployed })}>
-          <Text className={classes.stepLabel}>Deploy Contract</Text>
-          <Text className={classes.stepDescription}>Some backend magic is happening to lay some ground work for minting.</Text>
-        </Box>
-      </Box>
-
-      {/* Mint NFTs */}
-      <Box display="flex" marginBottom={5} position="relative">
-        <Box className={cls(classes.stepBar, classes.stepBarSecond, {
-          [classes.stepBarActive]: hasDeployed,
-          [classes.stepBarCompleted]: hasMinted
-        })}/>
-        <Box className={cls(classes.step, {
-          [classes.stepActive]: hasDeployed,
-          [classes.stepCompleted]: hasMinted
-        })}>
-          {hasMinted ? (
-            <Checkmark />
-          ) : (
-            <span className={classes.stepNumber}>2</span>
-          )}
-          {(hasDeployed && !hasMinted) && (
-            <CircularProgress className={classes.progress} color="inherit" />
-          )}
-        </Box>
-        <Box display="flex" flexDirection="column" alignItems="stretch" width="100%" className={cls({ [classes.textCompleted]: hasMinted })}>
-          <Text className={classes.stepLabel}>Mint NFTs</Text>
-          <Text className={classes.stepDescription}>Your NFTs are now minting...</Text>
+        <Box display="flex" flexDirection="column" alignItems="stretch" width="100%" className={cls({ [classes.textCompleted]: hasPinned })}>
+          <Text className={classes.stepLabel}>Pin Data to IPFS</Text>
+          <Text className={classes.stepDescription}>Give us some time while we pin the provided metadata to IPFS.</Text>
 
           {/* progress bar */}
           <Box mt={2} display="flex">
@@ -197,18 +176,68 @@ const MintProgress: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
 
-          <KeyValueDisplay kkey="NFTs minted" mt="6px" className={cls(classes.nftsMinted, { [classes.mintedTextCompleted]: hasMinted })}>
+          <KeyValueDisplay kkey="NFTs pinned" mt="6px" className={cls(classes.nftsPinned, { [classes.mintedTextCompleted]: hasPinned })}>
             {pendingMintContract
-              ? <span>{pendingMintContract.mintedCount}/{pendingMintContract.tokenCount}</span>
+              ? <span>{pendingMintContract.pinnedCount}/{pendingMintContract.tokenCount}</span>
               : <span>-</span>
             }
           </KeyValueDisplay>
         </Box>
       </Box>
 
+      {/* Deploy Contract */}
+      <Box display="flex" marginBottom={5} position="relative">
+        <Box className={cls(classes.stepBar, {
+          [classes.stepBarActive]: hasPinned,
+          [classes.stepBarCompleted]: hasDeployed
+        })}/>
+        <Box className={cls(classes.step, {
+          [classes.stepActive]: hasPinned,
+          [classes.stepCompleted]: hasDeployed
+        })}>
+          {hasDeployed ? (
+            <Checkmark />
+          ) : (
+            <span className={classes.stepNumber}>2</span>
+          )}
+          {(hasPinned && !hasDeployed) && (
+            <CircularProgress className={classes.progress} color="inherit" />
+          )}
+        </Box>
+        <Box display="flex" flexDirection="column" alignItems="stretch" className={cls({ [classes.textCompleted]: hasDeployed })}>
+          <Text className={classes.stepLabel}>Deploy Contract</Text>
+          <Text className={classes.stepDescription}>Some backend magic is happening to lay some ground work for minting.</Text>
+        </Box>
+      </Box>
+
+      {/* Mint NFTs */}
+      <Box display="flex" marginBottom={5} position="relative">
+        <Box className={cls(classes.stepBar, {
+          [classes.stepBarActive]: hasDeployed,
+          [classes.stepBarCompleted]: hasMinted
+        })}/>
+        <Box className={cls(classes.step, {
+          [classes.stepActive]: hasDeployed,
+          [classes.stepCompleted]: hasMinted
+        })}>
+          {hasMinted ? (
+            <Checkmark />
+          ) : (
+            <span className={classes.stepNumber}>3</span>
+          )}
+          {(hasDeployed && !hasMinted) && (
+            <CircularProgress className={classes.progress} color="inherit" />
+          )}
+        </Box>
+        <Box display="flex" flexDirection="column" alignItems="stretch" width="100%" className={cls({ [classes.textCompleted]: hasMinted })}>
+          <Text className={classes.stepLabel}>Mint NFTs</Text>
+          <Text className={classes.stepDescription}>Your NFTs are now being minted...</Text>
+        </Box>
+      </Box>
+
       {/* Assign Ownership */}
       <Box display="flex" marginBottom={5} position="relative">
-        <Box className={cls(classes.stepBar, classes.stepBarThird, {
+        <Box className={cls(classes.stepBar, classes.stepBarOwnership, {
           [classes.stepBarActive]: hasMinted,
           [classes.stepBarCompleted]: hasAcceptOwnership
         })}/>
@@ -219,7 +248,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
           {hasAcceptOwnership ? (
             <Checkmark />
           ) : (
-            <span className={classes.stepNumber}>3</span>
+            <span className={classes.stepNumber}>4</span>
           )}
           {(loadingAcceptOwnership || loadingTx) && (
             <CircularProgress className={classes.progress} color="inherit" />
@@ -256,7 +285,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
           {hasCompleted? (
             <Checkmark />
           ) : (
-            <span className={classes.stepNumber}>4</span>
+            <span className={classes.stepNumber}>5</span>
           )}
           {(hasAcceptOwnership && !hasCompleted) && (
             <CircularProgress className={classes.progress} color="inherit" />
@@ -400,10 +429,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundImage: "linear-gradient(#29475A, #223139)",
     zIndex: 0,
   },
-  stepBarSecond: {
+  stepBarIpfs: {
     height: 130,
   },
-  stepBarThird: {
+  stepBarOwnership: {
     height: 70,
     [theme.breakpoints.down("xs")]: {
       height: 90,
@@ -451,7 +480,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: "1.5px",
     width: "100%",
   },
-  nftsMinted: {
+  nftsPinned: {
     "& .MuiTypography-root": {
       color: theme.palette.text?.primary,
       fontSize: "14px",
