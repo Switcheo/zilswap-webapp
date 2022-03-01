@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import cls from "classnames";
-import { Box, BoxProps, IconButton, Typography } from "@material-ui/core";
+import { Box, BoxProps, IconButton, Typography, Link } from "@material-ui/core";
+import { WarningOutlined } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -9,7 +10,7 @@ import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import BigNumber from "bignumber.js";
 import { AppTheme } from "app/theme/types";
 import { TWITTER_REGEX, INSTAGRAM_REGEX } from "app/utils/constants";
-import { ArkInput, HelpInfo } from "app/components";
+import { ArkInput, HelpInfo, NotificationBox } from "app/components";
 import { hexToRGBA } from "app/utils";
 import PlaceholderLight from "app/components/ArkComponents/ArkImageView/placeholder_bear_light.png";
 import PlaceholderDark from "app/components/ArkComponents/ArkImageView/placeholder_bear_dark.png";
@@ -25,7 +26,7 @@ interface Props extends BoxProps {
   uploadedFiles: MintImageFiles,
   setUploadedFiles: React.Dispatch<React.SetStateAction<MintImageFiles>>;
   errors: Errors;
-  setErrors:  React.Dispatch<React.SetStateAction<Errors>>;
+  setErrors: React.Dispatch<React.SetStateAction<Errors>>;
 }
 
 const DESCRIPTION_PLACEHOLDER = "The Bear Market is a collection of 10,000 programmatically, randomly-generated NFT bears on the Zilliqa blockchain."
@@ -129,7 +130,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
   const onEndEditRoyalties = () => {
     let royalties = inputValues["royalties"];
     let value = new BigNumber(royalties);
-    
+
     if (value.isNaN() || value.isZero()) {
       setInputValues({
         ...inputValues,
@@ -150,10 +151,23 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
   return (
     <Box className={classes.root} {...rest}>
+
       <Box mb={3}>
         <IconButton onClick={onNavigateBack} className={classes.backButton}>
           <ArrowBackIcon /><Typography className={classes.extraMargin}>Go Back</Typography>
         </IconButton>
+
+        <NotificationBox IconComponent={WarningOutlined}>
+          <Typography>
+            ARKY's Public Minter is currently in Beta mode.
+            If you encounter a bug, share them on our
+            {" "}
+            <Link target="_blank" href="https://discord.gg/zilswap">Discord</Link>.
+          </Typography>
+        </NotificationBox>
+
+        <Box marginBottom={3} />
+
         <Typography className={classes.pageHeader}>1. Set up Collection</Typography>
       </Box>
 
@@ -214,12 +228,12 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
       {/* Display Picture & Banner */}
       <Box className={classes.displayBox}>
         <Typography className={classes.header}>
-          DISPLAY PICTURE & BANNER
+          DISPLAY PICTURE &amp; BANNER
         </Typography>
         <Typography className={cls(classes.instruction, classes.lineHeight)}>
           Customise your collection page with a display picture and banner.
           {" "}
-          <HelpInfo 
+          <HelpInfo
             className={classes.infoIcon}
             icon={<InfoIcon />}
             placement="top"
@@ -235,12 +249,12 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
                 <Box>
                   <div {...getRootProps()}>
                     <input {...getInputProps()} />
-                      {!displayImage && (
-                        <Box className={cls(classes.displayImage, classes.displayImagePlaceholder)}>
-                          <Typography align="center" className={classes.displayText}>Drag and drop image here.</Typography>
-                        </Box>
-                      )}
-                      {displayImage && (<img alt="" className={classes.displayImage} src={displayImage?.toString() || ""} />)}
+                    {!displayImage && (
+                      <Box className={cls(classes.displayImage, classes.displayImagePlaceholder)}>
+                        <Typography align="center" className={classes.displayText}>Drag and drop image here.</Typography>
+                      </Box>
+                    )}
+                    {displayImage && (<img alt="" className={classes.displayImage} src={displayImage?.toString() || ""} />)}
                   </div>
                 </Box>
               )}
@@ -292,16 +306,16 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
       {/* Artist Name */}
       <ArkInput
         className={cls(classes.artistName, classes.inputHeader, classes.input)} value={inputValues.artistName}
-        label="ARTIST NAME" onValueChange={() => {}}
+        label="ARTIST NAME" onValueChange={() => { }}
         instruction={
           <span>
             Your collection will be minted under this profile.
             {" "}
-            <HelpInfo 
+            <HelpInfo
               className={classes.infoIcon}
               icon={<InfoIcon />}
               placement="top"
-              title="You may edit your name via your profile settings."/>
+              title="You may edit your name via your profile settings." />
           </span>}
         disabled
       />
@@ -316,7 +330,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         label="ROYALTIES" onValueChange={(value) => updateInputs("royalties")(value)}
         instruction={`Collect royalties of up to ${MAX_ROYALTIES}%.`}
       />
-      
+
       {/* Socials */}
       <Box className={classes.socialsBox}>
         <Typography className={classes.socialsHeader}>SOCIALS</Typography>
@@ -368,7 +382,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     opacity: "50%",
     borderRadius: "12px",
     padding: theme.spacing(1, 2),
-    marginBottom: theme.spacing(3),
     transform: "translateX(-18px)",
   },
   extraMargin: {
@@ -458,8 +471,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: "50%",
     padding: theme.spacing(2.5, 5),
     backgroundColor: `rgba${theme.palette.type === "dark"
-    ? hexToRGBA("#DEFFFF", 0.1)
-    : hexToRGBA("#003340", 0.2)}`,
+      ? hexToRGBA("#DEFFFF", 0.1)
+      : hexToRGBA("#003340", 0.2)}`,
     "& .MuiTypography-root": {
       fontSize: "14px",
       color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
@@ -485,14 +498,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     cursor: "pointer",
   },
   displayImagePlaceholder: {
-    backgroundImage: `url(${theme.palette.type === "dark" ? PlaceholderDark : PlaceholderLight })`,
+    backgroundImage: `url(${theme.palette.type === "dark" ? PlaceholderDark : PlaceholderLight})`,
   },
   displayText: {
     padding: theme.spacing(2),
     color: theme.palette.primary.light,
   },
   dropBox: {
-    backgroundImage: `url(${theme.palette.type === "dark" ? BannerDark : BannerLight })`,
+    backgroundImage: `url(${theme.palette.type === "dark" ? BannerDark : BannerLight})`,
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
     backgroundPositionY: "center",
