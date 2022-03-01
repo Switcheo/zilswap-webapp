@@ -315,7 +315,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         </Typography>
 
         <Box>
-          <Dropzone accept='image/jpeg, image/png, image/gif' maxSize={MAX_FILE_SIZE}  onFileDialogCancel={() => {}} onDrop={onHandleFileDrop}>
+          <Dropzone accept='image/jpeg, image/png, image/gif' maxSize={MAX_FILE_SIZE} maxFiles={200} onFileDialogCancel={() => {}} onDrop={onHandleFileDrop}>
             {({ getRootProps, getInputProps }) => (
               <Box>
                 <div {...getRootProps()}>

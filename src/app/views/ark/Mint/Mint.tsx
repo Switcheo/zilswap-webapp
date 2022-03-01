@@ -188,12 +188,19 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   useEffect(() => {
     if (address) {
       runQueryProfile(async () => {
-        const arkClient = new ArkClient(network);
+        let artistName;
+        try {
+          const arkClient = new ArkClient(network);
 
-        const { result: { model } } = await arkClient.getProfile(address.toLowerCase());
+          const { result: { model } } = await arkClient.getProfile(address.toLowerCase());
+          artistName = model?.username ?? toBech32Address(address);
+        } catch (e) {
+          artistName = toBech32Address(address);
+        }
+
         setInputValues({
           ...inputValues,
-          "artistName": model?.username ?? toBech32Address(address)
+          artistName,
         })
       })
     }
