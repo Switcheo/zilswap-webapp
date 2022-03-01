@@ -176,7 +176,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
 
-          <KeyValueDisplay kkey="NFTs pinned" mt="6px" className={cls(classes.nftsPinned, { [classes.mintedTextCompleted]: hasPinned })}>
+          <KeyValueDisplay kkey="NFTs Pinned" mt="6px" className={cls(classes.nftsPinned, { [classes.mintedTextCompleted]: hasPinned })}>
             {pendingMintContract
               ? <span>{pendingMintContract.pinnedCount}/{pendingMintContract.tokenCount}</span>
               : <span>-</span>
@@ -266,7 +266,7 @@ const MintProgress: React.FC<Props> = (props: Props) => {
                 href={explorerLink}
               >
                 <Typography>
-                  View on explorer
+                  View on Explorer
                   <LaunchIcon className={cls(classes.linkIcon, { [classes.linkIconCompleted]: hasAcceptOwnership })} />
                 </Typography>
               </Link>
