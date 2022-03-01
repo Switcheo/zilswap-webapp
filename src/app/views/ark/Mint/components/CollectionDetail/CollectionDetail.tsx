@@ -159,7 +159,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
 
         <NotificationBox IconComponent={WarningOutlined}>
           <Typography>
-            ARKY's Public Minter is currently in Beta mode.
+            ARKY's Public Minter feature is currently in Beta mode.
             If you encounter a bug, share them on our
             {" "}
             <Link target="_blank" href="https://discord.gg/zilswap">Discord</Link>.
