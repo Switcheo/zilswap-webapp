@@ -80,6 +80,10 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         if (input.length && input.length < 2) return "Minimum of 2 characters";
         if (input.length > 50) return "Maximum of 50 characters";
         return ""
+      case "symbol":
+        if (input.length && input.length < 3) return "Minimum of 3 characters";
+        if (input.length > 10) return "Maximum of 10 characters";
+        return ""
       case "description":
         if (input.length && input.length < 2) return "Minimum of 2 characters";
         if (input.length > 300) return "Maximum of 300 characters";
@@ -320,6 +324,15 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
         disabled
       />
 
+      {/* Token Symbol */}
+      <ArkInput
+        className={cls(classes.symbol, classes.inputHeader, classes.input)}
+        placeholder="BEAR" error={errors.symbol} errorBorder={!!errors.symbol} value={inputValues.symbol}
+        label="TOKEN SYMBOL" onValueChange={(value) => updateInputs("symbol")(value)}
+        instruction="The contract symbol that will be viewable on ViewBlock (e.g. $BEAR)." wordLimit={10}
+        disabled={mintOption === "select"}
+      />
+
       {/* Royalties */}
       <ArkInput
         type="number"
@@ -403,6 +416,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   collectionName: {
     marginTop: theme.spacing(3),
+  },
+  symbol: {
+    marginTop: theme.spacing(1),
   },
   description: {
     marginTop: theme.spacing(1),
