@@ -19,6 +19,7 @@ export type CollectionInputs = {
   collectionName: string;
   description: string;
   artistName: string;
+  symbol: string;
   royalties: string;
   websiteUrl: string;
   discordUrl: string;
@@ -31,6 +32,7 @@ export type Errors = {
   collectionName: string;
   description: string;
   artistName: string;
+  symbol: string;
   royalties: string;
   websiteUrl: string;
   discordUrl: string;
@@ -74,6 +76,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     collectionName: "",
     description: "",
     artistName: "",
+    symbol: "",
     royalties: "2.5",
     websiteUrl: "",
     discordUrl: "",
@@ -85,6 +88,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     collectionName: "",
     description: "",
     artistName: "",
+    symbol: "",
     royalties: "",
     websiteUrl: "",
     discordUrl: "",
@@ -117,7 +121,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       return false;
 
     // compulsory fields
-    if (!inputValues.collectionName || !inputValues.royalties || !inputValues.artistName)
+    if (!inputValues.collectionName || !inputValues.royalties || !inputValues.symbol || !inputValues.artistName)
       return false;
 
     // no nft uploaded
@@ -151,7 +155,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }
 
     return true;
-  }, [acceptTerms, inputValues.collectionName, inputValues.royalties, inputValues.artistName, nfts, attributes, errors]);
+  }, [acceptTerms, inputValues.collectionName, inputValues.symbol, inputValues.royalties, inputValues.artistName, nfts, attributes, errors]);
 
   useEffect(() => {
     if (isMintEnabled) setDisplayErrorBox(false);
@@ -239,6 +243,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
       const collection = {
         name: inputValues.collectionName,
+        symbol: inputValues.symbol,
         description: inputValues.description,
         address: "",
         verifiedAt: null,
@@ -295,6 +300,9 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
     if (!inputValues.collectionName)
       errors.collectionName = "Enter a collection name."
+
+    if (!inputValues.symbol)
+      errors.symbol = "Enter a token symbol."
     
     if (!nfts.length)
       errors.nfts = "No files uploaded."
