@@ -6,6 +6,7 @@ import statsSaga from "./app/statsSaga";
 import tokensSaga from "./app/tokensSaga";
 import rewardsSaga from "./app/rewardsSaga";
 import marketPlaceSaga from "./app/marketplaceSaga";
+import mintSaga from "./app/mintSaga";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -17,6 +18,7 @@ export function startSagas() {
   sagaMiddleware.run(statsSaga);
   sagaMiddleware.run(rewardsSaga);
   sagaMiddleware.run(marketPlaceSaga);
+  sagaMiddleware.run(mintSaga);
 };
 
 export default sagaMiddleware;

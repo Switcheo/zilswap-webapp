@@ -15,7 +15,10 @@ const loadSavedSlippage = () => {
       expiry: isNaN(expiry) ? DEFAULT_TX_EXPIRY : expiry,
     }
   } catch (error) {
-    return {};
+    return {
+      slippage: DEFAULT_TX_SLIPPAGE,
+      expiry: DEFAULT_TX_EXPIRY,
+    };
   }
 }
 

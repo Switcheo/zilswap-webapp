@@ -68,6 +68,11 @@ const routes: RouteConfig[] = [
         component: lazy(() => import("./views/ark/CollectionView")),
       },
       {
+        path: "/arky/mod/:collection/modify",
+        exact: true,
+        component: lazy(() => import("./views/ark/EditCollection")),
+      },
+      {
         path: "/arky/collections/:collection/:id",
         exact: true,
         component: lazy(() => import("./views/ark/NftView")),
@@ -91,6 +96,11 @@ const routes: RouteConfig[] = [
         path: "/arky/profile/:address/edit",
         exact: true,
         component: lazy(() => import("./views/ark/Profile/components/EditProfile")),
+      },
+      {
+        path: "/arky/mint",
+        exact: true,
+        component: lazy(() => import("./views/ark/Mint")),
       },
       {
         component: () => <Redirect to="/arky/discover"></Redirect>,

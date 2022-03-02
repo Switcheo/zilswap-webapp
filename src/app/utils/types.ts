@@ -1,4 +1,4 @@
-export interface SimpleMap<V> {
+export interface SimpleMap<V = string> {
   [index: string]: V;
 }
 

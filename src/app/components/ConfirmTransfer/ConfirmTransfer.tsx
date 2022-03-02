@@ -216,6 +216,11 @@ const CHAIN_NAMES: {
   [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
   [Blockchain.Native]: "Carbon",
   [Blockchain.Btc]: "Bitcoin",
+
+  [Blockchain.Carbon]: "Carbon",
+  [Blockchain.Switcheo]: "Switcheo",
+  [Blockchain.PolyNetwork]: "PolyNetwork",
+  [Blockchain.Neo3]: "Neo N3",
 } as const
 
 const ConfirmTransfer = (props: any) => {

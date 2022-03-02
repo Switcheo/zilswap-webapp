@@ -2,8 +2,8 @@ import React, { Suspense, useState, useMemo } from "react";
 import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { renderRoutes } from "react-router-config";
-import { useLocation } from "react-router-dom";
-import { ConnectWalletButton, NavDrawer, TopBar, DrawerComp } from "app/components";
+import { useLocation, useRouteMatch } from "react-router-dom";
+import { ConnectWalletButton, NavDrawer, TopBar, DrawerComp, ZilTokenSwapCTABanner } from "app/components";
 import { AppTheme } from "app/theme/types";
 import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
@@ -56,6 +56,8 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     else return "main";
   }, [location.pathname]);
 
+  const isZilTokenSwap = useRouteMatch("/bridge/erc20-zil-swap");
+
   const onToggleDrawer = (override?: boolean) => {
     setShowDrawer(typeof override === "boolean" ? override : !showDrawer);
   };
@@ -70,6 +72,7 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       <NavDrawer open={showDrawer} onClose={() => onToggleDrawer(false)} />
       <main className={classes.content}>
         <DevInfoBadge />
+        {!isZilTokenSwap && <ZilTokenSwapCTABanner />}
         <Suspense fallback={<LinearProgress />}>
           {renderRoutes(route.routes)}
         </Suspense>

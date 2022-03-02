@@ -3,11 +3,11 @@ import { Box, Container, Grid, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import cls from "classnames";
 import { ArkBanner, ArkBreadcrumb, ArkNFTListing, ArkFilterBar, Text, ArkSocialLinkGroup } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
-import { getBlockchain } from "app/saga/selectors";
+import { getBlockchain, getMarketplace } from "app/saga/selectors";
 import { actions } from "app/store";
 import { CollectionWithStats } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -17,6 +17,7 @@ import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import { updateFilter } from "app/store/marketplace/actions";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
+import { ReactComponent as EditIcon } from "./edit-icon.svg";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -133,6 +134,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
   const { network } = useSelector(getBlockchain);
+  const { profile } = useSelector(getMarketplace);
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -247,6 +249,11 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           <Box display="flex" flexDirection="column" maxWidth={500}>
             <Text variant="h1" className={classes.collectionName}>
               {collection.name}
+              {!!profile?.admin &&
+                <Link to={`/arky/mod/${toBech32Address(collection.address)}/modify`} style={{ padding: 8 }}>
+                  <EditIcon />
+                </Link>
+              }
             </Text>
 
             {/* missing info */}

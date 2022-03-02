@@ -1,5 +1,6 @@
-import { call, fork, delay, put, select, take, takeLatest, takeEvery } from "redux-saga/effects";
+import { call, fork, delay, put, select, takeLatest, takeEvery } from "redux-saga/effects";
 import { toBech32Address } from "@zilliqa-js/crypto";
+import dayjs from "dayjs";
 import { ArkClient, ArkExchangeInfo, logger, waitForTx } from "core/utilities";
 import { actions } from "app/store";
 import { SortBy } from "app/store/marketplace/actions";
@@ -123,10 +124,16 @@ function* loadProfile() {
     yield put(actions.Layout.addBackgroundLoading("loadProfile", "ARK:LOAD_PROFILE"));
     const { wallet } = getWallet(yield select());
     const { network } = getBlockchain(yield select());
+    let { oAuth } = getMarketplace(yield select());
 
     const arkClient = new ArkClient(network);
     if (!wallet) throw new Error("invalid wallet");
-    const { result: { model } } = (yield call(arkClient.getProfile, wallet.addressInfo.byte20.toLowerCase())) as unknown as any;
+    
+    const accessTokenValid = oAuth?.expires_at && dayjs.unix(oAuth.expires_at).isAfter(dayjs().add(30, "second"));
+    if (wallet.addressInfo.bech32 !== oAuth?.address || !accessTokenValid)
+      oAuth = undefined;
+
+    const { result: { model } } = (yield call(arkClient.getProfile, wallet.addressInfo.byte20.toLowerCase(), oAuth)) as unknown as any;
     yield put(actions.MarketPlace.updateProfile(model));
 
   } catch (error) {
@@ -196,10 +203,10 @@ function* watchLoadNftList() {
 }
 
 function* watchProfileLoad() {
-  while (true) {
-    yield take(actions.MarketPlace.MarketPlaceActionTypes.LOAD_PROFILE);
-    yield call(loadProfile);
-  }
+  yield takeLatest([
+    actions.MarketPlace.MarketPlaceActionTypes.LOAD_PROFILE,
+    actions.MarketPlace.MarketPlaceActionTypes.UPDATE_ACCESS_TOKEN,
+  ], loadProfile);
 }
 
 function* watchExchangeInfo() {

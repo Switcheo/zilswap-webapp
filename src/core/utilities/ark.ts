@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { CallParams } from '@zilliqa-js/contract'
+import { CallParams, Contract } from '@zilliqa-js/contract'
 import { BN, bytes, Long } from '@zilliqa-js/util';
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
@@ -35,12 +35,16 @@ const apiPaths = {
   "exchange/status": "/exchange/status",
   "exchange/info": "/exchange/info",
   "collection/list": "/nft/collection/list",
+  "collection/deploy": "/nft/collection/:address/deploy",
   "collection/detail": "/nft/collection/:address/detail",
+  "collection/mint": "/nft/collection/:address/mint",
   "collection/search": "/nft/collection/:address/search",
   "collection/traits": "/nft/collection/:address/traits",
   "collection/token/detail": "/nft/collection/:address/:tokenId/detail",
   "collection/token/history": "/nft/collection/:address/:tokenId/history",
   "collection/resync/metadata": "/nft/collection/:collectionAddress/:tokenId/resync",
+  "collection/image/request": "/admin/collection/:address/upload/request",
+  "collection/update": "/admin/collection/:address/update",
   "token/favourite": "/nft/collection/:address/:tokenId/favourite",
   "history/floor": "/nft/history/floor",
   "history/saleprice": "/nft/history/saleprice",
@@ -55,6 +59,11 @@ const apiPaths = {
   "user/image/notify": "/user/:address/upload/notify",
   "user/image/remove": "/user/:address/upload/remove",
   "user/image/profile": "/user/:address/upload/profile",
+  "mint/deploy": "/nft/mint/deploy",
+  "mint/check": "/nft/mint/check",
+  "mint/detail": "/nft/mint/:mintContractId/detail",
+  "mint/image/request": "/nft/mint/:mintContractId/upload/request",
+  "mint/image/notify": "/nft/mint/:mintContractId/upload/notify",
 };
 
 const getHttpClient = (network: Network) => {
@@ -240,9 +249,13 @@ export class ArkClient {
     return output;
   }
 
-  getProfile = async (address?: string) => {
+  getProfile = async (address: string, oAuth?: OAuth) => {
+    const headers: SimpleMap = {};
+    if (oAuth?.access_token) {
+      headers.authorization = "Bearer " + oAuth.access_token;
+    }
     const url = this.http.path("user/detail", { address });
-    const result = await this.http.get({ url });
+    const result = await this.http.get({ url, headers });
     const output = await result.json();
     await this.checkError(output);
     return output;
@@ -309,6 +322,69 @@ export class ArkClient {
     const headers = { Authorization: "Bearer " + access_token };
     const url = this.http.path("user/image/request", { address }, { type });
     const result = await this.http.get({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  requestCollectionImageUploadUrl = async (address: string, access_token: string, type = "profile") => {
+    const headers = { Authorization: "Bearer " + access_token };
+    const url = this.http.path("collection/image/request", { address }, { type });
+    const result = await this.http.get({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  updateCollection = async (address: string, data: Omit<Collection, "address">, oAuth: OAuth) => {
+    const headers = { "authorization": "Bearer " + oAuth.access_token };
+    const url = this.http.path("collection/update", { address })
+    const result = await this.http.post({ url, data, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  };
+
+  deployCollection = async (data: ArkClient.DeployCollectionParams, access_token: string) => {
+    const headers = { "authorization": "Bearer " + access_token };
+    const url = this.http.path("mint/deploy");
+    const result = await this.http.post({ url, data, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  mintDetail = async (mintContractId: string, access_token: string) => {
+    const headers = { "authorization": "Bearer " + access_token };
+    const url = this.http.path("mint/detail", { mintContractId });
+    const result = await this.http.get({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  getOngoingMint = async (access_token: string) => {
+    const headers = { "authorization": "Bearer " + access_token };
+    const url = this.http.path("mint/check");
+    const result = await this.http.get({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  requestMintImageUploadUrl = async (mintContractId: string, access_token: string, type: string) => {
+    const headers = { "authorization": "Bearer " + access_token };
+    const url = this.http.path("mint/image/request", { mintContractId }, { type });
+    const result = await this.http.get({ url, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  notifyMintImageUpload = async (mintContractId: string, access_token: string, type: string) => {
+    const headers = { "authorization": "Bearer " + access_token };
+    const url = this.http.path("mint/image/notify", { mintContractId }, { type });
+    const result = await this.http.post({ url, headers });
     const output = await result.json();
     await this.checkError(output);
     return output;
@@ -476,6 +552,26 @@ export class ArkClient {
       zilswap.getContract(tokenAddress),
       "SetApprovalForAll",
       args as any,
+      callParams,
+      true,
+    );
+
+    return result;
+  }
+
+  async acceptContractOwnership(contractAddress: string, zilswap: Zilswap) {
+    const minGasPrice = (await zilswap.zilliqa.blockchain.getMinimumGasPrice()).result as string;
+    const callParams = {
+      amount: new BN("0"),
+      gasPrice: new BN(minGasPrice),
+      gasLimit: Long.fromNumber(20000),
+      version: bytes.pack(CHAIN_IDS[this.network], MSG_VERSION),
+    };
+
+    const result = await zilswap.callContract(
+      zilswap.getContract(contractAddress),
+      "AcceptContractOwnership",
+      [],
       callParams,
       true,
     );
@@ -826,6 +922,32 @@ export namespace ArkClient {
     owner?: string;
     likedBy?: string;
     collection?: string;
+  }
+
+  export interface TokenTrait {
+    trait_type: string;
+    value: string;
+  }
+
+  export interface TokenMetadata {
+    attributes: TokenTrait[];
+    name: string;
+    description?: string;
+  }
+
+  export interface TokenParam {
+    resourceIpfsHash: string;
+    metadata: TokenMetadata;
+  }
+
+  export interface DeployCollectionParams {
+    collection: Collection;
+    tokens: TokenParam[];
+  }
+
+  export interface MintCollectionParams {
+    contract: Contract;
+    tokenUris: Array<string>;
   }
 
   export interface SearchCollectionParams extends ListQueryParams {

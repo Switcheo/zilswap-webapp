@@ -3,18 +3,24 @@ import { BoxProps, FormControl, FormHelperText, InputAdornment, InputBase, Box, 
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import cls from "classnames"
 import { AppTheme } from "app/theme/types";
+import { hexToRGBA} from "app/utils";
 
 interface Props extends BoxProps {
-  label: React.ReactNode;
-  value: string;
+  label?: React.ReactNode;
+  value: string | string[];
   onValueChange: (value: string) => void;
   multiline?: boolean;
   error?: string;
-  instruction?: string;
-  startAdorment?: JSX.Element;
+  instruction?: string | JSX.Element;
+  startAdornment?: JSX.Element;
+  endAdornment?: JSX.Element;
   inline?: boolean;
   wordLimit?: number;
   hideInput?: boolean;
+  type?: string;
+  onInputBlur?: () => void;
+  disabled?: boolean;
+  errorBorder?: boolean;
 }
 
 const BootstrapInput = withStyles(theme => ({
@@ -30,6 +36,15 @@ const BootstrapInput = withStyles(theme => ({
     },
     transition: theme.transitions.create(['border-color', 'box-shadow']),
     padding: '5px 12px',
+    "& input": {
+      // remove number spinner
+      "&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": {
+        "-webkit-appearance": "none",
+      },
+    },
+    "&.Mui-disabled": {
+      color: theme.palette.type === "dark" ? `rgba${hexToRGBA("#DEFFFF", 0.5)}` : `rgba${hexToRGBA("#003340", 0.35)}`
+    }
   },
   input: {
     position: 'relative',
@@ -39,21 +54,28 @@ const BootstrapInput = withStyles(theme => ({
 }))(InputBase);
 
 const ArkInput: React.FC<Props> = (props: Props) => {
-  const { hideInput, wordLimit, inline, startAdorment, instruction, error = "", label, multiline, value, onValueChange, className, ...rest } = props;
+  const { disabled, hideInput, wordLimit, inline, startAdornment, endAdornment, instruction, error = "", errorBorder, label, multiline, value, onValueChange, onInputBlur, className, type, ...rest } = props;
   const classes = useStyles();
   const [onFocus, setOnFocus] = useState(false)
 
+  const onBlur = () => {
+    if (onInputBlur) {
+      onInputBlur();
+    }
+    setOnFocus(false);
+  }
+
   return (
-    <Box className={classes.root}>
+    <Box className={cls(classes.root, className)}>
       {inline && (<Typography className={cls(classes.label, 'inline')}>
         {label}
       </Typography>)}
-      <FormControl fullWidth className={cls({ [classes.inline]: inline })}>
+      <FormControl fullWidth className={cls({ [classes.removeErrorMargin]: inline && error })}>
         {!inline && (
           <Fragment>
             {typeof label === "string" ? (<Typography className={classes.label}>{label}</Typography>) : label}
             {instruction && (
-              <FormHelperText className={cls(classes.instruction)}>{instruction}
+              <FormHelperText id="instruction" className={cls(classes.instruction)}>{instruction}
                 {wordLimit && (<Typography className={cls(classes.wordLimit)}> {value.length || "0"}/{wordLimit}</Typography>)}
               </FormHelperText>
             )}
@@ -61,11 +83,17 @@ const ArkInput: React.FC<Props> = (props: Props) => {
         )}
         {!hideInput && (
           <BootstrapInput
-            startAdornment={startAdorment ? <InputAdornment className={cls({ [classes.focusAdornment]: onFocus && !error })} position="start">{startAdorment}</InputAdornment> : undefined}
-            onFocus={() => setOnFocus(true)} onBlur={() => setOnFocus(false)} className={cls({ [classes.focussed]: onFocus && !error, [classes.multiline]: multiline, [classes.error]: error && !!value })}
+            type={type ?? "string"}
+            disabled={disabled}
+            startAdornment={startAdornment ? <InputAdornment className={cls({ [classes.focusAdornment]: onFocus && !error })} position="start">{startAdornment}</InputAdornment> : undefined}
+            endAdornment={endAdornment ? <InputAdornment className={cls({ [classes.focusAdornment]: onFocus && !error })} position="end">{endAdornment}</InputAdornment> : undefined}
+            onFocus={() => setOnFocus(true)} onBlur={onBlur} 
+            className={cls({ [classes.focused]: onFocus && !error, [classes.multiline]: multiline, [classes.error]: error && !!value, [classes.errorBorder]: errorBorder })}
             multiline={multiline} value={value} onChange={(e) => onValueChange(e.target.value)} fullWidth defaultValue="react-bootstrap" {...rest} />
         )}
-        <FormHelperText className={cls({ [classes.errorText]: true })} >{error ? error : " "}</FormHelperText>
+        {error &&
+          <FormHelperText className={classes.errorText} >{error}</FormHelperText>
+        }
       </FormControl>
     </Box >
   );
@@ -90,38 +118,43 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   error: {
-    border: '1px solid #FF5252',
+    border: "1px solid #FF5252",
     color: "#FF5252",
     '&:focus': {
       borderColor: "#FF5252",
       color: "#FF5252",
     },
   },
+  errorBorder: {
+    border: "1px solid #FF5252",
+  },
   errorText: {
     color: "#FF5252",
     fontSize: 10,
-    margin: 0
+    marginTop: "2px",
+    lineHeight: "14px",
+    margin: 0,
   },
   instruction: {
     color: theme.palette.type === "dark" ? "#DEFFFF99" : "#00334099",
     fontFamily: 'Avenir Next',
     fontWeight: 600,
-    fontSize: 11,
+    fontSize: 12,
     margin: theme.spacing(0.4, 0),
   },
   hiddenText: {
     visibility: "hidden"
   },
-  focussed: {
+  focused: {
     borderColor: theme?.palette?.action?.selected,
   },
   multiline: {
-    padding: '5px 12px',
-    minHeight: 50,
+    padding: '12px',
+    minHeight: 60,
+    alignItems: "flex-start",
   },
-  inline: {
-    // display: "flex",
-    // justifyContent: "space-between",
+  removeErrorMargin: {
+    marginBottom: "0px!important",
   },
   focusAdornment: {
     color: theme.palette.action?.selected
@@ -137,4 +170,4 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 
 
 
-export default ArkInput;
+export default React.memo(ArkInput);

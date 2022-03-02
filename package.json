@@ -10,6 +10,7 @@
     "@material-ui/icons": "^4.4.1",
     "@material-ui/lab": "^4.0.0-alpha.26",
     "@material-ui/pickers": "^3.2.10",
+    "@material-ui/styles": "~4.11.4",
     "@portis/web3": "^4.0.5",
     "@toruslabs/torus-embed": "^1.10.20",
     "@transak/transak-sdk": "^1.0.28",
@@ -20,15 +21,18 @@
     "authereum": "^0.1.14",
     "bignumber.js": "^9.0.0",
     "buffer": "^6.0.3",
+    "carbon-js-sdk": "^0.1.39",
     "classnames": "^2.2.6",
     "crypto-js": "^3.1.9-1",
     "dayjs": "^1.10.4",
     "decimal.js": "^10.2.0",
     "ethers": "^5.5.1",
     "fortmatic": "^2.2.1",
-    "jss": "10.5.1",
-    "jss-plugin-compose": "10.5.1",
-    "jss-plugin-extend": "10.5.1",
+    "ipfs": "^0.61.0",
+    "ipfs-http-client": "^55.0.0",
+    "jss": "10.9.0",
+    "jss-plugin-compose": "^10.9.0",
+    "jss-plugin-extend": "^10.9.0",
     "lightweight-charts": "^3.3.0",
     "node-sass": "^6.0.0",
     "notistack": "^1.0.9",
@@ -53,11 +57,10 @@
     "redux-logger": "^3.0.6",
     "redux-saga": "^1.1.3",
     "redux-thunk": "^2.3.0",
-    "carbon-js-sdk": "^0.1.22",
     "uuid": "^3.3.3",
     "validate.js": "^0.13.1",
     "web3modal": "^1.9.4",
-    "zeeves-auth-sdk-js": "^2.0.12",
+    "zeeves-auth-sdk-js": "^2.0.0",
     "zilswap-sdk": "^1.3.21"
   },
   "scripts": {
@@ -73,9 +76,11 @@
   },
   "browserslist": {
     "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+      "chrome >= 67",
+      "edge >= 79",
+      "firefox >= 68",
+      "opera >= 54",
+      "safari >= 14"
     ],
     "development": [
       "last 1 chrome version",

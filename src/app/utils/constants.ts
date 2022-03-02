@@ -28,6 +28,7 @@ export const LocalStorageKeys = {
   ArkAccessToken: 'zilswap:ark-access-token',
   ArkBuyAcceptTerms: 'zilswap:ark-buy-accept-terms',
   ArkBidAcceptTerms: 'zilswap:ark-bid-accept-terms',
+  MintContracts: 'zilswap:mint-contracts',
 };
 
 export const PlaceholderStrings = {
@@ -147,6 +148,8 @@ export class PollIntervals {
   public static BridgeDepositWatcher = 10000;
   public static BridgeWithdrawWatcher = 10000;
   public static BridgeTokenFee = 60000;
+
+  public static MintPollStatus = 5000;
 }
 
 export const COLLECTION_NFT_PER_PAGE = 36;

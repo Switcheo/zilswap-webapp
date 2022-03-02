@@ -6,12 +6,14 @@ import { AppTheme } from "app/theme/types";
 import { ReactComponent as TooltipSVG } from "./tooltip.svg";
 
 interface Props extends Omit<TooltipProps, "children"> {
+  icon?: JSX.Element;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
-    '&:hover': {
-      cursor: 'pointer',
+    "&:hover": {
+      cursor: "pointer",
+      color: theme.palette.icon,
     },
   },
   tooltip: {
@@ -28,39 +30,45 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     verticalAlign: "middle",
     "& #helpInfo": {
       "& #Oval": {
-        stroke: theme.palette.text?.secondary
+        stroke: theme.palette.text?.secondary,
       },
       "& #questionMarkTop": {
-        fill: theme.palette.text?.secondary
+        fill: theme.palette.text?.secondary,
       },
       "& #questionMarkBottom": {
-        fill: theme.palette.text?.secondary
-      }
+        fill: theme.palette.text?.secondary,
+      },
     },
     "&:hover": {
       "& #helpInfo": {
         "& #Oval": {
-          stroke: theme.palette.icon
+          stroke: theme.palette.icon,
         },
         "& #questionMarkTop": {
-          fill: theme.palette.icon
+          fill: theme.palette.icon,
         },
         "& #questionMarkBottom": {
-          fill: theme.palette.icon
-        }
-      }
-    }
-  }
+          fill: theme.palette.icon,
+        },
+      },
+    },
+  },
 }));
 
 const HelpInfo: React.FC<Props> = (props: Props) => {
-  const { className, classes, ...rest } = props;
+  const { className, classes, icon, ...rest } = props;
   const classNames = useStyles();
 
   return (
-    <Tooltip {...rest} className={cls(classNames.root, className)}
-      classes={{ tooltip: classNames.tooltip, ...classes }}>
-      <TooltipSVG className={classNames.tooltipSVG} />
+    <Tooltip
+      {...rest}
+      className={cls(classNames.root, className)}
+      classes={{ tooltip: classNames.tooltip, ...classes }}
+    >
+      {!!icon
+        ? icon
+        : <TooltipSVG className={classNames.tooltipSVG} />
+      }
     </Tooltip>
   );
 };

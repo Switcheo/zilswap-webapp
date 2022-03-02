@@ -109,15 +109,11 @@ export interface Collection {
   instagramUrl: string | null;
   bannerImageUrl: string | null;
   profileImageUrl: string | null;
-  royaltyBps: string | null;
-  royaltyType: string | null;
 
   ownerName: string | null;
   royaltyBps: number | null;
   royaltyType: string | null;
   artists?: SimpleMap<string>;
-
-  brokerAddress: string;
 }
 
 export interface CollectionWithStats extends Collection {
@@ -164,6 +160,7 @@ export interface Profile extends MarketplaceUser {
   bannerImage?: {
     url: string;
   };
+  admin?: boolean;
 }
 
 export interface BiddedNft {

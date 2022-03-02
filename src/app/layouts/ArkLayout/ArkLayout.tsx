@@ -1,9 +1,11 @@
 import React, { Suspense, useEffect, useState } from "react";
+import cls from "classnames";
 import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { useDispatch, useSelector } from "react-redux";
+import { useRouteMatch } from "react-router-dom";
 import { renderRoutes } from "react-router-config";
-import { ArkNavDrawer, ArkTopBar, NavDrawer } from "app/components";
+import { ArkNavDrawer, ArkTopBar, NavDrawer, ZilTokenSwapCTABanner } from "app/components";
 import ConnectWalletButton from "app/components/ConnectWalletButton";
 import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
@@ -35,6 +37,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       paddingLeft: theme.spacing(8),
     },
   },
+  mintBackground: {
+    background: theme.palette.type === "dark" ? "radial-gradient(50% 50% at 50% 0%, #00FFB0 -800%, rgba(0, 255, 176, 0) 85%), radial-gradient(50% 20% at 50% 100%, #9CFFFF -800%, rgba(255, 156, 156, 0) 85%), #0D1B24" : "#F6FFFC",
+  }
 }));
 
 const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
@@ -59,6 +64,9 @@ const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     // eslint-disable-next-line
   }, [blockchainState.ready, walletState.wallet?.addressInfo.bech32]);
 
+  const isZilTokenSwap = useRouteMatch("/bridge/erc20-zil-swap");
+  const isMint = useRouteMatch("/arky/mint");
+
   const onToggleDrawer = (override?: boolean) => {
     setShowDrawer(typeof override === "boolean" ? override : !showDrawer);
   };
@@ -69,7 +77,7 @@ const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   // to change according to new ARK layout
   return (
-    <Box className={classes.root}>
+    <Box className={cls(classes.root, { [classes.mintBackground]: isMint })}>
       <ArkTopBar
         onToggleDrawer={onToggleDrawer}
         onToggleArkDrawer={onToggleArkDrawer}
@@ -77,6 +85,7 @@ const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       <NavDrawer onClose={() => onToggleDrawer(false)} open={showDrawer} />
       <main className={classes.content}>
         <DevInfoBadge />
+        {!isZilTokenSwap && <ZilTokenSwapCTABanner />}
         <Suspense fallback={<LinearProgress />}>
           {renderRoutes(route.routes)}
           <Box marginBottom={30} />
