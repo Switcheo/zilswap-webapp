@@ -221,6 +221,8 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
         if (key === 'verifiedAt') {
           if ((isVerified && collection?.verifiedAt) || (!isVerified && !collection?.verifiedAt)) {
             return
+          } else {
+            value = value === "true" ? dayjs().format("YYYY-MM-DD") : null;
           }
         }
         const previous = profile ? (profile as any)[key] : null
