@@ -32,7 +32,7 @@ interface ProfileInputs {
   twitterUrl: string;
   telegramUrl: string;
   ownerName: string;
-  verifiedAt: Date | dayjs.Dayjs | null;
+  verifiedAt: string;
 }
 
 const emptyInputs = () => ({
@@ -44,12 +44,11 @@ const emptyInputs = () => ({
   twitterUrl: "",
   telegramUrl: "",
   ownerName: "",
-  verifiedAt: null,
+  verifiedAt: "",
 })
 
 
 const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
-  console.log("enter edit collection")
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
   const network = useNetwork();
@@ -69,7 +68,7 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
   const [inputValues, setInputValues] = useState<ProfileInputs>(emptyInputs())
   const inputRef = useRef<HTMLDivElement | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
+  const isVerified = inputValues.verifiedAt === "true";
   // const [toRemove, setToRemove] = useState<string | null>(null);
 
   const { hexAddress } = useMemo(() => {
@@ -115,7 +114,7 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
   }, [hexAddress]);
 
   const hasError = useMemo(() => {
-    const errorString = Object.values(errors).reduce((prev, curr) => (prev && curr) ? prev + curr : null);
+    const errorString = Object.values(errors).reduce((prev, curr) => prev + curr);
     return !!errorString;
   }, [errors])
 
@@ -144,21 +143,11 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
       twitterUrl: collection?.twitterUrl ?? "",
       telegramUrl: collection?.telegramUrl ?? "",
       ownerName: collection?.ownerName ?? "",
-      verifiedAt: dayjs(collection?.verifiedAt, 'YYYY-MM-DD') ?? null,
+      verifiedAt: collection?.verifiedAt ? "true" : "",
     })
-
-    setIsVerified(collection?.verifiedAt ? true : false);
 
     // eslint-disable-next-line
   }, [collection])
-
-  // handle updating the input values whenever user checks/unchecks the verification box
-  useEffect(() => {
-    setInputValues({
-      ...inputValues,
-      verifiedAt: isVerified ? dayjs() : null
-    })
-  }, [isVerified])
 
   const onNavigateBack = () => {
     if (!collection)
@@ -229,8 +218,10 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
       let filteredData: any = {};
       Object.entries(inputValues).forEach(([key, value]) => {
         // check if verification status changed
-        if ((key === 'verifiedAt' && isVerified && collection?.verifiedAt) || (key === 'verifiedAt' && !isVerified && !collection?.verifiedAt)) {
-          return
+        if (key === 'verifiedAt') {
+          if ((isVerified && collection?.verifiedAt) || (!isVerified && !collection?.verifiedAt)) {
+            return
+          }
         }
         const previous = profile ? (profile as any)[key] : null
         if (previous !== value) {
@@ -317,7 +308,6 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
 
   const disableSave = (isLoading) || (!profileImage && !bannerImage && !hasChange) || hasError;
 
-  console.log("load profile", profile?.admin)
   if (!profile?.admin)
     return <Redirect to="/arky" />
 
@@ -431,7 +421,7 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
                   labelPlacement="start"
                   label={
                     <Typography className={classes.verifyCollectionText}>
-                      Verify Collection
+                      Verified Collection
                     </Typography>}
                   control={
                     <Checkbox
@@ -439,7 +429,7 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
                       checkedIcon={<CheckedIcon />}
                       icon={<UncheckedIcon fontSize="small" />}
                       checked={isVerified}
-                      onChange={() => setIsVerified(!isVerified)}
+                      onChange={(e, checked) => updateInputs("verifiedAt")(checked ? "true" : "")}
                       disableRipple
                     />}
                 />
