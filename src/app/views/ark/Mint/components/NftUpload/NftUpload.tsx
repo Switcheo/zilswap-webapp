@@ -9,7 +9,7 @@ import DoneIcon from "@material-ui/icons/DoneRounded";
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { AppTheme } from "app/theme/types";
 import { ArkChipInput, ArkInput, HelpInfo } from "app/components";
-import { hexToRGBA } from "app/utils";
+import { hexToRGBA, isProduction } from "app/utils";
 import { AttributeData, Errors, NftData } from "../../Mint";
 import { ReactComponent as FileIcon } from "./assets/file.svg";
 import { ReactComponent as FileSuccessIcon} from "./assets/file-success.svg";
@@ -29,6 +29,7 @@ interface Props extends BoxProps {
 export type ProgressType = "queued" | "uploaded";
 
 const MAX_FILE_SIZE = 50 * Math.pow(1024, 2);
+const MAX_FILES = isProduction() ? 200 : 1000;
 
 const NftUpload: React.FC<Props> = (props: Props) => {
   const { children, className, attributes, setAttributes, nfts, setNfts, errors, setErrors, displayErrorBox, ...rest } = props;
@@ -97,21 +98,29 @@ const NftUpload: React.FC<Props> = (props: Props) => {
   }
 
   const onHandleFileDrop = (files: File[], rejection: FileRejection[], dropEvent: DropEvent) => {
-    if (!files.length || uploadedFiles.length > 200) {
+    if (!files.length) {
       return;
+    }
+
+    let acceptedFiles;
+
+    if (uploadedFiles.length + files.length > MAX_FILES) {
+      acceptedFiles = files.slice(0, MAX_FILES - uploadedFiles.length);
+    } else {
+      acceptedFiles = files;
     }
 
     setUploadedFiles([
       ...uploadedFiles,
-      ...files.map(file => file.name)
+      ...acceptedFiles.map(file => file.name)
     ]);
 
     setProgress([
       ...progress,
-      ...Array(files.length).fill("queued"),
+      ...Array(acceptedFiles.length).fill("queued"),
     ]);
 
-    readFiles(files);
+    readFiles(acceptedFiles);
   }
 
   const handleAttributeNameChange = (index: number, value: string) => {
@@ -315,7 +324,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         </Typography>
 
         <Box>
-          <Dropzone accept='image/jpeg, image/png, image/gif' maxSize={MAX_FILE_SIZE} maxFiles={200} onFileDialogCancel={() => {}} onDrop={onHandleFileDrop}>
+          <Dropzone accept='image/jpeg, image/png, image/gif' maxSize={MAX_FILE_SIZE} maxFiles={MAX_FILES} onFileDialogCancel={() => {}} onDrop={onHandleFileDrop}>
             {({ getRootProps, getInputProps }) => (
               <Box>
                 <div {...getRootProps()}>
@@ -367,7 +376,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
         </Box>
 
         <Typography className={cls(classes.instruction, classes.footerInstruction)}>
-          Recommended Format: PNG/JPEG/GIF &nbsp;|&nbsp; Maximum Number of Files: 200 &nbsp;|&nbsp; Maximum File Size: 50MB
+          Recommended Format: PNG/JPEG/GIF &nbsp;|&nbsp; Maximum Number of Files: {MAX_FILES} &nbsp;|&nbsp; Maximum File Size: 50MB
         </Typography>
         
         {errors.nfts && (
