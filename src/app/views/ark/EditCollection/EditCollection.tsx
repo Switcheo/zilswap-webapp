@@ -11,6 +11,7 @@ import PanoramaIcon from '@material-ui/icons/Panorama';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { fromBech32Address, toBech32Address } from "@zilliqa-js/zilliqa";
+import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { ArkClient } from "core/utilities";
 import { useAsyncTask, useNetwork, useToaster, SimpleMap } from "app/utils";
 import { CollectionWithStats, OAuth } from "app/store/types";
@@ -19,9 +20,8 @@ import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
 import ArkPage from "app/layouts/ArkPage";
 import { getMarketplace, getWallet } from "app/saga/selectors";
-import { ImageDialog } from "./components";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
-import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
+import { ImageDialog } from "./components";
 
 interface ProfileInputs {
   name: string;
