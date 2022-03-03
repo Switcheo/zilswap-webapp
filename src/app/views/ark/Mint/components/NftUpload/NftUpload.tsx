@@ -9,7 +9,7 @@ import DoneIcon from "@material-ui/icons/DoneRounded";
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { AppTheme } from "app/theme/types";
 import { ArkChipInput, ArkInput, HelpInfo } from "app/components";
-import { hexToRGBA } from "app/utils";
+import { hexToRGBA, isProduction } from "app/utils";
 import { AttributeData, Errors, NftData } from "../../Mint";
 import { ReactComponent as FileIcon } from "./assets/file.svg";
 import { ReactComponent as FileSuccessIcon} from "./assets/file-success.svg";
@@ -29,7 +29,7 @@ interface Props extends BoxProps {
 export type ProgressType = "queued" | "uploaded";
 
 const MAX_FILE_SIZE = 50 * Math.pow(1024, 2);
-const MAX_FILES = process.env.NODE_ENV === "production" ? 200 : 1000;
+const MAX_FILES = isProduction() ? 200 : 1000;
 
 const NftUpload: React.FC<Props> = (props: Props) => {
   const { children, className, attributes, setAttributes, nfts, setNfts, errors, setErrors, displayErrorBox, ...rest } = props;
