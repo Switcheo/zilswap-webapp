@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Box, IconButton, TextField, Typography, Button, Tooltip } from "@material-ui/core";
+import { Box, IconButton, TextField, Typography, Button, Tooltip, FormControlLabel, Checkbox } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,6 +20,8 @@ import { actions } from "app/store";
 import ArkPage from "app/layouts/ArkPage";
 import { getMarketplace, getWallet } from "app/saga/selectors";
 import { ImageDialog } from "./components";
+import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
+import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 
 interface ProfileInputs {
   name: string;
@@ -30,6 +32,7 @@ interface ProfileInputs {
   twitterUrl: string;
   telegramUrl: string;
   ownerName: string;
+  verifiedAt: Date | dayjs.Dayjs | null;
 }
 
 const emptyInputs = () => ({
@@ -41,6 +44,7 @@ const emptyInputs = () => ({
   twitterUrl: "",
   telegramUrl: "",
   ownerName: "",
+  verifiedAt: null,
 })
 
 
@@ -65,6 +69,7 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
   const [inputValues, setInputValues] = useState<ProfileInputs>(emptyInputs())
   const inputRef = useRef<HTMLDivElement | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
   // const [toRemove, setToRemove] = useState<string | null>(null);
 
   const { hexAddress } = useMemo(() => {
@@ -110,7 +115,7 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
   }, [hexAddress]);
 
   const hasError = useMemo(() => {
-    const errorString = Object.values(errors).reduce((prev, curr) => prev + curr);
+    const errorString = Object.values(errors).reduce((prev, curr) => (prev && curr) ? prev + curr : null);
     return !!errorString;
   }, [errors])
 
@@ -139,11 +144,21 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
       twitterUrl: collection?.twitterUrl ?? "",
       telegramUrl: collection?.telegramUrl ?? "",
       ownerName: collection?.ownerName ?? "",
+      verifiedAt: dayjs(collection?.verifiedAt, 'YYYY-MM-DD') ?? null,
     })
+
+    setIsVerified(collection?.verifiedAt ? true : false);
 
     // eslint-disable-next-line
   }, [collection])
 
+  // handle updating the input values whenever user checks/unchecks the verification box
+  useEffect(() => {
+    setInputValues({
+      ...inputValues,
+      verifiedAt: isVerified ? dayjs() : null
+    })
+  }, [isVerified])
 
   const onNavigateBack = () => {
     if (!collection)
@@ -213,6 +228,10 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
       let ok = true
       let filteredData: any = {};
       Object.entries(inputValues).forEach(([key, value]) => {
+        // check if verification status changed
+        if ((key === 'verifiedAt' && isVerified && collection?.verifiedAt) || (key === 'verifiedAt' && !isVerified && !collection?.verifiedAt)) {
+          return
+        }
         const previous = profile ? (profile as any)[key] : null
         if (previous !== value) {
           if (value === '' && !previous) return
@@ -407,6 +426,22 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
                   className={classes.input}
                   inline={true} placeholder="https://www.example.com" error={errors.telegramUrl} value={inputValues.telegramUrl}
                   label="Telegram" onValueChange={(value) => updateInputs("telegramUrl")(value)}
+                />
+                <FormControlLabel
+                  labelPlacement="start"
+                  label={
+                    <Typography className={classes.verifyCollectionText}>
+                      Verify Collection
+                    </Typography>}
+                  control={
+                    <Checkbox
+                      className={classes.radioButton}
+                      checkedIcon={<CheckedIcon />}
+                      icon={<UncheckedIcon fontSize="small" />}
+                      checked={isVerified}
+                      onChange={() => setIsVerified(!isVerified)}
+                      disableRipple
+                    />}
                 />
 
                 <FancyButton
@@ -620,7 +655,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiFormControl-root": {
       marginBottom: theme.spacing(2),
     }
-  }
+  },
+  radioButton: {
+    padding: "6px",
+    "&:hover": {
+      background: "transparent!important",
+    },
+  },
+  verifyCollectionText: {
+    fontSize: "14px",
+    lineHeight: "16px",
+    maxWidth: "790px",
+    marginLeft: -theme.spacing(1.7)
+  },
 }));
 
 export default EditCollection;
