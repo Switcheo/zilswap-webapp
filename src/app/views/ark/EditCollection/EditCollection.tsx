@@ -22,7 +22,6 @@ import { getMarketplace, getWallet } from "app/saga/selectors";
 import { ImageDialog } from "./components";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
-import moment, { Moment } from 'moment'
 
 interface ProfileInputs {
   name: string;
@@ -33,7 +32,7 @@ interface ProfileInputs {
   twitterUrl: string;
   telegramUrl: string;
   ownerName: string;
-  verifiedAt: Date | Moment | null;
+  verifiedAt: Date | dayjs.Dayjs | null;
 }
 
 const emptyInputs = () => ({
@@ -145,7 +144,7 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
       twitterUrl: collection?.twitterUrl ?? "",
       telegramUrl: collection?.telegramUrl ?? "",
       ownerName: collection?.ownerName ?? "",
-      verifiedAt: moment(collection?.verifiedAt, 'YYYY-MM-DD') ?? null,
+      verifiedAt: dayjs(collection?.verifiedAt, 'YYYY-MM-DD') ?? null,
     })
 
     setIsVerified(collection?.verifiedAt ? true : false);
@@ -157,7 +156,7 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
   useEffect(() => {
     setInputValues({
       ...inputValues,
-      verifiedAt: isVerified ? moment() : null
+      verifiedAt: isVerified ? dayjs() : null
     })
   }, [isVerified])
 

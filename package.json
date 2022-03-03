@@ -34,7 +34,6 @@
     "jss-plugin-compose": "^10.9.0",
     "jss-plugin-extend": "^10.9.0",
     "lightweight-charts": "^3.3.0",
-    "moment": "^2.29.1",
     "node-sass": "^6.0.0",
     "notistack": "^1.0.9",
     "prismjs": "^1.25.0",
