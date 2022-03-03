@@ -244,7 +244,6 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
           }
         }
       })
-      console.log('this is MY FILTERED DATAAAAAAAAAAAAAAAAAAAAAAA', filteredData)
       if (!ok) {
         toaster("Invalid inputs")
         return
