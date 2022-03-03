@@ -5,7 +5,7 @@ import { makeStyles } from "@material-ui/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router-dom";
 import { renderRoutes } from "react-router-config";
-import { ArkNavDrawer, ArkTopBar, NavDrawer, ZilTokenSwapCTABanner } from "app/components";
+import { ArkNavDrawer, ArkTopBar, NavDrawer } from "app/components";
 import ConnectWalletButton from "app/components/ConnectWalletButton";
 import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
@@ -64,7 +64,6 @@ const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     // eslint-disable-next-line
   }, [blockchainState.ready, walletState.wallet?.addressInfo.bech32]);
 
-  const isZilTokenSwap = useRouteMatch("/bridge/erc20-zil-swap");
   const isMint = useRouteMatch("/arky/mint");
 
   const onToggleDrawer = (override?: boolean) => {
@@ -85,7 +84,6 @@ const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       <NavDrawer onClose={() => onToggleDrawer(false)} open={showDrawer} />
       <main className={classes.content}>
         <DevInfoBadge />
-        {!isZilTokenSwap && <ZilTokenSwapCTABanner />}
         <Suspense fallback={<LinearProgress />}>
           {renderRoutes(route.routes)}
           <Box marginBottom={30} />
