@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Box, IconButton, TextField, Typography, Button, Tooltip } from "@material-ui/core";
+import { Box, IconButton, TextField, Typography, Button, Tooltip, FormControlLabel, Checkbox } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,6 +11,7 @@ import PanoramaIcon from '@material-ui/icons/Panorama';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import Dropzone, { FileRejection, DropEvent } from "react-dropzone";
 import { fromBech32Address, toBech32Address } from "@zilliqa-js/zilliqa";
+import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { ArkClient } from "core/utilities";
 import { useAsyncTask, useNetwork, useToaster, SimpleMap } from "app/utils";
 import { CollectionWithStats, OAuth } from "app/store/types";
@@ -19,6 +20,7 @@ import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
 import ArkPage from "app/layouts/ArkPage";
 import { getMarketplace, getWallet } from "app/saga/selectors";
+import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { ImageDialog } from "./components";
 
 interface ProfileInputs {
@@ -30,6 +32,7 @@ interface ProfileInputs {
   twitterUrl: string;
   telegramUrl: string;
   ownerName: string;
+  verifiedAt: string;
 }
 
 const emptyInputs = () => ({
@@ -41,11 +44,11 @@ const emptyInputs = () => ({
   twitterUrl: "",
   telegramUrl: "",
   ownerName: "",
+  verifiedAt: "",
 })
 
 
 const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
-  console.log("enter edit collection")
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
   const network = useNetwork();
@@ -65,6 +68,7 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
   const [inputValues, setInputValues] = useState<ProfileInputs>(emptyInputs())
   const inputRef = useRef<HTMLDivElement | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const isVerified = inputValues.verifiedAt === "true";
   // const [toRemove, setToRemove] = useState<string | null>(null);
 
   const { hexAddress } = useMemo(() => {
@@ -139,11 +143,11 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
       twitterUrl: collection?.twitterUrl ?? "",
       telegramUrl: collection?.telegramUrl ?? "",
       ownerName: collection?.ownerName ?? "",
+      verifiedAt: collection?.verifiedAt ? "true" : "",
     })
 
     // eslint-disable-next-line
   }, [collection])
-
 
   const onNavigateBack = () => {
     if (!collection)
@@ -213,6 +217,14 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
       let ok = true
       let filteredData: any = {};
       Object.entries(inputValues).forEach(([key, value]) => {
+        // check if verification status changed
+        if (key === 'verifiedAt') {
+          if ((isVerified && collection?.verifiedAt) || (!isVerified && !collection?.verifiedAt)) {
+            return
+          } else {
+            value = value === "true" ? dayjs().format("YYYY-MM-DD") : null;
+          }
+        }
         const previous = profile ? (profile as any)[key] : null
         if (previous !== value) {
           if (value === '' && !previous) return
@@ -298,7 +310,6 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
 
   const disableSave = (isLoading) || (!profileImage && !bannerImage && !hasChange) || hasError;
 
-  console.log("load profile", profile?.admin)
   if (!profile?.admin)
     return <Redirect to="/arky" />
 
@@ -407,6 +418,22 @@ const EditCollection: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: a
                   className={classes.input}
                   inline={true} placeholder="https://www.example.com" error={errors.telegramUrl} value={inputValues.telegramUrl}
                   label="Telegram" onValueChange={(value) => updateInputs("telegramUrl")(value)}
+                />
+                <FormControlLabel
+                  labelPlacement="start"
+                  label={
+                    <Typography className={classes.verifyCollectionText}>
+                      Verified Collection
+                    </Typography>}
+                  control={
+                    <Checkbox
+                      className={classes.radioButton}
+                      checkedIcon={<CheckedIcon />}
+                      icon={<UncheckedIcon fontSize="small" />}
+                      checked={isVerified}
+                      onChange={(e, checked) => updateInputs("verifiedAt")(checked ? "true" : "")}
+                      disableRipple
+                    />}
                 />
 
                 <FancyButton
@@ -620,7 +647,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiFormControl-root": {
       marginBottom: theme.spacing(2),
     }
-  }
+  },
+  radioButton: {
+    padding: "6px",
+    "&:hover": {
+      background: "transparent!important",
+    },
+  },
+  verifyCollectionText: {
+    fontSize: "14px",
+    lineHeight: "16px",
+    maxWidth: "790px",
+    marginLeft: -theme.spacing(1.7)
+  },
 }));
 
 export default EditCollection;
