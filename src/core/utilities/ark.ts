@@ -64,6 +64,7 @@ const apiPaths = {
   "mint/detail": "/nft/mint/:mintContractId/detail",
   "mint/image/request": "/nft/mint/:mintContractId/upload/request",
   "mint/image/notify": "/nft/mint/:mintContractId/upload/notify",
+  "mint/image": "/nft/mint/image"
 };
 
 const getHttpClient = (network: Network) => {
@@ -372,9 +373,18 @@ export class ArkClient {
     return output;
   }
 
-  requestMintImageUploadUrl = async (mintContractId: string, access_token: string, type: string, tokenId?: string) => {
+  requestMintTokenUploadImageUrl = async (access_token: string) => { 
+    const headers = { "authorization": "Bearer " + access_token }; 
+    const url = this.http.path("mint/image"); 
+    const result = await this.http.get({ url, headers }); 
+    const output = await result.json(); 
+    await this.checkError(output); 
+    return output; 
+  }
+
+  requestMintImageUploadUrl = async (mintContractId: string, access_token: string, type: string) => {
     const headers = { "authorization": "Bearer " + access_token };
-    const url = this.http.path("mint/image/request", { mintContractId }, { type, tokenId });
+    const url = this.http.path("mint/image/request", { mintContractId }, { type });
     const result = await this.http.get({ url, headers });
     const output = await result.json();
     await this.checkError(output);
