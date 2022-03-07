@@ -372,9 +372,9 @@ export class ArkClient {
     return output;
   }
 
-  requestMintImageUploadUrl = async (mintContractId: string, access_token: string, type: string) => {
+  requestMintImageUploadUrl = async (mintContractId: string, access_token: string, type: string, tokenId?: string) => {
     const headers = { "authorization": "Bearer " + access_token };
-    const url = this.http.path("mint/image/request", { mintContractId }, { type });
+    const url = this.http.path("mint/image/request", { mintContractId }, { type, tokenId });
     const result = await this.http.get({ url, headers });
     const output = await result.json();
     await this.checkError(output);
