@@ -139,6 +139,14 @@ const NetworkToggle: React.FC<NetworkToggleProps> = (
           })
         );
         return;
+      } else if (wallet?.type === WalletConnectType.Z3Wallet) {
+        dispatch(
+          actions.Layout.updateNotification({
+            type: "",
+            message: "Please change network using your Z3 Wallet.",
+          })
+        );
+        return;
       }
       dispatch(actions.Blockchain.initialize({ wallet, network: newNetwork }));
     });

@@ -14,95 +14,138 @@ import { DialogModal } from "app/components";
 import NetworkSwitchBox from "./NetworkSwitchBox";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
-    root: {
-    },
+  root: {},
 }));
 
 const NetworkSwitchDialog = (props: any) => {
-    const { children, className, ...rest } = props;
-    const classes = useStyles();
-    const network = useNetwork();
-    const dispatch = useDispatch();
-    const showNetworkSwitchDialog = useSelector<RootState, boolean>(state => state.layout.showNetworkSwitchDialog);
-    const zilWallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
-    const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]);
-    const srcChain = useSelector<RootState, Blockchain>(state => state.bridge.formState.fromBlockchain);
+  const { children, className, ...rest } = props;
+  const classes = useStyles();
+  const network = useNetwork();
+  const dispatch = useDispatch();
+  const showNetworkSwitchDialog = useSelector<RootState, boolean>(
+    (state) => state.layout.showNetworkSwitchDialog
+  );
+  const zilWallet = useSelector<RootState, ConnectedWallet | null>(
+    (state) => state.wallet.wallet
+  );
+  const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(
+    (state) => state.wallet.bridgeWallets[Blockchain.Ethereum]
+  );
+  const srcChain = useSelector<RootState, Blockchain>(
+    (state) => state.bridge.formState.fromBlockchain
+  );
 
-    const isMainNet = useMemo(() => {
-      if (srcChain === Blockchain.Ethereum) {
-        if (Number(ethWallet?.chainId) === 3) return false;
-        // set to mainnet even if currently set to some random net
-        return true;
-      } else if (srcChain === Blockchain.Zilliqa) {
-        return network === Network.MainNet
-      }
-    }, [ethWallet?.chainId, network, srcChain])
+  const isMainNet = useMemo(() => {
+    if (srcChain === Blockchain.Ethereum) {
+      if (Number(ethWallet?.chainId) === 3) return false;
+      // set to mainnet even if currently set to some random net
+      return true;
+    } else if (srcChain === Blockchain.Zilliqa) {
+      return network === Network.MainNet;
+    }
+  }, [ethWallet?.chainId, network, srcChain]);
 
-    const [requiredChainName, requiredChainID, walletToChange, currentChainName] = useMemo(() => {
+  const [requiredChainName, requiredChainID, walletToChange, currentChainName] =
+    useMemo(() => {
       const getEthChainName = (chainId: number) => {
         switch (chainId) {
-          case 1: return 'Ethereum Network'
-          case 3: return 'Ropsten Test Network'
-          default: return 'Unknown Network'
+          case 1:
+            return "Ethereum Network";
+          case 3:
+            return "Ropsten Test Network";
+          default:
+            return "Unknown Network";
         }
-      }
+      };
       const getEthWalletName = () => {
         if (ethWallet?.provider.isBoltX) {
-            return 'BoltX';
+          return "BoltX";
         } else if (ethWallet?.provider.isMetamask) {
-            return 'Metamask';
+          return "Metamask";
         }
-        return 'Your Wallet';
-      }
+        return "Your Wallet";
+      };
 
       const getZilWalletName = () => {
         switch (zilWallet?.type) {
-          case WalletConnectType.Zeeves: return "Zeeves Wallet";
-          case WalletConnectType.ZilPay: return "ZilPay";
-          case WalletConnectType.BoltX: return "BoltX";
-          default: return "Your Wallet";
+          case WalletConnectType.Zeeves:
+            return "Zeeves Wallet";
+          case WalletConnectType.ZilPay:
+            return "ZilPay";
+          case WalletConnectType.Z3Wallet:
+            return "Z3Wallet";
+          case WalletConnectType.BoltX:
+            return "BoltX";
+          default:
+            return "Your Wallet";
         }
-      }
+      };
 
       if (!ethWallet || !zilWallet) {
-        return [null, null, null, null]
+        return [null, null, null, null];
       }
 
-      const ethChainID = Number(ethWallet?.chainId)
+      const ethChainID = Number(ethWallet?.chainId);
       if (isMainNet) {
         if (ethChainID !== 1) {
-          dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
-          return [getEthChainName(1), '0x1', getEthWalletName(), getEthChainName(ethChainID)]
+          dispatch(actions.Layout.toggleShowNetworkSwitch("open"));
+          return [
+            getEthChainName(1),
+            "0x1",
+            getEthWalletName(),
+            getEthChainName(ethChainID),
+          ];
         } else if (zilWallet?.network !== Network.MainNet) {
-          dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
-          return ['Zilliqa MainNet', null, getZilWalletName(), 'Zilliqa TestNet']
+          dispatch(actions.Layout.toggleShowNetworkSwitch("open"));
+          return [
+            "Zilliqa MainNet",
+            null,
+            getZilWalletName(),
+            "Zilliqa TestNet",
+          ];
         }
       } else {
         if (ethChainID !== 3) {
-          dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
-          return [getEthChainName(3), '0x3', getEthWalletName(), getEthChainName(ethChainID)]
+          dispatch(actions.Layout.toggleShowNetworkSwitch("open"));
+          return [
+            getEthChainName(3),
+            "0x3",
+            getEthWalletName(),
+            getEthChainName(ethChainID),
+          ];
         } else if (zilWallet?.network !== Network.TestNet) {
-          dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
-          return ['Zilliqa TestNet', null, getZilWalletName(), 'Zilliqa MainNet']
+          dispatch(actions.Layout.toggleShowNetworkSwitch("open"));
+          return [
+            "Zilliqa TestNet",
+            null,
+            getZilWalletName(),
+            "Zilliqa MainNet",
+          ];
         }
       }
-      return [null, null, null, null]
-    }, [dispatch, ethWallet, zilWallet, isMainNet])
+      return [null, null, null, null];
+    }, [dispatch, ethWallet, zilWallet, isMainNet]);
 
-    const onCloseDialog = () => {
-        dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
-    };
+  const onCloseDialog = () => {
+    dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
+  };
 
-    return (
-        <DialogModal
-            open={showNetworkSwitchDialog}
-            onClose={onCloseDialog}
-            {...rest}
-            className={cls(classes.root, className)}
-        >
-            <NetworkSwitchBox ethWallet={ethWallet} requiredChainName={requiredChainName} requiredChainID={requiredChainID} walletToChange={walletToChange} currentChainName={currentChainName} />
-        </DialogModal>
-    )
-}
+  return (
+    <DialogModal
+      open={showNetworkSwitchDialog}
+      onClose={onCloseDialog}
+      {...rest}
+      className={cls(classes.root, className)}
+    >
+      <NetworkSwitchBox
+        ethWallet={ethWallet}
+        requiredChainName={requiredChainName}
+        requiredChainID={requiredChainID}
+        walletToChange={walletToChange}
+        currentChainName={currentChainName}
+      />
+    </DialogModal>
+  );
+};
 
 export default NetworkSwitchDialog;

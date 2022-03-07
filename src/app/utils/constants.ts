@@ -18,17 +18,18 @@ export const LoadingKeys = {
 export const LocalStorageKeys = {
   PrivateKey: "zilswap:private-key",
   ZilPayConnected: "zilswap:zilpay-connected",
+  Z3WalletConnected: "zilswap:z3wallet-connected",
   BoltXConnected: "zilswap:boltx-connected",
   ZeevesConnected: "zilswap:zeeves-connected",
   Network: "zilswap:network",
   UserTokenList: "zilswap:user-token-list",
   PendingClaimedTxs: "zilswap:pending-claimed-txs",
   SwapSlippageExpiry: "zilswap:swap-slippage-expiry",
-  BridgeTxs: 'zilswap:bridge-txs',
-  ArkAccessToken: 'zilswap:ark-access-token',
-  ArkBuyAcceptTerms: 'zilswap:ark-buy-accept-terms',
-  ArkBidAcceptTerms: 'zilswap:ark-bid-accept-terms',
-  MintContracts: 'zilswap:mint-contracts',
+  BridgeTxs: "zilswap:bridge-txs",
+  ArkAccessToken: "zilswap:ark-access-token",
+  ArkBuyAcceptTerms: "zilswap:ark-buy-accept-terms",
+  ArkBidAcceptTerms: "zilswap:ark-bid-accept-terms",
+  MintContracts: "zilswap:mint-contracts",
 };
 
 export const PlaceholderStrings = {
@@ -37,6 +38,11 @@ export const PlaceholderStrings = {
 };
 
 export const ZilPayNetworkMap = {
+  mainnet: Network.MainNet,
+  testnet: Network.TestNet,
+} as { [index: string]: Network };
+
+export const Z3WalletNetworkMap = {
   mainnet: Network.MainNet,
   testnet: Network.TestNet,
 } as { [index: string]: Network };
@@ -51,8 +57,8 @@ export const ZeevesNetworkMap = {
 } as { [index: string]: Network };
 
 export const RPCEndpoints: { [key in Network]: string } = {
-  [Network.MainNet]: 'https://api.zilliqa.com',
-  [Network.TestNet]: 'https://dev-api.zilliqa.com',
+  [Network.MainNet]: "https://api.zilliqa.com",
+  [Network.TestNet]: "https://dev-api.zilliqa.com",
 };
 
 export const BIG_ZERO = new BigNumber(0);
@@ -66,8 +72,8 @@ export const PRODUCTION_HOSTS = [
 ];
 
 export const isProduction = () => {
-  return PRODUCTION_HOSTS.includes(window.location.hostname)
-}
+  return PRODUCTION_HOSTS.includes(window.location.hostname);
+};
 
 export const DEFAULT_TX_SLIPPAGE = 0.01;
 export const DEFAULT_TX_EXPIRY = 3;
@@ -85,55 +91,67 @@ export const ZIL_DECIMALS = 12;
 
 export const TOKEN_NAME_OVERRIDE: SimpleMap<string> = {
   // Legacy XCAD Network token
-  "zil1h63h5rlg7avatnlzhfnfzwn8vfspwkapzdy2aw": "XCAD (Legacy)",
-}
+  zil1h63h5rlg7avatnlzhfnfzwn8vfspwkapzdy2aw: "XCAD (Legacy)",
+};
 
 export const WZIL_TOKEN_CONTRACT = {
   [Network.MainNet]: "zil1gvr0jgwfsfmxsyx0xsnhtlte4gks6r3yk8x5fn",
   [Network.TestNet]: "zil1nzn3k336xwal7egdzgalqnclxtgu3dggxed85m",
-}
+};
 
 export const BRIDGEABLE_WRAPPED_DENOMS = {
   [Network.MainNet]: [
-    "zusdt.1.18.1728e9", "zeth.1.18.54437c", "zwbtc.1.18.a9cb60",
-    "zxcad.1.18.35137d", "eport.1.2.7d4912", "efees.1.2.586fb5",
-    "elunr.1.2.e2121e", "ezil.1.2.f1b7e4", "dxcad.1.2.67dde7",
-    "zbrkl.1.18.b8c24f", "zopul.1.18.4bcdc9",
+    "zusdt.1.18.1728e9",
+    "zeth.1.18.54437c",
+    "zwbtc.1.18.a9cb60",
+    "zxcad.1.18.35137d",
+    "eport.1.2.7d4912",
+    "efees.1.2.586fb5",
+    "elunr.1.2.e2121e",
+    "ezil.1.2.f1b7e4",
+    "dxcad.1.2.67dde7",
+    "zbrkl.1.18.b8c24f",
+    "zopul.1.18.4bcdc9",
   ],
-  [Network.TestNet]: ["zeth.1.111.eaa57f", "zdai.1.111.f9a752", "zwap.0.111.227030", "zil.0.2.6b2a39"],
-}
+  [Network.TestNet]: [
+    "zeth.1.111.eaa57f",
+    "zdai.1.111.f9a752",
+    "zwap.0.111.227030",
+    "zil.0.2.6b2a39",
+  ],
+};
 
 export const ERC20_ZIL_TOKENSWAP_CONTRACT = {
   [Network.MainNet]: "0xef1efb7f22fb728820d4952b33012a7115e87687",
   [Network.TestNet]: "0xa5E6e035daa1B85383f36f36D22562F552591df9",
-}
+};
 
 export const ERC20_LEGACY_ZIL_CONTRACT = {
   [Network.MainNet]: "0x05f4a42e251f2d52b8ed15e9fedaacfcef1fad27",
   [Network.TestNet]: "0x2024cb47191db8a8f2961a9d9dff9e11999fe8c7",
-}
+};
 
 export const ERC20_BRIDGEABLE_ZIL_CONTRACT = {
   [Network.MainNet]: "0x6eeb539d662bb971a4a01211c67cb7f65b09b802",
   [Network.TestNet]: "0x92774e23edaa2927f3938ab4b690c076095cda0a",
-}
+};
 
 export const TOKEN_SYMBOLS = {
-  "ZETH": "zETH",
-  "ZWBTC": "zWBTC",
-  "ZUSDT": "zUSDT",
+  ZETH: "zETH",
+  ZWBTC: "zWBTC",
+  ZUSDT: "zUSDT",
 } as SimpleMap<string>;
 
 export const TRANSAK_API_KEY = {
   DEVELOPMENT: process.env.REACT_APP_TRANSAK_DEV,
   PRODUCTION: process.env.REACT_APP_TRANSAK_PROD,
-}
+};
 
 export const TIME_UNIX_PAIRS: { [interval: string]: number } = {
-  'hour': 3600,
-  'day': 86400,
-  'week': 604800,
-}
+  hour: 3600,
+  day: 86400,
+  week: 604800,
+};
 
 // ms
 export class PollIntervals {
@@ -154,7 +172,7 @@ export class PollIntervals {
 
 export const COLLECTION_NFT_PER_PAGE = 36;
 
-export const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
-export const USERNAME_REGEX = /^[A-Za-z0-9_]{1,19}$/
-export const TWITTER_REGEX = /^[A-Za-z0-9_]{1,14}$/
-export const INSTAGRAM_REGEX = /^[A-Za-z0-9_]{1,29}$/
+export const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+export const USERNAME_REGEX = /^[A-Za-z0-9_]{1,19}$/;
+export const TWITTER_REGEX = /^[A-Za-z0-9_]{1,14}$/;
+export const INSTAGRAM_REGEX = /^[A-Za-z0-9_]{1,29}$/;

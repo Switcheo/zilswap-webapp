@@ -26,11 +26,14 @@ import { ReactComponent as PrivateKeyIconDark } from "./components/ConnectWallet
 import { ReactComponent as PrivateKeyIcon } from "./components/ConnectWallet/private-key.svg";
 import { ReactComponent as ZeevesIcon } from "./components/ConnectWallet/zeeves.svg";
 import { ReactComponent as ZilPayIcon } from "./components/ConnectWallet/zilpay.svg";
+import { ReactComponent as Z3WalletIcon } from "./components/ConnectWallet/z3wallet.svg";
 import { ReactComponent as BoltXIcon } from "./components/ConnectWallet/boltx.svg";
 import ConnectWalletBoltX from "./components/ConnectWalletBoltX";
 import ConnectWalletZeeves from "./components/ConnectWalletZeeves";
+import ConnectWalletZ3Wallet from "./components/ConnectWalletZ3Wallet";
 
 const DIALOG_HEADERS: { [key in ConnectOptionType]: string } = {
+  z3wallet: "Connect With Z3Wallet",
   zeeves: "Connect With Zeeves",
   zilpay: "Connect With ZilPay",
   boltX: "Connect With BoltX",
@@ -39,7 +42,7 @@ const DIALOG_HEADERS: { [key in ConnectOptionType]: string } = {
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: "100%"
+    width: "100%",
   },
 }));
 
@@ -62,6 +65,8 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   const getIcon = () => {
     switch (walletState.wallet?.type) {
+      case WalletConnectType.Z3Wallet:
+        return Z3WalletIcon;
       case WalletConnectType.ZilPay:
         return ZilPayIcon;
       case WalletConnectType.BoltX:
@@ -137,6 +142,9 @@ const WalletDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
           )}
           {connectWalletType === "zeeves" && (
             <ConnectWalletZeeves onBack={onBack} />
+          )}
+          {connectWalletType === "z3wallet" && (
+            <ConnectWalletZ3Wallet onBack={onBack} />
           )}
         </Fragment>
       )}

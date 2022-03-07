@@ -19,6 +19,7 @@ import { ReactComponent as PrivateKeyIconDark } from "./private-key-dark.svg";
 import { ReactComponent as PrivateKeyIcon } from "./private-key.svg";
 import { ReactComponent as ZeevesIcon } from "./zeeves.svg";
 import { ReactComponent as ZilPayIcon } from "./zilpay.svg";
+import { ReactComponent as Z3WalletIcon } from "./z3wallet.svg";
 
 export interface ConnectWalletProps {
   onSelectConnectOption: (option: ConnectOptionType) => void;
@@ -29,12 +30,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     maxWidth: theme.spacing(82),
     backgroundColor: theme.palette.background.default,
-    borderLeft:
-      theme.palette.border,
-    borderRight:
-      theme.palette.border,
-    borderBottom:
-      theme.palette.border,
+    borderLeft: theme.palette.border,
+    borderRight: theme.palette.border,
+    borderBottom: theme.palette.border,
     borderRadius: "0 0 12px 12px",
   },
   extraSpacious: {
@@ -102,6 +100,13 @@ const ConnectWallet: React.FC<
           secureLevel={4}
           buttonText="Connect Zeeves"
           onSelect={() => onSelectConnectOption("zeeves")}
+        />
+        <ConnectWalletOption
+          label="Z3Wallet"
+          icon={Z3WalletIcon}
+          secureLevel={4}
+          buttonText="Connect Z3Wallet"
+          onSelect={() => onSelectConnectOption("z3wallet")}
         />
         {showPrivateKeyOption && (
           <ConnectWalletOption
