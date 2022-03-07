@@ -392,7 +392,6 @@ export class ArkClient {
   }
 
   notifyMintImageUpload = async (mintContractId: string, access_token: string, type: string) => {
-    console.log("mint contract id param: ", mintContractId);
     const headers = { "authorization": "Bearer " + access_token };
     const url = this.http.path("mint/image/notify", { mintContractId }, { type });
     const result = await this.http.post({ url, headers });
