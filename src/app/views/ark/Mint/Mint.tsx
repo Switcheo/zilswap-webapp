@@ -300,11 +300,11 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       const blobData = new Blob([uploadFile], { type: uploadFile.type });
 
       await arkClient.putImageUpload(requestResult.result.uploadUrl, blobData);
-      const url = await arkClient.notifyMintImageUpload(uuid, accessToken, type);
+      const uploadResult = await arkClient.notifyMintImageUpload(uuid, accessToken, type, tokenId);
       
       setTokenUrls({
         ...tokenUrls,
-        [parseInt(tokenId)]: url,
+        [parseInt(tokenId)]: uploadResult.result.url,
       })
     })
   }

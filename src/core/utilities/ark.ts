@@ -373,17 +373,19 @@ export class ArkClient {
   }
 
   requestMintImageUploadUrl = async (mintContractId: string, access_token: string, type: string, tokenId?: string) => {
+    console.log("mint contract id param: ", mintContractId);
     const headers = { "authorization": "Bearer " + access_token };
-    const url = this.http.path("mint/image/request", { mintContractId }, { type, tokenId });
+    const url = this.http.path("mint/image/request", { mintContractId }, { type, tokenId, uuid: mintContractId });
     const result = await this.http.get({ url, headers });
     const output = await result.json();
     await this.checkError(output);
     return output;
   }
 
-  notifyMintImageUpload = async (mintContractId: string, access_token: string, type: string) => {
+  notifyMintImageUpload = async (mintContractId: string, access_token: string, type: string, tokenId?: string) => {
+    console.log("mint contract id param: ", mintContractId);
     const headers = { "authorization": "Bearer " + access_token };
-    const url = this.http.path("mint/image/notify", { mintContractId }, { type });
+    const url = this.http.path("mint/image/notify", { mintContractId }, { type, tokenId, uuid: mintContractId });
     const result = await this.http.post({ url, headers });
     const output = await result.json();
     await this.checkError(output);
