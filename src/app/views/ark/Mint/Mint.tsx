@@ -5,16 +5,14 @@ import cls from "classnames";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { toBech32Address } from "@zilliqa-js/crypto";
-import * as IPFS from "ipfs";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask, useNetwork, useToaster } from "app/utils";
+import { useAsyncTask, useNetwork, useToaster, uuidv4 } from "app/utils";
 import ArkPage from "app/layouts/ArkPage";
 import { getMarketplace, getMint, getWallet } from "app/saga/selectors";
 import { OAuth } from "app/store/types";
 import { actions } from "app/store";
 import { ArkClient } from "core/utilities";
 import { CollectionDetail, ConfirmMint, MintProgress, NftUpload } from "./components";
-import { uuidv4 } from "app/utils";
 
 export type CollectionInputs = {
   collectionName: string;
@@ -62,6 +60,10 @@ export type MintImageFiles = {
   banner?: File;
 }
 
+export type TokenUrlsMap = {
+  [key: number]: string
+};
+
 const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
@@ -102,6 +104,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const [attributes, setAttributes] = useState<AttributeData[]>([]);
   const [nfts, setNfts] = useState<NftData[]>([]);
+  const [tokenUrls, setTokenUrls] = useState<TokenUrlsMap>({});
 
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [displayErrorBox, setDisplayErrorBox] = useState<boolean>(false);
@@ -110,8 +113,6 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [runQueryMint, loadingQueryMint] = useAsyncTask("queryMint");
   const [runDeployCollection, loadingDeployCollection] = useAsyncTask("deployCollection", (error) => toaster(error.message, { overridePersist: false }));
   const [runUploadImage] = useAsyncTask("uploadImage");
-
-  const [tokenUrls, setTokenUrls] = useState<string[]>([])
 
   const pendingMintContract = mintState.activeMintContract;
 
@@ -229,31 +230,25 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         newOAuth = result;
       }
 
-      // upload image to ipfs
+      // upload token image
       await Promise.all(nfts.map(async (nft, index) => {
         try {
-          imageUpload(uuidv4(), nft.imageFile, newOAuth!.access_token, "token-image", arkClient, index.toString());
+          tokenImageUpload(uuidv4(), nft.imageFile, newOAuth!.access_token, "token-image", arkClient, index.toString());
         } catch (err) {
           throw err;
         }
       }));
 
-        //   resourceIpfsHash: url,
-        //   metadata: {
-        //     attributes: nft.attributes,
-        //     name: nft.name,
-        //   }
-        // 
-
-        const tokens = tokenUrls.map((tokenUrl, index) => {
-          return {
-            resourceIpfsHash: tokenUrl,
-            metadata: {
-              attributes: nfts[index].attributes,
-              name: nfts[index].name
-            }
+      // format tokens
+      const tokens = nfts.map((nft, index) => {
+        return {
+          resourceIpfsHash: tokenUrls[index],
+          metadata: {
+            attributes: nft.attributes,
+            name: nft.name
           }
-        })
+        }
+      })
 
       const collection = {
         name: inputValues.collectionName,
@@ -298,17 +293,30 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     })
   }
 
-  const imageUpload = (mintContractId: string, uploadFile: File, accessToken: string, type: string, arkClient: ArkClient, tokenId?: string) => {
+  const tokenImageUpload = (uuid: string, uploadFile: File, accessToken: string, type: string, arkClient: ArkClient, tokenId: string) => {
     runUploadImage(async () => {
-      const requestResult = await arkClient.requestMintImageUploadUrl(mintContractId, accessToken, type, tokenId);
+      const requestResult = await arkClient.requestMintImageUploadUrl(uuid, accessToken, type, tokenId);
 
       const blobData = new Blob([uploadFile], { type: uploadFile.type });
 
       await arkClient.putImageUpload(requestResult.result.uploadUrl, blobData);
-      const url = await arkClient.notifyMintImageUpload(mintContractId, accessToken, type);
-      if (type === 'token-image') {
-        setTokenUrls([...tokenUrls, url])
-      }
+      const url = await arkClient.notifyMintImageUpload(uuid, accessToken, type);
+      
+      setTokenUrls({
+        ...tokenUrls,
+        [parseInt(tokenId)]: url,
+      })
+    })
+  }
+
+  const imageUpload = (mintContractId: string, uploadFile: File, accessToken: string, type: string, arkClient: ArkClient) => {
+    runUploadImage(async () => {
+      const requestResult = await arkClient.requestMintImageUploadUrl(mintContractId, accessToken, type);
+
+      const blobData = new Blob([uploadFile], { type: uploadFile.type });
+
+      await arkClient.putImageUpload(requestResult.result.uploadUrl, blobData);
+      await arkClient.notifyMintImageUpload(mintContractId, accessToken, type);
     })
   }
 
