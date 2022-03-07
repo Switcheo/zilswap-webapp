@@ -60,10 +60,6 @@ export type MintImageFiles = {
   banner?: File;
 }
 
-export type TokenUrlsMap = {
-  [key: number]: string
-};
-
 const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const { children, className, ...rest } = props;
   const classes = useStyles();
@@ -104,7 +100,6 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
   const [attributes, setAttributes] = useState<AttributeData[]>([]);
   const [nfts, setNfts] = useState<NftData[]>([]);
-  const [tokenUrls, setTokenUrls] = useState<TokenUrlsMap>({});
 
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [displayErrorBox, setDisplayErrorBox] = useState<boolean>(false);
@@ -232,13 +227,13 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
       // upload token image
       const tokenUrls = await Promise.all(nfts.map(async (nft, index) => {
-        return tokenImageUpload(nft.imageFile, newOAuth!.access_token, arkClient, index.toString());
+        return tokenImageUpload(nft.imageFile, newOAuth!.access_token, arkClient, index);
       }));
 
 
       // format tokens
       const tokens = nfts.map((nft, index) => {
-        const url = tokenUrls.find(tokenUrl => tokenUrl.tokenId === index.toString())?.url
+        const url = tokenUrls.find(tokenUrl => tokenUrl.tokenId === index)!.url
         return {
           resourceIpfsHash: url,
           metadata: {
@@ -291,7 +286,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     })
   }
 
-  const tokenImageUpload = async (uploadFile: File, accessToken: string, arkClient: ArkClient, tokenId: string) => {
+  const tokenImageUpload = async (uploadFile: File, accessToken: string, arkClient: ArkClient, tokenId: number) => {
     const url = await arkClient.requestMintTokenUploadImageUrl(accessToken);
 
     const blobData = new Blob([uploadFile], { type: uploadFile.type });
