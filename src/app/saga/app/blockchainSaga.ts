@@ -227,6 +227,7 @@ const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken) => {
 function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPayload>, stateChannel: Channel<StateChangeObservedPayload>) {
   let sdk: Zilswap | null = null;
   try {
+    const { wallet: prevWallet } = getWallet(yield select());
     yield put(actions.Layout.addBackgroundLoading('initChain', 'INIT_CHAIN'))
     yield put(actions.Wallet.update({ wallet: null }))
 
@@ -312,9 +313,16 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     logger('init chain set tokens')
     yield put(actions.Bridge.setTokens(bridgeTokenResult))
     yield put(actions.Token.init({ tokens }));
-    yield put(actions.Wallet.update({ wallet }))
+    yield put(actions.Wallet.update({ wallet }));
 
-    if (network !== prevNetwork) yield put(actions.Blockchain.setNetwork(network))
+    if (wallet?.addressInfo.bech32 !== prevWallet?.addressInfo.bech32) {
+      yield put(actions.MarketPlace.removeAccessToken());
+    }
+
+    if (network !== prevNetwork) {
+      yield put(actions.Blockchain.setNetwork(network));
+      yield put(actions.MarketPlace.removeAccessToken());
+    }
 
     yield put(actions.Stats.reloadPoolTx());
 

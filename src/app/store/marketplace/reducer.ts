@@ -58,6 +58,12 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
         ...state,
         oAuth: payload,
       }
+    case MarketPlaceActionTypes.REMOVE_ACCESS_TOKEN:
+      localStorage.removeItem(LocalStorageKeys.ArkAccessToken);
+      return {
+        ...state,
+        oAuth: undefined,
+      }
     case MarketPlaceActionTypes.UPDATE_TOKENS:
       return {
         ...state,

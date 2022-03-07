@@ -21,6 +21,7 @@ export const MarketPlaceActionTypes = {
   APPEND_TOKENS: "ARK:APPEND_TOKENS",
   UPDATE_ACCESS_TOKEN: "ARK:UPDATE_ACCESS_TOKEN",
   REFRESH_ACCESS_TOKEN: "ARK:REFRESH_ACCESS_TOKEN",
+  REMOVE_ACCESS_TOKEN: "ARK:REMOVE_ACCESS_TOKEN",
   UPDATE_COLLECTION: "ARK:UPDATE_COLLECTION",
   UPDATE_FILTER: "ARK:UPDATE_FILTER",
   UPDATE_COLLECTION_TRAITS: "ARK:UPDATE_COLLECTION_TRAITS",
@@ -63,6 +64,12 @@ export function updateAccessToken(payload: OAuth) {
   return {
     type: MarketPlaceActionTypes.UPDATE_ACCESS_TOKEN,
     payload
+  }
+}
+
+export function removeAccessToken() {
+  return {
+    type: MarketPlaceActionTypes.REMOVE_ACCESS_TOKEN,
   }
 }
 
