@@ -300,7 +300,6 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     }
   }
 
-
   const imageUpload = (mintContractId: string, uploadFile: File, accessToken: string, type: string, arkClient: ArkClient) => {
     runUploadImage(async () => {
       const requestResult = await arkClient.requestMintImageUploadUrl(mintContractId, accessToken, type);
