@@ -64,7 +64,7 @@ const apiPaths = {
   "mint/detail": "/nft/mint/:mintContractId/detail",
   "mint/image/request": "/nft/mint/:mintContractId/upload/request",
   "mint/image/notify": "/nft/mint/:mintContractId/upload/notify",
-  "mint/image": "/nft/mint/image"
+  "mint/image": "/nft/mint/image",
 };
 
 const getHttpClient = (network: Network) => {
