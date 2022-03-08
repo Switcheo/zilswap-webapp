@@ -5,6 +5,7 @@ import cls from "classnames";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { toBech32Address } from "@zilliqa-js/crypto";
+import _ from 'lodash';
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useNetwork, useToaster } from "app/utils";
 import ArkPage from "app/layouts/ArkPage";
@@ -13,7 +14,6 @@ import { OAuth } from "app/store/types";
 import { actions } from "app/store";
 import { ArkClient } from "core/utilities";
 import { CollectionDetail, ConfirmMint, MintProgress, NftUpload } from "./components";
-import _ from 'lodash';
 
 export type CollectionInputs = {
   collectionName: string;
