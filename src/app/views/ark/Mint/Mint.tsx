@@ -13,6 +13,7 @@ import { OAuth } from "app/store/types";
 import { actions } from "app/store";
 import { ArkClient } from "core/utilities";
 import { CollectionDetail, ConfirmMint, MintProgress, NftUpload } from "./components";
+import _ from 'lodash';
 
 export type CollectionInputs = {
   collectionName: string;
@@ -227,13 +228,14 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
       // upload token image
       const tokenUrls = await Promise.all(nfts.map(async (nft, index) => {
-        return tokenImageUpload(nft.imageFile, newOAuth!.access_token, arkClient, index);
+        const throt = _.throttle(_.partial(tokenImageUpload, nft.imageFile, newOAuth!.access_token, arkClient, index), 100)
+        return throt();
       }));
 
 
       // format tokens
       const tokens = nfts.map((nft, index) => {
-        const url = tokenUrls.find(tokenUrl => tokenUrl.tokenId === index)!.url
+        const url = tokenUrls.find(tokenUrl => tokenUrl?.tokenId === index)!.url
         return {
           resourceIpfsHash: url,
           metadata: {
@@ -295,6 +297,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
     return {tokenId: tokenId, url: url.result.assetUrl}
   }
+
 
   const imageUpload = (mintContractId: string, uploadFile: File, accessToken: string, type: string, arkClient: ArkClient) => {
     runUploadImage(async () => {
