@@ -219,6 +219,7 @@ const CHAIN_NAMES: {
 
   [Blockchain.Carbon]: "Carbon",
   [Blockchain.Switcheo]: "Switcheo",
+  [Blockchain.TradeHub]: "TradeHub",
   [Blockchain.PolyNetwork]: "PolyNetwork",
   [Blockchain.Neo3]: "Neo N3",
 } as const

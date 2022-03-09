@@ -66,6 +66,7 @@ const NftUpload: React.FC<Props> = (props: Props) => {
                 name: file.name.substring(0, file.name.indexOf(".")),
                 image,
                 attributes: [],
+                imageFile: file
               },
               ...prevState.slice(size + index + 1)
             ]

@@ -332,9 +332,10 @@ function* initialize(
 ) {
   let sdk: Zilswap | null = null;
   try {
-    yield put(actions.Layout.addBackgroundLoading("initChain", "INIT_CHAIN"));
-    yield put(actions.Wallet.update({ wallet: null }));
-
+    const { wallet: prevWallet } = getWallet(yield select());
+    yield put(actions.Layout.addBackgroundLoading('initChain', 'INIT_CHAIN'))
+    yield put(actions.Wallet.update({ wallet: null }))
+    
     const { network, wallet } = action.payload;
     const providerOrKey = getProviderOrKeyFromWallet(wallet);
     const { observingTxs } = getTransactions(yield select());
@@ -441,8 +442,14 @@ function* initialize(
     yield put(actions.Token.init({ tokens }));
     yield put(actions.Wallet.update({ wallet }));
 
-    if (network !== prevNetwork)
+    if (wallet?.addressInfo.bech32 !== prevWallet?.addressInfo.bech32) {
+      yield put(actions.MarketPlace.removeAccessToken());
+    }
+
+    if (network !== prevNetwork) {
       yield put(actions.Blockchain.setNetwork(network));
+      yield put(actions.MarketPlace.removeAccessToken());
+    }
 
     yield put(actions.Stats.reloadPoolTx());
 
