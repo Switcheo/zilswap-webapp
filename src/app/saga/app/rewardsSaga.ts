@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js'
-import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
+import { call, delay, fork, put, race, select, take, takeLatest } from "redux-saga/effects";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { Distribution, Distributor, EstimatedRewards, ZAPStats, logger } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
@@ -21,6 +21,8 @@ function* queryDistributors() {
     try {
       const distributors: ReadonlyArray<Distributor> = yield ZAPStats.getDistributionInfo({ network })
       const distrWithTimings: DistributorWithTimings[] = []
+
+      logger("query distributors: ", distributors);
 
       const rewards: SimpleMap<PoolReward[]> = {};
       for (const tokenAddress in tokens) {
@@ -133,9 +135,9 @@ function* queryDistribution() {
         const distributor = distributors.find(d => d.distributor_address_hex === addr);
         if (distributor) {
           const tokenContract = zilswap.getContract(distributor.reward_token_address_hex);
-          const balances = yield call([tokenContract, tokenContract.getSubState], "balances");
+          const balancesState = yield call([tokenContract, tokenContract.getSubState], "balances");
 
-          const tokenBalance = balances[addr];
+          const tokenBalance = balancesState.balances[addr];
 
           if (tokenBalance) {
             funded = bnOrZero(tokenBalance).gte(info.amount);
@@ -218,10 +220,17 @@ function* queryPotentialRewards() {
   }
 }
 
+function* watchDistributors() {
+  yield takeLatest([
+    actions.Rewards.RewardsActionTypes.UPDATE_DISTRIBUTORS,
+  ], queryDistribution);
+}
+
 export default function* rewardsSaga() {
   logger("init rewards saga");
   yield take(BlockchainActionTypes.INITIALIZED) // wait for first init
   yield fork(queryDistributors);
   yield fork(queryDistribution);
   yield fork(queryPotentialRewards);
+  yield fork(watchDistributors);
 }
