@@ -280,7 +280,7 @@ const BidCard: React.FC<Props> = (props: Props) => {
         }
         <Box mt={1} display="flex" justifyContent="space-between">
           <Typography className={classes.header}>Date</Typography>
-          <Typography>{dayjs(bid.createdAt).format("D MMM YYYY")}</Typography>
+          <Typography>{dayjs(bid.createdAt).format("D MMM YYYY HH:mm:ss")}</Typography>
         </Box>
         <Box mt={1} display="flex" justifyContent="space-between">
           <Typography className={classes.header}>Amount</Typography>
