@@ -22,8 +22,8 @@ const TBMBanner = () => {
   const classes = useStyles();
 
   return <Box className={classes.banner} maxWidth={800} margin="0 auto">
-    <a href="https://thebear.market" target="_blank" rel="noreferrer">
-      <img className={classes.bannerImage} src="/assets/tbm-banner.svg" alt="" />
+    <a href="https://zolar.io/summon" target="_blank" rel="noreferrer">
+      <img className={classes.bannerImage} src="/assets/zolar-banner.png" alt="" />
     </a>
   </Box>
 }
