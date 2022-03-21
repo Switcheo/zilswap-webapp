@@ -43,6 +43,7 @@ export { default as SlippageField } from "./SlippageField";
 export { default as StatefulText } from "./StatefulText";
 export { default as StatsCard } from "./StatsCard";
 export { default as Text } from "./Text";
+export { default as TBMBanner } from "./TBMBanner";
 export { default as TokenFilter } from "./TokenFilter";
 export { default as TokenGraph } from "./TokenGraph";
 export { default as TokenILOCard } from "./TokenILOCard";
