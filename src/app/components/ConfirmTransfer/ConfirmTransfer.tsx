@@ -222,6 +222,8 @@ const CHAIN_NAMES: {
   [Blockchain.TradeHub]: "TradeHub",
   [Blockchain.PolyNetwork]: "PolyNetwork",
   [Blockchain.Neo3]: "Neo N3",
+  [Blockchain.Osmosis]: "Osmosis",
+  [Blockchain.Ibc]: "IBC",
 } as const
 
 const ConfirmTransfer = (props: any) => {

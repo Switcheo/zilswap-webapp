@@ -86,9 +86,9 @@ function* watchDepositConfirmation() {
 
             const depositTransfer = result.data.find((transfer) => transfer.from_address?.toLowerCase() === tx.srcAddr && transfer.source_blockchain === tx.srcChain);
 
-            if (depositTransfer?.destination_transaction !== null) {
+            if (depositTransfer?.destination_event !== null) {
               if (!tx.sourceTxHash) {
-                tx.sourceTxHash = depositTransfer?.source_transaction?.tx_hash;
+                tx.sourceTxHash = depositTransfer?.source_event?.tx_hash;
               }
 
               tx.depositTxConfirmedAt = dayjs();
