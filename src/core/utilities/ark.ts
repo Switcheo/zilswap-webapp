@@ -184,7 +184,7 @@ export class ArkClient {
   }
 
   listCollection = async (params?: ArkClient.ListCollectionParams) => {
-    const { limit = 100, ...rest } = params ?? {};
+    const { limit = 500, ...rest } = params ?? {};
     const url = this.http.path("collection/list", null, { limit, ...rest });
     const result = await this.http.get({ url });
     const output = await result.json();
