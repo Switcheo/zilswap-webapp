@@ -182,15 +182,17 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
               />
             </Box>
           </CardActionArea>
-        ) : <Box className={classes.imageContainer}>
-          <span className={classes.imageHeight} />
-          <ArkImageView
-            className={classes.image}
-            altName={token.asset?.filename || "Token Image"}
-            imageUrl={token.asset?.url}
-            imageType="card"
-          />
-        </Box>}
+        ) : (
+          <Box className={classes.imageContainer}>
+            <span className={classes.imageHeight} />
+            <ArkImageView
+              className={classes.image}
+              altName={token.asset?.filename || "Token Image"}
+              imageUrl={token.asset?.url}
+              imageType="card"
+            />
+          </Box>
+        )}
         <CardContent className={classes.cardContent}>
           <Box className={classes.bodyBox}>
             {!dialog ? (

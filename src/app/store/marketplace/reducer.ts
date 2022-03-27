@@ -98,8 +98,11 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
         exchangeInfo: payload,
       }
     case MarketPlaceActionTypes.UPDATE_FILTER:
+      const newCollectionAddress = payload.collectionAddress ?? state.filter.collectionAddress;
+      const tokens = state.filter.collectionAddress === newCollectionAddress ? [...state.tokens] : [];
       return {
         ...state,
+        tokens,
         filter: {
           ...state.filter,
           ...payload,

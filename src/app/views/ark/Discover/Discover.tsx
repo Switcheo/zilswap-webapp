@@ -3,7 +3,7 @@ import BigNumber from "bignumber.js"
 import {
   Box, Checkbox, Container, FormControl, FormControlLabel, FormLabel,
   InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Typography, useMediaQuery, useTheme, Popper, Button,
+  TableHead, TableRow, Typography, useMediaQuery, useTheme, Popper, Button, CircularProgress,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
@@ -16,7 +16,7 @@ import { getBlockchain } from "app/saga/selectors";
 import { CollectionWithStats } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
-import { bnOrZero, hexToRGBA } from "app/utils";
+import { bnOrZero, hexToRGBA, useAsyncTask } from "app/utils";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
 import { ReactComponent as UncheckedIcon } from "./unchecked-icon.svg";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
@@ -51,6 +51,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   // const { exchangeInfo } = useSelector(getMarketplace);
   const theme = useTheme();
   const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
+  const [runQueryCollections, loading] = useAsyncTask("queryCollections");
   const [search, setSearch] = useState<string>("");
   const [searchFilter, setSearchFilter] = useState<SearchFilters>({
     profile: true,
@@ -62,14 +63,12 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const [collections, setCollections] = useState<CollectionWithStats[]>([]);
 
   useEffect(() => {
-    const getCollections = async () => {
+    runQueryCollections(async () => {
       const arkClient = new ArkClient(network);
       const result = await arkClient.listCollection();
       setCollections(result.result.entries);
-    };
-
-    getCollections();
-  }, [network]);
+    });
+  }, [network]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearchFilter = (value: string) => {
     setSearchFilter(prevState => ({
@@ -355,6 +354,12 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
               })}
             </TableBody>
           </Table>
+
+          {loading && (
+            <Box display="flex" justifyContent="center" padding={2}>
+              <CircularProgress />
+            </Box>
+          )}
         </TableContainer>
       </Container>
     </ArkPage>
