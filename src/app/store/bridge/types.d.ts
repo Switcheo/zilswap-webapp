@@ -7,10 +7,12 @@ export type BridgeableToken = {
   blockchain: Blockchain;
   tokenAddress: string;
   lockproxyAddress: string;
-  denom: string;
+  denom: string;    // carbon denom
+  tokenId: string;  // tradehub denom
   toBlockchain: Blockchain;
   toTokenAddress: string;
-  toDenom: string;
+  toDenom: string;  // carbon denom
+  toTokenId: string // tradehub denom
   balDenom: string;
 }
 
@@ -66,6 +68,10 @@ export interface BridgeTx {
   // token denom
   srcToken: string;
   dstToken: string;
+
+  // used for bridge txs
+  srcTokenId: string;
+  dstTokenId: string;
 
   // allocated withdraw fee
   withdrawFee: BigNumber;

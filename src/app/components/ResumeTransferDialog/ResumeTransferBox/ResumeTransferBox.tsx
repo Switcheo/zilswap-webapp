@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import { ethers } from "ethers";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import { Blockchain, CarbonSDK, Models, AddressUtils } from "carbon-js-sdk";
+import { Blockchain, CarbonSDK, AddressUtils, Hydrogen } from "carbon-js-sdk";
 import Web3Modal from 'web3modal';
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet } from "core/wallet";
@@ -142,7 +142,7 @@ const ResumeTransferBox = (props: any) => {
     const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
     const pendingBridgeTx = bridgeState.activeBridgeTx;
 
-    const [depositTransfer, setDepositTransfer] = useState<Models.ExternalTransfer | null>(null);
+    const [depositTransfer, setDepositTransfer] = useState<Hydrogen.CrossChainTransferDetailed | null>(null);
     const [sdk, setSdk] = useState<CarbonSDK | null>(null);
 
     const [runInitCarbonSDK] = useAsyncTask("initCarbonSDK");
@@ -169,7 +169,7 @@ const ResumeTransferBox = (props: any) => {
 
     const dstChain = useMemo(() => {
         if (depositTransfer) {
-            return depositTransfer.blockchain === Blockchain.Zilliqa ? Blockchain.Ethereum : Blockchain.Zilliqa;
+            return depositTransfer.source_blockchain === Blockchain.Zilliqa ? Blockchain.Ethereum : Blockchain.Zilliqa;
         }
 
         return null;
@@ -225,14 +225,12 @@ const ResumeTransferBox = (props: any) => {
             const carbonNetwork = sdk.network;
             const swthAddress = AddressUtils.SWTHAddress.generateAddress(mnemonicString, undefined, { network: carbonNetwork });
 
-            // find deposit confirmation tx
-            const queryOpts = Models.QueryGetExternalTransfersRequest.fromPartial({
-                address: swthAddress,
-                status: "success",
-                transferType: "deposit",
-            });
-            const result = await sdk.query.coin.ExternalTransfers(queryOpts);
-            const depositTransfer = result.externalTransfers.find((transfer) => transfer.transferType === 'deposit');
+            const queryOpts: Hydrogen.GetTransfersRequest = {
+              to_address: swthAddress,
+              limit: 100,
+            };
+            const result = await sdk.hydrogen.getDetailedTransfers(queryOpts);
+            const depositTransfer = result.data.find((transfer) => transfer.status === Hydrogen.CrossChainFlowStatus.Completed && (transfer.source_blockchain === Blockchain.Zilliqa || transfer.source_blockchain === Blockchain.Ethereum));
 
             if (depositTransfer) {
                 setErrorMsg("");
@@ -249,8 +247,8 @@ const ResumeTransferBox = (props: any) => {
     const handleResumeTransfer = () => {
         // tx found and status success - build bridgeTx
         if (depositTransfer && dstChain) {
-            const srcChain = depositTransfer.blockchain as Blockchain.Zilliqa | Blockchain.Ethereum;
-            const bridgeToken = bridgeableTokens[srcChain].find(token => token.denom === depositTransfer.denom);
+            const srcChain = depositTransfer.source_blockchain as Blockchain.Zilliqa | Blockchain.Ethereum;
+            const bridgeToken = bridgeableTokens[srcChain].find(token => token.denom === depositTransfer.from_asset || token.tokenId === depositTransfer.from_asset);
 
             if (!bridgeToken || !sdk) return;
             runResumeTransfer(async () => {
@@ -268,12 +266,14 @@ const ResumeTransferBox = (props: any) => {
                     dstChain,
                     srcAddr: "",
                     dstAddr: dstWalletAddr,
-                    srcToken: depositTransfer.denom,
+                    srcToken: bridgeToken.denom,
+                    srcTokenId: bridgeToken.tokenId,
                     dstToken: bridgeToken.toDenom,
+                    dstTokenId: bridgeToken.toTokenId,
                     inputAmount: new BigNumber(depositTransfer.amount),
                     interimAddrMnemonics: mnemonic.join(" "),
                     withdrawFee: feeAmount, // need to check
-                    sourceTxHash: depositTransfer.transactionHash,
+                    sourceTxHash: depositTransfer.source_event?.tx_hash,
                     depositDispatchedAt: dayjs(),
                     network,
                 }

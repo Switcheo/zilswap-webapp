@@ -191,9 +191,11 @@ const addMapping = (r: BridgeMappingResult, a: CarbonToken, b: CarbonToken, sour
     tokenAddress: a.tokenAddress.toLowerCase(),
     lockproxyAddress: a.bridgeAddress,
     denom: a.denom,
+    tokenId: a.id,
     toBlockchain: bChain,
     toTokenAddress: b.tokenAddress.toLowerCase(),
     toDenom: b.denom,
+    toTokenId: b.id,
     balDenom: sourceChain === aChain ? a.denom : b.denom,
   })
 }

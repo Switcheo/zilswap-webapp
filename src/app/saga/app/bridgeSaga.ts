@@ -5,7 +5,7 @@ import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { CarbonWallet, Blockchain, Models, AddressUtils, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
-import { GetDetailedTransfersResponse, GetTransfersRequest } from "carbon-js-sdk/lib/hydrogen";
+import { GetDetailedTransfersResponse, GetTransfersRequest, CrossChainFlowStatus } from "carbon-js-sdk/lib/hydrogen";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
 import { FeesData } from "core/utilities/bridge";
 import { Bridge, logger } from "core/utilities";
@@ -218,19 +218,18 @@ function* watchWithdrawConfirmation() {
           const sdk = (yield CarbonSDK.instance({ network: carbonNetwork })) as CarbonSDK;
           const swthAddress = AddressUtils.SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network: carbonNetwork });
 
-          const queryOpts = Models.QueryGetExternalTransfersRequest.fromPartial({
-            address: swthAddress,
-            status: "success",
-            blockchain: tx.dstChain,
-            transferType: "withdrawal",
-          });
-          const result = (yield call([sdk.query.coin, sdk.query.coin.ExternalTransfers], queryOpts)) as Models.QueryGetExternalTransfersResponse;
+          const queryOpts: GetTransfersRequest = {
+            from_address: swthAddress,
+            destination_blockchain: tx.dstChain,
+            limit: 100,
+          };
+          const result = (yield call([sdk.hydrogen, sdk.hydrogen.getDetailedTransfers], queryOpts)) as GetDetailedTransfersResponse;
 
-          const withdrawTransfer = result.externalTransfers.find((transfer) => transfer.transferType === 'withdrawal' && transfer.blockchain === tx.dstChain);
+          const withdrawTransfer = result.data.find((transfer) => transfer !== null);
 
           // update destination chain tx hash if success
-          if (withdrawTransfer?.status === 'success') {
-            tx.destinationTxHash = withdrawTransfer.transactionHash;
+          if (withdrawTransfer?.status === CrossChainFlowStatus.Completed) {
+            tx.destinationTxHash = withdrawTransfer.destination_event?.tx_hash;
             updatedTxs[tx.sourceTxHash!] = tx;
 
             logger("bridge saga", "confirmed tx withdraw", tx.withdrawTxHash);
