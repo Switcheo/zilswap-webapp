@@ -354,7 +354,10 @@ const Row: React.FC<Props> = (props: Props) => {
               </TableCell>
             }
             <TableCell align="center" className={cls(classes.bodyCell, { [classes.withBorder]: expand })}>
-              {dayjs(bid.createdAt).format("D MMM YYYY")}
+              <Box className={classes.doubleInfo}>
+                <Box component="span">{dayjs(bid.createdAt).format("D MMM YYYY")}</Box>
+                <Box className="large" component="span">{dayjs(bid.createdAt).format("HH:mm:ss")}</Box>
+              </Box>
             </TableCell>
             <TableCell align="right" className={cls(classes.bodyCell, { [classes.withBorder]: expand, [classes.firstCell]: !showItem })}>
               <Box className={classes.doubleInfo}>
