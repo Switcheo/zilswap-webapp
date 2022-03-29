@@ -1,3 +1,4 @@
+import Long from "long";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { Blockchain, Models } from "carbon-js-sdk";
@@ -7,10 +8,12 @@ export type BridgeableToken = {
   blockchain: Blockchain;
   tokenAddress: string;
   lockproxyAddress: string;
+  decimals: Long; 
   denom: string;    // carbon denom
   tokenId: string;  // tradehub denom
   toBlockchain: Blockchain;
   toTokenAddress: string;
+  toDecimals: Long;
   toDenom: string;  // carbon denom
   toTokenId: string // tradehub denom
   balDenom: string;

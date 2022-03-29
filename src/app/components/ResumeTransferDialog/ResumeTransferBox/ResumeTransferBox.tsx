@@ -248,15 +248,14 @@ const ResumeTransferBox = (props: any) => {
         // tx found and status success - build bridgeTx
         if (depositTransfer && dstChain) {
             const srcChain = depositTransfer.source_blockchain as Blockchain.Zilliqa | Blockchain.Ethereum;
-            const bridgeToken = bridgeableTokens[srcChain].find(token => token.denom === depositTransfer.from_asset || token.tokenId === depositTransfer.from_asset);
+            const bridgeToken = bridgeableTokens[srcChain].find(token => token.denom === depositTransfer.to_asset || token.tokenId === depositTransfer.to_asset);
 
             if (!bridgeToken || !sdk) return;
             runResumeTransfer(async () => {
                 const fee = await Bridge.getEstimatedFees({ denom: bridgeToken.toDenom, network });
                 if (!fee.withdrawalFee?.gt(0))
                     throw new Error("Could not retrieve withdraw fee");
-                const decimals = sdk.token.getDecimals(bridgeToken.toDenom) ?? 0;
-                const feeAmount = fee.withdrawalFee.shiftedBy(-decimals);
+                const feeAmount = fee.withdrawalFee.shiftedBy(-bridgeToken.toDecimals);
 
                 if (new BigNumber(depositTransfer.amount).lt(feeAmount))
                     throw new Error("Transferred amount insufficient to pay for withdraw fees.");
@@ -270,7 +269,7 @@ const ResumeTransferBox = (props: any) => {
                     srcTokenId: bridgeToken.tokenId,
                     dstToken: bridgeToken.toDenom,
                     dstTokenId: bridgeToken.toTokenId,
-                    inputAmount: new BigNumber(depositTransfer.amount),
+                    inputAmount: new BigNumber(depositTransfer.amount).shiftedBy(-bridgeToken.decimals),
                     interimAddrMnemonics: mnemonic.join(" "),
                     withdrawFee: feeAmount, // need to check
                     sourceTxHash: depositTransfer.source_event?.tx_hash,

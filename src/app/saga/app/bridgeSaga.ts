@@ -289,7 +289,7 @@ function* watchActiveTxConfirmations() {
           switch (bridgeTx.srcChain) {
             case Blockchain.Zilliqa: {
               const zilswapSdk = ZilswapConnector.getSDK();
-              const sourceTx: Transaction = yield zilswapSdk.zilliqa.blockchain.getTransaction(bridgeTx.sourceTxHash)
+              const sourceTx: Transaction = yield zilswapSdk.zilliqa.blockchain.getTransaction(bridgeTx.sourceTxHash);
               if (sourceTx.blockConfirmation) {
                 yield put(actions.Bridge.addBridgeTx([{
                   sourceTxHash: bridgeTx.sourceTxHash,
