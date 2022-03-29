@@ -56,6 +56,14 @@ const makeTxFilter = (statuses: Status[]) => {
   }
 }
 
+const sdkCache: SimpleMap<CarbonSDK> = {};
+const getCarbonSDK = async (network: CarbonSDK.Network) => {
+  if (!sdkCache[network]) {
+    sdkCache[network] = await CarbonSDK.instance({ network });
+  }
+  return sdkCache[network];
+};
+
 function* watchDepositConfirmation() {
   const getFilteredTx = makeTxFilter([Status.NotStarted, Status.DepositTxStarted, Status.DepositTxConfirmed]);
   while (true) {
@@ -70,7 +78,7 @@ function* watchDepositConfirmation() {
       for (const tx of bridgeTxs) {
         try {
           const network = netZilToCarbon(tx.network ?? Network.TestNet);
-          const sdk = (yield CarbonSDK.instance({ network })) as CarbonSDK;
+          const sdk = (yield getCarbonSDK(network)) as CarbonSDK;
 
           const swthAddress = AddressUtils.SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
 
@@ -122,7 +130,7 @@ function* watchDepositConfirmation() {
             } else {
               try {
                 const carbonNetwork = netZilToCarbon(tx.network);
-                const sdk = (yield CarbonSDK.instance({ network: carbonNetwork })) as CarbonSDK;
+                const sdk: CarbonSDK = yield getCarbonSDK(carbonNetwork);
                 const provider = sdk.eth.getProvider();
                 const transaction = (yield call([provider, provider.getTransactionReceipt], tx.sourceTxHash!)) as ethers.providers.TransactionReceipt
                 logger("bridge saga", tx.sourceTxHash, transaction?.confirmations);
@@ -215,7 +223,7 @@ function* watchWithdrawConfirmation() {
       for (const tx of bridgeTxs) {
         logger("bridge saga", "checking tx withdraw", tx.withdrawTxHash);
         try {
-          const sdk = (yield CarbonSDK.instance({ network: carbonNetwork })) as CarbonSDK;
+          const sdk = (yield getCarbonSDK(carbonNetwork)) as CarbonSDK;
           const swthAddress = AddressUtils.SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network: carbonNetwork });
 
           const queryOpts: GetTransfersRequest = {
@@ -292,7 +300,7 @@ function* watchActiveTxConfirmations() {
             };
             case Blockchain.Ethereum: {
               const carbonNetwork = netZilToCarbon(network);
-              const sdk: CarbonSDK = yield CarbonSDK.instance({ network: carbonNetwork });
+              const sdk: CarbonSDK = yield getCarbonSDK(carbonNetwork);
 
               const sourceTx: EthTransactionResponse = yield sdk.eth.getProvider().getTransaction(bridgeTx.sourceTxHash);
               if (sourceTx.confirmations) {
@@ -334,7 +342,7 @@ function* queryTokenFees() {
       logger("bridge saga", lastCheckedToken?.toDenom, bridgeToken?.toDenom)
       if ((!lastCheckedToken || lastCheckedToken !== bridgeToken) && bridgeToken) {
         logger("bridge saga", "query", bridgeToken?.toDenom)
-        const sdk = (yield CarbonSDK.instance({ network })) as CarbonSDK;
+        const sdk: CarbonSDK = yield getCarbonSDK(network);
         yield call([sdk, sdk.initialize]);
         const carbonToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken.toDenom);
 
