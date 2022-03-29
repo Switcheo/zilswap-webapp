@@ -1,19 +1,18 @@
-import Long from "long";
 import BigNumber from "bignumber.js";
-import dayjs from "dayjs";
 import { Blockchain, Models } from "carbon-js-sdk";
+import dayjs from "dayjs";
 import { Network } from "zilswap-sdk/lib/constants";
 
 export type BridgeableToken = {
   blockchain: Blockchain;
   tokenAddress: string;
   lockproxyAddress: string;
-  decimals: Long; 
+  decimals: number; 
   denom: string;    // carbon denom
   tokenId: string;  // tradehub denom
   toBlockchain: Blockchain;
   toTokenAddress: string;
-  toDecimals: Long;
+  toDecimals: number;
   toDenom: string;  // carbon denom
   toTokenId: string // tradehub denom
   balDenom: string;
