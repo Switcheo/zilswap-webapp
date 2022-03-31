@@ -1,7 +1,7 @@
 version: 2.1
 jobs:
   build:
-    resource_class: large
+    resource_class: xlarge
     docker:
       # image with node, npm and yarn installed
       - image: cimg/node:14.17.5
