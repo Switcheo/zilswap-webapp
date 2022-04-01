@@ -36,7 +36,7 @@ function* queryDistributors() {
         const {
           distribution_start_time, epoch_period,
           tokens_per_epoch, developer_token_ratio_bps,
-          total_number_of_epochs
+          total_number_of_epochs, initial_epoch_number,
         } = emission_info
 
         const endTime = distribution_start_time + (total_number_of_epochs * epoch_period);
@@ -46,8 +46,9 @@ function* queryDistributors() {
         const epochs_completed = Math.floor(Math.max(0, now - distribution_start_time) / epoch_period)
         const from = ended ? -1 : distribution_start_time + (epochs_completed * epoch_period)
         const until = ended ? -1 : from + epoch_period
+        const finalEpochNumber = initial_epoch_number + total_number_of_epochs;
 
-        distrWithTimings.push({ ...distributor, currentEpochStart: from, currentEpochEnd: until })
+        distrWithTimings.push({ ...distributor, currentEpochStart: from, currentEpochEnd: until, finalEpochNumber })
         if (ended)
           continue;
 
@@ -130,7 +131,7 @@ function* queryDistribution() {
         const merkleRoots = uploadState?.merkle_roots ?? {};
 
         let funded = null;
-        const distributor = distributors.find(d => d.distributor_address_hex === addr);
+        const distributor = distributors.find(d => d.distributor_address_hex === addr && d.finalEpochNumber >= info.epoch_number);
         if (distributor) {
           const tokenContract = zilswap.getContract(distributor.reward_token_address_hex);
           const balances = yield call([tokenContract, tokenContract.getSubState], "balances");

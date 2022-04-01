@@ -30,6 +30,7 @@ export interface DistributionWithStatus {
 export interface DistributorWithTimings extends Distributor {
   currentEpochStart: number;
   currentEpochEnd: number;
+  finalEpochNumber: number;
 }
 
 export interface PotentialRewards {
