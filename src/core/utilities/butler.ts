@@ -1,7 +1,6 @@
 
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Network } from "zilswap-sdk/lib/constants";
 import { connectWalletBoltX, connectWalletPrivateKey, connectWalletZeeves, connectWalletZilPay } from "core/wallet";
 import { actions } from "app/store";
 import { BlockchainState, RootState } from "app/store/types";
@@ -107,14 +106,7 @@ export const AppButler: React.FC<{}> = (_props: {}) => {
 
   const initWithoutWallet = async () => {
     logger("butler", "initWithoutWallet");
-    console.log(network);
-    console.log(JSON.stringify(network));
-    try {
-      dispatch(actions.Blockchain.initialize({ wallet: null, network }));
-    } catch (err) {
-      console.error(err)
-      dispatch(actions.Blockchain.initialize({ wallet: null, network: Network.MainNet }));
-    }
+    dispatch(actions.Blockchain.initialize({ wallet: null, network }));
   };
 
   useEffect(() => {

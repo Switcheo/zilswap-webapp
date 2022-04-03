@@ -242,9 +242,10 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
 
     logger('init chain zilswap sdk')
     sdk = new Zilswap(network, providerOrKey ?? undefined, { rpcEndpoint: RPCEndpoints[network] });
-    logger('zilswap sdk initialized')
 
     yield call([sdk, sdk.initialize], txObserver(txChannel), observingTxs)
+    logger('zilswap sdk initialized')
+
     for (let i = 0; i < ZILO_DATA[network].length; ++i) {
       const data = ZILO_DATA[network][i]
       if (data.comingSoon) continue
@@ -293,13 +294,13 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
         if (!bridgeableDenoms.includes(wrappedDenom)) {
           return;
         }
-  
+
         const wrappedToken = carbonTokens.find(d => d.denom === wrappedDenom)!
         const sourceToken = carbonTokens.find(d => d.denom === sourceDenom)!
-  
+
         const wrappedChain = blockchainForChainId(wrappedToken.chainId.toNumber());
         const sourceChain = blockchainForChainId(sourceToken.chainId.toNumber());
-  
+
         if ((wrappedChain !== Blockchain.Zilliqa && wrappedChain !== Blockchain.Ethereum) ||
           (sourceChain !== Blockchain.Zilliqa && sourceChain !== Blockchain.Ethereum)) {
           return
