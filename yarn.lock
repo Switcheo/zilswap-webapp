@@ -1113,6 +1113,7 @@
   integrity sha512-nvslHi77gv1Vc44rZb2QamQyWhWGhooXDnVCIA6BZUpiArMWZ3TNYaDCXLWQTSvz14UdcYN8WIIt9v/vcD/wqg==
 
 "@cityofzion/neon-core-next@npm:@cityofzion/neon-core@^5.0.0", "@cityofzion/neon-core@^5.0.0":
+  name "@cityofzion/neon-core-next"
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@cityofzion/neon-core/-/neon-core-5.0.0.tgz#6b242782404df474285ad7760224871444cc1d35"
   integrity sha512-OJPZsgWxXFCSSFo6WiGmxn+/2XP0w0JXT8oYOqYxKfFYJXNh6/ENuglMs7w5jMpFsYb/Hp6Hy8qdXf/Q3Es9jg==
@@ -17775,10 +17776,10 @@ zeeves-auth-sdk-js@^2.0.0:
     buffer "^6.0.3"
     crypto-js "^4.0.0"
 
-zilswap-sdk@^1.3.21:
-  version "1.3.21"
-  resolved "https://registry.yarnpkg.com/zilswap-sdk/-/zilswap-sdk-1.3.21.tgz#6adf84003d0a01ca55a0420233e832abfce7a448"
-  integrity sha512-AH627MT2yw2OFTYzgzALH39mJFUrWv2r21nifiOLqsbjnbLGzEgmWQl9vZhh+l4c3twnGvMiE+cwq2il9ntvCQ==
+zilswap-sdk@^1.3.22:
+  version "1.3.22"
+  resolved "https://registry.yarnpkg.com/zilswap-sdk/-/zilswap-sdk-1.3.22.tgz#91c4f790765a117088b002a8b72636d50ccbadc5"
+  integrity sha512-96Z5ojKItSSlxKk9rNLvLg6mJ1D4321VbV5XYocdk+zdQvowXt6qiZ5oVEB71NnvBoLzNVitVXlMc9WMH3lSCw==
   dependencies:
     "@zilliqa-js/zilliqa" "^2.2.0"
     async-mutex "^0.2.2"
