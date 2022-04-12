@@ -353,7 +353,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       // guide users to select rewards
       if (selectedDistributions.length === 0) {
         if (showDetails) {
-          setSelectedDistributions(claimableRewards.filter(r => !claimedDistributions.includes(r.info.id)));
+          setSelectedDistributions(claimableRewards.filter(r => r.funded && !claimedDistributions.includes(r.info.id)));
         } else {
           setShowDetails(true)
         }
@@ -605,7 +605,13 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                               {token.symbol}
                                               <HelpInfo 
                                                 placement="top" 
-                                                title={reward.funded === false ? "Reward pending distribution from project owner." : `${reward.rewardDistributor.name} from ${reward.rewardDistributor.distributor_name} at ${reward.rewardDistributor.distributor_address_hex} for epoch ${reward.info.epoch_number}.`}
+                                                title={
+                                                  reward.funded === null
+                                                    ? "Checking if rewards are in..."
+                                                    : reward.funded === false 
+                                                      ? "Reward pending distribution from project owner." 
+                                                      : `${reward.rewardDistributor.name} from ${reward.rewardDistributor.distributor_name} at ${reward.rewardDistributor.distributor_address_hex} for epoch ${reward.info.epoch_number}.`
+                                                }
                                                 className={classes.tooltip} 
                                                 icon={reward.funded === false ? <ErrorIcon className={classes.errorIcon} /> : undefined} 
                                               />
