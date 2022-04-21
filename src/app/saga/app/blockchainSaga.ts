@@ -261,6 +261,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
     const zilswapTokens = appState.tokens
     const tokens: SimpleMap<TokenInfo> = Object.keys(zilswapTokens).reduce((acc, addr) => {
       const tkn = zilswapTokens[addr]
+      const isHuny = tkn.address === 'zil1m3m5jqqcaemtefnlk795qpw59daukra8prc43e'
       acc[tkn.address] = {
         initialized: false,
         registered: tkn.registered,
@@ -270,7 +271,7 @@ function* initialize(action: ChainInitAction, txChannel: Channel<TxObservedPaylo
         isZwap: tkn.address === ZWAP_TOKEN_CONTRACT[network],
         address: tkn.address,
         decimals: tkn.decimals,
-        symbol: tkn.symbol,
+        symbol: (isHuny ?  tkn.symbol.toUpperCase() : tkn.symbol),
         name: tkn.name,
         balance: undefined,
         allowances: {},
