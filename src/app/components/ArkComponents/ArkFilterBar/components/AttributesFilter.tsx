@@ -52,20 +52,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginTop: 8,
     marginRight: 8,
   },
-  categories: {
-    marginTop: 10,
-    paddingRight: 16,
-    marginRight: 16,
-    width: 210,
-    maxHeight: 352,
-    borderRight: theme.palette.border,
-  },
-  scrollableTraits: {
+  scrollbar: {
     overflowY: "scroll",
-    maxHeight: 314,
-    paddingRight: 10,
-    paddingTop: 10,
-    marginTop: 6,
     "&::-webkit-scrollbar": {
       width: "0.4rem"
     },
@@ -73,6 +61,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       backgroundColor: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#003340", 0.1)}`,
       borderRadius: 12
     },
+  },
+  scrollableTraits: {
+    extend: 'scrollbar',
+    maxHeight: 314,
+    paddingRight: 10,
+    paddingTop: 10,
+    marginTop: 6,
   },
   itemHeader: {
     color: theme.palette.label
@@ -95,9 +90,21 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: 12,
     paddingLeft: 20
   },
+  categories: {
+    marginTop: 10,
+    paddingRight: 16,
+    marginRight: 16,
+    width: 210,
+    maxHeight: 352,
+    borderRight: theme.palette.border,
+  },
   filterCategory: {
     display: "flex",
     marginBottom: 8,
+  },
+  filterCategoryList: {
+    extend: 'scrollbar',
+    maxHeight: 302,
   },
   filterCategoryButton: {
     display: "block",
@@ -105,6 +112,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   filterCategoryLabel: {
     fontSize: 18,
+    lineHeight: 1,
     fontWeight: 'bolder',
     fontFamily: 'Avenir Next',
     color: theme.palette.text!.primary,
@@ -439,18 +447,18 @@ const AttributesFilter = (props: Props) => {
               <Box display="flex" paddingY={0.6} mb={2} mt={0}>
                 <button className={classes.filterResetButton} onClick={reset}>Reset Filters</button>
               </Box>
-
-              {Object.values(filteredTraits).map(trait => {
-                const values = Object.values(trait.values)
-                const selectedCount = values.filter(value => value.selected).length
-                return (
-                  <a key={trait.trait} href={`#${trait.trait}`} className={classes.filterCategoryButton}>
-                    <Text className={classes.filterCategoryLabel}>{trait.trait}</Text>
-                    <Text className={cls(classes.filterValueSubText, { hasSelected: selectedCount > 0 })}>{selectedCount} of {values.length} selected</Text>
-                  </a>
-                )
-              })}
-
+              <Box className={classes.filterCategoryList}>
+                {Object.values(filteredTraits).map(trait => {
+                  const values = Object.values(trait.values)
+                  const selectedCount = values.filter(value => value.selected).length
+                  return (
+                    <a key={trait.trait} href={`#${trait.trait}`} className={classes.filterCategoryButton}>
+                      <Text className={classes.filterCategoryLabel}>{trait.trait}</Text>
+                      <Text className={cls(classes.filterValueSubText, { hasSelected: selectedCount > 0 })}>{selectedCount} of {values.length} selected</Text>
+                    </a>
+                  )
+                })}
+              </Box>
             </Box>
             <Box flexGrow="1">
               <OutlinedInput
