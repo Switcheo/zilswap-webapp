@@ -3,7 +3,7 @@ import { Box, Hidden, LinearProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { renderRoutes } from "react-router-config";
 import { useLocation } from "react-router-dom";
-import { ConnectWalletButton, NavDrawer, TopBar, DrawerComp, TBMBanner } from "app/components";
+import { ConnectWalletButton, NavDrawer, TopBar, DrawerComp, MainBanner } from "app/components";
 import { AppTheme } from "app/theme/types";
 import TransactionDialog from "../TransactionDialog";
 import WalletDialog from "../WalletDialog";
@@ -71,7 +71,9 @@ const MainLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       <main className={classes.content}>
         <DevInfoBadge />
         <Suspense fallback={<LinearProgress />}>
-          <TBMBanner />
+          {currentPath !== "bridge" &&
+            <MainBanner />
+          }
           {renderRoutes(route.routes)}
         </Suspense>
       </main>
