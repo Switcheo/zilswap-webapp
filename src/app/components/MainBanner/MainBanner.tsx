@@ -22,8 +22,8 @@ const MainBanner = () => {
   const classes = useStyles();
 
   return <Box className={classes.banner} maxWidth={800} margin="0 auto">
-    <a href="https://twitter.com/envizionworld" target="_blank" rel="noreferrer">
-      <img className={classes.bannerImage} src="/assets/envizion-banner.png" alt="" />
+    <a href="https://docs.zilswap.io/zilo/overview/06-envizion" target="_blank" rel="noreferrer">
+      <img className={classes.bannerImage} src="/assets/envizion-banner.jpg" alt="" />
     </a>
   </Box>
 }
