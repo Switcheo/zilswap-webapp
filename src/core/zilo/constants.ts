@@ -129,15 +129,15 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     usdTarget: '$2,100,000',
   }, {
     projectURL: 'https://docs.zilswap.io/zilo/overview/06-envizion',
-    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-5-ZWT-banner.png',
+    imageURL: 'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-6-EVZ-banner.png',
     tokenSymbol: 'EVZ',
     tokenName: 'EnviZion',
     tokenDecimals: 8,
-    description: 'Coming soon.',
-    contractAddress: 'zil1evnkhs6ugq3rgews7mhz5xx5kwqzpnw4f5s7ep',
-    showUntil: dayjs('2022-04-26T10:00:00.000+0800'),
+    description: 'EnviZion is well-positioned to be at the forefront of the creator’s economy, revolutionizing how individual Creators can create and collaborate at a scale never seen before.',
+    contractAddress: 'zil1gkeedfqxgf78ywekvd9zjza72mqnzkkp9yfurj',
+    showUntil: dayjs('2022-05-15T10:00:00.000+0800'),
     usdRatio: '0.9',
-    usdTarget: '$325,000',
+    usdTarget: '$234,000',
   }],
 }
 
