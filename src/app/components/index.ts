@@ -19,6 +19,7 @@ export { default as HelpInfo } from "./HelpInfo";
 export { default as ILOCard } from "./ILOCard";
 export { default as KeyValueDisplay } from "./KeyValueDisplay";
 export { default as LoadableArea } from "./LoadableArea";
+export { default as MainBanner } from "./MainBanner";
 export { default as MnemonicDialog } from "./MnemonicDialog";
 export { default as NavDrawer } from "./NavDrawer";
 export { default as NewLinkIcon } from "./new_link.svg";
