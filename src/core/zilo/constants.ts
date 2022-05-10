@@ -82,7 +82,6 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     showUntil: dayjs('2022-05-16T10:00:00.000+0800'),
     usdRatio: '0.9',
     usdTarget: '$234,000',
-    comingSoon: true,
   }],
   [Network.TestNet]: [{
     projectURL: 'https://docs.zilswap.io/zilo/overview/01-zilstream',
