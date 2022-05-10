@@ -78,7 +78,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     tokenName: 'EnviZion',
     tokenDecimals: 8,
     description: 'EnviZion is well-positioned to be at the forefront of the creator’s economy, revolutionizing how individual Creators can create and collaborate at a scale never seen before.',
-    contractAddress: 'zil1y8enzdxpw3y4an2zyw7zz3nmr7m8mrl5veqtd0',
+    contractAddress: 'zil1uhytmtrjc96rf6r5f7tmrl96aua0rzh987zj5t',
     showUntil: dayjs('2022-05-16T10:00:00.000+0800'),
     usdRatio: '0.9',
     usdTarget: '$234,000',
