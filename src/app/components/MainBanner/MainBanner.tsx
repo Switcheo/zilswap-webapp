@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, makeStyles } from '@material-ui/core';
+import { Link } from "react-router-dom";
 import { AppTheme } from 'app/theme/types';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -22,9 +23,9 @@ const MainBanner = () => {
   const classes = useStyles();
 
   return <Box className={classes.banner} maxWidth={800} margin="0 auto">
-    <a href="https://docs.zilswap.io/zilo/overview/06-envizion" target="_blank" rel="noreferrer">
+    <Link to="/zilo/current">
       <img className={classes.bannerImage} src="/assets/envizion-banner.jpg" alt="" />
-    </a>
+    </Link>
   </Box>
 }
 
