@@ -363,16 +363,7 @@ const TokenILOCard = (props: Props) => {
                   color="primary"
                   onClick={onCommit}
                 >
-                  {!!iloStarted && (
-                    <>
-                      {insufficientBalanceError ?? 'Commit'}
-                    </>
-                  )}
-                  {!iloStarted && (
-                    <>
-                      {currentTime.isAfter(startTime) ? 'Waiting for start block...' : 'Waiting to begin...'}
-                    </>
-                  )}
+                  {!!iloStarted ? (insufficientBalanceError ?? 'Commit') : (currentTime.isAfter(startTime) ? 'Waiting for start block...' : 'Waiting to begin...')}
 
                 </FancyButton>
                 <Typography className={classes.errorMessage} color="error">{txError?.message}</Typography>
