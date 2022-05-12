@@ -165,7 +165,8 @@ const TokenILOCard = (props: Props) => {
 
   const totalContributions = new BigNumber(totalContributionStr)
   const totalCommittedUSD = totalContributions.shiftedBy(-12).dividedBy(data.usdRatio).times(tokenState.prices[ZIL_ADDRESS]).toFormat(2)
-  const progress = totalContributions.dividedBy(targetZil).times(100).integerValue()
+  const contributionRate = totalContributions.dividedBy(targetZil);
+  const progress = contributionRate.times(100).integerValue()
   const iloStarted = iloState === ILOState.Active
   const iloOver = iloState === ILOState.Failed || iloState === ILOState.Completed
   const startTime = blockTime.add((startBlock - currentBlock) / BLOCKS_PER_MINUTE, 'minute')
@@ -174,7 +175,7 @@ const TokenILOCard = (props: Props) => {
   const blocksToNextPhase = currentTime.isAfter(startTime) ? (currentTime.isAfter(endTime) || !iloStarted ? 0 : endBlock - currentBlock) : startBlock - currentBlock
   const effectiveContribution = totalContributions.gt(targetZil) ? userContribution.times(targetZil).dividedToIntegerBy(totalContributions) : userContribution
   const effectiveTotalContributions = BigNumber.min(targetZil, totalContributions)
-  const receiveAmount = effectiveContribution.times(tokenAmount).dividedToIntegerBy(effectiveTotalContributions)
+  const receiveAmount = effectiveContribution.times(tokenAmount.times(contributionRate)).dividedToIntegerBy(effectiveTotalContributions)
   const refundZil = BigNumber.max(userContribution.minus(effectiveContribution.plus(1)), new BigNumber(0))
   const refundZwap = BigNumber.max(refundZil.times(targetZwap).dividedToIntegerBy(targetZil).minus(1), new BigNumber(0))
 
