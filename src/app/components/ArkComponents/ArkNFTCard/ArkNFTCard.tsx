@@ -313,6 +313,8 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                     <Typography onClick={() => { setOpenShareDialog(true); setPopAnchor(null); }} className={classes.popperText}>Share NFT</Typography>
                     <Box className={classes.divider} />
                     <Typography onClick={onResyncMetadata} className={classes.popperText}>Reload Metadata</Typography>
+                    <Box className={classes.divider} />
+                    <Typography onClick={() => { setOpenReportDialog(true); setPopAnchor(null); }} className={classes.popperText}>Report Collection</Typography>
                   </Popper>
                 </ClickAwayListener>
               )}

@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Box, BoxProps, Typography, IconButton } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ReplayIcon from '@material-ui/icons/Replay';
+import FlagIcon from '@material-ui/icons/Flag';
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
@@ -110,6 +111,9 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           <Box flexGrow={1} />
           <Box>
             <IconButton onClick={onResyncMetadata} className={classes.menuButton}><ReplayIcon /></IconButton>
+          </Box>
+          <Box>
+            <IconButton className={classes.menuButton}><FlagIcon /></IconButton>
           </Box>
         </Box>
 
@@ -302,6 +306,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   menuButton: {
     borderRadius: 8,
     padding: "8px",
+    marginLeft: "10px",
     backgroundColor: theme.palette.type === "dark" ? "#DEFFFF17" : "#6BE1FF33",
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
     "&:hover": {
