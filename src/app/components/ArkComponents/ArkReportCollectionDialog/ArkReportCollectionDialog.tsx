@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import {
-    Box, Button, DialogProps, DialogContent,
+    Box, Button, DialogProps, DialogContent, ClickAwayListener, Typography,
     List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction
 } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
 import { AppTheme } from "app/theme/types";
 import { ArrowDropDownRounded, ArrowDropUpRounded } from "@material-ui/icons";
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import CopyrightIcon from '@material-ui/icons/Copyright';
 import CheckIcon from '@material-ui/icons/Check';
-import { makeStyles } from "@material-ui/core/styles";
-import cls from "classnames";
 import { hexToRGBA } from "app/utils";
 import { DialogModal, FancyButton } from "app/components";
 import { ReactComponent as ViolenceIcon } from "./reason-icons/violence.svg";
@@ -25,7 +25,7 @@ interface Props extends Partial<DialogProps> {
 
 
 const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
-    const { children, className, collectionAddress, tokenId, open, onCloseDialog, header = "Report Collection", ...rest } = props;
+    const { children, className, collectionAddress, tokenId, open, onCloseDialog, header = "Report Collection" } = props;
     const classes = useStyles();
     const [active, setActive] = useState<boolean>(false);
     const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -34,7 +34,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
         { reason: 'Fake, Scam or Copied Collection', icon: <HighlightOffIcon></HighlightOffIcon> },
         { reason: 'Copyright Infringement', icon: <CopyrightIcon></CopyrightIcon> },
         { reason: 'Violence, Hate-Speech or Illegal Content', icon: <ViolenceIcon></ViolenceIcon> },
-        { reason: 'I dont\'t like it', icon: <HighlightOffIcon></HighlightOffIcon> },
+        { reason: 'I don\'t like it', icon: <HighlightOffIcon></HighlightOffIcon> },
         { reason: 'Other reasons', icon: <OtherReasonsIcon></OtherReasonsIcon> }];
 
     const onToggleDropdown = () => {
@@ -52,34 +52,38 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
         <DialogModal header={header} open={!!open} onClose={onCloseDialog}
             titlePadding={false} className={cls(classes.root, className)}>
             <DialogContent className={cls(classes.dialogContent)}>
+                <Typography className={classes.label}>Reason for Reporting</Typography>
                 <Button fullWidth onClick={onToggleDropdown}
                     className={cls(classes.dropdownButton, active ? classes.active : classes.inactive)}>
-                    <Box display="flex" flexDirection="column" flexGrow={1} alignItems="start">
-                        <div className={classes.selectValue}>
+                    <Box display="flex" flexDirection="row" flexGrow={1} alignItems="start">
+                        {selectedIndex !== -1 && reportReasons[selectedIndex].icon}
+                        <Typography className={classes.selectValue}>
                             {selectedIndex === -1 ? 'SELECT' : reportReasons[selectedIndex].reason}
-                        </div>
+                        </Typography>
                     </Box>
                     {active && <ArrowDropUpRounded className={classes.arrowIcon} />}
                     {!active && <ArrowDropDownRounded className={classes.arrowIcon} />}
                 </Button>
-                {active && <Box className={classes.dropdownContainer}>
-                    <List dense>
-                        {reportReasons.map((item, index) =>
-                        ([<ListItem selected={selectedIndex === index}
-                            className={classes.listItemRow}
-                            onClick={(event) => handleListItemClick(event, index)}>
-                            <ListItemIcon className={classes.listIcon}>
-                                {item.icon}
-                            </ListItemIcon>
-                            <ListItemText className={classes.listItemText}>{item.reason}</ListItemText>
-                            {selectedIndex === index && <ListItemSecondaryAction>
-                                <CheckIcon className={classes.active}></CheckIcon>
-                            </ListItemSecondaryAction>}
-                        </ListItem>]
-                        ))}
-                    </List>
-                </Box>}
-                <FancyButton disabled={selectedIndex === -1} color="primary" variant="contained" className={classes.button}>
+                {active && <ClickAwayListener onClickAway={onToggleDropdown}>
+                    <Box className={classes.dropdownContainer} onBlur={onToggleDropdown}>
+                        <List dense>
+                            {reportReasons.map((item, index) =>
+                            ([<ListItem selected={selectedIndex === index}
+                                className={classes.listItemRow}
+                                onClick={(event) => handleListItemClick(event, index)}>
+                                <ListItemIcon className={classes.listIcon}>
+                                    {item.icon}
+                                </ListItemIcon>
+                                <ListItemText className={classes.listItemText}>{item.reason}</ListItemText>
+                                {selectedIndex === index && <ListItemSecondaryAction>
+                                    <CheckIcon className={classes.active}></CheckIcon>
+                                </ListItemSecondaryAction>}
+                            </ListItem>]
+                            ))}
+                        </List>
+                    </Box>
+                </ClickAwayListener>}
+                <FancyButton disabled={true} color="primary" variant="contained" className={classes.button}>
                     Report
                 </FancyButton>
             </DialogContent>
@@ -104,16 +108,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         "& .Mui-selected": {
             backgroundColor: "transparent",
             "& div, span": {
-                color: "#00FFB0"
+                color: "#00FFB0",
+                "& path, circle": {
+                    fill: "#00FFB0",
+                    fillOpacity: "1 !important"
+                }
             },
             "&:hover": {
                 backgroundColor: theme.palette.type === "dark" ? "#4E5A60" : "#A9CCC1",
             },
         },
         position: "relative",
-    },
-    content: {
-        backgroundColor: theme.palette.background.default,
     },
     dialogContent: {
         backgroundColor: theme.palette.background.default,
@@ -136,16 +141,27 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             backgroundClip: "padding-box"
         },
     },
+    label: {
+        fontFamily: "'Raleway', sans-serif",
+        fontSize: 16,
+        color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+        textTransform: "uppercase",
+        marginBottom: 8,
+        fontWeight: 800,
+    },
     dropdownButton: {
         border: theme.palette.border,
         color: theme.palette.text?.primary,
         fontSize: 14,
         justifyContent: "flex-start",
-        padding: "10px 24px",
+        padding: "10px 16px",
         borderRadius: "12px",
         display: "flex",
         alignItems: "center",
-        position: "relative"
+        position: "relative",
+        "& .MuiSvgIcon-root, svg": {
+            marginRight: 12
+        },
     },
     inactive: {
         borderRadius: "12px"
@@ -153,8 +169,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     active: {
         borderColor: "#00FFB0",
         color: "#00FFB0",
-        "& div, .MuiSvgIcon-root": {
+        "& p, .MuiSvgIcon-root": {
             color: "#00FFB0",
+            "& path, circle": {
+                fill: "#00FFB0",
+                fillOpacity: "1 !important"
+            }
         }
     },
     selectValue: {
@@ -162,7 +182,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         fontFamily: "'Raleway', sans-serif",
         color: theme.palette.text!.primary,
         fontWeight: 700,
-        textTransform: 'uppercase'
+        textTransform: 'uppercase',
+        marginTop: 4,
+        marginBottom: 4
     },
     dropdownContainer: {
         marginTop: 8,
@@ -206,7 +228,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         }
     },
     arrowIcon: {
-        color: theme.palette.label
+        color: theme.palette.label,
+        marginRight: '0 !important'
     }
 }));
 
