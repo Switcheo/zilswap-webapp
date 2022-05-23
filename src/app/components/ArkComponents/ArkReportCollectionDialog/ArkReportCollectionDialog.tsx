@@ -1,34 +1,53 @@
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import {
     Box, Button, DialogProps, DialogContent, ClickAwayListener, Typography,
-    List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction
+    List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction, Link
 } from "@material-ui/core";
+import { useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { AppTheme } from "app/theme/types";
+import { useHistory } from "react-router-dom";
+import { getWallet } from "app/saga/selectors";
 import { ArrowDropDownRounded, ArrowDropUpRounded } from "@material-ui/icons";
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import CopyrightIcon from '@material-ui/icons/Copyright';
 import CheckIcon from '@material-ui/icons/Check';
 import { hexToRGBA } from "app/utils";
-import { DialogModal, FancyButton } from "app/components";
+import { DialogModal, FancyButton, ArkInput } from "app/components";
 import { ReactComponent as ViolenceIcon } from "./reason-icons/violence.svg";
 import { ReactComponent as OtherReasonsIcon } from "./reason-icons/others.svg";
+import { SmallDialog } from "./components";
+import { RootState } from "app/store/types";
+
 
 
 interface Props extends Partial<DialogProps> {
     collectionAddress: string;
     tokenId: number;
-    onCloseDialog?: () => void;
+    onCloseDialog: () => void;
     header?: string;
 }
 
-
 const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
-    const { children, className, collectionAddress, tokenId, open, onCloseDialog, header = "Report Collection" } = props;
+    const { className, collectionAddress, tokenId, open, onCloseDialog, header = "Report Collection" } = props;
     const classes = useStyles();
+    const history = useHistory();
+    const { wallet } = useSelector(getWallet);
     const [active, setActive] = useState<boolean>(false);
-    const [selectedIndex, setSelectedIndex] = useState(-1);
+    const [openFeedbackReceived, setOpenFeedbackReceived] = useState<boolean>(false);
+    const [openReportSubmitted, setOpenReportSubmitted] = useState<boolean>(false);
+    const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+    const [details, setDetails] = useState<string>("");
+    const showWalletDialog = useSelector<RootState, boolean>(
+        (state) => state.layout.showWalletDialog
+    );
+
+    const DETAIL_LIMIT = 500;
+    const FAKE_SCAM_INDEX = 0;
+    const COPYRIGHT_INDEX = 1;
+    const DISLIKE_INDEX = 3;
+    const OTHER_REASONS_INDEX = 4;    
 
     const reportReasons = [
         { reason: 'Fake, Scam or Copied Collection', icon: <HighlightOffIcon></HighlightOffIcon> },
@@ -36,6 +55,12 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
         { reason: 'Violence, Hate-Speech or Illegal Content', icon: <ViolenceIcon></ViolenceIcon> },
         { reason: 'I don\'t like it', icon: <HighlightOffIcon></HighlightOffIcon> },
         { reason: 'Other reasons', icon: <OtherReasonsIcon></OtherReasonsIcon> }];
+
+    const additionalTextDetails = [
+        { reasonIndex: FAKE_SCAM_INDEX, label: 'The Original Collection is', instruction: 'What was this collection called? Add links or contract addresses.', placeholder: 'The Bear Market. http://thebear.market' },
+        { reasonIndex: COPYRIGHT_INDEX, label: 'Details', instruction: 'Who was the original artist? Add links, sources and relevant evidence.', placeholder: 'The artwork was stolen from...' },
+        { reasonIndex: OTHER_REASONS_INDEX, label: 'Details', instruction: 'Why are you reporting this collection?', placeholder: 'I am reporting this because...' },
+    ];
 
     const onToggleDropdown = () => {
         setActive(!active);
@@ -48,46 +73,108 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
         setSelectedIndex(index);
     };
 
-    return (
-        <DialogModal header={header} open={!!open} onClose={onCloseDialog}
-            titlePadding={false} className={cls(classes.root, className)}>
-            <DialogContent className={cls(classes.dialogContent)}>
-                <Typography className={classes.label}>Reason for Reporting</Typography>
-                <Button fullWidth onClick={onToggleDropdown}
-                    className={cls(classes.dropdownButton, active ? classes.active : classes.inactive)}>
-                    <Box display="flex" flexDirection="row" flexGrow={1} alignItems="start">
-                        {selectedIndex !== -1 && reportReasons[selectedIndex].icon}
-                        <Typography className={classes.selectValue}>
-                            {selectedIndex === -1 ? 'SELECT' : reportReasons[selectedIndex].reason}
-                        </Typography>
-                    </Box>
-                    {active && <ArrowDropUpRounded className={classes.arrowIcon} />}
-                    {!active && <ArrowDropDownRounded className={classes.arrowIcon} />}
-                </Button>
-                {active && <ClickAwayListener onClickAway={onToggleDropdown}>
-                    <Box className={classes.dropdownContainer} onBlur={onToggleDropdown}>
-                        <List dense>
-                            {reportReasons.map((item, index) =>
-                            ([<ListItem selected={selectedIndex === index}
-                                className={classes.listItemRow}
-                                onClick={(event) => handleListItemClick(event, index)}>
-                                <ListItemIcon className={classes.listIcon}>
-                                    {item.icon}
-                                </ListItemIcon>
-                                <ListItemText className={classes.listItemText}>{item.reason}</ListItemText>
-                                {selectedIndex === index && <ListItemSecondaryAction>
-                                    <CheckIcon className={classes.active}></CheckIcon>
-                                </ListItemSecondaryAction>}
-                            </ListItem>]
-                            ))}
-                        </List>
-                    </Box>
-                </ClickAwayListener>}
-                <FancyButton disabled={true} color="primary" variant="contained" className={classes.button}>
-                    Report
-                </FancyButton>
-            </DialogContent>
-        </DialogModal>
+    const isAdditionalInputRequired = () => {
+        return selectedIndex === FAKE_SCAM_INDEX ||
+            selectedIndex === COPYRIGHT_INDEX ||
+            selectedIndex === OTHER_REASONS_INDEX;
+    }
+
+    const isInputsValid = () => {
+        if (isAdditionalInputRequired()) {
+            return details === "";
+        } else {
+            return selectedIndex === -1;
+        }
+    }
+
+    const generateAdditionalInput = () => {
+        const current = additionalTextDetails
+            .filter(obj => selectedIndex === obj.reasonIndex)[0];
+        if (current) {
+            return <ArkInput
+                className={classes.arkInputMulti}
+                value={details} onValueChange={(value => { setDetails(value) })}
+                placeholder={current.placeholder}
+                label={current.label} multiline={true}
+                instruction={current.instruction}
+                wordLimit={DETAIL_LIMIT} />;
+        } 
+    }
+
+    const onConfirm = () => {
+        onCloseDialog();
+        if(selectedIndex === DISLIKE_INDEX){
+            setOpenFeedbackReceived(true);
+        }else{
+            setOpenReportSubmitted(true);
+        }
+    }
+
+    const onBackToDiscover = () => {
+        history.push(`/arky/discover`);
+    }
+
+    const onBackToCollection = () => {
+        setOpenFeedbackReceived(false);
+        history.push(`/arky/collections/${collectionAddress}`);
+    }
+
+    return ( wallet && !showWalletDialog ? 
+        <Fragment>
+            <DialogModal header={header} open={!!open} onClose={onCloseDialog}
+                titlePadding={false} className={cls(classes.root, className)}>
+                <DialogContent className={cls(classes.dialogContent)}>
+                    <Typography className={classes.label}>Reason for Reporting</Typography>
+                    <Button fullWidth onClick={onToggleDropdown}
+                        className={cls(classes.dropdownButton, active ? classes.active : classes.inactive)}>
+                        <Box display="flex" flexDirection="row" flexGrow={1} alignItems="centre">
+                            {selectedIndex !== -1 && reportReasons[selectedIndex].icon}
+                            <Typography className={classes.selectValue}>
+                                {selectedIndex === -1 ? 'SELECT' : reportReasons[selectedIndex].reason}
+                            </Typography>
+                        </Box>
+                        {active && <ArrowDropUpRounded className={classes.arrowIcon} />}
+                        {!active && <ArrowDropDownRounded className={classes.arrowIcon} />}
+                    </Button>
+                    {active && <ClickAwayListener onClickAway={onToggleDropdown}>
+                        <Box className={classes.dropdownContainer} onBlur={onToggleDropdown}>
+                            <List dense>
+                                {reportReasons.map((item, index) =>
+                                ([<ListItem key={index} selected={selectedIndex === index}
+                                    className={classes.listItemRow}
+                                    onClick={(event) => handleListItemClick(event, index)}>
+                                    <ListItemIcon className={classes.listIcon}>
+                                        {item.icon}
+                                    </ListItemIcon>
+                                    <ListItemText className={classes.listItemText}>{item.reason}</ListItemText>
+                                    {selectedIndex === index && <ListItemSecondaryAction>
+                                        <CheckIcon className={classes.active}></CheckIcon>
+                                    </ListItemSecondaryAction>}
+                                </ListItem>]))}
+                            </List>
+                        </Box>
+                    </ClickAwayListener>}
+                    {isAdditionalInputRequired() && generateAdditionalInput()}
+                    <FancyButton disabled={isInputsValid()} color="primary" variant="contained" className={classes.button} onClick={onConfirm}>
+                        Report
+                    </FancyButton>
+                </DialogContent>
+            </DialogModal>
+            <SmallDialog open={openReportSubmitted}
+                onCloseDialog={() => setOpenReportSubmitted(false)}
+                header="Collection Reported" subHeader="The collection has been reported"
+                buttonLabel="Head to Discover" walletRequired={false} onConfirm={onBackToDiscover}
+                details="Thanks for keeping our community safe!" />
+            <SmallDialog open={openFeedbackReceived}
+                onCloseDialog={() => setOpenFeedbackReceived(false)}
+                header="Feedback Received" subHeader="Thanks for your feedback!"
+                buttonLabel="Back to Collection" walletRequired={false} onConfirm={onBackToCollection}
+                details={<Typography>However, this is not a valid reason to report a collection.
+                    Check out the community <Link href="https://discord.gg/zilswap">Discord</Link> if you would like to voice other concerns.</Typography>} />
+        </Fragment> :
+        <SmallDialog open={!!open} onCloseDialog={onCloseDialog}
+            header="Connect Wallet" subHeader="Please connect wallet to submit your report."
+            walletRequired={true} /> 
     );
 };
 
@@ -99,7 +186,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
                 fontFamily: "'Raleway', sans-serif",
                 fontWeight: 700,
                 fontSize: "24px",
-                linHeight: "36px",
+                lineHeight: "36px",
             },
             "& .MuiSvgIcon-root": {
                 fontSize: "1.8rem",
@@ -126,8 +213,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         borderRight: theme.palette.border,
         borderBottom: theme.palette.border,
         borderRadius: "0 0 12px 12px",
-        minWidth: 544,
         padding: theme.spacing(0, 3, 2),
+        minWidth: 360,
+        [theme.breakpoints.up('sm')]: {
+            width: 544
+        },
         overflowY: "auto",
         "&::-webkit-scrollbar-track": {
             marginBottom: theme.spacing(1),
@@ -175,6 +265,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
                 fill: "#00FFB0",
                 fillOpacity: "1 !important"
             }
+        },
+        "& div path, circle": {
+                fill: "#00FFB0",
+                fillOpacity: "1 !important"
         }
     },
     selectValue: {
@@ -184,7 +278,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         fontWeight: 700,
         textTransform: 'uppercase',
         marginTop: 4,
-        marginBottom: 4
+        marginBottom: 4,
+        textAlign: 'left',
     },
     dropdownContainer: {
         marginTop: 8,
@@ -197,14 +292,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         maxHeight: 600
     },
     listItemRow: {
-        [theme.breakpoints.down('sm')]: {
-            width: '92vw',
-            padding: '10px 18px',
-        },
         "&:hover": {
             backgroundColor: theme.palette.type === "dark" ? "#4E5A60" : "#A9CCC1",
         },
-
     },
     button: {
         marginTop: 24,
@@ -230,6 +320,35 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     arrowIcon: {
         color: theme.palette.label,
         marginRight: '0 !important'
+    },
+    arkInputMulti:{
+        marginTop: 24,
+        "& [class*='label']": {
+            fontSize: 16,
+            fontWeight: 800,
+            textTransform: "uppercase",
+        },
+        "& textarea": {
+            fontSize: 16,
+            height: '86px !important'
+        },
+        "& [class*='instruction']": {
+            fontWeight: 700
+        }
+    },
+    arkInput:{
+        marginTop: 24,
+        "& [class*='label']": {
+            fontSize: 16,
+            fontWeight: 800,
+            textTransform: "uppercase",
+        },
+        "& textarea": {
+            fontSize: 16,
+        },
+        "& [class*='instruction']": {
+            fontWeight: 700
+        }
     }
 }));
 
