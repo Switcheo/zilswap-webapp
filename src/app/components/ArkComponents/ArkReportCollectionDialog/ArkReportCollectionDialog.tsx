@@ -6,20 +6,19 @@ import {
 import { useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import { AppTheme } from "app/theme/types";
 import { useHistory } from "react-router-dom";
-import { getWallet } from "app/saga/selectors";
 import { ArrowDropDownRounded, ArrowDropUpRounded } from "@material-ui/icons";
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import CopyrightIcon from '@material-ui/icons/Copyright';
 import CheckIcon from '@material-ui/icons/Check';
+import { getWallet } from "app/saga/selectors";
 import { hexToRGBA } from "app/utils";
 import { DialogModal, FancyButton, ArkInput } from "app/components";
+import { AppTheme } from "app/theme/types";
+import { RootState } from "app/store/types";
+import { SmallDialog } from "./components";
 import { ReactComponent as ViolenceIcon } from "./reason-icons/violence.svg";
 import { ReactComponent as OtherReasonsIcon } from "./reason-icons/others.svg";
-import { SmallDialog } from "./components";
-import { RootState } from "app/store/types";
-
 
 
 interface Props extends Partial<DialogProps> {
