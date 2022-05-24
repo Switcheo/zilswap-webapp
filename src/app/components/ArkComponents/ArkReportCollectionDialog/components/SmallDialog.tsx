@@ -27,9 +27,12 @@ const SmallDialog: React.FC<Props> = (props: Props) => {
         <DialogModal header={header} open={!!open} onClose={onCloseDialog}
             titlePadding={false} className={cls(classes.root, className)}>
             <DialogContent className={cls(classes.dialogContent)}>
-                {subHeader && <Typography className={classes.subHeader}>{subHeader}</Typography>}
+                {subHeader &&
+                    <Typography className={cls(classes.subHeader,
+                        details ? classes.bottomMargin : classes.largerBottomMargin)}>{subHeader}
+                    </Typography>}
                 {details && <Typography className={classes.details}>{details}</Typography>}
-                <FancyButton color="primary" variant="contained" className={classes.button} 
+                <FancyButton color="primary" variant="contained" className={classes.button}
                     onClick={onConfirm} walletRequired={walletRequired}>
                     {buttonLabel}
                 </FancyButton>
@@ -52,6 +55,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             "& .MuiSvgIcon-root": {
                 fontSize: "1.8rem",
             },
+            "& button": {
+                top: 16
+            }
         },
         "& .Mui-selected": {
             backgroundColor: "transparent",
@@ -96,17 +102,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         fontFamily: "'Raleway', sans-serif",
         fontSize: 16,
         color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
-        marginBottom: 18,
         fontWeight: 900,
         textAlign: 'center'
     },
     details: {
+        maxWidth: 364,
+        margin: "0 auto 24px auto",
         fontFamily: 'Avenir Next',
         fontSize: 16,
         color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
         textAlign: 'center',
         lineHeight: "19.65px",
-        "& p": {
+        "& p, a": {
             fontFamily: 'Avenir Next',
             fontSize: 16,
             color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
@@ -114,20 +121,22 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             lineHeight: "19.65px"
         },
         "& a": {
-            fontFamily: 'Avenir Next',
-            fontSize: 16,
-            color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
-            lineHeight: "19.65px",
             textDecoration: "underline"
         }
     },
     button: {
-        marginTop: 24,
+        marginTop: 0,
         borderRadius: "12px",
         display: "flex",
         padding: "18px 32px",
         alignItems: "center",
     },
+    bottomMargin: {
+        marginBottom: "18.78px"
+    },
+    largerBottomMargin: {
+        marginBottom: "24px"
+    }
 }));
 
 export default SmallDialog;

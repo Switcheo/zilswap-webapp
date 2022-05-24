@@ -190,6 +190,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             "& .MuiSvgIcon-root": {
                 fontSize: "1.8rem",
             },
+            "& button": {
+                top: 16
+            },
         },
         "& .Mui-selected": {
             backgroundColor: "transparent",
