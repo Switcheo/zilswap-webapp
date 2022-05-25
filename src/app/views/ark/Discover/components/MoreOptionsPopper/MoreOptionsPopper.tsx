@@ -6,6 +6,7 @@ import {
 import { Network } from "zilswap-sdk/lib/constants";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import { ArkReportCollectionDialog } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { useNetwork } from "app/utils";
 
@@ -18,6 +19,7 @@ const MoreOptionsPopper: React.FC<Props> = (props: Props) => {
     const classes = useStyles();
     const network = useNetwork();
     const [popAnchor, setPopAnchor] = useState(null);
+    const [openReportDialog, setOpenReportDialog] = useState(false);
 
     const explorerLink = useMemo(() => {
         const addr = toBech32Address(collectionAddress);
@@ -33,25 +35,33 @@ const MoreOptionsPopper: React.FC<Props> = (props: Props) => {
         setPopAnchor(popAnchor ? null : event.currentTarget)
     }
 
+    const closePopper = () => {
+        setPopAnchor(null);
+    }
+
     return (
         <Fragment>
             <IconButton size="small" className={classes.extrasButton} onClick={handlePopClick}>
                 <MoreHorizIcon />
             </IconButton>
-            {popAnchor && (<ClickAwayListener onClickAway={() => setPopAnchor(null)}>
+            {popAnchor && (<ClickAwayListener onClickAway={closePopper}>
                 <Popper onClick={event => event.stopPropagation()} className={classes.popper}
                     open anchorEl={popAnchor} placement="bottom-end">
                     <Link
                         className={classes.popperText}
                         underline="none"
                         target="_blank"
-                        href={explorerLink}>
+                        href={explorerLink}
+                        onClick={closePopper}>
                         <Typography className={classes.popperText}>View on Explorer</Typography>
                     </Link>
                     <Box className={classes.divider} />
-                    <Typography className={classes.popperText}>Report Collection</Typography>
+                    <Typography className={classes.popperText} onClick={() => { setOpenReportDialog(true); closePopper();}}>Report Collection</Typography>
                 </Popper>
             </ClickAwayListener>)}
+            <Box onClick={event => event.stopPropagation()}>
+                <ArkReportCollectionDialog open={openReportDialog} onCloseDialog={() => setOpenReportDialog(false)} collectionAddress={collectionAddress} />
+            </Box>
         </Fragment>
     );
 };

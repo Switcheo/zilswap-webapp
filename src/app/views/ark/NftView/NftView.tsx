@@ -126,7 +126,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
         {/* Nft image and main info */}
         <Container disableGutters className={classes.imageInfoContainer}>
           <NftImage className={classes.nftImage} token={token} rounded={true} />
-          {token && <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} isCancelling={isCancelling} tokenUpdatedCallback={() => getNFTDetails()} />}
+          {token && <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} isCancelling={isCancelling} tokenUpdatedCallback={() => getNFTDetails()} collectionAddress={collectionId} />}
         </Container>
 
         {/* About info and trait table */}

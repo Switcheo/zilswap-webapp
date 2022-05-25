@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Box, BoxProps, Typography, IconButton } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ReplayIcon from '@material-ui/icons/Replay';
@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { darken } from '@material-ui/core/styles';
-import { ArkBox, FancyButton, ZapWidget } from "app/components";
+import { ArkBox, FancyButton, ZapWidget, ArkReportCollectionDialog } from "app/components";
 import { getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/types";
@@ -24,10 +24,11 @@ interface Props extends BoxProps {
   tokenId: string;
   isCancelling?: boolean | null;
   tokenUpdatedCallback: () => void;
+  collectionAddress: string;
 }
 
 const SalesDetail: React.FC<Props> = (props: Props) => {
-  const { token, tokenId, children, className, tokenUpdatedCallback, isCancelling, ...rest } = props;
+  const { token, tokenId, children, className, collectionAddress, tokenUpdatedCallback, isCancelling, ...rest } = props;
   const classes = useStyles();
   const history = useHistory();
   const dispatch = useDispatch();
@@ -36,6 +37,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
   const { wallet } = useSelector(getWallet);
   const [blockTime, currentBlock] = useBlockTime();
   const [runResyncMetadata] = useAsyncTask("resyncMetadata");
+  const [openReportDialog, setOpenReportDialog] = useState(false);
 
   const isOwnToken = useMemo(() => {
     return (
@@ -113,7 +115,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
             <IconButton onClick={onResyncMetadata} className={classes.menuButton}><ReplayIcon /></IconButton>
           </Box>
           <Box>
-            <IconButton className={classes.menuButton}><FlagIcon /></IconButton>
+            <IconButton onClick={() => { setOpenReportDialog(true); }} className={classes.menuButton}><FlagIcon /></IconButton>
           </Box>
         </Box>
 
@@ -160,6 +162,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           </Box>
         </Box>
       </Box>
+      <ArkReportCollectionDialog open={openReportDialog} onCloseDialog={() => setOpenReportDialog(false)} tokenId={token.tokenId} collectionAddress={collectionAddress}/>
     </Box>
   );
 };

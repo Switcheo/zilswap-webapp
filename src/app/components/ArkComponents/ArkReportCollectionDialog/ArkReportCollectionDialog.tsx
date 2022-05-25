@@ -23,7 +23,7 @@ import { ReactComponent as OtherReasonsIcon } from "./reason-icons/others.svg";
 
 interface Props extends Partial<DialogProps> {
     collectionAddress: string;
-    tokenId: number;
+    tokenId?: number;
     onCloseDialog: () => void;
     header?: string;
 }
@@ -48,14 +48,14 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
     const DISLIKE_INDEX = 3;
     const OTHER_REASONS_INDEX = 4;    
 
-    const reportReasons = [
+    const REPORT_REASONS = [
         { reason: 'Fake, Scam or Copied Collection', icon: <HighlightOffIcon></HighlightOffIcon> },
         { reason: 'Copyright Infringement', icon: <CopyrightIcon></CopyrightIcon> },
         { reason: 'Violence, Hate-Speech or Illegal Content', icon: <ViolenceIcon></ViolenceIcon> },
         { reason: 'I don\'t like it', icon: <HighlightOffIcon></HighlightOffIcon> },
         { reason: 'Other reasons', icon: <OtherReasonsIcon></OtherReasonsIcon> }];
 
-    const additionalTextDetails = [
+    const ADDITIONAL_TEXT_LABELS = [
         { reasonIndex: FAKE_SCAM_INDEX, label: 'The Original Collection is', instruction: 'What was this collection called? Add links or contract addresses.', placeholder: 'The Bear Market. http://thebear.market' },
         { reasonIndex: COPYRIGHT_INDEX, label: 'Details', instruction: 'Who was the original artist? Add links, sources and relevant evidence.', placeholder: 'The artwork was stolen from...' },
         { reasonIndex: OTHER_REASONS_INDEX, label: 'Details', instruction: 'Why are you reporting this collection?', placeholder: 'I am reporting this because...' },
@@ -87,7 +87,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
     }
 
     const generateAdditionalInput = () => {
-        const current = additionalTextDetails
+        const current = ADDITIONAL_TEXT_LABELS
             .filter(obj => selectedIndex === obj.reasonIndex)[0];
         if (current) {
             return <ArkInput
@@ -127,9 +127,9 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
                     <Button fullWidth onClick={onToggleDropdown}
                         className={cls(classes.dropdownButton, active ? classes.active : classes.inactive)}>
                         <Box display="flex" flexDirection="row" flexGrow={1} alignItems="centre">
-                            {selectedIndex !== -1 && reportReasons[selectedIndex].icon}
+                            {selectedIndex !== -1 && REPORT_REASONS[selectedIndex].icon}
                             <Typography className={classes.selectValue}>
-                                {selectedIndex === -1 ? 'SELECT' : reportReasons[selectedIndex].reason}
+                                {selectedIndex === -1 ? 'SELECT' : REPORT_REASONS[selectedIndex].reason}
                             </Typography>
                         </Box>
                         {active && <ArrowDropUpRounded className={classes.arrowIcon} />}
@@ -138,7 +138,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
                     {active && <ClickAwayListener onClickAway={onToggleDropdown}>
                         <Box className={classes.dropdownContainer} onBlur={onToggleDropdown}>
                             <List dense>
-                                {reportReasons.map((item, index) =>
+                                {REPORT_REASONS.map((item, index) =>
                                 ([<ListItem key={index} selected={selectedIndex === index}
                                     className={classes.listItemRow}
                                     onClick={(event) => handleListItemClick(event, index)}>
