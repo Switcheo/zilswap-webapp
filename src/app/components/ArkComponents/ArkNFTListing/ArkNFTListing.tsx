@@ -13,10 +13,11 @@ import { useIntersectionObserver, useTaskSubscriber } from "app/utils";
 interface Props extends BoxProps {
   collectionName?: string;
   filterComponent: React.ReactNode;
+  reportState? :number | null;
 }
 
 const ArkNFTListing: React.FC<Props> = (props: Props) => {
-  const { filterComponent, className, collectionName } = props;
+  const { filterComponent, className, collectionName, reportState } = props;
   const classes = useStyles();
   const { filter, tokens } = useSelector(getMarketplace);
   const [loading] = useTaskSubscriber("reloadNftList");
@@ -63,6 +64,7 @@ const ArkNFTListing: React.FC<Props> = (props: Props) => {
             <ArkNFTCard
               token={token}
               collectionAddress={token.collection!.address}
+              reportState={reportState}
             />
           </Grid>
         ))}

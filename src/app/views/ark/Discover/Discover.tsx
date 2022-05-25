@@ -10,6 +10,7 @@ import { toBech32Address } from "@zilliqa-js/crypto";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
+import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 import { ArkImageView, CurrencyLogo, Text } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
@@ -17,6 +18,7 @@ import { CollectionWithStats } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
 import { bnOrZero, hexToRGBA, useAsyncTask } from "app/utils";
+import { REPORT_LEVEL_WARNING, REPORT_LEVEL_SUSPICIOUS } from "app/utils/constants";
 import { MoreOptionsPopper } from "./components";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
 import { ReactComponent as UncheckedIcon } from "./unchecked-icon.svg";
@@ -109,10 +111,21 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const isSm = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("sm"));
 
   const fullCollections = useMemo(() => {
-    const sorted = collections.sort((a, b) => {
+    //simulate report level
+    if(collections[0]){
+        collections.filter(c => toBech32Address(c.address) === "zil13fum43ax8qeprt5s9u6wsmrtw2vsvdrdhmvtrm")[0].reportLevel = 1;
+        collections.filter(c => toBech32Address(c.address) === "zil167flx79fykulp57ykmh9gnf3curcnyux6dcj5e")[0].reportLevel = 2;
+    }
+    const sortByVol = collections.sort((a, b) => {
       const volDiff = bnOrZero(b.priceStat?.volume ?? 0).comparedTo(a.priceStat?.volume ?? 0)
       if (volDiff !== 0) return volDiff
       return bnOrZero(b.priceStat?.allTimeVolume ?? 0).comparedTo(a.priceStat?.allTimeVolume ?? 0)
+    })
+
+    const sorted = sortByVol.sort((a, b) => {
+        if(a.reportLevel && !b.reportLevel) return 1;
+        if(!a.reportLevel && b.reportLevel === REPORT_LEVEL_SUSPICIOUS) return -1;
+        return 0;
     })
     return sorted
 
@@ -309,10 +322,12 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                           imageUrl={collection.profileImageUrl}
                         />
                         <Box className={classes.collectionNameContainer}>
-                          <Box display="flex" alignItems="center">
-                            <Box className={classes.collectionName}>{collection.name}</Box>
-                            {collection.verifiedAt && (<VerifiedBadge className={classes.verifiedBadge} />)}
-                          </Box>
+                            <Box display="flex" alignItems="center">
+                                <Box className={classes.collectionName}>{collection.name}</Box>
+                                {collection.reportLevel ? <ReportProblemOutlinedIcon
+                                    className={cls(classes.icon, collection.reportLevel === REPORT_LEVEL_WARNING ? classes.warning : classes.suspicious)} />
+                                    : collection.verifiedAt && (<VerifiedBadge className={classes.icon} />)}
+                            </Box>
                           <Typography className={classes.ownerName}>By {collection.ownerName}</Typography>
                         </Box>
                       </Box>
@@ -500,7 +515,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     lineHeight: "16px",
     color: theme.palette.text?.primary,
   },
-  verifiedBadge: {
+  icon: {
     marginLeft: "4px",
     marginTop: 2,
     width: "20px",
@@ -636,4 +651,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   minWidth: {
       minWidth: 100
   },
+  warning: {
+    color: "#FFDF6B"
+  },
+  suspicious:{
+    color: "#FF5252"
+  }
 }));

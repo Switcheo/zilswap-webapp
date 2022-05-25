@@ -8,12 +8,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { darken } from '@material-ui/core/styles';
+import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 import { ArkBox, FancyButton, ZapWidget, ArkReportCollectionDialog } from "app/components";
 import { getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
+import { useAsyncTask, useBlockTime, useNetwork, useToaster, REPORT_LEVEL_SUSPICIOUS } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { ReactComponent as VerifiedBadge } from "../assets/verified-badge.svg";
 import { InfoBox, PrimaryPrice, SecondaryPrice } from "./components";
@@ -98,6 +99,10 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
     })
   }
 
+  const isCollectionSuspicious = () => {
+    return token.collection?.reportLevel === REPORT_LEVEL_SUSPICIOUS;
+  }
+
   return (
     <Box {...rest} className={cls(classes.root, className)}>
       <Box className={classes.container}>
@@ -106,7 +111,9 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           <Box>
             <Typography className={classes.collectionName}>
               {token.collection?.name ?? ""}{" "}
-              {token.collection?.verifiedAt && <VerifiedBadge className={classes.verifiedBadge} />}
+              {token.collection?.reportLevel ? <ReportProblemOutlinedIcon
+                className={cls(classes.verifiedBadge, isCollectionSuspicious() ? classes.suspicious : classes.warning)} />
+                : token.collection?.verifiedAt && <VerifiedBadge className={classes.verifiedBadge} />}
             </Typography>
             {<Typography className={classes.tokenId}><span className={classes.hexSymbol}>{token.name?.replace(/#\s*\d+$/i, "")} #</span>{tokenId}</Typography>}
           </Box>
@@ -140,7 +147,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           }
           <Box display="flex" className={cls(classes.buttonBox, { overlap: !!priceInfos.primaryPrice })}>
             {!isOwnToken && (
-              <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onBid}>
+              <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onBid} disabled={isCollectionSuspicious()}>
                 Place Offer
               </FancyButton>
             )}
@@ -155,7 +162,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
               </FancyButton>
             )}
             {!isOwnToken && token.bestAsk && (
-              <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onBuy}>
+              <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onBuy} disabled={isCollectionSuspicious()}>
                 Buy Now
               </FancyButton>
             )}
@@ -246,6 +253,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       width: "100%",
       marginBottom: theme.spacing(1),
     },
+    "&:disabled": {
+        backgroundColor: "rgba(0, 51, 64, 1)",
+        "& .MuiButton-label": {
+            color: "rgba(222, 255, 255, 0.5)"
+        }
+    }
   },
   buyButton: {
     padding: theme.spacing(2.5, 4),
@@ -266,6 +279,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       width: "100%",
       marginBottom: theme.spacing(1),
     },
+    "&:disabled": {
+        backgroundColor: "rgba(0, 51, 64, 1)",
+        borderColor: "rgba(0, 51, 64, 1)",
+        "& .MuiButton-label": {
+            color: "rgba(222, 255, 255, 0.5)"
+        }
+    }
   },
   collectionName: {
     fontFamily: "'Raleway', sans-serif",
@@ -335,6 +355,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       width: 14,
     }
   },
+  warning: {
+    color: "#FFDF6B"
+  },
+  suspicious: {
+    color: "#FF5252"
+  }
 }));
 
 export default SalesDetail;

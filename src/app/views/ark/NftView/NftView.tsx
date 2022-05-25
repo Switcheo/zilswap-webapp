@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Transaction } from "@zilliqa-js/account";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ArkBidsTable, ArkEventHistoryTable, ArkBreadcrumb, ArkPriceHistoryGraph, ArkTab, ArkOwnerLabel, ArkBox } from "app/components";
+import { ArkBidsTable, ArkEventHistoryTable, ArkBreadcrumb, ArkPriceHistoryGraph, ArkTab, ArkOwnerLabel, ArkBox, ArkReportedBanner } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getMarketplace, getWallet } from "app/saga/selectors";
 import { Nft, Profile } from "app/store/types";
@@ -91,7 +91,14 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
       const address = fromBech32Address(collectionId).toLowerCase()
       const viewerAddress = wallet?.addressInfo.byte20.toLowerCase()
       const { result } = await arkClient.getNftToken(address, tokenId, viewerAddress);
+      //simulate report level
+      if (collectionId === "zil13fum43ax8qeprt5s9u6wsmrtw2vsvdrdhmvtrm") {
+        result.model.collection.reportLevel = 1;
+      } else if (collectionId === "zil167flx79fykulp57ykmh9gnf3curcnyux6dcj5e") {
+        result.model.collection.reportLevel = 2;
+      }
       setToken(result.model);
+      
 
       const { model: { owner } } = result
       if (owner && !bypass) {
@@ -122,7 +129,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
         <ArkBreadcrumb linkPath={breadcrumbs} />
-
+        { token?.collection?.reportLevel && <ArkReportedBanner collectionAddress={fromBech32Address(collectionId)} reportState={token?.collection?.reportLevel} />}
         {/* Nft image and main info */}
         <Container disableGutters className={classes.imageInfoContainer}>
           <NftImage className={classes.nftImage} token={token} rounded={true} />

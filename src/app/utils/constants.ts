@@ -158,3 +158,6 @@ export const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 export const USERNAME_REGEX = /^[A-Za-z0-9_]{1,20}$/
 export const TWITTER_REGEX = /^[A-Za-z0-9_]{1,15}$/
 export const INSTAGRAM_REGEX = /^[A-Za-z0-9_]{1,30}$/
+
+export const REPORT_LEVEL_WARNING = 1;
+export const REPORT_LEVEL_SUSPICIOUS = 2;
