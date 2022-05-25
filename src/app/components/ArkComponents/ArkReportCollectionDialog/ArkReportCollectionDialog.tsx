@@ -29,7 +29,7 @@ interface Props extends Partial<DialogProps> {
 }
 
 const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
-    const { className, collectionAddress, tokenId, open, onCloseDialog, header = "Report Collection" } = props;
+    const { className, collectionAddress, open, onCloseDialog, header = "Report Collection" } = props;
     const classes = useStyles();
     const history = useHistory();
     const { wallet } = useSelector(getWallet);
@@ -46,7 +46,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
     const FAKE_SCAM_INDEX = 0;
     const COPYRIGHT_INDEX = 1;
     const DISLIKE_INDEX = 3;
-    const OTHER_REASONS_INDEX = 4;    
+    const OTHER_REASONS_INDEX = 4;
 
     const REPORT_REASONS = [
         { reason: 'Fake, Scam or Copied Collection', icon: <HighlightOffIcon></HighlightOffIcon> },
@@ -97,14 +97,14 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
                 label={current.label} multiline={true}
                 instruction={current.instruction}
                 wordLimit={DETAIL_LIMIT} />;
-        } 
+        }
     }
 
     const onConfirm = () => {
         onCloseDialog();
-        if(selectedIndex === DISLIKE_INDEX){
+        if (selectedIndex === DISLIKE_INDEX) {
             setOpenFeedbackReceived(true);
-        }else{
+        } else {
             setOpenReportSubmitted(true);
         }
     }
@@ -118,7 +118,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
         history.push(`/arky/collections/${collectionAddress}`);
     }
 
-    return ( wallet && !showWalletDialog ? 
+    return (wallet && !showWalletDialog ?
         <Fragment>
             <DialogModal header={header} open={!!open} onClose={onCloseDialog}
                 titlePadding={false} className={cls(classes.root, className)}>
@@ -173,7 +173,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
         </Fragment> :
         <SmallDialog open={!!open} onCloseDialog={onCloseDialog}
             header="Connect Wallet" subHeader="Please connect wallet to submit your report."
-            walletRequired={true} /> 
+            walletRequired={true} />
     );
 };
 
@@ -269,8 +269,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             }
         },
         "& div path, circle": {
-                fill: "#00FFB0",
-                fillOpacity: "1 !important"
+            fill: "#00FFB0",
+            fillOpacity: "1 !important"
         }
     },
     selectValue: {
@@ -323,7 +323,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         color: theme.palette.label,
         marginRight: '0 !important'
     },
-    arkInputMulti:{
+    arkInputMulti: {
         marginTop: 24,
         "& [class*='label']": {
             fontSize: 16,
@@ -338,7 +338,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             fontWeight: 700
         }
     },
-    arkInput:{
+    arkInput: {
         marginTop: 24,
         "& [class*='label']": {
             fontSize: 16,

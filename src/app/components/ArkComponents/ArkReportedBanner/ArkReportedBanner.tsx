@@ -16,11 +16,11 @@ const ArkReportedBanner: React.FC<Props> = (props: Props) => {
 
     const generateLabel = () => {
         return reportState === 1 ? (
-            <Typography className={classes.warning}>This collection was reported for 
-            suspicious activity. <Link href="#">Learn More</Link></Typography>
+            <Typography className={classes.warning}>This collection was reported for
+                suspicious activity. <Link href="#">Learn More</Link></Typography>
         ) : (
-            <Typography className={classes.suspicious}>This collection was reported for 
-            suspicious activity and cannot be traded on ARKY. <Link href="#">What happens next?</Link></Typography>
+            <Typography className={classes.suspicious}>This collection was reported for
+                suspicious activity and cannot be traded on ARKY. <Link href="#">What happens next?</Link></Typography>
         )
     }
 
@@ -34,7 +34,7 @@ const ArkReportedBanner: React.FC<Props> = (props: Props) => {
 };
 
 const useStyles = makeStyles((theme: AppTheme) => ({
-    bannerContainer:{
+    bannerContainer: {
         width: "100%",
         padding: theme.spacing(1.5),
         marginTop: 24,
@@ -47,18 +47,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             fontSize: 14,
             lineHeight: "17.2px",
             marginLeft: 10,
-            "& a":{
+            "& a": {
                 textDecoration: "underline",
                 color: "inherit"
             }
         },
     },
-    warningBanner:{
-        border:"1px solid #FFDF6B",
+    warningBanner: {
+        border: "1px solid #FFDF6B",
         backgroundColor: "rgba(255, 223, 107, 0.2)",
     },
-    suspiciousBanner:{
-        border:"1px solid #FF5252",
+    suspiciousBanner: {
+        border: "1px solid #FF5252",
         backgroundColor: "rgba(255, 82, 82, 0.2)",
     },
     warning: {
