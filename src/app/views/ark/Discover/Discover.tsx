@@ -17,6 +17,7 @@ import { CollectionWithStats } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
 import { bnOrZero, hexToRGBA, useAsyncTask } from "app/utils";
+import { MoreOptionsPopper } from "./components";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
 import { ReactComponent as UncheckedIcon } from "./unchecked-icon.svg";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
@@ -40,6 +41,7 @@ const HEADERS: HeadersProp[] = [
   // { align: "center", value: "% Change (24hr / 7day)" },
   { align: "center", value: "Owners" },
   { align: "center", value: "Collection Size" },
+  { align: "center", value: "" },
 ]
 
 const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
@@ -346,8 +348,11 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                     <TableCell align="center" className={classes.numberCell}>
                       {collectionStats.holderCount ?? "-"}
                     </TableCell>
-                    <TableCell align="center" className={cls(classes.numberCell, classes.lastCell)}>
+                    <TableCell align="center" className={cls(classes.numberCell, classes.minWidth)}>
                       {collectionStats.tokenCount ?? "-"}
+                    </TableCell>
+                    <TableCell align="center" className={cls(classes.numberCell, classes.lastCell)}>
+                        <MoreOptionsPopper collectionAddress={collection.address} />
                     </TableCell>
                   </TableRow>
                 )
@@ -465,7 +470,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRight: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid rgba(107, 225, 255, 0.2)",
     borderTopRightRadius: 12,
     borderBottomRightRadius: 12,
-    minWidth: 100,
+    padding: 24
   },
   amount: {
     fontWeight: 800,
@@ -627,5 +632,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.text?.primary,
     // fontSize: 18,
     marginRight: theme.spacing(.5),
-  }
+  },
+  minWidth: {
+      minWidth: 100
+  },
 }));
