@@ -94,11 +94,11 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     if (!search.trim().length) return { filteredCollections, filteredArtist, filteredProfile };
 
     if (searchFilter.collection) {
-      filteredCollections = sorted.filter(c => c.name?.toLowerCase().includes(search));
+      filteredCollections = sorted.filter(c => c.name?.toLowerCase().includes(search.toLowerCase()));
     }
 
     if (searchFilter.artist) {
-      filteredArtist = sorted.filter(c => c.ownerName?.toLowerCase().includes(search));
+      filteredArtist = sorted.filter(c => c.ownerName?.toLowerCase().includes(search.toLowerCase()));
     }
 
     return { filteredCollections, filteredArtist, filteredProfile };
