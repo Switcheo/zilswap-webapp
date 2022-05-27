@@ -4,12 +4,12 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Transaction } from "@zilliqa-js/account";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ArkBidsTable, ArkEventHistoryTable, ArkBreadcrumb, ArkPriceHistoryGraph, ArkTab, ArkOwnerLabel, ArkBox } from "app/components";
+import { ArkBidsTable, ArkEventHistoryTable, ArkBreadcrumb, ArkPriceHistoryGraph, ArkTab, ArkOwnerLabel, ArkBox, ArkReportedBanner } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getMarketplace, getWallet } from "app/saga/selectors";
 import { Nft, Profile } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, tryGetBech32Address, useAsyncTask } from "app/utils";
+import { bnOrZero, REPORT_LEVEL_SUSPICIOUS, REPORT_LEVEL_WARNING, tryGetBech32Address, useAsyncTask } from "app/utils";
 import { ArkClient, waitForTx } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import { actions } from "app/store";
@@ -91,7 +91,14 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
       const address = fromBech32Address(collectionId).toLowerCase()
       const viewerAddress = wallet?.addressInfo.byte20.toLowerCase()
       const { result } = await arkClient.getNftToken(address, tokenId, viewerAddress);
+      //TODO: remove mock data
+      if (collectionId === "zil13fum43ax8qeprt5s9u6wsmrtw2vsvdrdhmvtrm") {
+        result.model.collection.reportLevel = REPORT_LEVEL_WARNING;
+      } else if (collectionId === "zil167flx79fykulp57ykmh9gnf3curcnyux6dcj5e") {
+        result.model.collection.reportLevel = REPORT_LEVEL_SUSPICIOUS;
+      }
       setToken(result.model);
+      
 
       const { model: { owner } } = result
       if (owner && !bypass) {
@@ -122,11 +129,11 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
         <ArkBreadcrumb linkPath={breadcrumbs} />
-
+        { token?.collection?.reportLevel && <ArkReportedBanner collectionAddress={fromBech32Address(collectionId)} reportState={token?.collection?.reportLevel} />}
         {/* Nft image and main info */}
         <Container disableGutters className={classes.imageInfoContainer}>
           <NftImage className={classes.nftImage} token={token} rounded={true} />
-          {token && <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} isCancelling={isCancelling} tokenUpdatedCallback={() => getNFTDetails()} />}
+          {token && <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} isCancelling={isCancelling} tokenUpdatedCallback={() => getNFTDetails()} collectionAddress={collectionId} />}
         </Container>
 
         {/* About info and trait table */}

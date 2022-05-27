@@ -5,14 +5,14 @@ import { toBech32Address } from "@zilliqa-js/crypto";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import cls from "classnames";
-import { ArkBanner, ArkBreadcrumb, ArkNFTListing, ArkFilterBar, Text, ArkSocialLinkGroup } from "app/components";
+import { ArkBanner, ArkBreadcrumb, ArkNFTListing, ArkFilterBar, Text, ArkSocialLinkGroup, ArkReportedBanner } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getMarketplace } from "app/saga/selectors";
 import { actions } from "app/store";
 import { CollectionWithStats } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { bnOrZero, toHumanNumber, truncateAddress } from "app/utils";
-import { ZIL_DECIMALS } from "app/utils/constants";
+import { REPORT_LEVEL_SUSPICIOUS, REPORT_LEVEL_WARNING, ZIL_DECIMALS } from "app/utils/constants";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import { updateFilter } from "app/store/marketplace/actions";
@@ -200,6 +200,13 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         (collection: CollectionWithStats) => collection.address === hexAddress
       );
       if (collection) {
+        //TODO: remove mock data
+        if (toBech32Address(collection.address) === "zil13fum43ax8qeprt5s9u6wsmrtw2vsvdrdhmvtrm") {
+            collection.reportLevel = REPORT_LEVEL_WARNING;
+        } else if (toBech32Address(collection.address) === "zil167flx79fykulp57ykmh9gnf3curcnyux6dcj5e"){
+            collection.reportLevel = REPORT_LEVEL_SUSPICIOUS;
+        }
+
         setCollection(collection);
       } else {
         history.push("/arky/discover");
@@ -236,7 +243,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
         <ArkBreadcrumb linkPath={breadcrumbs} />
-
+          {collection.reportLevel && <ArkReportedBanner collectionAddress={toBech32Address(collection.address)} reportState={collection.reportLevel} />}
         <ArkBanner
           badgeContent={collection.verifiedAt ? <VerifiedBadge className={classes.verifiedBadge} /> : undefined}
           avatarImage={collection.profileImageUrl}
@@ -309,6 +316,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         <ArkNFTListing
           collectionName={collection.name}
           filterComponent={<ArkFilterBar collectionAddress={collection.address} />}
+          reportState={collection.reportLevel}
         />
       </Container>
     </ArkPage>

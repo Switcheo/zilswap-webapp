@@ -1,0 +1,1 @@
+export { default as SmallDialog } from "./SmallDialog";
