@@ -9,7 +9,7 @@ import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getMarketplace, getWallet } from "app/saga/selectors";
 import { Nft, Profile } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, tryGetBech32Address, useAsyncTask } from "app/utils";
+import { bnOrZero, REPORT_LEVEL_SUSPICIOUS, REPORT_LEVEL_WARNING, tryGetBech32Address, useAsyncTask } from "app/utils";
 import { ArkClient, waitForTx } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import { actions } from "app/store";
@@ -91,11 +91,11 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
       const address = fromBech32Address(collectionId).toLowerCase()
       const viewerAddress = wallet?.addressInfo.byte20.toLowerCase()
       const { result } = await arkClient.getNftToken(address, tokenId, viewerAddress);
-      //simulate report level
+      //TODO: remove mock data
       if (collectionId === "zil13fum43ax8qeprt5s9u6wsmrtw2vsvdrdhmvtrm") {
-        result.model.collection.reportLevel = 1;
+        result.model.collection.reportLevel = REPORT_LEVEL_WARNING;
       } else if (collectionId === "zil167flx79fykulp57ykmh9gnf3curcnyux6dcj5e") {
-        result.model.collection.reportLevel = 2;
+        result.model.collection.reportLevel = REPORT_LEVEL_SUSPICIOUS;
       }
       setToken(result.model);
       

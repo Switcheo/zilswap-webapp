@@ -99,9 +99,9 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
     })
   }
 
-  const isCollectionSuspicious = () => {
+  const isCollectionSuspicious = useMemo(() => {
     return token.collection?.reportLevel === REPORT_LEVEL_SUSPICIOUS;
-  }
+  }, [token.collection?.reportLevel]);
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
@@ -112,7 +112,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
             <Typography className={classes.collectionName}>
               {token.collection?.name ?? ""}{" "}
               {token.collection?.reportLevel ? <ReportProblemOutlinedIcon
-                className={cls(classes.verifiedBadge, isCollectionSuspicious() ? classes.suspicious : classes.warning)} />
+                className={cls(classes.verifiedBadge, isCollectionSuspicious ? classes.suspicious : classes.warning)} />
                 : token.collection?.verifiedAt && <VerifiedBadge className={classes.verifiedBadge} />}
             </Typography>
             {<Typography className={classes.tokenId}><span className={classes.hexSymbol}>{token.name?.replace(/#\s*\d+$/i, "")} #</span>{tokenId}</Typography>}
@@ -147,7 +147,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           }
           <Box display="flex" className={cls(classes.buttonBox, { overlap: !!priceInfos.primaryPrice })}>
             {!isOwnToken && (
-              <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onBid} disabled={isCollectionSuspicious()}>
+              <FancyButton containerClass={classes.button} className={classes.bidButton} disableRipple onClick={onBid} disabled={isCollectionSuspicious}>
                 Place Offer
               </FancyButton>
             )}
@@ -162,7 +162,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
               </FancyButton>
             )}
             {!isOwnToken && token.bestAsk && (
-              <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onBuy} disabled={isCollectionSuspicious()}>
+              <FancyButton containerClass={classes.button} className={classes.buyButton} disableRipple onClick={onBuy} disabled={isCollectionSuspicious}>
                 Buy Now
               </FancyButton>
             )}
@@ -356,7 +356,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   warning: {
-    color: "#FFDF6B"
+    color: theme.palette.warning.main
   },
   suspicious: {
     color: "#FF5252"

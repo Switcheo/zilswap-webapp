@@ -54,7 +54,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         },
     },
     warningBanner: {
-        border: "1px solid #FFDF6B",
+        border: `1px solid ${theme.palette.warning.main}`,
         backgroundColor: "rgba(255, 223, 107, 0.2)",
     },
     suspiciousBanner: {
@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         backgroundColor: "rgba(255, 82, 82, 0.2)",
     },
     warning: {
-        color: "#FFDF6B"
+        color: theme.palette.warning.main
     },
     suspicious: {
         color: "#FF5252"

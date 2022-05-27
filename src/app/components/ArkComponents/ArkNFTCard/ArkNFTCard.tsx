@@ -526,13 +526,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: "100%",
   },
   warningRarityBar: {
-    backgroundColor: "#FFDF6B",
+    backgroundColor: theme.palette.warning.main,
   },
   suspiciousRarityBar: {
     backgroundColor: "#FF5252",
   },
   warning: {
-    color: "#FFDF6B",
+    color: theme.palette.warning.main,
   },
   suspicious: {
     color: "#FF5252",

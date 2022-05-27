@@ -111,10 +111,10 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const isSm = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("sm"));
 
   const fullCollections = useMemo(() => {
-    //simulate report level
+    //TODO: remove mock data
     if(collections[0]){
-        collections.filter(c => toBech32Address(c.address) === "zil13fum43ax8qeprt5s9u6wsmrtw2vsvdrdhmvtrm")[0].reportLevel = 1;
-        collections.filter(c => toBech32Address(c.address) === "zil167flx79fykulp57ykmh9gnf3curcnyux6dcj5e")[0].reportLevel = 2;
+        collections.filter(c => toBech32Address(c.address) === "zil13fum43ax8qeprt5s9u6wsmrtw2vsvdrdhmvtrm")[0].reportLevel = REPORT_LEVEL_WARNING;
+        collections.filter(c => toBech32Address(c.address) === "zil167flx79fykulp57ykmh9gnf3curcnyux6dcj5e")[0].reportLevel = REPORT_LEVEL_SUSPICIOUS;
     }
     const sortByVol = collections.sort((a, b) => {
       const volDiff = bnOrZero(b.priceStat?.volume ?? 0).comparedTo(a.priceStat?.volume ?? 0)
@@ -652,7 +652,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       minWidth: 100
   },
   warning: {
-    color: "#FFDF6B"
+    color: theme.palette.warning.main
   },
   suspicious:{
     color: "#FF5252"
