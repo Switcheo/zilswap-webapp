@@ -130,7 +130,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     })
     return sorted
 
-  }, [collections]);
+  }, [collections, network]);
 
   const clearSearch = () => {
     setSearch("");
