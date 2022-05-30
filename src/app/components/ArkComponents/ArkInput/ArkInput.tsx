@@ -67,13 +67,13 @@ const ArkInput: React.FC<Props> = (props: Props) => {
 
   return (
     <Box className={cls(classes.root, className)}>
-      {inline && (<Typography className={cls(classes.label, 'inline')}>
+      {inline && (<Typography id='label' className={cls(classes.label, 'inline')}>
         {label}
       </Typography>)}
       <FormControl fullWidth className={cls({ [classes.removeErrorMargin]: inline && error })}>
         {!inline && (
           <Fragment>
-            {typeof label === "string" ? (<Typography className={classes.label}>{label}</Typography>) : label}
+            {typeof label === "string" ? (<Typography id='label' className={classes.label}>{label}</Typography>) : label}
             {instruction && (
               <FormHelperText id="instruction" className={cls(classes.instruction)}>{instruction}
                 {wordLimit && (<Typography className={cls(classes.wordLimit)}> {value.length || "0"}/{wordLimit}</Typography>)}

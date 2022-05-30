@@ -44,12 +44,11 @@ const SmallDialog: React.FC<Props> = (props: Props) => {
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
         "& .MuiDialogTitle-root": {
-            padding: theme.spacing(3),
-            paddingLeft: theme.spacing(4),
+          padding: theme.spacing(3, 4),
             "& .MuiTypography-root": {
                 fontFamily: "'Raleway', sans-serif",
                 fontWeight: 700,
-                fontSize: "24px",
+                fontSize: "30px",
                 lineHeight: "36px",
             },
             "& .MuiSvgIcon-root": {
@@ -80,7 +79,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
         borderRight: theme.palette.border,
         borderBottom: theme.palette.border,
         borderRadius: "0 0 12px 12px",
-        padding: theme.spacing(0, 3, 2),
+        padding: theme.spacing(0, 4, 4),
         minWidth: 310,
         [theme.breakpoints.up('sm')]: {
             width: 428

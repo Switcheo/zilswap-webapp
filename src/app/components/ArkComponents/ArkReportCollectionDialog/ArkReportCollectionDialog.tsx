@@ -68,6 +68,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
     event: React.MouseEvent<HTMLLIElement, MouseEvent>,
     index: number,
   ) => {
+    onToggleDropdown();
     setSelectedIndex(index);
   };
 
@@ -179,11 +180,11 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     "& .MuiDialogTitle-root": {
-      padding: theme.spacing(3),
+      padding: theme.spacing(3, 4),
       "& .MuiTypography-root": {
         fontFamily: "'Raleway', sans-serif",
         fontWeight: 700,
-        fontSize: "24px",
+        fontSize: "30px",
         lineHeight: "36px",
       },
       "& .MuiSvgIcon-root": {
@@ -214,7 +215,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRight: theme.palette.border,
     borderBottom: theme.palette.border,
     borderRadius: "0 0 12px 12px",
-    padding: theme.spacing(0, 3, 2),
+    padding: theme.spacing(0, 4, 4),
     minWidth: 360,
     [theme.breakpoints.up('sm')]: {
       width: 544
@@ -324,16 +325,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   arkInputMulti: {
     marginTop: 24,
-    "& [class*='label']": {
+    "& #label": {
       fontSize: 16,
       fontWeight: 800,
       textTransform: "uppercase",
     },
     "& textarea": {
-      fontSize: 16,
+      fontSize: '16px !important',
       height: '86px !important'
     },
-    "& [class*='instruction']": {
+    "& #instruction": {
       fontWeight: 700
     }
   },
