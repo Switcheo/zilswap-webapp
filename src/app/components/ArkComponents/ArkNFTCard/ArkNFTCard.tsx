@@ -10,7 +10,6 @@ import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
 import { Network } from "zilswap-sdk/lib/constants";
-import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 import { ArkOwnerLabel, ArkImageView, ZapWidget, CurrencyLogo, ArkSocialShareDialog, ArkReportCollectionDialog } from "app/components";
 import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
@@ -21,6 +20,7 @@ import { bnOrZero, REPORT_LEVEL_SUSPICIOUS, toHumanNumber, useAsyncTask, useBloc
 import { ArkClient } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { toBech32Address } from "core/zilswap";
+import { ReactComponent as WarningIcon } from "app/assets/icons/warning.svg";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 
 export interface Props extends CardProps {
@@ -220,7 +220,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   {/* to truncate if too long? */}
                   <Typography className={cls(classes.title, classes.overflowWrap)}>
                     {token.name}
-                    {token.collection.reportLevel ? <ReportProblemOutlinedIcon
+                    {token.collection.reportLevel ? <WarningIcon
                         className={cls(classes.icon, token.collection.reportLevel === REPORT_LEVEL_SUSPICIOUS ? classes.suspicious : classes.warning)} />
                     : token.collection.verifiedAt && (<VerifiedBadge className={classes.icon} />)}
                   </Typography>
@@ -286,7 +286,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                 >
                   <Typography className={classes.dialogBody}>
                     {token.name}
-                    {token.collection.reportLevel ? <ReportProblemOutlinedIcon
+                    {token.collection.reportLevel ? <WarningIcon
                         className={cls(classes.icon, token.collection.reportLevel === REPORT_LEVEL_SUSPICIOUS ? classes.suspicious : classes.warning)} />
                     : token.collection.verifiedAt && (<VerifiedBadge className={classes.icon} />)}
                   </Typography>
@@ -532,10 +532,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: "#FF5252",
   },
   warning: {
-    color: theme.palette.warning.main,
+    "& path": {
+      stroke: theme.palette.warning.main
+    }
   },
-  suspicious: {
-    color: "#FF5252",
+  suspicious:{
+    "& path": {
+      stroke:  "#FF5252"
+    }
   },
   link: {
     color: theme.palette.text?.secondary,

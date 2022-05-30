@@ -2,8 +2,8 @@ import React from "react";
 import { Box, Typography, Link, BoxProps } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
-import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 import { AppTheme } from "app/theme/types";
+import { ReactComponent as WarningIcon } from "app/assets/icons/warning.svg";
 
 interface Props extends Partial<BoxProps> {
     collectionAddress: string;
@@ -27,7 +27,7 @@ const ArkReportedBanner: React.FC<Props> = (props: Props) => {
     return (
         <Box className={cls(classes.bannerContainer,
             reportState === 1 ? classes.warningBanner : classes.suspiciousBanner)}>
-            <ReportProblemOutlinedIcon className={reportState === 1 ? classes.warning : classes.suspicious} />
+            <WarningIcon className={reportState === 1 ? classes.warningIcon : classes.suspiciousIcon} />
             {generateLabel()}
         </Box>
     );
@@ -66,7 +66,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     suspicious: {
         color: "#FF5252"
-    }
+    },
+    warningIcon: {
+      "& path": {
+        stroke: theme.palette.warning.main
+      }
+    },
+    suspiciousIcon:{
+      "& path": {
+        stroke:  "#FF5252"
+      }
+    },
 }));
 
 export default ArkReportedBanner;

@@ -2,13 +2,11 @@ import React, { useMemo, useState } from "react";
 import { Box, BoxProps, Typography, IconButton } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ReplayIcon from '@material-ui/icons/Replay';
-import FlagIcon from '@material-ui/icons/Flag';
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { darken } from '@material-ui/core/styles';
-import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 import { ArkBox, FancyButton, ZapWidget, ArkReportCollectionDialog } from "app/components";
 import { getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
@@ -16,6 +14,8 @@ import { Nft } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { useAsyncTask, useBlockTime, useNetwork, useToaster, REPORT_LEVEL_SUSPICIOUS } from "app/utils";
 import { ArkClient } from "core/utilities";
+import { ReactComponent as WarningIcon } from "app/assets/icons/warning.svg";
+import { ReactComponent as FlagIcon } from "app/assets/icons/flag.svg";
 import { ReactComponent as VerifiedBadge } from "../assets/verified-badge.svg";
 import { InfoBox, PrimaryPrice, SecondaryPrice } from "./components";
 import { PriceInfo, PriceType } from "./types";
@@ -111,7 +111,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           <Box>
             <Typography className={classes.collectionName}>
               {token.collection?.name ?? ""}{" "}
-              {token.collection?.reportLevel ? <ReportProblemOutlinedIcon
+              {token.collection?.reportLevel ? <WarningIcon
                 className={cls(classes.verifiedBadge, isCollectionSuspicious ? classes.suspicious : classes.warning)} />
                 : token.collection?.verifiedAt && <VerifiedBadge className={classes.verifiedBadge} />}
             </Typography>
@@ -356,11 +356,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   warning: {
-    color: theme.palette.warning.main
+    "& path": {
+      stroke: theme.palette.warning.main
+    }
   },
-  suspicious: {
-    color: "#FF5252"
-  }
+  suspicious:{
+    "& path": {
+      stroke:  "#FF5252"
+    }
+  },
 }));
 
 export default SalesDetail;

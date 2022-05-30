@@ -11,7 +11,6 @@ import { toBech32Address } from "@zilliqa-js/crypto";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
-import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 import { ArkImageView, CurrencyLogo, Text } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
@@ -20,6 +19,7 @@ import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
 import { bnOrZero, hexToRGBA, useAsyncTask } from "app/utils";
 import { REPORT_LEVEL_WARNING, REPORT_LEVEL_SUSPICIOUS } from "app/utils/constants";
+import { ReactComponent as WarningIcon } from "app/assets/icons/warning.svg";
 import { MoreOptionsPopper } from "./components";
 import { ReactComponent as CheckedIcon } from "./checked-icon.svg";
 import { ReactComponent as UncheckedIcon } from "./unchecked-icon.svg";
@@ -325,7 +325,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                         <Box className={classes.collectionNameContainer}>
                             <Box display="flex" alignItems="center">
                                 <Box className={classes.collectionName}>{collection.name}</Box>
-                                {collection.reportLevel ? <ReportProblemOutlinedIcon
+                                {collection.reportLevel ? <WarningIcon
                                     className={cls(classes.icon, collection.reportLevel === REPORT_LEVEL_WARNING ? classes.warning : classes.suspicious)} />
                                     : collection.verifiedAt && (<VerifiedBadge className={classes.icon} />)}
                             </Box>
@@ -653,9 +653,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       minWidth: 100
   },
   warning: {
-    color: theme.palette.warning.main
+    "& path": {
+      stroke: theme.palette.warning.main
+    }
   },
   suspicious:{
-    color: "#FF5252"
+    "& path": {
+      stroke:  "#FF5252"
+    }
   }
 }));
