@@ -48,11 +48,11 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
   const OTHER_REASONS_INDEX = 4;
 
   const REPORT_REASONS = [
-    { reason: 'Fake, Scam or Copied Collection', icon: <HighlightOffIcon></HighlightOffIcon> },
-    { reason: 'Copyright Infringement', icon: <CopyrightIcon></CopyrightIcon> },
-    { reason: 'Violence, Hate-Speech or Illegal Content', icon: <ViolenceIcon></ViolenceIcon> },
-    { reason: 'I don\'t like it', icon: <HighlightOffIcon></HighlightOffIcon> },
-    { reason: 'Other reasons', icon: <OtherReasonsIcon></OtherReasonsIcon> }];
+    { reason: 'Fake, Scam or Copied Collection', icon: <HighlightOffIcon /> },
+    { reason: 'Copyright Infringement', icon: <CopyrightIcon /> },
+    { reason: 'Violence, Hate-Speech or Illegal Content', icon: <ViolenceIcon /> },
+    { reason: 'I don\'t like it', icon: <HighlightOffIcon /> },
+    { reason: 'Other reasons', icon: <OtherReasonsIcon /> }];
 
   const ADDITIONAL_TEXT_LABELS = [
     { reasonIndex: FAKE_SCAM_INDEX, label: 'The Original Collection is', instruction: 'What was this collection called? Add links or contract addresses.', placeholder: 'The Bear Market. http://thebear.market' },
@@ -126,7 +126,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
           <Typography className={classes.label}>Reason for Reporting</Typography>
           <Button fullWidth onClick={onToggleDropdown}
             className={cls(classes.dropdownButton, active ? classes.active : classes.inactive)}>
-            <Box display="flex" flexDirection="row" flexGrow={1} alignItems="centre">
+            <Box className={classes.selectBox}>
               {selectedIndex !== -1 && REPORT_REASONS[selectedIndex].icon}
               <Typography className={classes.selectValue}>
                 {selectedIndex === -1 ? 'SELECT' : REPORT_REASONS[selectedIndex].reason}
@@ -283,6 +283,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginBottom: 4,
     textAlign: 'left',
   },
+  selectBox: {
+    placeItems: "center",
+    alignItems: "center",
+    display: "flex",
+    flexDirection: "row",
+    flexGrow: 1,
+  },
   dropdownContainer: {
     marginTop: 8,
     paddingBottom: "5px",
@@ -296,6 +303,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   listItemRow: {
     "&:hover": {
       backgroundColor: theme.palette.type === "dark" ? "#4E5A60" : "#A9CCC1",
+      cursor: "pointer"
     },
   },
   button: {

@@ -111,9 +111,8 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           <Box>
             <Typography className={classes.collectionName}>
               {token.collection?.name ?? ""}{" "}
-              {token.collection?.reportLevel ? <WarningIcon
-                className={cls(classes.verifiedBadge, isCollectionSuspicious ? classes.suspicious : classes.warning)} />
-                : token.collection?.verifiedAt && <VerifiedBadge className={classes.verifiedBadge} />}
+              {token.collection?.reportLevel ? <WarningIcon className={cls(classes.verifiedBadge, isCollectionSuspicious ? classes.suspicious : classes.warning)} />
+              : token.collection?.verifiedAt && <VerifiedBadge className={classes.verifiedBadge} />}
             </Typography>
             {<Typography className={classes.tokenId}><span className={classes.hexSymbol}>{token.name?.replace(/#\s*\d+$/i, "")} #</span>{tokenId}</Typography>}
           </Box>
