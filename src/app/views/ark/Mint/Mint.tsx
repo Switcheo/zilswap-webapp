@@ -258,6 +258,7 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
 
         bannerImageUrl: "",
         profileImageUrl: "",
+        reportLevel: null,
 
         ownerName: inputValues.artistName,
         royaltyBps: parseFloat(inputValues.royalties) * 100,

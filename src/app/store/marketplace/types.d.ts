@@ -109,7 +109,7 @@ export interface Collection {
   instagramUrl: string | null;
   bannerImageUrl: string | null;
   profileImageUrl: string | null;
-  reportLevel?: number | null;
+  reportLevel: number | null;
 
   ownerName: string | null;
   royaltyBps: number | null;
