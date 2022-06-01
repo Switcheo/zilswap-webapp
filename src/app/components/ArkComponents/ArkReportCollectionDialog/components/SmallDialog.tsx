@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  DialogProps, DialogContent, Typography
+  DialogProps, DialogContent, Typography, Box
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
@@ -31,7 +31,7 @@ const SmallDialog: React.FC<Props> = (props: Props) => {
           <Typography className={cls(classes.subHeader,
             details ? classes.bottomMargin : classes.largerBottomMargin)}>{subHeader}
           </Typography>}
-        {details && <Typography className={classes.details}>{details}</Typography>}
+        {details && <Box className={classes.details}>{details}</Box>}
         <FancyButton color="primary" variant="contained" className={classes.button}
           onClick={onConfirm} walletRequired={walletRequired}>
           {buttonLabel}
@@ -109,6 +109,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     margin: "0 auto 24px auto",
     fontFamily: 'Avenir Next',
     fontSize: 16,
+    fontWeight: 600,
     color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
     textAlign: 'center',
     lineHeight: "19.65px",

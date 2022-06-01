@@ -16,7 +16,7 @@ import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { MarketPlaceState, OAuth, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, REPORT_LEVEL_SUSPICIOUS, toHumanNumber, useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
+import { bnOrZero, REPORT_LEVEL_SUSPICIOUS, REPORT_LEVEL_DEFAULT, toHumanNumber, useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { toBech32Address } from "core/zilswap";
@@ -137,7 +137,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   }
 
   const generateRarityBar = () => {
-    return reportState !== undefined ? (
+    return reportState && reportState !== REPORT_LEVEL_DEFAULT ? (
         <Box className={cls(classes.rarityBackground,
             reportState === REPORT_LEVEL_SUSPICIOUS ? classes.suspiciousRarityBackground : classes.warningRarityBackground)}>
             <Box className={cls(classes.rarityBar,
