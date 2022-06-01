@@ -168,7 +168,7 @@ const SalesDetail: React.FC<Props> = (props: Props) => {
           </Box>
         </Box>
       </Box>
-      <ArkReportCollectionDialog open={openReportDialog} onCloseDialog={() => setOpenReportDialog(false)} tokenId={token.tokenId} collectionAddress={collectionAddress}/>
+      <ArkReportCollectionDialog open={openReportDialog} onCloseDialog={() => setOpenReportDialog(false)} tokenId={token.tokenId} collectionAddress={token.collection.address}/>
     </Box>
   );
 };

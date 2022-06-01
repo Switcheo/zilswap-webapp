@@ -4,7 +4,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { ArkReportCollectionDialog } from "app/components";
 import { Collection } from "app/store/types";
-import { toBech32Address } from "core/zilswap";
 import { ReactComponent as FlagIcon } from "app/assets/icons/flag.svg";
 import { ReactComponent as DiscordIcon } from "./social-icons/discord.svg";
 import { ReactComponent as GlobeIcon } from "./social-icons/globe.svg";
@@ -93,7 +92,7 @@ const ArkSocialLinkGroup: React.FC<Props> = (props: Props) => {
                 onClick={() => { setOpenReportDialog(true); }}>
                 <FlagIcon />
             </IconButton>
-            <ArkReportCollectionDialog open={openReportDialog} onCloseDialog={() => setOpenReportDialog(false)} collectionAddress={toBech32Address(collection.address)} />
+            <ArkReportCollectionDialog open={openReportDialog} onCloseDialog={() => setOpenReportDialog(false)} collectionAddress={collection.address} />
         </Fragment>
       )}
     </Box>

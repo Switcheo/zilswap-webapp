@@ -346,7 +346,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
         </CardContent >
       </Box >
       <ArkSocialShareDialog open={openShareDialog} onCloseDialog={() => setOpenShareDialog(false)} tokenId={token.tokenId} collectionAddress={toBech32Address(collectionAddress)} />
-      <ArkReportCollectionDialog open={openReportDialog} onCloseDialog={() => setOpenReportDialog(false)} tokenId={token.tokenId} collectionAddress={toBech32Address(collectionAddress)} />
+      <ArkReportCollectionDialog open={openReportDialog} onCloseDialog={() => setOpenReportDialog(false)} tokenId={token.tokenId} collectionAddress={collectionAddress} />
     </Card >
   );
 };
