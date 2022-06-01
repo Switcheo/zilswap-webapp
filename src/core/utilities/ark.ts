@@ -43,6 +43,7 @@ const apiPaths = {
   "collection/token/detail": "/nft/collection/:address/:tokenId/detail",
   "collection/token/history": "/nft/collection/:address/:tokenId/history",
   "collection/resync/metadata": "/nft/collection/:collectionAddress/:tokenId/resync",
+  "collection/report": "/nft/collection/:address/report",
   "collection/image/request": "/admin/collection/:address/upload/request",
   "collection/update": "/admin/collection/:address/update",
   "token/favourite": "/nft/collection/:address/:tokenId/favourite",
@@ -350,6 +351,15 @@ export class ArkClient {
     const headers = { "authorization": "Bearer " + access_token };
     const url = this.http.path("mint/deploy");
     const result = await this.http.post({ url, data, headers });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  postCollectionReport = async (address: string, tokenId: number | undefined, reason: string, details: string, access_token: string) => {
+    const headers = { "authorization": "Bearer " + access_token };
+    const url = this.http.path("collection/report", { address }, { tokenId } );
+    const result = await this.http.post({ url, headers, data: { reason, details } });
     const output = await result.json();
     await this.checkError(output);
     return output;

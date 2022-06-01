@@ -3,7 +3,7 @@ import {
   Box, Button, DialogProps, DialogContent, ClickAwayListener, Typography,
   List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction, Link
 } from "@material-ui/core";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useHistory } from "react-router-dom";
@@ -11,8 +11,12 @@ import { ArrowDropDownRounded, ArrowDropUpRounded } from "@material-ui/icons";
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import CopyrightIcon from '@material-ui/icons/Copyright';
 import CheckIcon from '@material-ui/icons/Check';
-import { getWallet } from "app/saga/selectors";
+import dayjs from "dayjs";
+import { getWallet, getBlockchain } from "app/saga/selectors";
+import { actions } from "app/store";
+import { MarketPlaceState, OAuth } from "app/store/types";
 import { hexToRGBA } from "app/utils";
+import { ArkClient } from "core/utilities";
 import { DialogModal, FancyButton, ArkInput } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { RootState } from "app/store/types";
@@ -28,10 +32,14 @@ interface Props extends Partial<DialogProps> {
 }
 
 const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
-  const { className, collectionAddress, open, onCloseDialog, header = "Report Collection" } = props;
+  const { className, collectionAddress, tokenId, open, onCloseDialog, header = "Report Collection" } = props;
   const classes = useStyles();
   const history = useHistory();
+  const { oAuth } = useSelector<RootState, MarketPlaceState>((state) => state.marketplace);
   const { wallet } = useSelector(getWallet);
+  const { network } = useSelector(getBlockchain);
+  const dispatch = useDispatch();
+
   const [active, setActive] = useState<boolean>(false);
   const [openFeedbackReceived, setOpenFeedbackReceived] = useState<boolean>(false);
   const [openReportSubmitted, setOpenReportSubmitted] = useState<boolean>(false);
@@ -48,11 +56,11 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
   const OTHER_REASONS_INDEX = 4;
 
   const REPORT_REASONS = [
-    { reason: 'Fake, Scam or Copied Collection', icon: <HighlightOffIcon /> },
-    { reason: 'Copyright Infringement', icon: <CopyrightIcon /> },
-    { reason: 'Violence, Hate-Speech or Illegal Content', icon: <ViolenceIcon /> },
-    { reason: 'I don\'t like it', icon: <HighlightOffIcon /> },
-    { reason: 'Other reasons', icon: <OtherReasonsIcon /> }];
+    { reason: 'Fake, Scam or Copied Collection', type: 'fake', icon: <HighlightOffIcon /> },
+    { reason: 'Copyright Infringement', type: 'copyright', icon: <CopyrightIcon /> },
+    { reason: 'Violence, Hate-Speech or Illegal Content', type: 'violence-legal', icon: <ViolenceIcon /> },
+    { reason: 'I don\'t like it', type: 'user-dont-like', icon: <HighlightOffIcon /> },
+    { reason: 'Other reasons', type: 'other', icon: <OtherReasonsIcon /> }];
 
   const ADDITIONAL_TEXT_LABELS = [
     { reasonIndex: FAKE_SCAM_INDEX, label: 'The Original Collection is', instruction: 'What was this collection called? Add links or contract addresses.', placeholder: 'The Bear Market. http://thebear.market' },
@@ -100,8 +108,25 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
     }
   }
 
-  const onConfirm = () => {
+  const resetDialog = () => {
     onCloseDialog();
+    setSelectedIndex(-1);
+    setDetails("");
+  }
+
+  const onConfirm = async () => {
+    const arkClient = new ArkClient(network);
+    let newOAuth: OAuth | undefined = oAuth;
+
+    if (!newOAuth?.access_token || (newOAuth?.expires_at && dayjs(newOAuth.expires_at * 1000).isBefore(dayjs()))) {
+      const { result } = await arkClient.arkLogin(wallet!, window.location.hostname);
+      dispatch(actions.MarketPlace.updateAccessToken(result));
+      newOAuth = result;
+    }
+
+    await arkClient.postCollectionReport(collectionAddress, tokenId, REPORT_REASONS[selectedIndex].type, details, newOAuth!.access_token);
+
+    await resetDialog();
     if (selectedIndex === DISLIKE_INDEX) {
       setOpenFeedbackReceived(true);
     } else {
