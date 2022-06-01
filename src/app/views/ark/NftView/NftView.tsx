@@ -129,7 +129,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
         <ArkBreadcrumb linkPath={breadcrumbs} />
-        { token?.collection?.reportLevel && <ArkReportedBanner collectionAddress={fromBech32Address(collectionId)} reportState={token?.collection?.reportLevel} />}
+        { token?.collection?.reportLevel ? <ArkReportedBanner collectionAddress={fromBech32Address(collectionId)} reportState={token?.collection?.reportLevel} /> : undefined}
         {/* Nft image and main info */}
         <Container disableGutters className={classes.imageInfoContainer}>
           <NftImage className={classes.nftImage} token={token} rounded={true} />
