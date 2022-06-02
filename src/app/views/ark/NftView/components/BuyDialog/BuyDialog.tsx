@@ -295,7 +295,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
           )}
         </Box>
 
-        {token.collection.reportLevel && <ArkReportedBanner collectionAddress={collectionAddress} reportState={token.collection.reportLevel} />}
+        {token.collection.reportLevel && <ArkReportedBanner collectionAddress={collectionAddress} reportState={token.collection.reportLevel} isOnDialog={true} />}
 
         {!(completePending || completedPurchase) && (
           <Fragment>
