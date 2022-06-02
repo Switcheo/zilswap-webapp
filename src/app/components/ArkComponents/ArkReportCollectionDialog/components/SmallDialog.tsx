@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiDialogTitle-root": {
       padding: theme.spacing(3, 4),
       color: theme.palette.type === "dark" ? theme.palette.primary.contrastText : theme.palette.primary.main,
-      backgroundColor: theme.palette.type === "dark" ? theme.palette.background.default : "#FFFFFF",
+      backgroundColor: theme.palette.background.default,
       "& .MuiTypography-root": {
         fontFamily: "'Raleway', sans-serif",
         fontWeight: 700,

@@ -58,7 +58,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
   const OTHER_REASONS_INDEX = 4;
 
   const REPORT_REASONS = [
-    { reason: 'Fake, Scam or Copied Collection', type: 'test', icon: <HighlightOffIcon /> },
+    { reason: 'Fake, Scam or Copied Collection', type: 'fake', icon: <HighlightOffIcon /> },
     { reason: 'Copyright Infringement', type: 'copyright', icon: <CopyrightIcon /> },
     { reason: 'Violence, Hate-Speech or Illegal Content', type: 'violence-legal', icon: <ViolenceIcon /> },
     { reason: 'I don\'t like it', type: 'user-dont-like', icon: <HighlightOffIcon /> },
@@ -204,7 +204,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
         header="Feedback Received" subHeader="Thanks for your feedback!"
         buttonLabel="Back to Collection" walletRequired={false} onConfirm={onBackToCollection}
         details={<Typography>However, this is not a valid reason to report a collection.
-          Check out the community <Link href="https://discord.gg/zilswap">Discord</Link> if you would like to voice other concerns.</Typography>} />
+          Check out the community <Link target="_blank" href="https://discord.gg/zilswap">Discord</Link> if you would like to voice other concerns.</Typography>} />
     </Fragment> :
     <SmallDialog open={!!open} onCloseDialog={onCloseDialog}
       header="Connect Wallet" subHeader="Please connect wallet to submit your report."
@@ -220,7 +220,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .MuiDialogTitle-root": {
       padding: theme.spacing(3, 4),
       color: theme.palette.type === "dark" ? theme.palette.primary.contrastText : theme.palette.primary.main,
-      backgroundColor: theme.palette.type === "dark" ? theme.palette.background.default : "#FFFFFF",
+      backgroundColor: theme.palette.background.default,
       "& .MuiTypography-root": {
         fontFamily: "'Raleway', sans-serif",
         fontWeight: 700,
@@ -246,7 +246,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     position: "relative",
   },
   dialogContent: {
-    backgroundColor: theme.palette.type === "dark" ? theme.palette.background.default : "#FFFFFF",
+    backgroundColor: theme.palette.background.default,
     borderLeft: theme.palette.border,
     borderRight: theme.palette.border,
     borderBottom: theme.palette.border,
@@ -304,7 +304,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   selectValue: {
     fontSize: 16,
     fontFamily: "'Raleway', sans-serif",
-    color: theme.palette.type === "dark" ? theme.palette.text!.primary : "#00334099",
+    color: theme.palette.type === "dark" ? theme.palette.text!.primary : theme.palette.primary.main,
     fontWeight: 700,
     textTransform: 'uppercase',
     marginTop: 4,
@@ -317,11 +317,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     flexDirection: "row",
     flexGrow: 1,
+    "& svg": {
+      color: theme.palette.type === "dark" ? "#DEFFFF80" : theme.palette.primary.main
+    }
   },
   dropdownContainer: {
     marginTop: 8,
     paddingBottom: "5px",
-    backgroundColor: theme.palette.type === "dark" ? "#223139" : "#FFFFFF",
+    backgroundColor: theme.palette.type === "dark" ? "#223139" : theme.palette.background.default,
     width: '100%',
     borderRadius: 12,
     border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #00D895",
@@ -346,7 +349,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       minHeight: 24
     },
     "&:disabled": {
-      backgroundColor: theme.palette.type === "dark" ? theme.palette.primary.main : "#0033401A",
+      backgroundColor: theme.palette.type === "dark" ? theme.palette.primary.main : "#E5EBEC",
       color: theme.palette.type === "dark" ? theme.palette.primary.light : "#00334099"
     },
     "&:hover": {
@@ -380,7 +383,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
     "& .MuiInputBase-root": {
       border: theme.palette.type === "dark" ? theme.palette.border : "1px solid #00334033",
-      backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"
+      backgroundColor: theme.palette.background.default
     },
     "& textarea": {
       fontSize: '16px !important',

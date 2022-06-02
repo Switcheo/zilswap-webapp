@@ -8,20 +8,21 @@ import { ReactComponent as WarningIcon } from "app/assets/icons/warning.svg";
 interface Props extends Partial<BoxProps> {
   collectionAddress: string;
   reportState: number | null | undefined;
+  isOnDialog?: boolean | null;
 }
 
 const ArkReportedBanner: React.FC<Props> = (props: Props) => {
-  const { reportState } = props;
+  const { className, reportState, isOnDialog } = props;
   const classes = useStyles();
 
   const link = "https://docs.zilswap.io/arky/report";
 
   const generateLabel = () => {
     return reportState === 1 ? (
-      <Typography className={classes.warning}>This collection was reported for
+      <Typography className={cls(classes.warning, (isOnDialog ? classes.smallerBannerWidth : className))}>This collection was reported for
         suspicious activity. <Link href={link} target="_blank">Learn More</Link></Typography>
     ) : (
-      <Typography className={classes.suspicious}>This collection was reported for
+      <Typography className={cls(classes.suspicious, (isOnDialog ? classes.smallerBannerWidth : className))}>This collection was reported for
         suspicious activity and cannot be traded on ARKY. <Link href={link} target="_blank">What happens next?</Link></Typography>
     )
   }
@@ -29,7 +30,7 @@ const ArkReportedBanner: React.FC<Props> = (props: Props) => {
   return (
     <Box className={cls(classes.bannerContainer,
       reportState === 1 ? classes.warningBanner : classes.suspiciousBanner)}>
-      <WarningIcon className={reportState === 1 ? classes.warningIcon : classes.suspiciousIcon} />
+      <WarningIcon className={cls(classes.icon, (reportState === 1 ? classes.warningIcon : classes.suspiciousIcon))} />
       {generateLabel()}
     </Box>
   );
@@ -38,7 +39,7 @@ const ArkReportedBanner: React.FC<Props> = (props: Props) => {
 const useStyles = makeStyles((theme: AppTheme) => ({
   bannerContainer: {
     width: "100%",
-    padding: theme.spacing(1.5),
+    padding: "16px 24px",
     marginTop: 24,
     marginBottom: 24,
     borderRadius: 12,
@@ -48,7 +49,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& p": {
       fontSize: 14,
       lineHeight: "17.2px",
-      marginLeft: 10,
+      marginLeft: 8,
       "& a": {
         textDecoration: "underline",
         color: "inherit"
@@ -69,12 +70,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   suspicious: {
     color: "#FF5252"
   },
+  icon: {
+    minWidth: '24px !important'
+  },
   warningIcon: {
     color: theme.palette.warning.light
   },
   suspiciousIcon: {
     color: "#FF5252"
   },
+  smallerBannerWidth: {
+    minWidth: "284px"
+  }
 }));
 
 export default ArkReportedBanner;

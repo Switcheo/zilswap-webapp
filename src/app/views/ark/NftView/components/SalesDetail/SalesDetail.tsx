@@ -253,10 +253,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       marginBottom: theme.spacing(1),
     },
     "&:disabled": {
-        backgroundColor: "rgba(0, 51, 64, 1)",
-        "& .MuiButton-label": {
-            color: "rgba(222, 255, 255, 0.5)"
-        }
+      backgroundColor: theme.palette.type === "dark" ? theme.palette.primary.main : "#E5EBEC",
+      "& .MuiButton-label": {
+        color: theme.palette.type === "dark" ? theme.palette.primary.light : "#00334099"
+      }
     }
   },
   buyButton: {
@@ -279,10 +279,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       marginBottom: theme.spacing(1),
     },
     "&:disabled": {
-        backgroundColor: "rgba(0, 51, 64, 1)",
-        borderColor: "rgba(0, 51, 64, 1)",
+        backgroundColor: theme.palette.type === "dark" ? theme.palette.primary.main : "#E5EBEC",
+        borderColor: theme.palette.type === "dark" ? theme.palette.primary.main : "transparent",
         "& .MuiButton-label": {
-            color: "rgba(222, 255, 255, 0.5)"
+          color: theme.palette.type === "dark" ? theme.palette.primary.light : "#00334099"
         }
     }
   },
