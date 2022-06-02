@@ -43,6 +43,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
   const [active, setActive] = useState<boolean>(false);
   const [openFeedbackReceived, setOpenFeedbackReceived] = useState<boolean>(false);
   const [openReportSubmitted, setOpenReportSubmitted] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [details, setDetails] = useState<string>("");
   const showWalletDialog = useSelector<RootState, boolean>(
@@ -110,11 +111,13 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
 
   const resetDialog = () => {
     onCloseDialog();
+    setLoading(false);
     setSelectedIndex(-1);
     setDetails("");
   }
 
   const onConfirm = async () => {
+    setLoading(true);
     const arkClient = new ArkClient(network);
     let newOAuth: OAuth | undefined = oAuth;
 
@@ -127,6 +130,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
     await arkClient.postCollectionReport(collectionAddress, tokenId, REPORT_REASONS[selectedIndex].type, details, newOAuth!.access_token);
 
     await resetDialog();
+
     if (selectedIndex === DISLIKE_INDEX) {
       setOpenFeedbackReceived(true);
     } else {
@@ -135,6 +139,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
   }
 
   const onBackToDiscover = () => {
+    setOpenReportSubmitted(false);
     history.push(`/arky/discover`);
   }
 
@@ -179,7 +184,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
             </Box>
           </ClickAwayListener>}
           {isAdditionalInputRequired() && generateAdditionalInput()}
-          <FancyButton disabled={isInputsValid()} color="primary" variant="contained" className={classes.button} onClick={onConfirm}>
+          <FancyButton loading={loading} disabled={isInputsValid()} color="primary" variant="contained" className={classes.button} onClick={onConfirm}>
             Report
           </FancyButton>
         </DialogContent>

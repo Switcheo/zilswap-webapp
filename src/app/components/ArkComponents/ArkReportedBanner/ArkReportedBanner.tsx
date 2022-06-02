@@ -14,13 +14,15 @@ const ArkReportedBanner: React.FC<Props> = (props: Props) => {
   const { reportState } = props;
   const classes = useStyles();
 
+  const link = "https://docs.zilswap.io/arky/report";
+
   const generateLabel = () => {
     return reportState === 1 ? (
       <Typography className={classes.warning}>This collection was reported for
-        suspicious activity. <Link href="#">Learn More</Link></Typography>
+        suspicious activity. <Link href={link}>Learn More</Link></Typography>
     ) : (
       <Typography className={classes.suspicious}>This collection was reported for
-        suspicious activity and cannot be traded on ARKY. <Link href="#">What happens next?</Link></Typography>
+        suspicious activity and cannot be traded on ARKY. <Link href={link}>What happens next?</Link></Typography>
     )
   }
 
