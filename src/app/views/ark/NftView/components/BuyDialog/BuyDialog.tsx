@@ -10,7 +10,7 @@ import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
 import { useHistory } from "react-router-dom";
-import { CurrencyLogo, DialogModal, FancyButton, Text, ArkNFTCard } from "app/components";
+import { CurrencyLogo, DialogModal, FancyButton, Text, ArkNFTCard, ArkReportedBanner } from "app/components";
 import { getBlockchain, getMarketplace, getTokens, getTransactions, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
@@ -294,6 +294,8 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
             </Box>
           )}
         </Box>
+
+        {token.collection.reportLevel && <ArkReportedBanner collectionAddress={collectionAddress} reportState={token.collection.reportLevel} />}
 
         {!(completePending || completedPurchase) && (
           <Fragment>

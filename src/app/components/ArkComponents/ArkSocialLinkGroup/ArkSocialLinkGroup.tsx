@@ -1,8 +1,10 @@
-import React from "react";
+import React, { Fragment, useState } from "react";
 import { Box, BoxProps, IconButton } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
+import { ArkReportCollectionDialog } from "app/components";
 import { Collection } from "app/store/types";
+import { ReactComponent as FlagIcon } from "app/assets/icons/flag.svg";
 import { ReactComponent as DiscordIcon } from "./social-icons/discord.svg";
 import { ReactComponent as GlobeIcon } from "./social-icons/globe.svg";
 import { ReactComponent as TelegramIcon } from "./social-icons/telegram.svg";
@@ -27,6 +29,12 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.primary,
     opacity: 0.5,
   },
+  flagIcon: {
+    "& span svg": {
+      fontSize: "1.35rem",
+      margin: "-2.8px"
+    }
+  }
 }));
 
 interface Props extends BoxProps {
@@ -37,6 +45,7 @@ interface Props extends BoxProps {
 const ArkSocialLinkGroup: React.FC<Props> = (props: Props) => {
   const { children, className, collection, ...rest } = props;
   const classes = useStyles();
+  const [openReportDialog, setOpenReportDialog] = useState(false);
 
   return (
     <Box {...rest} className={cls(classes.root, className)}>
@@ -75,6 +84,16 @@ const ArkSocialLinkGroup: React.FC<Props> = (props: Props) => {
         >
           <GlobeIcon />
         </IconButton>
+      )}
+      {collection?.address && (
+        <Fragment>
+          <IconButton
+            className={cls(classes.icon, classes.flagIcon)}
+            onClick={() => { setOpenReportDialog(true); }}>
+            <FlagIcon />
+          </IconButton>
+          <ArkReportCollectionDialog open={openReportDialog} onCloseDialog={() => setOpenReportDialog(false)} collectionAddress={collection.address} />
+        </Fragment>
       )}
     </Box>
   );

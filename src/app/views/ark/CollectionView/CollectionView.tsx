@@ -5,7 +5,7 @@ import { toBech32Address } from "@zilliqa-js/crypto";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import cls from "classnames";
-import { ArkBanner, ArkBreadcrumb, ArkNFTListing, ArkFilterBar, Text, ArkSocialLinkGroup } from "app/components";
+import { ArkBanner, ArkBreadcrumb, ArkNFTListing, ArkFilterBar, Text, ArkSocialLinkGroup, ArkReportedBanner } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getMarketplace } from "app/saga/selectors";
 import { actions } from "app/store";
@@ -236,7 +236,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
         <ArkBreadcrumb linkPath={breadcrumbs} />
-
+          { collection.reportLevel ? <ArkReportedBanner collectionAddress={toBech32Address(collection.address)} reportState={collection.reportLevel} /> : undefined}
         <ArkBanner
           badgeContent={collection.verifiedAt ? <VerifiedBadge className={classes.verifiedBadge} /> : undefined}
           avatarImage={collection.profileImageUrl}
@@ -309,6 +309,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
         <ArkNFTListing
           collectionName={collection.name}
           filterComponent={<ArkFilterBar collectionAddress={collection.address} />}
+          reportState={collection.reportLevel}
         />
       </Container>
     </ArkPage>

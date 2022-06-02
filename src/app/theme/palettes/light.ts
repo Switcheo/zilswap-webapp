@@ -68,7 +68,8 @@ const theme = {
   icon: "#003340",
   label: "#003340",
   warning: {
-    main: "#FF5252"
+    main: "#FF5252",
+    light: "#E7B400"
   },
   link: "#02586D",
   border: "1px solid #D2E5DF",

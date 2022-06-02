@@ -10,27 +10,29 @@ import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
 import { Network } from "zilswap-sdk/lib/constants";
-import { ArkOwnerLabel, ArkImageView, ZapWidget, CurrencyLogo, ArkSocialShareDialog } from "app/components";
+import { ArkOwnerLabel, ArkImageView, ZapWidget, CurrencyLogo, ArkSocialShareDialog, ArkReportCollectionDialog } from "app/components";
 import { getTokens, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
 import { MarketPlaceState, OAuth, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, toHumanNumber, useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
+import { bnOrZero, REPORT_LEVEL_SUSPICIOUS, REPORT_LEVEL_DEFAULT, toHumanNumber, useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
 import { toBech32Address } from "core/zilswap";
+import { ReactComponent as WarningIcon } from "app/assets/icons/warning.svg";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 
 export interface Props extends CardProps {
   token: Nft;
   collectionAddress: string;
+  reportState?: number | null;
   dialog?: boolean;
   // tx href
 }
 
 const ArkNFTCard: React.FC<Props> = (props: Props) => {
-  const { className, token, collectionAddress, dialog, ...rest } = props;
+  const { className, token, collectionAddress, dialog, reportState, ...rest } = props;
   const classes = useStyles();
   const { oAuth } = useSelector<RootState, MarketPlaceState>((state) => state.marketplace);
   const { wallet } = useSelector(getWallet);
@@ -44,6 +46,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const network = useNetwork();
   const [popAnchor, setPopAnchor] = useState(null);
   const [openShareDialog, setOpenShareDialog] = useState(false);
+  const [openReportDialog, setOpenReportDialog] = useState(false);
   const toaster = useToaster(false);
   const isOwner = wallet?.addressInfo.byte20.toLowerCase() === token.owner?.address.toLowerCase();
 
@@ -133,6 +136,18 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
     })
   }
 
+  const generateRarityBar = () => {
+    return reportState && reportState !== REPORT_LEVEL_DEFAULT ? (
+      <Box className={cls(classes.rarityBackground,
+        reportState === REPORT_LEVEL_SUSPICIOUS ? classes.suspiciousRarityBackground : classes.warningRarityBackground)}>
+        <Box className={cls(classes.rarityBar,
+          reportState === REPORT_LEVEL_SUSPICIOUS ? classes.suspiciousRarityBar : classes.warningRarityBar)} />
+      </Box>) :
+      (<Box className={classes.rarityBackground}>
+        <Box className={classes.rarityBar} />
+      </Box>);
+  }
+
   return (
     <Card {...rest} className={cls(classes.root, className)}>
       <Box className={classes.borderBox}>
@@ -205,7 +220,9 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   {/* to truncate if too long? */}
                   <Typography className={cls(classes.title, classes.overflowWrap)}>
                     {token.name}
-                    {token.collection.verifiedAt && (<VerifiedBadge className={classes.verifiedBadge} />)}
+                    {token.collection.reportLevel ? <WarningIcon
+                      className={cls(classes.icon, token.collection.reportLevel === REPORT_LEVEL_SUSPICIOUS ? classes.suspicious : classes.warning)} />
+                      : token.collection.verifiedAt && (<VerifiedBadge className={classes.icon} />)}
                   </Typography>
                   {bestAsk && (
                     <Typography className={cls(classes.title, classes.flex)}>
@@ -269,7 +286,9 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                 >
                   <Typography className={classes.dialogBody}>
                     {token.name}
-                    {token.collection.verifiedAt && (<VerifiedBadge className={classes.verifiedBadge} />)}
+                    {token.collection.reportLevel ? <WarningIcon
+                      className={cls(classes.icon, token.collection.reportLevel === REPORT_LEVEL_SUSPICIOUS ? classes.suspicious : classes.warning)} />
+                      : token.collection.verifiedAt && (<VerifiedBadge className={classes.icon} />)}
                   </Typography>
                 </Box>
               </Fragment>
@@ -313,6 +332,8 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                     <Typography onClick={() => { setOpenShareDialog(true); setPopAnchor(null); }} className={classes.popperText}>Share NFT</Typography>
                     <Box className={classes.divider} />
                     <Typography onClick={onResyncMetadata} className={classes.popperText}>Reload Metadata</Typography>
+                    <Box className={classes.divider} />
+                    <Typography onClick={() => { setOpenReportDialog(true); setPopAnchor(null); }} className={classes.popperText}>Report Collection</Typography>
                   </Popper>
                 </ClickAwayListener>
               )}
@@ -321,12 +342,11 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
 
           {/* TODO: refactor and take in a rarity as prop */}
           {/* Rarity indicator */}
-          <Box className={classes.rarityBackground}>
-            <Box className={classes.rarityBar} />
-          </Box>
+          {generateRarityBar()}
         </CardContent >
       </Box >
       <ArkSocialShareDialog open={openShareDialog} onCloseDialog={() => setOpenShareDialog(false)} tokenId={token.tokenId} collectionAddress={toBech32Address(collectionAddress)} />
+      <ArkReportCollectionDialog open={openReportDialog} onCloseDialog={() => setOpenReportDialog(false)} tokenId={token.tokenId} collectionAddress={collectionAddress} />
     </Card >
   );
 };
@@ -480,7 +500,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 600,
     color: theme.palette.primary.light,
   },
-  verifiedBadge: {
+  icon: {
     marginLeft: "4px",
     width: "15px",
     height: "15px",
@@ -492,12 +512,30 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     padding: "3px",
   },
+  warningRarityBackground: {
+    backgroundColor: "rgba(255, 223, 107, 0.2)"
+  },
+  suspiciousRarityBackground: {
+    backgroundColor: "rgba(255, 82, 82, 0.2)"
+  },
   rarityBar: {
     display: "flex",
     backgroundColor: "#6BE1FF",
     borderRadius: 5,
     padding: "1.5px",
     width: "100%",
+  },
+  warningRarityBar: {
+    backgroundColor: theme.palette.warning.light,
+  },
+  suspiciousRarityBar: {
+    backgroundColor: "#FF5252",
+  },
+  warning: {
+    color: theme.palette.warning.light
+  },
+  suspicious: {
+    color: "#FF5252"
   },
   link: {
     color: theme.palette.text?.secondary,
@@ -534,16 +572,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     whiteSpace: "nowrap"
   },
   popper: {
-    backgroundColor: "#003340",
-    border: "2px solid #29475A",
+    backgroundColor: theme.palette.type === "dark" ? theme.palette.primary.main : "#FFFFFF",
+    border: theme.palette.border,
+    borderWidth: "2px !important",
     padding: theme.spacing(1, 2),
     borderRadius: 12,
   },
   divider: {
-    border: "1px solid #29475A",
+    border: theme.palette.border
   },
   popperText: {
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.type === "dark" ? theme.palette.primary.contrastText : theme.palette.primary.main,
     padding: theme.spacing(1, 0, 1),
     cursor: "pointer",
     "&:hover": {

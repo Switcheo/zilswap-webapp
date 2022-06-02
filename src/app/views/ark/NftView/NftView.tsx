@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Transaction } from "@zilliqa-js/account";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ArkBidsTable, ArkEventHistoryTable, ArkBreadcrumb, ArkPriceHistoryGraph, ArkTab, ArkOwnerLabel, ArkBox } from "app/components";
+import { ArkBidsTable, ArkEventHistoryTable, ArkBreadcrumb, ArkPriceHistoryGraph, ArkTab, ArkOwnerLabel, ArkBox, ArkReportedBanner } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getMarketplace, getWallet } from "app/saga/selectors";
 import { Nft, Profile } from "app/store/types";
@@ -91,7 +91,9 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
       const address = fromBech32Address(collectionId).toLowerCase()
       const viewerAddress = wallet?.addressInfo.byte20.toLowerCase()
       const { result } = await arkClient.getNftToken(address, tokenId, viewerAddress);
+
       setToken(result.model);
+      
 
       const { model: { owner } } = result
       if (owner && !bypass) {
@@ -122,11 +124,11 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
         <ArkBreadcrumb linkPath={breadcrumbs} />
-
+        {token?.collection?.reportLevel ? <ArkReportedBanner collectionAddress={fromBech32Address(collectionId)} reportState={token?.collection?.reportLevel} /> : undefined}
         {/* Nft image and main info */}
         <Container disableGutters className={classes.imageInfoContainer}>
           <NftImage className={classes.nftImage} token={token} rounded={true} />
-          {token && <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} isCancelling={isCancelling} tokenUpdatedCallback={() => getNFTDetails()} />}
+          {token && <SalesDetail className={classes.mainInfoBox} tokenId={tokenId} token={token} isCancelling={isCancelling} tokenUpdatedCallback={() => getNFTDetails()} collectionAddress={collectionId} />}
         </Container>
 
         {/* About info and trait table */}

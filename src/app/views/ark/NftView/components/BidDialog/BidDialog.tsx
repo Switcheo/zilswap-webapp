@@ -9,7 +9,7 @@ import { Box, Checkbox, DialogContent, DialogProps, FormControlLabel, Link } fro
 import { makeStyles } from "@material-ui/core/styles";
 import UncheckedIcon from "@material-ui/icons/CheckBoxOutlineBlankRounded";
 import { ZilswapConnector } from "core/zilswap";
-import { ArkExpiry, ArkNFTCard, CurrencyInput, CurrencyLogo, DialogModal, FancyButton, Text } from "app/components";
+import { ArkExpiry, ArkNFTCard, ArkReportedBanner, CurrencyInput, CurrencyLogo, DialogModal, FancyButton, Text } from "app/components";
 import { getBlockchain, getMarketplace, getTokens, getTransactions, getWallet } from "app/saga/selectors";
 import { actions } from "app/store";
 import { Nft } from "app/store/marketplace/types";
@@ -354,7 +354,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
           {/* Set expiry */}
           <ArkExpiry label="Offer Expiry" onExpiryChange={onExpiryChange} />
-
+          {token.collection.reportLevel && <ArkReportedBanner collectionAddress={collectionAddress} reportState={token.collection.reportLevel} />}
           {!completedPurchase && (
             <Fragment>
               {/* Terms */}
