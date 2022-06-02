@@ -5,7 +5,6 @@ import {
   InputAdornment, OutlinedInput, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Typography, useMediaQuery, useTheme, Popper, Button, CircularProgress,
 } from "@material-ui/core";
-import { Network } from "zilswap-sdk/lib/constants";
 import { makeStyles } from "@material-ui/core/styles";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import cls from "classnames";
@@ -112,11 +111,6 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const isSm = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("sm"));
 
   const fullCollections = useMemo(() => {
-    //TODO: remove mock data
-    if(collections[0] && network === Network.MainNet){
-        collections.filter(c => toBech32Address(c.address) === "zil13fum43ax8qeprt5s9u6wsmrtw2vsvdrdhmvtrm")[0].reportLevel = REPORT_LEVEL_WARNING;
-        collections.filter(c => toBech32Address(c.address) === "zil167flx79fykulp57ykmh9gnf3curcnyux6dcj5e")[0].reportLevel = REPORT_LEVEL_SUSPICIOUS;
-    }
     const sortByVol = collections.sort((a, b) => {
       const volDiff = bnOrZero(b.priceStat?.volume ?? 0).comparedTo(a.priceStat?.volume ?? 0)
       if (volDiff !== 0) return volDiff
@@ -124,13 +118,13 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     })
 
     const sorted = sortByVol.sort((a, b) => {
-        if(a.reportLevel && !b.reportLevel) return 1;
-        if(!a.reportLevel && b.reportLevel === REPORT_LEVEL_SUSPICIOUS) return -1;
+        if(a.reportLevel === REPORT_LEVEL_SUSPICIOUS && b.reportLevel !== REPORT_LEVEL_SUSPICIOUS) return 1;
+        if(a.reportLevel !== REPORT_LEVEL_SUSPICIOUS && b.reportLevel === REPORT_LEVEL_SUSPICIOUS) return -1;
         return 0;
     })
     return sorted
 
-  }, [collections, network]);
+  }, [collections]);
 
   const clearSearch = () => {
     setSearch("");
