@@ -118,9 +118,9 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     })
 
     const sorted = sortByVol.sort((a, b) => {
-        if(a.reportLevel === REPORT_LEVEL_SUSPICIOUS && b.reportLevel !== REPORT_LEVEL_SUSPICIOUS) return 1;
-        if(a.reportLevel !== REPORT_LEVEL_SUSPICIOUS && b.reportLevel === REPORT_LEVEL_SUSPICIOUS) return -1;
-        return 0;
+      if (a.reportLevel === REPORT_LEVEL_SUSPICIOUS && b.reportLevel !== REPORT_LEVEL_SUSPICIOUS) return 1;
+      if (a.reportLevel !== REPORT_LEVEL_SUSPICIOUS && b.reportLevel === REPORT_LEVEL_SUSPICIOUS) return -1;
+      return 0;
     })
     return sorted
 
@@ -317,12 +317,12 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                           imageUrl={collection.profileImageUrl}
                         />
                         <Box className={classes.collectionNameContainer}>
-                            <Box display="flex" alignItems="center">
-                                <Box className={classes.collectionName}>{collection.name}</Box>
-                                {collection.reportLevel ? <WarningIcon
-                                    className={cls(classes.icon, collection.reportLevel === REPORT_LEVEL_WARNING ? classes.warning : classes.suspicious)} />
-                                    : collection.verifiedAt && (<VerifiedBadge className={classes.icon} />)}
-                            </Box>
+                          <Box display="flex" alignItems="center">
+                            <Box className={classes.collectionName}>{collection.name}</Box>
+                            {collection.reportLevel ? <WarningIcon
+                              className={cls(classes.icon, collection.reportLevel === REPORT_LEVEL_WARNING ? classes.warning : classes.suspicious)} />
+                              : collection.verifiedAt && (<VerifiedBadge className={classes.icon} />)}
+                          </Box>
                           <Typography className={classes.ownerName}>By {collection.ownerName}</Typography>
                         </Box>
                       </Box>
@@ -362,7 +362,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                       {collectionStats.tokenCount ?? "-"}
                     </TableCell>
                     <TableCell align="center" className={cls(classes.numberCell, classes.lastCell)}>
-                        <MoreOptionsPopper collectionAddress={collection.address} />
+                      <MoreOptionsPopper collectionAddress={collection.address} />
                     </TableCell>
                   </TableRow>
                 )
@@ -644,12 +644,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginRight: theme.spacing(.5),
   },
   minWidth: {
-      minWidth: 100
+    minWidth: 100
   },
   warning: {
     color: theme.palette.warning.light
   },
-  suspicious:{
+  suspicious: {
     color: "#FF5252"
   }
 }));

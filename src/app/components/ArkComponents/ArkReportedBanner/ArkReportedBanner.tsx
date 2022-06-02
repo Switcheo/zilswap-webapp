@@ -73,7 +73,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.warning.light
   },
   suspiciousIcon: {
-    color: "#FF5252" 
+    color: "#FF5252"
   },
 }));
 

@@ -26,7 +26,7 @@ import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
 export interface Props extends CardProps {
   token: Nft;
   collectionAddress: string;
-  reportState? :number | null;
+  reportState?: number | null;
   dialog?: boolean;
   // tx href
 }
@@ -138,14 +138,14 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
 
   const generateRarityBar = () => {
     return reportState && reportState !== REPORT_LEVEL_DEFAULT ? (
-        <Box className={cls(classes.rarityBackground,
-            reportState === REPORT_LEVEL_SUSPICIOUS ? classes.suspiciousRarityBackground : classes.warningRarityBackground)}>
-            <Box className={cls(classes.rarityBar,
-                reportState === REPORT_LEVEL_SUSPICIOUS ? classes.suspiciousRarityBar : classes.warningRarityBar)} />
-        </Box>) :
-        (<Box className={classes.rarityBackground}>
-            <Box className={classes.rarityBar} />
-        </Box>);
+      <Box className={cls(classes.rarityBackground,
+        reportState === REPORT_LEVEL_SUSPICIOUS ? classes.suspiciousRarityBackground : classes.warningRarityBackground)}>
+        <Box className={cls(classes.rarityBar,
+          reportState === REPORT_LEVEL_SUSPICIOUS ? classes.suspiciousRarityBar : classes.warningRarityBar)} />
+      </Box>) :
+      (<Box className={classes.rarityBackground}>
+        <Box className={classes.rarityBar} />
+      </Box>);
   }
 
   return (
@@ -221,8 +221,8 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   <Typography className={cls(classes.title, classes.overflowWrap)}>
                     {token.name}
                     {token.collection.reportLevel ? <WarningIcon
-                        className={cls(classes.icon, token.collection.reportLevel === REPORT_LEVEL_SUSPICIOUS ? classes.suspicious : classes.warning)} />
-                    : token.collection.verifiedAt && (<VerifiedBadge className={classes.icon} />)}
+                      className={cls(classes.icon, token.collection.reportLevel === REPORT_LEVEL_SUSPICIOUS ? classes.suspicious : classes.warning)} />
+                      : token.collection.verifiedAt && (<VerifiedBadge className={classes.icon} />)}
                   </Typography>
                   {bestAsk && (
                     <Typography className={cls(classes.title, classes.flex)}>
@@ -287,8 +287,8 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
                   <Typography className={classes.dialogBody}>
                     {token.name}
                     {token.collection.reportLevel ? <WarningIcon
-                        className={cls(classes.icon, token.collection.reportLevel === REPORT_LEVEL_SUSPICIOUS ? classes.suspicious : classes.warning)} />
-                    : token.collection.verifiedAt && (<VerifiedBadge className={classes.icon} />)}
+                      className={cls(classes.icon, token.collection.reportLevel === REPORT_LEVEL_SUSPICIOUS ? classes.suspicious : classes.warning)} />
+                      : token.collection.verifiedAt && (<VerifiedBadge className={classes.icon} />)}
                   </Typography>
                 </Box>
               </Fragment>
@@ -513,10 +513,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: "3px",
   },
   warningRarityBackground: {
-      backgroundColor: "rgba(255, 223, 107, 0.2)"
+    backgroundColor: "rgba(255, 223, 107, 0.2)"
   },
   suspiciousRarityBackground: {
-      backgroundColor: "rgba(255, 82, 82, 0.2)"
+    backgroundColor: "rgba(255, 82, 82, 0.2)"
   },
   rarityBar: {
     display: "flex",
@@ -534,7 +534,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   warning: {
     color: theme.palette.warning.light
   },
-  suspicious:{
+  suspicious: {
     color: "#FF5252"
   },
   link: {

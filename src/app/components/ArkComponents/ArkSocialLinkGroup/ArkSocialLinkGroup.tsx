@@ -30,10 +30,10 @@ const useStyles = makeStyles((theme) => ({
     opacity: 0.5,
   },
   flagIcon: {
-      "& span svg":{
-          fontSize: "1.35rem",
-          margin: "-2.8px"
-      }
+    "& span svg": {
+      fontSize: "1.35rem",
+      margin: "-2.8px"
+    }
   }
 }));
 
@@ -87,12 +87,12 @@ const ArkSocialLinkGroup: React.FC<Props> = (props: Props) => {
       )}
       {collection?.address && (
         <Fragment>
-            <IconButton 
-                className={cls(classes.icon, classes.flagIcon)}
-                onClick={() => { setOpenReportDialog(true); }}>
-                <FlagIcon />
-            </IconButton>
-            <ArkReportCollectionDialog open={openReportDialog} onCloseDialog={() => setOpenReportDialog(false)} collectionAddress={collection.address} />
+          <IconButton
+            className={cls(classes.icon, classes.flagIcon)}
+            onClick={() => { setOpenReportDialog(true); }}>
+            <FlagIcon />
+          </IconButton>
+          <ArkReportCollectionDialog open={openReportDialog} onCloseDialog={() => setOpenReportDialog(false)} collectionAddress={collection.address} />
         </Fragment>
       )}
     </Box>
