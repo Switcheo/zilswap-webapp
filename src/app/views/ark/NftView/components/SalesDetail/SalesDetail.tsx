@@ -355,14 +355,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     }
   },
   warning: {
-    "& path": {
-      stroke: theme.palette.warning.main
-    }
+    color: theme.palette.warning.light
   },
   suspicious:{
-    "& path": {
-      stroke:  "#FF5252"
-    }
+    color:  "#FF5252"
   },
 }));
 

@@ -79,16 +79,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   popper: {
-    backgroundColor: "#003340",
-    border: "2px solid #29475A",
+    backgroundColor: theme.palette.type === "dark" ? theme.palette.primary.main : "#FFFFFF",
+    border: theme.palette.border,
+    borderWidth: "2px !important",
     padding: theme.spacing(1, 2),
     borderRadius: 12,
   },
   divider: {
-    border: "1px solid #29475A",
+    border: theme.palette.border
   },
   popperText: {
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.type === "dark" ? theme.palette.primary.contrastText : theme.palette.primary.main,
     padding: theme.spacing(1, 0, 1),
     cursor: "pointer",
     "&:hover": {

@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   warningBanner: {
-    border: `1px solid ${theme.palette.warning.main}`,
+    border: `1px solid ${theme.palette.warning.light}`,
     backgroundColor: "rgba(255, 223, 107, 0.2)",
   },
   suspiciousBanner: {
@@ -64,20 +64,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     backgroundColor: "rgba(255, 82, 82, 0.2)",
   },
   warning: {
-    color: theme.palette.warning.main
+    color: theme.palette.warning.light
   },
   suspicious: {
     color: "#FF5252"
   },
   warningIcon: {
-    "& path": {
-      stroke: theme.palette.warning.main
-    }
+    color: theme.palette.warning.light
   },
   suspiciousIcon: {
-    "& path": {
-      stroke: "#FF5252"
-    }
+    color: "#FF5252" 
   },
 }));
 

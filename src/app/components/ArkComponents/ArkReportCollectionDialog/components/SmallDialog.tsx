@@ -43,8 +43,13 @@ const SmallDialog: React.FC<Props> = (props: Props) => {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    "& .MuiPaper-root": {
+      border: theme.palette.type === "dark" ? theme.palette.border : "1px solid #00334033",
+    },
     "& .MuiDialogTitle-root": {
       padding: theme.spacing(3, 4),
+      color: theme.palette.type === "dark" ? theme.palette.primary.contrastText : theme.palette.primary.main,
+      backgroundColor: theme.palette.type === "dark" ? theme.palette.background.default : "#FFFFFF",
       "& .MuiTypography-root": {
         fontFamily: "'Raleway', sans-serif",
         fontWeight: 700,
@@ -57,19 +62,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       "& button": {
         top: 16
       }
-    },
-    "& .Mui-selected": {
-      backgroundColor: "transparent",
-      "& div, span": {
-        color: "#00FFB0",
-        "& path, circle": {
-          fill: "#00FFB0",
-          fillOpacity: "1 !important"
-        }
-      },
-      "&:hover": {
-        backgroundColor: theme.palette.type === "dark" ? "#4E5A60" : "#A9CCC1",
-      },
     },
     position: "relative",
   },
@@ -100,7 +92,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   subHeader: {
     fontFamily: "'Raleway', sans-serif",
     fontSize: 16,
-    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    color: theme.palette.type === "dark" ? theme.palette.primary.contrastText : theme.palette.primary.dark,
     fontWeight: 900,
     textAlign: 'center'
   },
@@ -110,13 +102,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontFamily: 'Avenir Next',
     fontSize: 16,
     fontWeight: 600,
-    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    color: theme.palette.type === "dark" ? theme.palette.primary.contrastText : theme.palette.primary.dark,
     textAlign: 'center',
     lineHeight: "19.65px",
     "& p, a": {
       fontFamily: 'Avenir Next',
       fontSize: 16,
-      color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+      color: theme.palette.type === "dark" ? theme.palette.primary.contrastText : theme.palette.primary.dark,
       textAlign: 'center',
       lineHeight: "19.65px"
     },
@@ -130,6 +122,15 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     padding: "18px 32px",
     alignItems: "center",
+    minHeight: 24,
+    backgroundColor: "#6BE1FF",
+    color: theme.palette.primary.main,
+    "& .MuiBox-root": {
+      minHeight: 24
+    },
+    "&:hover": {
+      backgroundColor: "#60CAE5"
+    }
   },
   bottomMargin: {
     marginBottom: "18.78px"

@@ -516,7 +516,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       backgroundColor: "rgba(255, 223, 107, 0.2)"
   },
   suspiciousRarityBackground: {
-      backgroundColor: "rgba(255, 223, 107, 0.2)"
+      backgroundColor: "rgba(255, 82, 82, 0.2)"
   },
   rarityBar: {
     display: "flex",
@@ -526,20 +526,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     width: "100%",
   },
   warningRarityBar: {
-    backgroundColor: theme.palette.warning.main,
+    backgroundColor: theme.palette.warning.light,
   },
   suspiciousRarityBar: {
     backgroundColor: "#FF5252",
   },
   warning: {
-    "& path": {
-      stroke: theme.palette.warning.main
-    }
+    color: theme.palette.warning.light
   },
   suspicious:{
-    "& path": {
-      stroke:  "#FF5252"
-    }
+    color: "#FF5252"
   },
   link: {
     color: theme.palette.text?.secondary,
@@ -576,16 +572,17 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     whiteSpace: "nowrap"
   },
   popper: {
-    backgroundColor: "#003340",
-    border: "2px solid #29475A",
+    backgroundColor: theme.palette.type === "dark" ? theme.palette.primary.main : "#FFFFFF",
+    border: theme.palette.border,
+    borderWidth: "2px !important",
     padding: theme.spacing(1, 2),
     borderRadius: 12,
   },
   divider: {
-    border: "1px solid #29475A",
+    border: theme.palette.border
   },
   popperText: {
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.type === "dark" ? theme.palette.primary.contrastText : theme.palette.primary.main,
     padding: theme.spacing(1, 0, 1),
     cursor: "pointer",
     "&:hover": {

@@ -209,8 +209,13 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
+    "& .MuiPaper-root": {
+      border: theme.palette.type === "dark" ? theme.palette.border : "1px solid #00334033",
+    },
     "& .MuiDialogTitle-root": {
       padding: theme.spacing(3, 4),
+      color: theme.palette.type === "dark" ? theme.palette.primary.contrastText : theme.palette.primary.main,
+      backgroundColor: theme.palette.type === "dark" ? theme.palette.background.default : "#FFFFFF",
       "& .MuiTypography-root": {
         fontFamily: "'Raleway', sans-serif",
         fontWeight: 700,
@@ -227,20 +232,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& .Mui-selected": {
       backgroundColor: "transparent",
       "& div, span": {
-        color: "#00FFB0",
-        "& path, circle": {
-          fill: "#00FFB0",
-          fillOpacity: "1 !important"
-        }
+        color: theme.palette.type === "dark" ? theme.palette.primary.dark : "#00D895",
       },
       "&:hover": {
-        backgroundColor: theme.palette.type === "dark" ? "#4E5A60" : "#A9CCC1",
+        backgroundColor: theme.palette.type === "dark" ? "#DEFFFF1A" : "#6BE1FF33",
       },
     },
     position: "relative",
   },
   dialogContent: {
-    backgroundColor: theme.palette.background.default,
+    backgroundColor: theme.palette.type === "dark" ? theme.palette.background.default : "#FFFFFF",
     borderLeft: theme.palette.border,
     borderRight: theme.palette.border,
     borderBottom: theme.palette.border,
@@ -266,13 +267,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   label: {
     fontFamily: "'Raleway', sans-serif",
     fontSize: 16,
-    color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+    color: theme.palette.type === "dark" ? theme.palette.primary.contrastText : theme.palette.primary.main,
     textTransform: "uppercase",
     marginBottom: 8,
     fontWeight: 800,
   },
   dropdownButton: {
-    border: theme.palette.border,
+    border: theme.palette.type === "dark" ? theme.palette.border : "1px solid #00334033",
     color: theme.palette.text?.primary,
     fontSize: 14,
     justifyContent: "flex-start",
@@ -289,24 +290,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "12px"
   },
   active: {
-    borderColor: "#00FFB0",
-    color: "#00FFB0",
+    borderColor: theme.palette.type === "dark" ? theme.palette.primary.dark : "#00D895",
+    color: theme.palette.type === "dark" ? theme.palette.primary.dark : "#00D895",
     "& p, .MuiSvgIcon-root": {
-      color: "#00FFB0",
-      "& path, circle": {
-        fill: "#00FFB0",
-        fillOpacity: "1 !important"
-      }
+      color: theme.palette.type === "dark" ? theme.palette.primary.dark : "#00D895",
     },
-    "& div path, circle": {
-      fill: "#00FFB0",
-      fillOpacity: "1 !important"
-    }
   },
   selectValue: {
     fontSize: 16,
     fontFamily: "'Raleway', sans-serif",
-    color: theme.palette.text!.primary,
+    color: theme.palette.type === "dark" ? theme.palette.text!.primary : "#00334099",
     fontWeight: 700,
     textTransform: 'uppercase',
     marginTop: 4,
@@ -323,16 +316,16 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   dropdownContainer: {
     marginTop: 8,
     paddingBottom: "5px",
-    backgroundColor: theme.palette.type === "dark" ? "#223139" : "#D4FFF2",
+    backgroundColor: theme.palette.type === "dark" ? "#223139" : "#FFFFFF",
     width: '100%',
     borderRadius: 12,
-    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid rgba(107, 225, 255, 0.2)",
+    border: theme.palette.type === "dark" ? "1px solid #29475A" : "1px solid #00D895",
     padding: 0,
     maxHeight: 600
   },
   listItemRow: {
     "&:hover": {
-      backgroundColor: theme.palette.type === "dark" ? "#4E5A60" : "#A9CCC1",
+      backgroundColor: theme.palette.type === "dark" ? "#DEFFFF1A" : "#6BE1FF33",
       cursor: "pointer"
     },
   },
@@ -342,9 +335,21 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: "flex",
     padding: "18px 32px",
     alignItems: "center",
+    backgroundColor: "#6BE1FF",
+    color: theme.palette.primary.main,
+    "& .MuiBox-root": {
+      minHeight: 24
+    },
+    "&:disabled": {
+      backgroundColor: theme.palette.type === "dark" ? theme.palette.primary.main : "#0033401A",
+      color: theme.palette.type === "dark" ? theme.palette.primary.light : "#00334099"
+    },
+    "&:hover": {
+      backgroundColor: "#60CAE5"
+    }
   },
   listIcon: {
-    color: `rgba${hexToRGBA(theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24", 0.5)}`,
+    color: theme.palette.type === "dark" ? theme.palette.primary.light : theme.palette.primary.main,
     minWidth: 20,
     marginRight: 12,
   },
@@ -353,12 +358,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fontSize: 16,
       textTransform: 'uppercase',
       fontFamily: "'Raleway', sans-serif",
-      color: theme.palette.type === "dark" ? "#DEFFFF" : "#0D1B24",
+      color: theme.palette.type === "dark" ? theme.palette.primary.contrastText : theme.palette.primary.main,
       fontWeight: 700,
     }
   },
   arrowIcon: {
-    color: theme.palette.label,
+    color: theme.palette.type === "dark" ? theme.palette.label : "#00334099",
     marginRight: '0 !important'
   },
   arkInputMulti: {
@@ -368,28 +373,18 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       fontWeight: 800,
       textTransform: "uppercase",
     },
+    "& .MuiInputBase-root": {
+      border: theme.palette.type === "dark" ? theme.palette.border : "1px solid #00334033",
+      backgroundColor: theme.palette.type === "dark" ? "#0D1B24" : "#FFFFFF"
+    },
     "& textarea": {
       fontSize: '16px !important',
-      height: '86px !important'
+      height: '86px !important',
     },
-    "& #instruction": {
-      fontWeight: 700
+    "& #instruction p": {
+      fontWeight: 600
     }
   },
-  arkInput: {
-    marginTop: 24,
-    "& [class*='label']": {
-      fontSize: 16,
-      fontWeight: 800,
-      textTransform: "uppercase",
-    },
-    "& textarea": {
-      fontSize: 16,
-    },
-    "& [class*='instruction']": {
-      fontWeight: 700
-    }
-  }
 }));
 
 export default ArkReportCollectionDialog;
