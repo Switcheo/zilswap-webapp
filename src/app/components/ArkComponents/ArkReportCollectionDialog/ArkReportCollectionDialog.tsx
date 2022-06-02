@@ -15,7 +15,7 @@ import dayjs from "dayjs";
 import { getWallet, getBlockchain } from "app/saga/selectors";
 import { actions } from "app/store";
 import { MarketPlaceState, OAuth } from "app/store/types";
-import { hexToRGBA } from "app/utils";
+import { hexToRGBA, useToaster } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { DialogModal, FancyButton, ArkInput } from "app/components";
 import { AppTheme } from "app/theme/types";
@@ -39,6 +39,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
   const { wallet } = useSelector(getWallet);
   const { network } = useSelector(getBlockchain);
   const dispatch = useDispatch();
+  const toaster = useToaster(false);
 
   const [active, setActive] = useState<boolean>(false);
   const [openFeedbackReceived, setOpenFeedbackReceived] = useState<boolean>(false);
@@ -57,7 +58,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
   const OTHER_REASONS_INDEX = 4;
 
   const REPORT_REASONS = [
-    { reason: 'Fake, Scam or Copied Collection', type: 'fake', icon: <HighlightOffIcon /> },
+    { reason: 'Fake, Scam or Copied Collection', type: 'test', icon: <HighlightOffIcon /> },
     { reason: 'Copyright Infringement', type: 'copyright', icon: <CopyrightIcon /> },
     { reason: 'Violence, Hate-Speech or Illegal Content', type: 'violence-legal', icon: <ViolenceIcon /> },
     { reason: 'I don\'t like it', type: 'user-dont-like', icon: <HighlightOffIcon /> },
@@ -127,14 +128,18 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
       newOAuth = result;
     }
 
-    await arkClient.postCollectionReport(collectionAddress, tokenId, REPORT_REASONS[selectedIndex].type, details, newOAuth!.access_token);
+    try {
+      await arkClient.postCollectionReport(collectionAddress, tokenId, REPORT_REASONS[selectedIndex].type, details, newOAuth!.access_token);
+      await resetDialog();
 
-    await resetDialog();
-
-    if (selectedIndex === DISLIKE_INDEX) {
-      setOpenFeedbackReceived(true);
-    } else {
-      setOpenReportSubmitted(true);
+      if (selectedIndex === DISLIKE_INDEX) {
+        setOpenFeedbackReceived(true);
+      } else {
+        setOpenReportSubmitted(true);
+      }
+    } catch (error) {
+      setLoading(false);
+      if(error instanceof Error) toaster(`Error sending report: ${typeof error === "string" ? error : error?.message}`);
     }
   }
 
