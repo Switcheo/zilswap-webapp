@@ -196,7 +196,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
       </DialogModal>
       <SmallDialog open={openReportSubmitted}
         onCloseDialog={() => setOpenReportSubmitted(false)}
-        header="Collection Reported" subHeader="The collection has been reported"
+        header="Collection Reported" subHeader="This collection has been reported."
         buttonLabel="Head to Discover" walletRequired={false} onConfirm={onBackToDiscover}
         details="Thanks for keeping our community safe!" />
       <SmallDialog open={openFeedbackReceived}
@@ -297,8 +297,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   active: {
     borderColor: theme.palette.type === "dark" ? theme.palette.primary.dark : "#00D895",
     color: theme.palette.type === "dark" ? theme.palette.primary.dark : "#00D895",
-    "& p, .MuiSvgIcon-root": {
-      color: theme.palette.type === "dark" ? theme.palette.primary.dark : "#00D895",
+    "& p, .MuiSvgIcon-root, svg": {
+      color: `${theme.palette.type === "dark" ? theme.palette.primary.dark : "#00D895"} !important`,
     },
   },
   selectValue: {
