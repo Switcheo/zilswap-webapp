@@ -130,13 +130,13 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
 
     try {
       await arkClient.postCollectionReport(collectionAddress, tokenId, REPORT_REASONS[selectedIndex].type, details, newOAuth!.access_token);
-      await resetDialog();
 
       if (selectedIndex === DISLIKE_INDEX) {
         setOpenFeedbackReceived(true);
       } else {
         setOpenReportSubmitted(true);
       }
+      resetDialog();
     } catch (error) {
       setLoading(false);
       if(error instanceof Error) toaster(`Error sending report: ${typeof error === "string" ? error : error?.message}`);
