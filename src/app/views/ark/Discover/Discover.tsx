@@ -14,7 +14,7 @@ import { ArrowDropDownRounded, ArrowDropUpRounded } from "@material-ui/icons";
 import { ArkImageView, CurrencyLogo, Text } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
-import { CollectionWithStats } from "app/store/types";
+import { CollectionPriceStat, CollectionTokenStat, CollectionWithStats } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { ArkClient } from "core/utilities";
 import { bnOrZero, hexToRGBA, useAsyncTask } from "app/utils";
@@ -29,32 +29,37 @@ interface SearchFilters {
   [prop: string]: boolean;
 }
 
+interface CollectionStatsKeys {
+  priceStatKey: keyof CollectionPriceStat;
+  tokenStatKey: keyof CollectionTokenStat;
+}
+
 const SEARCH_FILTERS = ["artist", "collection"]
 
 type CellAligns = "right" | "left" | "inherit" | "center" | "justify" | undefined;
 interface HeadersProp {
   align: CellAligns;
   value: string;
-  statKey: string;
+  statKey?: string;
 }
 
 const HEADERS: HeadersProp[] = [
-  { align: "left", value: "Collection", statKey: "" },
+  { align: "left", value: "Collection" },
   { align: "center", value: "7-Day Volume", statKey: "volume" },
   { align: "center", value: "All-Time Volume", statKey: "allTimeVolume" },
   { align: "center", value: "Floor", statKey: "floorPrice" },
   // { align: "center", value: "% Change (24hr / 7day)" },
   { align: "center", value: "Owners", statKey: "holderCount" },
   { align: "center", value: "Collection Size", statKey: "tokenCount" },
-  { align: "center", value: "", statKey: "" },
+  { align: "center", value: "" },
 ]
 
-const COLLECTION_NAME_INDEX = HEADERS.findIndex(h => h.value === "Collection");
-const VOLUME_INDEX = HEADERS.findIndex(h => h.value === "7-Day Volume");
-const ALL_TIME_VOLUME_INDEX = HEADERS.findIndex(h => h.value === "All-Time Volume");
-const FLOOR_INDEX = HEADERS.findIndex(h => h.value === "Floor");
-const COLLECTION_SIZE_INDEX = HEADERS.findIndex(h => h.value === "Collection Size");
-const MORE_OPTIONS_INDEX = HEADERS.findIndex(h => h.value === "");
+const collectionNameIndex = HEADERS.findIndex(h => h.value === "Collection");
+const volumeIndex = HEADERS.findIndex(h => h.value === "7-Day Volume");
+const allTimeVolumeIndex = HEADERS.findIndex(h => h.value === "All-Time Volume");
+const floorIndex = HEADERS.findIndex(h => h.value === "Floor");
+const collectionSizeIndex = HEADERS.findIndex(h => h.value === "Collection Size");
+const moreOptionsIndex = HEADERS.findIndex(h => h.value === "");
 
 const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
@@ -65,7 +70,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   // const { exchangeInfo } = useSelector(getMarketplace);
   const theme = useTheme();
   const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
-  const [selectedSort, setSelectedSort] = useState<string>("");
+  const [selectedSort, setSelectedSort] = useState<string>("default");
   const [runQueryCollections, loading] = useAsyncTask("queryCollections");
   const [search, setSearch] = useState<string>("");
   const [searchFilter, setSearchFilter] = useState<SearchFilters>({
@@ -73,6 +78,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     artist: true,
     collection: true,
   });
+  const sortOrder = selectedSort[0] === '-' ? -1 : 1;
 
   // fetch collections (to use store instead)
   const [collections, setCollections] = useState<CollectionWithStats[]>([]);
@@ -122,40 +128,41 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const isSm = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("sm"));
 
   const isSortPriceStats = () => {
-    return selectedSort.includes(HEADERS[VOLUME_INDEX].statKey) ||
-      selectedSort.includes(HEADERS[ALL_TIME_VOLUME_INDEX].statKey) ||
-      selectedSort.includes(HEADERS[FLOOR_INDEX].statKey);
+    return selectedSort.includes(`${HEADERS[volumeIndex].statKey}`) ||
+      selectedSort.includes(`${HEADERS[allTimeVolumeIndex].statKey}`) ||
+      selectedSort.includes(`${HEADERS[floorIndex].statKey}`);
   }
 
-  const sortByVolume = (a: any, b: any) => {
+  const sortByVolume = (a: CollectionWithStats, b: CollectionWithStats) => {
     const diff = bnOrZero(a.priceStat?.volume ?? 0).comparedTo(b.priceStat?.volume ?? 0);
     if (diff !== 0) return diff;
     return bnOrZero(a.priceStat?.allTimeVolume ?? 0).comparedTo(b.priceStat?.allTimeVolume ?? 0)
   }
 
-  const sort = (a: any, b: any, key: string) => {
+  const sort = (a: CollectionWithStats, b: CollectionWithStats, key: CollectionStatsKeys) => {
     let isPriceStats = isSortPriceStats();
-    if (isPriceStats && selectedSort.includes(HEADERS[VOLUME_INDEX].statKey)) return sortByVolume(a, b);
-    else if (isPriceStats) return bnOrZero(a.priceStat?.[key] ?? 0).comparedTo(b.priceStat?.[key] ?? 0);
-    return bnOrZero(a.tokenStat?.[key] ?? 0).comparedTo(b.tokenStat?.[key] ?? 0);
+    if (isPriceStats && selectedSort.includes(`${HEADERS[volumeIndex].statKey}`)) return sortByVolume(a, b);
+    else if (isPriceStats) return bnOrZero(a.priceStat?.[key.priceStatKey] ?? 0).comparedTo(b.priceStat?.[key.priceStatKey] ?? 0);
+    return bnOrZero(a.tokenStat?.[key.tokenStatKey] ?? 0).comparedTo(b.tokenStat?.[key.tokenStatKey] ?? 0);
   }
 
-  const getSortOrder = () => {
-    return selectedSort[0] === '-' ? -1 : 1;
-  }
+  const collectionSorter = () => (a: CollectionWithStats, b: CollectionWithStats) => {
+    let dir = sortOrder;
+    let stringKey = selectedSort
+    if (dir === -1) stringKey = selectedSort.substring(1);
+    let keys = {
+      priceStatKey: stringKey,
+      tokenStatKey: stringKey
+    } as CollectionStatsKeys;
 
-  const collectionSorter = () => (a: any, b: any) => {
-    let dir = getSortOrder();
-    let key = selectedSort;
-    if (dir === -1) key = selectedSort.substring(1);
-    if (dir === 1) return sort(a, b, key);
-    return sort(b, a, key);
+    if (dir === 1) return sort(a, b, keys);
+    return sort(b, a, keys);
   };
 
   const fullCollections = useMemo(() => {
     let collectionsToSort = [...collections];
     let sorted = collections.sort((a, b) => sortByVolume(b, a));
-    if (selectedSort !== "") sorted = collectionsToSort.sort(collectionSorter());
+    if (selectedSort !== "default") sorted = collectionsToSort.sort(collectionSorter());
 
     const sortByReportLevel = sorted.sort((a, b) => {
       if (a.reportLevel === REPORT_LEVEL_SUSPICIOUS && b.reportLevel !== REPORT_LEVEL_SUSPICIOUS) return 1;
@@ -175,9 +182,9 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   const handleSort = (statKey: string) => {
     if (selectedSort.includes(statKey)) {
-      if (selectedSort === "") setSelectedSort(`${statKey}`);
-      else if (getSortOrder() === 1) setSelectedSort(`-${statKey}`);
-      else setSelectedSort("");
+      if (selectedSort === "default") setSelectedSort(`${statKey}`);
+      else if (sortOrder === 1) setSelectedSort(`-${statKey}`);
+      else setSelectedSort("default");
     } else {
       setSelectedSort(`${statKey}`);
     }
@@ -342,15 +349,15 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                 {HEADERS.map((header, index) => (
                   <TableCell
                     key={`offers-${index}`}
-                    className={cls(classes.headerCell, (header.value === HEADERS[COLLECTION_SIZE_INDEX].value ? classes.minWidthHeader : className))}
+                    className={cls(classes.headerCell, (header.value === HEADERS[collectionSizeIndex].value ? classes.minWidthHeader : className))}
                     align={header.align}>
-                    <Box onClick={() => handleSort(header.statKey)}
-                      className={cls(classes.headerCellBox, (index !== COLLECTION_NAME_INDEX ? classes.sortableHeaderCell : className))}
-                      justifyContent={(index !== COLLECTION_NAME_INDEX ? 'center' : 'none')}>
+                    <Box onClick={() => handleSort(`${header.statKey}`)}
+                      className={cls(classes.headerCellBox, (index !== collectionNameIndex ? classes.sortableHeaderCell : className))}
+                      justifyContent={(index !== collectionNameIndex ? 'center' : 'none')}>
                       {header.value}
                       <span className={classes.iconContainer}>
-                        {(index !== COLLECTION_NAME_INDEX && index !== MORE_OPTIONS_INDEX && isSorted(header.statKey)) && (
-                          (getSortOrder() === 1) ? <ArrowDropUpRounded className={classes.arrowIcon} />
+                        {(index !== collectionNameIndex && index !== moreOptionsIndex && isSorted(`${header.statKey}`)) && (
+                          (sortOrder === 1) ? <ArrowDropUpRounded className={classes.arrowIcon} />
                             : <ArrowDropDownRounded className={classes.arrowIcon} />
                         )}
                       </span>
