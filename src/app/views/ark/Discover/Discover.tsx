@@ -10,6 +10,7 @@ import { toBech32Address } from "@zilliqa-js/crypto";
 import cls from "classnames";
 import { useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
+import { ArrowDropDownRounded, ArrowDropUpRounded } from "@material-ui/icons";
 import { ArkImageView, CurrencyLogo, Text } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain } from "app/saga/selectors";
@@ -34,17 +35,24 @@ type CellAligns = "right" | "left" | "inherit" | "center" | "justify" | undefine
 interface HeadersProp {
   align: CellAligns;
   value: string;
+  statKey: string;
 }
+
 const HEADERS: HeadersProp[] = [
-  { align: "left", value: "Collection" },
-  { align: "center", value: "7-Day Volume" },
-  { align: "center", value: "All-Time Volume" },
-  { align: "center", value: "Floor" },
+  { align: "left", value: "Collection", statKey: "" },
+  { align: "center", value: "7-Day Volume", statKey: "volume" },
+  { align: "center", value: "All-Time Volume", statKey: "allTimeVolume" },
+  { align: "center", value: "Floor", statKey: "floorPrice" },
   // { align: "center", value: "% Change (24hr / 7day)" },
-  { align: "center", value: "Owners" },
-  { align: "center", value: "Collection Size" },
-  { align: "center", value: "" },
+  { align: "center", value: "Owners", statKey: "holderCount" },
+  { align: "center", value: "Collection Size", statKey: "tokenCount" },
+  { align: "center", value: "", statKey: "" },
 ]
+
+const VOLUME_INDEX = HEADERS.findIndex(h => h.value === "7-Day Volume");
+const ALL_TIME_VOLUME_INDEX = HEADERS.findIndex(h => h.value === "All-Time Volume");
+const FLOOR_INDEX = HEADERS.findIndex(h => h.value === "Floor");
+const COLLECTION_SIZE_INDEX = HEADERS.findIndex(h => h.value === "Collection Size");
 
 const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
@@ -55,6 +63,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   // const { exchangeInfo } = useSelector(getMarketplace);
   const theme = useTheme();
   const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
+  const [selectedSort, setSelectedSort] = useState<string>("");
   const [runQueryCollections, loading] = useAsyncTask("queryCollections");
   const [search, setSearch] = useState<string>("");
   const [searchFilter, setSearchFilter] = useState<SearchFilters>({
@@ -110,24 +119,66 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   const isSm = useMediaQuery((theme: AppTheme) => theme.breakpoints.down("sm"));
 
-  const fullCollections = useMemo(() => {
-    const sortByVol = collections.sort((a, b) => {
-      const volDiff = bnOrZero(b.priceStat?.volume ?? 0).comparedTo(a.priceStat?.volume ?? 0)
-      if (volDiff !== 0) return volDiff
-      return bnOrZero(b.priceStat?.allTimeVolume ?? 0).comparedTo(a.priceStat?.allTimeVolume ?? 0)
-    })
+  const isSortPriceStats = () => {
+    return selectedSort.includes(HEADERS[VOLUME_INDEX].statKey) ||
+      selectedSort.includes(HEADERS[ALL_TIME_VOLUME_INDEX].statKey) ||
+      selectedSort.includes(HEADERS[FLOOR_INDEX].statKey);
+  }
 
-    const sorted = sortByVol.sort((a, b) => {
+  const sortByVolume = (a: any, b: any) => {
+    const diff = bnOrZero(a.priceStat?.volume ?? 0).comparedTo(b.priceStat?.volume ?? 0);
+    if (diff !== 0) return diff;
+    return bnOrZero(a.priceStat?.allTimeVolume ?? 0).comparedTo(b.priceStat?.allTimeVolume ?? 0)
+  }
+
+  const sort = (a: any, b: any, key: string) => {
+    let isPriceStats = isSortPriceStats();
+    if (isPriceStats && selectedSort.includes(HEADERS[VOLUME_INDEX].statKey)) return sortByVolume(a, b);
+    else if (isPriceStats) return bnOrZero(a.priceStat?.[key] ?? 0).comparedTo(b.priceStat?.[key] ?? 0);
+    return bnOrZero(a.tokenStat?.[key] ?? 0).comparedTo(b.tokenStat?.[key] ?? 0);
+  }
+
+  const getSortOrder = () => {
+    return selectedSort[0] === '-' ? -1 : 1;
+  }
+
+  const collectionSorter = () => (a: any, b: any) => {
+    let dir = getSortOrder();
+    let key = selectedSort;
+    if (dir === -1) { key = selectedSort.substring(1); }
+    if (dir === 1) { return sort(a, b, key); }
+    return sort(b, a, key);
+  };
+
+  const fullCollections = useMemo(() => {
+    let collectionsToSort = [...collections];
+    let sorted = collections.sort((a, b) => sortByVolume(b, a));
+    if (selectedSort !== "") sorted = collectionsToSort.sort(collectionSorter());
+
+    const sortByReportLevel = sorted.sort((a, b) => {
       if (a.reportLevel === REPORT_LEVEL_SUSPICIOUS && b.reportLevel !== REPORT_LEVEL_SUSPICIOUS) return 1;
       if (a.reportLevel !== REPORT_LEVEL_SUSPICIOUS && b.reportLevel === REPORT_LEVEL_SUSPICIOUS) return -1;
       return 0;
-    })
-    return sorted
-
-  }, [collections]);
+    });
+    return sortByReportLevel;
+  }, [collections, selectedSort]); // eslint-disable-line
 
   const clearSearch = () => {
     setSearch("");
+  }
+
+  const isSorted = (statKey: string) => {
+    return selectedSort.includes(statKey) || selectedSort.includes(`-${statKey}`);
+  }
+
+  const handleSort = (statKey: string) => {
+    if (selectedSort.includes(statKey)) {
+      if (selectedSort === "") setSelectedSort(`-${statKey}`);
+      else if (getSortOrder() === 1) setSelectedSort("");
+      else setSelectedSort(`${statKey}`);
+    } else {
+      setSelectedSort(`-${statKey}`);
+    }
   }
 
   return (
@@ -289,10 +340,14 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                 {HEADERS.map((header, index) => (
                   <TableCell
                     key={`offers-${index}`}
-                    className={classes.headerCell}
-                    align={header.align}
-                  >
-                    {header.value}
+                    className={cls(classes.headerCell, (header.value === HEADERS[COLLECTION_SIZE_INDEX].value ? classes.minWidthHeader : className))}
+                    align={header.align}>
+                    <Box onClick={() => handleSort(header.statKey)} className={cls(classes.headerCellBox, (index !== 0 ? classes.sortableHeaderCell : className))} justifyContent={(index !== 0 ? 'center' : 'none')}>
+                      {header.value}
+                      {index !== 0 && index !== HEADERS.length - 1 &&
+                        (isSorted(header.statKey) &&
+                          (getSortOrder() === -1 ? <ArrowDropDownRounded className={classes.arrowIcon} /> : <ArrowDropUpRounded className={classes.arrowIcon} />))}
+                    </Box>
                   </TableCell>
                 ))}
               </TableRow>
@@ -437,14 +492,31 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: "0px 0px 10px 10px!important",
   },
   headerCell: {
-    color: theme.palette.type === "dark" ? "#DEFFFF" : "#003340",
+    color: theme.palette.type === "dark" ? "#DEFFFF80" : "#00334099",
     padding: "8px 0 0 0",
     fontFamily: 'Avenir Next',
     fontWeight: 600,
     fontSize: 13,
     letterSpacing: '0.2px',
-    opacity: 0.5,
+    // opacity: 0.5,
     borderBottom: 'none',
+  },
+  minWidthHeader: {
+    minWidth: 140
+  },
+  headerCellBox: {
+    verticalAlign: 'middle',
+    display: 'flex'
+  },
+  sortableHeaderCell: {
+    "&:hover": {
+      color: theme.palette.type === "dark" ? "#00FFB0" : "#00D895",
+      cursor: 'pointer',
+    },
+    "&:hover svg": {
+      color: theme.palette.type === "dark" ? "#00FFB0" : "#00D895",
+      cursor: 'pointer',
+    }
   },
   tableRow: {
     padding: 12,
@@ -651,5 +723,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   suspicious: {
     color: "#FF5252"
-  }
+  },
+  arrowIcon: {
+    color: theme.palette.type === "dark" ? "#DEFFFF80" : "#00334099",
+    marginRight: '0 !important',
+  },
 }));
