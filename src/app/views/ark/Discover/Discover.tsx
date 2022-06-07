@@ -49,10 +49,12 @@ const HEADERS: HeadersProp[] = [
   { align: "center", value: "", statKey: "" },
 ]
 
+const COLLECTION_NAME_INDEX = HEADERS.findIndex(h => h.value === "Collection");
 const VOLUME_INDEX = HEADERS.findIndex(h => h.value === "7-Day Volume");
 const ALL_TIME_VOLUME_INDEX = HEADERS.findIndex(h => h.value === "All-Time Volume");
 const FLOOR_INDEX = HEADERS.findIndex(h => h.value === "Floor");
 const COLLECTION_SIZE_INDEX = HEADERS.findIndex(h => h.value === "Collection Size");
+const MORE_OPTIONS_INDEX = HEADERS.findIndex(h => h.value === "");
 
 const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
@@ -342,9 +344,11 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                     key={`offers-${index}`}
                     className={cls(classes.headerCell, (header.value === HEADERS[COLLECTION_SIZE_INDEX].value ? classes.minWidthHeader : className))}
                     align={header.align}>
-                    <Box onClick={() => handleSort(header.statKey)} className={cls(classes.headerCellBox, (index !== 0 ? classes.sortableHeaderCell : className))} justifyContent={(index !== 0 ? 'center' : 'none')}>
+                    <Box onClick={() => handleSort(header.statKey)}
+                      className={cls(classes.headerCellBox, (index !== COLLECTION_NAME_INDEX ? classes.sortableHeaderCell : className))}
+                      justifyContent={(index !== COLLECTION_NAME_INDEX ? 'center' : 'none')}>
                       {header.value}
-                      {index !== 0 && index !== HEADERS.length - 1 &&
+                      {index !== COLLECTION_NAME_INDEX && index !== MORE_OPTIONS_INDEX &&
                         (isSorted(header.statKey) &&
                           (getSortOrder() === -1 ? <ArrowDropDownRounded className={classes.arrowIcon} /> : <ArrowDropUpRounded className={classes.arrowIcon} />))}
                     </Box>
