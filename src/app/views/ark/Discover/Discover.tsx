@@ -147,8 +147,8 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const collectionSorter = () => (a: any, b: any) => {
     let dir = getSortOrder();
     let key = selectedSort;
-    if (dir === -1) { key = selectedSort.substring(1); }
-    if (dir === 1) { return sort(a, b, key); }
+    if (dir === -1) key = selectedSort.substring(1);
+    if (dir === 1) return sort(a, b, key);
     return sort(b, a, key);
   };
 
@@ -175,11 +175,11 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   const handleSort = (statKey: string) => {
     if (selectedSort.includes(statKey)) {
-      if (selectedSort === "") setSelectedSort(`-${statKey}`);
-      else if (getSortOrder() === 1) setSelectedSort("");
-      else setSelectedSort(`${statKey}`);
+      if (selectedSort === "") setSelectedSort(`${statKey}`);
+      else if (getSortOrder() === 1) setSelectedSort(`-${statKey}`);
+      else setSelectedSort("");
     } else {
-      setSelectedSort(`-${statKey}`);
+      setSelectedSort(`${statKey}`);
     }
   }
 
@@ -348,9 +348,12 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
                       className={cls(classes.headerCellBox, (index !== COLLECTION_NAME_INDEX ? classes.sortableHeaderCell : className))}
                       justifyContent={(index !== COLLECTION_NAME_INDEX ? 'center' : 'none')}>
                       {header.value}
-                      {index !== COLLECTION_NAME_INDEX && index !== MORE_OPTIONS_INDEX &&
-                        (isSorted(header.statKey) &&
-                          (getSortOrder() === -1 ? <ArrowDropDownRounded className={classes.arrowIcon} /> : <ArrowDropUpRounded className={classes.arrowIcon} />))}
+                      <span className={classes.iconContainer}>
+                        {(index !== COLLECTION_NAME_INDEX && index !== MORE_OPTIONS_INDEX && isSorted(header.statKey)) && (
+                          (getSortOrder() === 1) ? <ArrowDropUpRounded className={classes.arrowIcon} />
+                            : <ArrowDropDownRounded className={classes.arrowIcon} />
+                        )}
+                      </span>
                     </Box>
                   </TableCell>
                 ))}
@@ -732,4 +735,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.type === "dark" ? "#DEFFFF80" : "#00334099",
     marginRight: '0 !important',
   },
+  iconContainer: {
+    height: 24,
+    width: 24
+  }
 }));
