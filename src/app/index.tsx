@@ -1,6 +1,6 @@
 import React from "react";
 import { Provider } from "react-redux";
-import "./assets/scss/index.scss";
+import "./assets/scss/index.css";
 import "./mixins/dayjs";
 import "./mixins/prismjs";
 import "./mixins/validate";
