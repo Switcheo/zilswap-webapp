@@ -61,6 +61,8 @@ const floorIndex = HEADERS.findIndex(h => h.value === "Floor");
 const collectionSizeIndex = HEADERS.findIndex(h => h.value === "Collection Size");
 const moreOptionsIndex = HEADERS.findIndex(h => h.value === "");
 
+const defaultStatKey = `${HEADERS[allTimeVolumeIndex].statKey}`;
+
 const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   props: any
 ) => {
@@ -70,7 +72,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   // const { exchangeInfo } = useSelector(getMarketplace);
   const theme = useTheme();
   const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
-  const [selectedSort, setSelectedSort] = useState<string>(`-${HEADERS[allTimeVolumeIndex].statKey}`);
+  const [selectedSort, setSelectedSort] = useState<string>(`-${defaultStatKey}`);
   const [runQueryCollections, loading] = useAsyncTask("queryCollections");
   const [search, setSearch] = useState<string>("");
   const [searchFilter, setSearchFilter] = useState<SearchFilters>({
@@ -180,7 +182,6 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   }
 
   const handleSort = (statKey: string) => {
-    let defaultStatKey = `${HEADERS[allTimeVolumeIndex].statKey}`;
     if (selectedSort.includes(statKey)) {
       if (selectedSort === `-${defaultStatKey}` && defaultStatKey !== statKey) setSelectedSort(`-${statKey}`);
       else if (sortOrder === 1) setSelectedSort(`-${defaultStatKey}`);
