@@ -70,7 +70,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   // const { exchangeInfo } = useSelector(getMarketplace);
   const theme = useTheme();
   const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
-  const [selectedSort, setSelectedSort] = useState<string>("default");
+  const [selectedSort, setSelectedSort] = useState<string>(`-${HEADERS[allTimeVolumeIndex].statKey}`);
   const [runQueryCollections, loading] = useAsyncTask("queryCollections");
   const [search, setSearch] = useState<string>("");
   const [searchFilter, setSearchFilter] = useState<SearchFilters>({
@@ -161,8 +161,7 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   const fullCollections = useMemo(() => {
     let collectionsToSort = [...collections];
-    let sorted = collections.sort((a, b) => sortByVolume(b, a));
-    if (selectedSort !== "default") sorted = collectionsToSort.sort(collectionSorter());
+    let sorted = collectionsToSort.sort(collectionSorter());
 
     const sortByReportLevel = sorted.sort((a, b) => {
       if (a.reportLevel === REPORT_LEVEL_SUSPICIOUS && b.reportLevel !== REPORT_LEVEL_SUSPICIOUS) return 1;
@@ -181,9 +180,10 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   }
 
   const handleSort = (statKey: string) => {
+    let defaultStatKey = `${HEADERS[allTimeVolumeIndex].statKey}`;
     if (selectedSort.includes(statKey)) {
-      if (selectedSort === "default") setSelectedSort(`-${statKey}`);
-      else if (sortOrder === 1) setSelectedSort("default");
+      if (selectedSort === `-${defaultStatKey}` && defaultStatKey !== statKey) setSelectedSort(`-${statKey}`);
+      else if (sortOrder === 1) setSelectedSort(`-${defaultStatKey}`);
       else setSelectedSort(`${statKey}`);
     } else {
       setSelectedSort(`-${statKey}`);
