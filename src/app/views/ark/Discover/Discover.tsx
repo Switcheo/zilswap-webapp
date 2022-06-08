@@ -182,11 +182,11 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   const handleSort = (statKey: string) => {
     if (selectedSort.includes(statKey)) {
-      if (selectedSort === "default") setSelectedSort(`${statKey}`);
-      else if (sortOrder === 1) setSelectedSort(`-${statKey}`);
-      else setSelectedSort("default");
+      if (selectedSort === "default") setSelectedSort(`-${statKey}`);
+      else if (sortOrder === 1) setSelectedSort("default");
+      else setSelectedSort(`${statKey}`);
     } else {
-      setSelectedSort(`${statKey}`);
+      setSelectedSort(`-${statKey}`);
     }
   }
 
