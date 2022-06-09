@@ -6,6 +6,7 @@ export { default as hexToRGB } from "./hexToRGB";
 export { default as hexToRGBA } from "./hexToRGBA";
 export { default as isUrl } from "./isUrl";
 export { default as multiLineFormat } from "./multiLineFormat";
+export { default as mapToSelectableTraits } from "./mapToSelectableTraits";
 export * from "./network";
 export { default as snakeToTitle } from "./snakeToTitle";
 export * from "./strings";

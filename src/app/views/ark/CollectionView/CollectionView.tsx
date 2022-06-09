@@ -11,7 +11,7 @@ import { getBlockchain, getMarketplace } from "app/saga/selectors";
 import { actions } from "app/store";
 import { CollectionWithStats } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, toHumanNumber, truncateAddress } from "app/utils";
+import { bnOrZero, toHumanNumber, truncateAddress, mapToSelectableTraits } from "app/utils";
 import { ZIL_DECIMALS } from "app/utils/constants";
 import { ArkClient } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
@@ -134,7 +134,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   const { children, className, match, ...rest } = props;
   const classes = useStyles();
   const { network } = useSelector(getBlockchain);
-  const { profile } = useSelector(getMarketplace);
+  const { profile, collectionTraits, filter } = useSelector(getMarketplace);
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -144,11 +144,24 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
 
   useEffect(() => {
     if (match.params?.collection) {
-      dispatch(actions.MarketPlace.updateFilter({
-        collectionAddress: match.params.collection,
-        likedBy: null,
-        owner: null,
-      }));
+      const filterCollectionAddress = filter.collectionAddress ? fromBech32Address(`${filter.collectionAddress}`).toLowerCase() : null;
+      const currentCollectionAddress = fromBech32Address(match.params.collection).toLowerCase();
+
+      if (filterCollectionAddress !== currentCollectionAddress && collectionTraits[currentCollectionAddress]) {
+        const traits = mapToSelectableTraits(collectionTraits[currentCollectionAddress]);
+        dispatch(actions.MarketPlace.updateFilter({
+          collectionAddress: match.params.collection,
+          likedBy: null,
+          owner: null,
+          traits: traits
+        }));
+      } else {
+        dispatch(actions.MarketPlace.updateFilter({
+          collectionAddress: match.params.collection,
+          likedBy: null,
+          owner: null,
+        }));
+      }
     }
 
     // eslint-disable-next-line
@@ -236,7 +249,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
         <ArkBreadcrumb linkPath={breadcrumbs} />
-          { collection.reportLevel ? <ArkReportedBanner collectionAddress={toBech32Address(collection.address)} reportState={collection.reportLevel} /> : undefined}
+        {collection.reportLevel ? <ArkReportedBanner collectionAddress={toBech32Address(collection.address)} reportState={collection.reportLevel} /> : undefined}
         <ArkBanner
           badgeContent={collection.verifiedAt ? <VerifiedBadge className={classes.verifiedBadge} /> : undefined}
           avatarImage={collection.profileImageUrl}

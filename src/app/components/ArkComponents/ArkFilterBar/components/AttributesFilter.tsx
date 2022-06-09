@@ -6,9 +6,9 @@ import pickBy from "lodash/pickBy";
 import { toBech32Address } from '@zilliqa-js/crypto';
 import { ArkClient } from 'core/utilities';
 import { AppTheme } from 'app/theme/types';
-import { bnOrZero, hexToRGBA, SimpleMap, useAsyncTask } from 'app/utils';
+import { bnOrZero, hexToRGBA, SimpleMap, useAsyncTask, mapToSelectableTraits } from 'app/utils';
 import { Text } from "app/components";
-import { TraitType, TraitTypeWithSelection, TraitValueWithSelection } from 'app/store/types';
+import { TraitTypeWithSelection, TraitValueWithSelection } from 'app/store/types';
 import { updateFilter } from 'app/store/marketplace/actions';
 import { getBlockchain, getMarketplace } from 'app/saga/selectors';
 import { actions } from 'app/store';
@@ -261,17 +261,6 @@ const abbreviateTraitValue = (traitValue: string) => {
   const parts = traitValue.split(' ')
   if (parts.length > 3) return parts[0].slice(0, 4) + ' ' + parts.slice(1).map(p => p.slice(0, 1)).join("").slice(0, 9)
   else return parts.map(p => p.slice(0, 4)).join(" ")
-}
-
-const mapToSelectableTraits = (traits: SimpleMap<TraitType>): SimpleMap<TraitTypeWithSelection> => {
-  const traitWithSelection: SimpleMap<TraitTypeWithSelection> = {}
-  for (const x in traits) {
-    traitWithSelection[x] = { trait: traits[x].trait, values: {} }
-    for (const y in traits[x].values) {
-      traitWithSelection[x].values[y] = { ...traits[x].values[y], selected: false }
-    }
-  }
-  return traitWithSelection;
 }
 
 const AttributesFilter = (props: Props) => {
