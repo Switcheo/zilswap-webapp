@@ -105,6 +105,9 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [displayErrorBox, setDisplayErrorBox] = useState<boolean>(false);
 
+  const TWITTER_PREFIX = "https://twitter.com/";
+  const INSTAGRAM_PREFIX = "https://www.instagram.com/";
+
   const [runQueryProfile] = useAsyncTask("queryProfile");
   const [runQueryMint, loadingQueryMint] = useAsyncTask("queryMint");
   const [runDeployCollection, loadingDeployCollection] = useAsyncTask("deployCollection", (error) => toaster(error.message, { overridePersist: false }));
@@ -253,8 +256,8 @@ const Mint: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
         websiteUrl: inputValues.websiteUrl,
         discordUrl: inputValues.discordUrl,
         telegramUrl: inputValues.websiteUrl,
-        twitterUrl: inputValues.twitterHandle,
-        instagramUrl: inputValues.instagramHandle,
+        twitterUrl: inputValues.twitterHandle ? TWITTER_PREFIX + inputValues.twitterHandle : inputValues.twitterHandle,
+        instagramUrl: inputValues.instagramHandle ? INSTAGRAM_PREFIX + inputValues.instagramHandle : inputValues.instagramHandle,
 
         bannerImageUrl: "",
         profileImageUrl: "",
