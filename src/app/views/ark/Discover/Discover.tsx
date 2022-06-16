@@ -288,8 +288,8 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             {searchFilter.collection && (
               <Fragment>
                 <Box className={classes.searchResultHeader}>Collections</Box>
-                {filteredSearch?.filteredCollections.map((collection) => (
-                  <RouterLink to={`/arky/collections/${toBech32Address(collection.address)}`}>
+                {filteredSearch?.filteredCollections.map((collection, index) => (
+                  <RouterLink to={`/arky/collections/${toBech32Address(collection.address)}`} key={index}>
                     <Box className={classes.popoverRow} display="flex" justifyContent="space-between" alignItems="center">
                       <Box className={classes.resultCollectionName} display="flex" alignItems="center">
                         <ArkImageView
@@ -313,8 +313,8 @@ const Discover: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
             {searchFilter.artist && (
               <Fragment>
                 <Box className={classes.searchResultHeader}>Artist</Box>
-                {filteredSearch?.filteredArtist.map((collection) => (
-                  <RouterLink to={`/arky/collections/${toBech32Address(collection.address)}`}>
+                {filteredSearch?.filteredArtist.map((collection, index) => (
+                  <RouterLink to={`/arky/collections/${toBech32Address(collection.address)}`} key={index}>
                     <Box className={classes.popoverRow} display="flex" justifyContent="space-between" alignItems="center">
                       <Box className={classes.resultCollectionName} display="flex" alignItems="center">
                         <ArkImageView

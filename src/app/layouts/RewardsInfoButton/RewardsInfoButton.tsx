@@ -270,7 +270,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [selectedDistributions, setSelectedDistributions] = useState<ReadonlyArray<DistributionWithStatus>>([]); // default should be all claimable distributions
   const [runClaimRewards, loading, error] = useAsyncTask("claimRewards");
-  const buttonRef = useRef();
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const theme = useTheme();
   const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
   const tokenFinder = useTokenFinder();
@@ -473,16 +473,16 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
           isMobileView
             ? (
               buttonMode
-                ? <FancyButton onClick={() => setActive(!active)} buttonRef={buttonRef} className={classes.rewardButton} variant="contained" >
+                ? <FancyButton onClick={() => setActive(!active)} ref={buttonRef} className={classes.rewardButton} variant="contained" >
                   Claim Reward
                 </FancyButton>
-                : <IconButton onClick={() => setActive(!active)} buttonRef={buttonRef}>
+                : <IconButton onClick={() => setActive(!active)} ref={buttonRef}>
                   <IconSVG />
                 </IconButton>
             ) : (
               <Button
                 size="small"
-                buttonRef={buttonRef}
+                ref={buttonRef}
                 className={classes.topbarButton}
                 variant="outlined"
                 onClick={() => setActive(!active)}>
