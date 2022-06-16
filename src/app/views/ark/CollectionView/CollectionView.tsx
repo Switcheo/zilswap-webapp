@@ -249,7 +249,7 @@ const CollectionView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
     <ArkPage {...rest}>
       <Container className={classes.root} maxWidth="lg">
         <ArkBreadcrumb linkPath={breadcrumbs} />
-        {collection.reportLevel ? <ArkReportedBanner collectionAddress={toBech32Address(collection.address)} reportState={collection.reportLevel} /> : undefined}
+        {collection.reportLevel ? <ArkReportedBanner collectionAddress={toBech32Address(collection.address)} reportState={collection.reportLevel} /> : ""}
         <ArkBanner
           badgeContent={collection.verifiedAt ? <VerifiedBadge className={classes.verifiedBadge} /> : undefined}
           avatarImage={collection.profileImageUrl}

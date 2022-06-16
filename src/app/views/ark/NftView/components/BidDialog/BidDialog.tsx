@@ -360,7 +360,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
           {/* Set expiry */}
           <ArkExpiry label="Offer Expiry" onExpiryChange={onExpiryChange} />
-          {token.collection.reportLevel && <ArkReportedBanner collectionAddress={collectionAddress} reportState={token.collection.reportLevel} isOnDialog={true} />}
+          {token.collection.reportLevel ? <ArkReportedBanner collectionAddress={collectionAddress} reportState={token.collection.reportLevel} isOnDialog={true} /> : ""}
           {!completedPurchase && (
             <Fragment>
               {/* Terms */}
