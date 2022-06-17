@@ -71,24 +71,27 @@ const ArkExpiry: React.FC<Props> = (props: Props) => {
   const [expiryBlock, setExpiryBlock] = useState<number>(0);
   const [, currentBlock] = useBlockTime();
 
-  useEffect(() => {
+  const calcExpiry = () => {
     const currentTime = dayjs();
-    const intervalId = setInterval(() => {
-      const expiryTime = !!expiryOption.value ?
-        dayjs().add(expiryOption.value, expiryOption.unit as any) :
-        dayjs(expiryDate)
+    const expiryTime = !!expiryOption.value ?
+      dayjs().add(expiryOption.value, expiryOption.unit as any) :
+      dayjs(expiryDate)
 
-      const minutes = expiryTime.diff(currentTime, "minutes");
-      const blocks = minutes * BLOCKS_PER_MINUTE;
+    const minutes = expiryTime.diff(currentTime, "minutes");
+    const blocks = minutes * BLOCKS_PER_MINUTE;
 
-      setExpiryTime(expiryTime);
-      setExpiryBlock(currentBlock + ~~blocks);
-    }, 1000);
+    setExpiryTime(expiryTime);
+    setExpiryBlock(currentBlock + ~~blocks);
+  }
+  
+  useEffect(() => {
+    calcExpiry();
+    const intervalId = setInterval(calcExpiry, 1000);
 
     return () => clearInterval(intervalId);
 
     // eslint-disable-next-line
-  }, [expiryTime, currentBlock, expiryOption, expiryDate]);
+  }, [currentBlock, expiryOption, expiryDate]);
 
   useEffect(() => {
     onExpiryChange(expiryBlock)
