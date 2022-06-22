@@ -49,14 +49,7 @@ const reducer = (state: SwapFormState = initial_state, action: any) => {
   switch (action.type) {
 
     case SwapActionTypes.CLEAR_FORM:
-      return {
-        exactOf: "in",
-        inAmount: new BigNumber(0),
-        outAmount: new BigNumber(0),
-
-        isInsufficientReserves: false,
-        forNetwork: null,
-      };
+      return initial_state;
 
     case SwapActionTypes.UPDATE:
       checkToSaveSlippageExpiry(state, payload);
