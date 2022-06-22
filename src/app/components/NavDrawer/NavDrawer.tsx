@@ -199,7 +199,7 @@ const NavDrawer: React.FC<DrawerProps> = (props: any) => {
       className={cls(classes.root, className)}
       onMouseEnter={() => expandNavDrawer()}
       onMouseLeave={() => closeNavDrawer()}
-      variant={!isXs ? "permanent" : ""}
+      variant={!isXs ? "permanent" : "temporary"}
       transitionDuration={1}
       onClick={() => expandNavDrawer()}
     >

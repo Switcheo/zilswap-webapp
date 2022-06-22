@@ -276,7 +276,7 @@ const ArtistFilter = (props: Props) => {
             {artists && <Fragment>
               <Typography className={classes.searchResultHeader}>Artists</Typography>
               {sortedArtist.map(([key, value]) => (
-                <Box onClick={() => handleSelect(key)} className={classes.popoverRow} display="flex" justifyContent="space-between" alignItems="center">
+                <Box onClick={() => handleSelect(key)} className={classes.popoverRow} display="flex" justifyContent="space-between" alignItems="center" key={key}>
                   <Box className={classes.resultCollectionName} display="flex" alignItems="center">
                     <ArkImageView
                       imageType="avatar"

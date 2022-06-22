@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router";
@@ -67,6 +67,12 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
   const bestBid = token.bestBid;
   const txIsPending = loadingApproveTx || observingTxs.findIndex(tx => tx.hash.toLowerCase() === pendingTxHash) >= 0;
+
+  const dialogBottomRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    dialogBottomRef.current?.scrollIntoView();
+  }, [error])
 
   const wrappingRequired = bidToken && bidToken.isWzil &&
     (bnOrZero(bidToken.balance).lt(
@@ -354,7 +360,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
 
           {/* Set expiry */}
           <ArkExpiry label="Offer Expiry" onExpiryChange={onExpiryChange} />
-          {token.collection.reportLevel && <ArkReportedBanner collectionAddress={collectionAddress} reportState={token.collection.reportLevel} isOnDialog={true} />}
+          {token.collection.reportLevel ? <ArkReportedBanner collectionAddress={collectionAddress} reportState={token.collection.reportLevel} isOnDialog={true} /> : ""}
           {!completedPurchase && (
             <Fragment>
               {/* Terms */}
@@ -430,11 +436,12 @@ const BidDialog: React.FC<Props> = (props: Props) => {
               {(error || wrapError || approveError || wrapCompleteError) && (
                 <Box className={classes.errorBox}>
                   <WarningIcon className={classes.warningIcon} />
-                  <Text color="error">
+                  <Text className={classes.errorText}>
                     Error: {(error?.message || wrapError?.message || approveError?.message || wrapCompleteError?.message) ?? "Unknown error"}
                   </Text>
                 </Box>
               )}
+              <div ref={dialogBottomRef}/>
 
             </Fragment>
           )}
@@ -622,6 +629,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     padding: theme.spacing(2, 3),
     display: "flex",
     alignItems: "center",
+  },
+  errorText: {
+    color: '#FF5252'
   },
   warningIcon: {
     height: 24,
