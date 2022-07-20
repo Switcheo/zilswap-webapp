@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { Distribution, Distributor, SwapVolume } from "core/utilities";
+import { Distribution, TbmFeeDistribution, Distributor, SwapVolume } from "core/utilities";
 import { SimpleMap } from "app/utils";
 import { TokenInfo } from "../token/types";
 
@@ -20,11 +20,12 @@ export type PoolReward = {
 export type PoolRewards = ReadonlyArray<PoolReward>;
 
 export interface DistributionWithStatus {
-  info: Distribution;
+  info: TbmFeeDistribution | Distribution;
   readyToClaim: boolean;
   funded: boolean | null;
   claimed?: boolean;
   claimTx?: any;
+  isTbmFee?: boolean;
 }
 
 export interface DistributorWithTimings extends Distributor {
@@ -46,4 +47,5 @@ export interface RewardsState {
   rewardsByPool: SimpleMap<PoolRewards>;
   potentialRewardsByPool: PotentialRewards;
   claimedDistributions: ReadonlyArray<string>;
+  bearCount: number;
 };

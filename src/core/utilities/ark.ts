@@ -34,6 +34,7 @@ const apiPaths = {
   "oauth": "/oauth/access_token",
   "exchange/status": "/exchange/status",
   "exchange/info": "/exchange/info",
+  "exchange/tbm-fee/distribution": "/exchange/tbm-fee/distribution/leaves",
   "collection/list": "/nft/collection/list",
   "collection/deploy": "/nft/collection/:address/deploy",
   "collection/detail": "/nft/collection/:address/detail",
@@ -86,6 +87,7 @@ export interface ArkExchangeInfo {
   featuredCollections: string[];
   baseFeeBps: number;
   denoms: string[];
+  feeDistributors?: { [key: string]: string };
 
   contracts: {
     v1: ArkContractInfo,
@@ -178,6 +180,14 @@ export class ArkClient {
 
   getExchangeInfo = async () => {
     const url = this.http.path("exchange/info");
+    const result = await this.http.get({ url });
+    const output = await result.json();
+    await this.checkError(output);
+    return output.result;
+  }
+
+  getTbmFeeDistributionEntries = async () => {
+    const url = this.http.path("exchange/tbm-fee/distribution");
     const result = await this.http.get({ url });
     const output = await result.json();
     await this.checkError(output);

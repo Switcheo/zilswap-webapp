@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Accordion, AccordionDetails, AccordionSummary, Backdrop, Box, BoxProps, Button, Card, Checkbox, CircularProgress, ClickAwayListener, Divider, FormControlLabel, IconButton, Link, Popper, Tooltip } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
@@ -14,13 +14,16 @@ import groupBy from "lodash/groupBy";
 import { useDispatch, useSelector } from "react-redux";
 import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import { claimMulti } from "core/rewards";
+import { ArkClient } from "core/utilities";
 import { CurrencyLogo, FancyButton, HelpInfo, Text } from "app/components";
 import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
 import { actions } from "app/store";
-import { DistributionWithStatus, DistributorWithTimings, RewardsState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
+import { DistributionWithStatus, DistributorWithTimings, RewardsState, RootState, TokenInfo, TokenState, WalletState, Nft, TransactionState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { formatZWAPLabel, hexToRGBA, useAsyncTask, useNetwork, useTokenFinder, useValueCalculators } from "app/utils";
-import { BIG_ZERO } from "app/utils/constants";
+import { BIG_ZERO, TBM_CONTRACT } from "app/utils/constants";
+import ArkyLogo from "app/components/ArkComponents/ArkTopBar/logo-arky-small.png";
+import { ReactComponent as TbmCoin } from "app/assets/icons/tbmCoin.svg";
 import { ReactComponent as IconSVG } from "./icon.svg";
 
 interface Props extends BoxProps {
@@ -87,7 +90,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     zIndex: 1101,
   },
   card: {
-    minWidth: 300,
+    minWidth: 315,
     padding: theme.spacing(3),
     boxShadow: theme.palette.mainBoxShadow,
     backgroundColor: theme.palette.background.default,
@@ -108,8 +111,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   textColoured: {
     color: theme.palette.primary.dark
   },
+  tbmCoinLogo: {
+    height: "31px",
+    width: "32px"
+  },
   currencyLogo: {
-    marginLeft: "2px",
+    height: "28px",
+    width: "32px"
   },
   currencyLogoButton: {
     height: "20px",
@@ -130,6 +138,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   tooltip: {
     marginLeft: "5px",
     verticalAlign: "top!important",
+  },
+  tooltipMaxWidth: {
+    maxWidth: "156px !important"
   },
   claimRewardsButton: {
     padding: "16px",
@@ -163,10 +174,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
   header: {
-    fontSize: "16px"
+    fontSize: "24px"
   },
   balanceAmount: {
-    fontSize: "28px"
+    fontSize: "14px",
+    marginTop: "8px",
+    lineHeight: "12.28px",
+    textAlign: "center",
+    width: "max-content"
   },
   body: {
     fontSize: "14px",
@@ -248,12 +263,34 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "&:hover": {
       color: "#FF5252",
     }
+  },
+  tokenValue: {
+    color: "rgba(222, 255, 255, 0.5)",
+    fontSize: "12px"
+  },
+  balanceFrame: {
+    border: '1px solid rgba(222, 255, 255, 0.1)',
+    borderRadius: '12px',
+    padding: '25px',
+    flex: 0.5,
+    minWidth: '75px',
+    boxSizing: 'content-box'
+  },
+  arkyLogo: {
+    height: "13px",
+    marginRight: "8px"
+  },
+  claimedAmt: {
+    fontSize: "20px",
+    fontWeight: 400,
+    fontFamily: 'Avenir Next',
+    color: 'rgba(222, 255, 255, 0.5)'
   }
 }));
 
 type ClaimableRewards = DistributionWithStatus & {
   rewardToken: TokenInfo
-  rewardDistributor: DistributorWithTimings
+  rewardDistributor?: DistributorWithTimings
 }
 
 const RewardsInfoButton: React.FC<Props> = (props: Props) => {
@@ -265,11 +302,16 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
+  const transactionState = useSelector<RootState, TransactionState>(state => state.transaction);
   const [active, setActive] = useState<boolean>(false);
   const [claimResult, setClaimResult] = useState<any>(null);
   const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
+  const [bearCount, setBearCount] = useState<number>(0);
+  const [selectedRewardsValue, setSelectedRewardsValue] = useState<BigNumber>(new BigNumber(0));
   const [selectedDistributions, setSelectedDistributions] = useState<ReadonlyArray<DistributionWithStatus>>([]); // default should be all claimable distributions
   const [runClaimRewards, loading, error] = useAsyncTask("claimRewards");
+  const [runLoadBears] = useAsyncTask("loadBears");
   const buttonRef = useRef<HTMLButtonElement>(null);
   const theme = useTheme();
   const isMobileView = useMediaQuery(theme.breakpoints.down('xs'));
@@ -278,13 +320,42 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   const zwapAddress = ZWAP_TOKEN_CONTRACT[network];
   const { distributors, distributions, claimedDistributions } = rewardsState;
 
+  useEffect(() => {
+    if (!walletState.wallet) return;
+    runLoadBears(async () => {
+      const arkClient = new ArkClient(network);
+      const query: ArkClient.ListTokenParams = { owner: walletState.wallet?.addressInfo.byte20.toLowerCase() };
+      const res = await arkClient.listTokens(query);
+      const nftList: Nft[] = res.entries;
+
+      const tbmContract = TBM_CONTRACT[network]?.toLowerCase();
+      const filtered = nftList.filter((nft) => {
+        return nft.collection.address.toLowerCase() === tbmContract
+      });
+      setBearCount(filtered.length)
+    })
+    // eslint-disable-next-line
+  }, [walletState.wallet, network])
+
+  const txLoading = useMemo(() => {
+    if(!claimResult) return false;
+    
+    const claimTx = transactionState.submittedTxs.find(t => t.hash === claimResult.hash);
+    if(!claimTx) return true;
+    if(claimTx && claimTx.status === 'confirmed') {
+      setClaimSuccess(true);
+    }
+    return false
+  }, [claimResult, transactionState.submittedTxs])
+
   const claimableRewards: ReadonlyArray<ClaimableRewards> = distributions.filter(distribution => distribution.readyToClaim).flatMap((d: DistributionWithStatus) => {
     const rewardDistributor = distributors.find(distributor => distributor.distributor_address_hex === d.info.distributor_address)
 
-    if (!rewardDistributor) {
+    if (!rewardDistributor && !d.isTbmFee) {
       return []
     }
-    const rewardToken = tokenFinder(rewardDistributor.reward_token_address_hex)!
+    const rewardTokenAddress = 'reward_token_address' in d.info ? d.info.reward_token_address : rewardDistributor?.reward_token_address_hex ?? "";
+    const rewardToken = tokenFinder(rewardTokenAddress)!
 
     return [{ rewardToken, rewardDistributor, ...d }]
   }).filter(r => !!r)
@@ -293,14 +364,18 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
   // group by epoch
   const rewardsByDate = groupBy(claimableRewards, (reward) => {
-    const {
-      distribution_start_time, epoch_period,
-      initial_epoch_number, retroactive_distribution_cutoff_time
-    } = reward.rewardDistributor.emission_info;
+    if (!!reward.rewardDistributor) {
+      const {
+        distribution_start_time, epoch_period,
+        initial_epoch_number, retroactive_distribution_cutoff_time
+      } = reward.rewardDistributor?.emission_info;
 
-    return dayjs.unix(distribution_start_time +
-      (epoch_period * (reward.info.epoch_number - initial_epoch_number + (!!retroactive_distribution_cutoff_time ? 0 : 1))))
-      .format('DD MMM YY');
+      return dayjs.unix(distribution_start_time +
+        (epoch_period * (reward.info.epoch_number - initial_epoch_number + (!!retroactive_distribution_cutoff_time ? 0 : 1))))
+        .format('DD MMM YY');
+    } else if('reward_token_address' in reward.info) {
+      return dayjs(reward.info.epoch).format('DD MMM YY');
+    }
   })
 
   // group by token address
@@ -364,9 +439,16 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
 
       let claimTx = null;
 
+      const filteredRewards = claimableRewards.filter(r => !!selectedDistributions.find(d => d.info.id === r.info.id))
+      const selectedValue = filteredRewards.reduce((sum, reward) => {
+        return sum.plus(valueCalculators.amount(tokenState.prices, reward.rewardToken, reward.info.amount));
+      }, BIG_ZERO)
+
+      setSelectedRewardsValue(selectedValue);
+
       const distributions = selectedDistributions.map(distribution => {
         // drop [leaf hash, ..., root hash]
-        const proof = distribution.info.proof.slice(1, distribution.info.proof.length - 1);
+        const proof = distribution.isTbmFee ? distribution.info.proof : distribution.info.proof.slice(1, distribution.info.proof.length - 1);
 
         return {
           distrAddr: distribution.info.distributor_address,
@@ -437,6 +519,8 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       return "Claim Rewards (All)";
     } else if (selectedDistributions.length) {
       return `Claim Rewards (${selectedDistributions.length})`;
+    } else if(loading || txLoading) {
+      return "Claiming Rewards"
     } else {
       return "Select Reward to Claim";
     }
@@ -464,6 +548,11 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       : amount.isLessThan(0.01)
         ? amount.toFormat(3)
         : amount.toFormat(2)
+  }
+
+  const resetClaimedRewardStates = () => {
+    setClaimSuccess(false);
+    setSelectedRewardsValue(new BigNumber(0));
   }
 
   return (
@@ -500,142 +589,180 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         modifiers={popperModifiers}>
         <Box marginTop={2}>
           <ClickAwayListener onClickAway={() => setActive(false)}>
-            <Card className={classes.card}>
-              <Box display="flex" flexDirection="column" alignItems="center">
-                <Text variant="h6" color="textPrimary" className={classes.header}>Your ZWAP Balance</Text>
-                <Box display="flex" marginTop={1}>
-                  <Text variant="h2" className={cls(classes.textColoured, classes.balanceAmount)}>
-                    {zapBalanceLabel}
+              <Card className={classes.card}>
+              <Box display="flex" flexDirection="column" alignItems="center" gridRowGap="18px">
+                <Text variant="h6" color="textPrimary" className={classes.header}>Your Balance</Text>
+                {claimSuccess && <>
+                  <Text variant="h4" className={classes.textColoured}>
+                    <CheckCircleRoundedIcon fontSize="inherit" className={classes.successIcon} />
+                    &nbsp;
+                    Rewards claimed successfully!
                   </Text>
-                  <CurrencyLogo currency="ZWAP" address={zwapAddress} className={classes.currencyLogo} />
-                </Box>
-                <Text marginTop={0.5} className={cls(classes.textColoured, classes.body)}>
-                  ≈ ${zapTokenValue.toFormat(2)}
-                </Text>
-              </Box>
-              <Box display="flex" flexDirection="column" alignItems="center" mt={3}>
-                <Text className={classes.body}>
-                  Claimable Rewards
-                  <HelpInfo placement="bottom" title="The estimated amount of rewards you have collected and are eligible to claim." className={classes.tooltip} />
-                </Text>
-                {
-                  claimableRewards.length !== 0 &&
-                  <Box className={classes.rewardBox} bgcolor="background.contrast" width="100%">
-                    {
-                      Object.keys(claimableAmountsByToken).map(tokenAddress => {
-                        const token = tokenFinder(tokenAddress)!
-                        return (
-                          <Text variant="h4" className={classes.totalReward} key={tokenAddress}>
-                            {displayRewardAmount(claimableAmountsByToken[tokenAddress].shiftedBy(-token!.decimals))}
-                            <CurrencyLogo address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoMd)} />
-                            <span className={classes.currency}>
-                              {token.symbol}
-                            </span>
-                          </Text>
-                        )
-                      })
-                    }
-                    <Text marginBottom={1} variant="body2" color="textSecondary" className={classes.usdAmount}>
-                      ≈ ${totalTokenValue.toFormat(2)}
+                  <Text className={classes.claimedAmt}>
+                    ≈ ${selectedRewardsValue.toFormat(2)}
+                  </Text>
+                  <Link
+                    className={classes.link}
+                    underline="none"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href={`https://viewblock.io/zilliqa/tx/0x${claimResult?.hash}?network=${network?.toLowerCase()}`}>
+                    <Box display="flex" justifyContent="center" alignItems="center" mt={0.5}>
+                      <Text className={classes.body}>View on Viewblock</Text>
+                      <NewLinkIcon className={classes.linkIcon} />
+                    </Box>
+                  </Link>
+                  <Button fullWidth variant="contained" color="primary" className={classes.claimRewardsButton} onClick={() => resetClaimedRewardStates()}>
+                    Back to Reward Balance
+                  </Button>
+                </>}
+                {!claimSuccess && <Box display="flex" flexDirection="row" width="100%" gridColumnGap="8px" marginTop="16px">
+                  <Box display="flex" flexDirection="column" alignItems="center" className={classes.balanceFrame}>
+                    <CurrencyLogo currency="ZWAP" address={zwapAddress} className={classes.currencyLogo} />
+                    <Text variant="h2" className={classes.balanceAmount}>
+                      {zapBalanceLabel} ZWAP
                     </Text>
-                    <Accordion className={classes.accordion} expanded={showDetails} onChange={(_, expanded) => setShowDetails(expanded)}>
-                      <Box display="flex" justifyContent="center" width="100%">
-                        <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon} />}>
-                          <Text color="textSecondary">View Details</Text>
-                        </AccordionSummary>
-                      </Box>
-                      <AccordionDetails>
-                        <Box display="flex" flexDirection="column">
-                          {/* Select/Unselect all */}
-                          <Box>
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  className={classes.checkbox}
-                                  icon={<IndeterminateCheckBoxIcon fontSize="small" />}
-                                  checkedIcon={<CheckBoxIcon fontSize="small" />}
-                                  checked={isAllSelected}
-                                  onChange={handleSelectAll}
-                                />
-                              }
-                              label={
-                                <Text color="textSecondary">
-                                  {isAllSelected ? "Unselect all" : "Select all"}
-                                </Text>
-                              }
-                            />
-                          </Box>
-
-                          <Box mb={0.5} />
-
-                          {Object.keys(rewardsByDate).sort((a, b) => a === b ? 0 : (dayjs(a) > dayjs(b) ? -1 : 1)).map(date => {
-                            return (
-                              <Box mt={1} key={date}>
-                                <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
-                                  <Text className={classes.date}>
-                                    {date}
-                                  </Text>
-                                  <Text variant="body2" color="textSecondary" className={classes.usdAmount}>
-                                    ≈ ${valuesByDate[date].toFormat(2)}
-                                  </Text>
-                                </Box>
-                                <Divider />
-                                {rewardsByDate[date].map(reward => {
-                                  const token = reward.rewardToken;
-                                  const isDisabled = !reward.funded || claimedDistributions.includes(reward.info.id);
-
-                                  return (
-                                    <Box mt={0.5} key={reward.info.id}>
-                                      <FormControlLabel
-                                        control={
-                                          reward.funded === null 
-                                          ? <CircularProgress size={16} />
-                                          : <Checkbox
-                                            disabled={isDisabled}
-                                            className={classes.checkbox}
-                                            checked={isDistributionSelected(reward)}
-                                            onChange={handleSelect(reward)}
-                                          />
-                                        }
-                                        label={
-                                          <Text className={classes.epochReward}>
-                                            {displayRewardAmount(reward.info.amount.shiftedBy(-token.decimals))}
-                                            <CurrencyLogo address={token.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)} />
-                                            <span className={classes.currency}>
-                                              {token.symbol}
-                                              <HelpInfo 
-                                                placement="top" 
-                                                title={
-                                                  reward.funded === null
-                                                    ? "Checking if rewards are in..."
-                                                    : reward.funded === false 
-                                                      ? "Reward pending distribution from project owner." 
-                                                      : `${reward.rewardDistributor.name} from ${reward.rewardDistributor.distributor_name} at ${reward.rewardDistributor.distributor_address_hex} for epoch ${reward.info.epoch_number}.`
-                                                }
-                                                className={classes.tooltip} 
-                                                icon={reward.funded === false ? <ErrorIcon className={classes.errorIcon} /> : undefined} 
-                                              />
-                                            </span>
-                                          </Text>
-                                        }
-                                      />
-                                    </Box>
-                                  )
-                                })}
-                              </Box>
-                            )
-                          })}
-                        </Box>
-                      </AccordionDetails>
-                    </Accordion>
+                    <Text marginTop={0.5} className={classes.tokenValue}>
+                      ≈ {zapTokenValue.toFormat(2)} USD
+                    </Text>
                   </Box>
-                }
+                  <Box display="flex" flexDirection="column" alignItems="center" className={classes.balanceFrame}>
+                    <TbmCoin className={classes.tbmCoinLogo} />
+                    <Text variant="h2" className={classes.balanceAmount}>
+                      {bearCount} BEAR
+                    </Text>
+                  </Box>
+                </Box>}
               </Box>
+              {!claimSuccess && <>
+                <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
+                  <Text className={classes.body}>
+                    Rewards Claimable
+                    <HelpInfo placement="bottom"
+                      title={<span>The estimated amount of rewards you have collected and are eligible to claim (includes <b>ARKY</b> and <b>liquidity mining</b> rewards).</span>}
+                      className={classes.tooltip} additionalStyling={classes.tooltipMaxWidth} />
+                  </Text>
+                  {
+                    claimableRewards.length !== 0 &&
+                    <Box className={classes.rewardBox} bgcolor="background.contrast" width="100%">
+                      {
+                        Object.keys(claimableAmountsByToken).map(tokenAddress => {
+                          const token = tokenFinder(tokenAddress)!
+                          return (
+                            <Text variant="h4" className={classes.totalReward} key={tokenAddress}>
+                              {displayRewardAmount(claimableAmountsByToken[tokenAddress].shiftedBy(-token!.decimals))}&nbsp;
+                              <CurrencyLogo address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoMd)} />&nbsp;
+                              <span className={classes.currency}>
+                                {token.symbol}
+                              </span>
+                            </Text>
+                          )
+                        })
+                      }
+                      <Text marginBottom={1} variant="body2" color="textSecondary" className={classes.usdAmount}>
+                        ≈ ${totalTokenValue.toFormat(2)}
+                      </Text>
+                      <Accordion className={classes.accordion} expanded={showDetails} onChange={(_, expanded) => setShowDetails(expanded)}>
+                        <Box display="flex" justifyContent="center" width="100%">
+                          <AccordionSummary expandIcon={<ArrowDropDownIcon className={classes.dropDownIcon} />}>
+                            <Text color="textSecondary">View Details</Text>
+                          </AccordionSummary>
+                        </Box>
+                        <AccordionDetails>
+                          <Box display="flex" flexDirection="column">
+                            {/* Select/Unselect all */}
+                            <Box>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    className={classes.checkbox}
+                                    icon={<IndeterminateCheckBoxIcon fontSize="small" />}
+                                    checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                    checked={isAllSelected}
+                                    onChange={handleSelectAll}
+                                  />
+                                }
+                                label={
+                                  <Text color="textSecondary">
+                                    {isAllSelected ? "Unselect all" : "Select all"}
+                                  </Text>
+                                }
+                              />
+                            </Box>
+
+                            <Box mb={0.5} />
+
+                            {Object.keys(rewardsByDate).sort((a, b) => a === b ? 0 : (dayjs(a) > dayjs(b) ? -1 : 1)).map(date => {
+                              return (
+                                <Box mt={1} key={date}>
+                                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
+                                    <Text className={classes.date}>
+                                      {date}
+                                    </Text>
+                                    <Text variant="body2" color="textSecondary" className={classes.usdAmount}>
+                                      ≈ ${valuesByDate[date].toFormat(2)}
+                                    </Text>
+                                  </Box>
+                                  <Divider />
+                                  {rewardsByDate[date].map(reward => {
+                                    const token = reward.rewardToken;
+                                    const isDisabled = !reward.funded || claimedDistributions.includes(reward.info.id);
+
+                                    return (
+                                      <Box mt={0.5} key={reward.info.id}>
+                                        <FormControlLabel
+                                          control={
+                                            reward.funded === null
+                                              ? <CircularProgress size={16} />
+                                              : <Checkbox
+                                                disabled={isDisabled}
+                                                className={classes.checkbox}
+                                                checked={isDistributionSelected(reward)}
+                                                onChange={handleSelect(reward)}
+                                              />
+                                          }
+                                          label={
+                                            <Text className={classes.epochReward}>
+                                              <img src={ArkyLogo} alt="arkyLogo" className={classes.arkyLogo} />
+                                              {displayRewardAmount(reward.info.amount.shiftedBy(-token.decimals))}&nbsp;
+                                              <CurrencyLogo address={token.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)} />&nbsp;
+                                              <span className={classes.currency}>
+                                                {token.symbol}
+                                                <HelpInfo
+                                                  placement="top"
+                                                  title={
+                                                    reward.funded === null
+                                                      ? "Checking if rewards are in..."
+                                                      : reward.funded === false
+                                                        ? "Reward pending distribution from project owner."
+                                                        : reward.isTbmFee
+                                                          ? "ZWAP rewards from holding ZWAP and/or BEARs."
+                                                          : `${reward.rewardDistributor?.name} from ${reward.rewardDistributor?.distributor_name} at ${reward.rewardDistributor?.distributor_address_hex} for epoch ${reward.info.epoch_number}.`
+                                                  }
+                                                  className={classes.tooltip}
+                                                  icon={reward.funded === false ? <ErrorIcon className={classes.errorIcon} /> : undefined}
+                                                />
+                                              </span>
+                                            </Text>
+                                          }
+                                        />
+                                      </Box>
+                                    )
+                                  })}
+                                </Box>
+                              )
+                            })}
+                          </Box>
+                        </AccordionDetails>
+                      </Accordion>
+                    </Box>
+                  }
+                </Box>
               <Box marginTop={2}>
                 <Tooltip title={claimTooltip}>
                   <span>
-                    <Button fullWidth variant="contained" color="primary" disabled={claimableRewards.length === 0} onClick={onClaimRewards} className={classes.claimRewardsButton}>
-                      {loading && <CircularProgress size="1em" color="inherit" className={classes.progress} />}
+                    <Button fullWidth variant="contained" color="primary" disabled={claimableRewards.length === 0 || loading || txLoading} onClick={onClaimRewards} className={classes.claimRewardsButton}>
+                      {(loading || txLoading) && <CircularProgress size="1em" color="inherit" className={classes.progress} />}
                       {claimButtonText()}
                     </Button>
                   </span>
@@ -670,6 +797,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                   </Text>
                 </Box>
               )}
+              </>}
 
             </Card>
           </ClickAwayListener>
@@ -680,5 +808,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     </Box>
   );
 };
+
 
 export default RewardsInfoButton;

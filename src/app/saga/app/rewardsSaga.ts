@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js'
 import { call, delay, fork, put, race, select, take, takeLatest } from "redux-saga/effects";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
-import { Distribution, Distributor, EstimatedRewards, ZAPStats, logger } from "core/utilities";
+import { Distribution, Distributor, EstimatedRewards, ZAPStats, logger, ArkClient, TbmFeeDistributionEntry, TbmFeeDistribution } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { actions } from "app/store";
 import { BlockchainActionTypes } from "app/store/blockchain/actions";
@@ -9,8 +9,8 @@ import { RewardsActionTypes } from "app/store/rewards/actions";
 import { DistributionWithStatus, DistributorWithTimings, PoolReward, PotentialRewards } from "app/store/types";
 import { WalletActionTypes } from "app/store/wallet/actions";
 import { bnOrZero, SimpleMap } from "app/utils";
-import { PollIntervals } from "app/utils/constants";
-import { getBlockchain, getRewards, getTokens, getWallet } from "../selectors";
+import { PollIntervals, WZIL_TOKEN_CONTRACT } from "app/utils/constants";
+import { getBlockchain, getRewards, getTokens, getWallet, getMarketplace } from "../selectors";
 
 function* queryDistributors() {
   while (true) {
@@ -171,6 +171,94 @@ function* queryDistribution() {
   }
 }
 
+function* queryTbmFeeDistributionEntry() {
+  const zilCurrency = "0x0000000000000000000000000000000000000000";
+  while (true) {
+    try {
+      logger("rewards saga", "query TBM fee distributions");
+
+      const { network } = getBlockchain(yield select())
+      const { exchangeInfo } = getMarketplace(yield select())
+      const walletState = getWallet(yield select())
+      const arkClient = new ArkClient(network);
+      const feeDistributors = exchangeInfo?.feeDistributors;
+
+      if (!walletState.wallet || !feeDistributors) {
+        continue;
+      }
+
+      const userAddress = walletState.wallet?.addressInfo.byte20;
+      const result = (yield call(arkClient.getTbmFeeDistributionEntries)) as unknown as any;
+      const entries: TbmFeeDistributionEntry[] = result.entries;
+
+      const userClaimables = entries.filter((e) => e.userAddress.toLowerCase() === userAddress.toLowerCase() && e.amount > 0 && !e.claimed);
+
+      const d: TbmFeeDistribution[] = userClaimables.map((c) => {
+        return {
+          id: c.id,
+          distributor_address: feeDistributors[c.currencyAddress],
+          epoch_number: c.tbmFeeDistributionRoot.epochNumber,
+          amount: new BigNumber(c.amount),
+          proof: c.proof,
+          reward_token_address: c.currencyAddress,
+          epoch: c.tbmFeeDistributionRoot.epoch
+        }
+      })
+
+      type Substate = { merkle_roots: { [epoch_number: string]: string } }
+      const uploadStates: { [distributor_address: string]: Substate } = {}
+      const distributions: DistributionWithStatus[] = []
+      const zilswap = ZilswapConnector.getSDK();
+      for (let i = 0; i < d.length; ++i) {
+        const info = d[i]
+        const addr = info.distributor_address
+        let uploadState = uploadStates[addr]
+        if (!uploadState) {
+          const contract = zilswap.getContract(addr);
+          uploadStates[addr] = uploadState = yield call([contract, contract.getSubState], "merkle_roots");
+        }
+        const merkleRoots = uploadState?.merkle_roots ?? {};
+
+        let funded = null;
+        let tokenAddress = info.reward_token_address;
+
+        if (info.reward_token_address === zilCurrency) tokenAddress = WZIL_TOKEN_CONTRACT[network]
+
+        const tokenContract = zilswap.getContract(tokenAddress);
+        const balancesState = (yield call([tokenContract, tokenContract.getSubState], "balances")) as unknown as any
+        const tokenBalance = balancesState.balances[addr];
+
+        if (tokenBalance) {
+          funded = bnOrZero(tokenBalance).gte(info.amount);
+        } else {
+          funded = true;
+        }
+
+        distributions.push({
+          info,
+          readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
+          funded,
+          isTbmFee: true
+        })
+      }
+
+      yield put(actions.Rewards.appendDistributions(distributions));
+
+    } catch (e) {
+      console.warn('Fetch failed, will automatically retry later. Error:')
+      console.warn(e)
+    } finally {
+      const invalidated = yield race({
+        networkUpdate: take(BlockchainActionTypes.SET_NETWORK),
+        distributionsUpdated: take(RewardsActionTypes.UPDATE_DISTRIBUTIONS),
+        walletUpdated: take(WalletActionTypes.WALLET_UPDATE),
+      });
+
+      logger("rewards saga", "TBM fee distributions epoch info invalidated", invalidated);
+    }
+  }
+}
+
 function* queryPotentialRewards() {
   while (true) {
     logger("zap saga", "query potential rewards");
@@ -233,5 +321,6 @@ export default function* rewardsSaga() {
   yield fork(queryDistributors);
   yield fork(queryDistribution);
   yield fork(queryPotentialRewards);
+  yield fork(queryTbmFeeDistributionEntry);
   yield fork(watchDistributors);
 }
