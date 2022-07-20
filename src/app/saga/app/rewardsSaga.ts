@@ -124,7 +124,10 @@ function* queryDistribution() {
       const zilswap = ZilswapConnector.getSDK();
       for (let i = 0; i < d.length; ++i) {
         const info = d[i]
-        const addr = info.distributor_address
+        const addr = info.distributor_address;
+        if (info.distributor_address === "0x940c02e471a082cc3062b7cc446e652e64fe13fe" && info.epoch_number === 3)
+          continue;
+
         let uploadState = uploadStates[addr]
         if (!uploadState) {
           const contract = zilswap.getContract(addr);
