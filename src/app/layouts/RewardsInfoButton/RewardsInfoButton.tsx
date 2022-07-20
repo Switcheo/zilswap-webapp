@@ -338,11 +338,11 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
   }, [walletState.wallet, network])
 
   const txLoading = useMemo(() => {
-    if(!claimResult) return false;
-    
+    if (!claimResult) return false;
+
     const claimTx = transactionState.submittedTxs.find(t => t.hash === claimResult.hash);
-    if(!claimTx) return true;
-    if(claimTx && claimTx.status === 'confirmed') {
+    if (!claimTx) return true;
+    if (claimTx && claimTx.status === 'confirmed') {
       setClaimSuccess(true);
     }
     return false
@@ -373,7 +373,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       return dayjs.unix(distribution_start_time +
         (epoch_period * (reward.info.epoch_number - initial_epoch_number + (!!retroactive_distribution_cutoff_time ? 0 : 1))))
         .format('DD MMM YY');
-    } else if('reward_token_address' in reward.info) {
+    } else if ('reward_token_address' in reward.info) {
       return dayjs(reward.info.epoch).format('DD MMM YY');
     }
   })
@@ -519,7 +519,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
       return "Claim Rewards (All)";
     } else if (selectedDistributions.length) {
       return `Claim Rewards (${selectedDistributions.length})`;
-    } else if(loading || txLoading) {
+    } else if (loading || txLoading) {
       return "Claiming Rewards"
     } else {
       return "Select Reward to Claim";
@@ -589,7 +589,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
         modifiers={popperModifiers}>
         <Box marginTop={2}>
           <ClickAwayListener onClickAway={() => setActive(false)}>
-              <Card className={classes.card}>
+            <Card className={classes.card}>
               <Box display="flex" flexDirection="column" alignItems="center" gridRowGap="18px">
                 <Text variant="h6" color="textPrimary" className={classes.header}>Your Balance</Text>
                 {claimSuccess && <>
@@ -758,45 +758,45 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                     </Box>
                   }
                 </Box>
-              <Box marginTop={2}>
-                <Tooltip title={claimTooltip}>
-                  <span>
-                    <Button fullWidth variant="contained" color="primary" disabled={claimableRewards.length === 0 || loading || txLoading} onClick={onClaimRewards} className={classes.claimRewardsButton}>
-                      {(loading || txLoading) && <CircularProgress size="1em" color="inherit" className={classes.progress} />}
-                      {claimButtonText()}
-                    </Button>
-                  </span>
-                </Tooltip>
-              </Box>
-
-              {claimResult && (
-                <Box display="flex" marginTop={1} flexDirection="column" alignItems="center">
-                  <Text marginTop={2} variant="h4" className={classes.textColoured}>
-                    <CheckCircleRoundedIcon fontSize="inherit" className={classes.successIcon} />
-                    &nbsp;
-                    Claim transaction submitted!
-                  </Text>
-                  <Link
-                    className={classes.link}
-                    underline="none"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                    href={`https://viewblock.io/zilliqa/tx/0x${claimResult?.hash}?network=${network?.toLowerCase()}`}>
-                    <Box display="flex" justifyContent="center" alignItems="center" mt={0.5}>
-                      <Text className={classes.body}>View on Viewblock</Text>
-                      <NewLinkIcon className={classes.linkIcon} />
-                    </Box>
-                  </Link>
+                <Box marginTop={2}>
+                  <Tooltip title={claimTooltip}>
+                    <span>
+                      <Button fullWidth variant="contained" color="primary" disabled={claimableRewards.length === 0 || loading || txLoading} onClick={onClaimRewards} className={classes.claimRewardsButton}>
+                        {(loading || txLoading) && <CircularProgress size="1em" color="inherit" className={classes.progress} />}
+                        {claimButtonText()}
+                      </Button>
+                    </span>
+                  </Tooltip>
                 </Box>
-              )}
 
-              {!!error && (
-                <Box mt={1.5} display="flex" justifyContent="center">
-                  <Text variant="body1" color="error">
-                    {error.message ?? "Unknown error"}
-                  </Text>
-                </Box>
-              )}
+                {claimResult && (
+                  <Box display="flex" marginTop={1} flexDirection="column" alignItems="center">
+                    <Text marginTop={2} variant="h4" className={classes.textColoured}>
+                      <CheckCircleRoundedIcon fontSize="inherit" className={classes.successIcon} />
+                      &nbsp;
+                      Claim transaction submitted!
+                    </Text>
+                    <Link
+                      className={classes.link}
+                      underline="none"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                      href={`https://viewblock.io/zilliqa/tx/0x${claimResult?.hash}?network=${network?.toLowerCase()}`}>
+                      <Box display="flex" justifyContent="center" alignItems="center" mt={0.5}>
+                        <Text className={classes.body}>View on Viewblock</Text>
+                        <NewLinkIcon className={classes.linkIcon} />
+                      </Box>
+                    </Link>
+                  </Box>
+                )}
+
+                {!!error && (
+                  <Box mt={1.5} display="flex" justifyContent="center">
+                    <Text variant="body1" color="error">
+                      {error.message ?? "Unknown error"}
+                    </Text>
+                  </Box>
+                )}
               </>}
 
             </Card>
