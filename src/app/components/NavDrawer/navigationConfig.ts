@@ -9,18 +9,21 @@ const navigationConfig: NavigationOptions[] = [{
   }, {
     title: "Pools",
     href: "/pools",
-    icon: "Layers",
+    icon: "Pools",
   }, {
     title: "ARKY",
     href: "/arky",
-    icon: "Dashboard",
-    badge: "BETA",
+    icon: "Arky",
+  }, {
+    title: "Zolar",
+    href: "https://zolar.io/",
+    icon: "Zolar",
+    external: true,
   },
   {
     title: "ZilBridge",
     href: "/bridge",
     icon: "Bridge",
-    badge: "NOW LIVE",
   }, {
     title: "ZILO",
     href: "/zilo",
