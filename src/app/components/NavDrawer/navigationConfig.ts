@@ -19,8 +19,7 @@ const navigationConfig: NavigationOptions[] = [{
     href: "https://zolar.io/",
     icon: "Zolar",
     external: true,
-  },
-  {
+  }, {
     title: "ZilBridge",
     href: "/bridge",
     icon: "Bridge",
