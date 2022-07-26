@@ -187,7 +187,7 @@ export class ArkClient {
   }
 
   getTbmFeeDistributionEntries = async () => {
-    const url = this.http.path("exchange/tbm-fee/distribution");
+    const url = this.http.path("exchange/tbm-fee/distribution", null, { claimed: false });
     const result = await this.http.get({ url });
     const output = await result.json();
     await this.checkError(output);

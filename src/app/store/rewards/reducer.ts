@@ -1,5 +1,4 @@
 import { SimpleMap } from "app/utils";
-import { TbmFeeDistribution } from "core/utilities";
 import { RewardsActionTypes } from "./actions";
 import { DistributionWithStatus, DistributorWithTimings, PoolRewards, PotentialRewards, RewardsState } from "./types";
 
