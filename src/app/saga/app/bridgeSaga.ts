@@ -90,8 +90,6 @@ function* watchDepositConfirmation() {
             };
             const result = (yield call([sdk.hydrogen, sdk.hydrogen.getDetailedTransfers], queryOpts)) as GetDetailedTransfersResponse;
 
-            console.log("bridge saga", result)
-
             const depositTransfer = result.data.find((transfer) => transfer.from_address?.toLowerCase() === tx.srcAddr && transfer.source_blockchain === tx.srcChain);
 
             if (depositTransfer?.destination_event !== null) {
@@ -111,7 +109,7 @@ function* watchDepositConfirmation() {
               try {
                 const rpcEndpoint = APIS[zilNetwork] ?? APIS.TestNet;
                 const zilliqa = new Zilliqa(rpcEndpoint);
-                const transaction = (yield call([zilliqa.blockchain, zilliqa.blockchain.getTransaction], tx.sourceTxHash!)) as Transaction | undefined;
+                const transaction = (yield call([zilliqa.blockchain, zilliqa.blockchain.getTransaction], tx.sourceTxHash?.replace(/^0x/i, "")!)) as Transaction | undefined;
 
                 logger("bridge saga", tx.sourceTxHash, transaction?.status);
                 if (transaction?.isPending()) continue;
@@ -165,14 +163,13 @@ function* watchDepositConfirmation() {
             }
 
             const decimals = sdk.token.getDecimals(balanceDenom) ?? 0;
-            const withdrawAmountHuman = withdrawAmount.shiftedBy(-decimals);
             const connectedSDK = (yield call([sdk, sdk.connectWithMnemonic], tx.interimAddrMnemonics)) as ConnectedCarbonSDK
             const withdrawResult = (yield call([connectedSDK.coin, connectedSDK.coin.createWithdrawal], {
-              amount: withdrawAmountHuman,
+              amount: withdrawAmount,
               denom: tx.dstToken,
               toAddress: tx.dstAddr.toLowerCase().replace(/^0x/i, ""),
               feeAddress: BridgeParamConstants.SWTH_FEE_ADDRESS,
-              feeAmount: tx.withdrawFee,
+              feeAmount: tx.withdrawFee.shiftedBy(decimals).dp(0),
             })) as CarbonWallet.SendTxResponse;
 
             tx.withdrawTxHash = withdrawResult.transactionHash;
@@ -289,7 +286,7 @@ function* watchActiveTxConfirmations() {
           switch (bridgeTx.srcChain) {
             case Blockchain.Zilliqa: {
               const zilswapSdk = ZilswapConnector.getSDK();
-              const sourceTx: Transaction = yield zilswapSdk.zilliqa.blockchain.getTransaction(bridgeTx.sourceTxHash);
+              const sourceTx: Transaction = yield zilswapSdk.zilliqa.blockchain.getTransaction(bridgeTx.sourceTxHash.replace(/^0x/i, ""));
               if (sourceTx.blockConfirmation) {
                 yield put(actions.Bridge.addBridgeTx([{
                   sourceTxHash: bridgeTx.sourceTxHash,
