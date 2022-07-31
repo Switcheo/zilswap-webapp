@@ -7,6 +7,7 @@ import dayjs from "dayjs";
 import { toBech32Address } from "@zilliqa-js/crypto";
 import { useSelector } from "react-redux";
 import { Blockchain } from "carbon-js-sdk";
+import BigNumber from "bignumber.js";
 import { Text } from "app/components";
 import { RewardsState, RootState, TokenInfo, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
@@ -119,6 +120,12 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
         const lhsUsdValues = tokenState.values[lhs.address] ?? EMPTY_USD_VALUE;
         const rhsUsdValues = tokenState.values[rhs.address] ?? EMPTY_USD_VALUE;
 
+        if (sortType === "staked") {
+          const lhsPoolLiquidity: BigNumber = lhsUsdValues.poolLiquidity ?? EMPTY_USD_VALUE;
+          const rhsPoolLiquidity: BigNumber = rhsUsdValues.poolLiquidity ?? EMPTY_USD_VALUE;
+          return sortOrder === "asc" ? lhsPoolLiquidity.comparedTo(rhsPoolLiquidity) : rhsPoolLiquidity.comparedTo(lhsPoolLiquidity)
+        }
+
         const secondsPerDay = 24 * 3600
 
         const lhsRoiPerSec = lhsUsdValues.rewardsPerSecond.dividedBy(lhsUsdValues.poolLiquidity);
@@ -222,7 +229,21 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
   }
   const getSortDetail = () => {
     const [sortType, sortOrder] = sortBy.split(":");
-    const sortString = sortType === "apr" ? "APR" : "Rewards";
+    let sortString = "";
+    switch(sortType) {
+      case "apr": 
+        sortString = "APR";
+        break;
+      case "dist": 
+        sortString = "Rewards";
+        break;
+      case "staked":
+        sortString = "Liquidity";
+        break;
+      default: 
+        sortString = "Rewards";
+        break;
+    }
     return <>{sortString} {sortOrder === "asc" ? <SingleAsc /> : <SingleDesc />}</>
   }
 
@@ -276,6 +297,16 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
                 onClick={() => { closeMenu(); setSortBy("dist:asc"); }}>
                 Rewards&nbsp;<Text className={classes.noBold}>Low - High</Text><Box flexGrow={1} />{sortBy === "dist:asc" && <Checkmark />}
               </Text>
+              <Text
+                className={cls(classes.menuItem, { [classes.selectedMenu]: sortBy === "staked:asc" })}
+                onClick={() => { closeMenu(); setSortBy("staked:asc"); }}>
+                Liquidity&nbsp;<Text className={classes.noBold}>Low - High</Text><Box flexGrow={1} />{sortBy === "staked:asc" && <Checkmark />}
+              </Text>
+              <Text
+                className={cls(classes.menuItem, { [classes.selectedMenu]: sortBy === "staked:desc" })}
+                onClick={() => { closeMenu(); setSortBy("staked:desc"); }}>
+                Liquidity&nbsp;<Text className={classes.noBold}>High - Low</Text><Box flexGrow={1} />{sortBy === "staked:desc" && <Checkmark />}
+              </Text>
             </Popover>
           </Hidden>
         </Box>
@@ -301,7 +332,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
               <Text>Pool</Text>
             </Box>
             <Box flex={2} justifyContent="flex-start" display="flex" flexDirection="column">
-              <Text paddingLeft="16px" >Total staked</Text>
+              <Text onClick={() => updateSort("staked")} className={classes.headerText}>{getLogo("staked")}Total staked</Text>
             </Box>
             <Box flex={2} justifyContent="flex-start" display="flex">
               <Text onClick={() => updateSort("dist")} className={classes.headerText}>{getLogo("dist")}Reward to be distributed</Text>
