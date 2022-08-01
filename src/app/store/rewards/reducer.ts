@@ -8,6 +8,7 @@ const initial_state: RewardsState = {
   rewardsByPool: {},
   potentialRewardsByPool: {},
   claimedDistributions: [],
+  bearCount: 0
 };
 
 const reducer = (state: RewardsState = initial_state, action: any): RewardsState => {
@@ -24,6 +25,13 @@ const reducer = (state: RewardsState = initial_state, action: any): RewardsState
       return {
         ...state,
         distributions,
+      };
+    }
+    case RewardsActionTypes.APPEND_DISTRIBUTIONS: {
+      const distributions = action.distributions as ReadonlyArray<DistributionWithStatus>;
+      return {
+        ...state,
+        distributions: [...state.distributions, ...distributions],
       };
     }
     case RewardsActionTypes.ADD_CLAIMED_DISTRIBUTIONS: {
@@ -48,6 +56,11 @@ const reducer = (state: RewardsState = initial_state, action: any): RewardsState
         ...state,
         potentialRewardsByPool,
       };
+    case RewardsActionTypes.UPDATE_USER_BEAR_COUNT:
+      return {
+        ...state,
+        bearCount: action.bearCount
+      }
     default:
       return state;
   };

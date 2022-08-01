@@ -101,10 +101,25 @@ export interface Distribution {
 	id: string,
 	distributor_address: string,
 	epoch_number: number,
-	address_bech32: string,
-	address_hex: string,
+	address_bech32?: string,
+	address_hex?: string,
 	amount: BigNumber,
 	proof: string[],
+}
+
+export interface TbmFeeDistributionEntry {
+  id: string;
+  userAddress: string;
+  currencyAddress: string;
+	amount: number;
+	proof: string[];
+  tbmFeeDistributionRoot: { epoch: string, epochNumber: number };
+  claimed: boolean;
+}
+
+export interface TbmFeeDistribution extends Distribution {
+  epoch: string;
+  reward_token_address: string;
 }
 
 export interface EstimatedRewards {

@@ -7,6 +7,7 @@ import { ReactComponent as TooltipSVG } from "./tooltip.svg";
 
 interface Props extends Omit<TooltipProps, "children"> {
   icon?: JSX.Element;
+  additionalStyling?: string;
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -56,14 +57,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const HelpInfo: React.FC<Props> = (props: Props) => {
-  const { className, classes, icon, ...rest } = props;
+  const { className, classes, icon, additionalStyling, ...rest } = props;
   const classNames = useStyles();
 
   return (
     <Tooltip
       {...rest}
       className={cls(classNames.root, className)}
-      classes={{ tooltip: classNames.tooltip, ...classes }}
+      classes={{ tooltip: cls(classNames.tooltip, additionalStyling), ...classes }}
     >
       {!!icon
         ? icon

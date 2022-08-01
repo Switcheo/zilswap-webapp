@@ -10,6 +10,8 @@ export const RewardsActionTypes = {
   UPDATE_POOL_REWARDS: "UPDATE_POOL_REWARDS",
   UPDATE_POTENTIAL_REWARDS: "UPDATE_POTENTIAL_REWARDS",
   ADD_CLAIMED_DISTRIBUTIONS: "ADD_CLAIMED_DISTRIBUTIONS",
+  APPEND_DISTRIBUTIONS: "APPEND_DISTRIBUTIONS",
+  UPDATE_USER_BEAR_COUNT: "UPDATE_USER_BEAR_COUNT",
 };
 
 export function updateDistributors(distributors: ReadonlyArray<DistributorWithTimings>) {
@@ -30,6 +32,20 @@ export function updateDistributions(distributions: DistributionWithStatus[]) {
   return {
     type: RewardsActionTypes.UPDATE_DISTRIBUTIONS,
     distributions,
+  }
+};
+
+export function appendDistributions(distributions: DistributionWithStatus[]) {
+  return {
+    type: RewardsActionTypes.APPEND_DISTRIBUTIONS,
+    distributions,
+  }
+};
+
+export function updateUserBear(bearCount: number) {
+  return {
+    type: RewardsActionTypes.UPDATE_USER_BEAR_COUNT,
+    bearCount,
   }
 };
 
