@@ -55,6 +55,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       "& path": {
         fill: theme.palette.type === "dark" ? "#00FFB0" : "",
       },
+      "& .pathWithStroke": {
+        stroke: theme.palette.type === "dark" ? "#00FFB0" : "",
+      },
+      "& line": {
+        stroke: theme.palette.type === "dark" ? "#00FFB0" : "",
+      },
     },
     "& .MuiButton-label": {
       color: theme.palette.type === "dark" ? "#00FFB0" : "",
@@ -72,6 +78,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   icon: {
     "& path": {
       fill: theme.palette.text?.primary,
+    },
+    "& .pathWithStroke": {
+      stroke: theme.palette.text?.primary,
+    },
+    "& line": {
+      stroke: theme.palette.text?.primary,
     },
   },
   iconMargin: {
