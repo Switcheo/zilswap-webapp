@@ -723,7 +723,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                           }
                                           label={
                                             <Text className={classes.epochReward}>
-                                              <img src={ArkyLogo} alt="arkyLogo" className={classes.arkyLogo} />
+                                              {reward.isTbmFee && <img src={ArkyLogo} alt="arkyLogo" className={classes.arkyLogo} />}
                                               {displayRewardAmount(reward.info.amount.shiftedBy(-token.decimals))}&nbsp;
                                               <CurrencyLogo address={token.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)} />&nbsp;
                                               <span className={classes.currency}>

@@ -186,8 +186,8 @@ export class ArkClient {
     return output.result;
   }
 
-  getTbmFeeDistributionEntries = async () => {
-    const url = this.http.path("exchange/tbm-fee/distribution", null, { claimed: false });
+  getTbmFeeDistributionEntries = async (userAddress: string) => {
+    const url = this.http.path("exchange/tbm-fee/distribution", null, { limit: 1000,  user: userAddress });
     const result = await this.http.get({ url });
     const output = await result.json();
     await this.checkError(output);
