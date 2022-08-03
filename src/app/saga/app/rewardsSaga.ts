@@ -191,7 +191,8 @@ function* queryTbmFeeDistributionEntry() {
       }
 
       const userAddress = walletState.wallet?.addressInfo.byte20;
-      const result = (yield call(arkClient.getTbmFeeDistributionEntries)) as unknown as any;
+      const userAddressBech32 = walletState.wallet?.addressInfo.bech32.toLowerCase();
+      const result = (yield call(arkClient.getTbmFeeDistributionEntries, userAddressBech32)) as unknown as any;
       const entries: TbmFeeDistributionEntry[] = result.entries;
 
       const userClaimables = entries.filter((e) => e.userAddress.toLowerCase() === userAddress.toLowerCase() && e.amount > 0 && !e.claimed);
