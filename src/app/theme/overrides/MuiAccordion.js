@@ -6,7 +6,7 @@ const MuiAccordion = theme => ({
     boxSizing: "border-box",
     position: "",
     margin: 0,
-    '&  $lastChild': {
+    '& :last-child': {
       borderBottomRightRadius: "12px",
       borderBottomLeftRadius: "12px",
     },
