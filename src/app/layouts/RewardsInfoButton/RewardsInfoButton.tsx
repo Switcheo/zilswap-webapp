@@ -651,7 +651,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                           return (
                             <Text variant="h4" className={classes.totalReward} key={tokenAddress}>
                               {displayRewardAmount(claimableAmountsByToken[tokenAddress].shiftedBy(-token!.decimals))}&nbsp;
-                              <CurrencyLogo address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoMd)} />&nbsp;
+                              <CurrencyLogo currency={token?.symbol} address={token?.address} className={cls(classes.currencyLogo, classes.currencyLogoMd)} />&nbsp;
                               <span className={classes.currency}>
                                 {token.symbol}
                               </span>
@@ -725,7 +725,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
                                             <Text className={classes.epochReward}>
                                               {reward.isTbmFee && <img src={ArkyLogo} alt="arkyLogo" className={classes.arkyLogo} />}
                                               {displayRewardAmount(reward.info.amount.shiftedBy(-token.decimals))}&nbsp;
-                                              <CurrencyLogo address={token.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)} />&nbsp;
+                                              <CurrencyLogo currency={token.symbol} address={token.address} className={cls(classes.currencyLogo, classes.currencyLogoSm)} />&nbsp;
                                               <span className={classes.currency}>
                                                 {token.symbol}
                                                 <HelpInfo
