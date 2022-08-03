@@ -179,9 +179,9 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   balanceAmount: {
     fontSize: "14px",
     marginTop: "8px",
-    lineHeight: "12.28px",
+    lineHeight: "16px",
     textAlign: "center",
-    width: "max-content"
+    whiteSpace: "pre-wrap"
   },
   body: {
     fontSize: "14px",
@@ -266,7 +266,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   tokenValue: {
     color: "rgba(222, 255, 255, 0.5)",
-    fontSize: "12px"
+    fontSize: "12px",
+    textAlign: "center"
   },
   balanceFrame: {
     border: '1px solid rgba(222, 255, 255, 0.1)',
@@ -538,7 +539,6 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     },
     arrow: {
       enabled: true,
-      element: buttonRef?.current,
     },
   } as const;
 
