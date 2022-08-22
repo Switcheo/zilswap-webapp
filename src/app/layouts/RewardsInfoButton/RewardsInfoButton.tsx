@@ -325,7 +325,7 @@ const RewardsInfoButton: React.FC<Props> = (props: Props) => {
     if (!walletState.wallet) return;
     runLoadBears(async () => {
       const arkClient = new ArkClient(network);
-      const query: ArkClient.ListTokenParams = { owner: walletState.wallet?.addressInfo.byte20.toLowerCase() };
+      const query: ArkClient.ListTokenParams = { owner: walletState.wallet?.addressInfo.byte20.toLowerCase(), limit: 500 };
       const res = await arkClient.listTokens(query);
       const nftList: Nft[] = res.entries;
 
