@@ -88,6 +88,10 @@ export const TOKEN_NAME_OVERRIDE: SimpleMap<string> = {
   "zil1h63h5rlg7avatnlzhfnfzwn8vfspwkapzdy2aw": "XCAD (Legacy)",
 }
 
+export const HIDE_SWAP_TOKEN_OVERRIDE: string[] = [
+  "zil14jmjrkvfcz2uvj3y69kl6gas34ecuf2j5ggmye",
+]
+
 export const WZIL_TOKEN_CONTRACT = {
   [Network.MainNet]: "zil1gvr0jgwfsfmxsyx0xsnhtlte4gks6r3yk8x5fn",
   [Network.TestNet]: "zil1nzn3k336xwal7egdzgalqnclxtgu3dggxed85m",

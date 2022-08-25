@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Box, CircularProgress, DialogContent, DialogProps, IconButton, InputAdornment, OutlinedInput, makeStyles } from "@material-ui/core";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
@@ -11,7 +10,7 @@ import { DialogModal } from "app/components";
 import { BridgeState } from "app/store/bridge/types";
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { hexToRGBA, useTaskSubscriber } from "app/utils";
-import { BIG_ZERO, LoadingKeys, ZIL_ADDRESS } from "app/utils/constants";
+import { BIG_ZERO, HIDE_SWAP_TOKEN_OVERRIDE, LoadingKeys, ZIL_ADDRESS } from "app/utils/constants";
 import { actions } from "app/store";
 import { AppTheme } from "app/theme/types";
 import { getMarketplace } from "app/saga/selectors";
@@ -164,6 +163,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
     if (token.isZil && hideZil) return false;
     if (!token.isZil && !token.pool && hideNoPool && !token.isWzil) return false;
     if (searchTerm === "" && !token.registered && !tokenState.userSavedTokens.includes(token.address)) return false;
+    if (HIDE_SWAP_TOKEN_OVERRIDE.includes(token.address)) return false;
 
     if (!token.registered && !tokenState.userSavedTokens.includes(token.address)) {
       return token.address.toLowerCase() === searchTerm;
