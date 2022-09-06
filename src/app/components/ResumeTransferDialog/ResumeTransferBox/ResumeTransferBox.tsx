@@ -226,8 +226,8 @@ const ResumeTransferBox = (props: any) => {
             const swthAddress = AddressUtils.SWTHAddress.generateAddress(mnemonicString, undefined, { network: carbonNetwork });
 
             const queryOpts: Hydrogen.GetTransfersRequest = {
-              to_address: swthAddress,
-              limit: 100,
+                to_address: swthAddress,
+                limit: 100,
             };
             const result = await sdk.hydrogen.getDetailedTransfers(queryOpts);
             const depositTransfer = result.data.find((transfer) => transfer.status === Hydrogen.CrossChainFlowStatus.Completed && (transfer.source_blockchain === Blockchain.Zilliqa || transfer.source_blockchain === Blockchain.Ethereum));

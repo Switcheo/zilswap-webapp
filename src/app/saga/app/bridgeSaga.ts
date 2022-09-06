@@ -4,18 +4,18 @@ import { Transaction as EthTransaction, ethers } from "ethers";
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
-import { CarbonWallet, Blockchain, Models, AddressUtils, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
-import { GetDetailedTransfersResponse, GetTransfersRequest, CrossChainFlowStatus } from "carbon-js-sdk/lib/hydrogen";
+import { Blockchain, AddressUtils, CarbonSDK } from "carbon-js-sdk";
+import { GetDetailedTransfersResponse, GetTransfersRequest, GetRelaysRequest, GetRelaysResponse, CrossChainFlowStatus } from "carbon-js-sdk/lib/hydrogen";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
 import { FeesData } from "core/utilities/bridge";
 import { Bridge, logger } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
-import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import { BIG_ONE, BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL, PollIntervals } from "app/utils/constants";
 import { SimpleMap, bnOrZero, netZilToCarbon } from "app/utils";
-import { BridgeTx, BridgeableToken, BridgeableTokenMapping, RootState } from "app/store/types";
+import { BridgeTx, BridgeableToken, RootState } from "app/store/types";
 import { actions } from "app/store";
 import { getBlockchain, getBridge } from '../selectors';
+
 
 export enum Status {
   NotStarted,
@@ -31,11 +31,11 @@ export interface EthTransactionResponse extends EthTransaction {
 }
 
 function getBridgeTxStatus(tx: BridgeTx): Status {
-  if (tx.destinationTxHash) {
+  if (tx.destinationTxHashFromCarbon) {
     return Status.WithdrawTxConfirmed;
   }
 
-  if (tx.withdrawTxHash) {
+  if (tx.sourceTxHashFromCarbon) {
     return Status.WithdrawTxStarted;
   }
 
@@ -71,7 +71,6 @@ function* watchDepositConfirmation() {
       // watch and update relevant txs
       const bridgeTxs = (yield select(getFilteredTx)) as BridgeTx[];
       const zilNetwork = (yield select((state: RootState) => state.wallet.wallet?.network)) as Network;
-      const bridgeableTokensMap = (yield select((state: RootState) => state.bridge.tokens)) as BridgeableTokenMapping;
       logger("bridge saga", "watch deposit confirmation", bridgeTxs.length);
 
       const updatedTxs: SimpleMap<BridgeTx> = {};
@@ -83,15 +82,13 @@ function* watchDepositConfirmation() {
           const swthAddress = AddressUtils.SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network });
 
           // check if deposit is confirmed
-          if (!tx.depositTxConfirmedAt) {
+          if (!tx.depositTxConfirmedAt || !tx.bridgeEntranceFlag) {
             const queryOpts: GetTransfersRequest = {
               to_address: swthAddress,
               limit: 100,
             };
             const result = (yield call([sdk.hydrogen, sdk.hydrogen.getDetailedTransfers], queryOpts)) as GetDetailedTransfersResponse;
-
             const depositTransfer = result.data.find((transfer) => transfer.from_address?.toLowerCase() === tx.srcAddr && transfer.source_blockchain === tx.srcChain);
-
             if (depositTransfer?.destination_event !== null) {
               if (!tx.sourceTxHash) {
                 tx.sourceTxHash = depositTransfer?.source_event?.tx_hash;
@@ -103,15 +100,14 @@ function* watchDepositConfirmation() {
               logger("bridge saga", "confirmed tx deposit", tx.sourceTxHash);
             }
           }
-
-          if (!tx.depositTxConfirmedAt) {
+          if (!tx.depositTxConfirmedAt || !tx.bridgeEntranceFlag) {
             if (tx.srcChain === Blockchain.Zilliqa) {
               try {
                 const rpcEndpoint = APIS[zilNetwork] ?? APIS.TestNet;
                 const zilliqa = new Zilliqa(rpcEndpoint);
                 const transaction = (yield call([zilliqa.blockchain, zilliqa.blockchain.getTransaction], tx.sourceTxHash?.replace(/^0x/i, "")!)) as Transaction | undefined;
 
-                logger("bridge saga", tx.sourceTxHash, transaction?.status);
+                logger("bridge saga eth to zil", tx.sourceTxHash, transaction?.status);
                 if (transaction?.isPending()) continue;
                 if (transaction?.isRejected()) {
                   tx.depositFailedAt = dayjs();
@@ -131,7 +127,6 @@ function* watchDepositConfirmation() {
                 const sdk: CarbonSDK = yield getCarbonSDK(carbonNetwork);
                 const provider = sdk.eth.getProvider();
                 const transaction = (yield call([provider, provider.getTransactionReceipt], tx.sourceTxHash!)) as ethers.providers.TransactionReceipt
-                logger("bridge saga", tx.sourceTxHash, transaction?.confirmations);
                 if (!transaction?.confirmations) continue;
                 if (transaction.status === 0) {
                   tx.depositFailedAt = dayjs();
@@ -147,42 +142,29 @@ function* watchDepositConfirmation() {
           logger("bridge saga", "tx", tx)
 
           // trigger withdraw tx if deposit confirmed
-          if (tx.depositTxConfirmedAt) {
-            const bridgeTokens = tx.srcChain === Blockchain.Zilliqa ? bridgeableTokensMap.zil : bridgeableTokensMap.eth;
-            const bridgeToken = bridgeTokens.find(t => t.denom === tx.srcToken);
-            const balanceDenom = bridgeToken?.balDenom ?? "";
+          if (!!tx.depositTxConfirmedAt) {
+            if (tx.srcChain !== Blockchain.Zilliqa) {
+              const queryOpts: GetRelaysRequest = {
+                source_tx_hash: tx.sourceTxHash
+              }
+              const result = (yield call([sdk.hydrogen, sdk.hydrogen.getRelaysTransfers], queryOpts)) as GetRelaysResponse;
+              const destinationTxHash = result.data[0].destination_tx_hash;
 
-            logger("bridge saga", "bridgeTokens", bridgeTokens)
-            logger("bridge saga", "balance denom", swthAddress, balanceDenom)
-            const balanceResult = (yield call([sdk.query.bank, sdk.query.bank.Balance], { address: swthAddress, denom: balanceDenom })) as Models.Bank.QueryBalanceResponse;
-
-            logger("bridge saga", "detected balance to withdraw", swthAddress, balanceResult, balanceDenom)
-            const withdrawAmount = bnOrZero(balanceResult.balance?.amount);
-            if (withdrawAmount.isZero()) {
-              throw new Error(`carbon address balance not found`)
+              logger(result, 'relays transfer result')
+              if (destinationTxHash !== null) {
+                tx.destinationTxHash = destinationTxHash;
+                tx.sourceTxHashFromCarbon = destinationTxHash;
+                tx.depositTxConfirmedAt = dayjs();
+                updatedTxs[tx.destinationTxHash!] = tx;
+                logger("bridge saga", "confirmed tx deposit", tx.sourceTxHash);
+              }
             }
-
-            const decimals = sdk.token.getDecimals(balanceDenom) ?? 0;
-            const connectedSDK = (yield call([sdk, sdk.connectWithMnemonic], tx.interimAddrMnemonics)) as ConnectedCarbonSDK
-            const withdrawResult = (yield call([connectedSDK.coin, connectedSDK.coin.createWithdrawal], {
-              amount: withdrawAmount,
-              denom: tx.dstToken,
-              toAddress: tx.dstAddr.toLowerCase().replace(/^0x/i, ""),
-              feeAddress: BridgeParamConstants.SWTH_FEE_ADDRESS,
-              feeAmount: tx.withdrawFee.shiftedBy(decimals).dp(0),
-            })) as CarbonWallet.SendTxResponse;
-
-            tx.withdrawTxHash = withdrawResult.transactionHash;
-            updatedTxs[tx.sourceTxHash!] = tx;
-
-            logger("bridge saga", "initiated tx withdraw", tx.withdrawTxHash);
           }
         } catch (error) {
           console.error('process deposit tx error');
           console.error(error);
         }
       }
-
       // update redux updatedTxs
       const updatedTxList = Object.values(updatedTxs);
       if (updatedTxList.length) {
@@ -222,19 +204,18 @@ function* watchWithdrawConfirmation() {
         try {
           const sdk = (yield getCarbonSDK(carbonNetwork)) as CarbonSDK;
           const swthAddress = AddressUtils.SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network: carbonNetwork });
-
-          const queryOpts: GetTransfersRequest = {
-            from_address: swthAddress,
-            destination_blockchain: tx.dstChain,
-            limit: 100,
+          logger(swthAddress, "swthAddress")
+          logger(tx, "tx")
+          const queryOpts: GetRelaysRequest = {
+            source_tx_hash: tx.sourceTxHashFromCarbon,
           };
-          const result = (yield call([sdk.hydrogen, sdk.hydrogen.getDetailedTransfers], queryOpts)) as GetDetailedTransfersResponse;
-
+          const result = (yield call([sdk.hydrogen, sdk.hydrogen.getRelaysTransfers], queryOpts)) as GetRelaysResponse;
+          logger(result, 'withdraw from carbon to dstchain')
           const withdrawTransfer = result.data.find((transfer) => transfer !== null);
 
           // update destination chain tx hash if success
           if (withdrawTransfer?.status === CrossChainFlowStatus.Completed) {
-            tx.destinationTxHash = withdrawTransfer.destination_event?.tx_hash;
+            tx.destinationTxHashFromCarbon = withdrawTransfer.destination_tx_hash;
             updatedTxs[tx.sourceTxHash!] = tx;
 
             logger("bridge saga", "confirmed tx withdraw", tx.withdrawTxHash);

@@ -15,10 +15,10 @@ import { Blockchain, AddressUtils, Models, CarbonSDK, ConnectedCarbonSDK } from 
 import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet } from "core/wallet";
-import { logger } from "core/utilities";
+import { getRecoveryAddress, logger } from "core/utilities";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
-import { BIG_ONE, truncateAddress } from "app/utils";
+import { BIG_ONE, BIG_ZERO, truncateAddress } from "app/utils";
 import { hexToRGBA, netZilToCarbon, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
 import { AppTheme } from "app/theme/types";
 import { RootState } from "app/store/types";
@@ -227,6 +227,7 @@ const CHAIN_NAMES: {
   [Blockchain.Juno]: "Juno",
   [Blockchain.CosmosHub]: "Cosmos",
   [Blockchain.Terra]: "Terra",
+  [Blockchain.Evmos]: "Evmos",
 } as const
 
 const ConfirmTransfer = (props: any) => {
@@ -245,10 +246,11 @@ const ConfirmTransfer = (props: any) => {
   const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
   const bridgeToken = useSelector<RootState, BridgeableToken | undefined>(state => state.bridge.formState.token);
   const [runInitCarbonSDK] = useAsyncTask("initCarbonSDK")
-
+  const [fetchTokenPrice] = useAsyncTask("fetchTokenPrice")
   const [tokenApproval, setTokenApproval] = useState<boolean>(false);
   const [approvalHash, setApprovalHash] = useState<string>("");
   const [swthAddrMnemonic, setSwthAddrMnemonic] = useState<string | undefined>();
+  const [feeInfo, setFeeInfo] = useState<BigNumber>(BIG_ZERO);
 
   const pendingBridgeTx = bridgeState.activeBridgeTx;
 
@@ -277,13 +279,31 @@ const ConfirmTransfer = (props: any) => {
     // eslint-disable-next-line
   }, [])
 
-  const { fromToken } = useMemo(() => {
-    if (!bridgeToken) return {};
+  const { fromToken, fromTokenDenom, toTokenDenom } = useMemo(() => {
+    if (!bridgeToken || !sdk) return {};
+
+    const mapping = sdk.token.wrapperMap;
+    let fromTknDenom = ""
+    let toTknDenom = ""
+    Object.entries(mapping).forEach(([wrappedToken, sourceToken]) => {
+      if (wrappedToken === bridgeToken.denom) {
+        fromTknDenom = wrappedToken;
+        toTknDenom = sourceToken;
+      } else if (sourceToken === bridgeToken.denom) {
+        fromTknDenom = sourceToken;
+        toTknDenom = wrappedToken;
+      }
+    });
+
+    const fromTkn = tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain)
+    // const toTkn = tokenFinder(bridgeToken.toTokenAddress, bridgeToken.toBlockchain)
+
     return {
-      fromToken: tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain),
-      toToken: tokenFinder(bridgeToken.toTokenAddress, bridgeToken.toBlockchain),
+      fromToken: fromTkn,
+      fromTokenDenom: fromTknDenom,
+      toTokenDenom: toTknDenom,
     }
-  }, [bridgeToken, tokenFinder]);
+  }, [bridgeToken, sdk, tokenFinder]);
 
   const { fromChainName, toChainName } = useMemo(() => {
     return {
@@ -304,6 +324,17 @@ const ConfirmTransfer = (props: any) => {
     // eslint-disable-next-line
   }, [swthAddrMnemonic, network])
 
+  useEffect(() => {
+    fetchTokenPrice(async () => {
+      if (!sdk || !fromTokenDenom) return;
+      console.log(fromTokenDenom, 'hoho');
+      const fee = await sdk.token.getFeeInfo(fromTokenDenom)
+      const withdrawFee = new BigNumber(fee.details.withdrawal.fee);
+      setFeeInfo(withdrawFee);
+    })
+    // eslint-disable-next-line
+  }, [fromTokenDenom, sdk])
+
   if (!showTransfer) return null;
 
   // returns true if asset is native coin, false otherwise
@@ -320,17 +351,16 @@ const ConfirmTransfer = (props: any) => {
   const isApprovalRequired = async (asset: Models.Token, amount: BigNumber) => {
     return !isNativeAsset(asset)
   }
-
   /**
     * Lock the asset on Ethereum chain
     * returns the txn hash if lock txn is successful, otherwise return null
     * @param asset         details of the asset being locked; retrieved from carbon
     */
-  async function lockAssetOnEth(asset: Models.Token, carbonMnemonics: string) {
-    if (!bridgeToken || !fromToken || !sdk || !swthAddrMnemonic) return null;
+  async function bridgeAssetFromEth(fromAsset: Models.Token, toAsset: Models.Token, carbonMnemonics: string) {
+    if (!bridgeToken || !fromTokenDenom || !toTokenDenom || !sdk || !swthAddrMnemonic || !wallet) return null;
 
-    const lockProxy = asset.bridgeAddress;
-    const swthAddress = AddressUtils.SWTHAddress.generateAddress(swthAddrMnemonic);
+    const lockProxy = fromAsset.bridgeAddress;
+    // const swthAddress = AddressUtils.SWTHAddress.generateAddress(swthAddrMnemonic);
 
     const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider);
     const signer: ethers.Signer = ethersProvider.getSigner();
@@ -339,17 +369,17 @@ const ConfirmTransfer = (props: any) => {
     const ethAddress = await signer.getAddress();
     const gasPrice = await sdk.eth.getProvider().getGasPrice();
     const gasPriceGwei = new BigNumber(ethers.utils.formatUnits(gasPrice, "gwei"));
-    const depositAmt = amount.shiftedBy(asset.decimals.toInt());
+    const depositAmt = amount.shiftedBy(fromAsset.decimals.toInt());
 
     // approve token
-    const approvalRequired = await isApprovalRequired(asset, depositAmt);
+    const approvalRequired = await isApprovalRequired(fromAsset, depositAmt);
     if (approvalRequired) {
 
-      const allowance = await sdk.eth.checkAllowanceERC20(asset, ethAddress, `0x${lockProxy}`);
+      const allowance = await sdk.eth.checkAllowanceERC20(fromAsset, ethAddress, `0x${lockProxy}`);
       if (allowance.lt(depositAmt)) {
         toaster(`Approval needed (Ethereum)`, { overridePersist: false });
         const approve_tx = await sdk.eth.approveERC20({
-          token: asset,
+          token: fromAsset,
           ethAddress: ethAddress,
           gasLimit: new BigNumber(100000),
           gasPriceGwei: gasPriceGwei,
@@ -370,16 +400,22 @@ const ConfirmTransfer = (props: any) => {
 
     toaster(`Locking asset (Ethereum)`, { overridePersist: false });
 
-    const swthAddressBytes = AddressUtils.SWTHAddress.getAddressBytes(swthAddress, sdk.network);
-    const lock_tx = await sdk.eth.lockDeposit({
-      token: asset,
-      address: swthAddressBytes,
-      ethAddress: ethAddress.toLowerCase(),
-      gasLimit: new BigNumber(`${BridgeParamConstants.ETH_GAS_LIMIT}`),
-      gasPriceGwei: gasPriceGwei,
+    const bridgeTokenParams = {
+      fromToken: fromAsset,
+      toToken: toAsset,
       amount: depositAmt,
+      fromAddress: ethAddress,
+      recoveryAddress: getRecoveryAddress(network),
+      toAddress: wallet.addressInfo.byte20.toLowerCase(),
+      feeAmount: feeInfo,
+      gasPriceGwei: gasPriceGwei,
+      gasLimit: new BigNumber(`${BridgeParamConstants.ETH_GAS_LIMIT}`),
       signer: signer,
-    });
+    };
+
+    console.log(bridgeTokenParams.amount.toString(10), bridgeTokenParams.feeAmount.toString(10), 'hoho')
+    // const swthAddressBytes = AddressUtils.SWTHAddress.getAddressBytes(swthAddress, sdk.network);
+    const lock_tx = await sdk.eth.bridgeTokens(bridgeTokenParams);
 
     toaster(`Submitted: (Ethereum - Lock Asset)`, { sourceBlockchain: "eth", hash: lock_tx.hash!.replace(/^0x/i, "") });
     logger("lock tx", lock_tx.hash!);
@@ -392,7 +428,7 @@ const ConfirmTransfer = (props: any) => {
     * returns the txn hash if lock txn is successful, otherwise return null
     * @param asset         details of the asset being locked; retrieved from carbon
     */
-  async function lockAssetOnZil(asset: Models.Token, carbonMnemonics: string) {
+  async function lockAssetOnZil(fromAsset: Models.Token, carbonMnemonics: string) {
     if (wallet === null) {
       console.error("Zilliqa wallet not connected");
       return null;
@@ -402,23 +438,23 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
-    const lockProxy = asset.bridgeAddress;
+    const lockProxy = fromAsset.bridgeAddress;
     const amount = bridgeFormState.transferAmount;
     const zilAddress = santizedAddress(wallet.addressInfo.byte20);
     const swthAddress = AddressUtils.SWTHAddress.generateAddress(carbonMnemonics);
     const swthAddressBytes = AddressUtils.SWTHAddress.getAddressBytes(swthAddress, sdk.network);
-    const depositAmt = amount.shiftedBy(asset.decimals.toInt())
+    const depositAmt = amount.shiftedBy(fromAsset.decimals.toInt())
 
-    if (!isNativeAsset(asset)) {
+    if (!isNativeAsset(fromAsset)) {
       // not native zils
       // user is transferring zrc2 tokens
       // need approval
-      const allowance = await sdk.zil.checkAllowanceZRC2(asset, `0x${zilAddress}`, `0x${lockProxy}`);
+      const allowance = await sdk.zil.checkAllowanceZRC2(fromAsset, `0x${zilAddress}`, `0x${lockProxy}`);
       logger("zil zrc2 allowance: ", allowance);
 
       if (allowance.lt(depositAmt)) {
         const approveZRC2Params = {
-          token: asset,
+          token: fromAsset,
           gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
           gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
           zilAddress: zilAddress,
@@ -449,7 +485,7 @@ const ConfirmTransfer = (props: any) => {
     const lockDepositParams = {
       address: swthAddressBytes,
       amount: depositAmt,
-      token: asset,
+      token: fromAsset,
       gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
       gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
       zilAddress: zilAddress,
@@ -488,9 +524,10 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
-    const asset = sdk.token.tokens[bridgeToken?.denom ?? ""];
+    const fromAsset = sdk.token.tokens[fromTokenDenom ?? ""];
+    const toAsset = sdk.token.tokens[toTokenDenom ?? ""];
 
-    if (!asset) {
+    if (!fromAsset) {
       console.error("asset not found for", bridgeToken);
       return null;
     }
@@ -515,10 +552,10 @@ const ConfirmTransfer = (props: any) => {
       downloadTransferKey(swthAddrMnemonic);
       if (fromBlockchain === Blockchain.Zilliqa) {
         // init lock on zil side
-        sourceTxHash = await lockAssetOnZil(asset, swthAddrMnemonic);
+        sourceTxHash = await lockAssetOnZil(fromAsset, swthAddrMnemonic);
       } else {
         // init lock on eth side
-        sourceTxHash = await lockAssetOnEth(asset, swthAddrMnemonic);
+        sourceTxHash = await bridgeAssetFromEth(fromAsset, toAsset, swthAddrMnemonic);
       }
 
       if (sourceTxHash === null) {
@@ -544,6 +581,7 @@ const ConfirmTransfer = (props: any) => {
         interimAddrMnemonics: swthAddrMnemonic!,
         withdrawFee: withdrawFee?.amount ?? BIG_ONE.shiftedBy(3 - fromToken.decimals), // 1000 sat bypass withdraw fee check,
         depositDispatchedAt: dayjs(),
+        bridgeEntranceFlag: 1, // additional flag
       }
       dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
 

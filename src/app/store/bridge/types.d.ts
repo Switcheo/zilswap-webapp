@@ -7,7 +7,7 @@ export type BridgeableToken = {
   blockchain: Blockchain;
   tokenAddress: string;
   lockproxyAddress: string;
-  decimals: number; 
+  decimals: number;
   denom: string;    // carbon denom
   tokenId: string;  // tradehub denom
   toBlockchain: Blockchain;
@@ -89,6 +89,9 @@ export interface BridgeTx {
 
   // .lock tx on the source chain
   sourceTxHash?: string;
+  destinationTxHash?: string;
+  sourceTxHashFromCarbon?: string;
+  destinationTxHashFromCarbon?: string;
 
   // Carbon external transfers confirmed
   depositTxConfirmedAt?: dayjs.Dayjs;
@@ -113,4 +116,7 @@ export interface BridgeTx {
 
   // block confirmations
   depositConfirmations?: number;
+
+  // flag for bridgeEntry local cache re-run
+  bridgeEntranceFlag?: number;
 }

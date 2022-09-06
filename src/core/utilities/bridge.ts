@@ -1,7 +1,7 @@
-import dayjs from "dayjs";
 import BigNumber from "bignumber.js";
-import { Network } from "zilswap-sdk/lib/constants";
 import { NetworkConfigs } from "carbon-js-sdk/lib/constant";
+import dayjs from "dayjs";
+import { Network } from "zilswap-sdk/lib/constants";
 import { bnOrZero } from "app/utils";
 import { HTTP } from "./http";
 
@@ -44,5 +44,16 @@ export class Bridge {
       depositFee: bnOrZero(details.deposit?.fee),
       withdrawalFee: bnOrZero(details.withdrawal?.fee),
     }
+  }
+}
+
+
+export const getRecoveryAddress = (network: Network) => {
+  const mainDevRecoveryAddress = 'swth1cuekk8en9zgnuv0eh4hk7xtr2kghn69x0x6u7r';
+  const localTestRecoveryAddress = 'tswth1cuekk8en9zgnuv0eh4hk7xtr2kghn69xt3tv8x';
+  if (network === Network.MainNet || network === Network.TestNet) {
+    return mainDevRecoveryAddress;
+  } else {
+    return localTestRecoveryAddress;
   }
 }

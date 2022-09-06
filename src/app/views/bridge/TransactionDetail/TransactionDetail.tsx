@@ -347,11 +347,11 @@ const TransactionDetail = (props: TransactionDetailProps) => {
   }
 
   const getActiveStep = () => {
-    if (currentBridgeTx?.destinationTxHash) {
+    if (currentBridgeTx?.destinationTxHashFromCarbon) {
       return 3;
     }
 
-    if (currentBridgeTx?.withdrawTxHash) {
+    if (currentBridgeTx?.sourceTxHashFromCarbon) {
       return 2;
     }
 
@@ -373,7 +373,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
   }
 
   const getEstimatedTime = () => {
-    if (currentBridgeTx?.withdrawTxHash) {
+    if (currentBridgeTx?.sourceTxHashFromCarbon) {
       return 10;
     }
 
@@ -387,6 +387,8 @@ const TransactionDetail = (props: TransactionDetailProps) => {
 
     return 30;
   }
+
+  console.log(currentBridgeTx, 'currentBridgeTx')
 
   const handleShowMnemonicDialog = () => {
     dispatch(actions.Layout.toggleShowMnemonic("open"));
@@ -408,7 +410,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
             <Box mt={4} />
           )}
 
-          {!currentBridgeTx.destinationTxHash
+          {!currentBridgeTx.destinationTxHashFromCarbon
             ? <Fragment>
               <Text variant="h2">Transfer in Progress...</Text>
 
@@ -416,7 +418,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                 <WarningRoundedIcon className={classes.warningIcon} /> Warning: Please read these instructions carefully before closing this window to avoid losing your funds.
               </Text>
 
-              {!currentBridgeTx.withdrawTxHash && (
+              {!currentBridgeTx.sourceTxHashFromCarbon && (
                 <Button onClick={handleShowMnemonicDialog} className={classes.instructionsButton} size="small" variant="contained">
                   Read Instructions
                 </Button>
@@ -441,7 +443,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
 
       <Box className={classes.box} bgcolor="background.contrast">
         <Box className={classes.transferBox}>
-          <Text>{!currentBridgeTx?.destinationTxHash ? "Transferring" : "Transferred"}</Text>
+          <Text>{!currentBridgeTx?.destinationTxHashFromCarbon ? "Transferring" : "Transferred"}</Text>
           <Text variant="h2" className={classes.amount}>
             {trimValue(currentBridgeTx?.inputAmount.toString(10))}
             <CurrencyLogo className={classes.token} currency={fromToken?.symbol} address={fromToken?.address} blockchain={fromToken?.blockchain} />
@@ -462,7 +464,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
             <Text variant="button" className={classes.walletAddress}>{currentBridgeTx?.srcAddr ? formatAddress(currentBridgeTx.srcAddr, srcChain) : "-"}</Text>
           </Box>
           <Box flex={0.2} />
-          {!!currentBridgeTx?.destinationTxHash
+          {!!currentBridgeTx?.destinationTxHashFromCarbon
             ? <StraightLine className={classes.straightLine} />
             : <WavyLine className={classes.wavyLine} />
           }
@@ -482,7 +484,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
 
       {currentBridgeTx && (
         <Box className={classes.box} bgcolor="background.contrast">
-          <Text align="center" variant="h6">{!currentBridgeTx.destinationTxHash ? "Transfer Progress" : "Transfer Complete"}</Text>
+          <Text align="center" variant="h6">{!currentBridgeTx.destinationTxHashFromCarbon ? "Transfer Progress" : "Transfer Complete"}</Text>
 
           <Stepper className={classes.stepper} activeStep={getActiveStep()} connector={<ColorlibConnector />} alternativeLabel>
             {STEPS.map((label, index) => (
@@ -583,18 +585,18 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                   </Box>
                   <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, currentBridgeTx.withdrawTxHash ? classes.checkIconCompleted : "")} />
+                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, currentBridgeTx.sourceTxHashFromCarbon ? classes.checkIconCompleted : "")} />
                       {" "}
                       Withdrawal to {toChainName}
                     </Text>
                     <Text className={cls(classes.link, classes.progressInfo)}>
-                      {currentBridgeTx.withdrawTxHash
+                      {currentBridgeTx.sourceTxHashFromCarbon
                         ? <Link
                           className={classes.link}
                           underline="hover"
                           rel="noopener noreferrer"
                           target="_blank"
-                          href={getCarbonExplorerLink(currentBridgeTx.withdrawTxHash)}>
+                          href={getCarbonExplorerLink(currentBridgeTx.sourceTxHashFromCarbon)}>
                           View on Carbon <NewLinkIcon className={classes.linkIcon} />
                         </Link>
                         : "-"
@@ -610,18 +612,18 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                   </Text>
                   <Box display="flex" className={classes.progressBox}>
                     <Text flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, currentBridgeTx.destinationTxHash ? classes.checkIconCompleted : "")} />
+                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, currentBridgeTx.destinationTxHashFromCarbon ? classes.checkIconCompleted : "")} />
                       {" "}
                       Transfer to {toChainName} Wallet
                     </Text>
                     <Text className={cls(classes.link, classes.progressInfo)}>
-                      {currentBridgeTx.destinationTxHash
+                      {currentBridgeTx.destinationTxHashFromCarbon
                         ? <Link
                           className={classes.link}
                           underline="hover"
                           rel="noopener noreferrer"
                           target="_blank"
-                          href={getExplorerLink(currentBridgeTx.destinationTxHash, currentBridgeTx?.dstChain)}>
+                          href={getExplorerLink(currentBridgeTx.destinationTxHashFromCarbon, currentBridgeTx?.dstChain)}>
                           View on {currentBridgeTx?.dstChain === Blockchain.Zilliqa ? 'ViewBlock' : 'Etherscan'} <NewLinkIcon className={classes.linkIcon} />
                         </Link>
                         : "-"
@@ -641,7 +643,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
 
       {!isHistory && (
         <>
-          {!currentBridgeTx.destinationTxHash && (
+          {!currentBridgeTx.destinationTxHashFromCarbon && (
             <FancyButton
               disabled={true}
               variant="contained"
@@ -652,7 +654,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
             </FancyButton>
           )}
 
-          {!!currentBridgeTx.destinationTxHash && (
+          {!!currentBridgeTx.destinationTxHashFromCarbon && (
             <FancyButton
               onClick={onNewTransfer}
               variant="contained"

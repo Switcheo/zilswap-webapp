@@ -122,7 +122,7 @@ export const ERC20_BRIDGEABLE_ZIL_CONTRACT = {
   [Network.TestNet]: "0x92774e23edaa2927f3938ab4b690c076095cda0a",
 }
 
-export const TBM_CONTRACT =  {
+export const TBM_CONTRACT = {
   [Network.MainNet]: "0xd793f378a925b9f0d3c4b6ee544d31c707899386",
   [Network.TestNet]: "0xc948942f55ef05a95a46bb58ee9b0a67b0f871fa",
 }
@@ -168,6 +168,6 @@ export const USERNAME_REGEX = /^[A-Za-z0-9_]{1,20}$/
 export const TWITTER_REGEX = /^[A-Za-z0-9_]{1,15}$/
 export const INSTAGRAM_REGEX = /^[A-Za-z0-9_]{1,30}$/
 
-export const REPORT_LEVEL_DEFAULT= 0;
+export const REPORT_LEVEL_DEFAULT = 0;
 export const REPORT_LEVEL_WARNING = 1;
 export const REPORT_LEVEL_SUSPICIOUS = 2;
