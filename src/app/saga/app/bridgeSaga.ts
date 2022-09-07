@@ -156,6 +156,7 @@ function* watchDepositConfirmation() {
                 tx.sourceTxHashFromCarbon = destinationTxHash;
                 tx.depositTxConfirmedAt = dayjs();
                 updatedTxs[tx.destinationTxHash!] = tx;
+                updatedTxs[tx.sourceTxHashFromCarbon] = tx;
                 logger("bridge saga", "confirmed tx deposit", tx.sourceTxHash);
               }
             }
@@ -216,7 +217,7 @@ function* watchWithdrawConfirmation() {
           // update destination chain tx hash if success
           if (withdrawTransfer?.status === CrossChainFlowStatus.Completed) {
             tx.destinationTxHashFromCarbon = withdrawTransfer.destination_tx_hash;
-            updatedTxs[tx.sourceTxHash!] = tx;
+            updatedTxs[tx.destinationTxHashFromCarbon!] = tx;
 
             logger("bridge saga", "confirmed tx withdraw", tx.withdrawTxHash);
           }

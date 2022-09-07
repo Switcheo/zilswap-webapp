@@ -29,8 +29,6 @@ import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
 
-const TRANSFER_KEY_MESSAGE = "In the event you are not able to complete Stage 2 of your transfer, you may retrieve and resume your transfer by entering the following unique transfer key phrase on your Transfer History page. Do not ever reveal your transfer key phrase to anyone. ZilSwap will not be held accountable and cannot help you retrieve those funds once they are lost.\n\n";
-
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     "& .MuiAccordionSummary-root": {
@@ -327,7 +325,6 @@ const ConfirmTransfer = (props: any) => {
   useEffect(() => {
     fetchTokenPrice(async () => {
       if (!sdk || !fromTokenDenom) return;
-      console.log(fromTokenDenom, 'hoho');
       const fee = await sdk.token.getFeeInfo(fromTokenDenom)
       const withdrawFee = new BigNumber(fee.details.withdrawal.fee);
       setFeeInfo(withdrawFee);
@@ -360,7 +357,6 @@ const ConfirmTransfer = (props: any) => {
     if (!bridgeToken || !fromTokenDenom || !toTokenDenom || !sdk || !swthAddrMnemonic || !wallet) return null;
 
     const lockProxy = fromAsset.bridgeAddress;
-    // const swthAddress = AddressUtils.SWTHAddress.generateAddress(swthAddrMnemonic);
 
     const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider);
     const signer: ethers.Signer = ethersProvider.getSigner();
@@ -413,8 +409,6 @@ const ConfirmTransfer = (props: any) => {
       signer: signer,
     };
 
-    console.log(bridgeTokenParams.amount.toString(10), bridgeTokenParams.feeAmount.toString(10), 'hoho')
-    // const swthAddressBytes = AddressUtils.SWTHAddress.getAddressBytes(swthAddress, sdk.network);
     const lock_tx = await sdk.eth.bridgeTokens(bridgeTokenParams);
 
     toaster(`Submitted: (Ethereum - Lock Asset)`, { sourceBlockchain: "eth", hash: lock_tx.hash!.replace(/^0x/i, "") });
@@ -502,17 +496,6 @@ const ConfirmTransfer = (props: any) => {
     return lock_tx.id;
   }
 
-  const downloadTransferKey = (key: string) => {
-    const element = document.createElement("a");
-    const file = new Blob([`${TRANSFER_KEY_MESSAGE}\n${key}`], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    const swthAddress = AddressUtils.SWTHAddress.generateAddress(key);
-    element.download = `private-recovery-key-${swthAddress}.txt`;
-    document.body.appendChild(element); // Required for this to work in FireFox
-    element.click();
-    toaster("Recovery key downloaded", { overridePersist: false });
-  }
-
   const onConfirm = async () => {
     if (!localStorage) {
       console.error("localStorage not available");
@@ -549,7 +532,7 @@ const ConfirmTransfer = (props: any) => {
 
     runConfirmTransfer(async () => {
       let sourceTxHash;
-      downloadTransferKey(swthAddrMnemonic);
+
       if (fromBlockchain === Blockchain.Zilliqa) {
         // init lock on zil side
         sourceTxHash = await lockAssetOnZil(fromAsset, swthAddrMnemonic);
