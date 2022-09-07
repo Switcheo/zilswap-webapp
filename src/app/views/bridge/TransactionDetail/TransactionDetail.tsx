@@ -575,7 +575,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                   </Text>
                   <Box display="flex" mt={0.9} mb={0.5}>
                     <Text flexGrow={1} align="left">
-                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, currentBridgeTx?.depositTxConfirmedAt ? classes.checkIconCompleted : "")} /> Carbon Deposit Confirmation
+                      <CheckCircleOutlineRoundedIcon className={cls(classes.checkIcon, currentBridgeTx?.destinationTxHash ? classes.checkIconCompleted : "")} /> Carbon Deposit Confirmation
                     </Text>
                     {!!depositConfirmations && (
                       <Text flexGrow={1} align="right">
@@ -596,7 +596,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                           underline="hover"
                           rel="noopener noreferrer"
                           target="_blank"
-                          href={getCarbonExplorerLink(currentBridgeTx.sourceTxHashFromCarbon)}>
+                          href={getCarbonExplorerLink(currentBridgeTx.sourceTxHashFromCarbon.replace("0x", ""))}>
                           View on Carbon <NewLinkIcon className={classes.linkIcon} />
                         </Link>
                         : "-"
