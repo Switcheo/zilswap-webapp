@@ -227,6 +227,7 @@ const CHAIN_NAMES: {
   [Blockchain.Juno]: "Juno",
   [Blockchain.CosmosHub]: "Cosmos",
   [Blockchain.Terra]: "Terra",
+  [Blockchain.Evmos]: "Evmos",
 } as const
 
 const ConfirmTransfer = (props: any) => {

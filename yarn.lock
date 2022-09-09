@@ -5885,9 +5885,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000981, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001125, caniuse-lite@^1.0.30001312:
-  version "1.0.30001312"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001312.tgz#e11eba4b87e24d22697dae05455d5aea28550d5f"
-  integrity sha512-Wiz1Psk2MEK0pX3rUzWaunLTZzqS2JYZFzNKqAiJGiuxIjRPLgV6+VDPOg6lQOUxmDwhTlh198JsTTi8Hzw6aQ==
+  version "1.0.30001393"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001393.tgz"
+  integrity sha512-N/od11RX+Gsk+1qY/jbPa0R6zJupEa0lxeBG598EbrtblxVCTJsQwbRBm6+V+rxpc5lHKdsXb9RY83cZIPLseA==
 
 capture-exit@^2.0.0:
   version "2.0.0"
@@ -5896,10 +5896,10 @@ capture-exit@^2.0.0:
   dependencies:
     rsvp "^4.8.4"
 
-carbon-js-sdk@^0.1.118:
-  version "0.1.118"
-  resolved "https://registry.yarnpkg.com/carbon-js-sdk/-/carbon-js-sdk-0.1.118.tgz#4f09ceb0aa8de95bb7321d35b357bc5605b9c7bc"
-  integrity sha512-8m9gWNmNn5wKkj3LwKoawxgitZPEo0rixFjSnxRKWkRKj+F1ZiAYCSmL3ebhsNJi5NN+kFzN7EFhRlogAUWR9A==
+carbon-js-sdk@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/carbon-js-sdk/-/carbon-js-sdk-0.2.1.tgz#0b77e22fca9e1bf76ad3b2e315408881f6f11ee9"
+  integrity sha512-My985ufRii++kdqp74F9ICP2HQCbkWWMQuRgYwMo/t+J0lzr6re8WXI7XfCDBLGT4BUKSuXsHy0nxaV/uK57Ig==
   dependencies:
     "@cityofzion/neon-core" "^4.9.0"
     "@cityofzion/neon-core-next" "npm:@cityofzion/neon-core@^5.0.0"
