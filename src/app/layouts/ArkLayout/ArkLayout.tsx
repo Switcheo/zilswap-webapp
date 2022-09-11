@@ -5,7 +5,7 @@ import { makeStyles } from "@material-ui/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouteMatch } from "react-router-dom";
 import { renderRoutes } from "react-router-config";
-import { ArkNavDrawer, ArkTopBar, NavDrawer, TBMBanner } from "app/components";
+import { ArkNavDrawer, ArkTopBar, NavDrawer, ZeevesCardBanner } from "app/components";
 import ConnectWalletButton from "app/components/ConnectWalletButton";
 import { AppTheme } from "app/theme/types";
 import { actions } from "app/store";
@@ -85,7 +85,7 @@ const ArkLayout: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
       <main className={classes.content}>
         <DevInfoBadge />
         <Suspense fallback={<LinearProgress />}>
-          <TBMBanner />
+          <ZeevesCardBanner />
           {renderRoutes(route.routes)}
           <Box marginBottom={30} />
         </Suspense>
