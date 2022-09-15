@@ -4,7 +4,7 @@ jobs:
     resource_class: xlarge
     docker:
       # image with node, npm and yarn installed
-      - image: cimg/node:14.17.5
+      - image: cimg/node:16.8.0
     steps:
       # checkout workspace to repo code
       - checkout
@@ -44,7 +44,7 @@ jobs:
 
   deploy:
     docker:
-      - image: cimg/node:14.17.5
+      - image: cimg/node:16.8.0
     steps:
       - attach_workspace:
           at: .
