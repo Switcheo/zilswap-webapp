@@ -23,6 +23,7 @@ import { LayoutState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { bnOrZero, hexToRGBA, netZilToCarbon, useAsyncTask, useNetwork, useTokenFinder } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
+import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg";
 import { ConnectButton } from "./components";
 import { BridgeParamConstants } from "./components/constants";
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg";
@@ -87,7 +88,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     if (queryTokenAddress.startsWith("zil")) {
       try {
         queryTokenAddress = fromBech32Address(queryTokenAddress).toLowerCase();
-      } catch { 
+      } catch {
         return;
       }
     }
@@ -103,7 +104,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         return;
       }
     })
-    
+
     if (queryToken) {
       dispatch(actions.Bridge.updateForm({
         token: queryToken
@@ -518,6 +519,13 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               </span>
             </Tooltip>
           </Text>
+          <Box className={classes.errorBox}>
+            <WarningIcon className={classes.warningIcon} />
+            <Text>
+              ZilBridge is disabled temporarily due to The Merge. The bridge will resume shortly after upgrade.
+              Follow us on <a href="https://twitter.com/ZilSwap" target="_blank" rel="noreferrer">twitter</a> for updates.
+            </Text>
+          </Box>
           <Box mt={2} mb={2} display="flex" justifyContent="space-between" position="relative">
             <Box className={classes.box} bgcolor="background.contrast">
               <Text variant="h4" align="center">From</Text>
@@ -746,7 +754,38 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   extraPadding: {
     padding: theme.spacing(1)
-  }
+  },
+  warningText: {
+    color: theme.palette.warning.main,
+  },
+  warningIcon: {
+    height: 24,
+    width: 24,
+    flex: "none",
+    color: theme.palette.warning.main,
+    marginRight: theme.spacing(1),
+    "& path": {
+      stroke: theme.palette.warning.main,
+    },
+  },
+  errorBox: {
+    marginBottom: theme.spacing(2),
+    border: `1px solid ${theme.palette.warning.main}`,
+    backgroundColor: `rgba${hexToRGBA(theme.palette.warning.light!, 0.2)}`,
+    borderRadius: 12,
+    padding: theme.spacing(2),
+    display: "flex",
+    alignItems: "center",
+    "& .MuiTypography-root": {
+      color: theme.palette.warning.main,
+      fontSize: "14px",
+      lineHeight: "17px",
+      [theme.breakpoints.down("xs")]: {
+        fontSize: "12px",
+      lineHeight: "14px",
+      }
+    }
+  },
 }))
 
 export default BridgeView
