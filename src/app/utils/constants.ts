@@ -4,7 +4,7 @@ import { SimpleMap } from "./types";
 
 export const DefaultFallbackNetwork = Network.MainNet;
 
-export const BRIDGE_DISABLED = true;
+export const BRIDGE_DISABLED = false;
 
 export type PageType = "pool" | "swap";
 export const LoadingKeys = {

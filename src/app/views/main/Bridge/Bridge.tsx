@@ -22,7 +22,7 @@ import { BridgeFormState, BridgeState } from 'app/store/bridge/types';
 import { LayoutState, RootState, TokenInfo } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { bnOrZero, hexToRGBA, netZilToCarbon, useAsyncTask, useNetwork, useTokenFinder } from "app/utils";
-import { BIG_ZERO } from "app/utils/constants";
+import { BIG_ZERO, BRIDGE_DISABLED } from "app/utils/constants";
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg";
 import { ConnectButton } from "./components";
 import { BridgeParamConstants } from "./components/constants";
@@ -519,13 +519,17 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               </span>
             </Tooltip>
           </Text>
-          <Box className={classes.errorBox}>
-            <WarningIcon className={classes.warningIcon} />
-            <Text>
-              ZilBridge is disabled temporarily due to The Merge. The bridge will resume shortly after upgrade.
-              Follow us on <a href="https://twitter.com/ZilSwap" target="_blank" rel="noreferrer">twitter</a> for updates.
-            </Text>
-          </Box>
+
+          {BRIDGE_DISABLED && (
+            <Box className={classes.errorBox}>
+              <WarningIcon className={classes.warningIcon} />
+              <Text>
+                ZilBridge is disabled temporarily due to The Merge. The bridge will resume shortly after upgrade.
+                Follow us on <a href="https://twitter.com/ZilSwap" target="_blank" rel="noreferrer">twitter</a> for updates.
+              </Text>
+            </Box>
+          )}
+
           <Box mt={2} mb={2} display="flex" justifyContent="space-between" position="relative">
             <Box className={classes.box} bgcolor="background.contrast">
               <Text variant="h4" align="center">From</Text>
@@ -782,7 +786,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
       lineHeight: "17px",
       [theme.breakpoints.down("xs")]: {
         fontSize: "12px",
-      lineHeight: "14px",
+        lineHeight: "14px",
       }
     }
   },
