@@ -207,28 +207,29 @@ const addNavigationHook = (history: History<unknown>) => {
   };
 }
 
-const CHAIN_NAMES: {
-  [key in Blockchain]: string
-} = {
-  [Blockchain.Zilliqa]: "Zilliqa",
-  [Blockchain.Ethereum]: "Ethereum",
-  [Blockchain.Neo]: "Neo",
-  [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
-  [Blockchain.Native]: "Carbon",
-  [Blockchain.Btc]: "Bitcoin",
+const getChainName = (blockchain: Blockchain) => {
+  switch (blockchain) {
+    case Blockchain.Zilliqa: return "Zilliqa";
+    case Blockchain.Ethereum: return "Ethereum";
+    case Blockchain.Neo: return "Neo";
+    case Blockchain.BinanceSmartChain: return "Binance Smart Chain";
+    case Blockchain.Native: return "Carbon";
+    case Blockchain.Btc: return "Bitcoin";
 
-  [Blockchain.Carbon]: "Carbon",
-  [Blockchain.Switcheo]: "Switcheo",
-  [Blockchain.TradeHub]: "TradeHub",
-  [Blockchain.PolyNetwork]: "PolyNetwork",
-  [Blockchain.Neo3]: "Neo N3",
-  [Blockchain.Osmosis]: "Osmosis",
-  [Blockchain.Ibc]: "IBC",
-  [Blockchain.Juno]: "Juno",
-  [Blockchain.CosmosHub]: "Cosmos",
-  [Blockchain.Terra]: "Terra",
-  [Blockchain.Evmos]: "Evmos",
-} as const
+    case Blockchain.Carbon: return "Carbon";
+    case Blockchain.Switcheo: return "Switcheo";
+    case Blockchain.TradeHub: return "TradeHub";
+    case Blockchain.PolyNetwork: return "PolyNetwork";
+    case Blockchain.Neo3: return "Neo N3";
+    case Blockchain.Osmosis: return "Osmosis";
+    case Blockchain.Ibc: return "IBC";
+    case Blockchain.Juno: return "Juno";
+    case Blockchain.CosmosHub: return "Cosmos";
+    case Blockchain.Terra: return "Terra";
+    case Blockchain.Evmos: return "Evmos";
+    default: blockchain?.toString?.();
+  }
+}
 
 const ConfirmTransfer = (props: any) => {
   const { showTransfer } = props;
@@ -288,8 +289,8 @@ const ConfirmTransfer = (props: any) => {
 
   const { fromChainName, toChainName } = useMemo(() => {
     return {
-      fromChainName: CHAIN_NAMES[bridgeFormState.fromBlockchain],
-      toChainName: CHAIN_NAMES[bridgeFormState.toBlockchain],
+      fromChainName: getChainName(bridgeFormState.fromBlockchain),
+      toChainName: getChainName(bridgeFormState.toBlockchain),
     }
   }, [bridgeFormState.fromBlockchain, bridgeFormState.toBlockchain]);
 

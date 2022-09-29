@@ -69,20 +69,6 @@ jobs:
           key: v1-npm-global
 
       - run:
-          name: deploy to aws
-          command: |
-            if [ "${CIRCLE_BRANCH}" = "staging" ]; then
-              aws s3 sync build s3://zilswap-ui-staging/ --delete
-              aws cloudfront create-invalidation --distribution-id="E4QZBREBNL47S" --paths=/*
-            elif [ "${CIRCLE_BRANCH}" = "master" ]; then
-              aws s3 sync build s3://zilswap-ui/production --delete
-              aws cloudfront create-invalidation --distribution-id="ESU80N8RF88HZ" --paths=/*
-            elif [ "${CIRCLE_BRANCH}" = "develop" ]; then
-              aws s3 sync build s3://zilswap-ui/develop --delete
-              aws cloudfront create-invalidation --distribution-id="E2E0YSY2VDFHFV" --paths=/*
-            fi
-
-      - run:
           name: deploy to ipfs
           command: |
             if [ "${CIRCLE_BRANCH}" = "staging" ]; then
@@ -93,6 +79,31 @@ jobs:
               IPFS_DEPLOY_CLOUDFLARE__ZONE=zilswap.exchange \
               IPFS_DEPLOY_CLOUDFLARE__RECORD=_dnslink.zilswap.exchange \
               ~/.npm-global/bin/ipfs-deploy build/ -d cloudflare -C
+            fi
+
+      - run:
+          name: deploy to aws
+          command: |
+            if [ -d "build/static/js" ]
+            then
+              gzip -9 build/static/js/*
+              for i in ./build/static/js/*;
+                do mv "$i" "${i%.gz}";
+              done
+            fi
+
+            if [ "${CIRCLE_BRANCH}" = "staging" ]; then
+              aws s3 sync build s3://zilswap-ui-staging/ --delete --exclude "static/js/*"
+              aws s3 sync build/static/js s3://zilswap-ui-staging/static/js --delete --content-encoding gzip
+              aws cloudfront create-invalidation --distribution-id="E4QZBREBNL47S" --paths=/*
+            elif [ "${CIRCLE_BRANCH}" = "master" ]; then
+              aws s3 sync build s3://zilswap-ui/production/ --delete --exclude "static/js/*"
+              aws s3 sync build/static/js s3://zilswap-ui/production/static/js --delete --content-encoding gzip
+              aws cloudfront create-invalidation --distribution-id="ESU80N8RF88HZ" --paths=/*
+            elif [ "${CIRCLE_BRANCH}" = "develop" ]; then
+              aws s3 sync build s3://zilswap-ui/develop/ --delete --exclude "static/js/*"
+              aws s3 sync build/static/js s3://zilswap-ui/develop/static/js --delete --content-encoding gzip
+              aws cloudfront create-invalidation --distribution-id="E2E0YSY2VDFHFV" --paths=/*
             fi
 
 workflows:

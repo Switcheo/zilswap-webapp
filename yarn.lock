@@ -1107,13 +1107,7 @@
     isomorphic-ws "4.0.1"
     ws "7.4.5"
 
-"@cityofzion/neon-api@^5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@cityofzion/neon-api/-/neon-api-5.0.0.tgz#7f8e68b14923dfb8c1292836c276b178f5184372"
-  integrity sha512-nvslHi77gv1Vc44rZb2QamQyWhWGhooXDnVCIA6BZUpiArMWZ3TNYaDCXLWQTSvz14UdcYN8WIIt9v/vcD/wqg==
-
-"@cityofzion/neon-core-next@npm:@cityofzion/neon-core@^5.0.0", "@cityofzion/neon-core@^5.0.0":
-  name "@cityofzion/neon-core-next"
+"@cityofzion/neon-core-next@npm:@cityofzion/neon-core@^5.0.0":
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@cityofzion/neon-core/-/neon-core-5.0.0.tgz#6b242782404df474285ad7760224871444cc1d35"
   integrity sha512-OJPZsgWxXFCSSFo6WiGmxn+/2XP0w0JXT8oYOqYxKfFYJXNh6/ENuglMs7w5jMpFsYb/Hp6Hy8qdXf/Q3Es9jg==
@@ -1152,30 +1146,6 @@
     scrypt-js "3.0.1"
     secure-random "1.1.2"
     wif "2.0.6"
-
-"@cityofzion/neon-js-next@npm:@cityofzion/neon-js@^5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@cityofzion/neon-js/-/neon-js-5.0.0.tgz#018df01d691f0736f5e604f2b87d01ef102bb5cf"
-  integrity sha512-c1c1wkGEn3vGds+T61Ki9Dm5uycrIUmC9UgtwrztkAhuZXxL86QgaAOCARLnJol+/qsHLSUwUmHo7cIrcMVWJA==
-  dependencies:
-    "@cityofzion/neon-api" "^5.0.0"
-    "@cityofzion/neon-core" "^5.0.0"
-
-"@cityofzion/neon-js@^4.9.0":
-  version "4.9.0"
-  resolved "https://registry.yarnpkg.com/@cityofzion/neon-js/-/neon-js-4.9.0.tgz#39f46720cff76f807128d5882832a3d722d9fd25"
-  integrity sha512-YYeMbQGZJkC8Wq2UQt98OUys8f8tPCaXMplbV8GwiJEdG+PJJOFGg3NkvrDGUfcuasff0dcn8LWjXTPKPp+Gyw==
-  dependencies:
-    "@cityofzion/neon-api" "^4.9.0"
-    "@cityofzion/neon-core" "^4.9.0"
-    "@cityofzion/neon-nep5" "^4.9.0"
-
-"@cityofzion/neon-nep5@^4.9.0":
-  version "4.9.0"
-  resolved "https://registry.yarnpkg.com/@cityofzion/neon-nep5/-/neon-nep5-4.9.0.tgz#aa170bfa83c5ef75270d10951e02f87e7faf4f47"
-  integrity sha512-MSRXHl+UGYnh8f9FC7zZvMNRblnl496VxG3tjA+GIShtLR6u75/FK7syVXua9h8/khljL7qqSfnNqA+sy7q+eg==
-  dependencies:
-    "@cityofzion/neon-core" "^4.9.0"
 
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
@@ -3681,13 +3651,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/ripemd160@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@types/ripemd160/-/ripemd160-2.0.0.tgz#d33e49cf66edf4668828030d4aa80116bbf8ae81"
-  integrity sha512-LD6AO/+8cAa1ghXax9NG9iPDLPUEGB2WWPjd//04KYfXxTwHvlDEfL0NRjrM5z9XWBi6WbKw75Are0rDyn3PSA==
-  dependencies:
-    "@types/node" "*"
-
 "@types/scheduler@*":
   version "0.16.2"
   resolved "https://registry.yarnpkg.com/@types/scheduler/-/scheduler-0.16.2.tgz#1a62f89525723dde24ba1b01b092bf5df8ad4d39"
@@ -3749,16 +3712,6 @@
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-8.3.1.tgz#1a32969cf8f0364b3d8c8af9cc3555b7805df14f"
   integrity sha512-Y2mHTRAbqfFkpjldbkHGY8JIzRN6XqYRliG8/24FcHm2D2PwW24fl5xMRTVGdrb7iMrwCaIEbLWerGIkXuFWVg==
 
-"@types/w3c-web-hid@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@types/w3c-web-hid/-/w3c-web-hid-1.0.2.tgz#bdf2f813ffa7ccd1ca63aa218d680edddd839417"
-  integrity sha512-tNLnl6+/AkmASEnviwdLLE6kaXlY28cDVyQ3e+WwnEAm5DHyO7c71a5TtYX6ofrnzzdQSnNsjNMoggsbrtOYfQ==
-
-"@types/w3c-web-usb@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@types/w3c-web-usb/-/w3c-web-usb-1.0.5.tgz#90284d17f35de981670c85d29053ae8b88fa5543"
-  integrity sha512-dYolx2XWesl1TMu+1BjtjU6eC6c2zZ2VDKhjU4f/mtR3+UBfMW6h1tPCQt7leY5Y8JBg0Fe/mMnoDMkPPNX9sw==
-
 "@types/webpack-sources@*":
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@types/webpack-sources/-/webpack-sources-3.2.0.tgz#16d759ba096c289034b26553d2df1bf45248d38b"
@@ -3784,13 +3737,6 @@
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@types/websocket/-/websocket-1.0.4.tgz#1dc497280d8049a5450854dd698ee7e6ea9e60b8"
   integrity sha512-qn1LkcFEKK8RPp459jkjzsfpbsx36BBt3oC3pITYtkoBw/aVX+EZFa5j3ThCRTNpLFvIMr5dSTD4RaMdilIOpA==
-  dependencies:
-    "@types/node" "*"
-
-"@types/ws@^7.4.7":
-  version "7.4.7"
-  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-7.4.7.tgz#f7c390a36f7a0679aa69de2d501319f4f8d9b702"
-  integrity sha512-JQbbmxZTZehdc2iszGKs5oC3NFnjeay7mtAWrdt7qNtAVK0g19muApzAy4bm9byz79xa2ZnO/BOBC2R8RC5Lww==
   dependencies:
     "@types/node" "*"
 
@@ -5896,15 +5842,14 @@ capture-exit@^2.0.0:
   dependencies:
     rsvp "^4.8.4"
 
-carbon-js-sdk@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/carbon-js-sdk/-/carbon-js-sdk-0.2.1.tgz#0b77e22fca9e1bf76ad3b2e315408881f6f11ee9"
-  integrity sha512-My985ufRii++kdqp74F9ICP2HQCbkWWMQuRgYwMo/t+J0lzr6re8WXI7XfCDBLGT4BUKSuXsHy0nxaV/uK57Ig==
+carbon-js-sdk@^0.2.8:
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/carbon-js-sdk/-/carbon-js-sdk-0.2.8.tgz#0ee57007e6dba5793f5664ba07dfddf596b7c60d"
+  integrity sha512-OOSLIcsNXTBlWXj1wJy1J6cpksCkWnPH9g//zbOS9FtX4rhYzcsK7XIZOut2m6BKxeLI6N0xlMgmvYNp3PaIww==
   dependencies:
+    "@cityofzion/neon-api" "^4.9.0"
     "@cityofzion/neon-core" "^4.9.0"
     "@cityofzion/neon-core-next" "npm:@cityofzion/neon-core@^5.0.0"
-    "@cityofzion/neon-js" "^4.9.0"
-    "@cityofzion/neon-js-next" "npm:@cityofzion/neon-js@^5.0.0"
     "@cosmjs/proto-signing" "^0.28.10"
     "@cosmjs/stargate" "^0.28.10"
     "@grpc/grpc-js" "^1.3.2"
@@ -5914,10 +5859,6 @@ carbon-js-sdk@^0.2.1:
     "@ledgerhq/hw-transport" "^6.3.0"
     "@ledgerhq/hw-transport-webhid" "^6.4.1"
     "@ledgerhq/hw-transport-webusb" "^6.3.0"
-    "@types/ripemd160" "^2.0.0"
-    "@types/w3c-web-hid" "^1.0.2"
-    "@types/w3c-web-usb" "^1.0.5"
-    "@types/ws" "^7.4.7"
     "@zilliqa-js/zilliqa" "^2.2.0"
     base58check "^2.0.0"
     bignumber.js "^9.0.1"
