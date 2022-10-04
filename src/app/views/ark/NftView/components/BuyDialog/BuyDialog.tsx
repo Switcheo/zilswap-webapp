@@ -18,7 +18,7 @@ import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { bnOrZero, hexToRGBA, truncate, useAsyncTask, useToaster, getLocalStored } from "app/utils";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
-import { LocalStorageKeys } from "app/utils/constants";
+import { BIG_ZERO, LocalStorageKeys } from "app/utils/constants";
 import { ArkClient, logger, waitForTx } from "core/utilities";
 import { fromBech32Address, ZilswapConnector } from "core/zilswap";
 import { ReactComponent as WarningIcon } from "../assets/warning.svg";
@@ -135,7 +135,7 @@ const BuyDialog: React.FC<Props> = (props: Props) => {
         throw new Error("Insufficient balance");
 
       const price = { amount: priceAmount, address: fromBech32Address(priceToken.address) };
-      const feeAmount = priceAmount.times(exchangeInfo.baseFeeBps).dividedToIntegerBy(10000).plus(1);
+      const feeAmount = BIG_ZERO // buy side no fee
 
       const arkClient = new ArkClient(network);
       const nonce = new BigNumber(Math.random()).times(2147483647).decimalPlaces(0).toString(10); // int32 max 2147483647

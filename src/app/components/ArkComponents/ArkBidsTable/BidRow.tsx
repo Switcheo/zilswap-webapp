@@ -14,7 +14,7 @@ import { darken } from '@material-ui/core/styles';
 import { ObservedTx } from "zilswap-sdk";
 import { AppTheme } from "app/theme/types";
 import { Cheque, WalletState } from "app/store/types";
-import { bnOrZero, toSignificantNumber, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
+import { BIG_ZERO, bnOrZero, toSignificantNumber, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
 import { RootState, TokenState } from "app/store/types";
 import { getChequeStatus } from "core/utilities/ark"
 import { ArkOwnerLabel, ArkAcceptBidDialog } from "app/components";
@@ -179,6 +179,12 @@ const Row: React.FC<Props> = (props: Props) => {
     return false;
   }, [pendingTxs, baseBid])
 
+  const isPlatformFeeExempt = useMemo(() => {
+    const collectionAddress = baseBid.token?.collection?.address.toLowerCase();
+    if (!collectionAddress) return false;
+    return exchangeInfo?.platformFeeExempt?.includes(collectionAddress);
+  }, [exchangeInfo, baseBid.token?.collection?.address])
+
   const cancelBid = (bid: Cheque) => {
     // TODO: refactor
     runCancelBid(async () => {
@@ -243,7 +249,8 @@ const Row: React.FC<Props> = (props: Props) => {
       if (typeof token?.collection?.royaltyBps !== "number")
         throw new Error("Could not retrieve collection information");
 
-      const totalFeeBps = bnOrZero(exchangeInfo.baseFeeBps).plus(bid.token.collection.royaltyBps);
+      const platformFeeBps = isPlatformFeeExempt ? BIG_ZERO : bnOrZero(exchangeInfo.baseFeeBps);
+      const totalFeeBps = platformFeeBps.plus(token.collection.royaltyBps);
       const feeAmount = priceAmount.times(totalFeeBps).dividedToIntegerBy(10000).plus(1);
 
       const walletAddress = wallet.addressInfo.byte20.toLowerCase();

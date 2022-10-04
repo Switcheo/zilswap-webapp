@@ -16,7 +16,7 @@ import { Nft } from "app/store/marketplace/types";
 import { RootState, TokenInfo, WalletObservedTx } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, toHumanNumber, useAsyncTask, useToaster, getLocalStored, bnOrZero } from "app/utils";
-import { LocalStorageKeys } from "app/utils/constants";
+import { BIG_ZERO, LocalStorageKeys } from "app/utils/constants";
 import { ReactComponent as CheckedIcon } from "app/views/ark/Collections/checked-icon.svg";
 import { ArkClient, logger, waitForTx } from "core/utilities";
 import { fromBech32Address, toBech32Address } from "core/zilswap";
@@ -221,10 +221,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
         amount: priceAmount,
         address: fromBech32Address(bidToken.address),
       };
-      const feeAmount = priceAmount
-        .times(exchangeInfo.baseFeeBps)
-        .dividedToIntegerBy(10000)
-        .plus(1);
+      const feeAmount = BIG_ZERO; // buy side no fee
 
       const arkClient = new ArkClient(network);
       const nonce = new BigNumber(Math.random())
@@ -253,6 +250,7 @@ const BidDialog: React.FC<Props> = (props: Props) => {
       const result = await arkClient.postTrade({
         publicKey,
         signature,
+        feeAmount,
 
         collectionAddress: address,
         address: wallet.addressInfo.byte20.toLowerCase(),

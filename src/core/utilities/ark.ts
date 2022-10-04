@@ -89,6 +89,8 @@ export interface ArkExchangeInfo {
   denoms: string[];
   feeDistributors?: { [key: string]: string };
 
+  platformFeeExempt?: string[];
+
   contracts: {
     v1: ArkContractInfo,
     v2: ArkContractInfo,
@@ -319,6 +321,7 @@ export class ArkClient {
       expiry: params.expiry,
       nonce: params.nonce,
       address: params.address,
+      feeAmount: params.feeAmount,
       publicKey: params.publicKey,
       signature: params.signature,
     };
@@ -906,6 +909,7 @@ export namespace ArkClient {
     side: 'Buy' | 'Sell';
     tokenId: string;
     price: { amount: BigNumber, address: string };
+    feeAmount: BigNumber;
     expiry: number;
     nonce: string;
     address: string;

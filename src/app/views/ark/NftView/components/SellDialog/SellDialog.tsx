@@ -42,9 +42,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const [token, setToken] = useState<Nft>();
   const [waitingForApprove, setWaitingForApprove] = useState(false);
   const toaster = useToaster();
-  // const [errors, setErrors] = useState({
-  //   description: "",
-  // })
+
   const [inputValues, setInputValues] = useState<SellForm>({
     description: "",
     saleType: "fixed_price",
@@ -59,6 +57,12 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const collectionId = match.params.collection;
   const tokenId = match.params.id;
+
+  const isPlatformFeeExempt = useMemo(() => {
+    const collectionAddress = token?.collection.address.toLowerCase();
+    if (!collectionAddress) return false;
+    return exchangeInfo?.platformFeeExempt?.includes(collectionAddress);
+  }, [exchangeInfo, token?.collection.address])
 
   const isOwnToken = useMemo(() => {
     return token?.owner?.address && wallet?.addressInfo.byte20?.toLowerCase() === token?.owner?.address;
@@ -161,7 +165,9 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       if (typeof token?.collection?.royaltyBps !== "number")
         throw new Error("Could not retrieve collection information");
 
-      const totalFeeBps = bnOrZero(exchangeInfo.baseFeeBps).plus(token.collection.royaltyBps);
+      const platformFeeBps = isPlatformFeeExempt ? BIG_ZERO : bnOrZero(exchangeInfo.baseFeeBps);
+
+      const totalFeeBps = platformFeeBps.plus(token.collection.royaltyBps);
       const feeAmount = priceAmount.times(totalFeeBps).dividedToIntegerBy(10000).plus(1);
 
       setOpen(true)
@@ -200,7 +206,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       const result = await arkClient.postTrade({
         publicKey,
         signature,
-
+        feeAmount,
         collectionAddress: address,
         address: wallet.addressInfo.byte20.toLowerCase(),
         tokenId: id,
@@ -353,8 +359,15 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 )}
                 {token?.collection && token.collection.royaltyBps !== null &&
                   <Box display="flex" marginTop={1}>
-                    <Typography className={classes.feeLabel}>Royalties</Typography>
-                    <Typography className={classes.feeValue}>{new BigNumber(token.collection.royaltyBps).shiftedBy(-2).toString()}%</Typography>
+                    <Typography className={classes.feeLabel}>
+                      Royalties
+                      {isPlatformFeeExempt && (
+                        <span>&nbsp; (Exempted)</span>
+                      )}
+                    </Typography>
+                    <Typography className={classes.feeValue}>
+                      {(isPlatformFeeExempt ? BIG_ZERO : new BigNumber(token.collection.royaltyBps).shiftedBy(-2)).toString()}%
+                    </Typography>
                   </Box>
                 }
               </Box>

@@ -10,7 +10,7 @@ import { AppTheme } from "app/theme/types";
 import { MintContract } from "app/store/mint/types";
 import { FancyButton, KeyValueDisplay, Text } from "app/components";
 import { ZilswapConnector } from "core/zilswap";
-import { ArkClient, waitForTx } from "core/utilities";
+import { ArkClient, logger, waitForTx } from "core/utilities";
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg";
 import { hexToRGBA, useAsyncTask, useNetwork, useToaster } from "app/utils";
 import { ReactComponent as Checkmark } from "app/views/ark/NftView/components/SellDialog/checkmark.svg";
@@ -87,11 +87,10 @@ const MintProgress: React.FC<Props> = (props: Props) => {
           setAcceptTxId(transaction.id);
           setLoadingTx(true);
           try {
-            console.log("waitForTx", transaction.id)
             await waitForTx(transaction.id);
             setAcceptOwnership(true);
           } catch (e) {
-            console.log("waitForTx", e);
+            logger("waitForTx", e);
           } finally {
             setLoadingTx(false);
           }
