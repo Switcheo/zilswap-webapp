@@ -2,16 +2,22 @@ import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import BigNumber from 'bignumber.js';
 import { ZiloAppState } from 'zilswap-sdk/lib/zilo';
-import { Box, CircularProgress, Link, Typography, makeStyles } from '@material-ui/core';
+import {
+  Box,
+  CircularProgress,
+  Link,
+  Typography,
+  makeStyles,
+  Divider,
+} from '@material-ui/core';
 import { fromBech32Address } from '@zilliqa-js/crypto';
-import ViewHeadlineIcon from '@material-ui/icons/ViewHeadline';
 import { Dayjs } from 'dayjs';
 import { ILOState } from 'zilswap-sdk/lib/constants';
 import { ObservedTx } from 'zilswap-sdk';
 import cls from 'classnames';
 import { BLOCKS_PER_MINUTE, ILOData } from 'core/zilo/constants';
 import { ZilswapConnector } from 'core/zilswap';
-import { CurrencyInputILO, FancyButton, Text } from 'app/components';
+import { FancyButton, Text, CurrencyInput, ProportionSelect } from 'app/components';
 import ProgressBar from 'app/components/ProgressBar';
 import { actions } from 'app/store';
 import {
@@ -28,6 +34,7 @@ import { ReactComponent as NewLinkIcon } from 'app/components/new_link.svg';
 import { AppTheme } from 'app/theme/types';
 import { toHumanNumber } from 'app/utils';
 import HelpInfo from '../HelpInfo';
+import WhitelistBadge from './WhitelistBadge';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -47,9 +54,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: 14,
     lineHeight: 1.2,
   },
+  titleContainer: {
+    marginTop: theme.spacing(3),
+  },
   title: {
     fontWeight: 700,
-    marginTop: theme.spacing(3),
   },
   meta: {
     fontFamily: "'Raleway', sans-serif",
@@ -92,6 +101,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontWeight: 600,
     color: theme.palette.text?.secondary,
     marginTop: theme.spacing(0.5),
+    marginLeft: theme.spacing(0.5),
   },
   linkIcon: {
     marginLeft: theme.spacing(0.5),
@@ -99,6 +109,26 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     '& path': {
       fill: theme.palette.text?.secondary,
     },
+  },
+  divider: {
+    border: theme.palette.border,
+    margin: theme.spacing(3, 0),
+  },
+  proportionSelect: {
+    marginTop: 3,
+    marginBottom: 4,
+  },
+  committedBox: {
+    backgroundColor: 'rgba(222, 255, 255, 0.1)',
+    border: '3px solid rgba(0, 255, 176, 0.2)',
+    borderRadius: 12,
+  },
+  committedBoxLabel: {
+    fontSize: '24px',
+  },
+  committedBoxAmount: {
+    fontSize: '24px',
+    color: theme.palette.primary.dark,
   },
 }));
 
@@ -111,7 +141,6 @@ interface Props {
 }
 
 const initialFormState = {
-  zwapAmount: '0',
   zilAmount: '0',
 };
 
@@ -137,7 +166,7 @@ const TokenILOCard = (props: Props) => {
 
   const insufficientBalanceError = useMemo(() => {
     // not initialized
-    if (!zilToken || !zwapToken) return null;
+    if (!zilToken) return null;
 
     // check zil balance
     const zilAmount = bnOrZero(formState.zilAmount)
@@ -146,15 +175,9 @@ const TokenILOCard = (props: Props) => {
     if (zilAmount.isZero()) return 'Enter amount to commit';
     if (zilAmount.gt(zilToken.balance ?? BIG_ZERO)) return 'Insufficient ZIL Balance';
 
-    // check zwap balance
-    const zwapAmount = bnOrZero(formState.zwapAmount)
-      .shiftedBy(zwapToken.decimals)
-      .integerValue();
-    if (zwapAmount.gt(zwapToken.balance ?? BIG_ZERO)) return 'Insufficient ZWAP Balance';
-
     // balance is sufficient
     return null;
-  }, [zwapToken, zilToken, formState]);
+  }, [zilToken, formState]);
 
   if (!zwapToken || !ziloState) {
     return (
@@ -170,11 +193,6 @@ const TokenILOCard = (props: Props) => {
     );
   }
 
-  const unitlessInAmount = new BigNumber(formState.zwapAmount)
-    .shiftedBy(zwapToken.decimals)
-    .integerValue();
-  const approved = new BigNumber(zwapToken.allowances![contractAddrHex] || '0');
-  const showTxApprove = approved.isZero() || approved.comparedTo(unitlessInAmount) < 0;
   const txIsPending =
     txIsSending ||
     txState.observingTxs.findIndex(tx => tx.hash.toLowerCase() === pendingTxHash) >= 0;
@@ -185,16 +203,9 @@ const TokenILOCard = (props: Props) => {
     userContribution,
     contractState: { total_contributions: totalContributionStr },
   } = ziloState;
-  const {
-    target_zil_amount: targetZil,
-    target_zwap_amount: targetZwap,
-    token_amount: tokenAmount,
-  } = ziloState.contractInit!;
+  const { target_zil_amount: targetZil, token_amount: tokenAmount } =
+    ziloState.contractInit!;
   const { start_block: startBlock, end_block: endBlock } = ziloState.contractInit!;
-  // const contributed = true
-  // const userContribution = new BigNumber('12345678912300000')
-  // const targetZil = new BigNumber('70000').shiftedBy(12)
-  // const targetZwap = new BigNumber('30000').shiftedBy(12)
 
   const totalContributions = new BigNumber(totalContributionStr);
   const totalCommittedUSD = totalContributions
@@ -202,6 +213,7 @@ const TokenILOCard = (props: Props) => {
     .dividedBy(data.usdRatio)
     .times(tokenState.prices[ZIL_ADDRESS])
     .toFormat(2);
+
   const contributionRate = totalContributions.dividedBy(targetZil);
   const progress = contributionRate.times(100).integerValue();
   const iloStarted = iloState === ILOState.Active;
@@ -232,56 +244,38 @@ const TokenILOCard = (props: Props) => {
     userContribution.minus(effectiveContribution.plus(1)),
     new BigNumber(0)
   );
-  const refundZwap = BigNumber.max(
-    refundZil.times(targetZwap).dividedToIntegerBy(targetZil).minus(1),
-    new BigNumber(0)
+
+  /* User contribution summary */
+  const fundUSD = new BigNumber(formState.zilAmount).times(
+    tokenState.prices[ZIL_ADDRESS]
   );
+  const discountUSD = fundUSD.div(95).times(5);
+  const receiveUSD = fundUSD.plus(discountUSD);
 
-  const onZwapChange = (amount: string = '0') => {
-    const _amount = new BigNumber(amount)
-      .shiftedBy(12)
-      .integerValue(BigNumber.ROUND_DOWN);
-    const _zilAmount = _amount
-      .minus(1)
-      .times(targetZil)
-      .dividedBy(targetZwap)
-      .integerValue(BigNumber.ROUND_DOWN);
-
-    setFormState({
-      ...formState,
-      zwapAmount: _amount.shiftedBy(-12).toString(),
-      zilAmount: _zilAmount.shiftedBy(-12).toString(),
-    });
+  const formatUSDValue = (value: BigNumber): string => {
+    if (value.isZero()) return '-';
+    if (value.isNaN()) return '-';
+    return `$${value.toFormat(2)}`;
   };
 
   const onZilChange = (amount: string = '0') => {
     const _amount = new BigNumber(amount)
       .shiftedBy(12)
       .integerValue(BigNumber.ROUND_DOWN);
-    const _zwapAmount = _amount.times(targetZwap).dividedToIntegerBy(targetZil).plus(1);
 
     setFormState({
       ...formState,
-      zwapAmount: _zwapAmount.shiftedBy(-12).toString(),
       zilAmount: _amount.shiftedBy(-12).toString(),
     });
   };
 
-  const onApprove = () => {
-    if (txIsPending) return;
-
-    runTx(async () => {
-      const tokenAmount = new BigNumber(formState.zwapAmount).plus(1);
-      const observedTx = await ZilswapConnector.approveTokenTransfer({
-        tokenAmount: tokenAmount.shiftedBy(zwapToken.decimals),
-        tokenID: zwapToken.address,
-        spenderAddress: contractAddrHex,
-      });
-
-      if (!observedTx)
-        throw new Error('Transfer allowance already sufficient for specified amount');
-
-      onSentTx(observedTx);
+  const onPercentage = (percentage: number) => {
+    const balance = bnOrZero(zilToken.balance);
+    const intendedAmount = balance.times(percentage).decimalPlaces(0);
+    const netGasAmount = ZilswapConnector.adjustedForGas(intendedAmount, balance);
+    setFormState({
+      ...formState,
+      zilAmount: netGasAmount.shiftedBy(-12).toString(),
     });
   };
 
@@ -343,6 +337,9 @@ const TokenILOCard = (props: Props) => {
     dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
   };
 
+  const isWhitelisted =
+    zwapToken.balance?.shiftedBy(-zwapToken.decimals).gt(46.46) || false;
+
   return (
     <Box className={classes.root}>
       <Box>
@@ -358,38 +355,46 @@ const TokenILOCard = (props: Props) => {
             alignItems="stretch"
             className={classes.meta}
           >
-            <Text variant="h1" className={cls(classes.title, classes.meta)}>
-              {data.tokenName} ({data.tokenSymbol})
-            </Text>
+            <WhitelistBadge whitelisted={isWhitelisted} />
+
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              className={classes.titleContainer}
+            >
+              <Text variant="h1" className={cls(classes.title, classes.meta)}>
+                {data.tokenName} ({data.tokenSymbol})
+              </Text>
+              {!!data.projectURL && (
+                <Link
+                  className={classes.link}
+                  underline="none"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  href={data.projectURL}
+                >
+                  <NewLinkIcon className={classes.linkIcon} />
+                </Link>
+              )}
+            </Box>
             <Text marginTop={2} marginBottom={0.75} className={classes.description}>
               {data.description}
             </Text>
-            {!!data.projectURL && (
-              <Link
-                className={classes.link}
-                underline="none"
-                rel="noopener noreferrer"
-                target="_blank"
-                href={data.projectURL}
-              >
-                Learn more about this token <NewLinkIcon className={classes.linkIcon} />
-              </Link>
-            )}
 
             {currentBlock > 0 && (
               <Text variant="h1" marginTop={2.75} className={classes.timer}>
                 {Math.floor(secondsToNextPhase / 3600).toLocaleString('en-US', {
                   minimumIntegerDigits: 2,
                 })}
-                h :{' '}
+                :
                 {(Math.floor(secondsToNextPhase / 60) % 60).toLocaleString('en-US', {
                   minimumIntegerDigits: 2,
                 })}
-                m :{' '}
+                :
                 {(secondsToNextPhase % 60).toLocaleString('en-US', {
                   minimumIntegerDigits: 2,
                 })}
-                s
                 <HelpInfo
                   placement="top"
                   title={`${blocksToNextPhase} blocks left to the ${
@@ -412,73 +417,65 @@ const TokenILOCard = (props: Props) => {
               </Box>
               <Box display="flex" marginTop={0.75}>
                 <Text className={classes.label} flexGrow={1} align="left">
-                  <strong>Total Target</strong>
+                  Target
                 </Text>
-                <Text className={classes.label}>
-                  <strong>{data.usdTarget}</strong>
-                </Text>
-              </Box>
-              <Box display="flex" marginTop={0.75}>
-                <Text className={classes.label} flexGrow={1} align="left">
-                  &nbsp; • &nbsp; ZIL to Raise
-                </Text>
-                <Text className={classes.label}>
-                  {targetZil.shiftedBy(-12).toFormat(0)}
-                </Text>
-              </Box>
-              <Box display="flex" marginTop={0.75}>
-                <Text className={classes.label} flexGrow={1} align="left">
-                  &nbsp; • &nbsp; ZWAP to Burn
-                </Text>
-                <Text className={classes.label}>
-                  {targetZwap.shiftedBy(-12).toFormat(0)}
-                </Text>
+                <Text className={classes.label}>{data.usdTarget}</Text>
               </Box>
             </Box>
 
+            <Divider className={classes.divider} />
+
             {!iloOver && (
               <Box>
-                <Text
-                  className={cls(classes.title, classes.description)}
-                  marginBottom={0.75}
-                >
-                  Commit your tokens in a fixed ratio to participate.
-                </Text>
-                <Text className={classes.description} color="textSecondary">
-                  {new BigNumber(1).minus(data.usdRatio).times(100).toFormat(0)}% ZWAP -{' '}
-                  {new BigNumber(data.usdRatio).times(100).toFormat(0)}% ZIL
-                </Text>
                 <Box
-                  marginTop={1.5}
                   display="flex"
                   bgcolor="background.contrast"
                   padding={0.5}
                   borderRadius={12}
                   position="relative"
                 >
-                  <CurrencyInputILO
-                    label="to Burn:"
-                    token={zwapToken}
-                    amount={formState.zwapAmount}
-                    hideBalance={false}
-                    onAmountChange={onZwapChange}
-                  />
-                  <ViewHeadlineIcon className={classes.viewIcon} />
-                  <CurrencyInputILO
-                    label="for Project:"
+                  <CurrencyInput
+                    label="Amount"
                     token={zilToken}
                     amount={formState.zilAmount}
-                    hideBalance={false}
+                    // disabled={!inToken}
+                    fixedToken={true}
                     onAmountChange={onZilChange}
                   />
                 </Box>
+                <Box display="flex" justifyContent="flex-end">
+                  <ProportionSelect
+                    size="small"
+                    className={classes.proportionSelect}
+                    onSelectProp={onPercentage}
+                  />
+                </Box>
+
+                <Box marginTop={1} marginBottom={0.5}>
+                  <Box display="flex" marginTop={0.75}>
+                    <Text className={classes.label} flexGrow={1} align="left">
+                      Cost
+                    </Text>
+                    <Text className={classes.label}>{formatUSDValue(fundUSD)}</Text>
+                  </Box>
+                  <Box display="flex" marginTop={0.75}>
+                    <Text className={classes.label} flexGrow={1} align="left">
+                      Whitelist Discount
+                    </Text>
+                    <Text className={classes.label}>{formatUSDValue(discountUSD)}</Text>
+                  </Box>
+                  <Box display="flex" marginTop={0.75}>
+                    <Text className={classes.label} flexGrow={1} align="left">
+                      Amount to Commit & Receive
+                    </Text>
+                    <Text className={classes.label}>{formatUSDValue(receiveUSD)}</Text>
+                  </Box>
+                </Box>
+
                 <FancyButton
                   walletRequired
                   className={classes.actionButton}
-                  showTxApprove={showTxApprove}
-                  loadingTxApprove={txIsPending}
-                  onClickTxApprove={onApprove}
-                  disabled={!showTxApprove && (!iloStarted || !!insufficientBalanceError)}
+                  disabled={!iloStarted || !!insufficientBalanceError}
                   variant="contained"
                   color="primary"
                   onClick={onCommit}
@@ -492,6 +489,28 @@ const TokenILOCard = (props: Props) => {
                 <Typography className={classes.errorMessage} color="error">
                   {txError?.message}
                 </Typography>
+                <Divider className={classes.divider} />
+                <Box display="flex" marginTop={0.75}>
+                  <Text className={classes.label} flexGrow={1} align="center">
+                    Your Committed Amount
+                  </Text>
+                </Box>
+
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  className={classes.committedBox}
+                  paddingX={2}
+                  paddingY={3}
+                  marginTop={2}
+                >
+                  <Text className={classes.committedBoxLabel}>ZIL</Text>
+                  <Text className={classes.committedBoxAmount}>
+                    {contributed
+                      ? toHumanNumber(userContribution.shiftedBy(-12), 2)
+                      : '-'}
+                  </Text>
+                </Box>
               </Box>
             )}
           </Box>
@@ -503,58 +522,8 @@ const TokenILOCard = (props: Props) => {
               alignItems="stretch"
               className={classes.meta}
             >
-              <Text className={cls(classes.title, classes.description)}>
-                Tokens Committed
-              </Text>
-              <Box
-                marginTop={1.5}
-                display="flex"
-                bgcolor="background.contrast"
-                padding={0.5}
-                borderRadius={12}
-                position="relative"
-              >
-                <CurrencyInputILO
-                  label="to Burn:"
-                  token={zwapToken}
-                  amount={
-                    contributed
-                      ? toHumanNumber(
-                          userContribution
-                            .times(targetZwap)
-                            .dividedToIntegerBy(targetZil)
-                            .plus(1)
-                            .shiftedBy(-12),
-                          6
-                        )
-                      : '-'
-                  }
-                  hideBalance={true}
-                  disabled={true}
-                  disabledStyle={contributed ? 'strong' : 'muted'}
-                />
-                <ViewHeadlineIcon className={classes.viewIcon} />
-                <CurrencyInputILO
-                  label="for Project:"
-                  token={zilToken}
-                  amount={
-                    contributed ? toHumanNumber(userContribution.shiftedBy(-12), 2) : '-'
-                  }
-                  hideBalance={true}
-                  disabled={true}
-                  disabledStyle={contributed ? 'strong' : 'muted'}
-                />
-              </Box>
               {iloOver && (
                 <Box marginTop={1} marginBottom={0.5}>
-                  <Box display="flex" marginTop={0.5}>
-                    <Text className={classes.label} flexGrow={1} align="left">
-                      <strong>ZWAP</strong> to Refund
-                    </Text>
-                    <Text className={classes.label}>
-                      {refundZwap.shiftedBy(-12).toFormat(4)}
-                    </Text>
-                  </Box>
                   <Box display="flex" marginTop={0.5}>
                     <Text className={classes.label} flexGrow={1} align="left">
                       <strong>ZIL</strong> to Refund
