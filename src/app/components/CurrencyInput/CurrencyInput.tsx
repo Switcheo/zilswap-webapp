@@ -1,26 +1,33 @@
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import cls from "classnames";
-import { Box, Button, InputAdornment, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import BigNumber from "bignumber.js";
-import { CurrencyLogo } from "app/components";
-import CurrencyDialog from "app/components/CurrencyDialog";
-import { RootState, TokenInfo } from "app/store/types";
-import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useMoneyFormatter } from "app/utils";
-import { formatSymbol } from "app/utils/currencies";
-import { MoneyFormatterOptions } from "app/utils/useMoneyFormatter";
-import { getWallet } from "app/saga/selectors";
-import { CurrencyDialogProps, CurrencyListType } from "../CurrencyDialog/CurrencyDialog";
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import cls from 'classnames';
+import {
+  Box,
+  Button,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
+  Typography,
+} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import BigNumber from 'bignumber.js';
+import { CurrencyLogo } from 'app/components';
+import CurrencyDialog from 'app/components/CurrencyDialog';
+import { RootState, TokenInfo } from 'app/store/types';
+import { AppTheme } from 'app/theme/types';
+import { hexToRGBA, useMoneyFormatter } from 'app/utils';
+import { formatSymbol } from 'app/utils/currencies';
+import { MoneyFormatterOptions } from 'app/utils/useMoneyFormatter';
+import { getWallet } from 'app/saga/selectors';
+import { CurrencyDialogProps, CurrencyListType } from '../CurrencyDialog/CurrencyDialog';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
   form: {
-    position: "relative",
-    display: "flex",
-    flexDirection: "column",
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
   },
   inputRow: {
     paddingLeft: 0,
@@ -28,25 +35,25 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     border: 0,
   },
   input: {
-    textAlign: "left",
+    textAlign: 'left',
   },
   inputRowNoLabel: {
-    "& .MuiInputBase-input": {
-      padding: "14px 18px 12px",
+    '& .MuiInputBase-input': {
+      padding: '14px 18px 12px',
     },
-    "& .MuiButtonBase-root": {
-      padding: "14px 18px 12px 5px"
-    }
+    '& .MuiButtonBase-root': {
+      padding: '14px 18px 12px 5px',
+    },
   },
   label: {
-    position: "absolute",
+    position: 'absolute',
     color: theme.palette.text?.primary,
     left: 20,
     top: 12,
     zIndex: 1,
   },
   balance: {
-    position: "absolute",
+    position: 'absolute',
     color: theme.palette.text?.primary,
     right: 20,
     top: 12,
@@ -57,23 +64,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     maxHeight: 'none',
   },
   currencyButton: {
-    display: "flex",
-    justifyContent: "space-between",
-    fontFamily: "Avenir Next",
-    fontWeight: "bold",
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontFamily: 'Avenir Next',
+    fontWeight: 'bold',
     borderRadius: 12,
-    padding: "30px 18px 8px 5px",
+    padding: '30px 18px 8px 5px',
     color: theme.palette.text?.primary,
-    "& .MuiButton-label": {
+    '& .MuiButton-label': {
       padding: theme.spacing(0.75),
     },
-    "&:hover": {
-      backgroundColor: "transparent",
-      "& .MuiButton-label": {
+    '&:hover': {
+      backgroundColor: 'transparent',
+      '& .MuiButton-label': {
         backgroundColor:
-          theme.palette.type === "dark"
-            ? "rgba(222, 255, 255, 0.08)"
-            : "rgba(0, 51, 64, 0.05)",
+          theme.palette.type === 'dark'
+            ? 'rgba(222, 255, 255, 0.08)'
+            : 'rgba(0, 51, 64, 0.05)',
         borderRadius: 12,
       },
     },
@@ -83,8 +90,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   currencyLogo: {
     marginRight: theme.spacing(1),
-    "& svg": {
-      display: "block",
+    '& svg': {
+      display: 'block',
     },
   },
   expandIcon: {
@@ -92,67 +99,65 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.text?.primary,
   },
   maxButton: {
-    display: "flex",
-    padding: "34px 0px 12px 5px",
-    color: theme.palette.type === "dark" ? "#003340" : "#DEFFFF",
-    "& .MuiButton-label": {
-      width: "inherit",
-      padding: "2px 4px",
+    display: 'flex',
+    padding: '34px 0px 12px 5px',
+    color: theme.palette.type === 'dark' ? '#003340' : '#DEFFFF',
+    '& .MuiButton-label': {
+      width: 'inherit',
+      padding: '2px 4px',
       backgroundColor: `rgba${hexToRGBA(
-        theme.palette.type === "dark" ? "#00FFB0" : "#003340",
+        theme.palette.type === 'dark' ? '#00FFB0' : '#003340',
         0.75
       )}`,
       borderRadius: 5,
-      "& .MuiTypography-root": {
-        fontWeight: "bold",
+      '& .MuiTypography-root': {
+        fontWeight: 'bold',
       },
-      "&:hover": {
+      '&:hover': {
         backgroundColor: `rgba${hexToRGBA(
-          theme.palette.type === "dark" ? "#00FFB0" : "#003340",
+          theme.palette.type === 'dark' ? '#00FFB0' : '#003340',
           0.5
         )}`,
       },
     },
-    "&:hover": {
-      backgroundColor: "transparent",
+    '&:hover': {
+      backgroundColor: 'transparent',
     },
-    "&.Mui-disabled": {
-      color: theme.palette.type === "dark" ? "#003340" : "#DEFFFF",
-      "& .MuiButton-label": {
+    '&.Mui-disabled': {
+      color: theme.palette.type === 'dark' ? '#003340' : '#DEFFFF',
+      '& .MuiButton-label': {
         backgroundColor: `rgba${hexToRGBA(
-          theme.palette.type === "dark" ? "#00FFB0" : "#003340",
+          theme.palette.type === 'dark' ? '#00FFB0' : '#003340',
           0.4
         )}`,
       },
     },
   },
   bidDialog: {
-    "& .MuiInputBase-input": {
-      padding: "56px 18px 12px!important",
+    '& .MuiInputBase-input': {
+      padding: '56px 18px 12px!important',
     },
-    "& .MuiButtonBase-root": {
-      padding: "56px 18px 12px 5px",
+    '& .MuiButtonBase-root': {
+      padding: '56px 18px 12px 5px',
     },
   },
-
 
   legacy: {
     width: 30,
     height: 30,
-    display: "flex",
+    display: 'flex',
     borderRadius: 14,
     padding: 2,
   },
   legacySvg: {
-    maxWidth: "100%",
-    width: "unset",
-    height: "unset",
+    maxWidth: '100%',
+    width: 'unset',
+    height: 'unset',
     flex: 1,
   },
 }));
 
-export interface CurrencyInputProps
-  extends React.HTMLAttributes<HTMLFormElement> {
+export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement> {
   label?: string;
   inputClassName?: string;
   token: TokenInfo | null;
@@ -179,9 +184,7 @@ export interface CurrencyInputProps
   onEnterKeyPress?: () => void;
 }
 
-const CurrencyInput: React.FC<CurrencyInputProps> = (
-  props: CurrencyInputProps
-) => {
+const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
   const {
     children,
     inputClassName,
@@ -203,27 +206,24 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
     onSelectMax,
     showMaxButton,
     onEnterKeyPress,
-    tokenList = "zil",
+    tokenList = 'zil',
     legacyZil = false,
     overrideBalance,
-    balanceLabel = "Balance"
+    balanceLabel = 'Balance',
   } = props;
   const classes = useStyles();
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 5 });
   const [tokenBalance, setTokenBalance] = useState<BigNumber | null>(null);
   const [showCurrencyDialog, setShowCurrencyDialog] = useState(false);
   const walletState = useSelector(getWallet);
-  const poolToken = useSelector<RootState, TokenInfo | null>((state) => state.pool.token);
+  const poolToken = useSelector<RootState, TokenInfo | null>(state => state.pool.token);
   const formatMoney = useMoneyFormatter({
     showCurrency: true,
     maxFractionDigits: 6,
   });
 
-  const userPoolTokenPercent =
-    poolToken?.pool?.contributionPercentage.shiftedBy(-2);
-  const inPoolAmount = poolToken?.pool?.tokenReserve.times(
-    userPoolTokenPercent || 0
-  );
+  const userPoolTokenPercent = poolToken?.pool?.contributionPercentage.shiftedBy(-2);
+  const inPoolAmount = poolToken?.pool?.tokenReserve.times(userPoolTokenPercent || 0);
 
   const formatOpts: MoneyFormatterOptions = {
     compression: poolToken?.decimals,
@@ -244,23 +244,21 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
   }, [walletState.wallet, token, showContribution]);
 
   const onCurrencySelect = (token: TokenInfo) => {
-    if (typeof onCurrencyChange === "function") onCurrencyChange(token);
+    if (typeof onCurrencyChange === 'function') onCurrencyChange(token);
     setShowCurrencyDialog(false);
   };
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (typeof onAmountChange === "function")
-      onAmountChange(event.target.value);
+    if (typeof onAmountChange === 'function') onAmountChange(event.target.value);
   };
 
   const onCloseDialog = () => {
     setShowCurrencyDialog(false);
-    if (typeof onCloseDialogListener === "function") onCloseDialogListener();
+    if (typeof onCloseDialogListener === 'function') onCloseDialogListener();
   };
 
   const clearPlaceholder = () => {
-    if (amount === "0" && typeof onAmountChange === "function")
-      onAmountChange("");
+    if (amount === '0' && typeof onAmountChange === 'function') onAmountChange('');
   };
 
   const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
@@ -277,32 +275,26 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
       autoComplete="off"
       onSubmit={onSubmitHandler}
     >
-      {label &&
-        <InputLabel className={cls(classes.label)}>
-          {label}
-        </InputLabel>
-      }
+      {label && <InputLabel className={cls(classes.label)}>{label}</InputLabel>}
 
       {!hideBalance && (
-        <Typography
-          className={cls(classes.balance)}
-          variant="body1"
-        >
-          {balanceLabel}:{" "}
+        <Typography className={cls(classes.balance)} variant="body1">
+          {balanceLabel}:{' '}
           {tokenBalance
             ? moneyFormat(tokenBalance, {
-              symbol: token?.symbol,
-              compression: token?.decimals,
-              showCurrency: false,
-            })
-            : (overrideBalance ? overrideBalance.toString() : "-")}
+                symbol: token?.symbol,
+                compression: token?.decimals,
+                showCurrency: false,
+              })
+            : overrideBalance
+            ? overrideBalance.toString()
+            : '-'}
         </Typography>
       )}
 
       {showPoolBalance && (
         <Typography className={classes.balance} variant="body2">
-          Balance in Pool:{" "}
-          {!!poolToken && formatMoney(inPoolAmount || 0, formatOpts)}
+          Balance in Pool: {!!poolToken && formatMoney(inPoolAmount || 0, formatOpts)}
         </Typography>
       )}
 
@@ -311,14 +303,14 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
           [classes.inputRowNoLabel]: !label,
           [inputClassName!]: !!inputClassName,
         })}
-        placeholder={"0"}
+        placeholder={'0'}
         value={amount.toString()}
         onChange={onChange}
         onFocus={clearPlaceholder}
         onBlur={onEditorBlur}
         disabled={disabled}
         type="number"
-        inputProps={{ min: "0", className: classes.input }}
+        inputProps={{ min: '0', className: classes.input }}
         endAdornment={
           <InputAdornment className={classes.endAdornment} position="end">
             {fixedToken ? (
@@ -334,7 +326,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
                       <Typography>MAX</Typography>
                     </Button>
                   )}
-                  <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
+                  <Box py={'4px'} px={'16px'} className={classes.currencyButton}>
                     <Box display="flex" alignItems="center">
                       <CurrencyLogo
                         legacy="true"
@@ -350,7 +342,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
                   </Box>
                 </Box>
               ) : (
-                <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
+                <Box py={'4px'} px={'16px'} className={classes.currencyButton}>
                   <Box display="flex" alignItems="center">
                     <CurrencyLogo
                       currency={token?.symbol}
@@ -390,11 +382,12 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (
                         className={classes.currencyLogo}
                       />
                     )}
-                    <Typography
-                      variant="button"
-                      className={classes.currencyText}
-                    >
-                      {formatSymbol(token) ?? <Box component="span" ml={1}>Select Token</Box>}
+                    <Typography variant="button" className={classes.currencyText}>
+                      {formatSymbol(token) ?? (
+                        <Box component="span" ml={1}>
+                          Select Token
+                        </Box>
+                      )}
                     </Typography>
                   </Box>
                   <ExpandMoreIcon className={classes.expandIcon} />
