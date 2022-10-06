@@ -17,7 +17,13 @@ import { ObservedTx } from 'zilswap-sdk';
 import cls from 'classnames';
 import { getBlocksPerMinute, ILOData } from 'core/zilo/constants';
 import { ZilswapConnector } from 'core/zilswap';
-import { FancyButton, Text, CurrencyInput, ProportionSelect } from 'app/components';
+import {
+  FancyButton,
+  Text,
+  CurrencyInput,
+  ProportionSelect,
+  CurrencyLogo,
+} from 'app/components';
 import ProgressBar from 'app/components/ProgressBar';
 import { actions } from 'app/store';
 import {
@@ -124,6 +130,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   committedBoxLabel: {
     fontSize: '24px',
+    lineHeight: 1.4,
+    marginLeft: theme.spacing(1),
   },
   committedBoxAmount: {
     fontSize: '24px',
@@ -213,8 +221,12 @@ const TokenILOCard = (props: Props) => {
 
   let userSent = new BigNumber(0);
   let isWhitelisted = false;
+  console.log('discountWhitelist', discountWhitelist);
   if (walletState.wallet) {
-    const userAddress = walletState.wallet.addressInfo.byte20;
+    const userAddress = walletState.wallet.addressInfo.byte20.toLowerCase();
+    console.log('userAddress', userAddress);
+    console.log('discountWhitelist', Object.keys(discountWhitelist!));
+    console.log('userAddress in discountWhitelist!', userAddress in discountWhitelist!);
     // get sent zil amount
     if (userAddress in balances!) {
       userSent = balances![userAddress];
@@ -521,10 +533,14 @@ const TokenILOCard = (props: Props) => {
                   justifyContent="space-between"
                   className={classes.committedBox}
                   paddingX={2}
-                  paddingY={3}
+                  paddingY={2}
                   marginTop={2}
+                  alignItems="center"
                 >
-                  <Text className={classes.committedBoxLabel}>ZIL</Text>
+                  <Box display="flex" justifyContent="center" alignItems="center">
+                    <CurrencyLogo currency={zilToken.symbol} />
+                    <Text className={classes.committedBoxLabel}>ZIL</Text>
+                  </Box>
                   <Text className={classes.committedBoxAmount}>
                     {contributed ? userSent.shiftedBy(-12).toFormat(2) : '-'}
                   </Text>

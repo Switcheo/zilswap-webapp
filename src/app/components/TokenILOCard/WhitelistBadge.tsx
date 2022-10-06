@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     marginTop: 2,
   },
   textFade: {
-    opacity: 0.5,
+    opacity: 0.7,
   },
   logo: {
     height: '22px',
