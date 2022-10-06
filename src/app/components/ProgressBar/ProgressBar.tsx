@@ -11,6 +11,7 @@ interface Props extends PartialBoxProps {
 
 interface StyleProps {
   left: string;
+  borderRadius: string;
 }
 
 const useStyles = makeStyles<AppTheme, StyleProps>(theme => ({
@@ -20,16 +21,20 @@ const useStyles = makeStyles<AppTheme, StyleProps>(theme => ({
     top: '-34px',
   }),
   root: {},
-  background: {
+  background: props => ({
     backgroundColor: theme.palette.primary.dark,
-  },
+    borderTopLeftRadius: '12px',
+    borderBottomLeftRadius: '12px',
+    borderTopRightRadius: props.borderRadius,
+    borderBottomRightRadius: props.borderRadius,
+  }),
   text: {
     color: theme.palette.primary.contrastText,
     textShadow: '0 0 4px rgba(0,0,0,0.95)',
   },
-  barBackground: {
+  barBackground: props => ({
     backgroundColor: 'rgba(0, 51, 64, 0.5)',
-  },
+  }),
   thresholdContainer: {
     width: '100%',
     left: '0px',
@@ -43,7 +48,8 @@ const useStyles = makeStyles<AppTheme, StyleProps>(theme => ({
 const ProgressBar: React.FC<Props> = (props: Props) => {
   const { boxProps } = extractBoxProps(props);
   const { progress, threshold } = props;
-  const styleProps = { left: `${threshold}%` };
+  const borderRadius = progress > 90 ? '12px' : '0px';
+  const styleProps = { left: `${threshold}%`, borderRadius };
   const classes = useStyles(styleProps);
 
   return (
@@ -63,15 +69,10 @@ const ProgressBar: React.FC<Props> = (props: Props) => {
         display="flex"
         alignItems="stretch"
         bgcolor="background.default"
-        borderRadius={12}
         mt={0}
+        borderRadius={12}
       >
-        <Box
-          padding={2}
-          width={`${progress}%`}
-          borderRadius={12}
-          className={classes.background}
-        />
+        <Box padding={2} width={`${progress}%`} className={classes.background} />
         <Box
           className={classes.text}
           fontWeight="fontWeightBold"
