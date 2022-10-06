@@ -1,74 +1,73 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Box, InputLabel, OutlinedInput, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import BigNumber from "bignumber.js";
-import cls from "classnames";
-import { useSelector } from "react-redux";
-import { CurrencyLogo, Text } from "app/components";
-import { RootState, TokenInfo, WalletState } from "app/store/types";
-import { useMoneyFormatter } from "app/utils";
-import { bnOrZero } from "app/utils";
-import { AppTheme } from "app/theme/types";
-import { CurrencyDialogProps } from "../CurrencyDialog/CurrencyDialog";
+import React, { useEffect, useMemo, useState } from 'react';
+import { Box, InputLabel, OutlinedInput, Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import BigNumber from 'bignumber.js';
+import cls from 'classnames';
+import { useSelector } from 'react-redux';
+import { CurrencyLogo, Text } from 'app/components';
+import { RootState, TokenInfo, WalletState } from 'app/store/types';
+import { useMoneyFormatter } from 'app/utils';
+import { bnOrZero } from 'app/utils';
+import { AppTheme } from 'app/theme/types';
+import { CurrencyDialogProps } from '../CurrencyDialog/CurrencyDialog';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
-  root: {
-  },
+  root: {},
   box: {
     backgroundColor: theme.palette.background!.contrast,
-    border: "3px solid rgba(0, 255, 176, 0.2)",
-    margin: "2px",
+    border: '3px solid rgba(0, 255, 176, 0.2)',
+    margin: '2px',
   },
   outlinedInput: {
     border: 0,
   },
   input: {
-    padding: "8px 14px 12px!important",
-    textAlign: "left",
+    padding: '8px 14px 12px!important',
+    textAlign: 'left',
   },
   strongInput: {
-    padding: "8px 14px 12px!important",
-    textAlign: "left",
-    color: theme.palette.primary.dark
+    padding: '8px 14px 12px!important',
+    textAlign: 'left',
+    color: theme.palette.primary.dark,
   },
   currencyButton: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "12px 12px 15px",
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: '12px 12px 15px',
     borderRadius: 0,
     borderTopLeftRadius: 4,
     borderBottomLeftRadius: 4,
     color: theme.palette.text?.primary,
   },
   form: {
-    display: "flex",
-    flexDirection: "column",
+    display: 'flex',
+    flexDirection: 'column',
   },
   currencyText: {
     fontSize: 20,
   },
   currencyLogo: {
     marginRight: theme.spacing(1),
-    "& svg": {
-      display: "block",
-    }
+    '& svg': {
+      display: 'block',
+    },
   },
   expandIcon: {
     marginLeft: theme.spacing(1),
-    color: theme.palette.primary.main
+    color: theme.palette.primary.main,
   },
   label: {
-    paddingLeft: "16px",
-    color: "#DEFFFF"
+    paddingLeft: '16px',
+    color: '#DEFFFF',
   },
   balance: {
     cursor: 'pointer',
     display: 'flex',
     width: '100%',
     justifyContent: 'space-between',
-    padding: "0 16px",
+    padding: '0 16px',
     marginBottom: theme.spacing(1),
-  }
+  },
 }));
 
 export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement> {
@@ -86,14 +85,20 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   onAmountChange?: (value: string) => void;
   onEditorBlur?: () => void;
   onCloseDialog?: () => void;
-};
+}
 
 const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) => {
   const {
-    children, className, disabledStyle = 'muted',
-    label, amount, disabled,
-    showContribution, hideBalance = {},
-    onAmountChange, token,
+    children,
+    className,
+    disabledStyle = 'muted',
+    label,
+    amount,
+    disabled,
+    showContribution,
+    hideBalance = {},
+    onAmountChange,
+    token,
     onEditorBlur,
   } = props;
   const classes = useStyles();
@@ -102,71 +107,85 @@ const CurrencyInputILO: React.FC<CurrencyInputProps> = (props: CurrencyInputProp
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
 
   useEffect(() => {
-    if (!walletState.wallet || !token)
-      return setTokenBalance(null);
+    if (!walletState.wallet || !token) return setTokenBalance(null);
 
     if (!showContribution) {
       const tokenBalance = token!.balance;
-      if (!tokenBalance)
-        return setTokenBalance(null);
+      if (!tokenBalance) return setTokenBalance(null);
 
       setTokenBalance(new BigNumber(tokenBalance!.toString()));
     } else {
       if (!token.pool) return setTokenBalance(null);
       setTokenBalance(token.pool!.userContribution);
     }
-
   }, [walletState.wallet, token, showContribution]);
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (typeof onAmountChange === "function")
-      onAmountChange(event.target.value);
+    if (typeof onAmountChange === 'function') onAmountChange(event.target.value);
   };
 
   const balanceHuman = useMemo(() => {
-    return bnOrZero(tokenBalance).shiftedBy(-(token?.decimals ?? 0))
-  }, [tokenBalance, token])
+    return bnOrZero(tokenBalance).shiftedBy(-(token?.decimals ?? 0));
+  }, [tokenBalance, token]);
 
   return (
     <form className={cls(classes.form, className)} noValidate autoComplete="off">
-        <Box flex={1} className={classes.box} display="flex" flexDirection="column" alignItems="start" borderRadius={12}>
-            <Box py={"4px"} px={"16px"} className={classes.currencyButton}>
-              <Box display="flex" alignItems="center">
-                <CurrencyLogo currency={token?.symbol} address={token?.address} className={classes.currencyLogo} />
-                <Typography variant="button" className={classes.currencyText}>{token?.symbol}</Typography>
-              </Box>
-            </Box>
-            <Text color="textSecondary" className={classes.label}>
-              {label}
-            </Text>
-            <OutlinedInput
-              className={classes.outlinedInput}
-              placeholder={"0"}
-              value={amount}
-              onChange={onChange}
-              onBlur={onEditorBlur}
-              disabled={disabled}
-              type={disabled && new BigNumber(amount).isNaN() ? 'string' : 'number'}
-              inputProps={{ min: "0", className: disabled && disabledStyle === 'strong' ? classes.strongInput : classes.input }}
+      <Box
+        flex={1}
+        className={classes.box}
+        display="flex"
+        flexDirection="column"
+        alignItems="start"
+        borderRadius={12}
+      >
+        <Box py={'4px'} px={'16px'} className={classes.currencyButton}>
+          <Box display="flex" alignItems="center">
+            <CurrencyLogo
+              currency={token?.symbol}
+              address={token?.address}
+              className={classes.currencyLogo}
             />
-            {!hideBalance && (
-              [
-                <InputLabel className={classes.balance} onClick={() => onAmountChange?.(balanceHuman.toString(10))}>
-                  <Typography align="left">
-                    Balance:
-                  </Typography>
-                  <Typography align="right">
-                    {moneyFormat(tokenBalance ?? 0, {
-                      symbol: token?.symbol,
-                      compression: token?.decimals,
-                      showCurrency: true,
-                    })}
-                  </Typography>
-                </InputLabel>,
-              ]
-            )}
+            <Typography variant="button" className={classes.currencyText}>
+              {token?.symbol}
+            </Typography>
+          </Box>
         </Box>
-        {children}
+        <Text color="textSecondary" className={classes.label}>
+          {label}
+        </Text>
+        <OutlinedInput
+          className={classes.outlinedInput}
+          placeholder={'0'}
+          value={amount}
+          onChange={onChange}
+          onBlur={onEditorBlur}
+          disabled={disabled}
+          type={disabled && new BigNumber(amount).isNaN() ? 'string' : 'number'}
+          inputProps={{
+            min: '0',
+            className:
+              disabled && disabledStyle === 'strong'
+                ? classes.strongInput
+                : classes.input,
+          }}
+        />
+        {!hideBalance && [
+          <InputLabel
+            className={classes.balance}
+            onClick={() => onAmountChange?.(balanceHuman.toString(10))}
+          >
+            <Typography align="left">Balance:</Typography>
+            <Typography align="right">
+              {moneyFormat(tokenBalance ?? 0, {
+                symbol: token?.symbol,
+                compression: token?.decimals,
+                showCurrency: true,
+              })}
+            </Typography>
+          </InputLabel>,
+        ]}
+      </Box>
+      {children}
     </form>
   );
 };

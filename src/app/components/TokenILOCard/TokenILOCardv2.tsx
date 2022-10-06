@@ -101,6 +101,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   label: {
     color: theme.palette.label,
+    fontWeight: 400,
+    fontSize: '14px',
+  },
+  highlight: {
+    fontSize: '14px',
+    color: theme.palette.type === 'dark' ? '#00FFB0' : '#003340',
+    fontWeight: 400,
   },
   link: {
     fontWeight: 600,
@@ -111,6 +118,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   linkIcon: {
     marginLeft: theme.spacing(0.5),
     verticalAlign: 'top',
+    width: '14px',
+    height: '14px',
     '& path': {
       fill: theme.palette.text?.secondary,
     },
@@ -221,12 +230,8 @@ const TokenILOCard = (props: Props) => {
 
   let userSent = new BigNumber(0);
   let isWhitelisted = false;
-  console.log('discountWhitelist', discountWhitelist);
   if (walletState.wallet) {
     const userAddress = walletState.wallet.addressInfo.byte20.toLowerCase();
-    console.log('userAddress', userAddress);
-    console.log('discountWhitelist', Object.keys(discountWhitelist!));
-    console.log('userAddress in discountWhitelist!', userAddress in discountWhitelist!);
     // get sent zil amount
     if (userAddress in balances!) {
       userSent = balances![userAddress];
@@ -492,15 +497,20 @@ const TokenILOCard = (props: Props) => {
                   </Box>
                   <Box display="flex" marginTop={0.75}>
                     <Text className={classes.label} flexGrow={1} align="left">
-                      Whitelist Discount
+                      <>
+                        Whitelist Discount{' '}
+                        {isWhitelisted ? `(${data.whitelistDiscountPercent}%)` : ''}
+                      </>
                     </Text>
                     <Text className={classes.label}>{formatUSDValue(discountUSD)}</Text>
                   </Box>
                   <Box display="flex" marginTop={0.75}>
-                    <Text className={classes.label} flexGrow={1} align="left">
+                    <Text className={cls(classes.highlight)} flexGrow={1} align="left">
                       Amount to Commit & Receive
                     </Text>
-                    <Text className={classes.label}>{formatUSDValue(receiveUSD)}</Text>
+                    <Text className={classes.highlight}>
+                      {formatUSDValue(receiveUSD)}
+                    </Text>
                   </Box>
                 </Box>
 

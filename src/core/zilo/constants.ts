@@ -201,14 +201,14 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
       version: 1,
     },
     {
-      projectURL: 'https://docs.zilswap.io/zilo/overview/06-envizion',
+      projectURL: 'https://docs.zilswap.io/zilo/overview/zilo-7-metasportz-city-mszc',
       imageURL:
         'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-6-EVZ-banner.png',
-      tokenSymbol: 'WNT',
-      tokenName: 'WN Token',
+      tokenSymbol: 'MSZC',
+      tokenName: 'MetaSportZ City',
       tokenDecimals: 12,
       description:
-        'WN is well-positioned to be at the forefront of the creator’s economy, revolutionizing how individual Creators can create and collaborate at a scale never seen before.',
+        'MetaSportZ City is the world’s first “Sportaverse” – within the next internet – featuring the next gamified sports and gaming entertainment experiences on web 3.5.',
       contractAddress: 'zil1wmy94966t7ku5ms4pp8nj92jkpat9x52n0uyyj',
       showUntil: dayjs('2022-10-10T12:00:00.000+0800'),
       usdRatio: '1.0',

@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     position: 'relative',
     display: 'flex',
     flexDirection: 'column',
+    width: '100%',
   },
   inputRow: {
     paddingLeft: 0,
