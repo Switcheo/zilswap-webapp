@@ -211,10 +211,6 @@ const TokenILOCard = (props: Props) => {
     ziloState.contractInit!;
   const { start_block: startBlock, end_block: endBlock } = ziloState.contractInit!;
 
-  console.log('discountWhitelist', discountWhitelist);
-  console.log('balances', balances);
-  console.log('walletState', walletState.wallet!.addressInfo.byte20);
-
   let userSent = new BigNumber(0);
   let isWhitelisted = false;
   if (walletState.wallet) {
@@ -228,7 +224,6 @@ const TokenILOCard = (props: Props) => {
       isWhitelisted = true;
     }
   }
-  console.log('userSent', userSent.toString());
 
   const totalContributions = new BigNumber(totalContributionStr);
   const totalCommittedUSD = totalContributions
