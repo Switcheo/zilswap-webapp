@@ -233,7 +233,6 @@ const TokenILOCard = (props: Props) => {
   const { start_block: startBlock, end_block: endBlock } = ziloState.contractInit!;
 
   const successThreshold = minZilAmount.div(targetZil).times(100).dp(0).toNumber();
-  console.log(successThreshold);
 
   let userSent = new BigNumber(0);
   let isWhitelisted = false;

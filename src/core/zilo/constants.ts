@@ -203,7 +203,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/zilo-7-metasportz-city-mszc',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-6-EVZ-banner.png',
+        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-7-MSZC-banner.jpg',
       tokenSymbol: 'MSZC',
       tokenName: 'MetaSportZ City',
       tokenDecimals: 12,
@@ -220,7 +220,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/zilo-7-metasportz-city-mszc',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-6-EVZ-banner.png',
+        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-7-MSZC-banner.jpg',
       tokenSymbol: 'MSZC',
       tokenName: 'MetaSportZ City',
       tokenDecimals: 12,

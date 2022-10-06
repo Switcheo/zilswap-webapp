@@ -1,5 +1,7 @@
 import React from 'react';
 import { Box, Typography, makeStyles } from '@material-ui/core';
+import { AppTheme } from 'app/theme/types';
+import { Text } from 'app/components';
 import { PartialBoxProps, extractBoxProps } from 'app/utils';
 
 interface Props extends PartialBoxProps {
@@ -7,7 +9,16 @@ interface Props extends PartialBoxProps {
   threshold?: number;
 }
 
-const useStyles = makeStyles(theme => ({
+interface StyleProps {
+  left: string;
+}
+
+const useStyles = makeStyles<AppTheme, StyleProps>(theme => ({
+  thresholdBox: props => ({
+    left: props.left,
+    position: 'absolute',
+    top: '-34px',
+  }),
   root: {},
   background: {
     backgroundColor: theme.palette.primary.dark,
@@ -19,21 +30,25 @@ const useStyles = makeStyles(theme => ({
   barBackground: {
     backgroundColor: 'rgba(0, 51, 64, 0.5)',
   },
-  thresholdBox: {
+  thresholdContainer: {
     width: '100%',
     left: '0px',
+  },
+  highlight: {
+    fontSize: '14px',
+    color: theme.palette.type === 'dark' ? '#00FFB0' : '#003340',
   },
 }));
 
 const ProgressBar: React.FC<Props> = (props: Props) => {
   const { boxProps } = extractBoxProps(props);
   const { progress, threshold } = props;
-  const classes = useStyles();
-  console.log('threshold', threshold);
+  const styleProps = { left: `${threshold}%` };
+  const classes = useStyles(styleProps);
 
   return (
     <Box
-      marginTop={10}
+      marginTop={6}
       bgcolor="background.contrast"
       display="flex"
       flexDirection="column"
@@ -72,11 +87,15 @@ const ProgressBar: React.FC<Props> = (props: Props) => {
           <Typography className={classes.text}>{progress}%</Typography>
         </Box>
       </Box>
-      {/* {threshold && (
-        <Box className={classes.thresholdBox} position="absolute">
-          <span>{threshold}</span>
+      {threshold && (
+        <Box className={classes.thresholdContainer} position="absolute">
+          <span className={classes.thresholdBox}>
+            <Text>
+              Success Threshold <span className={classes.highlight}>{threshold}%</span>
+            </Text>
+          </span>
         </Box>
-      )} */}
+      )}
     </Box>
   );
 };
