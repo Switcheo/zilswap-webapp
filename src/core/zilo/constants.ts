@@ -209,8 +209,8 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
       tokenDecimals: 12,
       description:
         'WN is well-positioned to be at the forefront of the creator’s economy, revolutionizing how individual Creators can create and collaborate at a scale never seen before.',
-      contractAddress: 'zil1zfmhyyl5sq5flm8z7sgckm5zyvwzystjklnfwp',
-      showUntil: dayjs('2022-10-07T12:00:00.000+0800'),
+      contractAddress: 'zil1wmy94966t7ku5ms4pp8nj92jkpat9x52n0uyyj',
+      showUntil: dayjs('2022-10-10T12:00:00.000+0800'),
       usdRatio: '1.0',
       usdTarget: '$1,000,000',
       version: 2,
