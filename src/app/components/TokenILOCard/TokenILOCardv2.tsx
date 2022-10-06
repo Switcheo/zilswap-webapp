@@ -224,8 +224,11 @@ const TokenILOCard = (props: Props) => {
       balances,
     },
   } = ziloState;
-  const { target_zil_amount: targetZil, token_amount: tokenAmount } =
-    ziloState.contractInit!;
+  const {
+    target_zil_amount: targetZil,
+    token_amount: tokenAmount,
+    // minimum_zil_amount: minZilAmount,
+  } = ziloState.contractInit!;
   const { start_block: startBlock, end_block: endBlock } = ziloState.contractInit!;
 
   let userSent = new BigNumber(0);
