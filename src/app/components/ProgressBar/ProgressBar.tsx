@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, makeStyles } from '@material-ui/core';
 import { AppTheme } from 'app/theme/types';
-import { Text } from 'app/components';
+import { Text, HelpInfo } from 'app/components';
 import { PartialBoxProps, extractBoxProps } from 'app/utils';
 
 interface Props extends PartialBoxProps {
@@ -43,7 +43,7 @@ const useStyles = makeStyles<AppTheme, StyleProps>(theme => ({
     position: 'absolute',
     borderRight: '1px dashed white',
     top: '-23px',
-    marginLeft: '-2px',
+    marginLeft: '-2.5px',
   }),
   thresholdContainer: {
     width: '100%',
@@ -52,6 +52,10 @@ const useStyles = makeStyles<AppTheme, StyleProps>(theme => ({
   highlight: {
     fontSize: '14px',
     color: theme.palette.type === 'dark' ? '#00FFB0' : '#003340',
+  },
+  tooltip: {
+    marginLeft: '6px',
+    marginTop: '-4px',
   },
 }));
 
@@ -106,6 +110,11 @@ const ProgressBar: React.FC<Props> = (props: Props) => {
                 <Text>
                   Success Threshold{' '}
                   <span className={classes.highlight}>{threshold}%</span>
+                  <HelpInfo
+                    className={classes.tooltip}
+                    placement="top"
+                    title={`ZILOs are deemed successful once the total commitment passes this threshold.`}
+                  />
                 </Text>
               </li>
             </ul>
