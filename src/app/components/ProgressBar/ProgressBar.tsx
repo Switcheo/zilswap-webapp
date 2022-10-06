@@ -18,7 +18,8 @@ const useStyles = makeStyles<AppTheme, StyleProps>(theme => ({
   thresholdBox: props => ({
     left: props.left,
     position: 'absolute',
-    top: '-34px',
+    top: '-40px',
+    marginLeft: '10px', // offsets the ul bullet's position
   }),
   root: {},
   background: props => ({
@@ -32,8 +33,17 @@ const useStyles = makeStyles<AppTheme, StyleProps>(theme => ({
     color: theme.palette.primary.contrastText,
     textShadow: '0 0 4px rgba(0,0,0,0.95)',
   },
-  barBackground: props => ({
+  barBackground: {
     backgroundColor: 'rgba(0, 51, 64, 0.5)',
+  },
+  dashes: props => ({
+    height: '70px',
+    width: '1px',
+    left: props.left,
+    position: 'absolute',
+    borderRight: '1px dashed white',
+    top: '-23px',
+    marginLeft: '-2px',
   }),
   thresholdContainer: {
     width: '100%',
@@ -91,10 +101,16 @@ const ProgressBar: React.FC<Props> = (props: Props) => {
       {threshold && (
         <Box className={classes.thresholdContainer} position="absolute">
           <span className={classes.thresholdBox}>
-            <Text>
-              Success Threshold <span className={classes.highlight}>{threshold}%</span>
-            </Text>
+            <ul>
+              <li style={{ fontSize: '18px' }}>
+                <Text>
+                  Success Threshold{' '}
+                  <span className={classes.highlight}>{threshold}%</span>
+                </Text>
+              </li>
+            </ul>
           </span>
+          <div className={classes.dashes} />
         </Box>
       )}
     </Box>
