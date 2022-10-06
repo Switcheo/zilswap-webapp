@@ -209,8 +209,8 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
       tokenDecimals: 12,
       description:
         'MetaSportZ City is the world’s first “Sportaverse” – within the next internet – featuring the next gamified sports and gaming entertainment experiences on web 3.5.',
-      contractAddress: 'zil1gq6rzyd3hnp3g7tgmd6w8z0pzc25qmmetk7uv3',
-      showUntil: dayjs('2022-10-10T12:00:00.000+0800'),
+      contractAddress: 'zil1wmy94966t7ku5ms4pp8nj92jkpat9x52n0uyyj',
+      showUntil: dayjs('2022-10-6T12:00:00.000+0800'),
       usdRatio: '1.0',
       usdTarget: '$1,000,000',
       version: 2,
@@ -226,7 +226,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
       tokenDecimals: 12,
       description:
         'MetaSportZ City is the world’s first “Sportaverse” – within the next internet – featuring the next gamified sports and gaming entertainment experiences on web 3.5.',
-      contractAddress: 'zil1wmy94966t7ku5ms4pp8nj92jkpat9x52n0uyyj',
+      contractAddress: 'zil1gq6rzyd3hnp3g7tgmd6w8z0pzc25qmmetk7uv3',
       showUntil: dayjs('2022-10-10T12:00:00.000+0800'),
       usdRatio: '1.0',
       usdTarget: '$1,000,000',

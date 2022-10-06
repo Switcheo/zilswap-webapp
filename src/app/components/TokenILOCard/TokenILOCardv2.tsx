@@ -117,6 +117,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
   linkIcon: {
     marginLeft: theme.spacing(0.5),
+    display: 'inline-block',
     verticalAlign: 'top',
     width: '14px',
     height: '14px',
@@ -227,9 +228,12 @@ const TokenILOCard = (props: Props) => {
   const {
     target_zil_amount: targetZil,
     token_amount: tokenAmount,
-    // minimum_zil_amount: minZilAmount,
+    minimum_zil_amount: minZilAmount,
   } = ziloState.contractInit!;
   const { start_block: startBlock, end_block: endBlock } = ziloState.contractInit!;
+
+  const successThreshold = minZilAmount.div(targetZil).times(100).dp(0).toNumber();
+  console.log(successThreshold);
 
   let userSent = new BigNumber(0);
   let isWhitelisted = false;
@@ -444,7 +448,11 @@ const TokenILOCard = (props: Props) => {
               </Text>
             )}
 
-            <ProgressBar progress={progress.toNumber()} marginTop={3} />
+            <ProgressBar
+              progress={progress.toNumber()}
+              marginTop={3}
+              threshold={successThreshold}
+            />
 
             <Box marginTop={1} marginBottom={0.5}>
               <Box display="flex" marginTop={0.75}>
