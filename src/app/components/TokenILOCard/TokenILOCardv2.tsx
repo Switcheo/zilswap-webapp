@@ -32,7 +32,6 @@ import { ZIL_ADDRESS } from 'app/utils/constants';
 import { ReactComponent as NewLinkIcon } from 'app/components/new_link.svg';
 
 import { AppTheme } from 'app/theme/types';
-import { toHumanNumber } from 'app/utils';
 import HelpInfo from '../HelpInfo';
 import WhitelistBadge from './WhitelistBadge';
 
@@ -147,7 +146,7 @@ const initialFormState = {
 const TokenILOCard = (props: Props) => {
   const { data, currentBlock, currentTime, blockTime, expanded = true } = props;
   const contractAddrHex = fromBech32Address(data.contractAddress).toLowerCase();
-  const dispatch = useDispatch();;
+  const dispatch = useDispatch();
   const network = useNetwork();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
@@ -202,11 +201,34 @@ const TokenILOCard = (props: Props) => {
     state: iloState,
     contributed,
     userContribution,
-    contractState: { total_contributions: totalContributionStr },
+    contractState: {
+      total_contributions: totalContributionStr,
+      discount_whitelist: discountWhitelist,
+      balances,
+    },
   } = ziloState;
   const { target_zil_amount: targetZil, token_amount: tokenAmount } =
     ziloState.contractInit!;
   const { start_block: startBlock, end_block: endBlock } = ziloState.contractInit!;
+
+  console.log('discountWhitelist', discountWhitelist);
+  console.log('balances', balances);
+  console.log('walletState', walletState.wallet!.addressInfo.byte20);
+
+  let userSent = new BigNumber(0);
+  let isWhitelisted = false;
+  if (walletState.wallet) {
+    const userAddress = walletState.wallet.addressInfo.byte20;
+    // get sent zil amount
+    if (userAddress in balances!) {
+      userSent = balances![userAddress];
+    }
+    // check whitelist
+    if (userAddress in discountWhitelist!) {
+      isWhitelisted = true;
+    }
+  }
+  console.log('userSent', userSent.toString());
 
   const totalContributions = new BigNumber(totalContributionStr);
   const totalCommittedUSD = totalContributions
@@ -246,11 +268,6 @@ const TokenILOCard = (props: Props) => {
   );
 
   /* User contribution summary */
-  let isWhitelisted = false;
-  if (data.minZwap) {
-    isWhitelisted =
-      zwapToken.balance?.shiftedBy(-zwapToken.decimals).gt(data.minZwap) || false;
-  }
   const fundUSD = new BigNumber(formState.zilAmount).times(
     tokenState.prices[ZIL_ADDRESS]
   );
@@ -514,9 +531,7 @@ const TokenILOCard = (props: Props) => {
                 >
                   <Text className={classes.committedBoxLabel}>ZIL</Text>
                   <Text className={classes.committedBoxAmount}>
-                    {contributed
-                      ? toHumanNumber(userContribution.shiftedBy(-12), 2)
-                      : '-'}
+                    {contributed ? userSent.shiftedBy(-12).toFormat(2) : '-'}
                   </Text>
                 </Box>
               </Box>
