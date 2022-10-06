@@ -214,8 +214,11 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
       usdRatio: '1.0',
       usdTarget: '$1,000,000',
       version: 2,
+<<<<<<< HEAD
       minZwap: 46.46,
       whitelistDiscountPercent: 5,
+=======
+>>>>>>> staging
     },
   ],
 };

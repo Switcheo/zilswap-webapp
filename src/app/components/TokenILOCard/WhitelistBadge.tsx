@@ -8,8 +8,11 @@ import { AppTheme } from 'app/theme/types';
 
 interface Props {
   whitelisted: boolean;
+<<<<<<< HEAD
   minZwap: number;
   discount: number;
+=======
+>>>>>>> staging
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -48,7 +51,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
+<<<<<<< HEAD
 const WhitelistBadge = ({ whitelisted, minZwap, discount }: Props) => {
+=======
+const WhitelistBadge = ({ whitelisted }: Props) => {
+>>>>>>> staging
   const classes = useStyles();
   const network = useNetwork();
   const zwapAddress = ZWAP_TOKEN_CONTRACT[network];
@@ -58,7 +65,11 @@ const WhitelistBadge = ({ whitelisted, minZwap, discount }: Props) => {
         <Text className={classes.text}>You're Whitelisted</Text>
       ) : (
         <Tooltip
+<<<<<<< HEAD
           title={`You need to hold more than ${minZwap} $ZWAP for at least 2 days in order to get whitelisted for a ${discount}% discount.`}
+=======
+          title="You need to hold more than 46.46 $ZWAP for at least 2 days in order to get whitelisted for a 5% discount."
+>>>>>>> staging
           placement="top"
           classes={{ tooltip: classes.tooltip }}
         >
