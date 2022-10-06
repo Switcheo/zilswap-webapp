@@ -14,6 +14,8 @@ export type ILOData = {
   usdRatio: string; // zil / zil+zwap
   usdTarget: string; // total USD raise
   version: 1 | 2;
+  whitelistDiscountPercent?: number;
+  minZwap?: number;
 };
 
 export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
@@ -212,6 +214,11 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
       usdRatio: '1.0',
       usdTarget: '$1,000,000',
       version: 2,
+<<<<<<< HEAD
+      minZwap: 46.46,
+      whitelistDiscountPercent: 5,
+=======
+>>>>>>> staging
     },
   ],
 };

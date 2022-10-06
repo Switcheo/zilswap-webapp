@@ -212,8 +212,7 @@ const TokenILOCard = (props: Props) => {
   const totalCommittedUSD = totalContributions
     .shiftedBy(-12)
     .dividedBy(data.usdRatio)
-    .times(tokenState.prices[ZIL_ADDRESS])
-    .toFormat(2);
+    .times(tokenState.prices[ZIL_ADDRESS]);
 
   const contributionRate = totalContributions.dividedBy(targetZil);
   const progress = contributionRate.times(100).integerValue();
@@ -247,10 +246,17 @@ const TokenILOCard = (props: Props) => {
   );
 
   /* User contribution summary */
+  let isWhitelisted = false;
+  if (data.minZwap) {
+    isWhitelisted =
+      zwapToken.balance?.shiftedBy(-zwapToken.decimals).gt(data.minZwap) || false;
+  }
   const fundUSD = new BigNumber(formState.zilAmount).times(
     tokenState.prices[ZIL_ADDRESS]
   );
-  const discountUSD = fundUSD.div(95).times(5);
+  const discount =
+    isWhitelisted && data.whitelistDiscountPercent ? data.whitelistDiscountPercent : 0;
+  const discountUSD = fundUSD.div(95).times(discount);
   const receiveUSD = fundUSD.plus(discountUSD);
 
   const formatUSDValue = (value: BigNumber): string => {
@@ -338,9 +344,6 @@ const TokenILOCard = (props: Props) => {
     dispatch(actions.Transaction.observe({ observedTx: walletObservedTx }));
   };
 
-  const isWhitelisted =
-    zwapToken.balance?.shiftedBy(-zwapToken.decimals).gt(46.46) || false;
-
   return (
     <Box className={classes.root}>
       <Box>
@@ -356,7 +359,11 @@ const TokenILOCard = (props: Props) => {
             alignItems="stretch"
             className={classes.meta}
           >
-            <WhitelistBadge whitelisted={isWhitelisted} />
+            <WhitelistBadge
+              whitelisted={isWhitelisted}
+              discount={data.whitelistDiscountPercent ? data.whitelistDiscountPercent : 0}
+              minZwap={data.minZwap ? data.minZwap : 0}
+            />
 
             <Box
               display="flex"
@@ -413,7 +420,7 @@ const TokenILOCard = (props: Props) => {
                   Total Committed
                 </Text>
                 <Text className={classes.label}>
-                  ~${totalCommittedUSD} ({progress.toString()}%)
+                  ~{formatUSDValue(totalCommittedUSD)} ({progress.toString()}%)
                 </Text>
               </Box>
               <Box display="flex" marginTop={0.75}>
