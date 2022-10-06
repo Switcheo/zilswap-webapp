@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import cls from "classnames";
 import dayjs, { Dayjs } from "dayjs";
 import DatePicker from "react-datepicker";
@@ -9,8 +9,8 @@ import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDownRounded";
 import DoneIcon from "@material-ui/icons/DoneRounded";
 import { HelpInfo, Text } from "app/components";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useBlockTime } from "app/utils";
-import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
+import { hexToRGBA, useBlockTime, useNetwork } from "app/utils";
+import { getBlocksPerMinute } from "core/zilo/constants";
 
 interface Props extends Partial<DialogProps> {
   onExpiryChange: (block: number) => void;
@@ -64,12 +64,15 @@ const EXPIRY_OPTIONS = [
 const ArkExpiry: React.FC<Props> = (props: Props) => {
   const { label, onExpiryChange } = props;
   const classes = useStyles();
+  const network = useNetwork();
   const [expanded, setExpanded] = useState<boolean>(false);
   const [expiryOption, setExpiryOption] = useState<ExpiryOption>(EXPIRY_OPTIONS[3]);
   const [expiryDate, setExpiryDate] = useState<Date>(new Date());
   const [expiryTime, setExpiryTime] = useState<Dayjs>(dayjs());
   const [expiryBlock, setExpiryBlock] = useState<number>(0);
   const [, currentBlock] = useBlockTime();
+
+  const blocksPerMinute = useMemo(() => getBlocksPerMinute(network), [network]);
 
   const calcExpiry = () => {
     const currentTime = dayjs();
@@ -78,7 +81,7 @@ const ArkExpiry: React.FC<Props> = (props: Props) => {
       dayjs(expiryDate)
 
     const minutes = expiryTime.diff(currentTime, "minutes");
-    const blocks = minutes * BLOCKS_PER_MINUTE;
+    const blocks = minutes * blocksPerMinute;
 
     setExpiryTime(expiryTime);
     setExpiryBlock(currentBlock + ~~blocks);

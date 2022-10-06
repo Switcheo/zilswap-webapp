@@ -9,7 +9,7 @@ import { Dayjs } from 'dayjs';
 import { ILOState } from 'zilswap-sdk/lib/constants';
 import { ObservedTx } from 'zilswap-sdk';
 import cls from 'classnames';
-import { BLOCKS_PER_MINUTE, ILOData } from 'core/zilo/constants';
+import { getBlocksPerMinute, ILOData } from 'core/zilo/constants';
 import { ZilswapConnector } from 'core/zilswap';
 import { CurrencyInputILO, FancyButton, Text } from 'app/components';
 import ProgressBar from 'app/components/ProgressBar';
@@ -135,6 +135,7 @@ const TokenILOCard = (props: Props) => {
   const [zwapToken] = Object.values(tokenState.tokens).filter(token => token.isZwap);
   const zilToken = tokenState.tokens[ZIL_ADDRESS];
 
+  const blocksPerMinute = useMemo(() => getBlocksPerMinute(network), [network]);
   const insufficientBalanceError = useMemo(() => {
     // not initialized
     if (!zilToken || !zwapToken) return null;
@@ -207,10 +208,10 @@ const TokenILOCard = (props: Props) => {
   const iloStarted = iloState === ILOState.Active;
   const iloOver = iloState === ILOState.Failed || iloState === ILOState.Completed;
   const startTime = blockTime.add(
-    (startBlock - currentBlock) / BLOCKS_PER_MINUTE,
+    (startBlock - currentBlock) / blocksPerMinute,
     'minute'
   );
-  const endTime = blockTime.add((endBlock - currentBlock) / BLOCKS_PER_MINUTE, 'minute');
+  const endTime = blockTime.add((endBlock - currentBlock) / blocksPerMinute, 'minute');
   const secondsToNextPhase = currentTime.isAfter(startTime)
     ? currentTime.isAfter(endTime) || !iloStarted
       ? 0

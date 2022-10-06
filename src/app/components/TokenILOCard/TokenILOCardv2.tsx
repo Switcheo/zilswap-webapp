@@ -15,7 +15,7 @@ import { Dayjs } from 'dayjs';
 import { ILOState } from 'zilswap-sdk/lib/constants';
 import { ObservedTx } from 'zilswap-sdk';
 import cls from 'classnames';
-import { BLOCKS_PER_MINUTE, ILOData } from 'core/zilo/constants';
+import { getBlocksPerMinute, ILOData } from 'core/zilo/constants';
 import { ZilswapConnector } from 'core/zilswap';
 import { FancyButton, Text, CurrencyInput, ProportionSelect } from 'app/components';
 import ProgressBar from 'app/components/ProgressBar';
@@ -147,7 +147,7 @@ const initialFormState = {
 const TokenILOCard = (props: Props) => {
   const { data, currentBlock, currentTime, blockTime, expanded = true } = props;
   const contractAddrHex = fromBech32Address(data.contractAddress).toLowerCase();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch();;
   const network = useNetwork();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
@@ -161,6 +161,7 @@ const TokenILOCard = (props: Props) => {
   const classes = useStyles();
   const toaster = useToaster();
 
+  const blocksPerMinute = useMemo(() => getBlocksPerMinute(network), [network]);
   const [zwapToken] = Object.values(tokenState.tokens).filter(token => token.isZwap);
   const zilToken = tokenState.tokens[ZIL_ADDRESS];
 
@@ -219,10 +220,10 @@ const TokenILOCard = (props: Props) => {
   const iloStarted = iloState === ILOState.Active;
   const iloOver = iloState === ILOState.Failed || iloState === ILOState.Completed;
   const startTime = blockTime.add(
-    (startBlock - currentBlock) / BLOCKS_PER_MINUTE,
+    (startBlock - currentBlock) / blocksPerMinute,
     'minute'
   );
-  const endTime = blockTime.add((endBlock - currentBlock) / BLOCKS_PER_MINUTE, 'minute');
+  const endTime = blockTime.add((endBlock - currentBlock) / blocksPerMinute, 'minute');
   const secondsToNextPhase = currentTime.isAfter(startTime)
     ? currentTime.isAfter(endTime) || !iloStarted
       ? 0
