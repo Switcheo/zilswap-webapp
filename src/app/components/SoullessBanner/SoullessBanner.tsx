@@ -18,14 +18,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   }
 }));
 
-const TBMBanner = () => {
+const SoullessBanner = () => {
   const classes = useStyles();
 
   return <Box className={classes.banner} maxWidth={800} margin="0 auto">
-    <a href="https://zolar.io/game" target="_blank" rel="noreferrer">
-      <img className={classes.bannerImage} src="/assets/zolar-banner.png" alt="" />
+    <a href="/arky/collections/zil13fum43ax8qeprt5s9u6wsmrtw2vsvdrdhmvtrm?search=&sortBy=price&sortDir=asc" target="_blank" rel="noreferrer">
+      <img className={classes.bannerImage} src="/assets/soulless-banner.png" alt="" />
     </a>
   </Box>
 }
 
-export default TBMBanner
+export default SoullessBanner
