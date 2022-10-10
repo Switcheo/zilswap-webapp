@@ -7,12 +7,13 @@ import { Link } from "react-router-dom";
 import { ArkBidsTable, ArkEventHistoryTable, ArkBreadcrumb, ArkPriceHistoryGraph, ArkTab, ArkOwnerLabel, ArkBox, ArkReportedBanner } from "app/components";
 import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getMarketplace, getWallet } from "app/saga/selectors";
-import { Nft, Profile } from "app/store/types";
+import { Nft, Profile, TraitValueWithType } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, tryGetBech32Address, useAsyncTask } from "app/utils";
+import { bnOrZero, METAZOA_COLLECTION_ADDRESS, METAZOA_STAT, METAZOA_STAT_PROFESSION, tryGetBech32Address, useAsyncTask } from "app/utils";
 import { ArkClient, waitForTx } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import { actions } from "app/store";
+import { updateAdditionalInfo } from "app/store/marketplace/actions";
 import { ReactComponent as VerifiedBadge } from "../CollectionView/verified-badge.svg";
 import { BidDialog, BuyDialog, CancelDialog, NftImage, SalesDetail, TraitTable } from "./components";
 
@@ -21,14 +22,17 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
   const classes = useStyles();
   const dispatch = useDispatch();
   const { network } = useSelector(getBlockchain);
-  const { bidsTable, pendingTxs } = useSelector(getMarketplace);
+  const { bidsTable, pendingTxs, additionalInfo } = useSelector(getMarketplace);
   const { wallet } = useSelector(getWallet);
   const [token, setToken] = useState<Nft>();
+  const [tokenAdditionalInfo, setTokenAdditionalInfo] = useState<TraitValueWithType[]>([]);
   const [runGetNFTDetails] = useAsyncTask("runGetNFTDetails");
   const [runGetBids] = useAsyncTask("getBids");
   const [owner, setOwner] = useState<Profile>();
   const [runGetOwner] = useAsyncTask("getOwner");
   const [currentTab, setCurrentTab] = useState("Bids");
+  const [moreInfoTab, setMoreInfoTab] = useState("Metadata");
+  const [runGetMetazoaAdditionalInfo] = useAsyncTask("getMetazoaAdditionalInfo");
 
   const collectionId = match.params.collection;
   const tokenId = match.params.id;
@@ -53,6 +57,18 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
     }
     // eslint-disable-next-line
   }, [wallet])
+
+  useEffect(() => {
+    if (token && token.collection.address === METAZOA_COLLECTION_ADDRESS) {
+      const cached = additionalInfo[token.collection.address] && additionalInfo[token.collection.address][token.tokenId];
+
+      if (!!cached) setTokenAdditionalInfo(cached);
+      else getMetazoaAdditionalInfo();
+    }
+
+    // eslint-disable-next-line
+  }, [token])
+
 
   const onCancelListing = async (txs: Transaction[]) => {
     await Promise.all(txs.map(tx => waitForTx(tx.id!, 300, 1000)));
@@ -101,6 +117,34 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
           const ownerResult = await arkClient.getProfile(owner.address.toLowerCase());
           setOwner(ownerResult.result.model)
         })
+      }
+    })
+  }
+
+  const getMetazoaAdditionalInfo = () => {
+    runGetMetazoaAdditionalInfo(async () => {
+      if (token) {
+        const arkClient = new ArkClient(network);
+        const res = await arkClient.getMetazoaData(token.tokenId);
+        const data = res.result;
+        const parsedData: TraitValueWithType[] = [];
+        const profession = METAZOA_STAT_PROFESSION[data.metazoa.profession] ?? 'Unassigned';
+
+        const netMasteryLevel = `${1 + parseInt(data.stats["LUK"].total)}`;
+        parsedData.push({ value: netMasteryLevel, count: 0, traitType: { trait: "Mastery" } });
+        parsedData.push({ value: "", count: 0, traitType: { trait: "Mastery Points" } });
+        parsedData.push({ value: data.metazoa.level.level, count: 0, traitType: { trait: "Metazoa Level" } });
+        parsedData.push({ value: data.metazoa.level.xpGained, count: 0, traitType: { trait: "Metazoa XP" } });
+        parsedData.push({ value: profession, count: 0, traitType: { trait: "Profession" } });
+
+        Object.keys(data.stats).forEach((key) => {
+          const stat = METAZOA_STAT[key];
+          if (!!stat) parsedData.push({ value: data.stats[key].total, count: 0, traitType: { trait: stat } });
+        })
+
+        setTokenAdditionalInfo(parsedData);
+        const toCache = { collectionAddress: token.collection.address, tokenId: token.tokenId, info: parsedData };
+        dispatch(updateAdditionalInfo(toCache));
       }
     })
   }
@@ -175,7 +219,13 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
             </Box>
           </ArkBox>
           <ArkBox variant="base" className={classes.traitContainer}>
-            {token && <TraitTable token={token} />}
+            {token && <>
+              {token.collection.address.toLowerCase() === METAZOA_COLLECTION_ADDRESS
+                && <ArkTab mt={3} setCurrentTab={(tab: string) => { setMoreInfoTab(tab) }} currentTab={moreInfoTab} tabHeaders={["Metadata", "Additional Info"]} />}
+
+              {moreInfoTab === "Metadata" && (<TraitTable token={token} />)}
+              {moreInfoTab === "Additional Info" && (<TraitTable token={token} additionalInfo={tokenAdditionalInfo} />)}
+            </>}
           </ArkBox>
         </Box>
 

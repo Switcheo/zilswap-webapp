@@ -1,10 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Table, TableHead, TableBody, TableRow, TableCell, TableProps, TableContainer } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { AppTheme } from "app/theme/types";
-import { Nft } from "app/store/types";
+import { Nft, TraitValueWithType } from "app/store/types";
 import { bnOrZero, useAsyncTask, useNetwork } from "app/utils";
 import { ArkClient } from "core/utilities";
 import { getMarketplace } from "app/saga/selectors";
@@ -12,10 +12,11 @@ import { actions } from "app/store";
 
 interface Props extends TableProps {
   token: Nft;
+  additionalInfo?: TraitValueWithType[];
 }
 
 const TraitTable: React.FC<Props> = (props: Props) => {
-  const { token, children, className, ...rest } = props;
+  const { token, children, className, additionalInfo, ...rest } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
   const network = useNetwork();
@@ -46,24 +47,35 @@ const TraitTable: React.FC<Props> = (props: Props) => {
     return `${percent.shiftedBy(2).toFormat(percent.lt(1) ? 2 : 0)} %`
   }
 
+  const { data, headers } = useMemo(() => {
+    const data = additionalInfo ?? token.traitValues
+      .sort((a, b) => a.traitType.trait.localeCompare(b.traitType.trait));
+
+    const headers = !!additionalInfo ? ["Category", "Attribute"] : ["Category", "Attribute", "Rarity", "Rarity %"];
+
+    return { data, headers }
+  }, [token, additionalInfo])
+
   return (
     <TableContainer>
       <Table {...rest} className={cls(classes.root, className)}>
         <TableHead>
           <TableRow className={classes.header}>
-            {["Category", "Attribute", "Rarity", "Rarity %"].map((head, index) => (
+            {headers.map((head, index) => (
               <TableCell align="center" key={head}>{head}</TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {token.traitValues.sort((a, b) => a.traitType.trait.localeCompare(b.traitType.trait)).map((value) => {
+          {data.map((value) => {
             const trait = value.traitType.trait
-            return <TableRow className={classes.bodyRow} key={value.value}>
+            return <TableRow className={classes.bodyRow} key={trait}>
               <TableCell className={cls(classes.key, 'highlight')} align="center">{trait}</TableCell>
               <TableCell className="highlight" align="center">{value.value || "-"}</TableCell>
-              <TableCell align="center">{value.count || "-"}</TableCell>
-              <TableCell align="center">{getPercent(value.count)}</TableCell>
+              {!additionalInfo && <>
+                <TableCell align="center">{value.count || "-"}</TableCell>
+                <TableCell align="center">{getPercent(value.count)}</TableCell>
+              </>}
             </TableRow>
           })}
           {(!token.traitValues || token.traitValues.length === 0) && (

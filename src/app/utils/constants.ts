@@ -173,3 +173,21 @@ export const INSTAGRAM_REGEX = /^[A-Za-z0-9_]{1,30}$/
 export const REPORT_LEVEL_DEFAULT= 0;
 export const REPORT_LEVEL_WARNING = 1;
 export const REPORT_LEVEL_SUSPICIOUS = 2;
+
+export const METAZOA_COLLECTION_ADDRESS =  "0xf79a456a5afd412d3890e2232f6205f664be8957"
+
+export const METAZOA_STAT: SimpleMap<string> = {
+  "STR": "Strength",
+  "INT": "Intellect",
+  "DEX": "Dexterity",
+  "LUK": "Luck",
+  "SPD": "Speed",
+  "END": "Endurance",
+  "ACC": "Accuracy",
+}
+
+export const METAZOA_STAT_PROFESSION: SimpleMap<string> = {
+  "STR": "Marauder",
+  "DEX": "Astrominer",
+  "INT": "Psionic",
+}
