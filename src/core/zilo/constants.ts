@@ -16,6 +16,7 @@ export type ILOData = {
   version: 1 | 2;
   whitelistDiscountPercent?: number;
   minZwap?: number;
+  tokenPrice?: number;
 };
 
 export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
@@ -250,6 +251,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
       version: 2,
       minZwap: 46.46,
       whitelistDiscountPercent: 5,
+      tokenPrice: 0.01,
     },
   ],
 };

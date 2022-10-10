@@ -295,9 +295,10 @@ const TokenILOCard = (props: Props) => {
   const receiveAmount = effectiveContribution
     .times(tokenAmount.times(contributionRate))
     .dividedToIntegerBy(effectiveTotalContributions);
-  const receiveAmountUSD = receiveAmount
-    .div(tokenAmount)
-    .times(tokenState.prices[ZIL_ADDRESS]);
+  const receiveAmountUSD = data.tokenPrice
+    ? receiveAmount.shiftedBy(-data.tokenDecimals).times(data.tokenPrice)
+    : new BigNumber(0);
+
   let refundZil = new BigNumber(0);
   if (totalContributions.lt(minZilAmount)) {
     refundZil = userSent;
@@ -608,7 +609,7 @@ const TokenILOCard = (props: Props) => {
               alignItems="stretch"
               className={classes.meta}
             >
-              {!iloOver && (
+              {iloOver && (
                 <Box marginTop={1} marginBottom={0.5}>
                   <Box display="flex" marginTop={0.5}>
                     <Text className={classes.highlight} flexGrow={1} align="left">
@@ -626,7 +627,7 @@ const TokenILOCard = (props: Props) => {
                       {contributed && totalContributions.gte(minZilAmount)
                         ? `${receiveAmount
                             .shiftedBy(-data.tokenDecimals)
-                            .toFormat(4)} (${receiveAmountUSD.toFormat(2)})`
+                            .toFormat(4)} ($${receiveAmountUSD.toFormat(2)})`
                         : '-'}
                     </Text>
                   </Box>

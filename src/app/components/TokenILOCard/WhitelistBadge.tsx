@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: 'flex',
     alignItems: 'center',
     width: 'fit-content',
-    cursor: 'grab',
+    cursor: 'inherit',
     '&:hover': {
       '& #text-tooltip': {
         color: '#00FFB0',
@@ -57,10 +57,18 @@ const WhitelistBadge = ({ whitelisted, minZwap, discount }: Props) => {
   const zwapAddress = ZWAP_TOKEN_CONTRACT[network];
   if (whitelisted) {
     return (
-      <Box className={classes.container}>
-        <Text className={classes.text}>You're Whitelisted</Text>
-        <CurrencyLogo currency="ZWAP" address={zwapAddress} className={classes.logo} />
-      </Box>
+      <Tooltip
+        title={`You hold more than ${minZwap} $ZWAP and got whitelisted for a ${discount}% discount.`}
+        placement="top"
+        classes={{ tooltip: classes.tooltip }}
+      >
+        <Box className={classes.container}>
+          <Text className={classes.text} id="text-tooltip">
+            You're Whitelisted
+          </Text>
+          <CurrencyLogo currency="ZWAP" address={zwapAddress} className={classes.logo} />
+        </Box>
+      </Tooltip>
     );
   }
   return (
