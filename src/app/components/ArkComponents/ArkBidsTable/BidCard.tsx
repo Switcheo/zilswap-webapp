@@ -118,10 +118,10 @@ const BidCard: React.FC<Props> = (props: Props) => {
   }, [pendingTxs, bid])
 
   const isPlatformFeeExempt = useMemo(() => {
-    const collectionAddress = bid.collection.address.toLowerCase();
+    const collectionAddress = bid.collection?.address.toLowerCase();
     if (!collectionAddress) return false;
     return exchangeInfo?.platformFeeExempt?.includes(collectionAddress);
-  }, [exchangeInfo, bid.collection.address])
+  }, [exchangeInfo, bid.collection?.address])
 
   const cancelBid = (bid: Cheque) => {
     // TODO: refactor

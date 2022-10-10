@@ -128,13 +128,15 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
         const res = await arkClient.getMetazoaData(token.tokenId);
         const data = res.result;
         const parsedData: TraitValueWithType[] = [];
-        const profession = METAZOA_STAT_PROFESSION[data.metazoa.profession] ?? 'Unassigned';
+        const profession = !!data.metazoa ? METAZOA_STAT_PROFESSION[data.metazoa.profession] : 'Unassigned';
+        const level = !!data.metazoa ? data.metazoa.level.level : '';
+        const xpGained = !!data.metazoa ? data.metazoa.level.xpGained : '';
 
         const netMasteryLevel = `${1 + parseInt(data.stats["LUK"].total)}`;
         parsedData.push({ value: netMasteryLevel, count: 0, traitType: { trait: "Mastery" } });
         parsedData.push({ value: "", count: 0, traitType: { trait: "Mastery Points" } });
-        parsedData.push({ value: data.metazoa.level.level, count: 0, traitType: { trait: "Metazoa Level" } });
-        parsedData.push({ value: data.metazoa.level.xpGained, count: 0, traitType: { trait: "Metazoa XP" } });
+        parsedData.push({ value: level, count: 0, traitType: { trait: "Metazoa Level" } });
+        parsedData.push({ value: xpGained, count: 0, traitType: { trait: "Metazoa XP" } });
         parsedData.push({ value: profession, count: 0, traitType: { trait: "Profession" } });
 
         Object.keys(data.stats).forEach((key) => {
