@@ -18,7 +18,7 @@ import { MarketPlaceState, OAuth, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { bnOrZero, REPORT_LEVEL_SUSPICIOUS, REPORT_LEVEL_DEFAULT, toHumanNumber, useAsyncTask, useBlockTime, useNetwork, useToaster } from "app/utils";
 import { ArkClient } from "core/utilities";
-import { BLOCKS_PER_MINUTE } from 'core/zilo/constants';
+import { getBlocksPerMinute } from 'core/zilo/constants';
 import { toBech32Address } from "core/zilswap";
 import { ReactComponent as WarningIcon } from "app/assets/icons/warning.svg";
 import { ReactComponent as VerifiedBadge } from "./verified-badge.svg";
@@ -50,9 +50,11 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const toaster = useToaster(false);
   const isOwner = wallet?.addressInfo.byte20.toLowerCase() === token.owner?.address.toLowerCase();
 
+  const blocksPerMinute = useMemo(() => getBlocksPerMinute(network), [network]);
+
   const bestAsk = useMemo(() => {
     if (!token.bestAsk) return undefined;
-    const expiryTime = blockTime.add((token.bestAsk?.expiry - currentBlock) / BLOCKS_PER_MINUTE, "minutes");
+    const expiryTime = blockTime.add((token.bestAsk?.expiry - currentBlock) / blocksPerMinute, "minutes");
     const hoursLeft = expiryTime.diff(currentTime, "hours");
     const minsLeft = expiryTime.diff(currentTime, "minutes");
     const secLeft = expiryTime.diff(currentTime, "seconds");
@@ -68,7 +70,7 @@ const ArkNFTCard: React.FC<Props> = (props: Props) => {
   const bestBid = useMemo(() => {
     if (!token.bestBid) return undefined;
 
-    const expiryTime = blockTime.add((token.bestBid?.expiry - currentBlock) / BLOCKS_PER_MINUTE, "minutes");
+    const expiryTime = blockTime.add((token.bestBid?.expiry - currentBlock) / blocksPerMinute, "minutes");
     const timeLeft = expiryTime.fromNow();
     const bidToken = tokens[toBech32Address(token.bestBid.price.address)];
     if (!bidToken) return undefined;

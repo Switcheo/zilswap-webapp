@@ -6,9 +6,9 @@ import { useSelector } from "react-redux";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
 import dayjs, { Dayjs } from "dayjs";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, toSignificantNumber, useValueCalculators } from "app/utils";
+import { bnOrZero, toSignificantNumber, useNetwork, useValueCalculators } from "app/utils";
 import { getTokens } from "app/saga/selectors";
-import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
+import { getBlocksPerMinute } from "core/zilo/constants";
 import { CurrencyLogo } from "app/components";
 import { PriceInfo, PriceType } from "../../types";
 
@@ -21,15 +21,18 @@ interface Props extends BoxProps {
 const PrimaryPrice: React.FC<Props> = (props: Props) => {
   const { children, className, data, blockTime, currentBlock, ...rest } = props;
   const classes = useStyles();
+  const network = useNetwork();
   const { tokens, prices } = useSelector(getTokens);
   const valueCalculator = useValueCalculators();
+
+  const blocksPerMinute = useMemo(() => getBlocksPerMinute(network), [network]);
 
   const timeLeft = useMemo(() => {
     if (data.type === PriceType.LastTrade) return null;
     const blocksLeft = data.cheque.expiry - currentBlock;
-    const expiryTime = blockTime.add(blocksLeft / BLOCKS_PER_MINUTE, "minutes");
+    const expiryTime = blockTime.add(blocksLeft / blocksPerMinute, "minutes");
     return expiryTime.isAfter(dayjs()) ? expiryTime.fromNow(true) + " left" : "Expired " + expiryTime.fromNow();
-  }, [currentBlock, blockTime, data.cheque.expiry, data.type])
+  }, [currentBlock, blockTime, data.cheque.expiry, data.type, blocksPerMinute])
 
   const priceToken = tokens[toBech32Address(data.cheque.price.address)];
   if (!priceToken) return null; // loading tokens (most likely.. lol)

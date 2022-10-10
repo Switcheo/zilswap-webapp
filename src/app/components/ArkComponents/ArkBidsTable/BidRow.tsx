@@ -14,14 +14,14 @@ import { darken } from '@material-ui/core/styles';
 import { ObservedTx } from "zilswap-sdk";
 import { AppTheme } from "app/theme/types";
 import { Cheque, WalletState } from "app/store/types";
-import { BIG_ZERO, bnOrZero, toSignificantNumber, useAsyncTask, useToaster, useValueCalculators } from "app/utils";
+import { BIG_ZERO, bnOrZero, toSignificantNumber, useAsyncTask, useNetwork, useToaster, useValueCalculators } from "app/utils";
 import { RootState, TokenState } from "app/store/types";
 import { getChequeStatus } from "core/utilities/ark"
 import { ArkOwnerLabel, ArkAcceptBidDialog } from "app/components";
 import { ZilswapConnector } from "core/zilswap";
 import { logger, ArkClient, waitForTx } from "core/utilities";
 import { getMarketplace } from "app/saga/selectors";
-import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
+import { getBlocksPerMinute } from "core/zilo/constants";
 import { ReactComponent as DownArrow } from "./assets/down-arrow.svg";
 import { ReactComponent as UpArrow } from "./assets/up-arrow.svg";
 
@@ -160,6 +160,7 @@ const Row: React.FC<Props> = (props: Props) => {
   const [expand, setExpand] = useState(false);
   const classes = useStyles();
   const toaster = useToaster();
+  const network = useNetwork();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const { exchangeInfo, pendingTxs } = useSelector(getMarketplace);
@@ -169,6 +170,8 @@ const Row: React.FC<Props> = (props: Props) => {
   const userAddress = walletState.wallet?.addressInfo.byte20.toLowerCase();
   const [selectedBid, setSelectedBid] = useState<Cheque | null>(null);
   const [awaitTxApproval, setAwaitTxApproval] = useState(false);
+
+  const blocksPerMinute = useMemo(() => getBlocksPerMinute(network), [network]);
 
   const isPendingTx = useMemo(() => {
     for (const pendingTx of Object.values(pendingTxs)) {
@@ -328,7 +331,7 @@ const Row: React.FC<Props> = (props: Props) => {
       {
         (expand ? [baseBid].concat(...relatedBids) : [baseBid]).map((bid: Cheque, index: number) => {
           const status = getChequeStatus(bid, currentBlock)
-          const expiryTime = blockTime.add((bid.expiry - currentBlock) * BLOCKS_PER_MINUTE, 'minutes')
+          const expiryTime = blockTime.add((bid.expiry - currentBlock) * blocksPerMinute, 'minutes')
           const priceToken = tokenState.tokens[toBech32Address(bid.price.address)]
           if (!priceToken) return null
           const priceAmount = new BigNumber(bid.price.amount).shiftedBy(-priceToken.decimals)

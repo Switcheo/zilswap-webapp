@@ -7,10 +7,10 @@ import cls from "classnames";
 import dayjs from "dayjs";
 import { Avatar, Box, BoxProps, Card, CardContent, CircularProgress, ListItemIcon, MenuItem, Typography } from "@material-ui/core";
 import { ArkCheckbox, CurrencyLogo, DialogModal, FancyButton } from "app/components";
-import { BLOCKS_PER_MINUTE } from "core/zilo/constants";
+import { getBlocksPerMinute } from "core/zilo/constants";
 import { Cheque, RootState, TokenState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { toSignificantNumber, tryGetBech32Address, useAsyncTask, valueCalculators } from "app/utils";
+import { toSignificantNumber, tryGetBech32Address, useAsyncTask, useNetwork, valueCalculators } from "app/utils";
 import { getWallet } from "app/saga/selectors";
 import { ZilswapConnector } from "core/zilswap";
 
@@ -116,20 +116,23 @@ const AcceptBidDialog: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
   const [checked, setChecked] = useState(false);
   const { wallet } = useSelector(getWallet);
+  const network = useNetwork();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const [txApproved, setTxApproved] = useState(false);
   const [runCheckTxApproved, checkingApproved] = useAsyncTask("checkApproveTx");
 
+  const blocksPerMinute = useMemo(() => getBlocksPerMinute(network), [network]);
+
   const bidRecord = useMemo(() => {
     if (!bid) return null;
-    const expiry = blocktime.add((bid.expiry - currentBlock) * BLOCKS_PER_MINUTE, 'minutes')
+    const expiry = blocktime.add((bid.expiry - currentBlock) * blocksPerMinute, 'minutes')
     const priceToken = tokenState.tokens[toBech32Address(bid.price.address)]
 
     if (!priceToken) return null
     const priceAmount = new BigNumber(bid.price.amount).shiftedBy(-priceToken.decimals)
     const usdValue = valueCalculators.amount(tokenState.prices, priceToken, new BigNumber(bid.price.amount));
     return { priceAmount, usdValue, expiry, priceToken };
-  }, [bid, blocktime, currentBlock, tokenState])
+  }, [bid, blocktime, currentBlock, tokenState, blocksPerMinute])
 
   const priceToken = useMemo(() => {
     if (!bid) return null;
