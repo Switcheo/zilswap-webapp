@@ -95,7 +95,11 @@ const ProgressBar: React.FC<Props> = (props: Props) => {
         mt={0}
         borderRadius={12}
       >
-        <Box padding={2} width={`${progress}%`} className={classes.background} />
+        <Box
+          height="32px"
+          width={`${progress === 0 ? 1 : progress}%`}
+          className={classes.background}
+        />
         <Box
           className={classes.text}
           fontWeight="fontWeightBold"
