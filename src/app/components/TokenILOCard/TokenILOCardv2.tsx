@@ -39,6 +39,7 @@ import { ReactComponent as NewLinkIcon } from 'app/components/new_link.svg';
 
 import { AppTheme } from 'app/theme/types';
 import HelpInfo from '../HelpInfo';
+import { ReactComponent as ZwapLogo } from './logo.svg';
 import WhitelistBadge from './WhitelistBadge';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -153,6 +154,11 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: theme.palette.type === 'dark' ? '#DEFFFF' : '#003340',
     opacity: 0.5,
     fontWeight: 400,
+  },
+  zwapLogo: {
+    height: '15px',
+    opacity: 0.5,
+    marginRight: '2px',
   },
 }));
 
@@ -516,6 +522,7 @@ const TokenILOCard = (props: Props) => {
                     <Text className={classes.label}>{formatUSDValue(fundUSD)}</Text>
                   </Box>
                   <Box display="flex" marginTop={0.75}>
+                    <ZwapLogo className={classes.zwapLogo} />
                     <Text className={classes.label} flexGrow={1} align="left">
                       <>
                         Whitelist Discount{' '}
