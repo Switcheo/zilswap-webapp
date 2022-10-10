@@ -15,14 +15,16 @@ interface Props {
 const useStyles = makeStyles((theme: AppTheme) => ({
   container: {
     padding: theme.spacing(0.5, 0.5, 0.5, 1),
-
     backgroundColor: `rgba(222, 255, 255, 0.1)`,
     borderRadius: '8px',
     display: 'flex',
     alignItems: 'center',
     width: 'fit-content',
-    [theme.breakpoints.down('xs')]: {
-      // padding: theme.spacing(2, 2, 0),
+    cursor: 'grab',
+    '&:hover': {
+      '& #text-tooltip': {
+        color: '#00FFB0',
+      },
     },
   },
   text: {
@@ -42,9 +44,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     borderRadius: 12,
     backgroundColor: theme.palette.background.tooltip,
     border: theme.palette.border,
-    color: theme.palette.text?.secondary,
+    color: theme.palette.text?.primary,
     padding: theme.spacing(1.5),
-    fontSize: 11,
+    fontSize: 14,
+    maxWidth: '280px',
   },
 }));
 
@@ -52,27 +55,32 @@ const WhitelistBadge = ({ whitelisted, minZwap, discount }: Props) => {
   const classes = useStyles();
   const network = useNetwork();
   const zwapAddress = ZWAP_TOKEN_CONTRACT[network];
-  return (
-    <Box className={classes.container}>
-      {whitelisted ? (
+  if (whitelisted) {
+    return (
+      <Box className={classes.container}>
         <Text className={classes.text}>You're Whitelisted</Text>
-      ) : (
-        <Tooltip
-          title={`You need to hold more than ${minZwap} $ZWAP for at least 2 days in order to get whitelisted for a ${discount}% discount.`}
-          placement="top"
-          classes={{ tooltip: classes.tooltip }}
+        <CurrencyLogo currency="ZWAP" address={zwapAddress} className={classes.logo} />
+      </Box>
+    );
+  }
+  return (
+    <Tooltip
+      title={`You need to hold more than ${minZwap} $ZWAP for at least 2 days in order to get whitelisted for a ${discount}% discount.`}
+      placement="top"
+      classes={{ tooltip: classes.tooltip }}
+    >
+      <Box className={classes.container}>
+        <Typography
+          variant="body1"
+          color="textPrimary"
+          className={cls(classes.textFade, classes.text)}
+          id="text-tooltip"
         >
-          <Typography
-            variant="body1"
-            color="textPrimary"
-            className={cls(classes.textFade, classes.text)}
-          >
-            How to get Whitelisted?
-          </Typography>
-        </Tooltip>
-      )}
-      <CurrencyLogo currency="ZWAP" address={zwapAddress} className={classes.logo} />
-    </Box>
+          How to get Whitelisted?
+        </Typography>
+        <CurrencyLogo currency="ZWAP" address={zwapAddress} className={classes.logo} />
+      </Box>
+    </Tooltip>
   );
 };
 
