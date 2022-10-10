@@ -129,6 +129,11 @@ export const TBM_CONTRACT =  {
   [Network.TestNet]: "0xc948942f55ef05a95a46bb58ee9b0a67b0f871fa",
 }
 
+export const METAZOA_CONTRACT =  {
+  [Network.MainNet]: "0xf79a456a5afd412d3890e2232f6205f664be8957",
+  [Network.TestNet]: "0x48161750bab73620b23c287925bd229093d8b72e",
+}
+
 export const TOKEN_SYMBOLS = {
   "ZETH": "zETH",
   "ZWBTC": "zWBTC",
@@ -173,8 +178,6 @@ export const INSTAGRAM_REGEX = /^[A-Za-z0-9_]{1,30}$/
 export const REPORT_LEVEL_DEFAULT= 0;
 export const REPORT_LEVEL_WARNING = 1;
 export const REPORT_LEVEL_SUSPICIOUS = 2;
-
-export const METAZOA_COLLECTION_ADDRESS =  "0xf79a456a5afd412d3890e2232f6205f664be8957"
 
 export const METAZOA_STAT: SimpleMap<string> = {
   "STR": "Strength",

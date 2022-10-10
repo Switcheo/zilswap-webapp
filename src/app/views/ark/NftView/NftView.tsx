@@ -9,7 +9,7 @@ import ArkPage from "app/layouts/ArkPage";
 import { getBlockchain, getMarketplace, getWallet } from "app/saga/selectors";
 import { Nft, Profile, TraitValueWithType } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { bnOrZero, METAZOA_COLLECTION_ADDRESS, METAZOA_STAT, METAZOA_STAT_PROFESSION, tryGetBech32Address, useAsyncTask } from "app/utils";
+import { bnOrZero, METAZOA_CONTRACT, METAZOA_STAT, METAZOA_STAT_PROFESSION, tryGetBech32Address, useAsyncTask } from "app/utils";
 import { ArkClient, waitForTx } from "core/utilities";
 import { fromBech32Address } from "core/zilswap";
 import { actions } from "app/store";
@@ -59,7 +59,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
   }, [wallet])
 
   useEffect(() => {
-    if (token && token.collection.address === METAZOA_COLLECTION_ADDRESS) {
+    if (token && token.collection.address === METAZOA_CONTRACT[network]) {
       const cached = additionalInfo[token.collection.address] && additionalInfo[token.collection.address][token.tokenId];
 
       if (!!cached) setTokenAdditionalInfo(cached);
@@ -220,7 +220,7 @@ const NftView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => 
           </ArkBox>
           <ArkBox variant="base" className={classes.traitContainer}>
             {token && <>
-              {token.collection.address.toLowerCase() === METAZOA_COLLECTION_ADDRESS
+              {token.collection.address.toLowerCase() === METAZOA_CONTRACT[network]
                 && <ArkTab mt={3} setCurrentTab={(tab: string) => { setMoreInfoTab(tab) }} currentTab={moreInfoTab} tabHeaders={["Metadata", "Additional Info"]} />}
 
               {moreInfoTab === "Metadata" && (<TraitTable token={token} />)}
