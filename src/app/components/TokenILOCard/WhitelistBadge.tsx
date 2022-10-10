@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: 'flex',
     alignItems: 'center',
     width: 'fit-content',
-    cursor: 'inherit',
+    cursor: 'pointer',
     '&:hover': {
       '& #text-tooltip': {
         color: '#00FFB0',
