@@ -295,6 +295,9 @@ const TokenILOCard = (props: Props) => {
   const receiveAmount = effectiveContribution
     .times(tokenAmount.times(contributionRate))
     .dividedToIntegerBy(effectiveTotalContributions);
+  const receiveAmountUSD = receiveAmount
+    .div(tokenAmount)
+    .times(tokenState.prices[ZIL_ADDRESS]);
   let refundZil = new BigNumber(0);
   if (totalContributions.lt(minZilAmount)) {
     refundZil = userSent;
@@ -313,12 +316,7 @@ const TokenILOCard = (props: Props) => {
     isWhitelisted && data.whitelistDiscountPercent ? data.whitelistDiscountPercent : 0;
   const discountUSD = fundUSD.div(100 - discount).times(discount);
   const receiveUSD = fundUSD.plus(discountUSD);
-  const userContributionPercent = isWhitelisted
-    ? userSent
-        .div((100 - discount) / 100)
-        .div(totalContributions)
-        .times(100)
-    : userSent.div(totalContributions).times(100);
+  const userContributionPercent = userContribution.div(totalContributions).times(100);
 
   const formatUSDValue = (value: BigNumber): string => {
     if (value.isZero()) return '-';
@@ -610,7 +608,7 @@ const TokenILOCard = (props: Props) => {
               alignItems="stretch"
               className={classes.meta}
             >
-              {iloOver && (
+              {!iloOver && (
                 <Box marginTop={1} marginBottom={0.5}>
                   <Box display="flex" marginTop={0.5}>
                     <Text className={classes.highlight} flexGrow={1} align="left">
@@ -626,7 +624,9 @@ const TokenILOCard = (props: Props) => {
                     </Text>
                     <Text className={classes.highlight}>
                       {contributed && totalContributions.gte(minZilAmount)
-                        ? receiveAmount.shiftedBy(-data.tokenDecimals).toFormat(4)
+                        ? `${receiveAmount
+                            .shiftedBy(-data.tokenDecimals)
+                            .toFormat(4)} (${receiveAmountUSD.toFormat(2)})`
                         : '-'}
                     </Text>
                   </Box>
