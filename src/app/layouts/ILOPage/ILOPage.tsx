@@ -1,8 +1,6 @@
-import React, { forwardRef } from 'react';
-import { Box, makeStyles, Button } from '@material-ui/core';
+import React from 'react';
+import { Box, makeStyles } from '@material-ui/core';
 import { PaperProps } from 'material-ui';
-import cls from 'classnames';
-import { Link as RouterLink } from 'react-router-dom';
 import { AppTheme } from 'app/theme/types';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -63,27 +61,27 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-const CustomRouterLink = forwardRef((props: any, ref: any) => (
-  <div ref={ref} style={{ flexGrow: 1 }}>
-    <RouterLink {...props} />
-  </div>
-));
+// const CustomRouterLink = forwardRef((props: any, ref: any) => (
+//   <div ref={ref} style={{ flexGrow: 1 }}>
+//     <RouterLink {...props} />
+//   </div>
+// ));
 
 const ILOPage: React.FC<PaperProps> = (props: PaperProps) => {
   const { children } = props;
   const classes = useStyles();
-  let currentClasses = cls(classes.tab, classes.tabCornerLeft);
-  if (window.location.pathname === '/zilo/current') {
-    currentClasses = cls(classes.tab, classes.tabCornerLeft, classes.tabActive);
-  }
-  let pastClasses = cls(classes.tab, classes.tabCornerRight);
-  if (window.location.pathname === '/zilo/past') {
-    pastClasses = cls(classes.tab, classes.tabCornerRight, classes.tabActive);
-  }
+  // let currentClasses = cls(classes.tab, classes.tabCornerLeft);
+  // if (window.location.pathname === '/zilo/current') {
+  //   currentClasses = cls(classes.tab, classes.tabCornerLeft, classes.tabActive);
+  // }
+  // let pastClasses = cls(classes.tab, classes.tabCornerRight);
+  // if (window.location.pathname === '/zilo/past') {
+  //   pastClasses = cls(classes.tab, classes.tabCornerRight, classes.tabActive);
+  // }
 
   return (
     <Box className={classes.root}>
-      <Box display="flex" justifyContent="center">
+      {/* <Box display="flex" justifyContent="center">
         <Box className={classes.tabs}>
           <Button
             disableElevation
@@ -106,7 +104,7 @@ const ILOPage: React.FC<PaperProps> = (props: PaperProps) => {
             Past
           </Button>
         </Box>
-      </Box>
+      </Box> */}
       {children}
     </Box>
   );
