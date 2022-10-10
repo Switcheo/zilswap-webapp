@@ -280,10 +280,7 @@ const TokenILOCard = (props: Props) => {
   const receiveAmount = effectiveContribution
     .times(tokenAmount.times(contributionRate))
     .dividedToIntegerBy(effectiveTotalContributions);
-  const refundZil = BigNumber.max(
-    userContribution.minus(effectiveContribution.plus(1)),
-    new BigNumber(0)
-  );
+  const refundZil = totalContributions.lt(minZilAmount) ? userSent : new BigNumber(0);
 
   /* User contribution summary */
   const fundUSD = new BigNumber(formState.zilAmount).times(
@@ -591,7 +588,7 @@ const TokenILOCard = (props: Props) => {
                       <strong>{data.tokenSymbol}</strong> to Claim
                     </Text>
                     <Text className={classes.label}>
-                      {contributed
+                      {contributed && totalContributions.gte(minZilAmount)
                         ? receiveAmount.shiftedBy(-data.tokenDecimals).toFormat(4)
                         : '0.0000'}
                     </Text>

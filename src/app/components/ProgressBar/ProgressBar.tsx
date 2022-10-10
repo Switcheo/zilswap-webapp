@@ -19,7 +19,8 @@ const useStyles = makeStyles<AppTheme, StyleProps>(theme => ({
     left: props.left,
     position: 'absolute',
     top: '-40px',
-    marginLeft: '10px', // offsets the ul bullet's position
+    display: 'flex',
+    alignItems: 'center',
   }),
   root: {},
   background: props => ({
@@ -43,7 +44,7 @@ const useStyles = makeStyles<AppTheme, StyleProps>(theme => ({
     position: 'absolute',
     borderRight: '1px dashed white',
     top: '-23px',
-    marginLeft: '-2.5px',
+    marginLeft: '3px',
   }),
   thresholdContainer: {
     width: '100%',
@@ -56,6 +57,14 @@ const useStyles = makeStyles<AppTheme, StyleProps>(theme => ({
   tooltip: {
     marginLeft: '6px',
     marginTop: '-4px',
+  },
+  dot: {
+    height: '8px',
+    width: '8px',
+    backgroundColor: '#fff',
+    borderRadius: '50%',
+    display: 'inline-block',
+    marginRight: '6px',
   },
 }));
 
@@ -105,19 +114,15 @@ const ProgressBar: React.FC<Props> = (props: Props) => {
       {threshold && (
         <Box className={classes.thresholdContainer} position="absolute">
           <span className={classes.thresholdBox}>
-            <ul>
-              <li style={{ fontSize: '18px' }}>
-                <Text>
-                  Success Threshold{' '}
-                  <span className={classes.highlight}>{threshold}%</span>
-                  <HelpInfo
-                    className={classes.tooltip}
-                    placement="top"
-                    title={`ZILOs are deemed successful once the total commitment passes this threshold.`}
-                  />
-                </Text>
-              </li>
-            </ul>
+            <div className={classes.dot} />
+            <Text>
+              Success Threshold <span className={classes.highlight}>{threshold}%</span>
+              <HelpInfo
+                className={classes.tooltip}
+                placement="top"
+                title={`ZILOs are deemed successful once the total commitment passes this threshold.`}
+              />
+            </Text>
           </span>
           <div className={classes.dashes} />
         </Box>
