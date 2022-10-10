@@ -146,6 +146,13 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   committedBoxAmount: {
     fontSize: '24px',
     color: theme.palette.primary.dark,
+    textAlign: 'right',
+  },
+  committedBoxPercent: {
+    fontSize: '14px',
+    color: theme.palette.type === 'dark' ? '#DEFFFF' : '#003340',
+    opacity: 0.5,
+    fontWeight: 400,
   },
 }));
 
@@ -288,8 +295,14 @@ const TokenILOCard = (props: Props) => {
   );
   const discount =
     isWhitelisted && data.whitelistDiscountPercent ? data.whitelistDiscountPercent : 0;
-  const discountUSD = fundUSD.div(95).times(discount);
+  const discountUSD = fundUSD.div(100 - discount).times(discount);
   const receiveUSD = fundUSD.plus(discountUSD);
+  const userContributionPercent = isWhitelisted
+    ? userSent
+        .div((100 - discount) / 100)
+        .div(totalContributions)
+        .times(100)
+    : userSent.div(totalContributions).times(100);
 
   const formatUSDValue = (value: BigNumber): string => {
     if (value.isZero()) return '-';
@@ -541,7 +554,7 @@ const TokenILOCard = (props: Props) => {
                 <Divider className={classes.divider} />
                 <Box display="flex" marginTop={0.75}>
                   <Text className={classes.label} flexGrow={1} align="center">
-                    Your Committed Amount
+                    Your Committed & To Receive
                   </Text>
                 </Box>
 
@@ -558,9 +571,16 @@ const TokenILOCard = (props: Props) => {
                     <CurrencyLogo currency={zilToken.symbol} />
                     <Text className={classes.committedBoxLabel}>ZIL</Text>
                   </Box>
-                  <Text className={classes.committedBoxAmount}>
-                    {contributed ? userSent.shiftedBy(-12).toFormat(2) : '-'}
-                  </Text>
+                  <Box display="flex" flexDirection="column">
+                    <Text className={classes.committedBoxAmount}>
+                      {contributed ? userSent.shiftedBy(-12).toFormat(2) : '-'}
+                    </Text>
+                    {contributed && (
+                      <Text className={classes.committedBoxPercent}>
+                        {userContributionPercent.toFormat(2)}% of Total Committed
+                      </Text>
+                    )}
+                  </Box>
                 </Box>
               </Box>
             )}
@@ -580,7 +600,7 @@ const TokenILOCard = (props: Props) => {
                       <strong>ZIL</strong> to Refund
                     </Text>
                     <Text className={classes.label}>
-                      {refundZil.shiftedBy(-12).toFormat(4)}
+                      {refundZil.isZero() ? '-' : refundZil.shiftedBy(-12).toFormat(4)}
                     </Text>
                   </Box>
                   <Box display="flex" marginTop={0.5}>
@@ -590,7 +610,7 @@ const TokenILOCard = (props: Props) => {
                     <Text className={classes.label}>
                       {contributed && totalContributions.gte(minZilAmount)
                         ? receiveAmount.shiftedBy(-data.tokenDecimals).toFormat(4)
-                        : '0.0000'}
+                        : '-'}
                     </Text>
                   </Box>
                 </Box>
