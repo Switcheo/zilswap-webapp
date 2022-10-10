@@ -148,6 +148,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: '24px',
     color: theme.palette.primary.dark,
     textAlign: 'right',
+    lineHeight: 1.1,
   },
   committedBoxPercent: {
     fontSize: '14px',
@@ -159,6 +160,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     height: '15px',
     opacity: 0.5,
     marginRight: '2px',
+    marginTop: '-1px',
   },
 }));
 
@@ -236,6 +238,7 @@ const TokenILOCard = (props: Props) => {
       total_contributions: totalContributionStr,
       discount_whitelist: discountWhitelist,
       balances,
+      contributions,
     },
   } = ziloState;
   const {
@@ -248,6 +251,7 @@ const TokenILOCard = (props: Props) => {
   const successThreshold = minZilAmount.div(targetZil).times(100).dp(0).toNumber();
 
   let userSent = new BigNumber(0);
+  let userCommitted = new BigNumber(0);
   let isWhitelisted = false;
   if (walletState.wallet) {
     const userAddress = walletState.wallet.addressInfo.byte20.toLowerCase();
@@ -258,6 +262,10 @@ const TokenILOCard = (props: Props) => {
     // check whitelist
     if (userAddress in discountWhitelist!) {
       isWhitelisted = true;
+    }
+    // check whitelist
+    if (userAddress in contributions!) {
+      userCommitted = contributions![userAddress];
     }
   }
 
@@ -293,7 +301,15 @@ const TokenILOCard = (props: Props) => {
   const receiveAmount = effectiveContribution
     .times(tokenAmount.times(contributionRate))
     .dividedToIntegerBy(effectiveTotalContributions);
-  const refundZil = totalContributions.lt(minZilAmount) ? userSent : new BigNumber(0);
+  let refundZil = new BigNumber(0);
+  if (totalContributions.lt(minZilAmount)) {
+    refundZil = userSent;
+  }
+  if (totalContributions.gt(targetZil)) {
+    refundZil = new BigNumber(1)
+      .minus(targetZil.div(totalContributions))
+      .times(userCommitted);
+  }
 
   /* User contribution summary */
   const fundUSD = new BigNumber(formState.zilAmount).times(
