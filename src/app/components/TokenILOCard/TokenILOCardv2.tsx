@@ -238,7 +238,6 @@ const TokenILOCard = (props: Props) => {
       total_contributions: totalContributionStr,
       discount_whitelist: discountWhitelist,
       balances,
-      contributions,
     },
   } = ziloState;
   const {
@@ -251,7 +250,6 @@ const TokenILOCard = (props: Props) => {
   const successThreshold = minZilAmount.div(targetZil).times(100).dp(0).toNumber();
 
   let userSent = new BigNumber(0);
-  let userCommitted = new BigNumber(0);
   let isWhitelisted = false;
   if (walletState.wallet) {
     const userAddress = walletState.wallet.addressInfo.byte20.toLowerCase();
@@ -262,10 +260,6 @@ const TokenILOCard = (props: Props) => {
     // check whitelist
     if (userAddress in discountWhitelist!) {
       isWhitelisted = true;
-    }
-    // check whitelist
-    if (userAddress in contributions!) {
-      userCommitted = contributions![userAddress];
     }
   }
 
@@ -308,7 +302,7 @@ const TokenILOCard = (props: Props) => {
   if (totalContributions.gt(targetZil)) {
     refundZil = new BigNumber(1)
       .minus(targetZil.div(totalContributions))
-      .times(userCommitted);
+      .times(userContribution);
   }
 
   /* User contribution summary */
@@ -619,18 +613,18 @@ const TokenILOCard = (props: Props) => {
               {iloOver && (
                 <Box marginTop={1} marginBottom={0.5}>
                   <Box display="flex" marginTop={0.5}>
-                    <Text className={classes.label} flexGrow={1} align="left">
+                    <Text className={classes.highlight} flexGrow={1} align="left">
                       <strong>ZIL</strong> to Refund
                     </Text>
-                    <Text className={classes.label}>
+                    <Text className={classes.highlight}>
                       {refundZil.isZero() ? '-' : refundZil.shiftedBy(-12).toFormat(4)}
                     </Text>
                   </Box>
                   <Box display="flex" marginTop={0.5}>
-                    <Text className={classes.label} flexGrow={1} align="left">
+                    <Text className={classes.highlight} flexGrow={1} align="left">
                       <strong>{data.tokenSymbol}</strong> to Claim
                     </Text>
-                    <Text className={classes.label}>
+                    <Text className={classes.highlight}>
                       {contributed && totalContributions.gte(minZilAmount)
                         ? receiveAmount.shiftedBy(-data.tokenDecimals).toFormat(4)
                         : '-'}
@@ -660,7 +654,8 @@ const TokenILOCard = (props: Props) => {
               </FancyButton>
               {contributed && iloState === ILOState.Completed && (
                 <Text className={classes.label} align="center">
-                  You'll be refunded any excess tokens in your claim transaction.
+                  Your claimable amount will be pro-rated if the total commited amount
+                  exceeds the target.
                 </Text>
               )}
               <Typography className={classes.errorMessage} color="error">
