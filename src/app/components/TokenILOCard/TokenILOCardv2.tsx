@@ -599,6 +599,41 @@ const TokenILOCard = (props: Props) => {
                 </Box>
               </Box>
             )}
+
+            {iloOver && contributed && (
+              <Box>
+                <Box display="flex" marginTop={0.75}>
+                  <Text className={classes.label} flexGrow={1} align="center">
+                    Your Committed & To Receive
+                  </Text>
+                </Box>
+
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  className={classes.committedBox}
+                  paddingX={2}
+                  paddingY={2}
+                  marginTop={2}
+                  alignItems="center"
+                >
+                  <Box display="flex" justifyContent="center" alignItems="center">
+                    <CurrencyLogo currency={zilToken.symbol} />
+                    <Text className={classes.committedBoxLabel}>ZIL</Text>
+                  </Box>
+                  <Box display="flex" flexDirection="column">
+                    <Text className={classes.committedBoxAmount}>
+                      {contributed ? userSent.shiftedBy(-12).toFormat(2) : '-'}
+                    </Text>
+                    {contributed && (
+                      <Text className={classes.committedBoxPercent}>
+                        {userContributionPercent.toFormat(2)}% of Total Committed
+                      </Text>
+                    )}
+                  </Box>
+                </Box>
+              </Box>
+            )}
           </Box>
 
           {(iloStarted || contributed) && (

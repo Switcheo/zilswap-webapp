@@ -69,29 +69,31 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         </ILOCard>
       ) : (
         ziloData.map(data =>
-          data.comingSoon ? (data.version === 1 ? (
-            <ILOCard>
-              <SampleILOCard
-                key={data.contractAddress}
-                expanded={true}
-                data={data}
-                blockTime={blockTime}
-                currentBlock={currentBlock}
-                currentTime={currentTime}
-              />
-            </ILOCard>
+          data.comingSoon ? (
+            data.version === 1 ? (
+              <ILOCard>
+                <SampleILOCard
+                  key={data.contractAddress}
+                  expanded={true}
+                  data={data}
+                  blockTime={blockTime}
+                  currentBlock={currentBlock}
+                  currentTime={currentTime}
+                />
+              </ILOCard>
+            ) : (
+              <ILOCard>
+                <SampleILOCardv2
+                  key={data.contractAddress}
+                  expanded={true}
+                  data={data}
+                  blockTime={blockTime}
+                  currentBlock={currentBlock}
+                  currentTime={currentTime}
+                />
+              </ILOCard>
+            )
           ) : (
-            <ILOCard>
-              <SampleILOCardv2
-                key={data.contractAddress}
-                expanded={true}
-                data={data}
-                blockTime={blockTime}
-                currentBlock={currentBlock}
-                currentTime={currentTime}
-              />
-            </ILOCard>
-          )) : (
             <ILOCard>
               {data.version === 1 ? (
                 <TokenILOCard
