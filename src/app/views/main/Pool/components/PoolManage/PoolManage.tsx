@@ -1,42 +1,40 @@
-import React from "react";
-import { Box, BoxProps, Button, CircularProgress } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import cls from "classnames";
-import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import { ContrastBox, Text } from "app/components";
-import { ReactComponent as NewLinkIcon } from "app/components/new_link.svg";
-import { actions } from "app/store";
-import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
-import { AppTheme } from "app/theme/types";
-import { useTaskSubscriber } from "app/utils";
-import { LoadingKeys } from "app/utils/constants";
-import { PoolInfoDropdown } from "./components";
+import React from 'react';
+import { Box, BoxProps, Button, CircularProgress } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import cls from 'classnames';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { ContrastBox, Text } from 'app/components';
+import { ReactComponent as NewLinkIcon } from 'app/components/new-link.svg';
+import { actions } from 'app/store';
+import { RootState, TokenInfo, TokenState, WalletState } from 'app/store/types';
+import { AppTheme } from 'app/theme/types';
+import { useTaskSubscriber } from 'app/utils';
+import { LoadingKeys } from 'app/utils/constants';
+import { PoolInfoDropdown } from './components';
 
-interface Props extends BoxProps {
-
-}
+interface Props extends BoxProps {}
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
     padding: theme.spacing(2, 4, 0),
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down('xs')]: {
       padding: theme.spacing(2, 2, 0),
     },
   },
   viewPoolsButton: {
-    "& svg": {
+    '& svg': {
       marginLeft: theme.spacing(1),
     },
   },
   actionButton: {
-    height: 46
+    height: 46,
   },
   newLinkIcon: {
-    "& path": {
-      fill: theme.palette.icon
-    }
-  }
+    '& path': {
+      fill: theme.palette.icon,
+    },
+  },
 }));
 
 const PoolManage: React.FC<Props> = (props: Props) => {
@@ -47,15 +45,11 @@ const PoolManage: React.FC<Props> = (props: Props) => {
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
 
-  const {
-    tokens,
-  } = React.useMemo(() => {
-
+  const { tokens } = React.useMemo(() => {
     const tokens = Object.values(tokenState.tokens).reduce((accum, token) => {
-      if (token.pool?.contributionPercentage.gt(0))
-        accum.push(token);
+      if (token.pool?.contributionPercentage.gt(0)) accum.push(token);
       return accum;
-    }, [] as TokenInfo[])
+    }, [] as TokenInfo[]);
 
     return {
       tokens,
@@ -63,28 +57,37 @@ const PoolManage: React.FC<Props> = (props: Props) => {
   }, [tokenState]);
 
   const onGotoAdd = () => {
-    dispatch(actions.Layout.showPoolType("add"));
+    dispatch(actions.Layout.showPoolType('add'));
   };
 
   const onConnectWallet = () => {
     if (loadingConnectWallet) return;
 
-    dispatch(actions.Layout.toggleShowWallet("open"));
+    dispatch(actions.Layout.toggleShowWallet('open'));
   };
 
   return (
-    <Box display="flex" flexDirection="column" {...rest} className={cls(classes.root, className)}>
+    <Box
+      display="flex"
+      flexDirection="column"
+      {...rest}
+      className={cls(classes.root, className)}
+    >
       <Text variant="h4">Your Pools</Text>
 
       {!loadingConnectWallet && (
         <Box marginTop={2} marginBottom={5}>
-          {tokens.map((token) => (
+          {tokens.map(token => (
             <PoolInfoDropdown key={token.address} token={token} />
           ))}
           {!tokens.length && !!walletState.wallet && (
             <ContrastBox display="flex" flexDirection="column" alignItems="center">
-              <Text marginBottom={2}>You don't have shares in any liquidity pool yet.</Text>
-              <Button variant="contained" color="primary" onClick={onGotoAdd}>Add Liquidity Now</Button>
+              <Text marginBottom={2}>
+                You don't have shares in any liquidity pool yet.
+              </Text>
+              <Button variant="contained" color="primary" onClick={onGotoAdd}>
+                Add Liquidity Now
+              </Button>
             </ContrastBox>
           )}
           {!walletState.wallet && (
@@ -93,7 +96,8 @@ const PoolManage: React.FC<Props> = (props: Props) => {
               className={classes.actionButton}
               fullWidth
               variant="contained"
-              color="primary">
+              color="primary"
+            >
               Connect Wallet
             </Button>
           )}
@@ -106,10 +110,16 @@ const PoolManage: React.FC<Props> = (props: Props) => {
       )}
 
       <Box display="flex" justifyContent="center" marginBottom={5}>
-        <Button component={Link} variant="text" to="/pools" size="small" className={classes.viewPoolsButton}>
+        <Button
+          component={Link}
+          variant="text"
+          to="/pools"
+          size="small"
+          className={classes.viewPoolsButton}
+        >
           <Box display="flex" alignItems="center">
             <Text color="inherit">View All Pools</Text>
-            <NewLinkIcon className={classes.newLinkIcon}/>
+            <NewLinkIcon className={classes.newLinkIcon} />
           </Box>
         </Button>
       </Box>

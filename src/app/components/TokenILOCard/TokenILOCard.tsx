@@ -23,7 +23,7 @@ import {
 } from 'app/store/types';
 import { BIG_ZERO, bnOrZero, useAsyncTask, useNetwork, useToaster } from 'app/utils';
 import { ZIL_ADDRESS } from 'app/utils/constants';
-import { ReactComponent as NewLinkIcon } from 'app/components/new_link.svg';
+import { ReactComponent as NewLinkIcon } from 'app/components/new-link.svg';
 
 import { AppTheme } from 'app/theme/types';
 import { toHumanNumber } from 'app/utils';
@@ -393,8 +393,9 @@ const TokenILOCard = (props: Props) => {
                 s
                 <HelpInfo
                   placement="top"
-                  title={`${blocksToNextPhase} blocks left to the ${currentTime.isAfter(startTime) ? 'end' : 'start'
-                    } of this ZILO. Countdown is an estimate only. This ZILO runs from block ${startBlock} to ${endBlock}.`}
+                  title={`${blocksToNextPhase} blocks left to the ${
+                    currentTime.isAfter(startTime) ? 'end' : 'start'
+                  } of this ZILO. Countdown is an estimate only. This ZILO runs from block ${startBlock} to ${endBlock}.`}
                 />
               </Text>
             )}
@@ -486,8 +487,8 @@ const TokenILOCard = (props: Props) => {
                   {!!iloStarted
                     ? insufficientBalanceError ?? 'Commit'
                     : currentTime.isAfter(startTime)
-                      ? 'Waiting for start block...'
-                      : 'Waiting to begin...'}
+                    ? 'Waiting for start block...'
+                    : 'Waiting to begin...'}
                 </FancyButton>
                 <Typography className={classes.errorMessage} color="error">
                   {txError?.message}
@@ -520,13 +521,13 @@ const TokenILOCard = (props: Props) => {
                   amount={
                     contributed
                       ? toHumanNumber(
-                        userContribution
-                          .times(targetZwap)
-                          .dividedToIntegerBy(targetZil)
-                          .plus(1)
-                          .shiftedBy(-12),
-                        6
-                      )
+                          userContribution
+                            .times(targetZwap)
+                            .dividedToIntegerBy(targetZil)
+                            .plus(1)
+                            .shiftedBy(-12),
+                          6
+                        )
                       : '-'
                   }
                   hideBalance={true}

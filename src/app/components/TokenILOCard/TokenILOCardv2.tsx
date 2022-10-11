@@ -35,10 +35,11 @@ import {
 } from 'app/store/types';
 import { BIG_ZERO, bnOrZero, useAsyncTask, useNetwork, useToaster } from 'app/utils';
 import { ZIL_ADDRESS } from 'app/utils/constants';
-import { ReactComponent as NewLinkIcon } from 'app/components/new_link.svg';
+import { ReactComponent as NewLinkIcon } from 'app/components/new-link.svg';
 
 import { AppTheme } from 'app/theme/types';
 import HelpInfo from '../HelpInfo';
+import { ReactComponent as ZwapLogo } from './logo.svg';
 import WhitelistBadge from './WhitelistBadge';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -120,7 +121,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: 'inline-block',
     verticalAlign: 'top',
     width: '14px',
-    height: '14px',
     '& path': {
       fill: theme.palette.text?.secondary,
     },
@@ -147,12 +147,19 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     fontSize: '24px',
     color: theme.palette.primary.dark,
     textAlign: 'right',
+    lineHeight: 1.1,
   },
   committedBoxPercent: {
     fontSize: '14px',
     color: theme.palette.type === 'dark' ? '#DEFFFF' : '#003340',
     opacity: 0.5,
     fontWeight: 400,
+  },
+  zwapLogo: {
+    height: '15px',
+    opacity: 0.5,
+    marginRight: '2px',
+    marginTop: '-1px',
   },
 }));
 
@@ -287,7 +294,19 @@ const TokenILOCard = (props: Props) => {
   const receiveAmount = effectiveContribution
     .times(tokenAmount.times(contributionRate))
     .dividedToIntegerBy(effectiveTotalContributions);
-  const refundZil = totalContributions.lt(minZilAmount) ? userSent : new BigNumber(0);
+  const receiveAmountUSD = data.tokenPrice
+    ? receiveAmount.shiftedBy(-data.tokenDecimals).times(data.tokenPrice)
+    : new BigNumber(0);
+
+  let refundZil = new BigNumber(0);
+  if (totalContributions.lt(minZilAmount)) {
+    refundZil = userSent;
+  }
+  if (totalContributions.gt(targetZil)) {
+    refundZil = new BigNumber(1)
+      .minus(targetZil.div(totalContributions))
+      .times(userContribution);
+  }
 
   /* User contribution summary */
   const fundUSD = new BigNumber(formState.zilAmount).times(
@@ -297,12 +316,7 @@ const TokenILOCard = (props: Props) => {
     isWhitelisted && data.whitelistDiscountPercent ? data.whitelistDiscountPercent : 0;
   const discountUSD = fundUSD.div(100 - discount).times(discount);
   const receiveUSD = fundUSD.plus(discountUSD);
-  const userContributionPercent = isWhitelisted
-    ? userSent
-      .div((100 - discount) / 100)
-      .div(totalContributions)
-      .times(100)
-    : userSent.div(totalContributions).times(100);
+  const userContributionPercent = userContribution.div(totalContributions).times(100);
 
   const formatUSDValue = (value: BigNumber): string => {
     if (value.isZero()) return '-';
@@ -450,8 +464,9 @@ const TokenILOCard = (props: Props) => {
                 })}
                 <HelpInfo
                   placement="top"
-                  title={`${blocksToNextPhase} blocks left to the ${currentTime.isAfter(startTime) ? 'end' : 'start'
-                    } of this ZILO. Countdown is an estimate only. This ZILO runs from block ${startBlock} to ${endBlock}.`}
+                  title={`${blocksToNextPhase} blocks left to the ${
+                    currentTime.isAfter(startTime) ? 'end' : 'start'
+                  } of this ZILO. Countdown is an estimate only. This ZILO runs from block ${startBlock} to ${endBlock}.`}
                 />
               </Text>
             )}
@@ -515,6 +530,7 @@ const TokenILOCard = (props: Props) => {
                     <Text className={classes.label}>{formatUSDValue(fundUSD)}</Text>
                   </Box>
                   <Box display="flex" marginTop={0.75}>
+                    <ZwapLogo className={classes.zwapLogo} />
                     <Text className={classes.label} flexGrow={1} align="left">
                       <>
                         Whitelist Discount{' '}
@@ -544,8 +560,8 @@ const TokenILOCard = (props: Props) => {
                   {!!iloStarted
                     ? insufficientBalanceError ?? 'Commit'
                     : currentTime.isAfter(startTime)
-                      ? 'Waiting for start block...'
-                      : 'Waiting to begin...'}
+                    ? 'Waiting for start block...'
+                    : 'Waiting to begin...'}
                 </FancyButton>
                 <Typography className={classes.errorMessage} color="error">
                   {txError?.message}
@@ -595,20 +611,22 @@ const TokenILOCard = (props: Props) => {
               {iloOver && (
                 <Box marginTop={1} marginBottom={0.5}>
                   <Box display="flex" marginTop={0.5}>
-                    <Text className={classes.label} flexGrow={1} align="left">
+                    <Text className={classes.highlight} flexGrow={1} align="left">
                       <strong>ZIL</strong> to Refund
                     </Text>
-                    <Text className={classes.label}>
+                    <Text className={classes.highlight}>
                       {refundZil.isZero() ? '-' : refundZil.shiftedBy(-12).toFormat(4)}
                     </Text>
                   </Box>
                   <Box display="flex" marginTop={0.5}>
-                    <Text className={classes.label} flexGrow={1} align="left">
+                    <Text className={classes.highlight} flexGrow={1} align="left">
                       <strong>{data.tokenSymbol}</strong> to Claim
                     </Text>
-                    <Text className={classes.label}>
+                    <Text className={classes.highlight}>
                       {contributed && totalContributions.gte(minZilAmount)
-                        ? receiveAmount.shiftedBy(-data.tokenDecimals).toFormat(4)
+                        ? `${receiveAmount
+                            .shiftedBy(-data.tokenDecimals)
+                            .toFormat(4)} ($${receiveAmountUSD.toFormat(2)})`
                         : '-'}
                     </Text>
                   </Box>
@@ -636,7 +654,8 @@ const TokenILOCard = (props: Props) => {
               </FancyButton>
               {contributed && iloState === ILOState.Completed && (
                 <Text className={classes.label} align="center">
-                  You'll be refunded any excess tokens in your claim transaction.
+                  Your claimable amount will be pro-rated if the total commited amount
+                  exceeds the target.
                 </Text>
               )}
               <Typography className={classes.errorMessage} color="error">
