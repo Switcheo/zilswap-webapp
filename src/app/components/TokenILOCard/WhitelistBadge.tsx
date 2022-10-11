@@ -73,7 +73,7 @@ const WhitelistBadge = ({ whitelisted, minZwap, discount }: Props) => {
   }
   return (
     <Tooltip
-      title={`You need to hold more than ${minZwap} $ZWAP for at least 2 days in order to get whitelisted for a ${discount}% discount.`}
+      title={`You need to hold more than ${minZwap} $ZWAP for at least 2 days before the sale in order to get whitelisted for a ${discount}% discount.`}
       placement="top"
       classes={{ tooltip: classes.tooltip }}
     >

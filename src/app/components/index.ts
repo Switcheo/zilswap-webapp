@@ -23,7 +23,7 @@ export { default as MainBanner } from './MainBanner';
 export { default as ZeevesCardBanner } from './ZeevesCardBanner';
 export { default as MnemonicDialog } from './MnemonicDialog';
 export { default as NavDrawer } from './NavDrawer';
-export { default as NewLinkIcon } from './new_link.svg';
+export { default as NewLinkIcon } from './new-link.svg';
 export { default as NotificationBar } from './NotificationBar';
 export { default as NotificationBox } from './NotificationBox';
 export { default as Notifications } from './Notifications';

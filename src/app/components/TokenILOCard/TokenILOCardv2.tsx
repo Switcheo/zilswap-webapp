@@ -35,7 +35,7 @@ import {
 } from 'app/store/types';
 import { BIG_ZERO, bnOrZero, useAsyncTask, useNetwork, useToaster } from 'app/utils';
 import { ZIL_ADDRESS } from 'app/utils/constants';
-import { ReactComponent as NewLinkIcon } from 'app/components/new_link.svg';
+import { ReactComponent as NewLinkIcon } from 'app/components/new-link.svg';
 
 import { AppTheme } from 'app/theme/types';
 import HelpInfo from '../HelpInfo';
@@ -121,7 +121,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     display: 'inline-block',
     verticalAlign: 'top',
     width: '14px',
-    height: '14px',
     '& path': {
       fill: theme.palette.text?.secondary,
     },
