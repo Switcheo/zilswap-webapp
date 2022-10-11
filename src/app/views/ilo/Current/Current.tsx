@@ -3,7 +3,7 @@ import { Box, makeStyles } from '@material-ui/core';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { ZILO_DATA } from 'core/zilo/constants';
-import { ILOCard, SampleILOCard, Text } from 'app/components';
+import { ILOCard, SampleILOCard, SampleILOCardv2, Text } from 'app/components';
 import { TokenILOCard, TokenILOCardv2 } from 'app/components/TokenILOCard';
 import ILOPage from 'app/layouts/ILOPage';
 import { RootState, WalletState } from 'app/store/types';
@@ -69,7 +69,7 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
         </ILOCard>
       ) : (
         ziloData.map(data =>
-          data.comingSoon ? (
+          data.comingSoon ? (data.version === 1 ? (
             <ILOCard>
               <SampleILOCard
                 key={data.contractAddress}
@@ -81,6 +81,17 @@ const CurrentView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any)
               />
             </ILOCard>
           ) : (
+            <ILOCard>
+              <SampleILOCardv2
+                key={data.contractAddress}
+                expanded={true}
+                data={data}
+                blockTime={blockTime}
+                currentBlock={currentBlock}
+                currentTime={currentTime}
+              />
+            </ILOCard>
+          )) : (
             <ILOCard>
               {data.version === 1 ? (
                 <TokenILOCard

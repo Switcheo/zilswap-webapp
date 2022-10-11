@@ -46,6 +46,7 @@ export { default as StatefulText } from './StatefulText';
 export { default as StatsCard } from './StatsCard';
 export { default as Text } from './Text';
 export { default as TBMBanner } from './TBMBanner';
+export { default as SampleILOCardv2 } from './SampleILOCardv2';
 export { default as SoullessBanner } from "./SoullessBanner";
 export { default as TokenFilter } from './TokenFilter';
 export { default as TokenGraph } from './TokenGraph';
