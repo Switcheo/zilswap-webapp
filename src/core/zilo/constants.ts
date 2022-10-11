@@ -244,7 +244,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
       tokenDecimals: 12,
       description:
         'MetaSportZ City is the world’s first “Sportaverse” – within the next internet – featuring the next gamified sports and gaming entertainment experiences on web 3.5.',
-      contractAddress: 'zil1jwh0j6k990670m6tkqfsaayv68k02hawtxkzf7',
+      contractAddress: 'zil1x2sc5pdnv70hqm9hj7aza4jet8dexaku938fy8',
       showUntil: dayjs('2022-10-13T12:00:00.000+0800'),
       usdRatio: '1.0',
       usdTarget: '$1,000,000',
