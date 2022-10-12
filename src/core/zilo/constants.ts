@@ -295,8 +295,8 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
 export const getBlocksPerMinute = (network = Network.MainNet) => {
   switch (network) {
     case Network.MainNet:
-      return 2.75;
+      return 1.58;
     default:
-      return 1.757;
+      return 2.75;
   }
 };
