@@ -204,7 +204,7 @@ const ArkReportCollectionDialog: React.FC<Props> = (props: Props) => {
         header="Feedback Received" subHeader="Thanks for your feedback!"
         buttonLabel="Back to Collection" walletRequired={false} onConfirm={onBackToCollection}
         details={<Typography>However, this is not a valid reason to report a collection.
-          Check out the community <Link target="_blank" href="https://discord.gg/zilswap">Discord</Link> if you would like to voice other concerns.</Typography>} />
+          Check out the community <Link target="_blank" href="https://discord.gg/zilswapio">Discord</Link> if you would like to voice other concerns.</Typography>} />
     </Fragment> :
     <SmallDialog open={!!open} onCloseDialog={onCloseDialog}
       header="Connect Wallet" subHeader="Please connect wallet to submit your report."

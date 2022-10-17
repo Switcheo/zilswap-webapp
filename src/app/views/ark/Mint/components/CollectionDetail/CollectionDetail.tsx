@@ -166,7 +166,7 @@ const CollectionDetail: React.FC<Props> = (props: Props) => {
             ARKY's NFT Mint feature is currently in Beta mode.
             If you encounter a bug, share it on our
             {" "}
-            <Link target="_blank" href="https://discord.gg/zilswap">Discord</Link>.
+            <Link target="_blank" href="https://discord.gg/zilswapio">Discord</Link>.
           </Typography>
         </NotificationBox>
 

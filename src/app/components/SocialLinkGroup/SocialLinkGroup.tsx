@@ -46,7 +46,7 @@ const SocialLinkGroup: React.FC<SocialLinkGroupProps> = (
         <TwitterIcon />
       </Button>
       <Button
-        href="https://discord.gg/zilswap"
+        href="https://discord.gg/zilswapio"
         className={cls({ [classes.compact]: compact })}
       >
         <Discord />
