@@ -353,20 +353,21 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                 <FormHelperText className={classes.instruction}>The following fees will be deducted once this NFT is sold.</FormHelperText>
                 {exchangeInfo?.baseFeeBps && (
                   <Box display="flex" marginTop={1}>
-                    <Typography className={classes.feeLabel}>Service Fee</Typography>
-                    <Typography className={classes.feeValue}>{exchangeInfo.baseFeeBps / 100}%</Typography>
+                    <Typography className={classes.feeLabel}>Service Fee
+                      {isPlatformFeeExempt && (
+                        <span>&nbsp; (Exempted)</span>
+                      )}
+                    </Typography>
+                    <Typography className={classes.feeValue}>{isPlatformFeeExempt ? BIG_ZERO : exchangeInfo.baseFeeBps / 100}%</Typography>
                   </Box>
                 )}
                 {token?.collection && token.collection.royaltyBps !== null &&
                   <Box display="flex" marginTop={1}>
                     <Typography className={classes.feeLabel}>
                       Royalties
-                      {isPlatformFeeExempt && (
-                        <span>&nbsp; (Exempted)</span>
-                      )}
                     </Typography>
                     <Typography className={classes.feeValue}>
-                      {(isPlatformFeeExempt ? BIG_ZERO : new BigNumber(token.collection.royaltyBps).shiftedBy(-2)).toString()}%
+                      {new BigNumber(token.collection.royaltyBps).shiftedBy(-2).toString()}%
                     </Typography>
                   </Box>
                 }
