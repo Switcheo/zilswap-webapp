@@ -38,6 +38,7 @@ const initial_state: MarketPlaceState = {
   collectionTraits: {},
   filteredTokensTraits: {},
   pendingTxs: {},
+  additionalInfo: {},
 }
 
 const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPlaceState => {
@@ -147,6 +148,16 @@ const reducer = (state: MarketPlaceState = initial_state, action: any): MarketPl
         pendingTxs,
       }
     }
+    case MarketPlaceActionTypes.UPDATE_ADDITONAL_INFO:
+      return {
+        ...state,
+        additionalInfo: {
+          [payload.collectionAddress]: {
+            ...state.additionalInfo[payload.collectionAddress],
+            [payload.tokenId]: payload.info,
+          },
+        },
+      }
     default:
       return state;
   }

@@ -15,6 +15,7 @@ export interface MarketPlaceState {
   filteredTokensTraits: SimpleMap<TraitType>;
   pendingTxs: SimpleMap<ArkPendingTx>;
   bidsTable?: BidsTableInfo;
+  additionalInfo: SimpleMap<SimpleMap<TraitValueWithType[]>>
 }
 
 export interface BidsTableInfo extends ArkClient.ListChequesParams {

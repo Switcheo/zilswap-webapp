@@ -1,7 +1,7 @@
 import { SimpleMap } from "app/utils"
 import { ArkExchangeInfo } from "core/utilities"
 import { CollectionFilter } from "../types"
-import { ArkPendingTx, BidsTableInfo, Collection, OAuth, Profile, QueryNftResult, TraitType } from "./types"
+import { ArkPendingTx, BidsTableInfo, Collection, OAuth, Profile, QueryNftResult, TraitType, TraitValueWithType } from "./types"
 
 export enum SortBy {
   PriceDescending,
@@ -27,6 +27,7 @@ export const MarketPlaceActionTypes = {
   UPDATE_COLLECTION_TRAITS: "ARK:UPDATE_COLLECTION_TRAITS",
   UPDATE_EXCHANGE_INFO: "ARK:UPDATE_EXCHANGE_INFO",
   RELOAD_TOKEN_LIST: "ARK:RELOAD_TOKEN_LIST",
+  UPDATE_ADDITONAL_INFO: "ARK:UPDATE_ADDITONAL_INFO",
 
   UPDATE_BIDS_TABLE_INFO: "ARK:UPDATE_BIDS_TABLE_INFO",
   REMOVE_PENDING_TX: "ARK:REMOVE_PENDING_TX",
@@ -131,6 +132,13 @@ export function removePendingTx(payload: ArkPendingTx) {
 export function listenPendingTx(payload: ArkPendingTx) {
   return {
     type: MarketPlaceActionTypes.LISTEN_PENDING_TX,
+    payload
+  }
+}
+
+export function updateAdditionalInfo(payload: { collectionAddress: string, tokenId: number, info: TraitValueWithType[] }) {
+  return {
+    type: MarketPlaceActionTypes.UPDATE_ADDITONAL_INFO,
     payload
   }
 }

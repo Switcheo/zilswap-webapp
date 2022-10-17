@@ -18,6 +18,11 @@ const ARK_ENDPOINTS: SimpleMap<string> = {
   [Network.TestNet]: "https://test-api-ark.zilswap.org",
 } as const;
 
+const METAZOA_ENDPOINTS: SimpleMap<string> = {
+  [Network.MainNet]: "https://api.zolar.io",
+  [Network.TestNet]: "https://test-api.zolar.io",
+} as const;
+
 const LOCALHOST_ENDPOINT = "http://localhost:8181";
 
 
@@ -69,9 +74,18 @@ const apiPaths = {
   "mint/image": "/nft/mint/image",
 };
 
+const metazoaApiPaths = {
+  "metazoa/tokenId/data": "/metazoa/:tokenId/data",
+};
+
 const getHttpClient = (network: Network) => {
   const endpoint = process.env.REACT_APP_ARK_API_LOCALHOST === "true" ? LOCALHOST_ENDPOINT : ARK_ENDPOINTS[network];
   return new HTTP(endpoint, apiPaths);
+}
+
+const getMetazoaHttpClient = (network: Network) => {
+  const endpoint = process.env.REACT_APP_ARK_API_LOCALHOST === "true" ? LOCALHOST_ENDPOINT : METAZOA_ENDPOINTS[network];
+  return new HTTP(endpoint, metazoaApiPaths);
 }
 
 export interface ArkContractInfo {
@@ -113,11 +127,13 @@ export class ArkClient {
   public readonly brokerAddressV2: string;
   public readonly tokenProxyAddressV2: string;
   private http: HTTP<typeof apiPaths>;
+  private httpMetazoa: HTTP<typeof metazoaApiPaths>;
 
   constructor(
     public readonly network: Network,
   ) {
     this.http = getHttpClient(network);
+    this.httpMetazoa = getMetazoaHttpClient(network);
     this.brokerAddressV1 = fromBech32Address(ARK_CONTRACTS_V1[network].broker).toLowerCase();
     this.tokenProxyAddressV1 = fromBech32Address(ARK_CONTRACTS_V1[network].tokenProxy).toLowerCase();
     this.brokerAddressV2 = fromBech32Address(ARK_CONTRACTS_V2[network].broker).toLowerCase();
@@ -476,6 +492,14 @@ export class ArkClient {
   resyncMetadata = async (collectionAddress: string, tokenId: number) => {
     const url = this.http.path("collection/resync/metadata", { collectionAddress, tokenId });
     const result = await this.http.post({ url });
+    const output = await result.json();
+    await this.checkError(output);
+    return output;
+  }
+
+  getMetazoaData = async (tokenId: number) => {
+    const url = this.httpMetazoa.path("metazoa/tokenId/data", { tokenId: tokenId });
+    const result = await this.http.get({ url });
     const output = await result.json();
     await this.checkError(output);
     return output;
