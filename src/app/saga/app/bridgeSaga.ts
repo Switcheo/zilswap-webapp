@@ -7,11 +7,11 @@ import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { CarbonWallet, Blockchain, Models, AddressUtils, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
 import { GetDetailedTransfersResponse, GetTransfersRequest, CrossChainFlowStatus } from "carbon-js-sdk/lib/hydrogen";
 import { APIS, Network } from "zilswap-sdk/lib/constants";
-import { FeesData } from "core/utilities/bridge";
-import { Bridge, logger } from "core/utilities";
+import { GetFeeQuoteResponse } from "carbon-js-sdk/lib/hydrogen/feeQuote";
+import { logger } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
-import { BIG_ONE, BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL, PollIntervals } from "app/utils/constants";
+import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL, PollIntervals } from "app/utils/constants";
 import { SimpleMap, bnOrZero, netZilToCarbon } from "app/utils";
 import { BridgeTx, BridgeableToken, BridgeableTokenMapping, RootState } from "app/store/types";
 import { actions } from "app/store";
@@ -347,15 +347,15 @@ function* queryTokenFees() {
           throw new Error(`token not found ${bridgeToken.toDenom}`);
         }
 
-        const retrievedFees = (yield call(Bridge.getEstimatedFees, { denom: carbonToken.denom, network: zilNetwork })) as FeesData | undefined;
-        const feeEst = retrievedFees ?? { withdrawalFee: BIG_ONE.shiftedBy(3 - carbonToken.decimals.toInt()) }; // 1000 sat to bypass min fee check
+        const feeResponse = (yield call([sdk.fee, sdk.fee.getDepositWithdrawalFees], carbonToken.denom)) as GetFeeQuoteResponse;
+        const withdrawFees = bnOrZero(feeResponse.withdrawal_fee ?? "1000"); // 1000 sat to bypass min fee check
         const price = bnOrZero(yield sdk.token.getUSDValue(carbonToken.denom));
 
-        logger("bridge saga", "withdraw fees", carbonToken.denom, feeEst?.withdrawalFee?.toString(10), price.toString(10))
+        logger("bridge saga", "withdraw fees", carbonToken.denom, withdrawFees?.toString(10), price.toString(10))
 
         yield put(actions.Bridge.updateFee({
-          amount: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-carbonToken!.decimals),
-          value: new BigNumber(feeEst.withdrawalFee!).shiftedBy(-carbonToken!.decimals).times(price),
+          amount: new BigNumber(withdrawFees!).shiftedBy(-carbonToken!.decimals),
+          value: new BigNumber(withdrawFees!).shiftedBy(-carbonToken!.decimals).times(price),
           token: carbonToken
         }));
 
