@@ -13,10 +13,9 @@ import { Blockchain, CarbonSDK, AddressUtils, Hydrogen } from "carbon-js-sdk";
 import Web3Modal from 'web3modal';
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet } from "core/wallet";
-import { Bridge } from "core/utilities";
 import { providerOptions } from "core/ethereum";
 import { ConnectButton } from "app/views/main/Bridge/components";
-import { hexToRGBA, netZilToCarbon, useAsyncTask, useNetwork } from "app/utils";
+import { bnOrZero, hexToRGBA, netZilToCarbon, useAsyncTask, useNetwork } from "app/utils";
 import { AppTheme } from "app/theme/types";
 import { RootState } from "app/store/types";
 import { BridgeState, BridgeTx, BridgeableTokenMapping } from "app/store/bridge/types";
@@ -252,10 +251,11 @@ const ResumeTransferBox = (props: any) => {
 
             if (!bridgeToken || !sdk) return;
             runResumeTransfer(async () => {
-                const fee = await Bridge.getEstimatedFees({ denom: bridgeToken.toDenom, network });
-                if (!fee.withdrawalFee?.gt(0))
+                const fee = await sdk.fee.getDepositWithdrawalFees(bridgeToken.toDenom);
+                const withdrawFee = bnOrZero(fee.withdrawal_fee);
+                if (!withdrawFee?.gt(0))
                     throw new Error("Could not retrieve withdraw fee");
-                const feeAmount = fee.withdrawalFee.shiftedBy(-bridgeToken.toDecimals);
+                const feeAmount = withdrawFee.shiftedBy(-bridgeToken.toDecimals);
 
                 if (new BigNumber(depositTransfer.amount).lt(feeAmount))
                     throw new Error("Transferred amount insufficient to pay for withdraw fees.");
@@ -271,7 +271,7 @@ const ResumeTransferBox = (props: any) => {
                     dstTokenId: bridgeToken.toTokenId,
                     inputAmount: new BigNumber(depositTransfer.amount).shiftedBy(-bridgeToken.decimals),
                     interimAddrMnemonics: mnemonic.join(" "),
-                    withdrawFee: feeAmount, // need to check
+                    withdrawFee: feeAmount,
                     sourceTxHash: depositTransfer.source_event?.tx_hash,
                     depositDispatchedAt: dayjs(),
                     network,
