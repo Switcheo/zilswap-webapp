@@ -358,7 +358,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                         <span>&nbsp; (Exempted)</span>
                       )}
                     </Typography>
-                    <Typography className={classes.feeValue}>{isPlatformFeeExempt ? BIG_ZERO : exchangeInfo.baseFeeBps / 100}%</Typography>
+                    <Typography className={classes.feeValue}>{(isPlatformFeeExempt ? BIG_ZERO : bnOrZero(exchangeInfo.baseFeeBps).shiftedBy(-2)).toString(10)}%</Typography>
                   </Box>
                 )}
                 {token?.collection && token.collection.royaltyBps !== null &&
@@ -367,7 +367,7 @@ const SellDialog: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                       Royalties
                     </Typography>
                     <Typography className={classes.feeValue}>
-                      {new BigNumber(token.collection.royaltyBps).shiftedBy(-2).toString()}%
+                      {new BigNumber(token.collection.royaltyBps).shiftedBy(-2).toString(10)}%
                     </Typography>
                   </Box>
                 }
