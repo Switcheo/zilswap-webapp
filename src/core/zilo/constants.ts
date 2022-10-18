@@ -116,12 +116,11 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
         'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-7-MSZC-banner.jpg',
       tokenSymbol: 'MSZC',
       tokenName: 'MetaSportZ City',
-      tokenDecimals: 12,
-      comingSoon: true,
+      tokenDecimals: 6,
       description:
         'MetaSportZ City is the world’s first “Sportaverse” – within the next internet – featuring the next gamified sports and gaming entertainment experiences on web 3.5.',
-      contractAddress: 'zil1x2sc5pdnv70hqm9hj7aza4jet8dexaku938fy8',
-      showUntil: dayjs('2022-10-13T12:00:00.000+0800'),
+      contractAddress: 'zil1ky52dse4qvw8v4ceqn2ja6z8jexvd3z4ljn42c',
+      showUntil: dayjs('2022-10-17T12:00:00.000+0800'),
       usdRatio: '1.0',
       usdTarget: '$1,000,000',
       version: 2,
@@ -296,8 +295,8 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
 export const getBlocksPerMinute = (network = Network.MainNet) => {
   switch (network) {
     case Network.MainNet:
-      return 2.75;
+      return 1.58;
     default:
-      return 1.757;
+      return 2.75;
   }
 };
