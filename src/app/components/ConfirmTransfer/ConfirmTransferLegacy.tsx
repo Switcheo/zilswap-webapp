@@ -13,8 +13,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, AddressUtils, Models, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
-import { ZilBridgeParams } from 'carbon-js-sdk/lib/clients/ZILClient'
-import { BridgeParams } from 'carbon-js-sdk/lib/clients/ETHClient'
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet } from "core/wallet";
 import { logger } from "core/utilities";
@@ -27,7 +25,6 @@ import { RootState } from "app/store/types";
 import { BridgeFormState, BridgeState, BridgeTx, BridgeableToken } from "app/store/bridge/types";
 import { actions } from "app/store";
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
-import { getRecoveryAddress } from 'app/utils/bridge'
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
@@ -327,16 +324,15 @@ const ConfirmTransfer = (props: any) => {
   }
 
   /**
-    * Bridge the asset from Ethereum chain
-    * returns the txn hash if bridge txn is successful, otherwise return null
-    * @param asset         details of the asset being bridged; retrieved from carbon
+    * Lock the asset on Ethereum chain
+    * returns the txn hash if lock txn is successful, otherwise return null
+    * @param asset         details of the asset being locked; retrieved from carbon
     */
-  async function bridgeAssetFromEth(asset: Models.Token) {
-   if (!fromToken || !sdk || !bridgeFormState.sourceAddress || !bridgeFormState.destAddress || !withdrawFee?.amount || !swthAddrMnemonic) {
-      return
-    }
+  async function lockAssetOnEth(asset: Models.Token, carbonMnemonics: string) {
+    if (!bridgeToken || !fromToken || !sdk || !swthAddrMnemonic) return null;
 
     const lockProxy = asset.bridgeAddress;
+    const swthAddress = AddressUtils.SWTHAddress.generateAddress(swthAddrMnemonic);
 
     const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider);
     const signer: ethers.Signer = ethersProvider.getSigner();
@@ -356,11 +352,10 @@ const ConfirmTransfer = (props: any) => {
         toaster(`Approval needed (Ethereum)`, { overridePersist: false });
         const approve_tx = await sdk.eth.approveERC20({
           token: asset,
-          ethAddress,
+          ethAddress: ethAddress,
           gasLimit: new BigNumber(100000),
           gasPriceGwei: gasPriceGwei,
           signer: signer,
-          spenderAddress: sdk.eth.getBridgeEntranceAddr()
         });
 
         logger("approve tx", approve_tx.hash);
@@ -375,54 +370,31 @@ const ConfirmTransfer = (props: any) => {
       }
     }
 
-    toaster(`Bridging asset (Ethereum)`, { overridePersist: false });
+    toaster(`Locking asset (Ethereum)`, { overridePersist: false });
 
-    const toToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken?.toDenom)
-
-
-    if (!toToken) {
-      toaster("Selected token is not available on Zilliqa");
-      return
-    }
-
-    console.log("token decimals", toToken.decimals.toNumber())
-
-    const bridgeDepositParams : BridgeParams = {
-      fromToken: asset,
-      toToken,
-      amount: depositAmt,
-      fromAddress: ethAddress,
-      recoveryAddress: getRecoveryAddress(sdk.network),
-      toAddress: bridgeFormState.destAddress,
-      feeAmount: withdrawFee.amount.shiftedBy(toToken.decimals.toNumber()), //TODO: Check whether dehumanizing value is correct
-      gasPriceGwei,
+    const swthAddressBytes = AddressUtils.SWTHAddress.getAddressBytes(swthAddress, sdk.network);
+    const lock_tx = await sdk.eth.lockDeposit({
+      token: asset,
+      address: swthAddressBytes,
+      ethAddress: ethAddress.toLowerCase(),
       gasLimit: new BigNumber(`${BridgeParamConstants.ETH_GAS_LIMIT}`),
-      signer,
-    }
+      gasPriceGwei: gasPriceGwei,
+      amount: depositAmt,
+      signer: signer,
+    });
 
-    const bridge_tx = await sdk.eth.bridgeTokens(bridgeDepositParams)
-    //TOCHECK: remove is unnecessary
-    if (!bridge_tx) {
-      return
-    }
+    toaster(`Submitted: (Ethereum - Lock Asset)`, { sourceBlockchain: "eth", hash: lock_tx.hash!.replace(/^0x/i, "") });
+    logger("lock tx", lock_tx.hash!);
 
-    logger("bridge deposit params: %o\n", bridgeDepositParams);
-    toaster(`Submitted: (Ethereum - Bridge Asset)`, { sourceBlockchain: "eth", hash: bridge_tx.hash!.replace(/^0x/i, "") });
-    logger("bridge tx", bridge_tx.hash!);
-
-    return bridge_tx.hash;
+    return lock_tx.hash!;
   }
 
   /**
-    * Bridge the asset from Zilliqa chain
-    * returns the txn hash if bridge txn is successful, otherwise return null
-    * @param asset         details of the asset being bridged; retrieved from carbon
+    * Lock the asset on Zilliqa chain
+    * returns the txn hash if lock txn is successful, otherwise return null
+    * @param asset         details of the asset being locked; retrieved from carbon
     */
-  async function bridgeAssetFromZil(asset: Models.Token, carbonMnemonics: string) {
-    if (!fromToken || !sdk || !bridgeFormState.sourceAddress || !bridgeFormState.destAddress || !withdrawFee?.amount) {
-      return
-    }
-
+  async function lockAssetOnZil(asset: Models.Token, carbonMnemonics: string) {
     if (wallet === null) {
       console.error("Zilliqa wallet not connected");
       return null;
@@ -435,6 +407,8 @@ const ConfirmTransfer = (props: any) => {
     const lockProxy = asset.bridgeAddress;
     const amount = bridgeFormState.transferAmount;
     const zilAddress = santizedAddress(wallet.addressInfo.byte20);
+    const swthAddress = AddressUtils.SWTHAddress.generateAddress(carbonMnemonics);
+    const swthAddressBytes = AddressUtils.SWTHAddress.getAddressBytes(swthAddress, sdk.network);
     const depositAmt = amount.shiftedBy(asset.decimals.toInt())
 
     if (!isNativeAsset(asset)) {
@@ -474,38 +448,24 @@ const ConfirmTransfer = (props: any) => {
       }
     }
 
-    const toToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken?.toDenom)
-
-    if (!toToken) {
-      toaster("Selected token is not available on Ethereum");
-      return
-    }
-
-    const bridgeDepositParams : ZilBridgeParams = {
-      fromToken: asset,
-      toToken,
+    const lockDepositParams = {
+      address: swthAddressBytes,
       amount: depositAmt,
-      fromAddress: wallet.addressInfo.bech32,
-      recoveryAddress: getRecoveryAddress(sdk.network),
-      toAddress: bridgeFormState.destAddress,
-      feeAmount: withdrawFee.amount.shiftedBy(toToken.decimals.toNumber()),
+      token: asset,
       gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
       gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
+      zilAddress: zilAddress,
       signer: wallet.provider! as any,
     }
 
-    logger("bridge deposit params: %o\n", bridgeDepositParams);
-    toaster(`Bridging asset (Zilliqa)`, { overridePersist: false });
-    const bridge_tx = await sdk.zil.bridgeTokens(bridgeDepositParams)
-    //TOCHECK: remove is unnecessary
-    if (!bridge_tx) {
-      return
-    }
+    logger("lock deposit params: %o\n", lockDepositParams);
+    toaster(`Locking asset (Zilliqa)`, { overridePersist: false });
+    const lock_tx = await sdk.zil.lockDeposit(lockDepositParams);
 
-    toaster(`Submitted: (Zilliqa - Bridge Asset)`, { hash: bridge_tx.id! });
-    logger("bridge tx", bridge_tx.id!);
+    toaster(`Submitted: (Zilliqa - Lock Asset)`, { hash: lock_tx.id! });
+    logger("lock tx", lock_tx.id!);
 
-    return bridge_tx.id;
+    return lock_tx.id;
   }
 
   const downloadTransferKey = (key: string) => {
@@ -530,7 +490,7 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
-    const asset = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken?.denom)
+    const asset = sdk.token.tokens[bridgeToken?.denom ?? ""];
 
     if (!asset) {
       console.error("asset not found for", bridgeToken);
@@ -548,7 +508,6 @@ const ConfirmTransfer = (props: any) => {
     }
 
     if (withdrawFee?.amount.gte(bridgeFormState.transferAmount)) {
-      console.log("amount", Number(withdrawFee?.amount), Number(bridgeFormState.transferAmount))
       toaster("Transfer amount too low", { overridePersist: false });
       return null;
     }
@@ -558,10 +517,10 @@ const ConfirmTransfer = (props: any) => {
       downloadTransferKey(swthAddrMnemonic);
       if (fromBlockchain === Blockchain.Zilliqa) {
         // init lock on zil side
-        sourceTxHash = await bridgeAssetFromZil(asset, swthAddrMnemonic);
+        sourceTxHash = await lockAssetOnZil(asset, swthAddrMnemonic);
       } else {
         // init lock on eth side
-        sourceTxHash = await bridgeAssetFromEth(asset);
+        sourceTxHash = await lockAssetOnEth(asset, swthAddrMnemonic);
       }
 
       if (sourceTxHash === null) {

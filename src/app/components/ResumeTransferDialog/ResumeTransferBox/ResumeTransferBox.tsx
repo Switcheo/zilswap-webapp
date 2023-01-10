@@ -251,7 +251,7 @@ const ResumeTransferBox = (props: any) => {
 
             if (!bridgeToken || !sdk) return;
             runResumeTransfer(async () => {
-                const fee = await sdk.fee.getDepositWithdrawalFees(bridgeToken.toDenom);
+                const fee = await sdk.hydrogen.getFeeQuote({ token_denom: bridgeToken.toDenom });
                 const withdrawFee = bnOrZero(fee.withdrawal_fee);
                 if (!withdrawFee?.gt(0))
                     throw new Error("Could not retrieve withdraw fee");
@@ -325,7 +325,7 @@ const ResumeTransferBox = (props: any) => {
         const web3Modal = new Web3Modal({
             cacheProvider: true,
             disableInjectedProvider: false,
-            network: "ropsten",
+            network: "goerli",
             providerOptions
         });
         if (clear) {

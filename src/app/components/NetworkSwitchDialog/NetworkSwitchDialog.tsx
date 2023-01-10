@@ -30,7 +30,7 @@ const NetworkSwitchDialog = (props: any) => {
 
     const isMainNet = useMemo(() => {
       if (srcChain === Blockchain.Ethereum) {
-        if (Number(ethWallet?.chainId) === 3) return false;
+        if (Number(ethWallet?.chainId) === 5) return false;
         // set to mainnet even if currently set to some random net
         return true;
       } else if (srcChain === Blockchain.Zilliqa) {
@@ -42,7 +42,7 @@ const NetworkSwitchDialog = (props: any) => {
       const getEthChainName = (chainId: number) => {
         switch (chainId) {
           case 1: return 'Ethereum Network'
-          case 3: return 'Ropsten Test Network'
+          case 5: return 'Goerli Test Network'
           default: return 'Unknown Network'
         }
       }
@@ -78,9 +78,9 @@ const NetworkSwitchDialog = (props: any) => {
           return ['Zilliqa MainNet', null, getZilWalletName(), 'Zilliqa TestNet']
         }
       } else {
-        if (ethChainID !== 3) {
+        if (ethChainID !== 5) {
           dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
-          return [getEthChainName(3), '0x3', getEthWalletName(), getEthChainName(ethChainID)]
+          return [getEthChainName(5), '0x5', getEthWalletName(), getEthChainName(ethChainID)]
         } else if (zilWallet?.network !== Network.TestNet) {
           dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
           return ['Zilliqa TestNet', null, getZilWalletName(), 'Zilliqa MainNet']

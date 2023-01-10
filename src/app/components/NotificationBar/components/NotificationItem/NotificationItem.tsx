@@ -97,6 +97,7 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
   };
 
   const checkMessage = () => {
+    if (typeof message !== "string") return
     if (message.includes("reject")) return "rejected";
     if (message.includes("expire")) return "expired";
   }
@@ -135,7 +136,7 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const getHref = () => {
     switch (sourceBlockchain) {
       case "swth":
-      case "eth": return network === Network.MainNet ? `https://etherscan.io/search?q=${hash}` : `https://ropsten.etherscan.io/search?q=${hash}`;
+      case "eth": return network === Network.MainNet ? `https://etherscan.io/search?q=${hash}` : `https://goerli.etherscan.io/tx/${hash}`;
       default: return `https://viewblock.io/zilliqa/tx/${hash}?network=${network.toLowerCase()}`
     }
   }

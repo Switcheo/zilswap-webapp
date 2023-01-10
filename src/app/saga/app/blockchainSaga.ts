@@ -1,5 +1,5 @@
 import { Channel, EventChannel, channel, eventChannel } from 'redux-saga';
-import { call, cancelled, fork, put, select, take, takeEvery } from 'redux-saga/effects';
+import { call, cancelled, CancelledEffect, fork, put, select, take, takeEvery } from 'redux-saga/effects';
 import { AppState, ObservedTx, TxReceipt, TxStatus, Zilswap } from 'zilswap-sdk';
 import { ZiloAppState } from 'zilswap-sdk/lib/zilo';
 
@@ -489,7 +489,7 @@ function* watchZilPay() {
       );
     }
   } finally {
-    if (yield cancelled()) {
+    if ((yield cancelled()) as CancelledEffect) {
       chan.close();
     }
   }
@@ -526,7 +526,7 @@ function* watchBoltX() {
       );
     }
   } finally {
-    if (yield cancelled()) {
+    if ((yield cancelled()) as CancelledEffect) {
       chan.close();
     }
   }
@@ -561,7 +561,7 @@ function* watchWeb3() {
       );
     }
   } finally {
-    if (yield cancelled()) {
+    if ((yield cancelled()) as CancelledEffect) {
       chan.close();
     }
   }

@@ -31,7 +31,7 @@ export class ETHBalances {
   static getClient = (network: Network): HTTP<{ root: string }> => {
     const url = network === Network.MainNet ?
       "https://eth-mainnet.alchemyapi.io/v2/MSB_PM1tNIxC1CD9al_iNOR5MbpcjsgS/" :
-      "https://eth-ropsten.alchemyapi.io/v2/-1JW5e_GEXU__5KEsCH_jYlavG3HowZC/"
+      "https://eth-goerli.alchemyapi.io/v2/Rog1kuZQf1R8X7EAmsXs7oFyQXyzIH-4"
     return new HTTP(url, { root: '' })
   }
 

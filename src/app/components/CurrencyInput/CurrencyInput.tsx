@@ -240,7 +240,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
       setTokenBalance(new BigNumber(tokenBalance!.toString()));
     } else {
       if (!token.pool) return setTokenBalance(null);
-      setTokenBalance(token.pool!.userContribution);
+      setTokenBalance(token.pool!.userContribution); 
     }
   }, [walletState.wallet, token, showContribution]);
 

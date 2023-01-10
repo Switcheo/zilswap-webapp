@@ -57,6 +57,11 @@ export const RPCEndpoints: { [key in Network]: string } = {
   [Network.TestNet]: 'https://dev-api.zilliqa.com',
 };
 
+export const EthRpcUrl = {
+  [Network.MainNet]: "https://eth-mainnet.alchemyapi.io/v2/RWHcfoaBKzRpXnLONcEDnVqtUp7StNYl",
+  [Network.TestNet]: "https://eth-goerli.alchemyapi.io/v2/Rog1kuZQf1R8X7EAmsXs7oFyQXyzIH-4",
+}
+
 export const BIG_ZERO = new BigNumber(0);
 export const BIG_ONE = new BigNumber(1);
 
@@ -193,4 +198,28 @@ export const METAZOA_STAT_PROFESSION: SimpleMap<string> = {
   "STR": "Marauder",
   "DEX": "Astrominer",
   "INT": "Psionic",
+}
+
+const ERC20_ABI = [
+  // Some details about the token
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+
+  // Get the account balance
+  "function balanceOf(address) view returns (uint)",
+
+  "function allowance(address owner, address spender) view returns (uint)",
+
+  // Send some of your tokens to someone else
+  "function transfer(address to, uint amount)",
+
+  "function approve(address spender, uint amount)",
+
+  // An event triggered whenever anyone transfers to someone else
+  "event Transfer(address indexed from, address indexed to, uint amount)"
+];
+
+export const EthContractABIs : {[key: string]: string[] | null} = {
+  [Network.MainNet]: ERC20_ABI,
+  [Network.TestNet]: ERC20_ABI,
 }

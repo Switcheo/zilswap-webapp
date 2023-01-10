@@ -171,6 +171,8 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }
   }, [tokenFinder, bridgeToken])
 
+  console.log("fromToken", bridgeFormState)
+
   useEffect(() => {
     const bridgeTx = bridgeState.activeBridgeTx;
 
@@ -276,7 +278,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     const web3Modal = new Web3Modal({
       cacheProvider: false,
       disableInjectedProvider: false,
-      network: network === Network.MainNet ? 'mainnet' : 'ropsten',
+      network: network === Network.MainNet ? 'mainnet' : 'goerli',
       providerOptions
     });
 
@@ -378,7 +380,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const showTransfer = () => {
     if (!(
       (Number(bridgeWallet?.chainId) === 1 && wallet?.network === Network.MainNet) ||
-      (Number(bridgeWallet?.chainId) === 3 && wallet?.network === Network.TestNet)
+      (Number(bridgeWallet?.chainId) === 5 && wallet?.network === Network.TestNet)
     )) {
       dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
       return
@@ -429,7 +431,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     const web3Modal = new Web3Modal({
       cacheProvider: true,
       disableInjectedProvider: false,
-      network: "ropsten",
+      network: "goerli",
       providerOptions
     });
     if (clear) {
@@ -445,6 +447,8 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       return false;
     if (bridgeFormState.transferAmount.isZero())
       return false;
+    if (!fromToken)
+      return false
     if (fromToken && bridgeFormState.transferAmount.isGreaterThan(bnOrZero(fromToken.balance).shiftedBy(-fromToken.decimals)))
       return false;
     if (isMobile)
@@ -620,7 +624,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               ? "Connect Wallet"
               : bridgeFormState.transferAmount.isZero()
                 ? "Enter Amount"
-                : "Head to Confirmation"
+                : !fromToken
+                  ? "Select Token"
+                  : "Head to Confirmation"
             }
           </Button>
         </Box>
