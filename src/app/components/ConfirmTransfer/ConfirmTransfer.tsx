@@ -385,8 +385,6 @@ const ConfirmTransfer = (props: any) => {
       return
     }
 
-    console.log("token decimals", toToken.decimals.toNumber())
-
     const bridgeDepositParams : BridgeParams = {
       fromToken: asset,
       toToken,
@@ -548,7 +546,6 @@ const ConfirmTransfer = (props: any) => {
     }
 
     if (withdrawFee?.amount.gte(bridgeFormState.transferAmount)) {
-      console.log("amount", Number(withdrawFee?.amount), Number(bridgeFormState.transferAmount))
       toaster("Transfer amount too low", { overridePersist: false });
       return null;
     }

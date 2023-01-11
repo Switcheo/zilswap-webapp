@@ -5,7 +5,7 @@ import BigNumber from "bignumber.js"
 import dayjs from "dayjs"
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects"
 import { Blockchain, AddressUtils, CarbonSDK } from "carbon-js-sdk"
-import { GetDetailedTransfersResponse, GetTransfersRequest, CrossChainFlowStatus, GetRelaysRequest } from "carbon-js-sdk/lib/hydrogen"
+import { GetDetailedTransfersResponse, GetTransfersRequest, CrossChainFlowStatus, GetRelaysRequest, RelaysResponse, GetRelaysResponse } from "carbon-js-sdk/lib/hydrogen"
 import { APIS, Network } from "zilswap-sdk/lib/constants"
 import { GetFeeQuoteResponse } from "carbon-js-sdk/lib/hydrogen/feeQuote"
 import { logger } from "core/utilities"
@@ -157,15 +157,15 @@ function* watchDepositConfirmation() {
             const queryOpts: GetRelaysRequest = {
               source_tx_hash: tx.sourceTxHash
             }
-            const result = (yield call([sdk.hydrogen, sdk.hydrogen.getRelaysTransfers], queryOpts)) as GetDetailedTransfersResponse
+            const result = (yield call([sdk.hydrogen, sdk.hydrogen.getRelaysTransfers], queryOpts)) as GetRelaysResponse
 
-            const depositTransfer = result.data.find((transfer) => transfer.destination_blockchain === "carbon" && transfer.source_blockchain === tx.srcChain) as any
+            const depositTransfer = result.data.find((transfer) => transfer.destination_blockchain === "carbon" && transfer.source_blockchain === tx.srcChain) as RelaysResponse
 
-            logger("bridge saga", "deposit results", depositTransfer)
+            logger("bridge saga", "deposit results", depositTransfer?.destination_tx_hash)
 
-            if (depositTransfer['destination_tx_hash']) {
+            if (depositTransfer?.destination_tx_hash) {
               if (!tx.sourceTxHash) {
-                tx.sourceTxHash = depositTransfer['destination_tx_hash']
+                tx.sourceTxHash = depositTransfer.destination_tx_hash
               }
 
               tx.depositTxConfirmedAt = dayjs()
@@ -174,7 +174,7 @@ function* watchDepositConfirmation() {
               logger("bridge saga", "confirmed tx deposit", tx.sourceTxHash)
 
 
-              tx.withdrawTxHash = depositTransfer['destination_tx_hash'].slice(2)
+              tx.withdrawTxHash = depositTransfer.destination_tx_hash.slice(2)
               updatedTxs[tx.sourceTxHash!] = tx
               
             }
@@ -228,15 +228,15 @@ function* watchWithdrawConfirmation() {
           const queryOpts: GetRelaysRequest = {
             source_tx_hash: tx.withdrawTxHash
           }
-          const result = (yield call([sdk.hydrogen, sdk.hydrogen.getRelaysTransfers], queryOpts)) as GetDetailedTransfersResponse
+          const result = (yield call([sdk.hydrogen, sdk.hydrogen.getRelaysTransfers], queryOpts)) as GetRelaysResponse
 
-          const withdrawTransfer = result.data.find((transfer) => transfer.destination_blockchain === tx.dstChain && transfer.source_blockchain === "carbon") as any
+          const withdrawTransfer = result.data.find((transfer) => transfer.destination_blockchain === tx.dstChain && transfer.source_blockchain === "carbon") as RelaysResponse
 
           logger("bridge saga", "withdrawal results", withdrawTransfer)
 
           // update destination chain tx hash if success
-          if (withdrawTransfer?.status === CrossChainFlowStatus.Completed && withdrawTransfer['destination_tx_hash']) {
-            tx.destinationTxHash = withdrawTransfer['destination_tx_hash']
+          if (withdrawTransfer?.status === CrossChainFlowStatus.Completed && withdrawTransfer.destination_tx_hash) {
+            tx.destinationTxHash = withdrawTransfer.destination_tx_hash
             updatedTxs[tx.sourceTxHash!] = tx
 
             logger("bridge saga", "confirmed tx withdraw", tx.withdrawTxHash)
