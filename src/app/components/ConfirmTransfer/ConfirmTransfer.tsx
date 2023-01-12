@@ -506,17 +506,6 @@ const ConfirmTransfer = (props: any) => {
     return bridge_tx.id;
   }
 
-  const downloadTransferKey = (key: string) => {
-    const element = document.createElement("a");
-    const file = new Blob([`${TRANSFER_KEY_MESSAGE}\n${key}`], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    const swthAddress = AddressUtils.SWTHAddress.generateAddress(key);
-    element.download = `private-recovery-key-${swthAddress}.txt`;
-    document.body.appendChild(element); // Required for this to work in FireFox
-    element.click();
-    toaster("Recovery key downloaded", { overridePersist: false });
-  }
-
   const onConfirm = async () => {
     if (!localStorage) {
       console.error("localStorage not available");
@@ -552,7 +541,6 @@ const ConfirmTransfer = (props: any) => {
 
     runConfirmTransfer(async () => {
       let sourceTxHash;
-      downloadTransferKey(swthAddrMnemonic);
       if (fromBlockchain === Blockchain.Zilliqa) {
         // init lock on zil side
         sourceTxHash = await bridgeAssetFromZil(asset, swthAddrMnemonic);

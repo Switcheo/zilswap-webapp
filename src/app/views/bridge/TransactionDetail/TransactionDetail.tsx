@@ -468,7 +468,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                 losing your funds.
               </Text>
 
-              {!currentBridgeTx.withdrawTxHash && (
+              {(!currentBridgeTx.withdrawTxHash && network == Network.MainNet) && (
                 <Button
                   onClick={handleShowMnemonicDialog}
                   className={classes.instructionsButton}
