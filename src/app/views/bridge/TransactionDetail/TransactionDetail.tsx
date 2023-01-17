@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo, useState } from 'react';
+import React, { Fragment, useMemo, useState } from 'react'
 import {
   Accordion,
   AccordionDetails,
@@ -14,17 +14,17 @@ import {
   Stepper,
   makeStyles,
   withStyles,
-} from '@material-ui/core';
-import { ArrowBack } from '@material-ui/icons';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded';
-import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded';
-import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded';
-import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded';
-import WarningRoundedIcon from '@material-ui/icons/WarningRounded';
-import cls from 'classnames';
-import { useDispatch } from 'react-redux';
-import { Blockchain } from 'carbon-js-sdk';
-import { Network } from 'zilswap-sdk/lib/constants';
+} from '@material-ui/core'
+import { ArrowBack } from '@material-ui/icons'
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded'
+import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded'
+import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded'
+import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded'
+import WarningRoundedIcon from '@material-ui/icons/WarningRounded'
+import cls from 'classnames'
+import { useDispatch } from 'react-redux'
+import { Blockchain } from 'carbon-js-sdk'
+import { Network } from 'zilswap-sdk/lib/constants'
 import {
   CurrencyLogo,
   FancyButton,
@@ -32,12 +32,12 @@ import {
   KeyValueDisplay,
   MnemonicDialog,
   Text,
-} from 'app/components';
-import { ReactComponent as StraightLine } from 'app/components/ConfirmTransfer/straight-line.svg';
-import { ReactComponent as NewLinkIcon } from 'app/components/new-link.svg';
-import { actions } from 'app/store';
-import { BridgeTx } from 'app/store/bridge/types';
-import { AppTheme } from 'app/theme/types';
+} from 'app/components'
+import { ReactComponent as StraightLine } from 'app/components/ConfirmTransfer/straight-line.svg'
+import { ReactComponent as NewLinkIcon } from 'app/components/new-link.svg'
+import { actions } from 'app/store'
+import { BridgeTx } from 'app/store/bridge/types'
+import { AppTheme } from 'app/theme/types'
 import {
   hexToRGBA,
   trimValue,
@@ -45,14 +45,15 @@ import {
   truncateAddress,
   useBridgeableTokenFinder,
   useNetwork,
-} from 'app/utils';
+} from 'app/utils'
 import {
   BRIDGE_TX_DEPOSIT_CONFIRM_ETH,
   BRIDGE_TX_DEPOSIT_CONFIRM_ZIL,
-} from 'app/utils/constants';
-import { ReactComponent as EthereumLogo } from 'app/views/main/Bridge/ethereum-logo.svg';
-import { ReactComponent as WavyLine } from 'app/views/main/Bridge/wavy-line.svg';
-import { ReactComponent as ZilliqaLogo } from 'app/views/main/Bridge/zilliqa-logo.svg';
+} from 'app/utils/constants'
+import { ReactComponent as ArbitrumLogo } from 'app/views/main/Bridge/arbitrum-one.svg'
+import { ReactComponent as EthereumLogo } from 'app/views/main/Bridge/ethereum-logo.svg'
+import { ReactComponent as WavyLine } from 'app/views/main/Bridge/wavy-line.svg'
+import { ReactComponent as ZilliqaLogo } from 'app/views/main/Bridge/zilliqa-logo.svg'
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
@@ -291,7 +292,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: 'rgba(255,255,255,.5)',
     marginRight: theme.spacing(1),
   },
-}));
+}))
 
 const ColorlibConnector = withStyles({
   alternativeLabel: {
@@ -316,128 +317,146 @@ const ColorlibConnector = withStyles({
     backgroundColor: '#0D1B24',
     zIndex: 0,
   },
-})(StepConnector);
+})(StepConnector)
 
 const CHAIN_NAMES = {
   [Blockchain.Zilliqa]: 'Zilliqa',
   [Blockchain.Ethereum]: 'Ethereum',
   [Blockchain.Neo]: 'Neo',
   [Blockchain.BinanceSmartChain]: 'Binance Smart Chain',
-};
+  [Blockchain.Arbitrum]: 'Arbitrum One',
+}
 
-const STEPS = ['Deposit', 'Confirm', 'Withdraw'];
+const STEPS = ['Deposit', 'Confirm', 'Withdraw']
 
 interface TransactionDetailProps {
-  currentTx: BridgeTx;
-  onBack?: () => void;
-  approvalHash: string;
-  tokenApproval?: boolean;
-  isHistory?: boolean;
-  onNewTransfer?: () => void;
+  currentTx: BridgeTx
+  onBack?: () => void
+  approvalHash: string
+  tokenApproval?: boolean
+  isHistory?: boolean
+  onNewTransfer?: () => void
 }
 
 const TransactionDetail = (props: TransactionDetailProps) => {
-  const classes = useStyles();
-  const dispatch = useDispatch();
-  const network = useNetwork();
-  const bridgeableTokenFinder = useBridgeableTokenFinder();
+  const classes = useStyles()
+  const dispatch = useDispatch()
+  const network = useNetwork()
+  const bridgeableTokenFinder = useBridgeableTokenFinder()
   const { currentTx, onBack, tokenApproval, approvalHash, isHistory, onNewTransfer } =
-    props;
+    props
 
-  const [showTransactions, setShowTransactions] = useState<boolean>(true);
+  const [showTransactions, setShowTransactions] = useState<boolean>(true)
 
-  const fromToken = bridgeableTokenFinder(currentTx.srcToken, currentTx.srcChain);
+  const fromToken = bridgeableTokenFinder(currentTx.srcToken, currentTx.srcChain)
 
-  let currentBridgeTx = currentTx;
+  let currentBridgeTx = currentTx
 
-  const { dstChain, srcChain } = currentBridgeTx;
+  const { dstChain, srcChain } = currentBridgeTx
   const requiredDepositConfirms =
     srcChain === Blockchain.Zilliqa
       ? BRIDGE_TX_DEPOSIT_CONFIRM_ZIL
-      : BRIDGE_TX_DEPOSIT_CONFIRM_ETH;
+      : BRIDGE_TX_DEPOSIT_CONFIRM_ETH
   const depositConfirmations =
     currentBridgeTx.depositConfirmations &&
     (currentBridgeTx.depositConfirmations > requiredDepositConfirms
       ? `${requiredDepositConfirms}+`
-      : currentBridgeTx.depositConfirmations.toString());
+      : currentBridgeTx.depositConfirmations.toString())
 
   const { fromChainName, toChainName } = useMemo(() => {
     return {
       fromChainName: CHAIN_NAMES[currentBridgeTx!.srcChain],
       toChainName: CHAIN_NAMES[currentBridgeTx!.dstChain],
-    };
-  }, [currentBridgeTx]);
+    }
+  }, [currentBridgeTx])
 
   const getCarbonExplorerLink = (hash: string) => {
     if (network === Network.MainNet) {
-      return `https://scan.carbon.network/transaction/${hash}`;
+      return `https://scan.carbon.network/transaction/${hash}`
     } else {
-      return `https://scan.carbon.network/transaction/${hash}?net=dev`;
+      return `https://scan.carbon.network/transaction/${hash}?net=dev`
     }
-  };
+  }
   const getExplorerLink = (hash: string, blockchain: Blockchain) => {
     if (network === Network.MainNet) {
       switch (blockchain) {
         case Blockchain.Ethereum:
-          return `https://etherscan.io/search?q=${hash}`;
+          return `https://etherscan.io/search?q=${hash}`
+        case Blockchain.Arbitrum:
+          return `https://arbiscan.io/tx/${hash}`
         default:
-          return `https://viewblock.io/zilliqa/tx/${hash}`;
+          return `https://viewblock.io/zilliqa/tx/${hash}`
       }
     } else {
       switch (blockchain) {
         case Blockchain.Ethereum:
-          return `https://goerli.etherscan.io/tx/${hash}`;
+          return `https://goerli.etherscan.io/tx/${hash}`
         default:
-          return `https://viewblock.io/zilliqa/tx/${hash}?network=testnet`;
+          return `https://viewblock.io/zilliqa/tx/${hash}?network=testnet`
       }
     }
-  };
+  }
 
   const getActiveStep = () => {
     if (currentBridgeTx?.destinationTxHash) {
-      return 3;
+      return 3
     }
 
     if (currentBridgeTx?.withdrawTxHash) {
-      return 2;
+      return 2
     }
 
     if (currentBridgeTx?.sourceTxHash) {
-      return 1;
+      return 1
     }
 
-    return 0;
-  };
+    return 0
+  }
 
   const formatAddress = (address: string | undefined | null, chain: Blockchain) => {
-    if (!address) return '';
+    if (!address) return ''
     switch (chain) {
       case Blockchain.Zilliqa:
-        return truncateAddress(address);
+        return truncateAddress(address)
       default:
-        return truncate(address, 5, 4);
+        return truncate(address, 5, 4)
     }
-  };
+  }
 
   const getEstimatedTime = () => {
     if (currentBridgeTx?.withdrawTxHash) {
-      return 10;
+      return 10
     }
 
     if (currentBridgeTx?.depositTxConfirmedAt) {
-      return 15;
+      return 15
     }
 
     if (currentBridgeTx?.sourceTxHash) {
-      return 25;
+      return 25
     }
 
-    return 30;
-  };
+    return 30
+  }
 
   const handleShowMnemonicDialog = () => {
-    dispatch(actions.Layout.toggleShowMnemonic('open'));
-  };
+    dispatch(actions.Layout.toggleShowMnemonic('open'))
+  }
+
+  const explorerSite: string = useMemo(() => {
+    switch (currentBridgeTx?.srcChain) {
+      case Blockchain.Ethereum:
+        return "Etherscan"
+      case Blockchain.Arbitrum:
+        return "Arbiscan"
+      case Blockchain.Zilliqa:
+        return "Viewblock"
+      default:
+        return ""
+    }
+  }, [currentBridgeTx?.srcChain])
+
+  console.log("source bridge", currentBridgeTx?.srcChain)
 
   return (
     <Box display="flex" flexDirection="column" className={classes.container}>
@@ -468,7 +487,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                 losing your funds.
               </Text>
 
-              {(!currentBridgeTx.withdrawTxHash && network == Network.MainNet) && (
+              {(!currentBridgeTx.withdrawTxHash && network === Network.MainNet) && (
                 <Button
                   onClick={handleShowMnemonicDialog}
                   className={classes.instructionsButton}
@@ -531,10 +550,13 @@ const TransactionDetail = (props: TransactionDetailProps) => {
               mt={1.5}
               mb={1.5}
             >
-              {currentBridgeTx?.srcChain === Blockchain.Ethereum ? (
-                <EthereumLogo />
-              ) : (
+              {currentBridgeTx?.srcChain === Blockchain.Zilliqa ? (
                 <ZilliqaLogo />
+              ) : (
+                currentBridgeTx?.srcChain === Blockchain.Ethereum ?
+                <EthereumLogo />
+                :
+                <ArbitrumLogo />
               )}
             </Box>
             <Text variant="h4" className={classes.chainName}>
@@ -567,7 +589,10 @@ const TransactionDetail = (props: TransactionDetailProps) => {
               {currentBridgeTx?.dstChain === Blockchain.Zilliqa ? (
                 <ZilliqaLogo />
               ) : (
+                currentBridgeTx?.dstChain === Blockchain.Ethereum ?
                 <EthereumLogo />
+                :
+                <ArbitrumLogo />
               )}
             </Box>
             <Text variant="h4" className={classes.chainName}>
@@ -670,6 +695,9 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                           href={getExplorerLink(approvalHash, currentBridgeTx?.srcChain)}
                         >
                           View on{' '}
+                          {
+                            explorerSite
+                          }
                           {currentBridgeTx?.srcChain === Blockchain.Ethereum
                             ? 'Etherscan'
                             : 'ViewBlock'}{' '}
@@ -869,7 +897,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
         isHistory={isHistory}
       />
     </Box>
-  );
-};
+  )
+}
 
-export default TransactionDetail;
+export default TransactionDetail

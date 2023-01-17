@@ -9,6 +9,7 @@ export const BridgeParamConstants = {
     ZIL_GAS_PRICE: 2000000000,
     ZIL_GAS_LIMIT: 25000,
     ETH_GAS_LIMIT: 250000,
+    ARBITRUM_GAS_LIMIT: 2000000,
     DEPOSIT_DENOM: "usdt.z",      //zil1 , zil9
     WITHDRAW_DENOM: "usdt.z",   //zil.e, zil9.e
     TRANSFER_FLOW: ChainTransferFlow.ZIL_TO_ETH,

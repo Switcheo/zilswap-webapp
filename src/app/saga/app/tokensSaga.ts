@@ -53,9 +53,20 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
         balance,
       }
     })
+
+    const arbitrumTokenAddresses = Object.values(tokens).filter(t => t.blockchain === Blockchain.Arbitrum && t.address !== ETH_ADDRESS).map(t => t.address)
+    const arbitrumBalances = await ETHBalances.getTokenBalances({ network, tokenAddresses: arbitrumTokenAddresses, walletAddress: address, chain: Blockchain.Arbitrum })
+    console.log("arbitrum balance", arbitrumBalances)
+    Object.entries(arbitrumBalances).forEach(([address, balance]) => {
+      updates[address] = {
+        ...tokens[address],
+        initialized: true,
+        balance,
+      }
+    })
   } catch (error) {
     console.error("failed to read eth balances")
-    console.error(error);
+    console.error("arbitrum error", error);
     return updates;
   }
 

@@ -33,6 +33,10 @@ const NetworkSwitchDialog = (props: any) => {
         if (Number(ethWallet?.chainId) === 5) return false;
         // set to mainnet even if currently set to some random net
         return true;
+      } else if (srcChain === Blockchain.Arbitrum) {
+        if (Number(ethWallet?.chainId) === 5) return false;
+        // set to mainnet even if currently set to some random net
+        return true;
       } else if (srcChain === Blockchain.Zilliqa) {
         return network === Network.MainNet
       }
@@ -43,6 +47,7 @@ const NetworkSwitchDialog = (props: any) => {
         switch (chainId) {
           case 1: return 'Ethereum Network'
           case 5: return 'Goerli Test Network'
+          case 42161: return 'Arbitrum One Network'
           default: return 'Unknown Network'
         }
       }
@@ -70,9 +75,12 @@ const NetworkSwitchDialog = (props: any) => {
 
       const ethChainID = Number(ethWallet?.chainId)
       if (isMainNet) {
-        if (ethChainID !== 1) {
+        if (ethChainID !== 1 && srcChain === Blockchain.Ethereum) {
           dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
-          return [getEthChainName(1), '0x1', getEthWalletName(), getEthChainName(ethChainID)]
+          return [getEthChainName(1), `0x${(1).toString(16)}`, getEthWalletName(), getEthChainName(ethChainID)]
+        } else if (ethChainID !== 42161 && srcChain === Blockchain.Arbitrum) {
+          dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
+          return [getEthChainName(42161), `0x${(42161).toString(16)}`, getEthWalletName(), getEthChainName(ethChainID)]
         } else if (zilWallet?.network !== Network.MainNet) {
           dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
           return ['Zilliqa MainNet', null, getZilWalletName(), 'Zilliqa TestNet']
@@ -87,7 +95,7 @@ const NetworkSwitchDialog = (props: any) => {
         }
       }
       return [null, null, null, null]
-    }, [dispatch, ethWallet, zilWallet, isMainNet])
+    }, [dispatch, ethWallet, zilWallet, isMainNet, srcChain])
 
     const onCloseDialog = () => {
         dispatch(actions.Layout.toggleShowNetworkSwitch("close"));

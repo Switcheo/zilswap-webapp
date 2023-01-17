@@ -1,29 +1,35 @@
-import { Blockchain, CarbonSDK } from 'carbon-js-sdk'
+import { Blockchain, CarbonSDK, ConnectedCarbonSDK } from 'carbon-js-sdk'
 import { SimpleMap } from 'carbon-js-sdk/lib/util/type'
 
-export const getTokenDenoms = (network: CarbonSDK.Network, chain: Blockchain) => {
+export const getTokenDenomList = (network: CarbonSDK.Network) => {
     const mainTokenDenoms: SimpleMap<string> = {
-        [Blockchain.Ethereum]: "swthe.1.2.683ddd",
-        [Blockchain.BinanceSmartChain]: "swth.1.6.5bc06b",
-        [Blockchain.Carbon]: "swth",
-        [Blockchain.Zilliqa]: "swth.1.18.4ef38b",
-        [Blockchain.Neo]: "swthn.1.4.2624e1",
-        [Blockchain.Neo3]: "swth.1.14.fffdbf",
+      [Blockchain.Ethereum]: "swthe.1.2.683ddd",
+      [Blockchain.BinanceSmartChain]: "swth.1.6.5bc06b",
+      [Blockchain.Carbon]: "swth",
+      [Blockchain.Zilliqa]: "swth.1.18.4ef38b",
+      [Blockchain.Neo]: "swthn.1.4.2624e1",
+      [Blockchain.Neo3]: "swth.1.14.fffdbf",
+      [Blockchain.Arbitrum]: "swth.1.19.6f83d0",
     }
     const devTokenDenoms: SimpleMap<string> = {
-        [Blockchain.Ethereum]: "swth1.1.350.9d90c3",
-        [Blockchain.BinanceSmartChain]: "swth2.1.350.6da2b8",
-        [Blockchain.Carbon]: "swth.1.111.7742c9",
-        [Blockchain.Zilliqa]: "zil1.1.111.f0354c",
-        [Blockchain.Neo]: "",
-        [Blockchain.Neo3]: "",
+      [Blockchain.Ethereum]: "swth1.1.350.9d90c3",
+      [Blockchain.BinanceSmartChain]: "swth2.1.350.6da2b8",
+      [Blockchain.Carbon]: "swth.1.111.7742c9",
+      [Blockchain.Zilliqa]: "zil1.1.111.f0354c",
+      [Blockchain.Neo]: "",
+      [Blockchain.Neo3]: "",
+      [Blockchain.Arbitrum]: "",
     }
     if (network === CarbonSDK.Network.MainNet) {
-        return mainTokenDenoms[chain]
+      return mainTokenDenoms
     } else {
-        return devTokenDenoms[chain]
+      return devTokenDenoms
     }
-}
+  }
+  
+  export const getTokenDenoms = (network: CarbonSDK.Network, chain: Blockchain) => {
+    return getTokenDenomList(network)[chain]
+  }
 
 export const getRecoveryAddress = (network: CarbonSDK.Network) => {
     const mainDevRecoveryAddress = 'swth1cuekk8en9zgnuv0eh4hk7xtr2kghn69x0x6u7r'
@@ -34,3 +40,15 @@ export const getRecoveryAddress = (network: CarbonSDK.Network) => {
         return localTestRecoveryAddress
     }
 }
+
+export const getETHClient = (sdk: ConnectedCarbonSDK | CarbonSDK, chain: Blockchain, network: CarbonSDK.Network) => {
+    if (network === CarbonSDK.Network.DevNet) {
+      return sdk.eth; // using SWC5 on rinkeby to simulate BSC for bridge feature
+    } else if (chain === Blockchain.BinanceSmartChain) {
+      return sdk.bsc;
+    } else if (chain === Blockchain.Arbitrum) {
+      return sdk.arbitrum;
+    } else {
+      return sdk.eth
+    }
+  }

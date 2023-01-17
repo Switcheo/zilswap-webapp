@@ -230,6 +230,8 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
     compression: poolToken?.decimals,
   };
 
+  console.log("token is", token)
+
   useEffect(() => {
     if (!walletState.wallet || !token) return setTokenBalance(null);
 
@@ -377,9 +379,9 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
                   <Box display="flex" alignItems="center">
                     {token && (
                       <CurrencyLogo
-                        currency={token.registered && token.symbol}
+                        currency={token?.registered && token?.symbol}
                         blockchain={token?.blockchain}
-                        address={token.address}
+                        address={token?.address}
                         className={classes.currencyLogo}
                       />
                     )}

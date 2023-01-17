@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js";
 import { Blockchain, Models } from "carbon-js-sdk";
+import { Token } from 'carbon-js-sdk/lib/codec'
 import dayjs from "dayjs";
 import { Network } from "zilswap-sdk/lib/constants";
 
@@ -10,18 +11,10 @@ export type BridgeableToken = {
   decimals: number; 
   denom: string;    // carbon denom
   tokenId: string;  // tradehub denom
-  toBlockchain: Blockchain;
-  toTokenAddress: string;
-  toDecimals: number;
-  toDenom: string;  // carbon denom
-  toTokenId: string // tradehub denom
-  balDenom: string;
+  chains: Record<string, string>
 }
 
-export type BridgeableTokenMapping = {
-  [Blockchain.Ethereum]: ReadonlyArray<BridgeableToken>;
-  [Blockchain.Zilliqa]: ReadonlyArray<BridgeableToken>;
-}
+export type BridgeableTokenMapping = ReadonlyArray<BridgeableToken>;
 
 export interface BridgeState {
   formState: BridgeFormState;
@@ -32,7 +25,7 @@ export interface BridgeState {
   tokens: BridgeableTokenMapping;
 }
 
-export type BridgeableChains = Blockchain.Ethereum | Blockchain.Zilliqa;
+export type BridgeableChains = Blockchain.Ethereum | Blockchain.Zilliqa | Blockchain.Arbitrum;
 export interface WithdrawFee {
   amount: BigNumber;
   value: BigNumber;

@@ -14,7 +14,7 @@ import { useHistory } from "react-router";
 import { Blockchain, AddressUtils, Models, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
 import { Network } from "zilswap-sdk/lib/constants";
 import { ZilBridgeParams } from 'carbon-js-sdk/lib/clients/ZILClient'
-import { BridgeParams } from 'carbon-js-sdk/lib/clients/ETHClient'
+import ETHClient, { BridgeParams } from 'carbon-js-sdk/lib/clients/ETHClient'
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet } from "core/wallet";
 import { logger } from "core/utilities";
@@ -27,12 +27,11 @@ import { RootState } from "app/store/types";
 import { BridgeFormState, BridgeState, BridgeTx, BridgeableToken } from "app/store/bridge/types";
 import { actions } from "app/store";
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
-import { getRecoveryAddress } from 'app/utils/bridge'
+import { getETHClient, getRecoveryAddress } from 'app/utils/bridge'
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
 
-const TRANSFER_KEY_MESSAGE = "In the event you are not able to complete Stage 2 of your transfer, you may retrieve and resume your transfer by entering the following unique transfer key phrase on your Transfer History page. Do not ever reveal your transfer key phrase to anyone. ZilSwap will not be held accountable and cannot help you retrieve those funds once they are lost.\n\n";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -263,6 +262,10 @@ const ConfirmTransfer = (props: any) => {
 
   const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx]);
 
+  const destToken = useMemo(() => {
+    return Object.values(bridgeState.tokens).find(token => token.denom === bridgeToken?.chains[toBlockchain])
+  }, [bridgeState.tokens, bridgeToken, toBlockchain])
+
   useEffect(() => {
     if (!swthAddrMnemonic)
       setSwthAddrMnemonic(AddressUtils.SWTHAddress.newMnemonic());
@@ -282,12 +285,9 @@ const ConfirmTransfer = (props: any) => {
     // eslint-disable-next-line
   }, [])
 
-  const { fromToken } = useMemo(() => {
-    if (!bridgeToken) return {};
-    return {
-      fromToken: tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain),
-      toToken: tokenFinder(bridgeToken.toTokenAddress, bridgeToken.toBlockchain),
-    }
+  const fromToken = useMemo(() => {
+    if (!bridgeToken) return;
+    return tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain)
   }, [bridgeToken, tokenFinder]);
 
   const { fromChainName, toChainName } = useMemo(() => {
@@ -336,6 +336,8 @@ const ConfirmTransfer = (props: any) => {
       return
     }
 
+    const ethClient: ETHClient= getETHClient(sdk, fromBlockchain, netZilToCarbon(network))
+
     const lockProxy = asset.bridgeAddress;
 
     const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider);
@@ -343,7 +345,7 @@ const ConfirmTransfer = (props: any) => {
 
     const amount = bridgeFormState.transferAmount;
     const ethAddress = await signer.getAddress();
-    const gasPrice = await sdk.eth.getProvider().getGasPrice();
+    const gasPrice = await ethClient.getProvider().getGasPrice();
     const gasPriceGwei = new BigNumber(ethers.utils.formatUnits(gasPrice, "gwei"));
     const depositAmt = amount.shiftedBy(asset.decimals.toInt());
 
@@ -351,16 +353,16 @@ const ConfirmTransfer = (props: any) => {
     const approvalRequired = await isApprovalRequired(asset, depositAmt);
     if (approvalRequired) {
 
-      const allowance = await sdk.eth.checkAllowanceERC20(asset, ethAddress, `0x${lockProxy}`);
+      const allowance = await ethClient.checkAllowanceERC20(asset, ethAddress, `0x${lockProxy}`);
       if (allowance.lt(depositAmt)) {
         toaster(`Approval needed (Ethereum)`, { overridePersist: false });
-        const approve_tx = await sdk.eth.approveERC20({
+        const approve_tx = await ethClient.approveERC20({
           token: asset,
           ethAddress,
           gasLimit: new BigNumber(100000),
           gasPriceGwei: gasPriceGwei,
           signer: signer,
-          spenderAddress: sdk.eth.getBridgeEntranceAddr()
+          spenderAddress: ethClient.getBridgeEntranceAddr()
         });
 
         logger("approve tx", approve_tx.hash);
@@ -377,7 +379,7 @@ const ConfirmTransfer = (props: any) => {
 
     toaster(`Bridging asset (Ethereum)`, { overridePersist: false });
 
-    const toToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken?.toDenom)
+    const toToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken?.chains[toBlockchain])
 
 
     if (!toToken) {
@@ -394,11 +396,11 @@ const ConfirmTransfer = (props: any) => {
       toAddress: bridgeFormState.destAddress,
       feeAmount: withdrawFee.amount.shiftedBy(toToken.decimals.toNumber()), //TODO: Check whether dehumanizing value is correct
       gasPriceGwei,
-      gasLimit: new BigNumber(`${BridgeParamConstants.ETH_GAS_LIMIT}`),
+      gasLimit: new BigNumber(`${fromBlockchain === Blockchain.Ethereum ? BridgeParamConstants.ETH_GAS_LIMIT : BridgeParamConstants.ARBITRUM_GAS_LIMIT}`),
       signer,
     }
 
-    const bridge_tx = await sdk.eth.bridgeTokens(bridgeDepositParams)
+    const bridge_tx = await ethClient.bridgeTokens(bridgeDepositParams)
     //TOCHECK: remove is unnecessary
     if (!bridge_tx) {
       return
@@ -472,7 +474,7 @@ const ConfirmTransfer = (props: any) => {
       }
     }
 
-    const toToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken?.toDenom)
+    const toToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken?.chains[toBlockchain])
 
     if (!toToken) {
       toaster("Selected token is not available on Ethereum");
@@ -564,8 +566,8 @@ const ConfirmTransfer = (props: any) => {
         srcChain: fromBlockchain,
         network: network,
         srcTokenId: bridgeToken.tokenId,
-        dstToken: bridgeToken.toDenom,
-        dstTokenId: bridgeToken.toTokenId,
+        dstToken: destToken?.denom ?? "",
+        dstTokenId: destToken?.tokenId ?? "",
         srcToken: bridgeToken.denom,
         sourceTxHash: sourceTxHash,
         inputAmount: bridgeFormState.transferAmount,

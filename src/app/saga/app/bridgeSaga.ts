@@ -8,12 +8,14 @@ import { Blockchain, AddressUtils, CarbonSDK } from "carbon-js-sdk"
 import { GetDetailedTransfersResponse, GetTransfersRequest, CrossChainFlowStatus, GetRelaysRequest, RelaysResponse, GetRelaysResponse } from "carbon-js-sdk/lib/hydrogen"
 import { APIS, Network } from "zilswap-sdk/lib/constants"
 import { GetFeeQuoteResponse } from "carbon-js-sdk/lib/hydrogen/feeQuote"
+import { ETHClient } from 'carbon-js-sdk/lib/clients'
 import { logger } from "core/utilities"
 import { ZilswapConnector } from "core/zilswap"
 import { BRIDGE_TX_DEPOSIT_CONFIRM_ETH, BRIDGE_TX_DEPOSIT_CONFIRM_ZIL, PollIntervals } from "app/utils/constants"
 import { SimpleMap, bnOrZero, netZilToCarbon } from "app/utils"
 import { BridgeTx, BridgeableToken, BridgeableTokenMapping, RootState } from "app/store/types"
 import { actions } from "app/store"
+import { getETHClient } from 'app/utils/bridge'
 import { getBlockchain, getBridge } from '../selectors'
 
 export enum Status {
@@ -128,7 +130,8 @@ function* watchDepositConfirmation() {
               try {
                 const carbonNetwork = netZilToCarbon(tx.network)
                 const sdk: CarbonSDK = yield getCarbonSDK(carbonNetwork)
-                const provider = sdk.eth.getProvider()
+                const ethClient: ETHClient = getETHClient(sdk, tx.srcChain, carbonNetwork)
+                const provider = ethClient.getProvider()
                 const transaction = (yield call([provider, provider.getTransactionReceipt], tx.sourceTxHash!)) as ethers.providers.TransactionReceipt
                 logger("bridge saga", tx.sourceTxHash, transaction?.confirmations)
                 if (!transaction?.confirmations) continue
@@ -147,12 +150,9 @@ function* watchDepositConfirmation() {
 
           // trigger withdraw tx if deposit confirmed
           if (tx.depositTxConfirmedAt) {
-            const bridgeTokens = tx.srcChain === Blockchain.Zilliqa ? bridgeableTokensMap.zil : bridgeableTokensMap.eth
-            const bridgeToken = bridgeTokens.find(t => t.denom === tx.srcToken)
-            const balanceDenom = bridgeToken?.balDenom ?? ""
+            const bridgeTokens = bridgeableTokensMap.filter(token => token.blockchain === tx.srcChain)
 
             logger("bridge saga", "bridgeTokens", bridgeTokens)
-            logger("bridge saga", "balance denom", swthAddress, balanceDenom)
 
             const queryOpts: GetRelaysRequest = {
               source_tx_hash: tx.sourceTxHash
@@ -300,8 +300,8 @@ function* watchActiveTxConfirmations() {
             case Blockchain.Ethereum: {
               const carbonNetwork = netZilToCarbon(network)
               const sdk: CarbonSDK = yield getCarbonSDK(carbonNetwork)
-
-              const sourceTx: EthTransactionResponse = yield sdk.eth.getProvider().getTransaction(bridgeTx.sourceTxHash)
+              const ethClient: ETHClient = getETHClient(sdk, bridgeTx.srcChain, carbonNetwork)
+              const sourceTx: EthTransactionResponse = yield ethClient.getProvider().getTransaction(bridgeTx.sourceTxHash)
               if (sourceTx.confirmations) {
                 yield put(actions.Bridge.addBridgeTx([{
                   sourceTxHash: bridgeTx.sourceTxHash,
@@ -338,19 +338,20 @@ function* queryTokenFees() {
         yield put(actions.Bridge.updateFee())
       }
 
-      logger("bridge saga", lastCheckedToken?.toDenom, bridgeToken?.toDenom)
+      logger("bridge saga", lastCheckedToken?.chains[formState.toBlockchain], bridgeToken?.chains[formState.toBlockchain])
       if ((!lastCheckedToken || lastCheckedToken !== bridgeToken) && bridgeToken) {
-        logger("bridge saga", "query", bridgeToken?.toDenom)
+        logger("bridge saga", "query", bridgeToken?.chains[formState.toBlockchain])
         const sdk: CarbonSDK = yield getCarbonSDK(network)
         yield call([sdk, sdk.initialize])
-        const carbonToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken.toDenom)
+        const carbonToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken.chains[formState.toBlockchain])
 
         if (!carbonToken) {
-          throw new Error(`token not found ${bridgeToken.toDenom}`)
+          throw new Error(`token not found ${bridgeToken.chains[formState.toBlockchain]}`)
         }
 
         const feeResponse = (yield call([sdk.hydrogen, sdk.hydrogen.getFeeQuote], { token_denom: carbonToken.denom })) as GetFeeQuoteResponse
         const withdrawFees = new BigNumber(feeResponse.withdrawal_fee)
+        console.log("withdraw fees", withdrawFees, feeResponse)
         const price = bnOrZero(yield sdk.token.getUSDValue(carbonToken.denom))
 
         logger("bridge saga", "withdraw fees", carbonToken.denom, withdrawFees?.toString(10), price.toString(10))

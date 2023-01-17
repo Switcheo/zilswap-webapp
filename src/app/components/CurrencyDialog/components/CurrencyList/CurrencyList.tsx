@@ -100,10 +100,11 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
   const getLogoAddress = (token: TokenInfo) => {
     if (token.blockchain === Blockchain.Ethereum) {
       const tokenHash = token.address.replace(/^0x/i, "");
-      const bridgeToken = bridgeState.tokens.eth.find((bridgeToken) => bridgeToken.tokenAddress === tokenHash)
+      const bridgeToken = bridgeState.tokens.find((bridgeToken) => bridgeToken.tokenAddress === tokenHash)
+      const destToken = bridgeState.tokens.find((token) => token.denom === bridgeToken?.chains[bridgeState.formState.toBlockchain])
 
-      if (bridgeToken) {
-        return toBech32Address(bridgeToken.toTokenAddress);
+      if (bridgeToken && destToken) {
+        return toBech32Address(destToken.tokenAddress);
       }
     }
 
