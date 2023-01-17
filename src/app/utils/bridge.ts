@@ -1,15 +1,15 @@
-import { Blockchain, CarbonSDK } from 'carbon-js-sdk'
-import { Token } from 'carbon-js-sdk/lib/codec'
+import { Blockchain, CarbonSDK, ConnectedCarbonSDK } from 'carbon-js-sdk'
 import { SimpleMap } from 'carbon-js-sdk/lib/util/type'
 
 export const getTokenDenomList = (network: CarbonSDK.Network) => {
     const mainTokenDenoms: SimpleMap<string> = {
-        [Blockchain.Ethereum]: "swthe.1.2.683ddd",
-        [Blockchain.BinanceSmartChain]: "swth.1.6.5bc06b",
-        [Blockchain.Carbon]: "swth",
-        [Blockchain.Zilliqa]: "swth.1.18.4ef38b",
-        [Blockchain.Neo]: "swthn.1.4.2624e1",
-        [Blockchain.Neo3]: "swth.1.14.fffdbf",
+      [Blockchain.Ethereum]: "swthe.1.2.683ddd",
+      [Blockchain.BinanceSmartChain]: "swth.1.6.5bc06b",
+      [Blockchain.Carbon]: "swth",
+      [Blockchain.Zilliqa]: "swth.1.18.4ef38b",
+      [Blockchain.Neo]: "swthn.1.4.2624e1",
+      [Blockchain.Neo3]: "swth.1.14.fffdbf",
+      [Blockchain.Arbitrum]: "swth.1.19.6f83d0",
     }
     // const devTokenDenoms: SimpleMap<string> = {
     //     [Blockchain.Ethereum]: "swth1.1.350.9d90c3",
@@ -59,3 +59,15 @@ export const getRecoveryAddress = (network: CarbonSDK.Network) => {
         return localTestRecoveryAddress
     }
 }
+
+export const getETHClient = (sdk: ConnectedCarbonSDK | CarbonSDK, chain: Blockchain, network: CarbonSDK.Network) => {
+    if (network === CarbonSDK.Network.DevNet) {
+      return sdk.eth; // using SWC5 on rinkeby to simulate BSC for bridge feature
+    } else if (chain === Blockchain.BinanceSmartChain) {
+      return sdk.bsc;
+    } else if (chain === Blockchain.Arbitrum) {
+      return sdk.arbitrum;
+    } else {
+      return sdk.eth
+    }
+  }

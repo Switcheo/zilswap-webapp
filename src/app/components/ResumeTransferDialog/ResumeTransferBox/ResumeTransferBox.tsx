@@ -247,15 +247,18 @@ const ResumeTransferBox = (props: any) => {
         // tx found and status success - build bridgeTx
         if (depositTransfer && dstChain) {
             const srcChain = depositTransfer.source_blockchain as Blockchain.Zilliqa | Blockchain.Ethereum;
-            const bridgeToken = bridgeableTokens[srcChain].find(token => token.denom === depositTransfer.to_asset || token.tokenId === depositTransfer.to_asset);
+            const bridgeToken = bridgeableTokens.find(token => (token.denom === depositTransfer.to_asset || token.tokenId === depositTransfer.to_asset) && token.blockchain === srcChain);
+            const destToken = bridgeableTokens.find(token => token.denom === bridgeToken?.chains[bridgeState.formState.toBlockchain]);
+
+            if (!destToken) return
 
             if (!bridgeToken || !sdk) return;
             runResumeTransfer(async () => {
-                const fee = await sdk.hydrogen.getFeeQuote({ token_denom: bridgeToken.toDenom });
+                const fee = await sdk.hydrogen.getFeeQuote({ token_denom: destToken.denom });
                 const withdrawFee = bnOrZero(fee.withdrawal_fee);
                 if (!withdrawFee?.gt(0))
                     throw new Error("Could not retrieve withdraw fee");
-                const feeAmount = withdrawFee.shiftedBy(-bridgeToken.toDecimals);
+                const feeAmount = withdrawFee.shiftedBy(-destToken.decimals);
 
                 if (new BigNumber(depositTransfer.amount).lt(feeAmount))
                     throw new Error("Transferred amount insufficient to pay for withdraw fees.");
@@ -267,8 +270,8 @@ const ResumeTransferBox = (props: any) => {
                     dstAddr: dstWalletAddr,
                     srcToken: bridgeToken.denom,
                     srcTokenId: bridgeToken.tokenId,
-                    dstToken: bridgeToken.toDenom,
-                    dstTokenId: bridgeToken.toTokenId,
+                    dstToken: destToken.denom,
+                    dstTokenId: destToken.tokenId,
                     inputAmount: new BigNumber(depositTransfer.amount).shiftedBy(-bridgeToken.decimals),
                     interimAddrMnemonics: mnemonic.join(" "),
                     withdrawFee: feeAmount,

@@ -24,9 +24,9 @@ import { AppTheme } from "app/theme/types"
 import { bnOrZero, hexToRGBA, netZilToCarbon, useAsyncTask, useNetwork, useTokenFinder } from "app/utils"
 import { BIG_ZERO, BRIDGE_DISABLED } from "app/utils/constants"
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg"
-import ConfirmTransferLegacy from 'app/components/ConfirmTransfer/ConfirmTransferLegacy'
 import { ConnectButton } from "./components"
 import { BridgeParamConstants } from "./components/constants"
+import { ReactComponent as ArbitrumLogo } from "./arbitrum-one.svg"
 import { ReactComponent as EthereumLogo } from "./ethereum-logo.svg"
 import { ReactComponent as WavyLine } from "./wavy-line.svg"
 import { ReactComponent as ZilliqaLogo } from "./zilliqa-logo.svg"
@@ -74,9 +74,28 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const queryParams = new URLSearchParams(location.search)
 
-  const tokenList: 'bridge-zil' | 'bridge-eth' = bridgeFormState.fromBlockchain === Blockchain.Zilliqa ? 'bridge-zil' : 'bridge-eth'
+  let tokenList: 'bridge-zil' | 'bridge-eth' | 'bridge-arbitrum'
+
+
+  switch (bridgeFormState.fromBlockchain) {
+    case Blockchain.Zilliqa:
+      tokenList = 'bridge-zil'
+      break
+    case Blockchain.Ethereum:
+      tokenList = 'bridge-eth'
+      break
+    case Blockchain.Arbitrum:
+      tokenList = 'bridge-arbitrum'
+      break
+  }
 
   const { token: bridgeToken, fromBlockchain, toBlockchain } = bridgeFormState
+
+  const destToken = useMemo(() => {
+    if (bridgeToken) {
+      return bridgeState.tokens.find(token => token.denom === bridgeToken.chains[toBlockchain])
+    }
+  }, [bridgeState.tokens, bridgeToken, toBlockchain])
 
   // update state from param
   useEffect(() => {
@@ -95,12 +114,14 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }
     queryTokenAddress = queryTokenAddress.replace(/^0x/, '')
 
-    bridgeState.tokens[fromBlockchain].forEach(token => {
+    const bridgeTokens = bridgeState.tokens.filter(token => token.blockchain === fromBlockchain)
+
+    bridgeTokens.forEach(token => {
       if (token.tokenAddress === queryTokenAddress) {
         queryToken = token
         return
-      } else if (token.toTokenAddress === queryTokenAddress) {
-        queryToken = bridgeState.tokens[toBlockchain].find(token => token.tokenAddress === queryTokenAddress)
+      } else if (destToken?.tokenAddress === queryTokenAddress) {
+        queryToken = bridgeState.tokens.find(token => token.tokenAddress === queryTokenAddress && token.blockchain === toBlockchain)
         swapBridgeChains()
         return
       }
@@ -164,12 +185,9 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     // eslint-disable-next-line
   }, [network])
 
-  const { fromToken } = useMemo(() => {
-    if (!bridgeToken) return {}
-    return {
-      fromToken: tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain),
-      toToken: tokenFinder(bridgeToken.toTokenAddress, bridgeToken.toBlockchain),
-    }
+  const fromToken = useMemo(() => {
+    if (!bridgeToken) return
+    return tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain)
   }, [tokenFinder, bridgeToken])
 
   useEffect(() => {
@@ -180,7 +198,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         dispatch(actions.Layout.showTransferConfirmation())
       }
 
-      const bridgeTokens = bridgeState.tokens[bridgeTx.srcChain as Blockchain.Ethereum | Blockchain.Zilliqa]
+      const bridgeTokens = bridgeState.tokens.filter(token => token.blockchain === bridgeTx.srcChain)
       const bridgeToken = bridgeTokens.find(token => token.denom === bridgeTx.srcToken)
 
       dispatch(actions.Bridge.updateForm({
@@ -233,7 +251,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }))
   }
 
-  const onFromBlockchainChange = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown }>) => {
+  const onFromBlockchainChange = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown; }>) => {
     if (e.target.value === Blockchain.Zilliqa) {
       setSourceAddress(wallet?.addressInfo.byte20!)
       setDestAddress(ethConnectedAddress)
@@ -242,12 +260,20 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         fromBlockchain: Blockchain.Zilliqa,
         toBlockchain: Blockchain.Ethereum,
       }))
-    } else {
+    } else if (e.target.value === Blockchain.Ethereum) {
       setSourceAddress(ethConnectedAddress)
       setDestAddress(wallet?.addressInfo.byte20!)
 
       dispatch(actions.Bridge.updateForm({
         fromBlockchain: Blockchain.Ethereum,
+        toBlockchain: Blockchain.Zilliqa,
+      }))
+    } else {
+      setSourceAddress(ethConnectedAddress)
+      setDestAddress(wallet?.addressInfo.byte20!)
+
+      dispatch(actions.Bridge.updateForm({
+        fromBlockchain: Blockchain.Arbitrum,
         toBlockchain: Blockchain.Zilliqa,
       }))
     }
@@ -262,13 +288,21 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
         fromBlockchain: Blockchain.Ethereum,
         toBlockchain: Blockchain.Zilliqa,
       }))
-    } else {
+    } else if (e.target.value === Blockchain.Ethereum) {
       setDestAddress(ethConnectedAddress)
       setSourceAddress(wallet?.addressInfo.byte20!)
 
       dispatch(actions.Bridge.updateForm({
         fromBlockchain: Blockchain.Zilliqa,
         toBlockchain: Blockchain.Ethereum,
+      }))
+    } else {
+      setDestAddress(ethConnectedAddress)
+      setSourceAddress(wallet?.addressInfo.byte20!)
+
+      dispatch(actions.Bridge.updateForm({
+        fromBlockchain: Blockchain.Zilliqa,
+        toBlockchain: Blockchain.Arbitrum,
       }))
     }
   }
@@ -277,7 +311,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     const web3Modal = new Web3Modal({
       cacheProvider: false,
       disableInjectedProvider: false,
-      network: network === Network.MainNet ? 'mainnet' : 'goerli',
+      network: network === Network.MainNet ? (bridgeFormState.fromBlockchain === Blockchain.Arbitrum ? 'arbitrum' : 'mainnet') : 'goerli',
       providerOptions
     })
 
@@ -287,11 +321,11 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     const ethAddress = await signer.getAddress()
     const chainId = (await ethersProvider.getNetwork()).chainId
 
-    if (bridgeFormState.fromBlockchain === Blockchain.Ethereum) {
+    if (bridgeFormState.fromBlockchain === Blockchain.Ethereum || bridgeFormState.fromBlockchain === Blockchain.Arbitrum) {
       setSourceAddress(ethAddress)
     }
 
-    if (bridgeFormState.toBlockchain === Blockchain.Ethereum) {
+    if (bridgeFormState.toBlockchain === Blockchain.Ethereum || bridgeFormState.toBlockchain === Blockchain.Arbitrum) {
       setDestAddress(ethAddress)
     }
 
@@ -337,14 +371,14 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const onCurrencyChange = (token: TokenInfo) => {
     let tokenAddress: string | undefined
-    if (fromBlockchain === Blockchain.Ethereum) {
+    if (fromBlockchain === Blockchain.Ethereum || fromBlockchain === Blockchain.Arbitrum) {
       tokenAddress = token.address.toLowerCase()
     } else {
       tokenAddress = fromBech32Address(token.address).toLowerCase()
     }
     tokenAddress = tokenAddress.replace(/^0x/, '')
 
-    const bridgeToken = bridgeState.tokens[fromBlockchain].find(bridgeToken => bridgeToken.tokenAddress === tokenAddress)
+    const bridgeToken = bridgeState.tokens.find(bridgeToken => bridgeToken.tokenAddress === tokenAddress && bridgeToken.blockchain === fromBlockchain)
 
     if (bridgeFormState.token && bridgeFormState.token === bridgeToken) return
 
@@ -355,7 +389,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const swapBridgeChains = () => {
-    const isZilToEth = fromBlockchain === Blockchain.Zilliqa
     setFormState({
       ...formState,
       destAddress: formState.sourceAddress,
@@ -363,8 +396,8 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     })
 
     dispatch(actions.Bridge.updateForm({
-      fromBlockchain: isZilToEth ? Blockchain.Ethereum : Blockchain.Zilliqa,
-      toBlockchain: isZilToEth ? Blockchain.Zilliqa : Blockchain.Ethereum,
+      fromBlockchain: toBlockchain,
+      toBlockchain: fromBlockchain,
 
       sourceAddress: formState.destAddress,
       destAddress: formState.sourceAddress,
@@ -379,6 +412,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const showTransfer = () => {
     if (!(
       (Number(bridgeWallet?.chainId) === 1 && wallet?.network === Network.MainNet) ||
+      (Number(bridgeWallet?.chainId) === 42161 && wallet?.network === Network.MainNet) ||
       (Number(bridgeWallet?.chainId) === 5 && wallet?.network === Network.TestNet)
     )) {
       dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
@@ -470,7 +504,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       return balance.minus(gasPrice.multipliedBy(gasLimit))
     } else {
       const gasPriceGwei = new BigNumber(ethers.utils.formatUnits((gasPrice ?? new BigNumber(65)).toString(10), "gwei"))
-      const gasLimit = new BigNumber(`${BridgeParamConstants.ETH_GAS_LIMIT}`)
+      const gasLimit = new BigNumber(`${blockchain === Blockchain.Ethereum ? BridgeParamConstants.ETH_GAS_LIMIT : BridgeParamConstants.ARBITRUM_GAS_LIMIT}`)
 
       return balance.minus(gasPriceGwei.multipliedBy(gasLimit))
     }
@@ -537,9 +571,12 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             <Box className={classes.box} bgcolor="background.contrast">
               <Text variant="h4" align="center">From</Text>
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-                {fromBlockchain === Blockchain.Ethereum
-                  ? <EthereumLogo />
-                  : <ZilliqaLogo />
+                {fromBlockchain === Blockchain.Zilliqa
+                  ? <ZilliqaLogo />
+                  :
+                  fromBlockchain === Blockchain.Ethereum
+                    ? <EthereumLogo />
+                    : <ArbitrumLogo />
                 }
               </Box>
               <Box display="flex" justifyContent="center">
@@ -552,6 +589,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                   >
                     <MenuItem value={Blockchain.Zilliqa}>Zilliqa</MenuItem>
                     <MenuItem value={Blockchain.Ethereum}>Ethereum</MenuItem>
+                    <MenuItem value={Blockchain.Arbitrum}>Arbitrum</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
@@ -573,7 +611,10 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
                 {toBlockchain === Blockchain.Zilliqa
                   ? <ZilliqaLogo />
-                  : <EthereumLogo />
+                  :
+                  toBlockchain === Blockchain.Ethereum
+                    ? <EthereumLogo />
+                    : <ArbitrumLogo />
                 }
               </Box>
               <Box display="flex" justifyContent="center">
@@ -586,6 +627,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                   >
                     <MenuItem value={Blockchain.Ethereum}>Ethereum</MenuItem>
                     <MenuItem value={Blockchain.Zilliqa}>Zilliqa</MenuItem>
+                    <MenuItem value={Blockchain.Arbitrum}>Arbitrum</MenuItem>
                   </Select>
                 </FormControl>
               </Box>

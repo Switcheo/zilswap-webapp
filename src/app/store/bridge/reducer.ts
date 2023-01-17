@@ -94,10 +94,7 @@ const initial_state: BridgeState = {
   activeBridgeTx: findActiveBridgeTx(loadedBridgeTxs),
   previewBridgeTx: undefined,
 
-  tokens: {
-    [Blockchain.Zilliqa]: [],
-    [Blockchain.Ethereum]: [],
-  },
+  tokens: [],
 
   formState: {
     transferAmount: new BigNumber(0),
@@ -139,9 +136,9 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
       let token = state.formState.token;
       if (!token) {
 
-        const fromBlockchain = state.formState.fromBlockchain as Blockchain.Zilliqa | Blockchain.Ethereum;
-        const firstToken = tokens[fromBlockchain]?.[0];
-        token = tokens[fromBlockchain]?.find(bridgeToken => bridgeToken.denom.startsWith("zil")) ?? firstToken;
+        const fromBlockchain = state.formState.fromBlockchain as Blockchain.Zilliqa | Blockchain.Ethereum | Blockchain.Arbitrum;
+        const firstToken = tokens.find(token => token.blockchain === fromBlockchain);
+        token = tokens?.find(bridgeToken => bridgeToken.denom.startsWith("zil") && bridgeToken.blockchain === fromBlockchain) ?? firstToken;
 
         state.formState = {
           ...state.formState,

@@ -109,7 +109,7 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
     "zusdt.1.18.1728e9", "zeth.1.18.54437c", "zwbtc.1.18.a9cb60",
     "zxcad.1.18.35137d", "eport.1.2.7d4912", "efees.1.2.586fb5",
     "elunr.1.2.e2121e", "ezil.1.2.f1b7e4", "dxcad.1.2.67dde7",
-    "zbrkl.1.18.b8c24f", "zopul.1.18.4bcdc9", "ztraxx.1.18.9c8e35",
+    "zbrkl.1.18.b8c24f", "zopul.1.18.4bcdc9", "ztraxx.1.18.9c8e35","swth.1.19.6f83d0"
   ],
   [Network.TestNet]: ["swth.1.111.ae86f6", "swth.1.502.976cb7"],
 }

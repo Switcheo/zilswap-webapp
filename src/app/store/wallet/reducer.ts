@@ -7,7 +7,7 @@ import { WalletState } from "./types";
 const initial_state: WalletState = {
   wallet: null,
   bridgeWallets: {
-    [Blockchain.Ethereum]: null
+    [Blockchain.Ethereum]: null,
   },
 };
 

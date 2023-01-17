@@ -50,6 +50,7 @@ import {
   BRIDGE_TX_DEPOSIT_CONFIRM_ETH,
   BRIDGE_TX_DEPOSIT_CONFIRM_ZIL,
 } from 'app/utils/constants'
+import { ReactComponent as ArbitrumLogo } from 'app/views/main/Bridge/arbitrum-one.svg'
 import { ReactComponent as EthereumLogo } from 'app/views/main/Bridge/ethereum-logo.svg'
 import { ReactComponent as WavyLine } from 'app/views/main/Bridge/wavy-line.svg'
 import { ReactComponent as ZilliqaLogo } from 'app/views/main/Bridge/zilliqa-logo.svg'
@@ -323,6 +324,7 @@ const CHAIN_NAMES = {
   [Blockchain.Ethereum]: 'Ethereum',
   [Blockchain.Neo]: 'Neo',
   [Blockchain.BinanceSmartChain]: 'Binance Smart Chain',
+  [Blockchain.Arbitrum]: 'Arbitrum One',
 }
 
 const STEPS = ['Deposit', 'Confirm', 'Withdraw']
@@ -380,6 +382,8 @@ const TransactionDetail = (props: TransactionDetailProps) => {
       switch (blockchain) {
         case Blockchain.Ethereum:
           return `https://etherscan.io/search?q=${hash}`
+        case Blockchain.Arbitrum:
+          return `https://arbiscan.io/tx/${hash}`
         default:
           return `https://viewblock.io/zilliqa/tx/${hash}`
       }
@@ -439,6 +443,21 @@ const TransactionDetail = (props: TransactionDetailProps) => {
     dispatch(actions.Layout.toggleShowMnemonic('open'))
   }
 
+  const explorerSite: string = useMemo(() => {
+    switch (currentBridgeTx?.srcChain) {
+      case Blockchain.Ethereum:
+        return "Etherscan"
+      case Blockchain.Arbitrum:
+        return "Arbiscan"
+      case Blockchain.Zilliqa:
+        return "Viewblock"
+      default:
+        return ""
+    }
+  }, [currentBridgeTx?.srcChain])
+
+  console.log("source bridge", currentBridgeTx?.srcChain)
+
   return (
     <Box display="flex" flexDirection="column" className={classes.container}>
       {!!onBack && (
@@ -470,7 +489,6 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                   losing your funds.
                 </Text>
               }
-
 
               {(!currentBridgeTx.withdrawTxHash && network === Network.MainNet) && (
                 <Button
@@ -535,10 +553,13 @@ const TransactionDetail = (props: TransactionDetailProps) => {
               mt={1.5}
               mb={1.5}
             >
-              {currentBridgeTx?.srcChain === Blockchain.Ethereum ? (
-                <EthereumLogo />
-              ) : (
+              {currentBridgeTx?.srcChain === Blockchain.Zilliqa ? (
                 <ZilliqaLogo />
+              ) : (
+                currentBridgeTx?.srcChain === Blockchain.Ethereum ?
+                <EthereumLogo />
+                :
+                <ArbitrumLogo />
               )}
             </Box>
             <Text variant="h4" className={classes.chainName}>
@@ -571,7 +592,10 @@ const TransactionDetail = (props: TransactionDetailProps) => {
               {currentBridgeTx?.dstChain === Blockchain.Zilliqa ? (
                 <ZilliqaLogo />
               ) : (
+                currentBridgeTx?.dstChain === Blockchain.Ethereum ?
                 <EthereumLogo />
+                :
+                <ArbitrumLogo />
               )}
             </Box>
             <Text variant="h4" className={classes.chainName}>
@@ -674,6 +698,9 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                           href={getExplorerLink(approvalHash, currentBridgeTx?.srcChain)}
                         >
                           View on{' '}
+                          {
+                            explorerSite
+                          }
                           {currentBridgeTx?.srcChain === Blockchain.Ethereum
                             ? 'Etherscan'
                             : 'ViewBlock'}{' '}

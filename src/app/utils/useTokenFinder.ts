@@ -14,11 +14,11 @@ const useTokenFinder = () => {
       address = address.toLowerCase();
       if (blockchain === Blockchain.Zilliqa && !address.startsWith("zil")) {
         address = toBech32Address(address);
-      } else if (blockchain === Blockchain.Ethereum && address.startsWith("zil")) {
+      } else if ((blockchain === Blockchain.Ethereum || blockchain === Blockchain.Arbitrum) && address.startsWith("zil")) {
         address = fromBech32Address(address);
       }
 
-      if (blockchain === Blockchain.Ethereum && !address.startsWith("0x")) {
+      if ((blockchain === Blockchain.Ethereum || blockchain === Blockchain.Arbitrum) && !address.startsWith("0x")) {
         address = `0x${address}`;
       }
 

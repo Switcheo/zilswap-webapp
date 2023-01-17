@@ -260,6 +260,10 @@ const ConfirmTransferLegacy = (props: any) => {
 
   const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx]);
 
+  const destToken = useMemo(() => {
+    return Object.values(bridgeState.tokens).filter(token => token.denom === bridgeToken?.chains[toBlockchain])[0]
+  }, [bridgeState.tokens, bridgeToken, toBlockchain])
+
   useEffect(() => {
     if (!swthAddrMnemonic)
       setSwthAddrMnemonic(AddressUtils.SWTHAddress.newMnemonic());
@@ -283,7 +287,7 @@ const ConfirmTransferLegacy = (props: any) => {
     if (!bridgeToken) return {};
     return {
       fromToken: tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain),
-      toToken: tokenFinder(bridgeToken.toTokenAddress, bridgeToken.toBlockchain),
+      toToken: tokenFinder(destToken.tokenAddress, toBlockchain),
     }
   }, [bridgeToken, tokenFinder]);
 
@@ -538,8 +542,8 @@ const ConfirmTransferLegacy = (props: any) => {
         srcChain: fromBlockchain,
         network: network,
         srcTokenId: bridgeToken.tokenId,
-        dstToken: bridgeToken.toDenom,
-        dstTokenId: bridgeToken.toTokenId,
+        dstToken: destToken.denom,
+        dstTokenId: destToken.tokenId,
         srcToken: bridgeToken.denom,
         sourceTxHash: sourceTxHash,
         inputAmount: bridgeFormState.transferAmount,

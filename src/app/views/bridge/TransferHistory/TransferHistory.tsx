@@ -23,6 +23,7 @@ const CHAIN_NAMES = {
     [Blockchain.Ethereum]: "Ethereum",
     [Blockchain.Neo]: "Neo",
     [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
+    [Blockchain.Arbitrum]: "Arbitrum One",
 }
 
 // TODO: remove any, type the props properly
