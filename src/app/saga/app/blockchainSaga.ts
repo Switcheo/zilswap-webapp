@@ -365,7 +365,11 @@ function* initialize(
         const sourceToken = carbonTokens.find(d => d.denom === sourceDenom)!
 
         const wrappedChain = blockchainForChainId(wrappedToken.chainId.toNumber())
-        const sourceChain = blockchainForChainId(sourceToken.chainId.toNumber())
+        var sourceChain = blockchainForChainId(sourceToken.chainId.toNumber())
+
+        if (sourceToken.chainId.toNumber() == 4) {
+          sourceChain = Blockchain.Carbon
+        }  
 
         console.log("source token", sourceToken, "wrapped", wrappedToken)
 
