@@ -15,6 +15,7 @@ import { Blockchain, AddressUtils, Models, CarbonSDK, ConnectedCarbonSDK } from 
 import { Network } from "zilswap-sdk/lib/constants";
 import { ZilBridgeParams } from 'carbon-js-sdk/lib/clients/ZILClient'
 import { BridgeParams } from 'carbon-js-sdk/lib/clients/ETHClient'
+import { BN_ZERO } from 'carbon-js-sdk/lib/util/number'
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet } from "core/wallet";
 import { logger } from "core/utilities";
@@ -31,8 +32,6 @@ import { getRecoveryAddress } from 'app/utils/bridge'
 import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
 import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
-
-const TRANSFER_KEY_MESSAGE = "In the event you are not able to complete Stage 2 of your transfer, you may retrieve and resume your transfer by entering the following unique transfer key phrase on your Transfer History page. Do not ever reveal your transfer key phrase to anyone. ZilSwap will not be held accountable and cannot help you retrieve those funds once they are lost.\n\n";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -282,12 +281,9 @@ const ConfirmTransfer = (props: any) => {
     // eslint-disable-next-line
   }, [])
 
-  const { fromToken } = useMemo(() => {
-    if (!bridgeToken) return {};
-    return {
-      fromToken: tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain),
-      toToken: tokenFinder(bridgeToken.toTokenAddress, bridgeToken.toBlockchain),
-    }
+  const fromToken = useMemo(() => {
+    if (!bridgeToken) return;
+    return tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain)
   }, [bridgeToken, tokenFinder]);
 
   const { fromChainName, toChainName } = useMemo(() => {
@@ -332,7 +328,7 @@ const ConfirmTransfer = (props: any) => {
     * @param asset         details of the asset being bridged; retrieved from carbon
     */
   async function bridgeAssetFromEth(asset: Models.Token) {
-   if (!fromToken || !sdk || !bridgeFormState.sourceAddress || !bridgeFormState.destAddress || !withdrawFee?.amount || !swthAddrMnemonic) {
+   if (!fromToken || !sdk || !bridgeFormState.sourceAddress || !bridgeFormState.destAddress || (!withdrawFee?.amount  && network === Network.MainNet)) {
       return
     }
 
@@ -385,6 +381,8 @@ const ConfirmTransfer = (props: any) => {
       return
     }
 
+    console.log("recovery address", getRecoveryAddress(sdk.network))
+
     const bridgeDepositParams : BridgeParams = {
       fromToken: asset,
       toToken,
@@ -392,7 +390,7 @@ const ConfirmTransfer = (props: any) => {
       fromAddress: ethAddress,
       recoveryAddress: getRecoveryAddress(sdk.network),
       toAddress: bridgeFormState.destAddress,
-      feeAmount: withdrawFee.amount.shiftedBy(toToken.decimals.toNumber()), //TODO: Check whether dehumanizing value is correct
+      feeAmount: network === Network.MainNet ? withdrawFee!.amount.shiftedBy(toToken.decimals.toNumber()) : BN_ZERO,
       gasPriceGwei,
       gasLimit: new BigNumber(`${BridgeParamConstants.ETH_GAS_LIMIT}`),
       signer,
@@ -417,7 +415,7 @@ const ConfirmTransfer = (props: any) => {
     * @param asset         details of the asset being bridged; retrieved from carbon
     */
   async function bridgeAssetFromZil(asset: Models.Token, carbonMnemonics: string) {
-    if (!fromToken || !sdk || !bridgeFormState.sourceAddress || !bridgeFormState.destAddress || !withdrawFee?.amount) {
+    if (!fromToken || !sdk || !bridgeFormState.sourceAddress || !bridgeFormState.destAddress || (!withdrawFee?.amount && network === Network.MainNet)) {
       return
     }
 
@@ -430,7 +428,7 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
-    const lockProxy = asset.bridgeAddress;
+    const lockProxy = sdk.networkConfig.zil.bridgeEntranceAddr;
     const amount = bridgeFormState.transferAmount;
     const zilAddress = santizedAddress(wallet.addressInfo.byte20);
     const depositAmt = amount.shiftedBy(asset.decimals.toInt())
@@ -449,6 +447,7 @@ const ConfirmTransfer = (props: any) => {
           gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
           zilAddress: zilAddress,
           signer: wallet.provider! as any,
+          spenderAddress: sdk.networkConfig.zil.bridgeEntranceAddr
         }
         logger("approve zrc2 token parameters: ", approveZRC2Params);
         toaster(`Approval needed (Zilliqa)`, { overridePersist: false });
@@ -486,7 +485,7 @@ const ConfirmTransfer = (props: any) => {
       fromAddress: wallet.addressInfo.bech32,
       recoveryAddress: getRecoveryAddress(sdk.network),
       toAddress: bridgeFormState.destAddress,
-      feeAmount: withdrawFee.amount.shiftedBy(toToken.decimals.toNumber()),
+      feeAmount: network === Network.MainNet ? withdrawFee!.amount.shiftedBy(toToken.decimals.toNumber()) : BN_ZERO,
       gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
       gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
       signer: wallet.provider! as any,
@@ -529,7 +528,7 @@ const ConfirmTransfer = (props: any) => {
       return null;
     }
 
-    if (!withdrawFee) {
+    if (!withdrawFee && network === Network.MainNet) {
       toaster("Transfer fee not loaded", { overridePersist: false });
       return null;
     }

@@ -231,7 +231,7 @@ const getChainName = (blockchain: Blockchain) => {
   }
 }
 
-const ConfirmTransfer = (props: any) => {
+const ConfirmTransferLegacy = (props: any) => {
   const { showTransfer } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -677,4 +677,4 @@ const ConfirmTransfer = (props: any) => {
   }
 }
 
-export default ConfirmTransfer;
+export default ConfirmTransferLegacy;

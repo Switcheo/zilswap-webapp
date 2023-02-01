@@ -4,7 +4,7 @@ import { AppState, ObservedTx, TxReceipt, TxStatus, Zilswap } from 'zilswap-sdk'
 import { ZiloAppState } from 'zilswap-sdk/lib/zilo';
 
 import { Blockchain, CarbonSDK } from 'carbon-js-sdk';
-import { Token as CarbonToken } from 'carbon-js-sdk/lib/codec';
+import { Token as CarbonToken, Token } from 'carbon-js-sdk/lib/codec';
 import { blockchainForChainId } from 'carbon-js-sdk/lib/util/blockchain';
 import {
   ConnectedWallet,
@@ -43,6 +43,7 @@ import {
 import { ChainInitAction } from 'app/store/blockchain/actions';
 import { actions } from 'app/store';
 import { StatsActionTypes } from 'app/store/stats/actions';
+import { getSwthBridgeTokens } from 'app/utils/bridge'
 import { getBlockchain, getTransactions, getWallet } from '../selectors';
 
 const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
@@ -239,8 +240,35 @@ const addMapping = (
   });
 };
 
-const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken) => {
-  const blockchain = blockchainForChainId(t.chainId.toNumber());
+/**
+ * Add mapping for swth tokens on different chains
+ * e.g. map swth denom from zil -> eth
+ */
+const addSwthMapping = (
+  r: BridgeMappingResult,
+  a: CarbonToken,
+  b: CarbonToken,
+  srcChain: Blockchain.Zilliqa | Blockchain.Ethereum,
+  destChain: Blockchain
+) => {
+  r[srcChain].push({
+    blockchain: srcChain,
+    tokenAddress: a.tokenAddress.toLowerCase(),
+    lockproxyAddress: a.bridgeAddress,
+    decimals: a.decimals.toNumber(),
+    denom: a.denom,
+    tokenId: a.id,
+    toBlockchain: destChain,
+    toTokenAddress: b.tokenAddress.toLowerCase(),
+    toDecimals: b.decimals.toNumber(),
+    toDenom: b.denom,
+    toTokenId: b.id,
+    balDenom: a.denom,
+  });
+};
+
+const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken, network: CarbonSDK.Network) => {
+  const blockchain = blockchainForChainId(t.chainId.toNumber(), network)
   const address =
     blockchain === Blockchain.Zilliqa
       ? toBech32Address(t.tokenAddress)
@@ -340,12 +368,14 @@ function* initialize(
 
     try {
       // load wrapper mappings and eth tokens by fetching bridge list from carbon
+      const carbonNetwork = netZilToCarbon(network)
       const carbonSdk: CarbonSDK = yield call(CarbonSDK.instance, {
-        network: netZilToCarbon(network),
+        network: carbonNetwork,
       });
       const mappings = carbonSdk.token.wrapperMap;
       const carbonTokens: CarbonToken[] = Object.values(carbonSdk.token.tokens);
       const bridgeableDenoms = BRIDGEABLE_WRAPPED_DENOMS[network];
+      const swthBridgeTokens: SimpleMap<Token> = yield call(getSwthBridgeTokens, carbonNetwork)
       Object.entries(mappings).forEach(([wrappedDenom, sourceDenom]) => {
         if (!bridgeableDenoms.includes(wrappedDenom)) {
           return;
@@ -354,20 +384,29 @@ function* initialize(
         const wrappedToken = carbonTokens.find(d => d.denom === wrappedDenom)!;
         const sourceToken = carbonTokens.find(d => d.denom === sourceDenom)!;
 
-        const wrappedChain = blockchainForChainId(wrappedToken.chainId.toNumber());
-        const sourceChain = blockchainForChainId(sourceToken.chainId.toNumber());
+        var wrappedChain = blockchainForChainId(wrappedToken.chainId.toNumber(), carbonNetwork) //need to specify carbon network because chain Ids of zil and eth on testnet is not on the default list of chain IDs
+        var sourceChain = blockchainForChainId(sourceToken.chainId.toNumber(), carbonNetwork) //need to specify carbon network because chain Ids of zil and eth on testnet is not on the default list of chain IDs
 
         if (
           (wrappedChain !== Blockchain.Zilliqa && wrappedChain !== Blockchain.Ethereum) ||
-          (sourceChain !== Blockchain.Zilliqa && sourceChain !== Blockchain.Ethereum)
+          (sourceChain !== Blockchain.Zilliqa && sourceChain !== Blockchain.Ethereum && sourceChain !== Blockchain.Carbon)
         ) {
           return;
         }
-        addToken(tokens, sourceToken);
-        addToken(tokens, wrappedToken);
-        addMapping(bridgeTokenResult, wrappedToken, sourceToken, sourceChain);
-        addMapping(bridgeTokenResult, sourceToken, wrappedToken, sourceChain);
-      });
+
+        addToken(tokens, sourceToken, carbonNetwork)
+        addToken(tokens, wrappedToken, carbonNetwork)
+
+        if (sourceChain === Blockchain.Carbon) { //if the wrapper mapping key, value is - <swth token on another chain>, "swth"
+          const swthChain = wrappedChain === Blockchain.Zilliqa ? Blockchain.Ethereum : Blockchain.Zilliqa
+          const swthToken = swthBridgeTokens[swthChain]
+          addSwthMapping(bridgeTokenResult, wrappedToken, swthToken, wrappedChain, swthChain)
+        } else {
+          addMapping(bridgeTokenResult, wrappedToken, sourceToken, sourceChain)
+          addMapping(bridgeTokenResult, sourceToken, wrappedToken, sourceChain)
+        }
+
+      })
     } catch (error) {
       console.error('could not load bridge tokens');
       console.error(error);

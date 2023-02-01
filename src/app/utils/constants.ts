@@ -111,7 +111,7 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
     "elunr.1.2.e2121e", "ezil.1.2.f1b7e4", "dxcad.1.2.67dde7",
     "zbrkl.1.18.b8c24f", "zopul.1.18.4bcdc9", "ztraxx.1.18.9c8e35",
   ],
-  [Network.TestNet]: ["zeth.1.111.eaa57f", "zdai.1.111.f9a752", "zwap.0.111.227030", "zil.0.2.6b2a39"],
+  [Network.TestNet]: ["swth.1.111.ae86f6", "swth.1.502.976cb7"],
 }
 
 export const ERC20_ZIL_TOKENSWAP_CONTRACT = {

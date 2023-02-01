@@ -327,13 +327,15 @@ function* watchActiveTxConfirmations() {
 
 function* queryTokenFees() {
   let lastCheckedToken: BridgeableToken | undefined = undefined
+  const { network } = getBlockchain(yield select())
+  if (network !== Network.MainNet) return
   while (true) {
     logger("bridge saga", "query withdraw fees")
     try {
       const { formState } = getBridge(yield select())
       const { network: zilNetwork } = getBlockchain(yield select())
       const bridgeToken = formState.token
-      const network = zilNetwork === Network.MainNet ? CarbonSDK.Network.MainNet : CarbonSDK.Network.DevNet
+      const network = zilNetwork === Network.MainNet ? CarbonSDK.Network.MainNet : CarbonSDK.Network.TestNet
       if (lastCheckedToken !== bridgeToken) {
         yield put(actions.Bridge.updateFee())
       }
