@@ -386,7 +386,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
     } else {
       switch (blockchain) {
         case Blockchain.Ethereum:
-          return `https://goerli.etherscan.io/tx/0x${hash}`
+          return `https://goerli.etherscan.io/tx/${hash}`
         default:
           return `https://viewblock.io/zilliqa/tx/${hash}?network=testnet`
       }
