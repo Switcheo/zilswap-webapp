@@ -105,7 +105,7 @@ const FailedBridgeTxWarning = (props: any) => {
     } else {
       switch (failedDepositTx?.srcChain) {
         case Blockchain.Ethereum:
-          return `https://goerli.etherscan.io/tx/${hash}`;
+          return `https://goerli.etherscan.io/tx/0x${hash}`;
         default:
           return `https://viewblock.io/zilliqa/tx/${hash}?network=testnet`;
       }

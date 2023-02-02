@@ -362,11 +362,14 @@ const ConfirmTransfer = (props: any) => {
         logger("approve tx", approve_tx.hash);
         toaster(`Submitted: (Ethereum - ERC20 Approval)`, { hash: approve_tx.hash!.replace(/^0x/i, ""), sourceBlockchain: "eth" });
         setApprovalHash(approve_tx.hash!);
-        await approve_tx.wait();
+        const txReceipt = await sdk.eth.getProvider().waitForTransaction(approve_tx.hash!)
 
         // token approval success
-        if (approve_tx !== undefined && (approve_tx as any).status === 1) {
+        if (approve_tx !== undefined && txReceipt?.status === 1) {
           setTokenApproval(true);
+        } else {
+          toaster("Approval not successful. Please try again.")
+          return null
         }
       }
     }
@@ -378,7 +381,7 @@ const ConfirmTransfer = (props: any) => {
 
     if (!toToken) {
       toaster("Selected token is not available on Zilliqa");
-      return
+      return null
     }
 
     console.log("recovery address", getRecoveryAddress(sdk.network))
@@ -437,8 +440,8 @@ const ConfirmTransfer = (props: any) => {
       // not native zils
       // user is transferring zrc2 tokens
       // need approval
-      const allowance = await sdk.zil.checkAllowanceZRC2(asset, `0x${zilAddress}`, `0x${lockProxy}`);
-      logger("zil zrc2 allowance: ", allowance);
+      const allowance = await sdk.zil.checkAllowanceZRC2(asset, `0x${zilAddress}`, lockProxy);
+      logger("zil zrc2 allowance: ", allowance.toNumber());
 
       if (allowance.lt(depositAmt)) {
         const approveZRC2Params = {
@@ -447,7 +450,7 @@ const ConfirmTransfer = (props: any) => {
           gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
           zilAddress: zilAddress,
           signer: wallet.provider! as any,
-          spenderAddress: sdk.networkConfig.zil.bridgeEntranceAddr
+          spenderAddress: lockProxy,
         }
         logger("approve zrc2 token parameters: ", approveZRC2Params);
         toaster(`Approval needed (Zilliqa)`, { overridePersist: false });
@@ -464,6 +467,9 @@ const ConfirmTransfer = (props: any) => {
         // token approval success
         if (confirmedTxn !== undefined && confirmedTxn.getReceipt()?.success) {
           setTokenApproval(true);
+        } else {
+          toaster("Approval not successful. Please try again.")
+          return null
         }
       } else {
         // approved before
@@ -475,7 +481,7 @@ const ConfirmTransfer = (props: any) => {
 
     if (!toToken) {
       toaster("Selected token is not available on Ethereum");
-      return
+      return null
     }
 
     const bridgeDepositParams : ZilBridgeParams = {
