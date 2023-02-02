@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js"
-import { Blockchain } from 'carbon-js-sdk'
+import { Blockchain } from 'carbon-js-sdk/lib'
 import { Network } from "zilswap-sdk/lib/constants"
 import { HTTP } from "../utilities/http"
 

@@ -81,9 +81,6 @@ const NetworkSwitchDialog = (props: any) => {
         } else if (ethChainID !== 42161 && srcChain === Blockchain.Arbitrum) {
           dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
           return [getEthChainName(42161), `0x${(42161).toString(16)}`, getEthWalletName(), getEthChainName(ethChainID)]
-        } else if (zilWallet?.network !== Network.MainNet) {
-          dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
-          return ['Zilliqa MainNet', null, getZilWalletName(), 'Zilliqa TestNet']
         }
       } else {
         if (ethChainID !== 5) {

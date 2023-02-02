@@ -251,7 +251,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     }))
   }
 
-  const onFromBlockchainChange = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown; }>) => {
+  const onFromBlockchainChange = (e: React.ChangeEvent<{ name?: string | undefined; value: unknown }>) => {
     if (e.target.value === Blockchain.Zilliqa) {
       setSourceAddress(wallet?.addressInfo.byte20!)
       setDestAddress(ethConnectedAddress)
@@ -674,13 +674,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
       )}
       <NetworkSwitchDialog />
       <FailedBridgeTxWarning />
-      {
-        network === Network.TestNet //TODO: remove once bridge entrance has been fully tested on testnet
-          ?
-          <ConfirmTransfer showTransfer={layoutState.showTransferConfirmation} />
-          :
-          <ConfirmTransferLegacy showTransfer={layoutState.showTransferConfirmation} />
-      }
+      <ConfirmTransfer showTransfer={layoutState.showTransferConfirmation} />
       <ConnectETHPopper
         open={!!disconnectMenu}
         anchorEl={disconnectMenu?.current}

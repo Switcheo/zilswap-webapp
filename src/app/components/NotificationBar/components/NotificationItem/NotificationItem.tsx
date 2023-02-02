@@ -136,7 +136,7 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const getHref = () => {
     switch (sourceBlockchain) {
       case "swth":
-      case "eth": return network === Network.MainNet ? `https://etherscan.io/search?q=${hash}` : `https://goerli.etherscan.io/tx/${hash}`;
+      case "eth": return network === Network.MainNet ? `https://etherscan.io/search?q=${hash}` : `https://goerli.etherscan.io/tx/0x${hash}`;
       default: return `https://viewblock.io/zilliqa/tx/${hash}?network=${network.toLowerCase()}`
     }
   }

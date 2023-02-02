@@ -212,13 +212,13 @@ const addMapping = (
   r: BridgeableToken[],
   a: CarbonToken,
   b: CarbonToken,
-  sourceChain: Blockchain
+  network: CarbonSDK.Network
 ) => {
-  const aChain = blockchainForChainId(a.chainId.toNumber()) as
+  const aChain = blockchainForChainId(a.chainId.toNumber(), network) as
     | Blockchain.Zilliqa
     | Blockchain.Ethereum
     | Blockchain.Arbitrum
-  const bChain = blockchainForChainId(b.chainId.toNumber()) as Blockchain
+  const bChain = blockchainForChainId(b.chainId.toNumber(), network) as Blockchain
   r.push({
     blockchain: aChain,
     tokenAddress: a.tokenAddress.toLowerCase(),
@@ -236,8 +236,9 @@ const addSwthMapping = (
   r: BridgeableToken[],
   a: CarbonToken,
   b: { [key: string]: string },
+  network: CarbonSDK.Network
 ) => {
-  const aChain = blockchainForChainId(a.chainId.toNumber()) as
+  const aChain = blockchainForChainId(a.chainId.toNumber(), network) as
     | Blockchain.Zilliqa
     | Blockchain.Ethereum
     | Blockchain.Arbitrum
@@ -252,8 +253,8 @@ const addSwthMapping = (
   })
 }
 
-const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken) => {
-  const blockchain = blockchainForChainId(t.chainId.toNumber())
+const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken, network: CarbonSDK.Network) => {
+  const blockchain = blockchainForChainId(t.chainId.toNumber(), network)
   const address =
     blockchain === Blockchain.Zilliqa
       ? toBech32Address(t.tokenAddress)
@@ -365,29 +366,29 @@ function* initialize(
         const wrappedToken = carbonTokens.find(d => d.denom === wrappedDenom)!
         const sourceToken = carbonTokens.find(d => d.denom === sourceDenom)!
 
-        const wrappedChain = blockchainForChainId(wrappedToken.chainId.toNumber())
-        const sourceChain = blockchainForChainId(sourceToken.chainId.toNumber())
-
         var wrappedChain = blockchainForChainId(wrappedToken.chainId.toNumber(), carbonNetwork) //need to specify carbon network because chain Ids of zil and eth on testnet is not on the default list of chain IDs
         var sourceChain = blockchainForChainId(sourceToken.chainId.toNumber(), carbonNetwork) //need to specify carbon network because chain Ids of zil and eth on testnet is not on the default list of chain IDs
 
+        /* "swth" chain id is 4 */
+        if (sourceToken.chainId.toNumber() === 4) {
+          sourceChain = Blockchain.Carbon
+        }
+
         if (
-          (wrappedChain !== Blockchain.Zilliqa && wrappedChain !== Blockchain.Ethereum && wrappedChain !== Blockchain.Arbitrum && wrappedChain !== Blockchain.Carbon) ||
+          (wrappedChain !== Blockchain.Zilliqa && wrappedChain !== Blockchain.Ethereum && wrappedChain !== Blockchain.Arbitrum) ||
           (sourceChain !== Blockchain.Zilliqa && sourceChain !== Blockchain.Ethereum && sourceChain !== Blockchain.Arbitrum && sourceChain !== Blockchain.Carbon)
         ) {
           return
         }
 
+        addToken(tokens, sourceToken, carbonNetwork)
+        addToken(tokens, wrappedToken, carbonNetwork)
 
-
-        addToken(tokens, sourceToken)
-        addToken(tokens, wrappedToken)
-
-        if (sourceToken.symbol === "swth") {
-          addSwthMapping(bridgeTokenResult, wrappedToken, getTokenDenomList(netZilToCarbon(network)))
+        if (sourceChain === Blockchain.Carbon) {
+          addSwthMapping(bridgeTokenResult, wrappedToken, getTokenDenomList(carbonNetwork), carbonNetwork)
         } else {
-          addMapping(bridgeTokenResult, wrappedToken, sourceToken, sourceChain)
-          addMapping(bridgeTokenResult, sourceToken, wrappedToken, sourceChain)
+          addMapping(bridgeTokenResult, wrappedToken, sourceToken, carbonNetwork)
+          addMapping(bridgeTokenResult, sourceToken, wrappedToken, carbonNetwork)
         }
 
       })

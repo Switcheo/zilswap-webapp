@@ -1,4 +1,5 @@
 import { Blockchain, CarbonSDK, ConnectedCarbonSDK } from 'carbon-js-sdk'
+import { Token } from 'carbon-js-sdk/lib/codec'
 import { SimpleMap } from 'carbon-js-sdk/lib/util/type'
 
 export const getTokenDenomList = (network: CarbonSDK.Network) => {

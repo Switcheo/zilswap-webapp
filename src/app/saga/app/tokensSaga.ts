@@ -4,7 +4,7 @@ import { Network } from "zilswap-sdk/lib/constants";
 import { Task } from "redux-saga";
 import { all, call, cancel, delay, fork, put, race, select, take } from "redux-saga/effects";
 
-import { Blockchain } from "carbon-js-sdk";
+import { Blockchain } from 'carbon-js-sdk/lib'
 import { logger } from "core/utilities";
 import {
   BatchRequestType, ZilswapConnector, balanceBatchRequest,
@@ -33,7 +33,7 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
       ...tokens[ETH_ADDRESS],
       address: ETH_ADDRESS,
       initialized: true,
-      name: "Ethereum",
+    name: "Ethereum",
       symbol: "ETH",
       decimals: 18,
       blockchain: Blockchain.Ethereum,
@@ -56,7 +56,6 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
 
     const arbitrumTokenAddresses = Object.values(tokens).filter(t => t.blockchain === Blockchain.Arbitrum && t.address !== ETH_ADDRESS).map(t => t.address)
     const arbitrumBalances = await ETHBalances.getTokenBalances({ network, tokenAddresses: arbitrumTokenAddresses, walletAddress: address, chain: Blockchain.Arbitrum })
-    console.log("arbitrum balance", arbitrumBalances)
     Object.entries(arbitrumBalances).forEach(([address, balance]) => {
       updates[address] = {
         ...tokens[address],
@@ -65,8 +64,8 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
       }
     })
   } catch (error) {
+    console.error("failed to read arbitrum balances")
     console.error("failed to read eth balances")
-    console.error("arbitrum error", error);
     return updates;
   }
 

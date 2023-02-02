@@ -4,8 +4,8 @@ import { toBech32Address } from "@zilliqa-js/zilliqa"
 import BigNumber from "bignumber.js"
 import clsx from "clsx"
 import { useDispatch, useSelector } from "react-redux"
-import { Blockchain } from "carbon-js-sdk"
 import CloseIcon from "@material-ui/icons/CloseOutlined"
+import { Blockchain } from 'carbon-js-sdk/lib'
 import { DialogModal } from "app/components"
 import { BridgeableToken, BridgeState } from "app/store/bridge/types"
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types"
@@ -145,15 +145,15 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
         tokens = tokens.filter(t => t.blockchain === Blockchain.Zilliqa && exchangeDenoms && exchangeDenoms.includes(t.address))
         break
       case 'bridge-eth':
-        bridgeTokens = bridgeState.tokens.filter(token => token.blockchain === "eth" && token.chains[toBlockchain])
+        bridgeTokens = bridgeState.tokens.filter(token => token.blockchain === Blockchain.Ethereum && token.chains[toBlockchain])
         tokens = tokens.filter(t => t.blockchain === Blockchain.Ethereum && bridgeTokens.filter(token => token.tokenAddress === t.address.slice(2)).length > 0)
         break
       case 'bridge-arbitrum':
-        bridgeTokens = bridgeState.tokens.filter(token => token.blockchain === "arbitrum" && (token.chains[toBlockchain] || token.chains[Blockchain.Carbon]))
+        bridgeTokens = bridgeState.tokens.filter(token => token.blockchain === Blockchain.Arbitrum && (token.chains[toBlockchain] || token.chains[Blockchain.Carbon]))
         tokens = tokens.filter(t => t.blockchain === Blockchain.Arbitrum && bridgeTokens.filter(token => token.tokenAddress === t.address.slice(2)).length > 0)
         break
       case 'bridge-zil':
-        bridgeTokens = bridgeState.tokens.filter(token => token.blockchain === "zil" && token.chains[toBlockchain])
+        bridgeTokens = bridgeState.tokens.filter(token => token.blockchain === Blockchain.Zilliqa && token.chains[toBlockchain])
         tokens = tokens.filter(t => t.blockchain === Blockchain.Zilliqa && bridgeTokens.filter(token => toBech32Address(token.tokenAddress) === t.address).length > 0)
         break
     }

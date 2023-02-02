@@ -4,7 +4,6 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
-  Button,
   CircularProgress,
   IconButton,
   Link,
@@ -20,9 +19,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDownRounded'
 import ArrowRightRoundedIcon from '@material-ui/icons/ArrowRightRounded'
 import CheckCircleOutlineRoundedIcon from '@material-ui/icons/CheckCircleOutlineRounded'
 import CheckCircleRoundedIcon from '@material-ui/icons/CheckCircleRounded'
-import WarningRoundedIcon from '@material-ui/icons/WarningRounded'
 import cls from 'classnames'
-import { useDispatch } from 'react-redux'
 import { Blockchain } from 'carbon-js-sdk'
 import { Network } from 'zilswap-sdk/lib/constants'
 import {
@@ -35,7 +32,6 @@ import {
 } from 'app/components'
 import { ReactComponent as StraightLine } from 'app/components/ConfirmTransfer/straight-line.svg'
 import { ReactComponent as NewLinkIcon } from 'app/components/new-link.svg'
-import { actions } from 'app/store'
 import { BridgeTx } from 'app/store/bridge/types'
 import { AppTheme } from 'app/theme/types'
 import {
@@ -340,7 +336,6 @@ interface TransactionDetailProps {
 
 const TransactionDetail = (props: TransactionDetailProps) => {
   const classes = useStyles()
-  const dispatch = useDispatch()
   const network = useNetwork()
   const bridgeableTokenFinder = useBridgeableTokenFinder()
   const { currentTx, onBack, tokenApproval, approvalHash, isHistory, onNewTransfer } =
@@ -439,9 +434,9 @@ const TransactionDetail = (props: TransactionDetailProps) => {
     return 30
   }
 
-  const handleShowMnemonicDialog = () => {
-    dispatch(actions.Layout.toggleShowMnemonic('open'))
-  }
+  // const handleShowMnemonicDialog = () => {
+  //   dispatch(actions.Layout.toggleShowMnemonic('open'))
+  // }
 
   const explorerSite: string = useMemo(() => {
     switch (currentBridgeTx?.srcChain) {
@@ -476,7 +471,10 @@ const TransactionDetail = (props: TransactionDetailProps) => {
             <Fragment>
               <Text variant="h2">Transfer in Progress...</Text>
 
+              
               {
+                //TODO; no longer needed for bridge entrance
+              /* {
                 network === Network.MainNet &&
                 <Text
                   variant="h4"
@@ -499,7 +497,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                 >
                   Read Instructions
                 </Button>
-              )}
+              )} */}
             </Fragment>
           ) : (
             <Fragment>
@@ -700,10 +698,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                           View on{' '}
                           {
                             explorerSite
-                          }
-                          {currentBridgeTx?.srcChain === Blockchain.Ethereum
-                            ? 'Etherscan'
-                            : 'ViewBlock'}{' '}
+                          }{' '}
                           <NewLinkIcon className={classes.linkIcon} />
                         </Link>
                       )}
@@ -742,9 +737,9 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                           )}
                         >
                           View on{' '}
-                          {currentBridgeTx?.srcChain === Blockchain.Ethereum
-                            ? 'Etherscan'
-                            : 'ViewBlock'}{' '}
+                          {
+                            explorerSite
+                          }{' '}
                           <NewLinkIcon className={classes.linkIcon} />
                         </Link>
                       ) : (

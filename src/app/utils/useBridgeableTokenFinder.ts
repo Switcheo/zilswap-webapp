@@ -11,6 +11,7 @@ const useBridgeableTokenFinder = () => {
   const bridgeableTokenFinder = useMemo(() => {
     return (denom: string, blockchain: Blockchain.Zilliqa | Blockchain.Ethereum | Blockchain.Arbitrum): any => {
       const bridgeableToken = bridgeableTokens.filter(token => token.denom === denom && token.blockchain === blockchain)[0];
+      console.log("bridgeable token", bridgeableToken)
       return bridgeableToken
         ? tokenFinder(bridgeableToken?.tokenAddress, blockchain)
         : {}
