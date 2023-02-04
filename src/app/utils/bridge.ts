@@ -2,7 +2,8 @@ import { Blockchain, CarbonSDK, ConnectedCarbonSDK } from 'carbon-js-sdk'
 import { Token } from 'carbon-js-sdk/lib/codec'
 import { SimpleMap } from 'carbon-js-sdk/lib/util/type'
 import { Network } from "zilswap-sdk/lib/constants"
-import { BridgeableChains } from 'app/store/types'
+import { BridgeableChains, BridgeableEvmChains } from 'app/store/types'
+import { BRIDGEABLE_CHAINS, BRIDGEABLE_EVM_CHAINS } from './constants'
 
 /**
  * Returns the mapping of chains to their respective SWTH denom
@@ -93,6 +94,26 @@ export const getEvmChainIDs = (network: Network): ReadonlyMap<Blockchain, number
     default:
       return mainnetChainIds
   }
+}
+
+/**
+ * This helper function allow us to check whether a chain with a superset type exists 
+ * in the readonly array of bridgeable evm chains
+ * @param {Blockchain} chain 
+ * @returns {boolean} Whether inputted chain exists in the list of bridgeable EVM chains
+ */
+export const evmIncludes = (chain: Blockchain): chain is BridgeableEvmChains => {
+  return BRIDGEABLE_EVM_CHAINS.includes(chain as BridgeableEvmChains)
+}
+
+/**
+ * This helper function allow us to check whether a chain with a superset type exists 
+ * in the readonly array of bridgeable chains
+ * @param {Blockchain} chain 
+ * @returns {boolean} Whether inputted chain exists in the list of bridgeable chains
+ */
+export const bridgeableIncludes = (chain: Blockchain): chain is BridgeableChains => {
+  return BRIDGEABLE_CHAINS.includes(chain as BridgeableChains)
 }
 
 export const getRecoveryAddress = (network: CarbonSDK.Network) => {

@@ -124,9 +124,18 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
   [Network.TestNet]: ["swth.1.111.ae86f6", "swth.1.502.976cb7"],
 }
 
-export const BRIDGEABLE_EVM_CHAINS = [Blockchain.Ethereum, Blockchain.Arbitrum, Blockchain.BinanceSmartChain]
+//To edit when integrating new EVM chains for Zilbridge
+export const BRIDGEABLE_EVM_CHAINS = [
+  Blockchain.Ethereum, 
+  Blockchain.Arbitrum, 
+  Blockchain.BinanceSmartChain
+] as const
 
-export const BRIDGEABLE_CHAINS = [Blockchain.Zilliqa, ...BRIDGEABLE_EVM_CHAINS]
+//To edit when integrating other blockchain protocols to Zilbridge
+export const BRIDGEABLE_CHAINS = [
+  Blockchain.Zilliqa, 
+  ...BRIDGEABLE_EVM_CHAINS
+] as const
 
 export const ERC20_ZIL_TOKENSWAP_CONTRACT = {
   [Network.MainNet]: "0xef1efb7f22fb728820d4952b33012a7115e87687",

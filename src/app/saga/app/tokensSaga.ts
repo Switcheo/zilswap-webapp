@@ -14,7 +14,7 @@ import { ETHBalances } from "core/ethereum";
 import { actions } from "app/store";
 import { TokenInfo } from "app/store/types";
 import { SimpleMap, bnOrZero } from "app/utils";
-import { ETH_ADDRESS, PollIntervals } from "app/utils/constants";
+import { BRIDGEABLE_EVM_CHAINS, ETH_ADDRESS, PollIntervals } from "app/utils/constants";
 import { getBlockchain, getTokens, getWallet } from "../selectors";
 
 const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string | null) => {
@@ -27,7 +27,7 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
 
     logger("tokens saga", "retrieving eth token balances/allowances");
 
-    // get eth balance
+    // get mainnet eth balance
     const balance = await ETHBalances.getETHBalance({ network, walletAddress: address })
     updates[ETH_ADDRESS] = {
       ...tokens[ETH_ADDRESS],
@@ -40,32 +40,22 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
       balance,
     }
 
-    // get rest
-    const tokenAddresses = Object.values(tokens).filter(t => t.blockchain === Blockchain.Ethereum && t.address !== ETH_ADDRESS).map(t => t.address)
-    if (!tokenAddresses.length)
-      return updates;
+    // loop through all the bridegable evm chains and get their respective token balances
+   for (const evmChain of BRIDGEABLE_EVM_CHAINS) {
+      const tokenAddresses = Object.values(tokens).filter(t => t.blockchain === evmChain && t.address !== ETH_ADDRESS).map(t => t.address)
+      if (!tokenAddresses.length) return;
 
-    const balances = await ETHBalances.getTokenBalances({ network, tokenAddresses, walletAddress: address })
-    Object.entries(balances).forEach(([address, balance]) => {
-      updates[address] = {
-        ...tokens[address],
-        initialized: true,
-        balance,
-      }
-    })
-
-    const arbitrumTokenAddresses = Object.values(tokens).filter(t => t.blockchain === Blockchain.Arbitrum && t.address !== ETH_ADDRESS).map(t => t.address)
-    const arbitrumBalances = await ETHBalances.getTokenBalances({ network, tokenAddresses: arbitrumTokenAddresses, walletAddress: address, chain: Blockchain.Arbitrum })
-    Object.entries(arbitrumBalances).forEach(([address, balance]) => {
-      updates[address] = {
-        ...tokens[address],
-        initialized: true,
-        balance,
-      }
-    })
+      const balances = await ETHBalances.getTokenBalances({ network, tokenAddresses, walletAddress: address, chain: evmChain })
+      Object.entries(balances).forEach(([address, balance]) => {
+        updates[address] = {
+          ...tokens[address],
+          initialized: true,
+          balance,
+        }
+      })
+    }
   } catch (error) {
-    console.error("failed to read arbitrum balances")
-    console.error("failed to read eth balances")
+    console.error("failed to read evm balances")
     return updates;
   }
 

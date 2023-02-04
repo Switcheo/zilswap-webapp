@@ -33,7 +33,6 @@ import {
   RPCEndpoints,
   ZIL_ADDRESS,
   WZIL_TOKEN_CONTRACT,
-  BRIDGEABLE_CHAINS,
 } from 'app/utils/constants'
 import { TokenInfo, Transaction } from 'app/store/types'
 import {
@@ -44,7 +43,7 @@ import {
 import { ChainInitAction } from 'app/store/blockchain/actions'
 import { actions } from 'app/store'
 import { StatsActionTypes } from 'app/store/stats/actions'
-import { getTokenDenomList } from 'app/utils/bridge'
+import { bridgeableIncludes, getTokenDenomList } from 'app/utils/bridge'
 import { getBlockchain, getTransactions, getWallet } from '../selectors'
 
 const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
@@ -361,17 +360,17 @@ function* initialize(
         const wrappedToken = carbonTokens.find(d => d.denom === wrappedDenom)!
         const sourceToken = carbonTokens.find(d => d.denom === sourceDenom)!
 
-        var wrappedChain = blockchainForChainId(wrappedToken.chainId.toNumber(), carbonNetwork) //need to specify carbon network because chain Ids of zil and eth on testnet is not on the default list of chain IDs
-        var sourceChain = blockchainForChainId(sourceToken.chainId.toNumber(), carbonNetwork) //need to specify carbon network because chain Ids of zil and eth on testnet is not on the default list of chain IDs
+        var wrappedChain = blockchainForChainId(wrappedToken.chainId.toNumber(), carbonNetwork) //need to specify carbon network because the list of chainIds vary based on the carbonNetwork
+        var sourceChain = blockchainForChainId(sourceToken.chainId.toNumber(), carbonNetwork) //need to specify carbon network because the list of chainIds vary based on the carbonNetwork
 
-        /* "swth" chain id is 4 */
+        /* HARDCODE: "swth" token chain id is 4 according to the carbonSDK tokens api */
         if (sourceToken.chainId.toNumber() === 4) {
           sourceChain = Blockchain.Carbon
         }
 
         if (
-          (!wrappedChain || !(BRIDGEABLE_CHAINS.includes(wrappedChain))) ||
-          (!sourceChain || (!(BRIDGEABLE_CHAINS.includes(sourceChain)) && sourceChain !== Blockchain.Carbon))
+          (!wrappedChain || !(bridgeableIncludes(wrappedChain))) ||
+          (!sourceChain || (!(bridgeableIncludes(sourceChain)) && sourceChain !== Blockchain.Carbon))
         ) {
           return
         }

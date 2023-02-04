@@ -6,12 +6,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet, WalletConnectType } from "core/wallet";
-import { BRIDGEABLE_EVM_CHAINS, useNetwork } from "app/utils";
+import { useNetwork } from "app/utils";
 import { AppTheme } from "app/theme/types";
-import { RootState } from "app/store/types";
+import { BridgeableChains, RootState } from "app/store/types";
 import { actions } from "app/store";
 import { DialogModal } from "app/components";
-import { getEvmChainIDs } from 'app/utils/bridge'
+import { evmIncludes, getEvmChainIDs } from 'app/utils/bridge'
 import NetworkSwitchBox from "./NetworkSwitchBox";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -27,15 +27,15 @@ const NetworkSwitchDialog = (props: any) => {
     const showNetworkSwitchDialog = useSelector<RootState, boolean>(state => state.layout.showNetworkSwitchDialog);
     const zilWallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
     const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]);
-    const srcChain = useSelector<RootState, Blockchain>(state => state.bridge.formState.fromBlockchain);
+    const srcChain = useSelector<RootState, BridgeableChains>(state => state.bridge.formState.fromBlockchain);
 
     const isMainNet = useMemo(() => {
-      if (BRIDGEABLE_EVM_CHAINS.includes(srcChain)) {
+      if (srcChain === Blockchain.Zilliqa) {
+        return network === Network.MainNet
+      } else if (evmIncludes(srcChain)) {
         if (Number(ethWallet?.chainId) === 5) return false;
         // set to mainnet even if currently set to some random net
         return true;
-      } else if (srcChain === Blockchain.Zilliqa) {
-        return network === Network.MainNet
       }
     }, [ethWallet?.chainId, network, srcChain])
 

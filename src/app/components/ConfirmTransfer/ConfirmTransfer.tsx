@@ -354,7 +354,7 @@ const ConfirmTransfer = (props: any) => {
     if (approvalRequired) {
       const allowance = await ethClient.checkAllowanceERC20(asset, ethAddress, `0x${lockProxy}`)
       if (allowance.lt(depositAmt)) {
-        toaster(`Approval needed (${fromBlockchain.charAt(0).toUpperCase() + fromBlockchain.slice(1)})`, { overridePersist: false })
+        toaster(`Approval needed (${fromBlockchain.toUpperCase()})`, { overridePersist: false })
         const approve_tx = await ethClient.approveERC20({
           token: asset,
           ethAddress,

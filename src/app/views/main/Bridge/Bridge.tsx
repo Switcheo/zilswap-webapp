@@ -24,7 +24,7 @@ import { AppTheme } from "app/theme/types"
 import { bnOrZero, hexToRGBA, netZilToCarbon, useAsyncTask, useNetwork, useTokenFinder } from "app/utils"
 import { BIG_ZERO, BRIDGEABLE_EVM_CHAINS, BRIDGE_DISABLED } from "app/utils/constants"
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg"
-import { getEvmChainIDs } from 'app/utils/bridge'
+import { evmIncludes, getEvmChainIDs } from 'app/utils/bridge'
 import { ConnectButton } from "./components"
 import { BridgeParamConstants } from "./components/constants"
 import { ReactComponent as WavyLine } from "./wavy-line.svg"
@@ -297,11 +297,11 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     const ethAddress = await signer.getAddress()
     const chainId = (await ethersProvider.getNetwork()).chainId
 
-    if (BRIDGEABLE_EVM_CHAINS.includes(bridgeFormState.fromBlockchain)) {
+    if (evmIncludes(bridgeFormState.fromBlockchain)) {
       setSourceAddress(ethAddress)
     }
 
-    if (BRIDGEABLE_EVM_CHAINS.includes(bridgeFormState.toBlockchain)) {
+    if (evmIncludes(bridgeFormState.toBlockchain)) {
       setDestAddress(ethAddress)
     }
 
@@ -347,7 +347,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
   const onCurrencyChange = (token: TokenInfo) => {
     let tokenAddress: string | undefined
-    if (BRIDGEABLE_EVM_CHAINS.includes(fromBlockchain)) {
+    if (evmIncludes(fromBlockchain)) {
       tokenAddress = token.address.toLowerCase()
     } else {
       tokenAddress = fromBech32Address(token.address).toLowerCase()
