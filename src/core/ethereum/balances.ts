@@ -1,6 +1,8 @@
 import BigNumber from "bignumber.js"
 import { Blockchain } from 'carbon-js-sdk/lib'
 import { Network } from "zilswap-sdk/lib/constants"
+import { EthRpcUrl } from 'app/utils'
+import { BridgeableEvmChains } from 'app/store/types'
 import { HTTP } from "../utilities/http"
 
 export interface CoinGeckoPriceResult {
@@ -10,14 +12,14 @@ export interface CoinGeckoPriceResult {
 interface GetETHBalanceProps {
   network: Network
   walletAddress: string
-  chain?: Blockchain
+  chain?: BridgeableEvmChains
 };
 
 interface GetTokenBalancesProps {
   network: Network
   tokenAddresses: string[]
   walletAddress: string
-  chain?: Blockchain
+  chain?: BridgeableEvmChains
 };
 
 interface GetTokenAllowanceProps {
@@ -25,25 +27,16 @@ interface GetTokenAllowanceProps {
   tokenAddress: string
   walletAddress: string
   spenderAddress: string
-  chain?: Blockchain
+  chain?: BridgeableEvmChains
 };
 
 /**
  * Ethereum Web3 balances API abstraction object
  */
 export class ETHBalances {
-  static getClient = (network: Network, chain?: Blockchain): HTTP<{ root: string }> => {
-    let url: string
+  static getClient = (network: Network, chain?: BridgeableEvmChains): HTTP<{ root: string }> => {
+    let url: string = EthRpcUrl[network][chain ?? Blockchain.Ethereum]
 
-    switch (chain) {
-      case Blockchain.Arbitrum:
-        url = "https://arb-mainnet.g.alchemy.com/v2/Oo0CNP_yGx_RlnwX35nmH3Z--40cn-De"
-        break
-      default:
-        url = network === Network.MainNet ?
-          "https://eth-mainnet.alchemyapi.io/v2/MSB_PM1tNIxC1CD9al_iNOR5MbpcjsgS/" :
-          "https://eth-goerli.alchemyapi.io/v2/Rog1kuZQf1R8X7EAmsXs7oFyQXyzIH-4"
-    }
     return new HTTP(url, { root: '' })
   }
 

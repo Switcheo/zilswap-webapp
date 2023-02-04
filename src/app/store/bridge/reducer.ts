@@ -7,7 +7,7 @@ import { DataCoder, bnOrZero } from "app/utils";
 import { LocalStorageKeys } from "app/utils/constants";
 import { SimpleMap } from "app/utils";
 import { BridgeActionTypes } from "./actions";
-import { BridgeState, BridgeTx, BridgeableTokenMapping } from "./types";
+import { BridgeState, BridgeTx, BridgeableTokenMapping, BridgeableChains } from "./types";
 
 export const BridgeTxEncoder: DataCoder<BridgeTx> = {
   encode: (tx: BridgeTx): object => {
@@ -136,7 +136,7 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
       let token = state.formState.token;
       if (!token) {
 
-        const fromBlockchain = state.formState.fromBlockchain as Blockchain.Zilliqa | Blockchain.Ethereum | Blockchain.Arbitrum;
+        const fromBlockchain = state.formState.fromBlockchain as BridgeableChains;
         const firstToken = tokens.find(token => token.blockchain === fromBlockchain);
         token = tokens?.find(bridgeToken => bridgeToken.denom.startsWith("zil") && bridgeToken.blockchain === fromBlockchain) ?? firstToken;
 

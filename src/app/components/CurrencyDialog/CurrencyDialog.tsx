@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux"
 import CloseIcon from "@material-ui/icons/CloseOutlined"
 import { Blockchain } from 'carbon-js-sdk/lib'
 import { DialogModal } from "app/components"
-import { BridgeableToken, BridgeState } from "app/store/bridge/types"
+import { BridgeableChains, BridgeableToken, BridgeState } from "app/store/bridge/types"
 import { RootState, TokenInfo, TokenState, WalletState } from "app/store/types"
 import { hexToRGBA, useTaskSubscriber } from "app/utils"
 import { BIG_ZERO, HIDE_SWAP_TOKEN_OVERRIDE, LoadingKeys, ZIL_ADDRESS } from "app/utils/constants"
@@ -91,8 +91,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }))
 
-export type CurrencyListType = "zil" | "ark-zil" | "bridge-zil" | "bridge-eth" | "bridge-arbitrum"
-
 export interface CurrencyDialogProps extends DialogProps {
   onSelectCurrency: (token: TokenInfo) => void
   hideZil?: boolean
@@ -100,12 +98,13 @@ export interface CurrencyDialogProps extends DialogProps {
   showContribution?: boolean
   zrc2Only?: boolean
   token?: TokenInfo | null
-  tokenList: CurrencyListType
+  tokenList: string
   wrapZil?: boolean
 };
 
 const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProps) => {
-  const { className, onSelectCurrency, hideZil, hideNoPool, showContribution, zrc2Only, tokenList, open, token, onClose, wrapZil } = props
+  const { className, onSelectCurrency, hideZil, hideNoPool, showContribution, zrc2Only, open, token, onClose, wrapZil } = props
+  var { tokenList } = props
   const classes = useStyles()
   const [search, setSearch] = useState("")
   const [tokens, setTokens] = useState<TokenInfo[]>([])
@@ -115,8 +114,19 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
   const tokenState = useSelector<RootState, TokenState>(state => state.token)
   const walletState = useSelector<RootState, WalletState>(state => state.wallet)
   const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge)
-  const toBlockchain = bridgeState.formState.toBlockchain
+  const { toBlockchain, fromBlockchain } = bridgeState.formState
   const { exchangeInfo } = useSelector(getMarketplace)
+  var bridgeChain: BridgeableChains = Blockchain.Zilliqa
+
+  /*
+  if tokenList starts with "bridge-", isolate the chain by using the substring after. 
+  Use the chain name for filtering the bridge tokens list later
+  */
+  const bridgeRegex = new RegExp(`bridge-` + fromBlockchain)
+  if (tokenList.match(bridgeRegex)) {
+    bridgeChain = tokenList.replace("bridge-", "") as BridgeableChains
+    tokenList = "bridge"
+  }
 
   useEffect(() => {
     if (!tokenState.tokens) return setTokens([])
@@ -144,18 +154,17 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
         const exchangeDenoms = exchangeInfo?.denoms
         tokens = tokens.filter(t => t.blockchain === Blockchain.Zilliqa && exchangeDenoms && exchangeDenoms.includes(t.address))
         break
-      case 'bridge-eth':
-        bridgeTokens = bridgeState.tokens.filter(token => token.blockchain === Blockchain.Ethereum && token.chains[toBlockchain])
-        tokens = tokens.filter(t => t.blockchain === Blockchain.Ethereum && bridgeTokens.filter(token => token.tokenAddress === t.address.slice(2)).length > 0)
-        break
-      case 'bridge-arbitrum':
-        bridgeTokens = bridgeState.tokens.filter(token => token.blockchain === Blockchain.Arbitrum && (token.chains[toBlockchain] || token.chains[Blockchain.Carbon]))
-        tokens = tokens.filter(t => t.blockchain === Blockchain.Arbitrum && bridgeTokens.filter(token => token.tokenAddress === t.address.slice(2)).length > 0)
-        break
-      case 'bridge-zil':
-        bridgeTokens = bridgeState.tokens.filter(token => token.blockchain === Blockchain.Zilliqa && token.chains[toBlockchain])
-        tokens = tokens.filter(t => t.blockchain === Blockchain.Zilliqa && bridgeTokens.filter(token => toBech32Address(token.tokenAddress) === t.address).length > 0)
-        break
+      case 'bridge':
+        switch (bridgeChain!) {
+          case Blockchain.Zilliqa:
+            bridgeTokens = bridgeState.tokens.filter(token => token.blockchain === Blockchain.Zilliqa && token.chains[toBlockchain])
+            tokens = tokens.filter(t => t.blockchain === Blockchain.Zilliqa && bridgeTokens.filter(token => toBech32Address(token.tokenAddress) === t.address).length > 0)
+            break
+          default:
+            bridgeTokens = bridgeState.tokens.filter(token => token.blockchain === bridgeChain && token.chains[toBlockchain])
+            tokens = tokens.filter(t => t.blockchain === bridgeChain && bridgeTokens.filter(token => token.tokenAddress === t.address.slice(2)).length > 0)
+            break
+        }
     }
 
     if (zrc2Only)
@@ -169,7 +178,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
 
     if (token && !tokens.find(t => t.address === token.address) && tokens.length > 0)
       onSelectCurrency(tokens[0])
-  }, [tokenState.tokens, walletState.wallet, bridgeState.tokens, showContribution, toBlockchain, tokenList, exchangeInfo?.denoms, zrc2Only, wrapZil, token, onSelectCurrency])
+  }, [tokenState.tokens, walletState.wallet, bridgeState.tokens, showContribution, toBlockchain, tokenList, bridgeChain, exchangeInfo?.denoms, zrc2Only, wrapZil, token, onSelectCurrency])
 
   const filterSearch = (token: TokenInfo): boolean => {
     const searchTerm = search.toLowerCase().trim()

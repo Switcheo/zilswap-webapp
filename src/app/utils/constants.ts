@@ -1,4 +1,5 @@
 import BigNumber from "bignumber.js";
+import { Blockchain } from 'carbon-js-sdk/lib'
 import { Network } from "zilswap-sdk/lib/constants";
 import { SimpleMap } from "./types";
 
@@ -58,8 +59,16 @@ export const RPCEndpoints: { [key in Network]: string } = {
 };
 
 export const EthRpcUrl = {
-  [Network.MainNet]: "https://eth-mainnet.alchemyapi.io/v2/RWHcfoaBKzRpXnLONcEDnVqtUp7StNYl",
-  [Network.TestNet]: "https://eth-goerli.alchemyapi.io/v2/Rog1kuZQf1R8X7EAmsXs7oFyQXyzIH-4",
+  [Network.MainNet]: {
+    [Blockchain.Ethereum]: "https://eth-mainnet.alchemyapi.io/v2/RWHcfoaBKzRpXnLONcEDnVqtUp7StNYl",
+    [Blockchain.Arbitrum]: "https://arb-mainnet.g.alchemy.com/v2/Oo0CNP_yGx_RlnwX35nmH3Z--40cn-De",
+    [Blockchain.BinanceSmartChain]: "https://bsc-dataseed1.binance.org",
+  },
+  [Network.TestNet]: {
+    [Blockchain.Ethereum]: "https://eth-goerli.alchemyapi.io/v2/Rog1kuZQf1R8X7EAmsXs7oFyQXyzIH-4",
+    [Blockchain.Arbitrum]: "",
+    [Blockchain.BinanceSmartChain]: "",
+  },
 }
 
 export const BIG_ZERO = new BigNumber(0);
@@ -109,10 +118,15 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
     "zusdt.1.18.1728e9", "zeth.1.18.54437c", "zwbtc.1.18.a9cb60",
     "zxcad.1.18.35137d", "eport.1.2.7d4912", "efees.1.2.586fb5",
     "elunr.1.2.e2121e", "ezil.1.2.f1b7e4", "dxcad.1.2.67dde7",
-    "zbrkl.1.18.b8c24f", "zopul.1.18.4bcdc9", "ztraxx.1.18.9c8e35","swth.1.19.6f83d0"
+    "zbrkl.1.18.b8c24f", "zopul.1.18.4bcdc9", "ztraxx.1.18.9c8e35",
+    "swth.1.19.6f83d0", "swth.1.6.5bc06b",
   ],
   [Network.TestNet]: ["swth.1.111.ae86f6", "swth.1.502.976cb7"],
 }
+
+export const BRIDGEABLE_EVM_CHAINS = [Blockchain.Ethereum, Blockchain.Arbitrum, Blockchain.BinanceSmartChain]
+
+export const BRIDGEABLE_CHAINS = [Blockchain.Zilliqa, ...BRIDGEABLE_EVM_CHAINS]
 
 export const ERC20_ZIL_TOKENSWAP_CONTRACT = {
   [Network.MainNet]: "0xef1efb7f22fb728820d4952b33012a7115e87687",

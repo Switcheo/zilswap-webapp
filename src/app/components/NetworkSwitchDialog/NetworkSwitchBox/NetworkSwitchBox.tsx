@@ -86,7 +86,10 @@ const NetworkSwitchBox = (props: Props) => {
 
     const switchEthChain = async () => {
       try {
-        if (!ethWallet) return
+        if (!ethWallet) {
+            onCloseDialog();
+            return
+        }
         await ethWallet.provider.request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: requiredChainID }],

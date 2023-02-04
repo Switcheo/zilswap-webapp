@@ -46,10 +46,9 @@ import {
   BRIDGE_TX_DEPOSIT_CONFIRM_ETH,
   BRIDGE_TX_DEPOSIT_CONFIRM_ZIL,
 } from 'app/utils/constants'
-import { ReactComponent as ArbitrumLogo } from 'app/views/main/Bridge/arbitrum-one.svg'
-import { ReactComponent as EthereumLogo } from 'app/views/main/Bridge/ethereum-logo.svg'
 import { ReactComponent as WavyLine } from 'app/views/main/Bridge/wavy-line.svg'
-import { ReactComponent as ZilliqaLogo } from 'app/views/main/Bridge/zilliqa-logo.svg'
+import ChainLogo from 'app/views/main/Bridge/components/ChainLogo/ChainLogo'
+import { getExplorerLink, getExplorerSite } from 'app/utils/bridge'
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
@@ -372,25 +371,6 @@ const TransactionDetail = (props: TransactionDetailProps) => {
       return `https://scan.carbon.network/transaction/${hash}?net=test`
     }
   }
-  const getExplorerLink = (hash: string, blockchain: Blockchain) => {
-    if (network === Network.MainNet) {
-      switch (blockchain) {
-        case Blockchain.Ethereum:
-          return `https://etherscan.io/search?q=${hash}`
-        case Blockchain.Arbitrum:
-          return `https://arbiscan.io/tx/${hash}`
-        default:
-          return `https://viewblock.io/zilliqa/tx/${hash}`
-      }
-    } else {
-      switch (blockchain) {
-        case Blockchain.Ethereum:
-          return `https://goerli.etherscan.io/tx/${hash}`
-        default:
-          return `https://viewblock.io/zilliqa/tx/${hash}?network=testnet`
-      }
-    }
-  }
 
   const getActiveStep = () => {
     if (currentBridgeTx?.destinationTxHash) {
@@ -439,19 +419,8 @@ const TransactionDetail = (props: TransactionDetailProps) => {
   // }
 
   const explorerSite: string = useMemo(() => {
-    switch (currentBridgeTx?.srcChain) {
-      case Blockchain.Ethereum:
-        return "Etherscan"
-      case Blockchain.Arbitrum:
-        return "Arbiscan"
-      case Blockchain.Zilliqa:
-        return "Viewblock"
-      default:
-        return ""
-    }
-  }, [currentBridgeTx?.srcChain])
-
-  console.log("source bridge", currentBridgeTx?.srcChain)
+    return getExplorerSite(network, currentBridgeTx?.srcChain)
+  }, [network, currentBridgeTx?.srcChain])
 
   return (
     <Box display="flex" flexDirection="column" className={classes.container}>
@@ -551,14 +520,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
               mt={1.5}
               mb={1.5}
             >
-              {currentBridgeTx?.srcChain === Blockchain.Zilliqa ? (
-                <ZilliqaLogo />
-              ) : (
-                currentBridgeTx?.srcChain === Blockchain.Ethereum ?
-                <EthereumLogo />
-                :
-                <ArbitrumLogo />
-              )}
+              <ChainLogo chain={currentBridgeTx?.srcChain} />
             </Box>
             <Text variant="h4" className={classes.chainName}>
               {fromChainName} Network
@@ -587,14 +549,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
               mt={1.5}
               mb={1.5}
             >
-              {currentBridgeTx?.dstChain === Blockchain.Zilliqa ? (
-                <ZilliqaLogo />
-              ) : (
-                currentBridgeTx?.dstChain === Blockchain.Ethereum ?
-                <EthereumLogo />
-                :
-                <ArbitrumLogo />
-              )}
+              <ChainLogo chain={currentBridgeTx?.dstChain} />
             </Box>
             <Text variant="h4" className={classes.chainName}>
               {toChainName} Network
@@ -693,7 +648,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                           underline="hover"
                           rel="noopener noreferrer"
                           target="_blank"
-                          href={getExplorerLink(approvalHash, currentBridgeTx?.srcChain)}
+                          href={getExplorerLink(approvalHash, network, currentBridgeTx?.srcChain)}
                         >
                           View on{' '}
                           {
@@ -733,6 +688,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                           target="_blank"
                           href={getExplorerLink(
                             currentBridgeTx.sourceTxHash,
+                            network,
                             currentBridgeTx?.srcChain
                           )}
                         >
@@ -840,13 +796,14 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                           target="_blank"
                           href={getExplorerLink(
                             currentBridgeTx.destinationTxHash,
+                            network,
                             currentBridgeTx?.dstChain
                           )}
                         >
                           View on{' '}
-                          {currentBridgeTx?.dstChain === Blockchain.Zilliqa
-                            ? 'ViewBlock'
-                            : 'Etherscan'}{' '}
+                          {
+                            getExplorerSite(network, currentBridgeTx?.dstChain)
+                          }{' '}
                           <NewLinkIcon className={classes.linkIcon} />
                         </Link>
                       ) : (

@@ -25,7 +25,7 @@ import {
 import { ConnectedBridgeWallet } from 'core/wallet/ConnectedBridgeWallet'
 import { getConnectedBoltX } from 'core/utilities/boltx'
 import { netZilToCarbon, SimpleMap } from 'app/utils'
-import { BridgeableToken } from 'app/store/bridge/types'
+import { BridgeableChains, BridgeableToken } from 'app/store/bridge/types'
 import { detachedToast } from 'app/utils/useToaster'
 import {
   BRIDGEABLE_WRAPPED_DENOMS,
@@ -33,6 +33,7 @@ import {
   RPCEndpoints,
   ZIL_ADDRESS,
   WZIL_TOKEN_CONTRACT,
+  BRIDGEABLE_CHAINS,
 } from 'app/utils/constants'
 import { TokenInfo, Transaction } from 'app/store/types'
 import {
@@ -214,10 +215,7 @@ const addMapping = (
   b: CarbonToken,
   network: CarbonSDK.Network
 ) => {
-  const aChain = blockchainForChainId(a.chainId.toNumber(), network) as
-    | Blockchain.Zilliqa
-    | Blockchain.Ethereum
-    | Blockchain.Arbitrum
+  const aChain = blockchainForChainId(a.chainId.toNumber(), network) as BridgeableChains
   const bChain = blockchainForChainId(b.chainId.toNumber(), network) as Blockchain
   r.push({
     blockchain: aChain,
@@ -238,10 +236,7 @@ const addSwthMapping = (
   b: { [key: string]: string },
   network: CarbonSDK.Network
 ) => {
-  const aChain = blockchainForChainId(a.chainId.toNumber(), network) as
-    | Blockchain.Zilliqa
-    | Blockchain.Ethereum
-    | Blockchain.Arbitrum
+  const aChain = blockchainForChainId(a.chainId.toNumber(), network) as BridgeableChains
   r.push({
     blockchain: aChain,
     tokenAddress: a.tokenAddress.toLowerCase(),
@@ -375,8 +370,8 @@ function* initialize(
         }
 
         if (
-          (wrappedChain !== Blockchain.Zilliqa && wrappedChain !== Blockchain.Ethereum && wrappedChain !== Blockchain.Arbitrum) ||
-          (sourceChain !== Blockchain.Zilliqa && sourceChain !== Blockchain.Ethereum && sourceChain !== Blockchain.Arbitrum && sourceChain !== Blockchain.Carbon)
+          (!wrappedChain || !(BRIDGEABLE_CHAINS.includes(wrappedChain))) ||
+          (!sourceChain || (!(BRIDGEABLE_CHAINS.includes(sourceChain)) && sourceChain !== Blockchain.Carbon))
         ) {
           return
         }

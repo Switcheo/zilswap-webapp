@@ -28,11 +28,9 @@ import { RootState } from "app/store/types"
 import { BridgeFormState, BridgeState, BridgeTx, BridgeableToken } from "app/store/bridge/types"
 import { actions } from "app/store"
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components"
-import { getETHClient, getRecoveryAddress } from 'app/utils/bridge'
-import { ReactComponent as ArbitrumLogo } from '../../views/main/Bridge/arbitrum-one.svg'
-import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg"
+import { getETHClient, getEvmGasLimit, getRecoveryAddress } from 'app/utils/bridge'
+import ChainLogo from 'app/views/main/Bridge/components/ChainLogo/ChainLogo'
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg"
-import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg"
 
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -235,14 +233,6 @@ const getChainName = (blockchain: Blockchain) => {
   }
 }
 
-const getChainLogo = (blockchain: Blockchain) => {
-  switch (blockchain) {
-    case Blockchain.Zilliqa: return <ZilliqaLogo />
-    case Blockchain.Ethereum: return <EthereumLogo />
-    case Blockchain.Arbitrum: return <ArbitrumLogo />
-  }
-}
-
 const ConfirmTransfer = (props: any) => {
   const { showTransfer } = props
   const classes = useStyles()
@@ -375,10 +365,9 @@ const ConfirmTransfer = (props: any) => {
         })
 
         logger("approve tx", approve_tx.hash)
-        toaster(`Submitted: (${fromBlockchain.charAt(0).toUpperCase() + fromBlockchain.slice(1)} - ERC20 Approval)`, { hash: approve_tx.hash!.replace(/^0x/i, ""), sourceBlockchain: "eth" })
+        toaster(`Submitted: (${fromBlockchain.toUpperCase()} - ERC20 Approval)`, { hash: approve_tx.hash!.replace(/^0x/i, ""), sourceBlockchain: "eth" })
         setApprovalHash(approve_tx.hash!)
         const txReceipt = await ethClient.getProvider().waitForTransaction(approve_tx.hash!)
-        console.log("zil zrc2", txReceipt)
 
         // token approval success
         if (approve_tx !== undefined && txReceipt?.status === 1) {
@@ -401,7 +390,6 @@ const ConfirmTransfer = (props: any) => {
       return
     }
 
-    console.log("recovery address", getRecoveryAddress(sdk.network))
 
     const bridgeDepositParams: BridgeParams = {
       fromToken: asset,
@@ -412,7 +400,7 @@ const ConfirmTransfer = (props: any) => {
       toAddress: bridgeFormState.destAddress,
       feeAmount: network === Network.MainNet ? withdrawFee!.amount.shiftedBy(toToken.decimals.toNumber()) : BN_ZERO,
       gasPriceGwei,
-      gasLimit: new BigNumber(`${fromBlockchain === Blockchain.Ethereum ? BridgeParamConstants.ETH_GAS_LIMIT : BridgeParamConstants.ARBITRUM_GAS_LIMIT}`),
+      gasLimit: new BigNumber(getEvmGasLimit(fromBlockchain)),
       signer,
     }
 
@@ -423,7 +411,7 @@ const ConfirmTransfer = (props: any) => {
     }
 
     logger("bridge deposit params: %o\n", bridgeDepositParams)
-    toaster(`Submitted: (Ethereum - Bridge Asset)`, { sourceBlockchain: "eth", hash: bridge_tx.hash!.replace(/^0x/i, "") })
+    toaster(`Submitted: (${fromBlockchain.toUpperCase()} - Bridge Asset)`, { sourceBlockchain: fromBlockchain, hash: bridge_tx.hash!.replace(/^0x/i, "") })
     logger("bridge tx", bridge_tx.hash!)
 
     return bridge_tx.hash
@@ -658,9 +646,7 @@ const ConfirmTransfer = (props: any) => {
             <Box className={classes.networkBox} flex={1}>
               <Text variant="h4" color="textSecondary">From</Text>
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-                {
-                  getChainLogo(bridgeState.formState.fromBlockchain)
-                }
+                <ChainLogo chain={bridgeState.formState.fromBlockchain} />
               </Box>
               <Text variant="h4" className={classes.chainName}>{fromChainName} Network</Text>
               <Text variant="button" className={classes.walletAddress}>{formatAddress(bridgeState.formState.sourceAddress, fromBlockchain)}</Text>
@@ -670,9 +656,7 @@ const ConfirmTransfer = (props: any) => {
             <Box className={classes.networkBox} flex={1}>
               <Text variant="h4" color="textSecondary">To</Text>
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-                {
-                  getChainLogo(bridgeState.formState.toBlockchain)
-                }
+                <ChainLogo chain={bridgeState.formState.toBlockchain} />
               </Box>
               <Text variant="h4" className={classes.chainName}>{toChainName} Network</Text>
               <Text variant="button" className={classes.walletAddress}>{formatAddress(bridgeState.formState.destAddress, toBlockchain)}</Text>

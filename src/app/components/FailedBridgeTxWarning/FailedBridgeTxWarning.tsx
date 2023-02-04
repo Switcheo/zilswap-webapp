@@ -1,14 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Box, Button, makeStyles } from "@material-ui/core";
 import { useDispatch, useSelector } from "react-redux";
-import { Blockchain } from "carbon-js-sdk";
-import { Network } from "zilswap-sdk/lib/constants";
 import cls from "classnames";
 import { DialogModal, Text } from "app/components";
 import { actions } from "app/store";
 import { BridgeState, BridgeTx, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useNetwork } from "app/utils";
+import { getExplorerLink } from 'app/utils/bridge'
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -95,21 +94,7 @@ const FailedBridgeTxWarning = (props: any) => {
 
   const explorerLink = useMemo(() => {
     const hash = failedDepositTx?.sourceTxHash ?? "";
-    if (network === Network.MainNet) {
-      switch (failedDepositTx?.srcChain) {
-        case Blockchain.Ethereum:
-          return `https://etherscan.io/search?q=${hash}`;
-        default:
-          return `https://viewblock.io/zilliqa/tx/${hash}`;
-      }
-    } else {
-      switch (failedDepositTx?.srcChain) {
-        case Blockchain.Ethereum:
-          return `https://goerli.etherscan.io/tx/0x${hash}`;
-        default:
-          return `https://viewblock.io/zilliqa/tx/${hash}?network=testnet`;
-      }
-    }
+    return getExplorerLink(hash, network, failedDepositTx?.srcChain)
   }, [failedDepositTx, network]);
 
   return (

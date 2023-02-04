@@ -353,7 +353,6 @@ function* queryTokenFees() {
 
         const feeResponse = (yield call([sdk.hydrogen, sdk.hydrogen.getFeeQuote], { token_denom: carbonToken.denom })) as GetFeeQuoteResponse
         const withdrawFees = new BigNumber(feeResponse.withdrawal_fee)
-        console.log("withdraw fees", withdrawFees, feeResponse)
         const price = bnOrZero(yield sdk.token.getUSDValue(carbonToken.denom))
 
         logger("bridge saga", "withdraw fees", carbonToken.denom, withdrawFees?.toString(10), price.toString(10))

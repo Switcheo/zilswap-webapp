@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js";
-import { Blockchain, Models } from "carbon-js-sdk";
+import { Models } from "carbon-js-sdk";
+import { Blockchain } from 'carbon-js-sdk/lib'
 import { Token } from 'carbon-js-sdk/lib/codec'
 import dayjs from "dayjs";
 import { Network } from "zilswap-sdk/lib/constants";
@@ -25,7 +26,17 @@ export interface BridgeState {
   tokens: BridgeableTokenMapping;
 }
 
-export type BridgeableChains = Blockchain.Ethereum | Blockchain.Zilliqa | Blockchain.Arbitrum;
+export type BridgeableChains =
+  Blockchain.Ethereum | 
+  Blockchain.Zilliqa | 
+  Blockchain.Arbitrum | 
+  Blockchain.BinanceSmartChain;
+
+export type BridgeableEvmChains =
+  Blockchain.Ethereum | 
+  Blockchain.Arbitrum | 
+  Blockchain.BinanceSmartChain;
+
 export interface WithdrawFee {
   amount: BigNumber;
   value: BigNumber;

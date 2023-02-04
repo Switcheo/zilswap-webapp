@@ -25,9 +25,8 @@ import { RootState } from "app/store/types";
 import { BridgeFormState, BridgeState, BridgeTx, BridgeableToken } from "app/store/bridge/types";
 import { actions } from "app/store";
 import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
-import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
 import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
-import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
+import ChainLogo from 'app/views/main/Bridge/components/ChainLogo/ChainLogo'
 
 const TRANSFER_KEY_MESSAGE = "In the event you are not able to complete Stage 2 of your transfer, you may retrieve and resume your transfer by entering the following unique transfer key phrase on your Transfer History page. Do not ever reveal your transfer key phrase to anyone. ZilSwap will not be held accountable and cannot help you retrieve those funds once they are lost.\n\n";
 
@@ -618,9 +617,8 @@ const ConfirmTransferLegacy = (props: any) => {
             <Box className={classes.networkBox} flex={1}>
               <Text variant="h4" color="textSecondary">From</Text>
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-                {bridgeState.formState.fromBlockchain === Blockchain.Ethereum
-                  ? <EthereumLogo />
-                  : <ZilliqaLogo />
+                {
+                  <ChainLogo chain={fromBlockchain} />
                 }
               </Box>
               <Text variant="h4" className={classes.chainName}>{fromChainName} Network</Text>
@@ -631,9 +629,8 @@ const ConfirmTransferLegacy = (props: any) => {
             <Box className={classes.networkBox} flex={1}>
               <Text variant="h4" color="textSecondary">To</Text>
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-                {bridgeState.formState.toBlockchain === Blockchain.Zilliqa
-                  ? <ZilliqaLogo />
-                  : <EthereumLogo />
+                {
+                  <ChainLogo chain={toBlockchain} />
                 }
               </Box>
               <Text variant="h4" className={classes.chainName}>{toChainName} Network</Text>

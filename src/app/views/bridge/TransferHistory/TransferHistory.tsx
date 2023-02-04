@@ -15,8 +15,7 @@ import { AppTheme } from "app/theme/types";
 import { hexToRGBA, useBridgeableTokenFinder } from "app/utils";
 import { toHumanNumber } from "app/utils";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
-import { ReactComponent as EthereumLogo } from "../../main/Bridge/ethereum-logo.svg";
-import { ReactComponent as ZilliqaLogo } from "../../main/Bridge/zilliqa-logo.svg";
+import ChainLogo from 'app/views/main/Bridge/components/ChainLogo/ChainLogo'
 
 const CHAIN_NAMES = {
     [Blockchain.Zilliqa]: "Zilliqa",
@@ -211,17 +210,18 @@ const TransferHistory = (props: any) => {
                                         </TableCell>
                                         <TableCell>
                                             <Text className={classes.transferNetwork}>
-                                                {tx.srcChain === Blockchain.Zilliqa
-                                                    ? <ZilliqaLogo className={cls(classes.chainLogo, classes.zilLogo)} />
-                                                    : <EthereumLogo className={classes.chainLogo} />
+                                                {
+                                                tx.srcChain === Blockchain.Zilliqa
+                                                    ? <ChainLogo chain={tx.srcChain} style={cls(classes.chainLogo, classes.zilLogo)} />
+                                                    : <ChainLogo chain={tx.srcChain} style={classes.chainLogo} />
                                                 }
                                                 {CHAIN_NAMES[tx.srcChain]}
                                                 {" "}
                                                 &mdash;
 
                                                 {tx.dstChain === Blockchain.Ethereum
-                                                    ? <EthereumLogo className={classes.chainLogo} />
-                                                    : <ZilliqaLogo className={cls(classes.chainLogo, classes.zilLogo)} />
+                                                    ? <ChainLogo chain={tx.dstChain} style={classes.chainLogo} />
+                                                    : <ChainLogo chain={tx.dstChain} style={cls(classes.chainLogo, classes.zilLogo)} />
                                                 }
                                                 {CHAIN_NAMES[tx.dstChain]}
                                             </Text>

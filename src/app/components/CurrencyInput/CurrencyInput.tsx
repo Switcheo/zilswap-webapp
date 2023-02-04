@@ -20,7 +20,7 @@ import { hexToRGBA, useMoneyFormatter } from 'app/utils';
 import { formatSymbol } from 'app/utils/currencies';
 import { MoneyFormatterOptions } from 'app/utils/useMoneyFormatter';
 import { getWallet } from 'app/saga/selectors';
-import { CurrencyDialogProps, CurrencyListType } from '../CurrencyDialog/CurrencyDialog';
+import { CurrencyDialogProps } from '../CurrencyDialog/CurrencyDialog';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {},
@@ -163,7 +163,7 @@ export interface CurrencyInputProps extends React.HTMLAttributes<HTMLFormElement
   inputClassName?: string;
   token: TokenInfo | null;
   amount: string;
-  tokenList?: CurrencyListType;
+  tokenList?: string;
   showCurrencyDialog?: boolean;
   fixedToken?: boolean;
   disabled?: boolean;
@@ -229,8 +229,6 @@ const CurrencyInput: React.FC<CurrencyInputProps> = (props: CurrencyInputProps) 
   const formatOpts: MoneyFormatterOptions = {
     compression: poolToken?.decimals,
   };
-
-  console.log("token is", token)
 
   useEffect(() => {
     if (!walletState.wallet || !token) return setTokenBalance(null);
