@@ -61,7 +61,7 @@ export const RPCEndpoints: { [key in Network]: string } = {
 export const EthRpcUrl = {
   [Network.MainNet]: {
     [Blockchain.Ethereum]: "https://eth-mainnet.alchemyapi.io/v2/RWHcfoaBKzRpXnLONcEDnVqtUp7StNYl",
-    [Blockchain.Arbitrum]: "https://arb-mainnet.g.alchemy.com/v2/Oo0CNP_yGx_RlnwX35nmH3Z--40cn-De",
+    [Blockchain.Arbitrum]: "https://arb1.arbitrum.io/rpc",
     [Blockchain.BinanceSmartChain]: "https://bsc-dataseed1.binance.org",
   },
   [Network.TestNet]: {

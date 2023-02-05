@@ -128,7 +128,7 @@ export const getRecoveryAddress = (network: CarbonSDK.Network) => {
 
 export const getETHClient = (sdk: ConnectedCarbonSDK | CarbonSDK, chain: Blockchain, network: CarbonSDK.Network) => {
   if (network === CarbonSDK.Network.TestNet) {
-    return sdk.eth // using SWC5 on rinkeby to simulate BSC for bridge feature
+    return sdk.eth
   } else if (chain === Blockchain.BinanceSmartChain) {
     return sdk.bsc
   } else if (chain === Blockchain.Arbitrum) {

@@ -27,7 +27,7 @@ export interface BridgeState {
   tokens: BridgeableTokenMapping;
 }
 
-export type BridgeableEvmChains = typeof BRIDGEABLE_EVM_CHAINS[number]
+export type BridgeableEvmChains = typeof BRIDGEABLE_EVM_CHAINS[number] & Partial<Blockchain>
 
 /**
  * BridgeableChains are the chains supported on Zilbridge.
