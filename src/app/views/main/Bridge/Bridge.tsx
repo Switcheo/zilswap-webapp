@@ -287,7 +287,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     const web3Modal = new Web3Modal({
       cacheProvider: false,
       disableInjectedProvider: false,
-      network: network === Network.MainNet ? (bridgeFormState.fromBlockchain === Blockchain.Arbitrum ? 'arbitrum' : 'mainnet') : 'goerli',
+      network: network === Network.MainNet ? 'mainnet' : 'testnet',
       providerOptions
     })
 
@@ -440,13 +440,14 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     const web3Modal = new Web3Modal({
       cacheProvider: true,
       disableInjectedProvider: false,
-      network: "goerli",
+      network: "testnet",
       providerOptions
     })
     if (clear) {
       web3Modal.clearCachedProvider()
     }
     setDisconnectMenu(null)
+    setEthConnectedAddress('')
     dispatch(actions.Bridge.updateForm(disconnectForm))
     dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: null }))
   }

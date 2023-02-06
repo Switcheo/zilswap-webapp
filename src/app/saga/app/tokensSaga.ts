@@ -65,7 +65,7 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
     }
 
     /**
-     * resolve Promises in parallel instead of sequential looping and continues 
+     * resolve Promises concurrently instead of sequential looping and continues 
      * fetching balance even if one of the Promise fails/rejects
      */
     const balances = await Promise.allSettled(fetchBalancePromises)

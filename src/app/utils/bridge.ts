@@ -84,6 +84,7 @@ export const getEvmChainIDs = (network: Network): ReadonlyMap<Blockchain, number
   const testnetChainIds: ReadonlyMap<Blockchain, number> = new Map<Blockchain, number>([
     [Blockchain.Ethereum, 5],
     [Blockchain.BinanceSmartChain, 97],
+    [Blockchain.Arbitrum, 421611]
   ])
 
   switch (network) {

@@ -105,7 +105,7 @@ const ZilErc20TokenSwap = (props: Props) => {
     const web3Modal = new Web3Modal({
       cacheProvider: false,
       disableInjectedProvider: false,
-      network: network === Network.MainNet ? 'mainnet' : 'goerli',
+      network: network === Network.MainNet ? 'mainnet' : 'testnet',
       providerOptions
     })
 

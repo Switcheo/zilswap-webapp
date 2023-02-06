@@ -328,7 +328,7 @@ const ResumeTransferBox = (props: any) => {
         const web3Modal = new Web3Modal({
             cacheProvider: true,
             disableInjectedProvider: false,
-            network: "goerli",
+            network: "testnet",
             providerOptions
         });
         if (clear) {

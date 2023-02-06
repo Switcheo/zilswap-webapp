@@ -380,7 +380,7 @@ const ConfirmTransfer = (props: any) => {
       setTokenApproval(true)
     }
 
-    toaster(`Bridging asset (${fromBlockchain.charAt(0).toUpperCase() + fromBlockchain.slice(1)})`, { overridePersist: false })
+    toaster(`Bridging asset (${fromBlockchain.toUpperCase()})`, { overridePersist: false })
 
     const toToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken?.chains[toBlockchain])
 

@@ -45,7 +45,9 @@ const NetworkSwitchDialog = (props: any) => {
           case 1: return 'Ethereum Network'
           case 5: return 'Goerli Test Network'
           case 56: return 'Binance Smart Chain Network'
+          case 97: return 'Binance Smart Chain (Testnet)'
           case 42161: return 'Arbitrum One Network'
+          case 421611: return "Arbitrum Testnet Network";
           default: return 'Unknown Network'
         }
       }

@@ -66,8 +66,8 @@ export const EthRpcUrl = {
   },
   [Network.TestNet]: {
     [Blockchain.Ethereum]: "https://eth-goerli.alchemyapi.io/v2/Rog1kuZQf1R8X7EAmsXs7oFyQXyzIH-4",
-    [Blockchain.Arbitrum]: "",
-    [Blockchain.BinanceSmartChain]: "",
+    [Blockchain.Arbitrum]: "https://rinkeby.arbitrum.io/rpc",
+    [Blockchain.BinanceSmartChain]: "https://data-seed-prebsc-1-s1.binance.org:8545/",
   },
 }
 
