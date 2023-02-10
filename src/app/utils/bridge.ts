@@ -3,7 +3,7 @@ import { Token } from 'carbon-js-sdk/lib/codec'
 import { SimpleMap } from 'carbon-js-sdk/lib/util/type'
 import { Network } from "zilswap-sdk/lib/constants"
 import { BridgeableChains, BridgeableEvmChains } from 'app/store/types'
-import { BRIDGEABLE_CHAINS, BRIDGEABLE_EVM_CHAINS } from './constants'
+import { BRIDGEABLE_CHAINS, BRIDGEABLE_EVM_CHAINS, EthRpcUrl } from './constants'
 
 /**
  * Returns the mapping of chains to their respective SWTH denom
@@ -197,5 +197,68 @@ export const getExplorerSite = (network: Network, blockchain?: BridgeableChains)
       default:
         return 'Viewblock'
     }
+  }
+}
+
+export const getChainParams = (network: Network) => {
+  switch (network) {
+    case Network.MainNet:
+      return {
+        [Blockchain.Ethereum]: {
+          //TODO: sub with the correct values
+          chainId: `0x${getEvmChainIDs(network).get(Blockchain.Ethereum)!.toString(16)}`,
+          chainName: "Ethereum Network",
+          rpcUrls: [EthRpcUrl[network][Blockchain.Ethereum]],
+          blockExplorerUrls: ["https://etherscan.io"]
+        },
+        [Blockchain.Arbitrum]: {
+          chainId: `0x${getEvmChainIDs(network).get(Blockchain.Arbitrum)!.toString(16)}`,
+          chainName: "Arbitrum One",
+          nativeCurrency: {
+            name: "Ethereum (Arbitrum)",
+            symbol: "ETH",
+            decimals: 18
+          },
+          rpcUrls: [EthRpcUrl[network][Blockchain.Arbitrum]],
+          blockExplorerUrls: ["https://explorer.arbitrum.io"]
+        },
+        [Blockchain.BinanceSmartChain]: {
+          chainId: `0x${getEvmChainIDs(network).get(Blockchain.BinanceSmartChain)!.toString(16)}`,
+          chainName: "Binance Smart Chain",
+          nativeCurrency: {
+            name: "Binance Chain Native Token",
+            symbol: "BNB",
+            decimals: 18
+          },
+          rpcUrls: [EthRpcUrl[network][Blockchain.BinanceSmartChain]],
+          blockExplorerUrls: ["https://bscscan.com"]
+        },
+      }
+    case Network.TestNet:
+      return {
+        [Blockchain.Ethereum]: {
+          chainId: `0x${getEvmChainIDs(network).get(Blockchain.Ethereum)!.toString(16)}`,
+          chainName: "Goerli Test Network",
+          RpcUrls: [EthRpcUrl[network][Blockchain.Ethereum]],
+          blockExplorerUrls: ["https://goerli.etherscan.io"]
+        },
+        [Blockchain.Arbitrum]: {
+          chainId: `0x${getEvmChainIDs(network).get(Blockchain.Arbitrum)!.toString(16)}`,
+          chainName: "Arbitrum One (Testnet)",
+          rpcUrls: [EthRpcUrl[network][Blockchain.Arbitrum]],
+          blockExplorerUrls: ["https://testnet.arbiscan.io"]
+        },
+        [Blockchain.BinanceSmartChain]: {
+          chainId: `0x${getEvmChainIDs(network).get(Blockchain.BinanceSmartChain)!.toString(16)}`,
+          chainName: "Binance Smart Chain (Testnet)",
+          nativeCurrency: {
+            name: "Binance Chain Native Token",
+            symbol: "BNB",
+            decimals: 18
+          },
+          rpcUrls: [EthRpcUrl[network][Blockchain.BinanceSmartChain]],
+          blockExplorerUrls: ["https://testnet.bscscan.com"]
+        }
+      }
   }
 }
