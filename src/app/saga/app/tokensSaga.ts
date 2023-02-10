@@ -51,10 +51,10 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
       balance,
     }
 
-    const fetchBalancePromises: Promise<[string, BigNumber]>[] = [] //iterable of token balance Promises to be resolved in parallel later
+    const fetchBalancePromises: Promise<[string, BigNumber]>[] = [] //iterable of token balance Promises to be resolved concurrently later
     for (const evmChain of BRIDGEABLE_EVM_CHAINS) {
       const tokenAddresses = Object.values(tokens).filter(t => t.blockchain === evmChain && t.address !== ETH_ADDRESS).map(t => t.address)
-      if (!tokenAddresses.length) return;
+      if (!tokenAddresses.length) continue;
 
       const provider = new ethers.providers.JsonRpcProvider(EthRpcUrl[network][evmChain]) as ethers.providers.JsonRpcProvider
 
@@ -69,7 +69,6 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
      * fetching balance even if one of the Promise fails/rejects
      */
     const balances = await Promise.allSettled(fetchBalancePromises)
-
     
     balances.filter(result => 'value' in result) as PromiseFulfilledResult<[string, BigNumber]>[] //filter for resolved Promises
     balances.forEach(result => {
