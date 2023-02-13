@@ -14,3 +14,5 @@ export const BridgeParamConstants = {
     WITHDRAW_DENOM: "usdt.z",   //zil.e, zil9.e
     TRANSFER_FLOW: ChainTransferFlow.ZIL_TO_ETH,
 }
+
+export const swthTokenAddress = "zil1yk93f957fanapf0yszgm84p62xrxxfytj4d2tl"

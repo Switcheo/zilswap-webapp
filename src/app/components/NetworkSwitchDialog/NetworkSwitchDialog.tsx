@@ -33,8 +33,7 @@ const NetworkSwitchDialog = (props: any) => {
       if (srcChain === Blockchain.Zilliqa) {
         return network === Network.MainNet
       } else if (evmIncludes(srcChain)) {
-        if (Number(ethWallet?.chainId) === 5) return false;
-        // set to mainnet even if currently set to some random net
+        if (Array.from(getEvmChainIDs(Network.TestNet).values()).includes(Number(ethWallet?.chainId))) return false;
         return true;
       }
     }, [ethWallet?.chainId, network, srcChain])
