@@ -52,6 +52,7 @@ export { default as TokenFilter } from './TokenFilter';
 export { default as TokenGraph } from './TokenGraph';
 export { TokenILOCard, TokenILOCardv2 } from './TokenILOCard';
 export { default as TopBar } from './TopBar';
+export { default as AdvertBanner } from './AdvertBanner';
 export { default as UserPoolMessage } from './UserPoolMessage';
 export { default as ZilTokenSwapCTABanner } from './ZilTokenSwapCTABanner';
 export * from './ArkComponents';
