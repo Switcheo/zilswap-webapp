@@ -14,7 +14,7 @@ import { ETHBalances } from "core/ethereum";
 import { actions } from "app/store";
 import { TokenInfo } from "app/store/types";
 import { SimpleMap, bnOrZero } from "app/utils";
-import { ETH_ADDRESS, PollIntervals } from "app/utils/constants";
+import { ZERO_ADDRESS, PollIntervals } from "app/utils/constants";
 import { getBlockchain, getTokens, getWallet } from "../selectors";
 
 const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string | null) => {
@@ -29,9 +29,9 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
 
     // get eth balance
     const balance = await ETHBalances.getETHBalance({ network, walletAddress: address })
-    updates[ETH_ADDRESS] = {
-      ...tokens[ETH_ADDRESS],
-      address: ETH_ADDRESS,
+    updates[ZERO_ADDRESS] = {
+      ...tokens[ZERO_ADDRESS],
+      address: ZERO_ADDRESS,
       initialized: true,
       name: "Ethereum",
       symbol: "ETH",
@@ -41,7 +41,7 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
     }
 
     // get rest
-    const tokenAddresses = Object.values(tokens).filter(t => t.blockchain === Blockchain.Ethereum && t.address !== ETH_ADDRESS).map(t => t.address)
+    const tokenAddresses = Object.values(tokens).filter(t => t.blockchain === Blockchain.Ethereum && t.address !== ZERO_ADDRESS).map(t => t.address)
     if (!tokenAddresses.length)
       return updates;
 
