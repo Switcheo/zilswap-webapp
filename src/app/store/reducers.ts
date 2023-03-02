@@ -13,7 +13,8 @@ import blockchain from "./blockchain/reducer";
 import bridge from "./bridge/reducer";
 import marketplace from "./marketplace/reducer";
 import mint from "./mint/reducer";
+import carbonSDK from "./carbonSDK/reducer"
 
 export default combineReducers({
-  preference, wallet, layout, stats, swap, token, pool, rewards, transaction, blockchain, bridge, marketplace, mint
+  preference, wallet, layout, stats, swap, token, pool, rewards, transaction, blockchain, bridge, marketplace, mint, carbonSDK
 });

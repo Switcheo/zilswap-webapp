@@ -57,13 +57,6 @@ const makeTxFilter = (statuses: Status[]) => {
   }
 }
 
-const sdkCache: SimpleMap<CarbonSDK> = {}
-const getCarbonSDK = async (network: CarbonSDK.Network) => {
-  if (!sdkCache[network]) {
-    sdkCache[network] = await CarbonSDK.instance({ network })
-  }
-  return sdkCache[network]
-}
 
 function* watchDepositConfirmation() {
   const getFilteredTx = makeTxFilter([Status.NotStarted, Status.DepositTxStarted, Status.DepositTxConfirmed])
@@ -79,7 +72,7 @@ function* watchDepositConfirmation() {
       for (const tx of bridgeTxs) {
         try {
           const network = netZilToCarbon(tx.network ?? Network.TestNet)
-          const sdk = (yield getCarbonSDK(network)) as CarbonSDK
+          const sdk = ((yield select((state: RootState) => state.carbonSDK.sdkCache)) as SimpleMap<CarbonSDK>)[tx.network]
 
           const swthAddress = AddressUtils.SWTHAddress.generateAddress(tx.interimAddrMnemonics, undefined, { network })
 
@@ -129,7 +122,7 @@ function* watchDepositConfirmation() {
             } else {
               try {
                 const carbonNetwork = netZilToCarbon(tx.network)
-                const sdk: CarbonSDK = yield getCarbonSDK(carbonNetwork)
+                const sdk: CarbonSDK = ((yield select((state: RootState) => state.carbonSDK.sdkCache)) as SimpleMap<CarbonSDK>)[tx.network]
                 const ethClient: ETHClient = getETHClient(sdk, tx.srcChain, carbonNetwork)
                 const provider = ethClient.getProvider()
                 const transaction = (yield call([provider, provider.getTransactionReceipt], tx.sourceTxHash!)) as ethers.providers.TransactionReceipt
@@ -219,11 +212,10 @@ function* watchWithdrawConfirmation() {
       logger("bridge saga", "watch withdraw confirmation", bridgeTxs.length)
 
       const updatedTxs: SimpleMap<BridgeTx> = {}
-      const carbonNetwork = netZilToCarbon(network)
       for (const tx of bridgeTxs) {
         logger("bridge saga", "checking tx withdraw", tx.withdrawTxHash)
         try {
-          const sdk = (yield getCarbonSDK(carbonNetwork)) as CarbonSDK
+          const sdk = ((yield select((state: RootState) => state.carbonSDK.sdkCache)) as SimpleMap<CarbonSDK>)[network]
 
           const queryOpts: GetRelaysRequest = {
             source_tx_hash: tx.withdrawTxHash
@@ -299,7 +291,7 @@ function* watchActiveTxConfirmations() {
             };
             case Blockchain.Ethereum: {
               const carbonNetwork = netZilToCarbon(network)
-              const sdk: CarbonSDK = yield getCarbonSDK(carbonNetwork)
+              const sdk: CarbonSDK = ((yield select((state: RootState) => state.carbonSDK.sdkCache)) as SimpleMap<CarbonSDK>)[network]
               const ethClient: ETHClient = getETHClient(sdk, bridgeTx.srcChain, carbonNetwork)
               const sourceTx: EthTransactionResponse = yield ethClient.getProvider().getTransaction(bridgeTx.sourceTxHash)
               if (sourceTx.confirmations) {
@@ -335,7 +327,6 @@ function* queryTokenFees() {
       const { formState } = getBridge(yield select())
       const { network: zilNetwork } = getBlockchain(yield select())
       const bridgeToken = formState.token
-      const network = zilNetwork === Network.MainNet ? CarbonSDK.Network.MainNet : CarbonSDK.Network.TestNet
       if (lastCheckedToken !== bridgeToken) {
         yield put(actions.Bridge.updateFee())
       }
@@ -343,7 +334,7 @@ function* queryTokenFees() {
       logger("bridge saga", lastCheckedToken?.chains[formState.toBlockchain], bridgeToken?.chains[formState.toBlockchain])
       if ((!lastCheckedToken || lastCheckedToken !== bridgeToken) && bridgeToken) {
         logger("bridge saga", "query", bridgeToken?.chains[formState.toBlockchain])
-        const sdk: CarbonSDK = yield getCarbonSDK(network)
+        const sdk: CarbonSDK = ((yield select((state: RootState) => state.carbonSDK.sdkCache)) as SimpleMap<CarbonSDK>)[zilNetwork]
         yield call([sdk, sdk.initialize])
         const carbonToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken.chains[formState.toBlockchain])
 

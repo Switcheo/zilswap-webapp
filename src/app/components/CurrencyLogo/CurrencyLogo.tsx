@@ -8,7 +8,7 @@ import { Network } from 'zilswap-sdk/lib/constants';
 import { netZilToCarbon, useNetwork } from 'app/utils';
 import { AppTheme } from 'app/theme/types';
 import { BridgeableTokenMapping, BridgeFormState, RootState } from 'app/store/types';
-import { evmIncludes, getTokenDenomList } from 'app/utils/bridge'
+import { bridgeableIncludes, getTokenDenomList } from 'app/utils/bridge'
 import { swthTokenAddress } from 'app/views/main/Bridge/components/constants'
 import legacySvg from './legacy-zil.svg';
 
@@ -56,7 +56,7 @@ const CurrencyLogo = (props: any) => {
   let tokenIconUrl: string;
 
   const logoAddress = useMemo(() => {
-    if (evmIncludes(blockchain!)) {
+    if (bridgeableIncludes(blockchain!)) {
       const tokenHash = address.replace(/^0x/i, '');
 
       const bridgeToken = bridgeTokens.find(

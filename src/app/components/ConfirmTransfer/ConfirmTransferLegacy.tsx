@@ -18,7 +18,7 @@ import { ConnectedWallet } from "core/wallet";
 import { logger } from "core/utilities";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
-import { BIG_ONE, BRIDGE_DISABLED, truncateAddress } from "app/utils";
+import { BIG_ONE, BRIDGE_DISABLED, SimpleMap, truncateAddress } from "app/utils";
 import { hexToRGBA, netZilToCarbon, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
 import { AppTheme } from "app/theme/types";
 import { RootState } from "app/store/types";
@@ -166,30 +166,6 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   },
 }));
 
-// initialize a carbon sdk client
-// @param mnemonic initialize the sdk with an account
-async function initCarbonSDK(mnemonic: string, network: Network) {
-  let attempts = 0;
-  const carbonNetwork = netZilToCarbon(network);
-  while (attempts++ < 10) {
-    try {
-      const sdk = await CarbonSDK.instanceWithMnemonic(mnemonic, {
-        network: carbonNetwork,
-        // debug: isDebug(),
-      });
-      return sdk;
-    } catch (error) {
-      console.error("init carbon sdk error");
-      console.error(error);
-
-      // delay <2 ^ attempts> seconds if error occurs
-      let delay = Math.pow(2, attempts) * 1000;
-      await new Promise(res => setTimeout(res, delay));
-    }
-  }
-  throw new Error("failed to initialize CarbonSDK")
-}
-
 const clearNavigationHook = (history: History<unknown>) => {
   history.block(true);
   window.onbeforeunload = null;
@@ -239,13 +215,12 @@ const ConfirmTransferLegacy = (props: any) => {
   const tokenFinder = useTokenFinder();
   const network = useNetwork();
 
-  const [sdk, setSdk] = useState<ConnectedCarbonSDK | null>(null);
   const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
   const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets.eth);
   const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
   const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
   const bridgeToken = useSelector<RootState, BridgeableToken | undefined>(state => state.bridge.formState.token);
-  const [runInitCarbonSDK] = useAsyncTask("initCarbonSDK")
+  const sdk = useSelector<RootState, SimpleMap<CarbonSDK>>(state => state.carbonSDK.sdkCache)[network]
 
   const [tokenApproval, setTokenApproval] = useState<boolean>(false);
   const [approvalHash, setApprovalHash] = useState<string>("");
@@ -296,18 +271,6 @@ const ConfirmTransferLegacy = (props: any) => {
       toChainName: getChainName(bridgeFormState.toBlockchain),
     }
   }, [bridgeFormState.fromBlockchain, bridgeFormState.toBlockchain]);
-
-  useEffect(() => {
-    if (!swthAddrMnemonic) return;
-
-    runInitCarbonSDK(async () => {
-      const sdk = await initCarbonSDK(swthAddrMnemonic, network);
-      await sdk.initialize();
-      setSdk(sdk);
-    })
-
-    // eslint-disable-next-line
-  }, [swthAddrMnemonic, network])
 
   if (!showTransfer) return null;
 

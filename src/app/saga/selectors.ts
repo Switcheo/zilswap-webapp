@@ -8,3 +8,4 @@ export const getTokens = (state: RootState) => state.token
 export const getBridge = (state: RootState) => state.bridge
 export const getMarketplace = (state: RootState) => state.marketplace
 export const getMint = (state: RootState) => state.mint
+export const getCarbonSDK = (state: RootState) => state.carbonSDK.sdkCache

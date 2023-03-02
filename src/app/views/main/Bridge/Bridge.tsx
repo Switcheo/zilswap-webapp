@@ -21,7 +21,7 @@ import { actions } from "app/store"
 import { BridgeFormState, BridgeState } from 'app/store/bridge/types'
 import { LayoutState, RootState, TokenInfo } from "app/store/types"
 import { AppTheme } from "app/theme/types"
-import { bnOrZero, hexToRGBA, netZilToCarbon, useAsyncTask, useNetwork, useTokenFinder } from "app/utils"
+import { bnOrZero, hexToRGBA, SimpleMap, useAsyncTask, useNetwork, useTokenFinder } from "app/utils"
 import { BIG_ZERO, BRIDGEABLE_EVM_CHAINS, BRIDGE_DISABLED } from "app/utils/constants"
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg"
 import { evmIncludes, getEvmChainIDs } from 'app/utils/bridge'
@@ -60,8 +60,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     transferAmount: bridgeFormState.transferAmount.toString() || "0"
   })
   const layoutState = useSelector<RootState, LayoutState>(store => store.layout)
-  const [sdk, setSdk] = useState<CarbonSDK | null>(null)
-  const [runInitCarbonSDK] = useAsyncTask("initCarbonSDK")
+  const sdk = useSelector<RootState, SimpleMap<CarbonSDK>>(state => state.carbonSDK.sdkCache)[network]
   const [runLoadGasPrice] = useAsyncTask("loadGasPrice")
   const [disconnectMenu, setDisconnectMenu] = useState<any>()
   const [gasPrice, setGasPrice] = useState<BigNumber | undefined>()
@@ -166,16 +165,6 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     // eslint-disable-next-line
   }, [sdk, gasPrice])
 
-  useEffect(() => {
-    runInitCarbonSDK(async () => {
-      const carbonNetwork = netZilToCarbon(network)
-      const sdk = await CarbonSDK.instance({ network: carbonNetwork })
-      await sdk.token.reloadTokens()
-      setSdk(sdk)
-    })
-
-    // eslint-disable-next-line
-  }, [network])
 
   const fromToken = useMemo(() => {
     if (!bridgeToken) return
@@ -307,7 +296,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
     setEthConnectedAddress(ethAddress)
 
-    dispatch(actions.Wallet.setBridgeWallet({ blockchain: bridgeFormState.fromBlockchain, wallet: { provider: provider, address: ethAddress, chainId: chainId } }))
+    dispatch(actions.Wallet.setBridgeWallet({ blockchain: Blockchain.Ethereum, wallet: { provider: provider, address: ethAddress, chainId: chainId } }))
     dispatch(actions.Token.refetchState())
   }
 

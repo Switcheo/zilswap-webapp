@@ -34,7 +34,7 @@ import {
   ZIL_ADDRESS,
   WZIL_TOKEN_CONTRACT,
 } from 'app/utils/constants'
-import { TokenInfo, Transaction } from 'app/store/types'
+import { RootState, TokenInfo, Transaction } from 'app/store/types'
 import {
   BridgeWalletAction,
   WalletAction,
@@ -287,6 +287,14 @@ function* initialize(
     yield put(actions.Wallet.update({ wallet: null }))
 
     const { network, wallet } = action.payload
+    const sdkState = (yield select((state: RootState) => state.carbonSDK.sdkCache)) as SimpleMap<CarbonSDK>
+    if (!sdkState[network]) {
+      const carbonNetwork = netZilToCarbon(network)
+      const carbonSDK: CarbonSDK = yield call(CarbonSDK.instance, {
+        network: carbonNetwork,
+      })
+      yield put(actions.CarbonSDK.updateCarbonSDK({ sdk: carbonSDK, network: network }))
+    }
     const providerOrKey = getProviderOrKeyFromWallet(wallet)
     const { observingTxs } = getTransactions(yield select())
     const { network: prevNetwork } = getBlockchain(yield select())
@@ -346,9 +354,8 @@ function* initialize(
     try {
       // load wrapper mappings and eth tokens by fetching bridge list from carbon
       const carbonNetwork = netZilToCarbon(network)
-      const carbonSdk: CarbonSDK = yield call(CarbonSDK.instance, {
-        network: netZilToCarbon(network),
-      })
+      const carbonSdkState = (yield select((state: RootState) => state.carbonSDK.sdkCache)) as SimpleMap<CarbonSDK>
+      const carbonSdk = carbonSdkState[network]
       const mappings = carbonSdk.token.wrapperMap
       const carbonTokens: CarbonToken[] = Object.values(carbonSdk.token.tokens)
       const bridgeableDenoms = BRIDGEABLE_WRAPPED_DENOMS[network]
