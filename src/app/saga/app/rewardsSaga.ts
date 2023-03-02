@@ -9,9 +9,8 @@ import { RewardsActionTypes } from "app/store/rewards/actions";
 import { DistributionWithStatus, DistributorWithTimings, PoolReward, PotentialRewards } from "app/store/types";
 import { WalletActionTypes } from "app/store/wallet/actions";
 import { bnOrZero, SimpleMap } from "app/utils";
-import { PollIntervals, WZIL_TOKEN_CONTRACT } from "app/utils/constants";
+import { PollIntervals, WZIL_TOKEN_CONTRACT, ZERO_ADDRESS } from "app/utils/constants";
 import { getBlockchain, getRewards, getTokens, getWallet, getMarketplace } from "../selectors";
-import { ZERO_ADDRESS } from 'app/utils/constants';
 
 function* queryDistributors() {
   while (true) {
@@ -141,7 +140,7 @@ function* queryDistribution() {
         if (distributor) {
           // check if reward_token_address_hex is ZIL address
           let tokenBalance;
-          if (distributor.reward_token_address_hex == ZERO_ADDRESS) {
+          if (distributor.reward_token_address_hex === ZERO_ADDRESS) {
             // reward is in ZIL, fetch _balance from distributor instead
             const distributorContract = zilswap.getContract(addr);
             const ZILBalanceState = yield call([distributorContract, distributorContract.getSubState], "_balance");
