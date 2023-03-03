@@ -5,14 +5,15 @@ import { toBech32Address } from "@zilliqa-js/crypto";
 import BigNumber from "bignumber.js";
 import cls from "classnames";
 import { useSelector } from "react-redux";
-import { Blockchain } from "carbon-js-sdk";
 import ContrastBox from "app/components/ContrastBox";
 import CurrencyLogo from "app/components/CurrencyLogo";
 import { BridgeState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { useMoneyFormatter } from "app/utils";
+import { netZilToCarbon, useMoneyFormatter, useNetwork } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import { formatSymbol, formatTokenName } from "app/utils/currencies";
+import { evmIncludes, getTokenDenomList } from 'app/utils/bridge'
+import { swthTokenAddress } from 'app/views/main/Bridge/components/constants'
 
 type CurrencyListProps = BoxProps & {
   tokens: TokenInfo[];
@@ -69,6 +70,7 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
   const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
   const walletState = useSelector<RootState, WalletState>(state => state.wallet);
   const moneyFormat = useMoneyFormatter({ maxFractionDigits: 12 });
+  const network = useNetwork();
 
   const getTokenBalance = (token: TokenInfo): BigNumber => {
     if (!walletState.wallet) return BIG_ZERO;
@@ -98,12 +100,16 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
   }
 
   const getLogoAddress = (token: TokenInfo) => {
-    if (token.blockchain === Blockchain.Ethereum) {
+    if (evmIncludes(token.blockchain)) {
       const tokenHash = token.address.replace(/^0x/i, "");
-      const bridgeToken = bridgeState.tokens.eth.find((bridgeToken) => bridgeToken.tokenAddress === tokenHash)
+      const bridgeToken = bridgeState.tokens.find((bridgeToken) => bridgeToken.tokenAddress === tokenHash)
+      const destToken = bridgeState.tokens.find((token) => token.denom === bridgeToken?.chains[bridgeState.formState.toBlockchain])
 
       if (bridgeToken) {
-        return toBech32Address(bridgeToken.toTokenAddress);
+        if (destToken) return toBech32Address(destToken.tokenAddress);
+        if (getTokenDenomList(netZilToCarbon(network))[token.blockchain] === bridgeToken.denom) { //If bridgeToken is a wrapped swth token
+          return swthTokenAddress //SWTH token address
+        }
       }
     }
 

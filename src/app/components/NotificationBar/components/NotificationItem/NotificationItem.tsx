@@ -10,17 +10,18 @@ import cls from "classnames";
 import { SnackbarContent, SnackbarKey, SnackbarProvider } from "notistack";
 import { useSelector } from "react-redux";
 import { TxStatus } from "zilswap-sdk";
-import { Network } from "zilswap-sdk/lib/constants";
+import { Blockchain } from 'carbon-js-sdk/lib'
 import { truncate, useNetwork } from "app/utils";
 import { AppTheme } from "app/theme/types";
 import { BridgeState, RootState, TransactionState } from "app/store/types";
+import { getExplorerLink } from 'app/utils/bridge'
 
 interface Props extends BoxProps {
   message: string,
   hash: string,
   providerRef: React.MutableRefObject<SnackbarProvider>,
   snackKey: SnackbarKey,
-  sourceBlockchain: string,
+  sourceBlockchain: Blockchain,
 }
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -97,6 +98,7 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
   };
 
   const checkMessage = () => {
+    if (typeof message !== "string") return
     if (message.includes("reject")) return "rejected";
     if (message.includes("expire")) return "expired";
   }
@@ -132,13 +134,7 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
     }
   }
 
-  const getHref = () => {
-    switch (sourceBlockchain) {
-      case "swth":
-      case "eth": return network === Network.MainNet ? `https://etherscan.io/search?q=${hash}` : `https://ropsten.etherscan.io/search?q=${hash}`;
-      default: return `https://viewblock.io/zilliqa/tx/${hash}?network=${network.toLowerCase()}`
-    }
-  }
+  const getHref = getExplorerLink(`0x${hash}`, network, sourceBlockchain)
 
   return (
     <SnackbarContent {...rest} ref={ref} className={classes.snackbar}>
@@ -151,7 +147,8 @@ const NotificationItem = forwardRef<HTMLDivElement, Props>((props, ref) => {
             underline="hover"
             rel="noopener noreferrer"
             target="_blank"
-            href={getHref()}>
+            href={getHref}
+          >
             {"0x"}{truncate(hash)}
             <LaunchIcon className={cls(classes.icon, classes.linkIcon)} />
           </Link>

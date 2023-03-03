@@ -19,9 +19,9 @@
     "@walletconnect/web3-provider": "^1.4.1",
     "@zilliqa-js/zilliqa": "^2.2.0",
     "authereum": "^0.1.14",
-    "bignumber.js": "^9.0.0",
+    "bignumber.js": "^9.0.1",
     "buffer": "^6.0.3",
-    "carbon-js-sdk": "^0.2.13",
+    "carbon-js-sdk": "0.3.49",
     "classnames": "^2.2.6",
     "crypto-js": "^3.1.9-1",
     "dayjs": "^1.10.4",
@@ -104,6 +104,7 @@
     "typescript": "^3.8.3"
   },
   "resolutions": {
-    "react-error-overlay": "6.0.9"
+    "react-error-overlay": "6.0.9",
+    "bignumber.js": "^9.0.0"
   }
 }

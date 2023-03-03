@@ -11,6 +11,7 @@ import { TransactionState } from "./transaction/types";
 import { WalletState } from "./wallet/types";
 import { MarketPlaceState } from "./marketplace/types";
 import { MintState } from "./mint/types";
+import { CarbonSDKState } from './carbonSDK/types';
 
 export * from "./blockchain/types";
 export * from "./bridge/types";
@@ -25,6 +26,7 @@ export * from "./transaction/types";
 export * from "./wallet/types";
 export * from "./marketplace/types";
 export * from "./mint/types";
+export * from "./carbonSDK/types";
 
 export interface RootState {
   blockchain: BlockchainState
@@ -40,4 +42,5 @@ export interface RootState {
   rewards: RewardsState;
   marketplace: MarketPlaceState;
   mint: MintState;
+  carbonSDK: CarbonSDKState;
 };

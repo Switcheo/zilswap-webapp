@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { Blockchain } from "carbon-js-sdk";
-import { BridgeableTokenMapping, RootState } from "app/store/types";
+import { BridgeableChains, BridgeableTokenMapping, RootState } from "app/store/types";
 import { useTokenFinder } from "app/utils";
 
 const useBridgeableTokenFinder = () => {
@@ -9,8 +8,8 @@ const useBridgeableTokenFinder = () => {
   const tokenFinder = useTokenFinder();
 
   const bridgeableTokenFinder = useMemo(() => {
-    return (denom: string, blockchain: Blockchain.Zilliqa | Blockchain.Ethereum): any => {
-      const bridgeableToken = bridgeableTokens[blockchain].filter(token => token.denom === denom)[0];
+    return (denom: string, blockchain: BridgeableChains): any => {
+      const bridgeableToken = bridgeableTokens.filter(token => token.denom === denom && token.blockchain === blockchain)[0];
       return bridgeableToken
         ? tokenFinder(bridgeableToken?.tokenAddress, blockchain)
         : {}

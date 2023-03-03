@@ -11,6 +11,7 @@ import * as Rewards from "./rewards/actions";
 import * as Transaction from "./transaction/actions";
 import * as MarketPlace from "./marketplace/actions";
 import * as Mint from "./mint/actions";
+import * as CarbonSDK from "./carbonSDK/actions"
 
-const actions = { Preference, Blockchain, Bridge, Layout, Wallet, Swap, Stats, Token, Pool, Rewards, Transaction, MarketPlace, Mint };
+const actions = { Preference, Blockchain, Bridge, Layout, Wallet, Swap, Stats, Token, Pool, Rewards, Transaction, MarketPlace, Mint, CarbonSDK };
 export default actions;

@@ -1,5 +1,8 @@
+import { BRIDGEABLE_EVM_CHAINS } from 'app/utils'
 import BigNumber from "bignumber.js";
-import { Blockchain, Models } from "carbon-js-sdk";
+import { Models } from "carbon-js-sdk";
+import { Blockchain } from 'carbon-js-sdk/lib'
+import { Token } from 'carbon-js-sdk/lib/codec'
 import dayjs from "dayjs";
 import { Network } from "zilswap-sdk/lib/constants";
 
@@ -10,18 +13,10 @@ export type BridgeableToken = {
   decimals: number; 
   denom: string;    // carbon denom
   tokenId: string;  // tradehub denom
-  toBlockchain: Blockchain;
-  toTokenAddress: string;
-  toDecimals: number;
-  toDenom: string;  // carbon denom
-  toTokenId: string // tradehub denom
-  balDenom: string;
+  chains: Record<string, string>
 }
 
-export type BridgeableTokenMapping = {
-  [Blockchain.Ethereum]: ReadonlyArray<BridgeableToken>;
-  [Blockchain.Zilliqa]: ReadonlyArray<BridgeableToken>;
-}
+export type BridgeableTokenMapping = ReadonlyArray<BridgeableToken>;
 
 export interface BridgeState {
   formState: BridgeFormState;
@@ -32,7 +27,14 @@ export interface BridgeState {
   tokens: BridgeableTokenMapping;
 }
 
-export type BridgeableChains = Blockchain.Ethereum | Blockchain.Zilliqa;
+export type BridgeableEvmChains = typeof BRIDGEABLE_EVM_CHAINS[number] & Partial<Blockchain>
+
+/**
+ * BridgeableChains are the chains supported on Zilbridge.
+ * Currently it supports the bridgeable EVM chains and the native chain.
+ */
+export type BridgeableChains = BridgeableEvmChains | Blockchain.Zilliqa
+
 export interface WithdrawFee {
   amount: BigNumber;
   value: BigNumber;
@@ -40,8 +42,8 @@ export interface WithdrawFee {
 }
 
 export interface BridgeFormState {
-  sourceAddress?: string; // can be eth or zil address
-  destAddress?: string; // can be eth or zil address
+  sourceAddress?: string; // can be evm or zil address
+  destAddress?: string; // can be evm or zil address
   transferAmount: BigNumber;
   fromBlockchain: BridgeableChains;
   toBlockchain: BridgeableChains;

@@ -1,4 +1,4 @@
-import { BridgeFormState, BridgeTx, BridgeableTokenMapping } from "./types";
+import { BridgeFormState, BridgeTx, BridgeableToken } from "./types";
 import { WithdrawFee } from "./types";
 
 export enum BridgeActionTypes {
@@ -38,7 +38,7 @@ export function dismissBridgeTx(payload: BridgeTx) {
   }
 }
 
-export function setTokens(payload: BridgeableTokenMapping) {
+export function setTokens(payload: BridgeableToken[]) {
   return {
     type: BridgeActionTypes.SET_TOKENS,
     payload

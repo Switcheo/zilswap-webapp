@@ -1,35 +1,37 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Box, CircularProgress, IconButton, Tooltip, makeStyles } from "@material-ui/core";
-import { ArrowBack } from "@material-ui/icons";
-import { Transaction } from '@zilliqa-js/account';
-import { HTTPProvider } from '@zilliqa-js/core';
-import { toBech32Address } from "@zilliqa-js/zilliqa";
-import BigNumber from "bignumber.js";
-import cls from "classnames";
-import dayjs from "dayjs";
-import { ethers } from "ethers";
-import { History } from "history";
-import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router";
-import { Blockchain, AddressUtils, Models, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
-import { Network } from "zilswap-sdk/lib/constants";
-import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
-import { ConnectedWallet } from "core/wallet";
-import { logger } from "core/utilities";
-import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
-import TransactionDetail from "app/views/bridge/TransactionDetail";
-import { BIG_ONE, BRIDGE_DISABLED, truncateAddress } from "app/utils";
-import { hexToRGBA, netZilToCarbon, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
-import { AppTheme } from "app/theme/types";
-import { RootState } from "app/store/types";
-import { BridgeFormState, BridgeState, BridgeTx, BridgeableToken } from "app/store/bridge/types";
-import { actions } from "app/store";
-import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components";
-import { ReactComponent as EthereumLogo } from "../../views/main/Bridge/ethereum-logo.svg";
-import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg";
-import { ReactComponent as ZilliqaLogo } from "../../views/main/Bridge/zilliqa-logo.svg";
+import React, { useEffect, useMemo, useState } from "react"
+import { Box, CircularProgress, IconButton, Tooltip, makeStyles } from "@material-ui/core"
+import { ArrowBack } from "@material-ui/icons"
+import { Transaction } from '@zilliqa-js/account'
+import { HTTPProvider } from '@zilliqa-js/core'
+import { toBech32Address } from "@zilliqa-js/zilliqa"
+import BigNumber from "bignumber.js"
+import cls from "classnames"
+import dayjs from "dayjs"
+import { ethers } from "ethers"
+import { History } from "history"
+import { useDispatch, useSelector } from "react-redux"
+import { useHistory } from "react-router"
+import { Blockchain, AddressUtils, Models, CarbonSDK } from "carbon-js-sdk"
+import { Network } from "zilswap-sdk/lib/constants"
+import { ZilBridgeParams } from 'carbon-js-sdk/lib/clients/ZILClient'
+import ETHClient, { BridgeParams } from 'carbon-js-sdk/lib/clients/ETHClient'
+import { BN_ZERO } from 'carbon-js-sdk/lib/util/number'
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet"
+import { ConnectedWallet } from "core/wallet"
+import { logger } from "core/utilities"
+import { BridgeParamConstants } from "app/views/main/Bridge/components/constants"
+import TransactionDetail from "app/views/bridge/TransactionDetail"
+import { BIG_ONE, BRIDGE_DISABLED, SimpleMap, truncateAddress } from "app/utils"
+import { hexToRGBA, netZilToCarbon, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils"
+import { AppTheme } from "app/theme/types"
+import { RootState } from "app/store/types"
+import { BridgeFormState, BridgeState, BridgeTx, BridgeableToken } from "app/store/bridge/types"
+import { actions } from "app/store"
+import { CurrencyLogo, FancyButton, HelpInfo, KeyValueDisplay, Text } from "app/components"
+import { getETHClient, getEvmGasLimit, getRecoveryAddress } from 'app/utils/bridge'
+import ChainLogo from 'app/views/main/Bridge/components/ChainLogo/ChainLogo'
+import { ReactComponent as WavyLine } from "../../views/main/Bridge/wavy-line.svg"
 
-const TRANSFER_KEY_MESSAGE = "In the event you are not able to complete Stage 2 of your transfer, you may retrieve and resume your transfer by entering the following unique transfer key phrase on your Transfer History page. Do not ever reveal your transfer key phrase to anyone. ZilSwap will not be held accountable and cannot help you retrieve those funds once they are lost.\n\n";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
   root: {
@@ -165,104 +167,83 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     color: "rgba(255,255,255,.5)",
     marginRight: theme.spacing(1)
   },
-}));
-
-// initialize a carbon sdk client
-// @param mnemonic initialize the sdk with an account
-async function initCarbonSDK(mnemonic: string, network: Network) {
-  let attempts = 0;
-  const carbonNetwork = netZilToCarbon(network);
-  while (attempts++ < 10) {
-    try {
-      const sdk = await CarbonSDK.instanceWithMnemonic(mnemonic, {
-        network: carbonNetwork,
-        // debug: isDebug(),
-      });
-      return sdk;
-    } catch (error) {
-      console.error("init carbon sdk error");
-      console.error(error);
-
-      // delay <2 ^ attempts> seconds if error occurs
-      let delay = Math.pow(2, attempts) * 1000;
-      await new Promise(res => setTimeout(res, delay));
-    }
-  }
-  throw new Error("failed to initialize CarbonSDK")
-}
+}))
 
 const clearNavigationHook = (history: History<unknown>) => {
-  history.block(true);
-  window.onbeforeunload = null;
+  history.block(true)
+  window.onbeforeunload = null
 }
 
 const addNavigationHook = (history: History<unknown>) => {
-  clearNavigationHook(history);
-  history.block("Do not close this window until your transfer has completed to prevent loss of tokens.");
+  clearNavigationHook(history)
+  history.block("Do not close this window until your transfer has completed to prevent loss of tokens.")
   window.onbeforeunload = (event: BeforeUnloadEvent) => {
-    const e = event || window.event;
-    e.preventDefault();
-    if (e) { e.returnValue = ''; }
-    return ''; // Legacy method for cross browser support
-  };
+    const e = event || window.event
+    e.preventDefault()
+    if (e) { e.returnValue = '' }
+    return '' // Legacy method for cross browser support
+  }
 }
 
 const getChainName = (blockchain: Blockchain) => {
   switch (blockchain) {
-    case Blockchain.Zilliqa: return "Zilliqa";
-    case Blockchain.Ethereum: return "Ethereum";
-    case Blockchain.Neo: return "Neo";
-    case Blockchain.BinanceSmartChain: return "Binance Smart Chain";
-    case Blockchain.Native: return "Carbon";
-    case Blockchain.Btc: return "Bitcoin";
+    case Blockchain.Zilliqa: return "Zilliqa"
+    case Blockchain.Ethereum: return "Ethereum"
+    case Blockchain.Neo: return "Neo"
+    case Blockchain.BinanceSmartChain: return "Binance Smart Chain"
+    case Blockchain.Native: return "Carbon"
+    case Blockchain.Btc: return "Bitcoin"
 
-    case Blockchain.Carbon: return "Carbon";
-    case Blockchain.Switcheo: return "Switcheo";
-    case Blockchain.TradeHub: return "TradeHub";
-    case Blockchain.PolyNetwork: return "PolyNetwork";
-    case Blockchain.Neo3: return "Neo N3";
-    case Blockchain.Osmosis: return "Osmosis";
-    case Blockchain.Ibc: return "IBC";
-    case Blockchain.Juno: return "Juno";
-    case Blockchain.CosmosHub: return "Cosmos";
-    case Blockchain.Terra: return "Terra";
-    case Blockchain.Evmos: return "Evmos";
-    default: blockchain?.toString?.();
+    case Blockchain.Carbon: return "Carbon"
+    case Blockchain.Switcheo: return "Switcheo"
+    case Blockchain.TradeHub: return "TradeHub"
+    case Blockchain.PolyNetwork: return "PolyNetwork"
+    case Blockchain.Neo3: return "Neo N3"
+    case Blockchain.Osmosis: return "Osmosis"
+    case Blockchain.Ibc: return "IBC"
+    case Blockchain.Juno: return "Juno"
+    case Blockchain.CosmosHub: return "Cosmos"
+    case Blockchain.Terra: return "Terra"
+    case Blockchain.Evmos: return "Evmos"
+    default: blockchain?.toString?.()
   }
 }
 
 const ConfirmTransfer = (props: any) => {
-  const { showTransfer } = props;
-  const classes = useStyles();
-  const dispatch = useDispatch();
-  const toaster = useToaster();
-  const history = useHistory();
-  const tokenFinder = useTokenFinder();
-  const network = useNetwork();
+  const { showTransfer } = props
+  const classes = useStyles()
+  const dispatch = useDispatch()
+  const toaster = useToaster()
+  const history = useHistory()
+  const tokenFinder = useTokenFinder()
+  const network = useNetwork()
 
-  const [sdk, setSdk] = useState<ConnectedCarbonSDK | null>(null);
-  const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
-  const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets.eth);
-  const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
-  const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
-  const bridgeToken = useSelector<RootState, BridgeableToken | undefined>(state => state.bridge.formState.token);
-  const [runInitCarbonSDK] = useAsyncTask("initCarbonSDK")
+  const wallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet)
+  const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets.eth)
+  const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge)
+  const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState)
+  const bridgeToken = useSelector<RootState, BridgeableToken | undefined>(state => state.bridge.formState.token)
+  const sdk = useSelector<RootState, SimpleMap<CarbonSDK>>(state => state.carbonSDK.sdkCache)[network]
 
-  const [tokenApproval, setTokenApproval] = useState<boolean>(false);
-  const [approvalHash, setApprovalHash] = useState<string>("");
-  const [swthAddrMnemonic, setSwthAddrMnemonic] = useState<string | undefined>();
+  const [tokenApproval, setTokenApproval] = useState<boolean>(false)
+  const [approvalHash, setApprovalHash] = useState<string>("")
+  const [swthAddrMnemonic, setSwthAddrMnemonic] = useState<string | undefined>()
 
-  const pendingBridgeTx = bridgeState.activeBridgeTx;
+  const pendingBridgeTx = bridgeState.activeBridgeTx
 
-  const [runConfirmTransfer, loadingConfirm] = useAsyncTask("confirmTransfer", (error) => toaster(error.message, { overridePersist: false }));
+  const [runConfirmTransfer, loadingConfirm] = useAsyncTask("confirmTransfer", (error) => toaster(error.message, { overridePersist: false }))
 
-  const { toBlockchain, fromBlockchain, withdrawFee } = bridgeFormState;
+  const { toBlockchain, fromBlockchain, withdrawFee } = bridgeFormState
 
-  const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx]);
+  const canNavigateBack = useMemo(() => !pendingBridgeTx || !!pendingBridgeTx.withdrawTxHash, [pendingBridgeTx])
+
+  const destToken = useMemo(() => {
+    return Object.values(bridgeState.tokens).find(token => token.denom === bridgeToken?.chains[toBlockchain])
+  }, [bridgeState.tokens, bridgeToken, toBlockchain])
 
   useEffect(() => {
     if (!swthAddrMnemonic)
-      setSwthAddrMnemonic(AddressUtils.SWTHAddress.newMnemonic());
+      setSwthAddrMnemonic(AddressUtils.SWTHAddress.newMnemonic())
   }, [swthAddrMnemonic])
 
   useEffect(() => {
@@ -279,44 +260,29 @@ const ConfirmTransfer = (props: any) => {
     // eslint-disable-next-line
   }, [])
 
-  const { fromToken } = useMemo(() => {
-    if (!bridgeToken) return {};
-    return {
-      fromToken: tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain),
-      toToken: tokenFinder(bridgeToken.toTokenAddress, bridgeToken.toBlockchain),
-    }
-  }, [bridgeToken, tokenFinder]);
+  const fromToken = useMemo(() => {
+    if (!bridgeToken) return
+    return tokenFinder(bridgeToken.tokenAddress, bridgeToken.blockchain)
+  }, [bridgeToken, tokenFinder])
 
   const { fromChainName, toChainName } = useMemo(() => {
     return {
       fromChainName: getChainName(bridgeFormState.fromBlockchain),
       toChainName: getChainName(bridgeFormState.toBlockchain),
     }
-  }, [bridgeFormState.fromBlockchain, bridgeFormState.toBlockchain]);
+  }, [bridgeFormState.fromBlockchain, bridgeFormState.toBlockchain])
 
-  useEffect(() => {
-    if (!swthAddrMnemonic) return;
-
-    runInitCarbonSDK(async () => {
-      const sdk = await initCarbonSDK(swthAddrMnemonic, network);
-      await sdk.initialize();
-      setSdk(sdk);
-    })
-
-    // eslint-disable-next-line
-  }, [swthAddrMnemonic, network])
-
-  if (!showTransfer) return null;
+  if (!showTransfer) return null
 
   // returns true if asset is native coin, false otherwise
   const isNativeAsset = (asset: Models.Token) => {
-    const zeroAddress = "0000000000000000000000000000000000000000";
+    const zeroAddress = "0000000000000000000000000000000000000000"
     return (asset.tokenAddress === zeroAddress)
   }
 
   // remove 0x and lowercase
   const santizedAddress = (address: string) => {
-    return address.replace("0x", "").toLowerCase();
+    return address.replace("0x", "").toLowerCase()
   }
 
   const isApprovalRequired = async (asset: Models.Token, amount: BigNumber) => {
@@ -324,99 +290,126 @@ const ConfirmTransfer = (props: any) => {
   }
 
   /**
-    * Lock the asset on Ethereum chain
-    * returns the txn hash if lock txn is successful, otherwise return null
-    * @param asset         details of the asset being locked; retrieved from carbon
+    * Bridge the asset from Ethereum chain
+    * returns the txn hash if bridge txn is successful, otherwise return null
+    * @param asset         details of the asset being bridged; retrieved from carbon
     */
-  async function lockAssetOnEth(asset: Models.Token, carbonMnemonics: string) {
-    if (!bridgeToken || !fromToken || !sdk || !swthAddrMnemonic) return null;
+  async function bridgeAssetFromEth(asset: Models.Token) {
+    if (!fromToken || !sdk || !bridgeFormState.sourceAddress || !bridgeFormState.destAddress || (!withdrawFee?.amount && network === Network.MainNet)) {
+      return
+    }
 
-    const lockProxy = asset.bridgeAddress;
-    const swthAddress = AddressUtils.SWTHAddress.generateAddress(swthAddrMnemonic);
+    const ethClient: ETHClient = getETHClient(sdk, fromBlockchain, netZilToCarbon(network))
 
-    const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider);
-    const signer: ethers.Signer = ethersProvider.getSigner();
+    const lockProxy = asset.bridgeAddress
 
-    const amount = bridgeFormState.transferAmount;
-    const ethAddress = await signer.getAddress();
-    const gasPrice = await sdk.eth.getProvider().getGasPrice();
-    const gasPriceGwei = new BigNumber(ethers.utils.formatUnits(gasPrice, "gwei"));
-    const depositAmt = amount.shiftedBy(asset.decimals.toInt());
+    const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider)
+    const signer: ethers.Signer = ethersProvider.getSigner()
+
+    const amount = bridgeFormState.transferAmount
+    const ethAddress = await signer.getAddress()
+    const gasPrice = await ethClient.getProvider().getGasPrice()
+    const gasPriceGwei = new BigNumber(ethers.utils.formatUnits(gasPrice, "gwei"))
+    const depositAmt = amount.shiftedBy(asset.decimals.toInt())
 
     // approve token
-    const approvalRequired = await isApprovalRequired(asset, depositAmt);
+    const approvalRequired = await isApprovalRequired(asset, depositAmt)
     if (approvalRequired) {
-
-      const allowance = await sdk.eth.checkAllowanceERC20(asset, ethAddress, `0x${lockProxy}`);
+      const allowance = await ethClient.checkAllowanceERC20(asset, ethAddress, `0x${lockProxy}`)
       if (allowance.lt(depositAmt)) {
-        toaster(`Approval needed (Ethereum)`, { overridePersist: false });
-        const approve_tx = await sdk.eth.approveERC20({
+        toaster(`Approval needed (${fromBlockchain.toUpperCase()})`, { overridePersist: false })
+        const approve_tx = await ethClient.approveERC20({
           token: asset,
-          ethAddress: ethAddress,
+          ethAddress,
           gasLimit: new BigNumber(100000),
           gasPriceGwei: gasPriceGwei,
           signer: signer,
-        });
+          spenderAddress: ethClient.getBridgeEntranceAddr(),
+        })
 
-        logger("approve tx", approve_tx.hash);
-        toaster(`Submitted: (Ethereum - ERC20 Approval)`, { hash: approve_tx.hash!.replace(/^0x/i, ""), sourceBlockchain: "eth" });
-        setApprovalHash(approve_tx.hash!);
-        await approve_tx.wait();
+        logger("approve tx", approve_tx.hash)
+        toaster(`Submitted: (${fromBlockchain.toUpperCase()} - ERC20 Approval)`, { hash: approve_tx.hash!.replace(/^0x/i, ""), sourceBlockchain: "eth" })
+        setApprovalHash(approve_tx.hash!)
+        const txReceipt = await ethClient.getProvider().waitForTransaction(approve_tx.hash!)
 
         // token approval success
-        if (approve_tx !== undefined && (approve_tx as any).status === 1) {
-          setTokenApproval(true);
+        if (approve_tx !== undefined && txReceipt?.status === 1) {
+          setTokenApproval(true)
+        } else {
+          setTokenApproval(false)
         }
       }
+    } else {
+      setTokenApproval(true)
     }
 
-    toaster(`Locking asset (Ethereum)`, { overridePersist: false });
+    toaster(`Bridging asset (${fromBlockchain.toUpperCase()})`, { overridePersist: false })
 
-    const swthAddressBytes = AddressUtils.SWTHAddress.getAddressBytes(swthAddress, sdk.network);
-    const lock_tx = await sdk.eth.lockDeposit({
-      token: asset,
-      address: swthAddressBytes,
-      ethAddress: ethAddress.toLowerCase(),
-      gasLimit: new BigNumber(`${BridgeParamConstants.ETH_GAS_LIMIT}`),
-      gasPriceGwei: gasPriceGwei,
+    const toToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken?.chains[toBlockchain])
+
+
+    if (!toToken) {
+      toaster("Selected token is not available on Zilliqa")
+      return
+    }
+
+
+    const bridgeDepositParams: BridgeParams = {
+      fromToken: asset,
+      toToken,
       amount: depositAmt,
-      signer: signer,
-    });
+      fromAddress: ethAddress,
+      recoveryAddress: getRecoveryAddress(sdk.network),
+      toAddress: bridgeFormState.destAddress,
+      feeAmount: network === Network.MainNet ? withdrawFee!.amount.shiftedBy(toToken.decimals.toNumber()) : BN_ZERO,
+      gasPriceGwei,
+      gasLimit: new BigNumber(getEvmGasLimit(fromBlockchain)),
+      signer,
+    }
 
-    toaster(`Submitted: (Ethereum - Lock Asset)`, { sourceBlockchain: "eth", hash: lock_tx.hash!.replace(/^0x/i, "") });
-    logger("lock tx", lock_tx.hash!);
+    const bridge_tx = await ethClient.bridgeTokens(bridgeDepositParams)
+    //TOCHECK: remove is unnecessary
+    if (!bridge_tx) {
+      return
+    }
 
-    return lock_tx.hash!;
+    logger("bridge deposit params: %o\n", bridgeDepositParams)
+    toaster(`Submitted: (${fromBlockchain.toUpperCase()} - Bridge Asset)`, { sourceBlockchain: fromBlockchain, hash: bridge_tx.hash!.replace(/^0x/i, "") })
+    logger("bridge tx", bridge_tx.hash!)
+
+    return bridge_tx.hash
   }
 
   /**
-    * Lock the asset on Zilliqa chain
-    * returns the txn hash if lock txn is successful, otherwise return null
-    * @param asset         details of the asset being locked; retrieved from carbon
+    * Bridge the asset from Zilliqa chain
+    * returns the txn hash if bridge txn is successful, otherwise return null
+    * @param asset         details of the asset being bridged; retrieved from carbon
     */
-  async function lockAssetOnZil(asset: Models.Token, carbonMnemonics: string) {
-    if (wallet === null) {
-      console.error("Zilliqa wallet not connected");
-      return null;
-    }
-    if (!sdk) {
-      console.error("CarbonSDK not initialized");
-      return null;
+  async function bridgeAssetFromZil(asset: Models.Token, carbonMnemonics: string) {
+    if (!fromToken || !sdk || !bridgeFormState.sourceAddress || !bridgeFormState.destAddress || (!withdrawFee?.amount && network === Network.MainNet)) {
+      return
     }
 
-    const lockProxy = asset.bridgeAddress;
-    const amount = bridgeFormState.transferAmount;
-    const zilAddress = santizedAddress(wallet.addressInfo.byte20);
-    const swthAddress = AddressUtils.SWTHAddress.generateAddress(carbonMnemonics);
-    const swthAddressBytes = AddressUtils.SWTHAddress.getAddressBytes(swthAddress, sdk.network);
+    if (wallet === null) {
+      console.error("Zilliqa wallet not connected")
+      return null
+    }
+    if (!sdk) {
+      console.error("CarbonSDK not initialized")
+      return null
+    }
+
+    const lockProxy = sdk.networkConfig.zil.bridgeEntranceAddr
+    const amount = bridgeFormState.transferAmount
+    const zilAddress = santizedAddress(wallet.addressInfo.byte20)
     const depositAmt = amount.shiftedBy(asset.decimals.toInt())
 
     if (!isNativeAsset(asset)) {
       // not native zils
       // user is transferring zrc2 tokens
       // need approval
-      const allowance = await sdk.zil.checkAllowanceZRC2(asset, `0x${zilAddress}`, `0x${lockProxy}`);
-      logger("zil zrc2 allowance: ", allowance);
+      const allowance = await sdk.zil.checkAllowanceZRC2(asset, `0x${zilAddress}`, lockProxy)
+      logger("zil zrc2 allowance: ", allowance.toNumber())
 
       if (allowance.lt(depositAmt)) {
         const approveZRC2Params = {
@@ -425,111 +418,113 @@ const ConfirmTransfer = (props: any) => {
           gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
           zilAddress: zilAddress,
           signer: wallet.provider! as any,
+          spenderAddress: lockProxy
         }
-        logger("approve zrc2 token parameters: ", approveZRC2Params);
-        toaster(`Approval needed (Zilliqa)`, { overridePersist: false });
+        logger("approve zrc2 token parameters: ", approveZRC2Params)
+        toaster(`Approval needed (Zilliqa)`, { overridePersist: false })
 
-        const approve_tx = await sdk.zil.approveZRC2(approveZRC2Params);
-        toaster(`Submitted: (Zilliqa - ZRC2 Approval)`, { hash: approve_tx.id! });
-        setApprovalHash(approve_tx.id!);
+        const approve_tx = await sdk.zil.approveZRC2(approveZRC2Params)
+        toaster(`Submitted: (Zilliqa - ZRC2 Approval)`, { hash: approve_tx.id! })
+        setApprovalHash(approve_tx.id!)
 
         const toAddr = toBech32Address(approve_tx.txParams.toAddr)
-        const emptyTx = new Transaction({ ...approve_tx.txParams, toAddr: toAddr }, new HTTPProvider(sdk.zil.getProviderUrl()));
-        const confirmedTxn = await emptyTx.confirm(approve_tx.id!);
+        const emptyTx = new Transaction({ ...approve_tx.txParams, toAddr: toAddr }, new HTTPProvider(sdk.zil.getProviderUrl()))
+        const confirmedTxn = await emptyTx.confirm(approve_tx.id!)
         logger("transaction confirmed! receipt is: ", confirmedTxn.getReceipt())
 
         // token approval success
         if (confirmedTxn !== undefined && confirmedTxn.getReceipt()?.success) {
-          setTokenApproval(true);
+          setTokenApproval(true)
+        } else {
+          toaster("Approval not successful. Please try again.")
+          return null
         }
       } else {
         // approved before
-        setTokenApproval(true);
+        setTokenApproval(true)
       }
     }
 
-    const lockDepositParams = {
-      address: swthAddressBytes,
+    const toToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken?.chains[toBlockchain])
+
+    if (!toToken) {
+      toaster("Selected token is not available on Ethereum")
+      return null
+    }
+
+    const bridgeDepositParams: ZilBridgeParams = {
+      fromToken: asset,
+      toToken,
       amount: depositAmt,
-      token: asset,
+      fromAddress: wallet.addressInfo.bech32,
+      recoveryAddress: getRecoveryAddress(sdk.network),
+      toAddress: bridgeFormState.destAddress,
+      feeAmount: network === Network.MainNet ? withdrawFee!.amount.shiftedBy(toToken.decimals.toNumber()) : BN_ZERO,
       gasPrice: new BigNumber(`${BridgeParamConstants.ZIL_GAS_PRICE}`),
       gasLimit: new BigNumber(`${BridgeParamConstants.ZIL_GAS_LIMIT}`),
-      zilAddress: zilAddress,
       signer: wallet.provider! as any,
     }
 
-    logger("lock deposit params: %o\n", lockDepositParams);
-    toaster(`Locking asset (Zilliqa)`, { overridePersist: false });
-    const lock_tx = await sdk.zil.lockDeposit(lockDepositParams);
+    logger("bridge deposit params: %o\n", bridgeDepositParams)
+    toaster(`Bridging asset (Zilliqa)`, { overridePersist: false })
+    const bridge_tx = await sdk.zil.bridgeTokens(bridgeDepositParams)
 
-    toaster(`Submitted: (Zilliqa - Lock Asset)`, { hash: lock_tx.id! });
-    logger("lock tx", lock_tx.id!);
+    toaster(`Submitted: (Zilliqa - Bridge Asset)`, { hash: bridge_tx.id! })
+    logger("bridge tx", bridge_tx.id!)
 
-    return lock_tx.id;
-  }
-
-  const downloadTransferKey = (key: string) => {
-    const element = document.createElement("a");
-    const file = new Blob([`${TRANSFER_KEY_MESSAGE}\n${key}`], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    const swthAddress = AddressUtils.SWTHAddress.generateAddress(key);
-    element.download = `private-recovery-key-${swthAddress}.txt`;
-    document.body.appendChild(element); // Required for this to work in FireFox
-    element.click();
-    toaster("Recovery key downloaded", { overridePersist: false });
+    return bridge_tx.id
   }
 
   const onConfirm = async () => {
     if (!localStorage) {
-      console.error("localStorage not available");
-      return null;
+      console.error("localStorage not available")
+      return null
     }
 
     if (!sdk) {
       console.error("CarbonSDK not initialized")
-      return null;
+      return null
     }
 
-    const asset = sdk.token.tokens[bridgeToken?.denom ?? ""];
+    const asset = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken?.denom)
 
     if (!asset) {
-      console.error("asset not found for", bridgeToken);
-      return null;
+      console.error("asset not found for", bridgeToken)
+      return null
     }
 
     if (!swthAddrMnemonic) {
-      console.error("carbon mnemonic not initialized");
-      return null;
+      console.error("carbon mnemonic not initialized")
+      return null
     }
 
-    if (!withdrawFee) {
-      toaster("Transfer fee not loaded", { overridePersist: false });
-      return null;
+    if (!withdrawFee && network === Network.MainNet) {
+      toaster("Transfer fee not loaded", { overridePersist: false })
+      return null
     }
 
     if (withdrawFee?.amount.gte(bridgeFormState.transferAmount)) {
-      toaster("Transfer amount too low", { overridePersist: false });
-      return null;
+      toaster("Transfer amount too low", { overridePersist: false })
+      return null
     }
 
     runConfirmTransfer(async () => {
-      let sourceTxHash;
-      downloadTransferKey(swthAddrMnemonic);
+      let sourceTxHash
       if (fromBlockchain === Blockchain.Zilliqa) {
         // init lock on zil side
-        sourceTxHash = await lockAssetOnZil(asset, swthAddrMnemonic);
+        sourceTxHash = await bridgeAssetFromZil(asset, swthAddrMnemonic)
       } else {
         // init lock on eth side
-        sourceTxHash = await lockAssetOnEth(asset, swthAddrMnemonic);
+        sourceTxHash = await bridgeAssetFromEth(asset)
       }
 
       if (sourceTxHash === null) {
-        console.error("source txn hash is null!");
-        return null;
+        console.error("source txn hash is null!")
+        return null
       }
 
-      const { destAddress, sourceAddress } = bridgeFormState;
-      if (!destAddress || !sourceAddress || !bridgeToken || !fromToken) return;
+      const { destAddress, sourceAddress } = bridgeFormState
+      if (!destAddress || !sourceAddress || !bridgeToken || !fromToken) return
 
       const bridgeTx: BridgeTx = {
         dstAddr: destAddress,
@@ -538,8 +533,8 @@ const ConfirmTransfer = (props: any) => {
         srcChain: fromBlockchain,
         network: network,
         srcTokenId: bridgeToken.tokenId,
-        dstToken: bridgeToken.toDenom,
-        dstTokenId: bridgeToken.toTokenId,
+        dstToken: destToken?.denom ?? "",
+        dstTokenId: destToken?.tokenId ?? "",
         srcToken: bridgeToken.denom,
         sourceTxHash: sourceTxHash,
         inputAmount: bridgeFormState.transferAmount,
@@ -547,33 +542,33 @@ const ConfirmTransfer = (props: any) => {
         withdrawFee: withdrawFee?.amount ?? BIG_ONE.shiftedBy(3 - fromToken.decimals), // 1000 sat bypass withdraw fee check,
         depositDispatchedAt: dayjs(),
       }
-      dispatch(actions.Bridge.addBridgeTx([bridgeTx]));
+      dispatch(actions.Bridge.addBridgeTx([bridgeTx]))
 
-      addNavigationHook(history);
+      addNavigationHook(history)
     })
   }
 
   const conductAnotherTransfer = () => {
     if (pendingBridgeTx)
-      dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
-    setSwthAddrMnemonic(AddressUtils.SWTHAddress.newMnemonic());
-    dispatch(actions.Layout.showTransferConfirmation(false));
+      dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx))
+    setSwthAddrMnemonic(AddressUtils.SWTHAddress.newMnemonic())
+    dispatch(actions.Layout.showTransferConfirmation(false))
   }
 
   const navigateBack = () => {
     if (pendingBridgeTx)
-      dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx));
-    dispatch(actions.Layout.showTransferConfirmation(false));
-    setSwthAddrMnemonic(AddressUtils.SWTHAddress.newMnemonic());
+      dispatch(actions.Bridge.dismissBridgeTx(pendingBridgeTx))
+    dispatch(actions.Layout.showTransferConfirmation(false))
+    setSwthAddrMnemonic(AddressUtils.SWTHAddress.newMnemonic())
   }
 
   const formatAddress = (address: string | undefined | null, chain: Blockchain) => {
-    if (!address) return "";
+    if (!address) return ""
     switch (chain) {
       case Blockchain.Zilliqa:
-        return truncateAddress(address);
+        return truncateAddress(address)
       default:
-        return truncate(address, 5, 4);
+        return truncate(address, 5, 4)
     }
   }
 
@@ -614,10 +609,7 @@ const ConfirmTransfer = (props: any) => {
             <Box className={classes.networkBox} flex={1}>
               <Text variant="h4" color="textSecondary">From</Text>
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-                {bridgeState.formState.fromBlockchain === Blockchain.Ethereum
-                  ? <EthereumLogo />
-                  : <ZilliqaLogo />
-                }
+                <ChainLogo chain={bridgeState.formState.fromBlockchain} />
               </Box>
               <Text variant="h4" className={classes.chainName}>{fromChainName} Network</Text>
               <Text variant="button" className={classes.walletAddress}>{formatAddress(bridgeState.formState.sourceAddress, fromBlockchain)}</Text>
@@ -627,10 +619,7 @@ const ConfirmTransfer = (props: any) => {
             <Box className={classes.networkBox} flex={1}>
               <Text variant="h4" color="textSecondary">To</Text>
               <Box display="flex" flex={1} alignItems="center" justifyContent="center" mt={1.5} mb={1.5}>
-                {bridgeState.formState.toBlockchain === Blockchain.Zilliqa
-                  ? <ZilliqaLogo />
-                  : <EthereumLogo />
-                }
+                <ChainLogo chain={bridgeState.formState.toBlockchain} />
               </Box>
               <Text variant="h4" className={classes.chainName}>{toChainName} Network</Text>
               <Text variant="button" className={classes.walletAddress}>{formatAddress(bridgeState.formState.destAddress, toBlockchain)}</Text>
@@ -677,4 +666,4 @@ const ConfirmTransfer = (props: any) => {
   }
 }
 
-export default ConfirmTransfer;
+export default ConfirmTransfer
