@@ -13,9 +13,9 @@ const theme = {
     main: "#0D1B24",
   },
   primary: {
-    contrastText: "#DEFFFF",
-    dark: "#00FFB0",
-    main: "#003340",
+    contrastText: "#FAFAFA",
+    dark: "#111111",
+    main: "#000000",
     light: "rgba(222, 255, 255, 0.5)",
   },
   error: {
@@ -39,10 +39,10 @@ const theme = {
     primary: "#00FFB0",
   },
   background: {
-    default: "#0D1B24",
-    gradient: "radial-gradient(50% 50% at 50% 0%, #00FFB0 -800%, rgba(0, 255, 176, 0) 85%), radial-gradient(50% 50% at 50% 100%, #00FFB0 -800%, rgba(0, 255, 176, 0) 85%), #0D1B24",
+    default: "#010101",
+    gradient: "radial-gradient(50% 50% at 50% 0%, #000111 -800%, rgba(0, 255, 176, 0) 85%), radial-gradient(50% 50% at 50% 100%, #000AAA -800%, rgba(0, 255, 176, 0) 85%), #000000",
     contrast: "rgba(222, 255, 255, 0.1)",
-    contrastAlternate: "#262626",
+    contrastAlternate: "#222222",
     paper: zilliqa.black,
     paperOpposite: zilliqa.neutral[100],
     tooltip: "#13222C",
@@ -55,26 +55,26 @@ const theme = {
     selected: "#00FFB0"
   },
   tab: {
-    active: "#13222C",
+    active: "#111111",
     disabled: "rgba(222, 255, 255, 0.5)",
     disabledBackground: "#0D1B24",
     selected: "#DEFFFF"
   },
   mainBoxShadow: "none",
   cardBoxShadow: "0 4px 8px 1px rgba(0, 0, 0, 0.2)",
-  navbar: "#0D1B24",
+  navbar: "#000000",
   switcheoLogo: switcheo.logoDark,
   colors: { zilliqa, switcheo },
-  currencyInput: "rgba(222, 255, 255, 0.1)",
+  currencyInput: "rgba(255, 255, 255, 0.1)",
   icon: "#00FFB0",
   label: "rgba(222, 255, 255, 0.5)",
   warning: {
     main: "#FFDF6B",
     light: "#FFDF6B"
   },
-  link: "#00FFB0",
-  border: "1px solid #29475A",
-  borderColor: "#29475A",
+  link: "#FAFAFA",
+  border: "1px solid #2A2A2A",
+  borderColor: "#AAAAAA",
 };
 
 export default theme;
