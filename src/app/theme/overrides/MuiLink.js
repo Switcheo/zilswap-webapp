@@ -1,6 +1,6 @@
 const MuiLink = theme => ({
   root: {
-    color: theme.palette.type === "dark" ? "#00FFB0" : "#02586D",
+    color: theme.palette.type === "dark" ? "#000000" : "#111111",
   }
 });
 
