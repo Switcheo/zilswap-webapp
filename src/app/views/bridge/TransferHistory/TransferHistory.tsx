@@ -12,18 +12,11 @@ import BridgeCard from "app/layouts/BridgeCard";
 import { actions } from "app/store";
 import { BridgeState, BridgeTx, RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { hexToRGBA, useBridgeableTokenFinder } from "app/utils";
+import { CHAIN_NAMES, hexToRGBA, useBridgeableTokenFinder } from "app/utils";
 import { toHumanNumber } from "app/utils";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
 import ChainLogo from 'app/views/main/Bridge/components/ChainLogo/ChainLogo'
 
-const CHAIN_NAMES = {
-    [Blockchain.Zilliqa]: "Zilliqa",
-    [Blockchain.Ethereum]: "Ethereum",
-    [Blockchain.Neo]: "Neo",
-    [Blockchain.BinanceSmartChain]: "Binance Smart Chain",
-    [Blockchain.Arbitrum]: "Arbitrum One",
-}
 
 // TODO: remove any, type the props properly
 const TransferHistory = (props: any) => {

@@ -45,6 +45,7 @@ import {
 import {
   BRIDGE_TX_DEPOSIT_CONFIRM_ETH,
   BRIDGE_TX_DEPOSIT_CONFIRM_ZIL,
+  CHAIN_NAMES,
 } from 'app/utils/constants'
 import { ReactComponent as WavyLine } from 'app/views/main/Bridge/wavy-line.svg'
 import ChainLogo from 'app/views/main/Bridge/components/ChainLogo/ChainLogo'
@@ -313,14 +314,6 @@ const ColorlibConnector = withStyles({
     zIndex: 0,
   },
 })(StepConnector)
-
-const CHAIN_NAMES = {
-  [Blockchain.Zilliqa]: 'Zilliqa',
-  [Blockchain.Ethereum]: 'Ethereum',
-  [Blockchain.Neo]: 'Neo',
-  [Blockchain.BinanceSmartChain]: 'Binance Smart Chain',
-  [Blockchain.Arbitrum]: 'Arbitrum One',
-}
 
 const STEPS = ['Deposit', 'Confirm', 'Withdraw']
 
@@ -715,7 +708,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                       <CheckCircleOutlineRoundedIcon
                         className={cls(
                           classes.checkIcon,
-                          currentBridgeTx?.depositTxConfirmedAt
+                          currentBridgeTx?.withdrawTxHash
                             ? classes.checkIconCompleted
                             : ''
                         )}

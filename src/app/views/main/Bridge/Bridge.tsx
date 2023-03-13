@@ -551,6 +551,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                     <MenuItem value={Blockchain.Ethereum}>Ethereum</MenuItem>
                     <MenuItem value={Blockchain.Arbitrum}>Arbitrum</MenuItem>
                     <MenuItem value={Blockchain.BinanceSmartChain}>BSC</MenuItem>
+                    <MenuItem value={Blockchain.Polygon}>Polygon</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
@@ -584,6 +585,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
                     <MenuItem value={Blockchain.Zilliqa}>Zilliqa</MenuItem>
                     <MenuItem value={Blockchain.Arbitrum}>Arbitrum</MenuItem>
                     <MenuItem value={Blockchain.BinanceSmartChain}>BSC</MenuItem>
+                    <MenuItem value={Blockchain.Polygon}>Polygon</MenuItem>
                   </Select>
                 </FormControl>
               </Box>

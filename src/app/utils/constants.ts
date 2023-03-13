@@ -63,11 +63,13 @@ export const EthRpcUrl = {
     [Blockchain.Ethereum]: "https://eth-mainnet.alchemyapi.io/v2/RWHcfoaBKzRpXnLONcEDnVqtUp7StNYl",
     [Blockchain.Arbitrum]: "https://arb1.arbitrum.io/rpc",
     [Blockchain.BinanceSmartChain]: "https://bsc-dataseed1.binance.org",
+    [Blockchain.Polygon]: "https://polygon-rpc.com",
   },
   [Network.TestNet]: {
     [Blockchain.Ethereum]: "https://eth-goerli.alchemyapi.io/v2/Rog1kuZQf1R8X7EAmsXs7oFyQXyzIH-4",
     [Blockchain.Arbitrum]: "https://rinkeby.arbitrum.io/rpc",
     [Blockchain.BinanceSmartChain]: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+    [Blockchain.Polygon]: "https://rpc-mumbai.maticvigil.com",
   },
 }
 
@@ -95,7 +97,7 @@ export const STATS_REFRESH_RATE = 300000; // ms
 export const BRIDGE_TX_DEPOSIT_CONFIRM_ZIL = 3;
 export const BRIDGE_TX_DEPOSIT_CONFIRM_ETH = 12;
 
-export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const ZIL_ADDRESS = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
 export const ZIL_DECIMALS = 12;
 
@@ -119,7 +121,8 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
     "zxcad.1.18.35137d", "eport.1.2.7d4912", "efees.1.2.586fb5",
     "elunr.1.2.e2121e", "ezil.1.2.f1b7e4", "dxcad.1.2.67dde7",
     "zbrkl.1.18.b8c24f", "zopul.1.18.4bcdc9", "ztraxx.1.18.9c8e35",
-    "swth.1.19.6f83d0", "swth.1.6.5bc06b", "swth.1.18.4ef38b"
+    "swth.1.19.6f83d0", "swth.1.6.5bc06b", "swth.1.18.4ef38b", 
+    "swth.1.17.dbb4d5"
   ],
   [Network.TestNet]: ["swth.1.111.ae86f6", "swth.1.502.976cb7"],
 }
@@ -128,8 +131,18 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
 export const BRIDGEABLE_EVM_CHAINS = [
   Blockchain.Ethereum, 
   Blockchain.Arbitrum, 
-  Blockchain.BinanceSmartChain
+  Blockchain.BinanceSmartChain,
+  Blockchain.Polygon
 ] as const
+
+export const CHAIN_NAMES = {
+  [Blockchain.Zilliqa]: 'Zilliqa',
+  [Blockchain.Ethereum]: 'Ethereum',
+  [Blockchain.Neo]: 'Neo',
+  [Blockchain.BinanceSmartChain]: 'Binance Smart Chain',
+  [Blockchain.Arbitrum]: 'Arbitrum One',
+  [Blockchain.Polygon]: 'Polygon',
+}
 
 //To edit when integrating other blockchain protocols to Zilbridge
 export const BRIDGEABLE_CHAINS = [

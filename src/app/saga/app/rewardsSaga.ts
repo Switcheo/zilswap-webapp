@@ -9,7 +9,7 @@ import { RewardsActionTypes } from "app/store/rewards/actions";
 import { DistributionWithStatus, DistributorWithTimings, PoolReward, PotentialRewards } from "app/store/types";
 import { WalletActionTypes } from "app/store/wallet/actions";
 import { bnOrZero, SimpleMap } from "app/utils";
-import { PollIntervals, WZIL_TOKEN_CONTRACT } from "app/utils/constants";
+import { PollIntervals, WZIL_TOKEN_CONTRACT, ZERO_ADDRESS } from "app/utils/constants";
 import { getBlockchain, getRewards, getTokens, getWallet, getMarketplace } from "../selectors";
 
 function* queryDistributors() {
@@ -138,10 +138,19 @@ function* queryDistribution() {
         let funded = null;
         const distributor = distributors.find(d => d.distributor_address_hex === addr && d.finalEpochNumber >= info.epoch_number);
         if (distributor) {
-          const tokenContract = zilswap.getContract(distributor.reward_token_address_hex);
-          const balancesState = yield call([tokenContract, tokenContract.getSubState], "balances");
-
-          const tokenBalance = balancesState.balances[addr];
+          // check if reward_token_address_hex is ZIL address
+          let tokenBalance;
+          if (distributor.reward_token_address_hex === ZERO_ADDRESS) {
+            // reward is in ZIL, fetch _balance from distributor instead
+            const distributorContract = zilswap.getContract(addr);
+            const ZILBalanceState = yield call([distributorContract, distributorContract.getSubState], "_balance");
+            tokenBalance = ZILBalanceState._balance;
+          } else {
+            // reward is a ZRC-2, fetch balance from rewardTokenContract state
+            const tokenContract = zilswap.getContract(distributor.reward_token_address_hex);
+            const balancesState = yield call([tokenContract, tokenContract.getSubState], "balances");
+            tokenBalance = balancesState.balances[addr];
+          }
 
           if (tokenBalance) {
             funded = bnOrZero(tokenBalance).gte(info.amount);

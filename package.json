@@ -21,7 +21,7 @@
     "authereum": "^0.1.14",
     "bignumber.js": "^9.0.1",
     "buffer": "^6.0.3",
-    "carbon-js-sdk": "0.3.49",
+    "carbon-js-sdk": "0.3.51",
     "classnames": "^2.2.6",
     "crypto-js": "^3.1.9-1",
     "dayjs": "^1.10.4",
