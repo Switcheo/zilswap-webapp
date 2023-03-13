@@ -328,7 +328,7 @@ const ConfirmTransfer = (props: any) => {
         })
 
         logger("approve tx", approve_tx.hash)
-        toaster(`Submitted: (${fromBlockchain.toUpperCase()} - ERC20 Approval)`, { hash: approve_tx.hash!.replace(/^0x/i, ""), sourceBlockchain: "eth" })
+        toaster(`Submitted: (${fromBlockchain.toUpperCase()} - ERC20 Approval)`, { hash: approve_tx.hash!.replace(/^0x/i, ""), sourceBlockchain: fromBlockchain })
         setApprovalHash(approve_tx.hash!)
         const txReceipt = await ethClient.getProvider().waitForTransaction(approve_tx.hash!)
 
