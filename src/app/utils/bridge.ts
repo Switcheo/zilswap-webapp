@@ -19,6 +19,7 @@ export const getTokenDenomList = (network: CarbonSDK.Network): SimpleMap<string>
     [Blockchain.Neo]: "swthn.1.4.2624e1",
     [Blockchain.Neo3]: "swth.1.14.fffdbf",
     [Blockchain.Arbitrum]: "swth.1.19.6f83d0",
+    [Blockchain.Polygon]: "swth.1.17.96d9cd",
   }
   // const devTokenDenoms: SimpleMap<string> = {
   //     [Blockchain.Ethereum]: "swth1.1.350.9d90c3",
@@ -79,12 +80,14 @@ export const getEvmChainIDs = (network: Network): ReadonlyMap<Blockchain, number
     [Blockchain.Ethereum, 1],
     [Blockchain.BinanceSmartChain, 56],
     [Blockchain.Arbitrum, 42161],
+    [Blockchain.Polygon, 137],
   ])
 
   const testnetChainIds: ReadonlyMap<Blockchain, number> = new Map<Blockchain, number>([
     [Blockchain.Ethereum, 5],
     [Blockchain.BinanceSmartChain, 97],
-    [Blockchain.Arbitrum, 421611]
+    [Blockchain.Arbitrum, 421611],
+    [Blockchain.Polygon, 80001],
   ])
 
   switch (network) {
@@ -130,10 +133,8 @@ export const getRecoveryAddress = (network: CarbonSDK.Network) => {
 export const getETHClient = (sdk: ConnectedCarbonSDK | CarbonSDK, chain: Blockchain, network: CarbonSDK.Network) => {
   if (network === CarbonSDK.Network.TestNet) {
     return sdk.eth
-  } else if (chain === Blockchain.BinanceSmartChain) {
-    return sdk.bsc
-  } else if (chain === Blockchain.Arbitrum) {
-    return sdk.arbitrum
+  } else if (evmIncludes(chain)) {
+    return sdk[chain]
   } else {
     return sdk.eth
   }
@@ -161,6 +162,8 @@ export const getExplorerLink = (hash: string, network: Network, blockchain?: Blo
         return `https://arbiscan.io/tx/${hash}`
       case Blockchain.BinanceSmartChain:
         return `https://bscscan.com/tx/${hash}`
+      case Blockchain.Polygon:
+        return `https://polygonscan.com/tx/${hash}`
       case Blockchain.Zilliqa: /* FALLTHROUGH */
       default:
         return `https://viewblock.io/zilliqa/tx/${hash}`
@@ -185,6 +188,8 @@ export const getExplorerSite = (network: Network, blockchain?: BridgeableChains)
         return 'Arbiscan'
       case Blockchain.BinanceSmartChain:
         return 'Bscscan'
+      case Blockchain.Polygon:
+        return 'Polygonscan'
       case Blockchain.Zilliqa: /* FALLTHROUGH */
       default:
         return 'Viewblock'
@@ -233,6 +238,17 @@ export const getChainParams = (network: Network) => {
           rpcUrls: [EthRpcUrl[network][Blockchain.BinanceSmartChain]],
           blockExplorerUrls: ["https://bscscan.com"]
         },
+        [Blockchain.Polygon]: {
+          chainId: `0x${getEvmChainIDs(network).get(Blockchain.Polygon)!.toString(16)}`,
+          chainName: "Polygon Network",
+          nativeCurrency: {
+            name: "Polygon Matic Token",
+            symbol: "MATIC",
+            decimals: 18
+          },
+          rpcUrls: [EthRpcUrl[network][Blockchain.Polygon]],
+          blockExplorerUrls: ["https://polygonscan.com"]
+        },
       }
     case Network.TestNet:
       return {
@@ -258,7 +274,18 @@ export const getChainParams = (network: Network) => {
           },
           rpcUrls: [EthRpcUrl[network][Blockchain.BinanceSmartChain]],
           blockExplorerUrls: ["https://testnet.bscscan.com"]
-        }
+        },
+        [Blockchain.Polygon]: {
+          chainId: `0x${getEvmChainIDs(network).get(Blockchain.Polygon)!.toString(16)}`,
+          chainName: "Polygon Mumbai Testnet",
+          nativeCurrency: {
+            name: "Polygon Matic Token",
+            symbol: "MATIC",
+            decimals: 18
+          },
+          rpcUrls: [EthRpcUrl[network][Blockchain.Polygon]],
+          blockExplorerUrls: ["https://mumbai.polygonscan.com"]
+        },
       }
   }
 }

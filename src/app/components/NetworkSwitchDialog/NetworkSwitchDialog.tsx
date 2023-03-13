@@ -45,6 +45,8 @@ const NetworkSwitchDialog = (props: any) => {
           case 5: return 'Goerli Test Network'
           case 56: return 'Binance Smart Chain Network'
           case 97: return 'Binance Smart Chain (Testnet)'
+          case 137: return 'Polygon Mainnet'
+          case 80001: return 'Polygon Mumbai Testnet'
           case 42161: return 'Arbitrum One Network'
           case 421611: return "Arbitrum Testnet Network";
           default: return 'Unknown Network'
