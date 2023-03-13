@@ -67,7 +67,7 @@ const CurrencyLogo = (props: any) => {
         let destToken = bridgeTokens.find(
           token => token.denom === bridgeToken.chains[bridgeFormState.toBlockchain]
         );
-        if (getTokenDenomList(netZilToCarbon(network))[blockchain] === bridgeToken.denom) { // If bridgeToken is a wrapped swth token
+        if (getTokenDenomList(netZilToCarbon(network))[blockchain!] === bridgeToken.denom) { // If bridgeToken is a wrapped swth token
           return swthTokenAddress // SWTH token address
         }
         if (!destToken) return

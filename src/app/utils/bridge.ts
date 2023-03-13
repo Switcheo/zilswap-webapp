@@ -19,7 +19,7 @@ export const getTokenDenomList = (network: CarbonSDK.Network): SimpleMap<string>
     [Blockchain.Neo]: "swthn.1.4.2624e1",
     [Blockchain.Neo3]: "swth.1.14.fffdbf",
     [Blockchain.Arbitrum]: "swth.1.19.6f83d0",
-    [Blockchain.Polygon]: "swth.1.17.96d9cd",
+    [Blockchain.Polygon]: "swth.1.17.dbb4d5",
   }
   // const devTokenDenoms: SimpleMap<string> = {
   //     [Blockchain.Ethereum]: "swth1.1.350.9d90c3",

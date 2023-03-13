@@ -708,7 +708,7 @@ const TransactionDetail = (props: TransactionDetailProps) => {
                       <CheckCircleOutlineRoundedIcon
                         className={cls(
                           classes.checkIcon,
-                          currentBridgeTx?.depositTxConfirmedAt
+                          currentBridgeTx?.withdrawTxHash
                             ? classes.checkIconCompleted
                             : ''
                         )}
