@@ -137,6 +137,7 @@ export const BRIDGEABLE_EVM_CHAINS = [
 ] as const
 
 export const BRIDGE_CHAINS_WITH_NATIVE_ZERO_TOKEN = [
+  Blockchain.Ethereum,
   Blockchain.BinanceSmartChain,
   Blockchain.Polygon
 ] as const

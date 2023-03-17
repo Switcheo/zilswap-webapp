@@ -249,15 +249,16 @@ const addSwthMapping = (
 
 const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken, network: CarbonSDK.Network) => {
   const blockchain = blockchainForChainId(t.chainId.toNumber(), network)
+  const isZil = blockchain === Blockchain.Zilliqa
   const address =
-    blockchain === Blockchain.Zilliqa
+    isZil
       ? toBech32Address(t.tokenAddress)
       : `0x${t.tokenAddress.toLowerCase()}`
-  if (r[address]) {
-    if (!r[address].registered) r[address].registered = true
+  if (r[blockchain + address]) {
+    if (!r[blockchain + address].registered) r[blockchain + address].registered = true
     return
   }
-  r[address] = {
+  r[isZil ? address : blockchain + "--" + address] = {
     initialized: false,
     registered: true,
     whitelisted: false,
