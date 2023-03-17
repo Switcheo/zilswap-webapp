@@ -7,7 +7,7 @@ import { DataCoder, bnOrZero } from "app/utils";
 import { LocalStorageKeys } from "app/utils/constants";
 import { SimpleMap } from "app/utils";
 import { BridgeActionTypes } from "./actions";
-import { BridgeState, BridgeTx, BridgeableTokenMapping, BridgeableChains } from "./types";
+import { BridgeState, BridgeTx, BridgeableTokenMapping, BridgeableChains, UpdateBridgeBalance } from "./types";
 
 export const BridgeTxEncoder: DataCoder<BridgeTx> = {
   encode: (tx: BridgeTx): object => {
@@ -150,6 +150,20 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
         ...state,
         tokens: payload,
       };
+
+      case BridgeActionTypes.UPDATE_TOKEN_BALANCES:
+        const updateBalanceProps: UpdateBridgeBalance[] = payload;
+        const newTokensState: BridgeableTokenMapping = state.tokens.slice()
+        updateBalanceProps.forEach(k => {
+          const index = state.tokens.findIndex(token => token.blockchain === k.chain && token.tokenAddress === k.tokenAddress)
+          if (index > 0) {
+            newTokensState[index].balance = k.balance
+          }
+        })
+        return {
+          ...state,
+          tokens: newTokensState,
+        };
 
     case BridgeActionTypes.ADD_BRIDGE_TXS:
       const uniqueTxs: SimpleMap<BridgeTx> = {};

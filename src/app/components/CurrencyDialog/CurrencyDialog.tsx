@@ -235,6 +235,7 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
         <Box className={classes.currenciesContainer}>
           <CurrencyList
             tokens={filteredTokens}
+            tokenList={tokenList}
             search={search}
             emptyStateLabel="No token found."
             showContribution={showContribution}

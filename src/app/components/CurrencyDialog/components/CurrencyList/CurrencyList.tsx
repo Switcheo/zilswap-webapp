@@ -9,7 +9,7 @@ import ContrastBox from "app/components/ContrastBox";
 import CurrencyLogo from "app/components/CurrencyLogo";
 import { BridgeState, RootState, TokenInfo, TokenState, WalletState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
-import { netZilToCarbon, useMoneyFormatter, useNetwork } from "app/utils";
+import { netZilToCarbon, removeHexPrefix, useMoneyFormatter, useNetwork } from "app/utils";
 import { BIG_ZERO } from "app/utils/constants";
 import { formatSymbol, formatTokenName } from "app/utils/currencies";
 import { evmIncludes, getTokenDenomList } from 'app/utils/bridge'
@@ -23,6 +23,7 @@ type CurrencyListProps = BoxProps & {
   onSelectCurrency: (token: TokenInfo) => void;
   onToggleUserToken: (token: TokenInfo) => void;
   userTokens: string[];
+  tokenList?: string;
 };
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -64,7 +65,7 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 }));
 
 const CurrencyList: React.FC<CurrencyListProps> = (props) => {
-  const { children, className, onSelectCurrency, onToggleUserToken, userTokens, emptyStateLabel, showContribution, search, tokens, ...rest } = props;
+  const { children, className, onSelectCurrency, onToggleUserToken, userTokens, emptyStateLabel, showContribution, search, tokens, tokenList, ...rest } = props;
   const classes = useStyles();
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const bridgeState = useSelector<RootState, BridgeState>(state => state.bridge);
@@ -78,6 +79,11 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
       const contribution = token.pool?.userContribution ?? BIG_ZERO;
       return contribution as BigNumber;
     } else {
+      if (tokenList && tokenList === "bridge") {
+        const amount = bridgeState.tokens.find(bridgeToken => bridgeToken.tokenAddress === removeHexPrefix(token.address) && bridgeToken.blockchain === token.blockchain)?.balance
+        if (!amount) return BIG_ZERO;
+        return new BigNumber(amount.toString());
+      }
       const amount = token.balance;
       if (!amount) return BIG_ZERO;
 

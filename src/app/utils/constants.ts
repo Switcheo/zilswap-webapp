@@ -122,7 +122,8 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
     "elunr.1.2.e2121e", "ezil.1.2.f1b7e4", "dxcad.1.2.67dde7",
     "zbrkl.1.18.b8c24f", "zopul.1.18.4bcdc9", "ztraxx.1.18.9c8e35",
     "swth.1.19.6f83d0", "swth.1.6.5bc06b", "swth.1.18.4ef38b", 
-    "swth.1.17.dbb4d5"
+    "swth.1.17.dbb4d5", "zbnb.1.18.c406be", "zil.1.17.3997a2",
+    "zil.1.19.0f16f8", "zil.1.6.52c256", "zmatic.1.18.45185c"
   ],
   [Network.TestNet]: ["swth.1.111.ae86f6", "swth.1.502.976cb7"],
 }
@@ -131,6 +132,11 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
 export const BRIDGEABLE_EVM_CHAINS = [
   Blockchain.Ethereum, 
   Blockchain.Arbitrum, 
+  Blockchain.BinanceSmartChain,
+  Blockchain.Polygon
+] as const
+
+export const BRIDGE_CHAINS_WITH_NATIVE_ZERO_TOKEN = [
   Blockchain.BinanceSmartChain,
   Blockchain.Polygon
 ] as const
