@@ -14,6 +14,7 @@ export type BridgeableToken = {
   denom: string;    // carbon denom
   tokenId: string;  // tradehub denom
   chains: Record<string, string>
+  balance?: BigNumber
 }
 
 export type BridgeableTokenMapping = ReadonlyArray<BridgeableToken>;
@@ -39,6 +40,12 @@ export interface WithdrawFee {
   amount: BigNumber;
   value: BigNumber;
   token?: Models.Token;
+}
+
+export interface UpdateBridgeBalance {
+  balance?: BigNumber;
+  tokenAddress: string;
+  chain: BridgeableChains;
 }
 
 export interface BridgeFormState {

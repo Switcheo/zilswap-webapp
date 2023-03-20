@@ -1,4 +1,4 @@
-import { BridgeFormState, BridgeTx, BridgeableToken } from "./types";
+import { BridgeFormState, BridgeTx, BridgeableToken, UpdateBridgeBalance } from "./types";
 import { WithdrawFee } from "./types";
 
 export enum BridgeActionTypes {
@@ -8,6 +8,7 @@ export enum BridgeActionTypes {
   ADD_BRIDGE_TXS = "BRIDGE_ADD_BRIDGE_TXS",
   SET_PREVIEW_BRIDGE_TX = "BRIDGE_SET_PREVIEW_BRIDGE_TX",
   UPDATE_FEE = "BRIDGE_UPDATE_FEE",
+  UPDATE_TOKEN_BALANCES = "UPDATE_TOKEN_BALANCES"
 }
 
 export function updateForm(payload: Partial<BridgeFormState>) {
@@ -41,6 +42,13 @@ export function dismissBridgeTx(payload: BridgeTx) {
 export function setTokens(payload: BridgeableToken[]) {
   return {
     type: BridgeActionTypes.SET_TOKENS,
+    payload
+  }
+}
+
+export function updateBridgeBalance(payload: UpdateBridgeBalance[]) {
+  return {
+    type: BridgeActionTypes.UPDATE_TOKEN_BALANCES,
     payload
   }
 }

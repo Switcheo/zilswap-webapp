@@ -71,6 +71,13 @@ export const truncateAddress = (input: string, forSmallScreen: boolean = false):
   return truncate(i, 5, forSmallScreen ? 2 : 5)
 }
 
+export const removeHexPrefix = (input: string): string => {
+  if (input.startsWith("0x")) {
+    input = input.slice(2)
+  }
+  return input
+}
+
 export const formatZWAPLabel = (input: BigNumber) => {
   const amount = input.shiftedBy(-12);
   if (!amount.isZero() && amount.lt(0.01)) return "<0.01";

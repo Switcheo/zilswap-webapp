@@ -20,7 +20,7 @@ const useTokenFinder = () => {
       }
 
       if (evmIncludes(blockchain) && !address.startsWith("0x")) {
-        address = `0x${address}`;
+        address = `${blockchain}--0x${address}`;
       }
 
       return tokens[address];
