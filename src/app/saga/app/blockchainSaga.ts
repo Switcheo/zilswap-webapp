@@ -248,7 +248,11 @@ const addSwthMapping = (
 }
 
 const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken, network: CarbonSDK.Network) => {
-  const blockchain = blockchainForChainId(t.chainId.toNumber(), network)
+  let blockchain = blockchainForChainId(t.chainId.toNumber(), network)
+  /* HARDCODE: "swth" token chain id is 4 according to the carbonSDK tokens api */
+  if (t.chainId.toNumber() === 4) {
+    blockchain = Blockchain.Carbon
+  }
   const isZil = blockchain === Blockchain.Zilliqa
   const address =
     isZil
