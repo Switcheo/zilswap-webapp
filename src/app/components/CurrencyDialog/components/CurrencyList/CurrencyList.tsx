@@ -102,7 +102,7 @@ const CurrencyList: React.FC<CurrencyListProps> = (props) => {
   const getLogoAddress = (token: TokenInfo) => {
     if (evmIncludes(token.blockchain)) {
       const tokenHash = token.address.replace(/^0x/i, "");
-      const bridgeToken = bridgeState.tokens.find((bridgeToken) => bridgeToken.tokenAddress === tokenHash)
+      const bridgeToken = bridgeState.tokens.find((bridgeToken) => bridgeToken.tokenAddress === tokenHash && bridgeToken.blockchain === token.blockchain)
       const destToken = bridgeState.tokens.find((token) => token.denom === bridgeToken?.chains[bridgeState.formState.toBlockchain])
 
       if (bridgeToken) {
