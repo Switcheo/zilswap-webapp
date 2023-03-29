@@ -6141,9 +6141,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000981, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001125, caniuse-lite@^1.0.30001312:
-  version "1.0.30001393"
-  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001393.tgz"
-  integrity sha512-N/od11RX+Gsk+1qY/jbPa0R6zJupEa0lxeBG598EbrtblxVCTJsQwbRBm6+V+rxpc5lHKdsXb9RY83cZIPLseA==
+  version "1.0.30001472"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001472.tgz"
+  integrity sha512-xWC/0+hHHQgj3/vrKYY0AAzeIUgr7L9wlELIcAvZdDUHlhL/kNxMdnQLOSOQfP8R51ZzPhmHdyMkI0MMpmxCfg==
 
 capture-exit@^2.0.0:
   version "2.0.0"
@@ -6152,7 +6152,7 @@ capture-exit@^2.0.0:
   dependencies:
     rsvp "^4.8.4"
 
-carbon-js-sdk@^0.4.0:
+carbon-js-sdk@^0.4.3:
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/carbon-js-sdk/-/carbon-js-sdk-0.4.3.tgz#2974f2d23f4b3d1f04c22ed6254b285bd996c22e"
   integrity sha512-WwSrLOVwnoTkCcSMARLs8VHfiBi6AFqcTvSlug2n5Wyryv/E5ktPgyUFkxM/2k7Gd+7GdJoA614JMYnh+lh26g==
