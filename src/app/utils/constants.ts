@@ -1,4 +1,5 @@
 import BigNumber from "bignumber.js";
+import { Blockchain } from 'carbon-js-sdk/lib'
 import { Network } from "zilswap-sdk/lib/constants";
 import { SimpleMap } from "./types";
 
@@ -57,6 +58,21 @@ export const RPCEndpoints: { [key in Network]: string } = {
   [Network.TestNet]: 'https://dev-api.zilliqa.com',
 };
 
+export const EthRpcUrl = {
+  [Network.MainNet]: {
+    [Blockchain.Ethereum]: "https://eth-mainnet.alchemyapi.io/v2/RWHcfoaBKzRpXnLONcEDnVqtUp7StNYl",
+    [Blockchain.Arbitrum]: "https://arb1.arbitrum.io/rpc",
+    [Blockchain.BinanceSmartChain]: "https://bsc-dataseed1.binance.org",
+    [Blockchain.Polygon]: "https://polygon-rpc.com",
+  },
+  [Network.TestNet]: {
+    [Blockchain.Ethereum]: "https://eth-goerli.alchemyapi.io/v2/Rog1kuZQf1R8X7EAmsXs7oFyQXyzIH-4",
+    [Blockchain.Arbitrum]: "https://rinkeby.arbitrum.io/rpc",
+    [Blockchain.BinanceSmartChain]: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+    [Blockchain.Polygon]: "https://rpc-mumbai.maticvigil.com",
+  },
+}
+
 export const BIG_ZERO = new BigNumber(0);
 export const BIG_ONE = new BigNumber(1);
 
@@ -105,9 +121,41 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
     "zxcad.1.18.35137d", "eport.1.2.7d4912", "efees.1.2.586fb5",
     "elunr.1.2.e2121e", "ezil.1.2.f1b7e4", "dxcad.1.2.67dde7",
     "zbrkl.1.18.b8c24f", "zopul.1.18.4bcdc9", "ztraxx.1.18.9c8e35",
+    "swth.1.19.6f83d0", "swth.1.6.5bc06b", "swth.1.18.4ef38b", 
+    "swth.1.17.dbb4d5", "zbnb.1.18.c406be", "zil.1.17.3997a2",
+    "zil.1.19.0f16f8", "zil.1.6.52c256", "zmatic.1.18.45185c"
   ],
-  [Network.TestNet]: ["zeth.1.111.eaa57f", "zdai.1.111.f9a752", "zwap.0.111.227030", "zil.0.2.6b2a39"],
+  [Network.TestNet]: ["swth.1.111.ae86f6", "swth.1.502.976cb7"],
 }
+
+//To edit when integrating new EVM chains for Zilbridge
+export const BRIDGEABLE_EVM_CHAINS = [
+  Blockchain.Ethereum, 
+  Blockchain.Arbitrum, 
+  Blockchain.BinanceSmartChain,
+  Blockchain.Polygon
+] as const
+
+export const BRIDGE_CHAINS_WITH_NATIVE_ZERO_TOKEN = [
+  Blockchain.Ethereum,
+  Blockchain.BinanceSmartChain,
+  Blockchain.Polygon
+] as const
+
+export const CHAIN_NAMES = {
+  [Blockchain.Zilliqa]: 'Zilliqa',
+  [Blockchain.Ethereum]: 'Ethereum',
+  [Blockchain.Neo]: 'Neo',
+  [Blockchain.BinanceSmartChain]: 'Binance Smart Chain',
+  [Blockchain.Arbitrum]: 'Arbitrum One',
+  [Blockchain.Polygon]: 'Polygon',
+}
+
+//To edit when integrating other blockchain protocols to Zilbridge
+export const BRIDGEABLE_CHAINS = [
+  Blockchain.Zilliqa, 
+  ...BRIDGEABLE_EVM_CHAINS
+] as const
 
 export const ERC20_ZIL_TOKENSWAP_CONTRACT = {
   [Network.MainNet]: "0xef1efb7f22fb728820d4952b33012a7115e87687",
@@ -193,4 +241,28 @@ export const METAZOA_STAT_PROFESSION: SimpleMap<string> = {
   "STR": "Marauder",
   "DEX": "Astrominer",
   "INT": "Psionic",
+}
+
+const ERC20_ABI = [
+  // Some details about the token
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+
+  // Get the account balance
+  "function balanceOf(address) view returns (uint)",
+
+  "function allowance(address owner, address spender) view returns (uint)",
+
+  // Send some of your tokens to someone else
+  "function transfer(address to, uint amount)",
+
+  "function approve(address spender, uint amount)",
+
+  // An event triggered whenever anyone transfers to someone else
+  "event Transfer(address indexed from, address indexed to, uint amount)"
+];
+
+export const EthContractABIs : {[key: string]: string[] | null} = {
+  [Network.MainNet]: ERC20_ABI,
+  [Network.TestNet]: ERC20_ABI,
 }

@@ -4,6 +4,7 @@ import { Blockchain } from "carbon-js-sdk";
 import { useSelector } from "react-redux";
 import { RootState, TokenInfo } from "app/store/types";
 import { SimpleMap } from "./types";
+import { evmIncludes } from './bridge'
 
 const useTokenFinder = () => {
   const tokens = useSelector<RootState, SimpleMap<TokenInfo>>(store => store.token.tokens);
@@ -14,12 +15,12 @@ const useTokenFinder = () => {
       address = address.toLowerCase();
       if (blockchain === Blockchain.Zilliqa && !address.startsWith("zil")) {
         address = toBech32Address(address);
-      } else if (blockchain === Blockchain.Ethereum && address.startsWith("zil")) {
+      } else if (evmIncludes(blockchain) && address.startsWith("zil")) {
         address = fromBech32Address(address);
       }
 
-      if (blockchain === Blockchain.Ethereum && !address.startsWith("0x")) {
-        address = `0x${address}`;
+      if (evmIncludes(blockchain) && !address.startsWith("0x")) {
+        address = `${blockchain}--0x${address}`;
       }
 
       return tokens[address];

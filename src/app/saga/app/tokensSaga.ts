@@ -3,8 +3,8 @@ import BigNumber from "bignumber.js";
 import { Network } from "zilswap-sdk/lib/constants";
 import { Task } from "redux-saga";
 import { all, call, cancel, delay, fork, put, race, select, take } from "redux-saga/effects";
-
-import { Blockchain } from "carbon-js-sdk";
+import { ethers } from "ethers";
+import { Blockchain } from 'carbon-js-sdk/lib'
 import { logger } from "core/utilities";
 import {
   BatchRequestType, ZilswapConnector, balanceBatchRequest,
@@ -12,10 +12,21 @@ import {
 } from "core/zilswap";
 import { ETHBalances } from "core/ethereum";
 import { actions } from "app/store";
-import { TokenInfo } from "app/store/types";
+import { BridgeableEvmChains, TokenInfo } from "app/store/types";
 import { SimpleMap, bnOrZero } from "app/utils";
-import { ZERO_ADDRESS, PollIntervals } from "app/utils/constants";
+import { BRIDGEABLE_EVM_CHAINS, EthContractABIs, EthRpcUrl, ZERO_ADDRESS, PollIntervals } from "app/utils/constants";
 import { getBlockchain, getTokens, getWallet } from "../selectors";
+
+/**
+ * This function returns a Promise to return the balance of the specified evm token
+ * @param {ethers.Contract} contract the token contract
+ * @param {string} address the evm wallet address
+ * @param {string} tokenAddress the address of the token
+ * @returns {Promise<[string, BigNumber]>}
+ */
+const fetchEthTokenBalance = async(contract: ethers.Contract, address: string, tokenAddress: string, chain: BridgeableEvmChains): Promise<[string, BigNumber, BridgeableEvmChains]> => {
+  return [tokenAddress, new BigNumber((await contract.balanceOf(address)).toString()), chain]
+}
 
 const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo>, address: string | null) => {
   const updates: SimpleMap<TokenInfo> = {};
@@ -25,37 +36,78 @@ const fetchEthTokensState = async (network: Network, tokens: SimpleMap<TokenInfo
       return updates
     }
 
-    logger("tokens saga", "retrieving eth token balances/allowances");
+    logger("tokens saga", "retrieving evm token balances/allowances");
 
-    // get eth balance
+    // get mainnet eth balance
     const balance = await ETHBalances.getETHBalance({ network, walletAddress: address })
-    updates[ZERO_ADDRESS] = {
-      ...tokens[ZERO_ADDRESS],
+    updates[Blockchain.Ethereum + "--" + ZERO_ADDRESS] = {
+      ...tokens[Blockchain.Ethereum + "--" + ZERO_ADDRESS],
       address: ZERO_ADDRESS,
       initialized: true,
       name: "Ethereum",
-      symbol: "ETH",
-      decimals: 18,
-      blockchain: Blockchain.Ethereum,
-      balance,
+        symbol: "ETH",
+        decimals: 18,
+        blockchain: Blockchain.Ethereum,
+        balance,
     }
 
-    // get rest
-    const tokenAddresses = Object.values(tokens).filter(t => t.blockchain === Blockchain.Ethereum && t.address !== ZERO_ADDRESS).map(t => t.address)
-    if (!tokenAddresses.length)
-      return updates;
+    // get polygon matic balance
+    const polygonBalance = await ETHBalances.getETHBalance({ network, walletAddress: address, chain: Blockchain.Polygon })
+    updates[Blockchain.Polygon + "--" + ZERO_ADDRESS] = {
+      ...tokens[Blockchain.Polygon + "--" + ZERO_ADDRESS],
+      address: ZERO_ADDRESS,
+      initialized: true,
+      name: "Matic",
+        symbol: "MATIC",
+        decimals: 18,
+        blockchain: Blockchain.Polygon,
+        balance: polygonBalance,
+    }
 
-    const balances = await ETHBalances.getTokenBalances({ network, tokenAddresses, walletAddress: address })
-    Object.entries(balances).forEach(([address, balance]) => {
-      updates[address] = {
-        ...tokens[address],
+    // get bsc bnb balance
+    const bscBalance = await ETHBalances.getETHBalance({ network, walletAddress: address, chain: Blockchain.BinanceSmartChain })
+    updates[Blockchain.BinanceSmartChain + "--" + ZERO_ADDRESS] = {
+      ...tokens[Blockchain.BinanceSmartChain + "--" + ZERO_ADDRESS],
+      address: ZERO_ADDRESS,
+      initialized: true,
+      name: "BNB",
+        symbol: "BNB",
+        decimals: 18,
+        blockchain: Blockchain.BinanceSmartChain,
+        balance: bscBalance,
+    }
+
+    const fetchBalancePromises: Promise<[string, BigNumber, BridgeableEvmChains]>[] = [] //iterable of token balance Promises to be resolved concurrently later
+    for (const evmChain of BRIDGEABLE_EVM_CHAINS) {
+      const tokenAddresses = Object.values(tokens).filter(t => t.blockchain === evmChain && t.address !== ZERO_ADDRESS).map(t => t.address)
+      if (!tokenAddresses.length) continue;
+
+      const provider = new ethers.providers.JsonRpcProvider(EthRpcUrl[network][evmChain]) as ethers.providers.JsonRpcProvider
+
+      for (const tokenAddress of tokenAddresses) {
+        const assetContract: ethers.Contract = new ethers.Contract(tokenAddress, EthContractABIs[network] ?? [], provider)
+        fetchBalancePromises.push(fetchEthTokenBalance(assetContract, address, tokenAddress, evmChain))
+      }
+    }
+
+    /**
+     * resolve Promises concurrently instead of sequential looping and continues 
+     * fetching balance even if one of the Promise fails/rejects
+     */
+    const balances = await Promise.allSettled(fetchBalancePromises)
+    
+    balances.filter(result => 'value' in result) as PromiseFulfilledResult<[string, BigNumber, BridgeableEvmChains]>[] //filter for resolved Promises
+    balances.forEach(result => {
+      if (result.status === "rejected") return
+      const [address, balance, chain] = result.value
+      updates[chain + "--" + address] = {
+        ...tokens[chain + "--" + address],
         initialized: true,
         balance,
       }
     })
   } catch (error) {
-    console.error("failed to read eth balances")
-    console.error(error);
+    console.error("failed to read evm balances")
     return updates;
   }
 

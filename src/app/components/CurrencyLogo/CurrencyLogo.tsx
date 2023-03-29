@@ -5,9 +5,11 @@ import cls from 'classnames';
 import { useSelector } from 'react-redux';
 import { Blockchain } from 'carbon-js-sdk';
 import { Network } from 'zilswap-sdk/lib/constants';
-import { useNetwork } from 'app/utils';
+import { netZilToCarbon, useNetwork } from 'app/utils';
 import { AppTheme } from 'app/theme/types';
-import { BridgeableTokenMapping, RootState } from 'app/store/types';
+import { BridgeableTokenMapping, BridgeFormState, RootState } from 'app/store/types';
+import { bridgeableIncludes, getTokenDenomList } from 'app/utils/bridge'
+import { swthTokenAddress } from 'app/views/main/Bridge/components/constants'
 import legacySvg from './legacy-zil.svg';
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -44,6 +46,7 @@ const CurrencyLogo = (props: any) => {
   const bridgeTokens = useSelector<RootState, BridgeableTokenMapping>(
     state => state.bridge.tokens
   );
+  const bridgeFormState = useSelector<RootState, BridgeFormState>(state => state.bridge.formState);
   const theme = useTheme();
   const [error, setError] = useState<boolean>(false);
   const network = useNetwork();
@@ -53,19 +56,27 @@ const CurrencyLogo = (props: any) => {
   let tokenIconUrl: string;
 
   const logoAddress = useMemo(() => {
-    if (blockchain === Blockchain.Ethereum) {
+    if (bridgeableIncludes(blockchain!)) {
       const tokenHash = address.replace(/^0x/i, '');
-      const bridgeToken = bridgeTokens.eth.find(
-        bridgeToken => bridgeToken.tokenAddress === tokenHash
+
+      const bridgeToken = bridgeTokens.find(
+        bridgeToken => bridgeToken.tokenAddress === tokenHash && bridgeToken.blockchain === blockchain
       );
 
       if (bridgeToken) {
-        return toBech32Address(bridgeToken.toTokenAddress);
+        let destToken = bridgeTokens.find(
+          token => token.denom === bridgeToken.chains[bridgeFormState.toBlockchain]
+        );
+        if (getTokenDenomList(netZilToCarbon(network))[blockchain!] === bridgeToken.denom) { // If bridgeToken is a wrapped swth token
+          return swthTokenAddress // SWTH token address
+        }
+        if (!destToken) return
+        return toBech32Address(destToken.tokenAddress);
       }
     }
 
     return address;
-  }, [blockchain, address, bridgeTokens.eth]);
+  }, [blockchain, network, address, bridgeTokens, bridgeFormState.toBlockchain]);
 
   if (network === Network.TestNet) {
     if (isZil) tokenIconUrl = `https://meta.viewblock.io/ZIL/logo${urlSuffix}`;
@@ -73,8 +84,9 @@ const CurrencyLogo = (props: any) => {
       tokenIconUrl = `https://dr297zt0qngbx.cloudfront.net/tokens/testnet/${logoAddress}`;
   } else {
     let tokenKey = isZil ? '' : `.${logoAddress}`;
-    if (logoAddress?.startsWith('0x') && !isZil)
+    if (logoAddress?.startsWith('0x') && !isZil) {
       tokenKey = `ZIL.${toBech32Address(logoAddress)}`;
+    }      
     tokenIconUrl = `https://meta.viewblock.io/ZIL${tokenKey}/logo${urlSuffix}`;
   }
   const fallbackImg = `https://meta.viewblock.io/ZIL.notfound/logo${urlSuffix}`;

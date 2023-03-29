@@ -5,12 +5,14 @@ import cls from "classnames";
 import { useSelector } from "react-redux";
 import { Blockchain } from "carbon-js-sdk";
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import { Network } from 'zilswap-sdk/lib/constants'
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { FancyButton, Text } from "app/components";
 import { ReactComponent as DotIcon } from "app/components/ConnectWalletButton/dot.svg";
 import { RootState } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 import { hexToRGBA, truncate, truncateAddress } from "app/utils";
+import { getEvmChainIDs } from 'app/utils/bridge'
 
 interface Props extends ButtonProps {
   address: string;
@@ -75,7 +77,7 @@ const ConnectButton: React.FC<Props> = (props: Props) => {
   const { chain, children, className, address, ...rest } = props;
   const classes = useStyles();
   const bridgeWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]);
-  const isTestNet = useMemo(() => bridgeWallet && Number(bridgeWallet.chainId) !== 1, [bridgeWallet]);
+  const isTestNet = useMemo(() => bridgeWallet && !(Array.from(getEvmChainIDs(Network.MainNet).values()).includes(Number(bridgeWallet.chainId))), [bridgeWallet]);
 
   const getFormattedAddress = () => {
     try {

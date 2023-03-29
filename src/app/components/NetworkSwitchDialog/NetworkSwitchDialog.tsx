@@ -8,9 +8,10 @@ import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet, WalletConnectType } from "core/wallet";
 import { useNetwork } from "app/utils";
 import { AppTheme } from "app/theme/types";
-import { RootState } from "app/store/types";
+import { BridgeableChains, RootState } from "app/store/types";
 import { actions } from "app/store";
 import { DialogModal } from "app/components";
+import { evmIncludes, getEvmChainIDs } from 'app/utils/bridge'
 import NetworkSwitchBox from "./NetworkSwitchBox";
 
 const useStyles = makeStyles((theme: AppTheme) => ({
@@ -26,15 +27,14 @@ const NetworkSwitchDialog = (props: any) => {
     const showNetworkSwitchDialog = useSelector<RootState, boolean>(state => state.layout.showNetworkSwitchDialog);
     const zilWallet = useSelector<RootState, ConnectedWallet | null>(state => state.wallet.wallet);
     const ethWallet = useSelector<RootState, ConnectedBridgeWallet | null>(state => state.wallet.bridgeWallets[Blockchain.Ethereum]);
-    const srcChain = useSelector<RootState, Blockchain>(state => state.bridge.formState.fromBlockchain);
+    const srcChain = useSelector<RootState, BridgeableChains>(state => state.bridge.formState.fromBlockchain);
 
     const isMainNet = useMemo(() => {
-      if (srcChain === Blockchain.Ethereum) {
-        if (Number(ethWallet?.chainId) === 3) return false;
-        // set to mainnet even if currently set to some random net
-        return true;
-      } else if (srcChain === Blockchain.Zilliqa) {
+      if (srcChain === Blockchain.Zilliqa) {
         return network === Network.MainNet
+      } else if (evmIncludes(srcChain)) {
+        if (Array.from(getEvmChainIDs(Network.TestNet).values()).includes(Number(ethWallet?.chainId))) return false;
+        return true;
       }
     }, [ethWallet?.chainId, network, srcChain])
 
@@ -42,10 +42,17 @@ const NetworkSwitchDialog = (props: any) => {
       const getEthChainName = (chainId: number) => {
         switch (chainId) {
           case 1: return 'Ethereum Network'
-          case 3: return 'Ropsten Test Network'
+          case 5: return 'Goerli Test Network'
+          case 56: return 'Binance Smart Chain Network'
+          case 97: return 'Binance Smart Chain (Testnet)'
+          case 137: return 'Polygon Mainnet'
+          case 80001: return 'Polygon Mumbai Testnet'
+          case 42161: return 'Arbitrum One Network'
+          case 421611: return "Arbitrum Testnet Network";
           default: return 'Unknown Network'
         }
       }
+
       const getEthWalletName = () => {
         if (ethWallet?.provider.isBoltX) {
             return 'BoltX';
@@ -70,24 +77,23 @@ const NetworkSwitchDialog = (props: any) => {
 
       const ethChainID = Number(ethWallet?.chainId)
       if (isMainNet) {
-        if (ethChainID !== 1) {
+        const correctChainId = getEvmChainIDs(network).get(srcChain)
+        if (correctChainId && correctChainId !== ethChainID) {
           dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
-          return [getEthChainName(1), '0x1', getEthWalletName(), getEthChainName(ethChainID)]
-        } else if (zilWallet?.network !== Network.MainNet) {
-          dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
-          return ['Zilliqa MainNet', null, getZilWalletName(), 'Zilliqa TestNet']
+          return [getEthChainName(correctChainId), `0x${(correctChainId).toString(16)}`, getEthWalletName(), getEthChainName(ethChainID)]
         }
-      } else {
-        if (ethChainID !== 3) {
+      } else if (!isMainNet) {
+        const correctChainId = getEvmChainIDs(network).get(srcChain)
+        if (correctChainId && ethChainID !== correctChainId) {
           dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
-          return [getEthChainName(3), '0x3', getEthWalletName(), getEthChainName(ethChainID)]
+          return [getEthChainName(correctChainId), `0x${(correctChainId).toString(16)}`, getEthWalletName(), getEthChainName(ethChainID)]
         } else if (zilWallet?.network !== Network.TestNet) {
           dispatch(actions.Layout.toggleShowNetworkSwitch("open"))
           return ['Zilliqa TestNet', null, getZilWalletName(), 'Zilliqa MainNet']
         }
       }
       return [null, null, null, null]
-    }, [dispatch, ethWallet, zilWallet, isMainNet])
+    }, [network, dispatch, ethWallet, zilWallet, isMainNet, srcChain])
 
     const onCloseDialog = () => {
         dispatch(actions.Layout.toggleShowNetworkSwitch("close"));

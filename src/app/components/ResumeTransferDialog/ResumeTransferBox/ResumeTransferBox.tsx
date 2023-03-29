@@ -1,4 +1,4 @@
-import React, { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
+import React, { MutableRefObject, useMemo, useRef, useState } from "react";
 import { Box, Button, CircularProgress, Grid, OutlinedInput, makeStyles } from "@material-ui/core";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
 import CheckCircleIcon from "@material-ui/icons/CheckCircleOutlineRounded";
@@ -15,7 +15,7 @@ import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet } from "core/wallet";
 import { providerOptions } from "core/ethereum";
 import { ConnectButton } from "app/views/main/Bridge/components";
-import { bnOrZero, hexToRGBA, netZilToCarbon, useAsyncTask, useNetwork } from "app/utils";
+import { bnOrZero, hexToRGBA, SimpleMap, useAsyncTask, useNetwork } from "app/utils";
 import { AppTheme } from "app/theme/types";
 import { RootState } from "app/store/types";
 import { BridgeState, BridgeTx, BridgeableTokenMapping } from "app/store/bridge/types";
@@ -142,9 +142,8 @@ const ResumeTransferBox = (props: any) => {
     const pendingBridgeTx = bridgeState.activeBridgeTx;
 
     const [depositTransfer, setDepositTransfer] = useState<Hydrogen.CrossChainTransferDetailed | null>(null);
-    const [sdk, setSdk] = useState<CarbonSDK | null>(null);
+    const sdk = useSelector<RootState, SimpleMap<CarbonSDK>>(state => state.carbonSDK.sdkCache)[network]
 
-    const [runInitCarbonSDK] = useAsyncTask("initCarbonSDK");
     const [runGetTransfer, loading, error] = useAsyncTask("getTransfer");
     const [runResumeTransfer, loadingResume] = useAsyncTask("resumeTransfer", (error) => setErrorMsg(error?.message));
     const [showMenu, setShowMenu] = useState<MutableRefObject<undefined>>();
@@ -154,17 +153,6 @@ const ResumeTransferBox = (props: any) => {
     const isMnemonicFilled = useMemo(() => {
         return mnemonic.indexOf("") === -1;
     }, [mnemonic])
-
-    useEffect(() => {
-        runInitCarbonSDK(async () => {
-            const carbonNetwork = netZilToCarbon(network);
-            const sdk = await CarbonSDK.instance({ network: carbonNetwork });
-            sdk.token.reloadTokens();
-            setSdk(sdk);
-        });
-
-        // eslint-disable-next-line
-    }, [network])
 
     const dstChain = useMemo(() => {
         if (depositTransfer) {
@@ -247,15 +235,18 @@ const ResumeTransferBox = (props: any) => {
         // tx found and status success - build bridgeTx
         if (depositTransfer && dstChain) {
             const srcChain = depositTransfer.source_blockchain as Blockchain.Zilliqa | Blockchain.Ethereum;
-            const bridgeToken = bridgeableTokens[srcChain].find(token => token.denom === depositTransfer.to_asset || token.tokenId === depositTransfer.to_asset);
+            const bridgeToken = bridgeableTokens.find(token => (token.denom === depositTransfer.to_asset || token.tokenId === depositTransfer.to_asset) && token.blockchain === srcChain);
+            const destToken = bridgeableTokens.find(token => token.denom === bridgeToken?.chains[bridgeState.formState.toBlockchain]);
+
+            if (!destToken) return
 
             if (!bridgeToken || !sdk) return;
             runResumeTransfer(async () => {
-                const fee = await sdk.fee.getDepositWithdrawalFees(bridgeToken.toDenom);
+                const fee = await sdk.hydrogen.getFeeQuote({ token_denom: destToken.denom });
                 const withdrawFee = bnOrZero(fee.withdrawal_fee);
                 if (!withdrawFee?.gt(0))
                     throw new Error("Could not retrieve withdraw fee");
-                const feeAmount = withdrawFee.shiftedBy(-bridgeToken.toDecimals);
+                const feeAmount = withdrawFee.shiftedBy(-destToken.decimals);
 
                 if (new BigNumber(depositTransfer.amount).lt(feeAmount))
                     throw new Error("Transferred amount insufficient to pay for withdraw fees.");
@@ -267,8 +258,8 @@ const ResumeTransferBox = (props: any) => {
                     dstAddr: dstWalletAddr,
                     srcToken: bridgeToken.denom,
                     srcTokenId: bridgeToken.tokenId,
-                    dstToken: bridgeToken.toDenom,
-                    dstTokenId: bridgeToken.toTokenId,
+                    dstToken: destToken.denom,
+                    dstTokenId: destToken.tokenId,
                     inputAmount: new BigNumber(depositTransfer.amount).shiftedBy(-bridgeToken.decimals),
                     interimAddrMnemonics: mnemonic.join(" "),
                     withdrawFee: feeAmount,
@@ -325,7 +316,7 @@ const ResumeTransferBox = (props: any) => {
         const web3Modal = new Web3Modal({
             cacheProvider: true,
             disableInjectedProvider: false,
-            network: "ropsten",
+            network: "testnet",
             providerOptions
         });
         if (clear) {

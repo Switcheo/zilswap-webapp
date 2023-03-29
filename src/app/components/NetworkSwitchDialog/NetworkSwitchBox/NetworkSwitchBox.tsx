@@ -1,15 +1,17 @@
-import React, { Fragment } from "react";
-import { useEffect } from "react";
-import { Box, BoxProps, Button, makeStyles } from "@material-ui/core";
-import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernetRounded';
-import cls from "classnames";
-import { useDispatch } from "react-redux";
-import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
-import { Text } from 'app/components';
-import { ReactComponent as DotIcon } from "app/components/ConnectWalletButton/dot.svg";
-import { actions } from "app/store";
-import { AppTheme } from "app/theme/types";
-import { hexToRGBA } from "app/utils";
+import React, { Fragment } from "react"
+import { useEffect } from "react"
+import { Box, BoxProps, Button, makeStyles } from "@material-ui/core"
+import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernetRounded'
+import cls from "classnames"
+import { useDispatch, useSelector } from "react-redux"
+import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet"
+import { Text } from 'app/components'
+import { ReactComponent as DotIcon } from "app/components/ConnectWalletButton/dot.svg"
+import { actions } from "app/store"
+import { AppTheme } from "app/theme/types"
+import { hexToRGBA, useNetwork } from "app/utils"
+import { BridgeableChains, BridgeableEvmChains, RootState } from 'app/store/types'
+import { evmIncludes, getChainParams } from 'app/utils/bridge'
 
 const useStyles = makeStyles((theme: AppTheme) => ({
     root: {
@@ -58,43 +60,59 @@ const useStyles = makeStyles((theme: AppTheme) => ({
             backgroundColor: `rgba${hexToRGBA("#DEFFFF", 0.2)}`
         }
     },
-}));
+}))
 
 interface Props extends BoxProps {
-  currentChainName: string | null;
-  requiredChainName: string | null;
-  requiredChainID: string | null;
-  walletToChange: string | null;
-  ethWallet: ConnectedBridgeWallet | null;
+    currentChainName: string | null
+    requiredChainName: string | null
+    requiredChainID: string | null
+    walletToChange: string | null
+    ethWallet: ConnectedBridgeWallet | null
 }
 const NetworkSwitchBox = (props: Props) => {
-    const { className, currentChainName, requiredChainName, requiredChainID, walletToChange, ethWallet } = props;
-    const classes = useStyles();
-    const dispatch = useDispatch();
+    const { className, currentChainName, requiredChainName, requiredChainID, walletToChange, ethWallet } = props
+    const classes = useStyles()
+    const dispatch = useDispatch()
+    const network = useNetwork()
+    const srcChain = useSelector<RootState, BridgeableChains>(state => state.bridge.formState.fromBlockchain);
 
     useEffect(() => {
         if (requiredChainName === null) {
-            dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
+            dispatch(actions.Layout.toggleShowNetworkSwitch("close"))
         }
 
         // eslint-disable-next-line
-    }, [requiredChainName]);
+    }, [requiredChainName])
 
     const onCloseDialog = () => {
-      dispatch(actions.Layout.toggleShowNetworkSwitch("close"));
-    };
+        dispatch(actions.Layout.toggleShowNetworkSwitch("close"))
+    }
 
     const switchEthChain = async () => {
-      try {
-        if (!ethWallet) return
-        await ethWallet.provider.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: requiredChainID }],
-        });
-        onCloseDialog();
-      } catch (switchError) {
-        console.error(switchError);
-      }
+        try {
+            if (!ethWallet || !evmIncludes(srcChain)) {
+                onCloseDialog()
+                return
+            }
+            await ethWallet.provider.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{
+                    chainId: requiredChainID,
+                }],
+            })
+            onCloseDialog()
+        } catch (switchError) {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [getChainParams(network)[srcChain as BridgeableEvmChains]],
+                })
+            } catch (error) {
+                console.error(error)
+            } finally {
+                onCloseDialog()
+            }  
+        }
     }
 
     return (
@@ -151,4 +169,4 @@ const NetworkSwitchBox = (props: Props) => {
     )
 }
 
-export default NetworkSwitchBox;
+export default NetworkSwitchBox

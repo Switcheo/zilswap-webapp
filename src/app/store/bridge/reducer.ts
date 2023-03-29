@@ -7,7 +7,7 @@ import { DataCoder, bnOrZero } from "app/utils";
 import { LocalStorageKeys } from "app/utils/constants";
 import { SimpleMap } from "app/utils";
 import { BridgeActionTypes } from "./actions";
-import { BridgeState, BridgeTx, BridgeableTokenMapping } from "./types";
+import { BridgeState, BridgeTx, BridgeableTokenMapping, BridgeableChains, UpdateBridgeBalance } from "./types";
 
 export const BridgeTxEncoder: DataCoder<BridgeTx> = {
   encode: (tx: BridgeTx): object => {
@@ -94,10 +94,7 @@ const initial_state: BridgeState = {
   activeBridgeTx: findActiveBridgeTx(loadedBridgeTxs),
   previewBridgeTx: undefined,
 
-  tokens: {
-    [Blockchain.Zilliqa]: [],
-    [Blockchain.Ethereum]: [],
-  },
+  tokens: [],
 
   formState: {
     transferAmount: new BigNumber(0),
@@ -139,9 +136,9 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
       let token = state.formState.token;
       if (!token) {
 
-        const fromBlockchain = state.formState.fromBlockchain as Blockchain.Zilliqa | Blockchain.Ethereum;
-        const firstToken = tokens[fromBlockchain]?.[0];
-        token = tokens[fromBlockchain]?.find(bridgeToken => bridgeToken.denom.startsWith("zil")) ?? firstToken;
+        const fromBlockchain = state.formState.fromBlockchain as BridgeableChains;
+        const firstToken = tokens.find(token => token.blockchain === fromBlockchain);
+        token = tokens?.find(bridgeToken => bridgeToken.denom.startsWith("zil") && bridgeToken.blockchain === fromBlockchain) ?? firstToken;
 
         state.formState = {
           ...state.formState,
@@ -153,6 +150,20 @@ const reducer = (state: BridgeState = initial_state, action: any) => {
         ...state,
         tokens: payload,
       };
+
+      case BridgeActionTypes.UPDATE_TOKEN_BALANCES:
+        const updateBalanceProps: UpdateBridgeBalance[] = payload;
+        const newTokensState: BridgeableTokenMapping = state.tokens.slice()
+        updateBalanceProps.forEach(k => {
+          const index = state.tokens.findIndex(token => token.blockchain === k.chain && token.tokenAddress === k.tokenAddress)
+          if (index > 0) {
+            newTokensState[index].balance = k.balance
+          }
+        })
+        return {
+          ...state,
+          tokens: newTokensState,
+        };
 
     case BridgeActionTypes.ADD_BRIDGE_TXS:
       const uniqueTxs: SimpleMap<BridgeTx> = {};
