@@ -103,7 +103,7 @@ export interface CurrencyDialogProps extends DialogProps {
 };
 
 const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProps) => {
-  const { className, onSelectCurrency, hideZil, hideNoPool, showContribution, zrc2Only, open, token, onClose, wrapZil } = props
+  const { className, onSelectCurrency, hideZil, hideNoPool, showContribution, zrc2Only = false, open, token, onClose, wrapZil } = props
   var { tokenList } = props
   const classes = useStyles()
   const [search, setSearch] = useState("")
@@ -167,8 +167,9 @@ const CurrencyDialog: React.FC<CurrencyDialogProps> = (props: CurrencyDialogProp
         }
     }
 
-    if (zrc2Only)
+    if (zrc2Only) {
       tokens = tokens.filter(t => t.address !== ZIL_ADDRESS)
+    }  
     setTokens(tokens.sort(sortFn))
 
     if (wrapZil) {

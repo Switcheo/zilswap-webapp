@@ -262,6 +262,10 @@ const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken, network: CarbonSDK.Ne
     if (!r[blockchain + address].registered) r[blockchain + address].registered = true
     return
   }
+  if (r[address]) {
+    if (!r[address].registered) r[address].registered = true
+    return
+  }
   r[isZil ? address : blockchain + "--" + address] = {
     initialized: false,
     registered: true,
