@@ -653,8 +653,8 @@ const ConfirmTransfer = (props: any) => {
             <CircularProgress size={20} className={classes.progress} />
           }
           {bridgeState.formState.fromBlockchain === Blockchain.Zilliqa
-            ? "Confirm (ZIL -> ETH)"
-            : "Confirm (ETH -> ZIL)"
+            ? `Confirm (ZIL -> ${bridgeState.formState.toBlockchain.toUpperCase()})`
+            : `Confirm (${bridgeState.formState.fromBlockchain.toUpperCase()} -> ZIL)`
           }
         </FancyButton>
       </Box>

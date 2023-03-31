@@ -216,6 +216,11 @@ const addMapping = (
 ) => {
   const aChain = blockchainForChainId(a.chainId.toNumber(), network) as BridgeableChains
   const bChain = blockchainForChainId(b.chainId.toNumber(), network) as Blockchain
+  const tokenInBridge = r.findIndex(bridgeToken => bridgeToken.blockchain === aChain && bridgeToken.denom === a.denom)
+  if (tokenInBridge > 0) {
+    r[tokenInBridge].chains[bChain] = b.denom
+    return
+  }
   r.push({
     blockchain: aChain,
     tokenAddress: a.tokenAddress.toLowerCase(),

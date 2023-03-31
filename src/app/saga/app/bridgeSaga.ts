@@ -3,7 +3,7 @@ import { Zilliqa } from "@zilliqa-js/zilliqa"
 import { Transaction as EthTransaction, ethers } from "ethers"
 import BigNumber from "bignumber.js"
 import dayjs from "dayjs"
-import { call, delay, fork, put, race, select, take } from "redux-saga/effects"
+import { call, delay, fork, put, race, select, take, takeLatest } from "redux-saga/effects"
 import { Blockchain, AddressUtils, CarbonSDK } from "carbon-js-sdk"
 import { GetDetailedTransfersResponse, GetTransfersRequest, CrossChainFlowStatus, GetRelaysRequest, RelaysResponse, GetRelaysResponse } from "carbon-js-sdk/lib/hydrogen"
 import { APIS, Network } from "zilswap-sdk/lib/constants"
@@ -321,58 +321,57 @@ function* queryTokenFees() {
   let lastCheckedToken: BridgeableToken | undefined = undefined
   const { network } = getBlockchain(yield select())
   if (network !== Network.MainNet) return
-  while (true) {
-    logger("bridge saga", "query withdraw fees")
-    try {
-      const { formState } = getBridge(yield select())
-      const { network: zilNetwork } = getBlockchain(yield select())
-      const bridgeToken = formState.token
-      if (lastCheckedToken !== bridgeToken) {
-        yield put(actions.Bridge.updateFee())
-      }
-
-      logger("bridge saga", lastCheckedToken?.chains[formState.toBlockchain], bridgeToken?.chains[formState.toBlockchain])
-      if ((!lastCheckedToken || lastCheckedToken !== bridgeToken) && bridgeToken) {
-        logger("bridge saga", "query", bridgeToken?.chains[formState.toBlockchain])
-        const sdk: CarbonSDK = ((yield select((state: RootState) => state.carbonSDK.sdkCache)) as SimpleMap<CarbonSDK>)[zilNetwork]
-        yield call([sdk, sdk.initialize])
-        const carbonToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken.chains[formState.toBlockchain])
-
-        if (!carbonToken) {
-          throw new Error(`token not found ${bridgeToken.chains[formState.toBlockchain]}`)
-        }
-
-        const feeResponse = (yield call([sdk.hydrogen, sdk.hydrogen.getFeeQuote], { token_denom: carbonToken.denom })) as GetFeeQuoteResponse
-        const withdrawFees = new BigNumber(feeResponse.withdrawal_fee)
-        const price = bnOrZero(yield sdk.token.getUSDValue(carbonToken.denom))
-
-        logger("bridge saga", "withdraw fees", carbonToken.denom, withdrawFees?.toString(10), price.toString(10))
-
-        yield put(actions.Bridge.updateFee({
-          amount: withdrawFees.shiftedBy(-carbonToken!.decimals),
-          value: withdrawFees.shiftedBy(-carbonToken!.decimals).times(price),
-          token: carbonToken
-        }))
-
-        lastCheckedToken = bridgeToken
-      }
-
-    } catch (e) {
-      console.warn('Fetch failed, will automatically retry later. Error:')
-      console.warn(e)
-    } finally {
-      yield race({
-        delay: delay(PollIntervals.BridgeTokenFee),
-        tokenUpdated: take(actions.Bridge.BridgeActionTypes.UPDATE_FORM),
-      })
+  logger("bridge saga", "query withdraw fees")
+  try {
+    const { formState } = getBridge(yield select())
+    const { network: zilNetwork } = getBlockchain(yield select())
+    const bridgeToken = formState.token
+    if (lastCheckedToken !== bridgeToken) {
+      yield put(actions.Bridge.updateFee())
     }
+
+    // logger("bridge saga", lastCheckedToken?.chains[formState.toBlockchain], bridgeToken?.chains[formState.toBlockchain])
+    if ((!lastCheckedToken || lastCheckedToken !== bridgeToken) && bridgeToken) {
+      logger("bridge saga", "query", bridgeToken?.chains[formState.toBlockchain])
+      const sdk: CarbonSDK = ((yield select((state: RootState) => state.carbonSDK.sdkCache)) as SimpleMap<CarbonSDK>)[zilNetwork]
+      yield call([sdk, sdk.initialize])
+      const carbonToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken.chains[formState.toBlockchain])
+
+      if (!carbonToken) {
+        throw new Error(`token not found ${bridgeToken.chains[formState.toBlockchain]}`)
+      }
+
+      const feeResponse = (yield call([sdk.hydrogen, sdk.hydrogen.getFeeQuote], { token_denom: carbonToken.denom })) as GetFeeQuoteResponse
+      const withdrawFees = new BigNumber(feeResponse.withdrawal_fee)
+      const price = bnOrZero(yield sdk.token.getUSDValue(carbonToken.denom))
+
+      logger("bridge saga", "withdraw fees", carbonToken.denom, withdrawFees?.toString(10), price.toString(10))
+
+      yield put(actions.Bridge.updateFee({
+        amount: withdrawFees.shiftedBy(-carbonToken!.decimals),
+        value: withdrawFees.shiftedBy(-carbonToken!.decimals).times(price),
+        token: carbonToken
+      }))
+
+      lastCheckedToken = bridgeToken
+    }
+
+  } catch (e) {
+    console.warn('Fetch failed, will automatically retry later. Error:')
+    console.warn(e)
   }
+}
+
+function* watchFees() {
+  yield takeLatest([
+    actions.Bridge.BridgeActionTypes.UPDATE_FORM,
+  ], queryTokenFees);
 }
 
 export default function* bridgeSaga() {
   logger("init bridge saga")
   yield fork(watchDepositConfirmation)
   yield fork(watchWithdrawConfirmation)
-  yield fork(queryTokenFees)
+  yield fork(watchFees)
   yield fork(watchActiveTxConfirmations)
 }
