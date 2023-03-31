@@ -212,10 +212,10 @@ const addMapping = (
   r: BridgeableToken[],
   a: CarbonToken,
   b: CarbonToken,
-  network: CarbonSDK.Network
+  network: CarbonSDK.Network,
+  chains: SimpleMap,
 ) => {
   const aChain = blockchainForChainId(a.chainId.toNumber(), network) as BridgeableChains
-  const bChain = blockchainForChainId(b.chainId.toNumber(), network) as Blockchain
   r.push({
     blockchain: aChain,
     tokenAddress: a.tokenAddress.toLowerCase(),
@@ -223,9 +223,7 @@ const addMapping = (
     decimals: a.decimals.toNumber(),
     denom: a.denom,
     tokenId: a.id,
-    chains: {
-      [bChain]: b.denom
-    }
+    chains,
   })
 }
 
@@ -233,7 +231,8 @@ const addSwthMapping = (
   r: BridgeableToken[],
   a: CarbonToken,
   b: { [key: string]: string },
-  network: CarbonSDK.Network
+  network: CarbonSDK.Network,
+  chains: SimpleMap,
 ) => {
   const aChain = blockchainForChainId(a.chainId.toNumber(), network) as BridgeableChains
   r.push({
@@ -243,7 +242,7 @@ const addSwthMapping = (
     decimals: a.decimals.toNumber(),
     denom: a.denom,
     tokenId: a.id,
-    chains: b
+    chains,
   })
 }
 
@@ -359,6 +358,7 @@ function* initialize(
     )
 
     const bridgeTokenResult: BridgeableToken[] = []
+    const tokenChains: SimpleMap<SimpleMap> = {};
 
     try {
       // load wrapper mappings and eth tokens by fetching bridge list from carbon
@@ -390,15 +390,19 @@ function* initialize(
         ) {
           return
         }
+        
+        if (!tokenChains[sourceDenom])
+          tokenChains[sourceDenom] = { [sourceChain]: sourceDenom };
+        tokenChains[sourceDenom][wrappedChain] = wrappedDenom;
 
         addToken(tokens, sourceToken, carbonNetwork)
         addToken(tokens, wrappedToken, carbonNetwork)
 
         if (sourceChain === Blockchain.Carbon) {
-          addSwthMapping(bridgeTokenResult, wrappedToken, getTokenDenomList(carbonNetwork), carbonNetwork)
+          addSwthMapping(bridgeTokenResult, wrappedToken, getTokenDenomList(carbonNetwork), carbonNetwork, tokenChains[sourceDenom])
         } else {
-          addMapping(bridgeTokenResult, wrappedToken, sourceToken, carbonNetwork)
-          addMapping(bridgeTokenResult, sourceToken, wrappedToken, carbonNetwork)
+          addMapping(bridgeTokenResult, wrappedToken, sourceToken, carbonNetwork, tokenChains[sourceDenom])
+          addMapping(bridgeTokenResult, sourceToken, wrappedToken, carbonNetwork, tokenChains[sourceDenom])
         }
 
       })
