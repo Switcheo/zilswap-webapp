@@ -2,15 +2,15 @@ import { BigNumber } from 'bignumber.js'
 import { call, delay, fork, put, race, select, take, takeLatest } from "redux-saga/effects";
 import { toBech32Address } from "@zilliqa-js/zilliqa";
 import { Distribution, Distributor, EstimatedRewards, ZAPStats, logger, ArkClient, TbmFeeDistributionEntry, TbmFeeDistribution } from "core/utilities";
-import { ZilswapConnector } from "core/zilswap";
+import { SimpleRPCRequest, ZilswapConnector, batchQuery } from "core/zilswap";
 import { actions } from "app/store";
 import { BlockchainActionTypes } from "app/store/blockchain/actions";
 import { RewardsActionTypes } from "app/store/rewards/actions";
 import { DistributionWithStatus, DistributorWithTimings, PoolReward, PotentialRewards } from "app/store/types";
-import { WalletActionTypes } from "app/store/wallet/actions";
-import { bnOrZero, SimpleMap } from "app/utils";
-import { PollIntervals, WZIL_TOKEN_CONTRACT, ZERO_ADDRESS } from "app/utils/constants";
+import { BIG_ZERO, bnOrZero, SimpleMap } from "app/utils";
+import { PollIntervals, WZIL_TOKEN_CONTRACT, ZERO_ADDRESS, ZWAP_DISTRIBUTOR_HEX } from "app/utils/constants";
 import { getBlockchain, getRewards, getTokens, getWallet, getMarketplace } from "../selectors";
+import { waitForWalletChange } from '../helper';
 
 function* queryDistributors() {
   while (true) {
@@ -100,6 +100,7 @@ function* queryDistributors() {
 }
 
 function* queryDistribution() {
+  let walletAddress: string | undefined = undefined;
   while (true) {
     try {
       logger("zap saga", "query distributions");
@@ -108,62 +109,92 @@ function* queryDistribution() {
       const { distributors } = getRewards(yield select())
       const walletState = getWallet(yield select())
 
+      walletAddress = walletState.wallet?.addressInfo.bech32;
       if (!walletState.wallet) {
         yield put(actions.Rewards.updateDistributions([]));
         continue;
       }
 
       const d: ReadonlyArray<Distribution> = yield ZAPStats.getClaimableDistributions({
-        address: walletState.wallet.addressInfo.bech32,
+        address: walletAddress,
         network,
       });
 
-      type Substate = { merkle_roots: { [epoch_number: string]: string } }
-      const uploadStates: { [distributor_address: string]: Substate } = {}
+      const uploadStates: { [distributor_address: string]: SimpleMap } = {}
       const distributions: DistributionWithStatus[] = []
       const zilswap = ZilswapConnector.getSDK();
+      const rpcEndpoint = (zilswap as any).rpcEndpoint
+
+      const distributorAddresses: SimpleMap<boolean> = d.reduce((accum, i) => {
+        accum[i.distributor_address] = true;
+        return accum;
+      }, {} as SimpleMap<boolean>);
+
+      yield batchQuery(Object.keys(distributorAddresses).map((addr) => ({
+        address: addr,
+        substate: "merkle_roots",
+        handler: (result) => {
+          uploadStates[addr] = result.merkle_roots
+        },
+      })), rpcEndpoint);
+
+      const batchRequests: SimpleRPCRequest[] = [];
+      const tokenBalances: SimpleMap<BigNumber | null> = {};
+
+      for (const i of d) {
+        const distributor = distributors.find(d => d.distributor_address_hex === i.distributor_address && d.finalEpochNumber >= i.epoch_number);
+        if (!distributor) continue;
+        if (distributor.distributor_address_hex === ZWAP_DISTRIBUTOR_HEX) continue; // no need balance check for zwap distributor
+
+        const balanceKey = `${distributor.distributor_address_hex}:${distributor.reward_token_address_hex}`;
+        if (tokenBalances[balanceKey]) continue;
+
+        tokenBalances[balanceKey] = BIG_ZERO;
+
+        const addr = i.distributor_address
+        if (distributor.reward_token_address_hex === ZERO_ADDRESS) {
+          // reward is in ZIL, fetch _balance from distributor instead
+          batchRequests.push({
+            address: addr,
+            substate: "_balance",
+            handler: (result) => tokenBalances[balanceKey] = bnOrZero(result?._balance)
+          });
+        } else {
+          // reward is a ZRC-2, fetch balance from rewardTokenContract state
+          const tokenAddress = distributor.reward_token_address_hex
+          const addrIndex = distributor.distributor_address_hex;
+          batchRequests.push({
+            address: tokenAddress,
+            substate: "balances",
+            indices: [addrIndex],
+            handler: (result) => tokenBalances[balanceKey] = bnOrZero(result?.balances?.[addrIndex])
+          });
+        }
+      }
+
+      if (batchRequests.length)
+        yield batchQuery(batchRequests, rpcEndpoint)
+
       for (let i = 0; i < d.length; ++i) {
         const info = d[i]
         const addr = info.distributor_address;
         if (info.distributor_address === "0x940c02e471a082cc3062b7cc446e652e64fe13fe" && info.epoch_number === 3)
           continue;
 
-        let uploadState = uploadStates[addr]
-        if (!uploadState) {
-          const contract = zilswap.getContract(addr);
-          uploadStates[addr] = uploadState = yield call([contract, contract.getSubState], "merkle_roots");
-        }
-        const merkleRoots = uploadState?.merkle_roots ?? {};
-
-        let funded = null;
+        const merkleRoots = uploadStates[addr] ?? {};
         const distributor = distributors.find(d => d.distributor_address_hex === addr && d.finalEpochNumber >= info.epoch_number);
         if (distributor) {
+
           // check if reward_token_address_hex is ZIL address
-          let tokenBalance;
-          if (distributor.reward_token_address_hex === ZERO_ADDRESS) {
-            // reward is in ZIL, fetch _balance from distributor instead
-            const distributorContract = zilswap.getContract(addr);
-            const ZILBalanceState = yield call([distributorContract, distributorContract.getSubState], "_balance");
-            tokenBalance = ZILBalanceState._balance;
-          } else {
-            // reward is a ZRC-2, fetch balance from rewardTokenContract state
-            const tokenContract = zilswap.getContract(distributor.reward_token_address_hex);
-            const balancesState = yield call([tokenContract, tokenContract.getSubState], "balances");
-            tokenBalance = balancesState.balances[addr];
-          }
+          const funded = ZWAP_DISTRIBUTOR_HEX === distributor.distributor_address_hex
+            || (tokenBalances[`${distributor.distributor_address_hex}:${distributor.reward_token_address_hex}`]?.gte(info.amount) ?? false)
 
-          if (tokenBalance) {
-            funded = bnOrZero(tokenBalance).gte(info.amount);
-          } else {
-            funded = true;
-          }
+          distributions.push({
+            info,
+            readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
+            funded,
+          });
         }
-
-        distributions.push({
-          info,
-          readyToClaim: typeof merkleRoots[info.epoch_number] === "string",
-          funded,
-        })
       }
 
       yield put(actions.Rewards.updateDistributions(distributions));
@@ -175,7 +206,7 @@ function* queryDistribution() {
       const invalidated = yield race({
         networkUpdate: take(BlockchainActionTypes.SET_NETWORK),
         distributorsUpdated: take(RewardsActionTypes.UPDATE_DISTRIBUTORS),
-        walletUpdated: take(WalletActionTypes.WALLET_UPDATE),
+        walletUpdated: waitForWalletChange(walletAddress),
       });
 
       logger("zap saga", "epoch info invalidated", invalidated);
@@ -184,6 +215,7 @@ function* queryDistribution() {
 }
 
 function* queryTbmFeeDistributionEntry() {
+  let walletAddress: string | undefined = undefined;
   const zilCurrency = "0x0000000000000000000000000000000000000000";
   while (true) {
     try {
@@ -195,6 +227,7 @@ function* queryTbmFeeDistributionEntry() {
       const arkClient = new ArkClient(network);
       const feeDistributors = exchangeInfo?.feeDistributors;
 
+      walletAddress = walletState.wallet?.addressInfo.bech32;
       if (!walletState.wallet || !feeDistributors) {
         continue;
       }
@@ -238,8 +271,8 @@ function* queryTbmFeeDistributionEntry() {
         if (info.reward_token_address === zilCurrency) tokenAddress = WZIL_TOKEN_CONTRACT[network]
 
         const tokenContract = zilswap.getContract(tokenAddress);
-        const balancesState = (yield call([tokenContract, tokenContract.getSubState], "balances")) as unknown as any
-        const tokenBalance = balancesState.balances[addr];
+        const balancesState = (yield call([tokenContract, tokenContract.getSubState], "balances", [addr])) as unknown as any
+        const tokenBalance = balancesState.balances?.[addr];
 
         if (tokenBalance) {
           funded = bnOrZero(tokenBalance).gte(info.amount);
@@ -264,7 +297,7 @@ function* queryTbmFeeDistributionEntry() {
       const invalidated = yield race({
         networkUpdate: take(BlockchainActionTypes.SET_NETWORK),
         distributionsUpdated: take(RewardsActionTypes.UPDATE_DISTRIBUTIONS),
-        walletUpdated: take(WalletActionTypes.WALLET_UPDATE),
+        walletUpdated: waitForWalletChange(walletAddress),
       });
 
       logger("rewards saga", "TBM fee distributions epoch info invalidated", invalidated);
@@ -273,6 +306,7 @@ function* queryTbmFeeDistributionEntry() {
 }
 
 function* queryPotentialRewards() {
+  let walletAddress: string | undefined = undefined;
   while (true) {
     logger("zap saga", "query potential rewards");
     try {
@@ -280,6 +314,7 @@ function* queryPotentialRewards() {
       const { wallet } = getWallet(yield select())
       const { distributors } = getRewards(yield select())
 
+      walletAddress = wallet?.addressInfo.bech32;
       if (!wallet) {
         yield put(actions.Rewards.updatePotentialRewards({}));
         continue;
@@ -314,7 +349,7 @@ function* queryPotentialRewards() {
     } finally {
       const invalidated = yield race({
         distributorsUpdated: take(RewardsActionTypes.UPDATE_DISTRIBUTORS),
-        walletUpdated: take(WalletActionTypes.WALLET_UPDATE),
+        walletUpdated: waitForWalletChange(walletAddress),
       });
 
       logger("zap saga", "epoch info invalidated", invalidated);

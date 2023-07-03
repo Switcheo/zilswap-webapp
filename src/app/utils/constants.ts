@@ -100,6 +100,7 @@ export const BRIDGE_TX_DEPOSIT_CONFIRM_ETH = 12;
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const ZIL_ADDRESS = "zil1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq9yf6pz";
 export const ZIL_DECIMALS = 12;
+export const ZWAP_DISTRIBUTOR_HEX = "0xea57c6b7b5475107688bc70aabefdd5352d0bed0";
 
 export const TOKEN_NAME_OVERRIDE: SimpleMap<string> = {
   // Legacy XCAD Network token

@@ -190,12 +190,12 @@ function* txObserved(payload: TxObservedPayload) {
 }
 
 type StateChangeObservedPayload = { state: ZiloAppState }
-const ziloStateObserver = (channel: Channel<StateChangeObservedPayload>) => {
-  return (state: ZiloAppState) => {
-    logger('zilo state changed observed', state)
-    channel.put({ state })
-  }
-}
+// const ziloStateObserver = (channel: Channel<StateChangeObservedPayload>) => {
+//   return (state: ZiloAppState) => {
+//     logger('zilo state changed observed', state)
+//     channel.put({ state })
+//   }
+// }
 
 function* stateChangeObserved(payload: StateChangeObservedPayload) {
   logger('zilo state change action')
@@ -212,10 +212,10 @@ const addMapping = (
   r: BridgeableToken[],
   a: CarbonToken,
   b: CarbonToken,
-  network: CarbonSDK.Network
+  network: CarbonSDK.Network,
+  chains: SimpleMap,
 ) => {
   const aChain = blockchainForChainId(a.chainId.toNumber(), network) as BridgeableChains
-  const bChain = blockchainForChainId(b.chainId.toNumber(), network) as Blockchain
   r.push({
     blockchain: aChain,
     tokenAddress: a.tokenAddress.toLowerCase(),
@@ -223,9 +223,7 @@ const addMapping = (
     decimals: a.decimals.toNumber(),
     denom: a.denom,
     tokenId: a.id,
-    chains: {
-      [bChain]: b.denom
-    }
+    chains,
   })
 }
 
@@ -233,7 +231,8 @@ const addSwthMapping = (
   r: BridgeableToken[],
   a: CarbonToken,
   b: { [key: string]: string },
-  network: CarbonSDK.Network
+  network: CarbonSDK.Network,
+  chains: SimpleMap,
 ) => {
   const aChain = blockchainForChainId(a.chainId.toNumber(), network) as BridgeableChains
   r.push({
@@ -243,7 +242,7 @@ const addSwthMapping = (
     decimals: a.decimals.toNumber(),
     denom: a.denom,
     tokenId: a.id,
-    chains: b
+    chains,
   })
 }
 
@@ -260,6 +259,10 @@ const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken, network: CarbonSDK.Ne
       : `0x${t.tokenAddress.toLowerCase()}`
   if (r[blockchain + address]) {
     if (!r[blockchain + address].registered) r[blockchain + address].registered = true
+    return
+  }
+  if (r[address]) {
+    if (!r[address].registered) r[address].registered = true
     return
   }
   r[isZil ? address : blockchain + "--" + address] = {
@@ -283,7 +286,7 @@ const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken, network: CarbonSDK.Ne
 function* initialize(
   action: ChainInitAction,
   txChannel: Channel<TxObservedPayload>,
-  stateChannel: Channel<StateChangeObservedPayload>
+  stateChannel: Channel<StateChangeObservedPayload>,
 ) {
   let sdk: Zilswap | null = null
   try {
@@ -309,20 +312,29 @@ function* initialize(
       rpcEndpoint: RPCEndpoints[network],
     })
 
-    yield call([sdk, sdk.initialize], txObserver(txChannel), observingTxs)
-    logger('zilswap sdk initialized')
+    for (let attempts = 1; attempts <= 5; ++attempts) {
+      try {
+        yield call([sdk, sdk.initialize], txObserver(txChannel), observingTxs);
+        logger('zilswap sdk initialized', attempts);
+        break;
+      } catch (err) {
+        yield call([sdk, sdk.teardown])
+      }
+    }
 
     for (let i = 0; i < ZILO_DATA[network].length; ++i) {
       const data = ZILO_DATA[network][i]
       if (data.comingSoon) continue
 
-      yield call(
-        [sdk, sdk.registerZilo],
-        data.contractAddress,
-        ziloStateObserver(stateChannel)
-      )
-      logger('zilo sdk initialized')
+      // disable ZILO fetches to improve initialization reliability
+      // TODO: shift zilo init code to external saga effect.
+      // yield call(
+      //   [sdk, sdk.registerZilo],
+      //   data.contractAddress,
+      //   ziloStateObserver(stateChannel)
+      // )
     }
+    logger('zilo sdk initialized')
     ZilswapConnector.setSDK(sdk)
 
     logger('init chain load tokens')
@@ -355,6 +367,7 @@ function* initialize(
     )
 
     const bridgeTokenResult: BridgeableToken[] = []
+    const tokenChains: SimpleMap<SimpleMap> = {};
 
     try {
       // load wrapper mappings and eth tokens by fetching bridge list from carbon
@@ -387,14 +400,18 @@ function* initialize(
           return
         }
 
+        if (!tokenChains[sourceDenom])
+          tokenChains[sourceDenom] = { [sourceChain]: sourceDenom };
+        tokenChains[sourceDenom][wrappedChain] = wrappedDenom;
+
         addToken(tokens, sourceToken, carbonNetwork)
         addToken(tokens, wrappedToken, carbonNetwork)
 
         if (sourceChain === Blockchain.Carbon) {
-          addSwthMapping(bridgeTokenResult, wrappedToken, getTokenDenomList(carbonNetwork), carbonNetwork)
+          addSwthMapping(bridgeTokenResult, wrappedToken, getTokenDenomList(carbonNetwork), carbonNetwork, tokenChains[sourceDenom])
         } else {
-          addMapping(bridgeTokenResult, wrappedToken, sourceToken, carbonNetwork)
-          addMapping(bridgeTokenResult, sourceToken, wrappedToken, carbonNetwork)
+          addMapping(bridgeTokenResult, wrappedToken, sourceToken, carbonNetwork, tokenChains[sourceDenom])
+          addMapping(bridgeTokenResult, sourceToken, wrappedToken, carbonNetwork, tokenChains[sourceDenom])
         }
 
       })
@@ -423,8 +440,11 @@ function* initialize(
     yield put(actions.Token.refetchState())
     yield put(actions.Blockchain.initialized())
   } catch (err) {
+    console.error("teardown")
     console.error(err)
-    sdk = yield call(teardown, sdk)
+    if (sdk) {
+      sdk = yield call(teardown, sdk);
+    }
   } finally {
     yield put(actions.Layout.removeBackgroundLoading('INIT_CHAIN'))
   }

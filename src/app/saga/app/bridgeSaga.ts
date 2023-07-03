@@ -169,7 +169,7 @@ function* watchDepositConfirmation() {
 
               tx.withdrawTxHash = depositTransfer.destination_tx_hash.slice(2)
               updatedTxs[tx.sourceTxHash!] = tx
-              
+
             }
             logger("bridge saga", "initiated tx withdraw", tx.withdrawTxHash)
           }
@@ -318,28 +318,31 @@ function* watchActiveTxConfirmations() {
 }
 
 function* queryTokenFees() {
-  let lastCheckedToken: BridgeableToken | undefined = undefined
+  let lastCheckedToken: BridgeableToken | undefined
   const { network } = getBlockchain(yield select())
   if (network !== Network.MainNet) return
   while (true) {
     logger("bridge saga", "query withdraw fees")
     try {
-      const { formState } = getBridge(yield select())
+      const { formState, tokens: bridgeTokens } = getBridge(yield select())
       const { network: zilNetwork } = getBlockchain(yield select())
       const bridgeToken = formState.token
-      if (lastCheckedToken !== bridgeToken) {
+
+      const dstDenom = bridgeToken?.chains[formState.toBlockchain];
+      const dstToken = typeof dstDenom === "string" ? bridgeTokens.find(t => t.denom === dstDenom) : undefined
+      if (lastCheckedToken !== dstToken) {
         yield put(actions.Bridge.updateFee())
       }
 
       logger("bridge saga", lastCheckedToken?.chains[formState.toBlockchain], bridgeToken?.chains[formState.toBlockchain])
-      if ((!lastCheckedToken || lastCheckedToken !== bridgeToken) && bridgeToken) {
-        logger("bridge saga", "query", bridgeToken?.chains[formState.toBlockchain])
+      if ((!lastCheckedToken || lastCheckedToken !== dstToken) && dstToken) {
+        logger("bridge saga", "query", dstToken)
         const sdk: CarbonSDK = ((yield select((state: RootState) => state.carbonSDK.sdkCache)) as SimpleMap<CarbonSDK>)[zilNetwork]
         yield call([sdk, sdk.initialize])
-        const carbonToken = Object.values(sdk.token.tokens).find(token => token.denom === bridgeToken.chains[formState.toBlockchain])
+        const carbonToken = Object.values(sdk.token.tokens).find(token => token.denom === dstToken.denom)
 
         if (!carbonToken) {
-          throw new Error(`token not found ${bridgeToken.chains[formState.toBlockchain]}`)
+          throw new Error(`token not found ${dstToken.denom}`)
         }
 
         const feeResponse = (yield call([sdk.hydrogen, sdk.hydrogen.getFeeQuote], { token_denom: carbonToken.denom })) as GetFeeQuoteResponse
@@ -354,7 +357,7 @@ function* queryTokenFees() {
           token: carbonToken
         }))
 
-        lastCheckedToken = bridgeToken
+        lastCheckedToken = dstToken
       }
 
     } catch (e) {
