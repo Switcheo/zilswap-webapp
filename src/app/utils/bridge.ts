@@ -1,5 +1,4 @@
 import { Blockchain, CarbonSDK, ConnectedCarbonSDK } from 'carbon-js-sdk'
-import { Token } from 'carbon-js-sdk/lib/codec'
 import { SimpleMap } from 'carbon-js-sdk/lib/util/type'
 import { Network } from "zilswap-sdk/lib/constants"
 import { BridgeableChains, BridgeableEvmChains } from 'app/store/types'
@@ -52,23 +51,6 @@ export const getTokenDenomList = (network: CarbonSDK.Network): SimpleMap<string>
  */
 export const getTokenDenoms = (network: CarbonSDK.Network, chain: Blockchain) => {
   return getTokenDenomList(network)[chain]
-}
-
-/**
- * Returns a mapping of chains to their respective SWTH token info
- * @param {CarbonSDK.Network} network 
- * @returns {SimpleMap<Token>}
- */
-export const getSwthBridgeTokens = async (network: CarbonSDK.Network) => {
-  var ret: SimpleMap<Token> = {}
-  const carbonSdk: CarbonSDK = await CarbonSDK.instance({ network })
-  const carbonTokens: Token[] = Object.values(carbonSdk.token.tokens)
-  const swthBridgeDenoms = getTokenDenomList(network)
-  Object.entries(swthBridgeDenoms).forEach(([chain, denom]) => {
-    const swthToken = carbonTokens.find(d => d.denom === denom)!
-    ret[chain] = swthToken
-  })
-  return ret
 }
 
 /**
