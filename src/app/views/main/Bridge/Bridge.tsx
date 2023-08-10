@@ -81,6 +81,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }, [bridgeFormState.fromBlockchain])
 
   const { token: bridgeToken, fromBlockchain, toBlockchain } = bridgeFormState
+  console.log("xx", bridgeState.tokens, bridgeToken?.denom, bridgeToken?.chains, bridgeFormState.toBlockchain)
 
   const destToken = useMemo(() => {
     if (bridgeToken) {
