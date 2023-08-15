@@ -87,6 +87,8 @@ export const isProduction = () => {
   return PRODUCTION_HOSTS.includes(window.location.hostname)
 }
 
+export const DISABLE_ZILBRIDGE = "Bridge is disabled due to issues with PolyNetwork. Please check Discord for updates. Funds are SAFU.";
+
 export const DEFAULT_TX_SLIPPAGE = 0.01;
 export const DEFAULT_TX_EXPIRY = 3;
 

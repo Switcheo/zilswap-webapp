@@ -296,12 +296,18 @@ function* initialize(
 
     const { network, wallet } = action.payload
     const sdkState = (yield select((state: RootState) => state.carbonSDK.sdkCache)) as SimpleMap<CarbonSDK>
-    if (!sdkState[network]) {
-      const carbonNetwork = netZilToCarbon(network)
-      const carbonSDK: CarbonSDK = yield call(CarbonSDK.instance, {
-        network: carbonNetwork,
-      })
-      yield put(actions.CarbonSDK.updateCarbonSDK({ sdk: carbonSDK, network: network }))
+    try {
+      if (!sdkState[network]) {
+        const carbonNetwork = netZilToCarbon(network)
+        const carbonSDK: CarbonSDK = yield call(CarbonSDK.instance, {
+          network: carbonNetwork,
+          skipInit: true, // skip initialization while carbon chain undergoes upgrade.
+        })
+        yield put(actions.CarbonSDK.updateCarbonSDK({ sdk: carbonSDK, network: network }))
+      }
+    } catch (error) {
+      console.warn("failed to initialize Carbon SDK");
+      console.error(error);
     }
     const providerOrKey = getProviderOrKeyFromWallet(wallet)
     const { observingTxs } = getTransactions(yield select())

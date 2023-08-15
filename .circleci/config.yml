@@ -1,10 +1,13 @@
 version: 2.1
 jobs:
   build:
-    resource_class: xlarge
     docker:
       # image with node, npm and yarn installed
-      - image: cimg/node:16.8.0
+      - image: cimg/node:18.16.1
+        auth:
+          username: $DOCKER_HUB_USERNAME
+          password: $DOCKER_HUB_PASSWORD
+    resource_class: xlarge
     steps:
       # checkout workspace to repo code
       - checkout
@@ -42,7 +45,29 @@ jobs:
           paths:
             - build
 
-  deploy:
+  deploy-gcp:
+    docker:
+      - image: cimg/gcp:2023.08
+        auth:
+          username: $DOCKER_HUB_USERNAME
+          password: $DOCKER_HUB_PASSWORD
+    steps:
+      - attach_workspace:
+          at: .
+
+      - run:
+          name: activate GCP service account
+          command: |
+            echo $GCP_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+            gcloud config set project $GCP_PROJECT_ID
+
+      - run:
+          name: deploy to gcp
+          command: |
+            gcloud storage cp -R build/* gs://zilswap-webapp-${CIRCLE_BRANCH}/
+
+  deploy-ipfs:
     docker:
       - image: cimg/node:16.8.0
     steps:
@@ -56,12 +81,6 @@ jobs:
       - run:
           name: install ipfs-deploy
           command: NPM_CONFIG_PREFIX=~/.npm-global npm install -g ipfs-deploy
-
-      - run:
-          name: install AWS CLI
-          command: |
-            sudo apt-get --allow-releaseinfo-change update
-            sudo apt-get install awscli
 
       - save_cache:
           paths:
@@ -81,31 +100,6 @@ jobs:
               ~/.npm-global/bin/ipfs-deploy build/ -d cloudflare -C
             fi
 
-      - run:
-          name: deploy to aws
-          command: |
-            if [ -d "build/static/js" ]
-            then
-              gzip -9 build/static/js/*
-              for i in ./build/static/js/*;
-                do mv "$i" "${i%.gz}";
-              done
-            fi
-
-            if [ "${CIRCLE_BRANCH}" = "staging" ]; then
-              aws s3 sync build s3://zilswap-ui-staging/ --delete --exclude "static/js/*"
-              aws s3 sync build/static/js s3://zilswap-ui-staging/static/js --delete --content-encoding gzip
-              aws cloudfront create-invalidation --distribution-id="E4QZBREBNL47S" --paths=/*
-            elif [ "${CIRCLE_BRANCH}" = "master" ]; then
-              aws s3 sync build s3://zilswap-ui/production/ --delete --exclude "static/js/*"
-              aws s3 sync build/static/js s3://zilswap-ui/production/static/js --delete --content-encoding gzip
-              aws cloudfront create-invalidation --distribution-id="ESU80N8RF88HZ" --paths=/*
-            elif [ "${CIRCLE_BRANCH}" = "develop" ]; then
-              aws s3 sync build s3://zilswap-ui/develop/ --delete --exclude "static/js/*"
-              aws s3 sync build/static/js s3://zilswap-ui/develop/static/js --delete --content-encoding gzip
-              aws cloudfront create-invalidation --distribution-id="E2E0YSY2VDFHFV" --paths=/*
-            fi
-
 workflows:
   build-and-deploy:
     jobs:
@@ -116,8 +110,11 @@ workflows:
               only:
                 - master
                 - staging
-                - develop
-      - deploy:
+      - deploy-gcp:
+          context: org-switcheo
+          requires:
+            - build
+      - deploy-ipfs:
           context: org-switcheo
           requires:
             - build
