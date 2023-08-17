@@ -21,7 +21,7 @@ import { ConnectedWallet } from "core/wallet"
 import { logger } from "core/utilities"
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants"
 import TransactionDetail from "app/views/bridge/TransactionDetail"
-import { BIG_ONE, BRIDGE_DISABLED, DISABLE_ZILBRIDGE, SimpleMap, truncateAddress } from "app/utils"
+import { BIG_ONE, BRIDGE_DISABLED, SimpleMap, truncateAddress } from "app/utils"
 import { hexToRGBA, netZilToCarbon, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils"
 import { AppTheme } from "app/theme/types"
 import { RootState } from "app/store/types"
@@ -509,9 +509,6 @@ const ConfirmTransfer = (props: any) => {
     }
 
     runConfirmTransfer(async () => {
-      if (DISABLE_ZILBRIDGE)
-        throw new Error(DISABLE_ZILBRIDGE);
-
       let sourceTxHash
       if (fromBlockchain === Blockchain.Zilliqa) {
         // init lock on zil side

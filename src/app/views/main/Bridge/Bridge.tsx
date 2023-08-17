@@ -64,8 +64,8 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   const [runLoadGasPrice] = useAsyncTask("loadGasPrice")
   const [disconnectMenu, setDisconnectMenu] = useState<any>()
   const [gasPrice, setGasPrice] = useState<BigNumber | undefined>()
-  const disconnectSrcButtonRef = useRef()
-  const disconnectDestButtonRef = useRef()
+  const disconnectSrcButtonRef = useRef(null)
+  const disconnectDestButtonRef = useRef(null)
 
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"), { noSsr: true })
@@ -558,7 +558,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
               <ConnectButton
                 className={classes.connectButton}
-                buttonRef={disconnectSrcButtonRef}
+                ref={disconnectSrcButtonRef}
                 chain={fromBlockchain}
                 address={bridgeFormState.sourceAddress || ''}
                 onClick={onConnectSrcWallet}
@@ -591,7 +591,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
               </Box>
               <ConnectButton
                 className={classes.connectButton}
-                buttonRef={disconnectDestButtonRef}
+                ref={disconnectDestButtonRef}
                 chain={toBlockchain}
                 address={bridgeFormState.destAddress || ''}
                 onClick={onConnectDstWallet}
