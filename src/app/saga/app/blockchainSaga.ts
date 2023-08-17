@@ -301,7 +301,6 @@ function* initialize(
         const carbonNetwork = netZilToCarbon(network)
         const carbonSDK: CarbonSDK = yield call(CarbonSDK.instance, {
           network: carbonNetwork,
-          skipInit: true, // skip initialization while carbon chain undergoes upgrade.
         })
         yield put(actions.CarbonSDK.updateCarbonSDK({ sdk: carbonSDK, network: network }))
       }

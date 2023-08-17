@@ -50,7 +50,7 @@ const ZilErc20TokenSwap = (props: Props) => {
   const [pendingApproval, setPendingApproval] = useState(false);
   const [swappedTx, setSwappedTx] = useState<any>();
   const [disconnectMenu, setDisconnectMenu] = useState<any>();
-  const connectButtonRef = useRef();
+  const connectButtonRef = useRef(null);
 
   const chainId = bnOrZero(ethWallet?.chainId).toNumber()
   const network = (!ethWallet || chainId === 1) ? Network.MainNet : Network.TestNet;
@@ -218,7 +218,7 @@ const ZilErc20TokenSwap = (props: Props) => {
         <Box display="flex" flexDirection="column" textAlign="center" mt={3}>
           <Text className={classes.stepText}><b>Step 1</b>: Connect Wallet</Text>
           <ConnectButton
-            buttonRef={connectButtonRef}
+            ref={connectButtonRef}
             chain={Blockchain.Ethereum}
             address={ethWallet?.address ?? ""}
             onClick={() => onClickConnectETH()}
