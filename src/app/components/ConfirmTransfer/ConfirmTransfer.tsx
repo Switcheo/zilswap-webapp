@@ -301,7 +301,7 @@ const ConfirmTransfer = (props: any) => {
 
     const ethClient: ETHClient = getETHClient(sdk, fromBlockchain, netZilToCarbon(network))
 
-    const lockProxy = asset.bridgeAddress
+    const bridgeEntranceAddr = ethClient.getConfig().bridgeEntranceAddr
 
     const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider)
     const signer: ethers.Signer = ethersProvider.getSigner()
@@ -315,7 +315,7 @@ const ConfirmTransfer = (props: any) => {
     // approve token
     const approvalRequired = await isApprovalRequired(asset, depositAmt)
     if (approvalRequired) {
-      const allowance = await ethClient.checkAllowanceERC20(asset, ethAddress, `0x${lockProxy}`)
+      const allowance = await ethClient.checkAllowanceERC20(asset, ethAddress, bridgeEntranceAddr)
       if (allowance.lt(depositAmt)) {
         toaster(`Approval needed (${fromBlockchain.toUpperCase()})`, { overridePersist: false })
         const approve_tx = await ethClient.approveERC20({
