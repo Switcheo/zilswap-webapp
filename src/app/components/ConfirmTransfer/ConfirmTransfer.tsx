@@ -275,7 +275,7 @@ const ConfirmTransfer = (props: any) => {
   if (!showTransfer) return null
 
   // returns true if asset is native coin, false otherwise
-  const isNativeAsset = (asset: Models.Token) => {
+  const isNativeAsset = (asset: Models.Carbon.Coin.Token) => {
     const zeroAddress = "0000000000000000000000000000000000000000"
     return (asset.tokenAddress === zeroAddress)
   }
@@ -285,7 +285,7 @@ const ConfirmTransfer = (props: any) => {
     return address.replace("0x", "").toLowerCase()
   }
 
-  const isApprovalRequired = async (asset: Models.Token, amount: BigNumber) => {
+  const isApprovalRequired = async (asset: Models.Carbon.Coin.Token, amount: BigNumber) => {
     return !isNativeAsset(asset)
   }
 
@@ -294,7 +294,7 @@ const ConfirmTransfer = (props: any) => {
     * returns the txn hash if bridge txn is successful, otherwise return null
     * @param asset         details of the asset being bridged; retrieved from carbon
     */
-  async function bridgeAssetFromEth(asset: Models.Token) {
+  async function bridgeAssetFromEth(asset: Models.Carbon.Coin.Token) {
     if (!fromToken || !sdk || !bridgeFormState.sourceAddress || !bridgeFormState.destAddress || (!withdrawFee?.amount && network === Network.MainNet)) {
       return
     }
@@ -385,7 +385,7 @@ const ConfirmTransfer = (props: any) => {
     * returns the txn hash if bridge txn is successful, otherwise return null
     * @param asset         details of the asset being bridged; retrieved from carbon
     */
-  async function bridgeAssetFromZil(asset: Models.Token, carbonMnemonics: string) {
+  async function bridgeAssetFromZil(asset: Models.Carbon.Coin.Token, carbonMnemonics: string) {
     if (!fromToken || !sdk || !bridgeFormState.sourceAddress || !bridgeFormState.destAddress || (!withdrawFee?.amount && network === Network.MainNet)) {
       return
     }

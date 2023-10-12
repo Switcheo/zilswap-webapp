@@ -3,8 +3,7 @@ import { call, cancelled, CancelledEffect, fork, put, select, take, takeEvery } 
 import { AppState, ObservedTx, TxReceipt, TxStatus, Zilswap } from 'zilswap-sdk'
 import { ZiloAppState } from 'zilswap-sdk/lib/zilo'
 
-import { Blockchain, CarbonSDK } from 'carbon-js-sdk'
-import { Token as CarbonToken } from 'carbon-js-sdk/lib/codec'
+import { Blockchain, CarbonSDK, Models } from 'carbon-js-sdk'
 import { blockchainForChainId } from 'carbon-js-sdk/lib/util/blockchain'
 import {
   ConnectedWallet,
@@ -210,8 +209,8 @@ function* stateChangeObserved(payload: StateChangeObservedPayload) {
 
 const addMapping = (
   r: BridgeableToken[],
-  a: CarbonToken,
-  b: CarbonToken,
+  a: Models.Carbon.Coin.Token,
+  b: Models.Carbon.Coin.Token,
   network: CarbonSDK.Network,
   chains: SimpleMap,
 ) => {
@@ -229,7 +228,7 @@ const addMapping = (
 
 const addSwthMapping = (
   r: BridgeableToken[],
-  a: CarbonToken,
+  a: Models.Carbon.Coin.Token,
   b: { [key: string]: string },
   network: CarbonSDK.Network,
   chains: SimpleMap,
@@ -246,7 +245,7 @@ const addSwthMapping = (
   })
 }
 
-const addToken = (r: SimpleMap<TokenInfo>, t: CarbonToken, network: CarbonSDK.Network) => {
+const addToken = (r: SimpleMap<TokenInfo>, t: Models.Carbon.Coin.Token, network: CarbonSDK.Network) => {
   let blockchain = blockchainForChainId(t.chainId.toNumber(), network)
   /* HARDCODE: "swth" token chain id is 4 according to the carbonSDK tokens api */
   if (t.chainId.toNumber() === 4) {
@@ -380,7 +379,7 @@ function* initialize(
       const carbonSdkState = (yield select((state: RootState) => state.carbonSDK.sdkCache)) as SimpleMap<CarbonSDK>
       const carbonSdk = carbonSdkState[network]
       const mappings = carbonSdk.token.wrapperMap
-      const carbonTokens: CarbonToken[] = Object.values(carbonSdk.token.tokens)
+      const carbonTokens: Models.Carbon.Coin.Token[] = Object.values(carbonSdk.token.tokens)
       const bridgeableDenoms = BRIDGEABLE_WRAPPED_DENOMS[network]
       Object.entries(mappings).forEach(([wrappedDenom, sourceDenom]) => {
         if (!bridgeableDenoms.includes(wrappedDenom)) {

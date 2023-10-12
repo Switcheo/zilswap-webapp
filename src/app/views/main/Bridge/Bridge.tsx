@@ -457,7 +457,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }, [formState, bridgeFormState.transferAmount, fromToken, isMobile])
 
   // returns true if asset is native coin, false otherwise
-  const isNativeAsset = (asset: Models.Token) => {
+  const isNativeAsset = (asset: Models.Carbon.Coin.Token) => {
     const zeroAddress = "0000000000000000000000000000000000000000"
     return (asset.tokenAddress === zeroAddress)
   }

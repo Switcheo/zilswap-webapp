@@ -18,12 +18,23 @@ const useStyles = makeStyles((theme: AppTheme) => ({
   }
 }));
 
+// const BANNER_SPEC = {
+//   src: "/assets/torch-banner.jpeg",
+//   href: "https://torchwallet.io",
+// }
+const BANNER_SPEC = null as {
+  src: string;
+  href: string;
+} | null;
+
 const AdvertBanner = () => {
   const classes = useStyles();
 
+  if (!BANNER_SPEC) return null;
+
   return <Box className={classes.banner} maxWidth={800} margin="0 auto">
-    <a href="https://torchwallet.io" target="_blank" rel="noreferrer">
-      <img className={classes.bannerImage} src="/assets/torch-banner.jpeg" alt="" />
+    <a href={BANNER_SPEC.href} target="_blank" rel="noreferrer">
+      <img className={classes.bannerImage} src={BANNER_SPEC.src} alt="" />
     </a>
   </Box>
 }
