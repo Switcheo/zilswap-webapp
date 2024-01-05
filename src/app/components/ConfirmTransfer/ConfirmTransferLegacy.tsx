@@ -12,14 +12,13 @@ import { History } from "history";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, AddressUtils, Models, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
-import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet } from "core/wallet";
 import { logger } from "core/utilities";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
-import { BIG_ONE, BRIDGE_DISABLED, SimpleMap, truncateAddress } from "app/utils";
-import { hexToRGBA, netZilToCarbon, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
+import { BIG_ONE, DISABLE_ZILBRIDGE, SimpleMap, truncateAddress } from "app/utils";
+import { hexToRGBA, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
 import { AppTheme } from "app/theme/types";
 import { RootState } from "app/store/types";
 import { BridgeFormState, BridgeState, BridgeTx, BridgeableToken } from "app/store/bridge/types";
@@ -619,7 +618,7 @@ const ConfirmTransferLegacy = (props: any) => {
         </Box>
 
         <FancyButton
-          disabled={BRIDGE_DISABLED || loadingConfirm || !!pendingBridgeTx}
+          disabled={DISABLE_ZILBRIDGE || loadingConfirm || !!pendingBridgeTx}
           onClick={onConfirm}
           variant="contained"
           color="primary"

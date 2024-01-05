@@ -22,7 +22,7 @@ import { BridgeFormState, BridgeState } from 'app/store/bridge/types'
 import { LayoutState, RootState, TokenInfo } from "app/store/types"
 import { AppTheme } from "app/theme/types"
 import { bnOrZero, hexToRGBA, SimpleMap, useAsyncTask, useNetwork, useTokenFinder } from "app/utils"
-import { BIG_ZERO, BRIDGEABLE_EVM_CHAINS, BRIDGE_DISABLED } from "app/utils/constants"
+import { BIG_ZERO, BRIDGEABLE_EVM_CHAINS, DISABLE_ZILBRIDGE } from "app/utils/constants"
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg"
 import { evmIncludes, getEvmChainIDs } from 'app/utils/bridge'
 import { ConnectButton } from "./components"
@@ -523,11 +523,11 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             </Tooltip>
           </Text>
 
-          {BRIDGE_DISABLED && (
+          {Boolean(DISABLE_ZILBRIDGE) && (
             <Box className={classes.errorBox}>
               <WarningIcon className={classes.warningIcon} />
               <Text>
-                ZilBridge is disabled temporarily due to The Merge. The bridge will resume shortly after upgrade.
+                ZilBridge is disabled temporarily due to the Zilliqa chain upgrade. The bridge will resume shortly.
                 Follow us on <a href="https://twitter.com/ZilSwap" target="_blank" rel="noreferrer">twitter</a> for updates.
               </Text>
             </Box>

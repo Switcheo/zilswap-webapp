@@ -5,8 +5,6 @@ import { SimpleMap } from "./types";
 
 export const DefaultFallbackNetwork = Network.MainNet;
 
-export const BRIDGE_DISABLED = false;
-
 export type PageType = "pool" | "swap";
 export const LoadingKeys = {
   connectWallet: [
@@ -86,6 +84,8 @@ export const PRODUCTION_HOSTS = [
 export const isProduction = () => {
   return PRODUCTION_HOSTS.includes(window.location.hostname)
 }
+
+export const DISABLE_ZILBRIDGE = "Bridge is disabled temporarily due to Zilliqa chain upgrade. Please check Discord for updates. Funds are SAFU.";
 
 export const DEFAULT_TX_SLIPPAGE = 0.01;
 export const DEFAULT_TX_EXPIRY = 3;
