@@ -644,7 +644,7 @@ const ConfirmTransfer = (props: any) => {
         </Box>
 
         <FancyButton
-          disabled={DISABLE_ZILBRIDGE || loadingConfirm || !!pendingBridgeTx}
+          disabled={!!DISABLE_ZILBRIDGE || loadingConfirm || !!pendingBridgeTx}
           onClick={onConfirm}
           variant="contained"
           color="primary"
