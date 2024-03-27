@@ -12,14 +12,13 @@ import { History } from "history";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Blockchain, AddressUtils, Models, CarbonSDK, ConnectedCarbonSDK } from "carbon-js-sdk";
-import { Network } from "zilswap-sdk/lib/constants";
 import { ConnectedBridgeWallet } from "core/wallet/ConnectedBridgeWallet";
 import { ConnectedWallet } from "core/wallet";
 import { logger } from "core/utilities";
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants";
 import TransactionDetail from "app/views/bridge/TransactionDetail";
-import { BIG_ONE, BRIDGE_DISABLED, SimpleMap, truncateAddress } from "app/utils";
-import { hexToRGBA, netZilToCarbon, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
+import { BIG_ONE, DISABLE_ZILBRIDGE, SimpleMap, truncateAddress } from "app/utils";
+import { hexToRGBA, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils";
 import { AppTheme } from "app/theme/types";
 import { RootState } from "app/store/types";
 import { BridgeFormState, BridgeState, BridgeTx, BridgeableToken } from "app/store/bridge/types";
@@ -275,7 +274,7 @@ const ConfirmTransferLegacy = (props: any) => {
   if (!showTransfer) return null;
 
   // returns true if asset is native coin, false otherwise
-  const isNativeAsset = (asset: Models.Token) => {
+  const isNativeAsset = (asset: Models.Carbon.Coin.Token) => {
     const zeroAddress = "0000000000000000000000000000000000000000";
     return (asset.tokenAddress === zeroAddress)
   }
@@ -285,7 +284,7 @@ const ConfirmTransferLegacy = (props: any) => {
     return address.replace("0x", "").toLowerCase();
   }
 
-  const isApprovalRequired = async (asset: Models.Token, amount: BigNumber) => {
+  const isApprovalRequired = async (asset: Models.Carbon.Coin.Token, amount: BigNumber) => {
     return !isNativeAsset(asset)
   }
 
@@ -294,7 +293,7 @@ const ConfirmTransferLegacy = (props: any) => {
     * returns the txn hash if lock txn is successful, otherwise return null
     * @param asset         details of the asset being locked; retrieved from carbon
     */
-  async function lockAssetOnEth(asset: Models.Token, carbonMnemonics: string) {
+  async function lockAssetOnEth(asset: Models.Carbon.Coin.Token, carbonMnemonics: string) {
     if (!bridgeToken || !fromToken || !sdk || !swthAddrMnemonic) return null;
 
     const lockProxy = asset.bridgeAddress;
@@ -360,7 +359,7 @@ const ConfirmTransferLegacy = (props: any) => {
     * returns the txn hash if lock txn is successful, otherwise return null
     * @param asset         details of the asset being locked; retrieved from carbon
     */
-  async function lockAssetOnZil(asset: Models.Token, carbonMnemonics: string) {
+  async function lockAssetOnZil(asset: Models.Carbon.Coin.Token, carbonMnemonics: string) {
     if (wallet === null) {
       console.error("Zilliqa wallet not connected");
       return null;
@@ -619,7 +618,7 @@ const ConfirmTransferLegacy = (props: any) => {
         </Box>
 
         <FancyButton
-          disabled={BRIDGE_DISABLED || loadingConfirm || !!pendingBridgeTx}
+          disabled={!!DISABLE_ZILBRIDGE || loadingConfirm || !!pendingBridgeTx}
           onClick={onConfirm}
           variant="contained"
           color="primary"

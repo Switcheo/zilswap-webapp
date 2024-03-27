@@ -21,7 +21,7 @@ import { ConnectedWallet } from "core/wallet"
 import { logger } from "core/utilities"
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants"
 import TransactionDetail from "app/views/bridge/TransactionDetail"
-import { BIG_ONE, BRIDGE_DISABLED, SimpleMap, truncateAddress } from "app/utils"
+import { BIG_ONE, DISABLE_ZILBRIDGE, SimpleMap, truncateAddress } from "app/utils"
 import { hexToRGBA, netZilToCarbon, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils"
 import { AppTheme } from "app/theme/types"
 import { RootState } from "app/store/types"
@@ -275,7 +275,7 @@ const ConfirmTransfer = (props: any) => {
   if (!showTransfer) return null
 
   // returns true if asset is native coin, false otherwise
-  const isNativeAsset = (asset: Models.Token) => {
+  const isNativeAsset = (asset: Models.Carbon.Coin.Token) => {
     const zeroAddress = "0000000000000000000000000000000000000000"
     return (asset.tokenAddress === zeroAddress)
   }
@@ -285,7 +285,7 @@ const ConfirmTransfer = (props: any) => {
     return address.replace("0x", "").toLowerCase()
   }
 
-  const isApprovalRequired = async (asset: Models.Token, amount: BigNumber) => {
+  const isApprovalRequired = async (asset: Models.Carbon.Coin.Token, amount: BigNumber) => {
     return !isNativeAsset(asset)
   }
 
@@ -294,14 +294,14 @@ const ConfirmTransfer = (props: any) => {
     * returns the txn hash if bridge txn is successful, otherwise return null
     * @param asset         details of the asset being bridged; retrieved from carbon
     */
-  async function bridgeAssetFromEth(asset: Models.Token) {
+  async function bridgeAssetFromEth(asset: Models.Carbon.Coin.Token) {
     if (!fromToken || !sdk || !bridgeFormState.sourceAddress || !bridgeFormState.destAddress || (!withdrawFee?.amount && network === Network.MainNet)) {
       return
     }
 
     const ethClient: ETHClient = getETHClient(sdk, fromBlockchain, netZilToCarbon(network))
 
-    const lockProxy = asset.bridgeAddress
+    const bridgeEntranceAddr = ethClient.getConfig().bridgeEntranceAddr
 
     const ethersProvider = new ethers.providers.Web3Provider(ethWallet?.provider)
     const signer: ethers.Signer = ethersProvider.getSigner()
@@ -315,7 +315,7 @@ const ConfirmTransfer = (props: any) => {
     // approve token
     const approvalRequired = await isApprovalRequired(asset, depositAmt)
     if (approvalRequired) {
-      const allowance = await ethClient.checkAllowanceERC20(asset, ethAddress, `0x${lockProxy}`)
+      const allowance = await ethClient.checkAllowanceERC20(asset, ethAddress, bridgeEntranceAddr)
       if (allowance.lt(depositAmt)) {
         toaster(`Approval needed (${fromBlockchain.toUpperCase()})`, { overridePersist: false })
         const approve_tx = await ethClient.approveERC20({
@@ -385,7 +385,7 @@ const ConfirmTransfer = (props: any) => {
     * returns the txn hash if bridge txn is successful, otherwise return null
     * @param asset         details of the asset being bridged; retrieved from carbon
     */
-  async function bridgeAssetFromZil(asset: Models.Token, carbonMnemonics: string) {
+  async function bridgeAssetFromZil(asset: Models.Carbon.Coin.Token, carbonMnemonics: string) {
     if (!fromToken || !sdk || !bridgeFormState.sourceAddress || !bridgeFormState.destAddress || (!withdrawFee?.amount && network === Network.MainNet)) {
       return
     }
@@ -644,7 +644,7 @@ const ConfirmTransfer = (props: any) => {
         </Box>
 
         <FancyButton
-          disabled={BRIDGE_DISABLED || loadingConfirm || !!pendingBridgeTx}
+          disabled={!!DISABLE_ZILBRIDGE || loadingConfirm || !!pendingBridgeTx}
           onClick={onConfirm}
           variant="contained"
           color="primary"

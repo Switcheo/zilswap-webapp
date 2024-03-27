@@ -39,7 +39,7 @@ export type BridgeableChains = BridgeableEvmChains | Blockchain.Zilliqa
 export interface WithdrawFee {
   amount: BigNumber;
   value: BigNumber;
-  token?: Models.Token;
+  token?: Models.Carbon.Coin.Token;
 }
 
 export interface UpdateBridgeBalance {
