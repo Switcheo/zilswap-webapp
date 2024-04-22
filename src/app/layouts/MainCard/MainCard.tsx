@@ -6,6 +6,7 @@ import React, {
 } from "react";
 import { Box, Paper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import cls from "classnames";
 import { PaperProps } from "material-ui";
 import { useSelector } from "react-redux";
 import { useRouteMatch } from "react-router-dom";
@@ -16,11 +17,18 @@ import {
 } from "app/store/types";
 import { AppTheme } from "app/theme/types";
 
+
 // const CustomRouterLink = forwardRef((props: any, ref: any) => (
 //   <div ref={ref} style={{ flexGrow: 1, flexBasis: 1 }}>
 //     <RouterLink {...props} />
 //   </div>
 // ));
+
+interface Props extends PaperProps{
+  header?: React.ReactNode
+  wrapperClass?: string
+  paperClass?: string
+}
 
 const CARD_BORDER_RADIUS = 12;
 
@@ -121,8 +129,8 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     },
   },
 }));
-const MainCard: React.FC<PaperProps> = (props: any) => {
-  const { children, className, staticContext, ...rest } = props;
+const MainCard: React.FC<Props> = (props: any) => {
+  const { children, className, staticContext, header, wrapperClass, paperClass, ...rest } = props;
   const classes = useStyles();
   // const isPool = useRouteMatch("/pool");
   const isSwap = useRouteMatch("/swap");
@@ -217,8 +225,9 @@ const MainCard: React.FC<PaperProps> = (props: any) => {
               outToken={swapState.outToken}
             />
           )}
-          <Box width={488}>
-            <Paper {...{ ref: boxRef }} {...rest} className={classes.card}>
+          <Box className={wrapperClass} width={488}>
+            {header && header}
+            <Paper {...{ ref: boxRef }} {...rest} className={cls(classes.card, paperClass)}>
               <Box>{children}</Box>
             </Paper>
           </Box>

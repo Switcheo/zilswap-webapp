@@ -1,10 +1,11 @@
 import React from "react";
 import { Box, Button, IconButton, } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import BrightnessLowIcon from '@material-ui/icons/BrightnessLowRounded';
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
-import BrightnessLowIcon from '@material-ui/icons/BrightnessLowRounded';
 import { Notifications, ShowAdvanced } from "app/components";
+import V2Banner from "app/components/V2Banner";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { LayoutState, OpenCloseState, PoolFormState, RootState } from "app/store/types";
@@ -48,6 +49,14 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     "& path": {
       fill: theme.palette.icon
     }
+  },
+  contentWrapper: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  cardPaper: {
+    // width: 488
   }
 }));
 const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
@@ -69,7 +78,7 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
   }
 
   return (
-    <MainCard {...rest} className={cls(classes.root, className)}>
+    <MainCard {...rest} wrapperClass={classes.contentWrapper} className={cls(classes.root, className)} header={<V2Banner />} paperClass={classes.cardPaper}>
       <Notifications />
       {!poolToken?.pool && (
         <NewPoolMessage token={poolToken || undefined} />
