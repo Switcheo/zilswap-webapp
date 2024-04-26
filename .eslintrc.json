@@ -1,59 +1,40 @@
 {
-  "env": {
-    "browser": true,
-    "es2021": true
-  },
-  "globals": {
-    "process": true
-  },
-  "extends": [
-    "eslint:recommended",
-    "plugin:react/recommended"
-  ],
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
-    "ecmaVersion": 12,
-    "sourceType": "module"
-  },
+  "extends": "react-app",
   "plugins": [
-    "react",
-    "@typescript-eslint"
+    "import"
   ],
   "rules": {
-    "no-console": [
+    "import/order": [
       "warn",
       {
-        "allow": [
-          "warn",
-          "error"
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index",
+          "object"
+        ],
+        "pathGroups": [
+          {
+            "pattern": "react",
+            "group": "builtin",
+            "position": "after"
+          },
+          {
+            "pattern": "app/**",
+            "group": "internal"
+          },
+          {
+            "pattern": "core/**",
+            "group": "internal"
+          }
+        ],
+        "pathGroupsExcludedImportTypes": [
+          "builtin"
         ]
       }
-    ],
-    "semi": [
-      "warn",
-      "always"
-    ],
-    "quotes": [
-      "warn",
-      "double"
-    ],
-    "object-curly-spacing": [
-      "warn",
-      "always"
-    ],
-    "comma-spacing": [
-      "warn",
-      {
-        "before": false,
-        "after": true
-      }
-    ],
-    "comma-dangle": [
-      "warn",
-      "always-multiline"
     ]
   }
 }
