@@ -527,7 +527,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             <Box className={classes.errorBox}>
               <WarningIcon className={classes.warningIcon} />
               <Text>
-                ZilBridge is disabled temporarily due to the Zilliqa chain upgrade. The bridge will resume shortly.
+                ZilBridge is disabled temporarily due to the PolyNetwork outage. The bridge will resume shortly.
                 Follow us on <a href="https://twitter.com/ZilSwap" target="_blank" rel="noreferrer">twitter</a> for updates.
               </Text>
             </Box>
