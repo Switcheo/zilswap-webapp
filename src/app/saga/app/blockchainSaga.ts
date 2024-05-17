@@ -414,8 +414,10 @@ function* initialize(
         if (sourceChain === Blockchain.Carbon) {
           addSwthMapping(bridgeTokenResult, wrappedToken, getTokenDenomList(carbonNetwork), carbonNetwork, tokenChains[sourceDenom])
         } else {
-          addMapping(bridgeTokenResult, wrappedToken, sourceToken, carbonNetwork, tokenChains[sourceDenom])
-          addMapping(bridgeTokenResult, sourceToken, wrappedToken, carbonNetwork, tokenChains[sourceDenom])
+          if (wrappedToken.isActive)
+            addMapping(bridgeTokenResult, wrappedToken, sourceToken, carbonNetwork, tokenChains[sourceDenom])
+          if (sourceToken.isActive)
+            addMapping(bridgeTokenResult, sourceToken, wrappedToken, carbonNetwork, tokenChains[sourceDenom])
         }
 
       })
