@@ -2,11 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./src",
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -20,9 +16,18 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react",
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "crypto": ["./node_modules/empty-module"], // crypto-browserify can be polyfilled here if needed
+      "stream": ["./node_modules/empty-module"], // stream-browserify can be polyfilled here if needed
+      "assert": ["./node_modules/empty-module"], // assert can be polyfilled here if needed
+      "http": ["./node_modules/empty-module"], // stream-http can be polyfilled here if needed
+      "https": ["./node_modules/empty-module"], // https-browserify can be polyfilled here if needed
+      "os": ["./node_modules/empty-module"], // os-browserify can be polyfilled here if needed
+      "url": ["./node_modules/empty-module"], // url can be polyfilled here if needed
+      "zlib": ["./node_modules/empty-module"], // browserify-zlib can be polyfilled here if needed
+      "process": ["./node_modules/process"]
+    }
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

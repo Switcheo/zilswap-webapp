@@ -1,8 +1,5 @@
 {
   "extends": "react-app",
-  "plugins": [
-    "import"
-  ],
   "rules": {
     "import/order": [
       "warn",
@@ -31,9 +28,7 @@
             "group": "internal"
           }
         ],
-        "pathGroupsExcludedImportTypes": [
-          "builtin"
-        ]
+        "pathGroupsExcludedImportTypes": ["builtin"]
       }
     ]
   }

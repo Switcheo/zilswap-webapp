@@ -33,7 +33,7 @@ const KeyValueDisplay: React.FC<Props> = (props: Props) => {
   const classes = useStyles();
 
   let value = inputValue;
-  if (typeof children !== undefined)
+  if (typeof children !== "undefined")
     value = children;
 
   return (
