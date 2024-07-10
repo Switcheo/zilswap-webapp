@@ -12,9 +12,8 @@ import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useLocation } from "react-router";
 import { CONTRACTS } from "zilswap-sdk/lib/constants";
-import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
-import { ZilswapConnector, toBasisPoints } from "core/zilswap";
 import { CurrencyInput, FancyButton, Notifications, ProportionSelect, ShowAdvanced, Text } from "app/components";
+import V2Banner from "app/components/V2Banner";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
@@ -22,6 +21,8 @@ import { AppTheme } from "app/theme/types";
 import { bnOrZero, useAsyncTask, useBlacklistAddress, useNetwork, useSearchParam, useToaster } from "app/utils";
 import { BIG_ONE, BIG_ZERO, PlaceholderStrings, ZIL_ADDRESS } from "app/utils/constants";
 import { ArkClient } from "core/utilities/ark";
+import { ZilswapConnector, toBasisPoints } from "core/zilswap";
+import { ZWAP_TOKEN_CONTRACT } from "core/zilswap/constants";
 import SwapDetail from "./components/SwapDetail";
 import { ReactComponent as SwapSVG } from "./swap_logo.svg";
 
@@ -175,7 +176,12 @@ const useStyles = makeStyles((theme: AppTheme) => ({
     [theme.breakpoints.down("sm")]: {
       justifyContent: "flex-start"
     },
-  }
+  },
+  contentWrapper: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
 }));
 
 const initialFormState = {
@@ -651,7 +657,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   }
 
   return (
-    <MainCard {...rest} className={cls(classes.root, className)}>
+    <MainCard {...rest} wrapperClass={classes.contentWrapper} className={cls(classes.root, className)} header={<V2Banner />}>
       <Notifications />
       {!layoutState.showAdvancedSetting && (
         <Box display="flex" flexDirection="column" className={classes.container}>

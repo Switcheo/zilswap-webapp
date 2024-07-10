@@ -21,7 +21,7 @@
     "authereum": "^0.1.14",
     "bignumber.js": "^9.0.0",
     "buffer": "^6.0.3",
-    "carbon-js-sdk": "^0.7.0-beta.1",
+    "carbon-js-sdk": "^0.11.1",
     "classnames": "^2.2.6",
     "crypto-js": "^3.1.9-1",
     "dayjs": "^1.10.4",
@@ -33,6 +33,7 @@
     "jss-plugin-extend": "^10.9.0",
     "lightweight-charts": "^3.3.0",
     "notistack": "^1.0.9",
+    "path": "npm:path-browserify",
     "prismjs": "^1.25.0",
     "prop-types": "^15.7.2",
     "qrcode": "^1.4.4",
@@ -49,7 +50,7 @@
     "react-router-config": "^5.1.1",
     "react-router-dom": "^5.2.0",
     "react-router-navigation-prompt": "^1.9.1",
-    "react-scripts": "4.0.3",
+    "react-scripts": "5.0.1",
     "redux": "^4.0.4",
     "redux-logger": "^3.0.6",
     "redux-saga": "^1.1.3",
@@ -61,15 +62,13 @@
     "zilswap-sdk": "^1.3.24"
   },
   "scripts": {
-    "start": "react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider  build",
+    "preinstall": "yarn config set ignore-engines true",
+    "start": "GENERATE_SOURCEMAP=false react-app-rewired --openssl-legacy-provider start",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' react-app-rewired --openssl-legacy-provider build",
     "postbuild": "cp build/index.html build/ipfs-404.html",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint --ext js,ts,tsx src"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
   },
   "browserslist": {
     "production": [
@@ -98,12 +97,26 @@
     "@types/react-router-config": "^5.0.1",
     "@types/react-router-dom": "^5.1.3",
     "@types/redux-logger": "^3.0.7",
+    "assert": "^2.1.0",
+    "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
+    "empty-module": "^0.0.2",
     "eslint-plugin-import": "^2.25.2",
-    "react-error-overlay": "6.0.9",
+    "fs": "^0.0.1-security",
+    "https-browserify": "^1.0.0",
+    "os": "^0.1.2",
+    "os-browserify": "^0.3.0",
+    "process": "^0.11.10",
+    "react-app-rewired": "^2.2.1",
+    "react-error-overlay": "6.0.11",
     "redux-devtools-extension": "^2.13.8",
-    "typescript": "^3.8.3"
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "typescript": "^3.8.3",
+    "url": "^0.11.3"
   },
   "resolutions": {
-    "react-error-overlay": "6.0.9"
+    "react-error-overlay": "6.0.11"
   }
 }
