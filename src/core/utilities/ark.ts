@@ -1,10 +1,10 @@
-import crypto from "crypto";
 import { CallParams, Contract } from '@zilliqa-js/contract'
 import { BN, bytes, Long } from '@zilliqa-js/util';
 import BigNumber from "bignumber.js";
 import dayjs from "dayjs";
 import { Zilswap } from "zilswap-sdk";
 import { Network, ZIL_HASH } from "zilswap-sdk/lib/constants";
+import { ethers } from "ethers";
 import { Cheque, Collection, CollectionWithStats, Nft, OAuth, Profile, SimpleCheque, TraitType, QueryNftResult, PaginatedList } from "app/store/types";
 import { bnOrZero, getZilChainId, SimpleMap, toHumanNumber } from "app/utils";
 import { HTTP, logger } from "core/utilities";
@@ -925,7 +925,8 @@ const strToHex = (str: string): string => {
 }
 
 const sha256 = (byteHexString: string): string => {
-  return crypto.createHash('sha256').update(Buffer.from(byteHexString, 'hex')).digest('hex')
+  const buffer = Buffer.from(byteHexString, "hex");
+  return ethers.utils.sha256(buffer).replace(/^0x/i,"");
 }
 
 export namespace ArkClient {
