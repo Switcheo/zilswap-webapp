@@ -85,7 +85,7 @@ export const isProduction = () => {
   return PRODUCTION_HOSTS.includes(window.location.hostname)
 }
 
-export const DISABLE_ZILBRIDGE = true;
+export const DISABLE_ZILBRIDGE = false;
 
 export const DEFAULT_TX_SLIPPAGE = 0.01;
 export const DEFAULT_TX_EXPIRY = 3;
