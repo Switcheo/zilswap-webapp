@@ -5,6 +5,7 @@ import BrightnessLowIcon from '@material-ui/icons/BrightnessLowRounded';
 import cls from "classnames";
 import { useDispatch, useSelector } from "react-redux";
 import { Notifications, ShowAdvanced } from "app/components";
+import V2Banner from "app/components/V2Banner";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { LayoutState, OpenCloseState, PoolFormState, RootState } from "app/store/types";
@@ -77,7 +78,7 @@ const PoolView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) =>
   }
 
   return (
-    <MainCard {...rest} wrapperClass={classes.contentWrapper} className={cls(classes.root, className)} paperClass={classes.cardPaper}>
+    <MainCard {...rest} wrapperClass={classes.contentWrapper} className={cls(classes.root, className)} header={<V2Banner />} paperClass={classes.cardPaper}>
       <Notifications />
       {!poolToken?.pool && (
         <NewPoolMessage token={poolToken || undefined} />

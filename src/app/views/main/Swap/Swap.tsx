@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useLocation } from "react-router";
 import { CONTRACTS } from "zilswap-sdk/lib/constants";
 import { CurrencyInput, FancyButton, Notifications, ProportionSelect, ShowAdvanced, Text } from "app/components";
+import V2Banner from "app/components/V2Banner";
 import MainCard from "app/layouts/MainCard";
 import { actions } from "app/store";
 import { ExactOfOptions, LayoutState, RootState, SwapFormState, TokenInfo, TokenState, WalletObservedTx, WalletState } from "app/store/types";
@@ -656,7 +657,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
   }
 
   return (
-    <MainCard {...rest} wrapperClass={classes.contentWrapper} className={cls(classes.root, className)}>
+    <MainCard {...rest} wrapperClass={classes.contentWrapper} className={cls(classes.root, className)} header={<V2Banner />}>
       <Notifications />
       {!layoutState.showAdvancedSetting && (
         <Box display="flex" flexDirection="column" className={classes.container}>
