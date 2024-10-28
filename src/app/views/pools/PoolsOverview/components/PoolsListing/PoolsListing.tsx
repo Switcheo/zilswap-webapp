@@ -230,17 +230,17 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
   const getSortDetail = () => {
     const [sortType, sortOrder] = sortBy.split(":");
     let sortString = "";
-    switch(sortType) {
-      case "apr": 
+    switch (sortType) {
+      case "apr":
         sortString = "APR";
         break;
-      case "dist": 
+      case "dist":
         sortString = "Rewards";
         break;
       case "staked":
         sortString = "Liquidity";
         break;
-      default: 
+      default:
         sortString = "Rewards";
         break;
     }
@@ -313,9 +313,8 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
         <Box display="flex" mt={1} className={classes.tabSearchBox}>
           <Box display="flex">
             <Tabs className={classes.tabs} value={tabValue} onChange={handleTabChange}>
-              <Tab className={classes.tab} label={<Text className={classes.tabText}>Mega Drops {!!megaDrop.length && (<Text className={classes.tabLabel}>{megaDrop.length}</Text>)}</Text>} />
-              <Tab className={classes.tab} label={<Text className={classes.tabText}>Single Drops {!!singleDrop.length && (<Text className={classes.tabLabel}>{singleDrop.length}</Text>)}</Text>} />
               <Tab className={classes.tab} label={<Text className={classes.tabText}>Core Pools {!!coreDrop.length && (<Text className={classes.tabLabel}>{coreDrop.length}</Text>)}</Text>} />
+              <Tab className={classes.tab} label={<Text className={classes.tabText}>Incentivized Pools {!!singleDrop.length && (<Text className={classes.tabLabel}>{singleDrop.length}</Text>)}</Text>} />
               <Tab className={classes.tab} label={<Text className={classes.tabText}>Main Pools {!!registeredTokens.length && (<Text className={classes.tabLabel}>{registeredTokens.length}</Text>)}</Text>} />
               <Tab className={classes.tab} label={<Text className={classes.tabText}>All Pools {!!allTokens.length && (<Text className={classes.tabLabel}>{allTokens.length}</Text>)}</Text>} />
             </Tabs>
