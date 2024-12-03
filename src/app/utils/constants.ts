@@ -122,7 +122,7 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
     "zxcad.1.18.35137d", "eport.1.2.7d4912", "efees.1.2.586fb5",
     "elunr.1.2.e2121e", "ezil.1.2.f1b7e4", "dxcad.1.2.67dde7",
     "zbrkl.1.18.b8c24f", "zopul.1.18.4bcdc9", "ztraxx.1.18.9c8e35",
-    "swth.1.19.6f83d0", "swth.1.6.5bc06b", "swth.1.18.4ef38b", 
+    "swth.1.19.6f83d0", "swth.1.6.5bc06b", "swth.1.18.4ef38b",
     "swth.1.17.dbb4d5", "zbnb.1.18.c406be", "zil.1.17.3997a2",
     "zil.1.19.0f16f8", "zil.1.6.52c256", "zmatic.1.18.45185c"
   ],
@@ -131,8 +131,8 @@ export const BRIDGEABLE_WRAPPED_DENOMS = {
 
 //To edit when integrating new EVM chains for Zilbridge
 export const BRIDGEABLE_EVM_CHAINS = [
-  Blockchain.Ethereum, 
-  Blockchain.Arbitrum, 
+  Blockchain.Ethereum,
+  Blockchain.Arbitrum,
   Blockchain.BinanceSmartChain,
   Blockchain.Polygon
 ] as const
@@ -154,7 +154,7 @@ export const CHAIN_NAMES = {
 
 //To edit when integrating other blockchain protocols to Zilbridge
 export const BRIDGEABLE_CHAINS = [
-  Blockchain.Zilliqa, 
+  Blockchain.Zilliqa,
   ...BRIDGEABLE_EVM_CHAINS
 ] as const
 
@@ -173,12 +173,12 @@ export const ERC20_BRIDGEABLE_ZIL_CONTRACT = {
   [Network.TestNet]: "0x92774e23edaa2927f3938ab4b690c076095cda0a",
 }
 
-export const TBM_CONTRACT =  {
+export const TBM_CONTRACT = {
   [Network.MainNet]: "0xd793f378a925b9f0d3c4b6ee544d31c707899386",
   [Network.TestNet]: "0xc948942f55ef05a95a46bb58ee9b0a67b0f871fa",
 }
 
-export const METAZOA_CONTRACT =  {
+export const METAZOA_CONTRACT = {
   [Network.MainNet]: "0xf79a456a5afd412d3890e2232f6205f664be8957",
   [Network.TestNet]: "0x48161750bab73620b23c287925bd229093d8b72e",
 }
@@ -224,7 +224,7 @@ export const USERNAME_REGEX = /^[A-Za-z0-9_]{1,20}$/
 export const TWITTER_REGEX = /^[A-Za-z0-9_]{1,15}$/
 export const INSTAGRAM_REGEX = /^[A-Za-z0-9_]{1,30}$/
 
-export const REPORT_LEVEL_DEFAULT= 0;
+export const REPORT_LEVEL_DEFAULT = 0;
 export const REPORT_LEVEL_WARNING = 1;
 export const REPORT_LEVEL_SUSPICIOUS = 2;
 
@@ -263,7 +263,7 @@ const ERC20_ABI = [
   "event Transfer(address indexed from, address indexed to, uint amount)"
 ];
 
-export const EthContractABIs : {[key: string]: string[] | null} = {
+export const EthContractABIs: { [key: string]: string[] | null } = {
   [Network.MainNet]: ERC20_ABI,
   [Network.TestNet]: ERC20_ABI,
 }

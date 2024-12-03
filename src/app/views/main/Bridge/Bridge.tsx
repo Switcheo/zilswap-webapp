@@ -373,7 +373,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
     // clear query param
     history.replace({ search: "" })
   }
-  
+
   //TOCHECK: does it work
   const showTransfer = () => {
     if (!(
@@ -527,7 +527,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             <Box className={classes.errorBox}>
               <WarningIcon className={classes.warningIcon} />
               <Text>
-                ZilBridge is disabled temporarily due to the PolyNetwork outage. The bridge will resume shortly.
+                ZilBridge is disabled temporarily. The bridge will resume shortly.
                 Follow us on <a href="https://twitter.com/ZilSwap" target="_blank" rel="noreferrer">twitter</a> for updates.
               </Text>
             </Box>
@@ -615,7 +615,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
 
           <Button
             onClick={showTransfer}
-            disabled={!isSubmitEnabled}
+            disabled={!isSubmitEnabled || DISABLE_ZILBRIDGE}
             className={classes.actionButton}
             color="primary"
             variant="contained">
