@@ -1,15 +1,14 @@
 import BigNumber from "bignumber.js";
 import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
-import { logger } from "core/utilities";
-import { CoinGecko, CoinGeckoPriceResult } from "core/utilities/coingecko";
-import { ZilswapConnector } from "core/zilswap";
 import actions from "app/store/actions";
 import { RewardsActionTypes } from "app/store/rewards/actions";
 import { TokenActionTypes } from "app/store/token/actions";
 import { TokenInfo, TokenUSDValues } from "app/store/types";
 import { SimpleMap, bnOrZero, valueCalculators } from "app/utils";
 import { BIG_ONE, PollIntervals, ZIL_ADDRESS, ZIL_DECIMALS } from "app/utils/constants";
-import { getRewards, getTokens } from '../selectors'
+import { logger } from "core/utilities";
+import { ZilswapConnector } from "core/zilswap";
+import { getRewards, getTokens } from '../selectors';
 
 const computeTokenPrice = (zilPrice: BigNumber, tokens: SimpleMap<TokenInfo>) => {
   const prices = Object.values(tokens).reduce((accum, token) => {
@@ -79,27 +78,29 @@ function* updatePoolUSDValues() {
   }
 }
 
-function* queryUSDValues() {
-  const coinGeckoZilName = "zilliqa";
-  const coinGeckoQuoteDenom = "usd";
+async function getZilPrice() {
+  try {
+    const carbonOraclePriceUrl = "https://api.carbon.network/carbon/pricing/v1/token_price/zil.1.18.1a4a06";
+    const response = await fetch(carbonOraclePriceUrl);
+    const result = await response.json();
+    return bnOrZero(result?.token_price?.twap);
+  } catch (error) {
+    return null
+  }
+}
 
+function* queryUSDValues() {
   while (true) {
     logger("price saga", "query USD values");
     try {
       const { tokens } = getTokens(yield select())
-      const result = (yield call(CoinGecko.getPrice, {
-        coins: [coinGeckoZilName],
-        quote: coinGeckoQuoteDenom,
-      })) as CoinGeckoPriceResult | undefined;
+      const zilPrice = (yield call(getZilPrice)) as BigNumber | null;
 
-      const zilPrice = result?.zilliqa;
       if (!zilPrice)
         continue;
 
       const prices = computeTokenPrice(zilPrice, tokens);
-
-      if (result)
-        yield put(actions.Token.updatePrices(prices));
+      yield put(actions.Token.updatePrices(prices));
     } catch (e) {
       console.warn('Fetch failed, will automatically retry later. Error:')
       console.warn(e)

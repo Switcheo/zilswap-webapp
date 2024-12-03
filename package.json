@@ -59,7 +59,7 @@
     "validate.js": "^0.13.1",
     "web3modal": "^1.9.4",
     "zeeves-auth-sdk-js": "^2.0.0",
-    "zilswap-sdk": "^1.3.24"
+    "zilswap-sdk": "^1.3.26"
   },
   "scripts": {
     "preinstall": "yarn config set ignore-engines true",
