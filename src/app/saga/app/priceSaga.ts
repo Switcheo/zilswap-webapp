@@ -1,13 +1,13 @@
+import BigNumber from "bignumber.js";
+import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import actions from "app/store/actions";
 import { RewardsActionTypes } from "app/store/rewards/actions";
 import { TokenActionTypes } from "app/store/token/actions";
 import { TokenInfo, TokenUSDValues } from "app/store/types";
 import { SimpleMap, bnOrZero, valueCalculators } from "app/utils";
 import { BIG_ONE, PollIntervals, ZIL_ADDRESS, ZIL_DECIMALS } from "app/utils/constants";
-import BigNumber from "bignumber.js";
 import { logger } from "core/utilities";
 import { ZilswapConnector } from "core/zilswap";
-import { call, delay, fork, put, race, select, take } from "redux-saga/effects";
 import { getRewards, getTokens } from '../selectors';
 
 const computeTokenPrice = (zilPrice: BigNumber, tokens: SimpleMap<TokenInfo>) => {
