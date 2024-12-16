@@ -21,7 +21,7 @@ import { ConnectedWallet } from "core/wallet"
 import { logger } from "core/utilities"
 import { BridgeParamConstants } from "app/views/main/Bridge/components/constants"
 import TransactionDetail from "app/views/bridge/TransactionDetail"
-import { BIG_ONE, DISABLE_ZILBRIDGE, SimpleMap, truncateAddress } from "app/utils"
+import { BIG_ONE, DISABLE_ZILBRIDGE, SimpleMap, truncateAddress, ZILBRIDGE_BLACKLIST_DENOMS } from "app/utils"
 import { hexToRGBA, netZilToCarbon, trimValue, truncate, useAsyncTask, useNetwork, useToaster, useTokenFinder } from "app/utils"
 import { AppTheme } from "app/theme/types"
 import { RootState } from "app/store/types"
@@ -271,6 +271,10 @@ const ConfirmTransfer = (props: any) => {
       toChainName: getChainName(bridgeFormState.toBlockchain),
     }
   }, [bridgeFormState.fromBlockchain, bridgeFormState.toBlockchain])
+
+  const isBlacklistedDenom = useMemo(() => {
+    return ZILBRIDGE_BLACKLIST_DENOMS.includes(bridgeToken?.denom ?? '')
+  }, [bridgeToken?.denom])
 
   if (!showTransfer) return null
 
@@ -644,7 +648,7 @@ const ConfirmTransfer = (props: any) => {
         </Box>
 
         <FancyButton
-          disabled={!!DISABLE_ZILBRIDGE || loadingConfirm || !!pendingBridgeTx}
+          disabled={!!DISABLE_ZILBRIDGE || isBlacklistedDenom || loadingConfirm || !!pendingBridgeTx}
           onClick={onConfirm}
           variant="contained"
           color="primary"

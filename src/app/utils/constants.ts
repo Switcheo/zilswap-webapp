@@ -87,6 +87,8 @@ export const isProduction = () => {
 
 export const DISABLE_ZILBRIDGE = false;
 
+export const ZILBRIDGE_BLACKLIST_DENOMS = ['bnb.1.6.773edb', 'zbnb.1.18.c406be'];
+
 export const DEFAULT_TX_SLIPPAGE = 0.01;
 export const DEFAULT_TX_EXPIRY = 3;
 
