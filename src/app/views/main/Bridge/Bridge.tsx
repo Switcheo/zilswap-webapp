@@ -22,7 +22,7 @@ import { BridgeFormState, BridgeState } from 'app/store/bridge/types'
 import { LayoutState, RootState, TokenInfo } from "app/store/types"
 import { AppTheme } from "app/theme/types"
 import { bnOrZero, hexToRGBA, SimpleMap, useAsyncTask, useNetwork, useTokenFinder } from "app/utils"
-import { BIG_ZERO, BRIDGEABLE_EVM_CHAINS, DISABLE_ZILBRIDGE, ZILBRIDGE_BLACKLIST_DENOMS } from "app/utils/constants"
+import { BIG_ZERO, BRIDGEABLE_EVM_CHAINS, DISABLE_ZILBRIDGE, isBlacklistedBridgeDenoms } from "app/utils/constants"
 import { ReactComponent as WarningIcon } from "app/views/ark/NftView/components/assets/warning.svg"
 import { evmIncludes, getEvmChainIDs } from 'app/utils/bridge'
 import { ConnectButton } from "./components"
@@ -501,7 +501,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
   }
 
   const isBlacklistedDenom = useMemo(() => {
-    return ZILBRIDGE_BLACKLIST_DENOMS.includes(bridgeToken?.denom ?? '')
+    return isBlacklistedBridgeDenoms(bridgeToken?.denom ?? '')
   }, [bridgeToken?.denom])
 
   const onEnterKeyPress = () => {
@@ -527,17 +527,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             </Tooltip>
           </Text>
 
-          {Boolean(DISABLE_ZILBRIDGE) && (
-            <Box className={classes.errorBox}>
-              <WarningIcon className={classes.warningIcon} />
-              <Text>
-                ZilBridge is disabled temporarily. The bridge will resume shortly.
-                Follow us on <a href="https://twitter.com/ZilSwap" target="_blank" rel="noreferrer">twitter</a> for updates.
-              </Text>
-            </Box>
-          )}
-
-          {isBlacklistedDenom && (
+          {(Boolean(DISABLE_ZILBRIDGE) || isBlacklistedDenom) && (
             <Box className={classes.errorBox}>
               <WarningIcon className={classes.warningIcon} />
               <Text>
