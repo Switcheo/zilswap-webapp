@@ -85,7 +85,7 @@ export const isProduction = () => {
   return PRODUCTION_HOSTS.includes(window.location.hostname)
 }
 
-export const DISABLE_ZILBRIDGE = false;
+export const DISABLE_ZILBRIDGE = true;
 
 export const ZILBRIDGE_BLACKLIST_DENOMS = ['bnb.1.6.773edb', 'zbnb.1.18.c406be'];
 

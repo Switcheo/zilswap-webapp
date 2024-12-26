@@ -531,7 +531,7 @@ const BridgeView: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) 
             <Box className={classes.errorBox}>
               <WarningIcon className={classes.warningIcon} />
               <Text>
-                ZilBridge is disabled {isBlacklistedDenom && ' for this token'}.
+                ZilBridge is disabled.
                 Follow us on <a href="https://twitter.com/ZilSwap" target="_blank" rel="noreferrer">twitter</a> for updates.
               </Text>
             </Box>
