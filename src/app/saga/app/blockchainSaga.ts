@@ -314,6 +314,7 @@ function* initialize(
     logger('init chain zilswap sdk')
     sdk = new Zilswap(network, providerOrKey ?? undefined, {
       rpcEndpoint: RPCEndpoints[network],
+      deadlineBuffer: 100
     })
 
     for (let attempts = 1; attempts <= 5; ++attempts) {

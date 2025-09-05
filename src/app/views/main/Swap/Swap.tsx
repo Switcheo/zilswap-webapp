@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, Button, IconButton, InputLabel, OutlinedInput, Typography, makeStyles } from "@material-ui/core";
 import { WarningRounded } from "@material-ui/icons";
 import AddIcon from "@material-ui/icons/Add";
@@ -280,7 +280,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     if (outToken) queryParams.set("tokenOut", outToken.address);
 
     history.replace({ search: queryParams.toString() });
-    
+
     // eslint-disable-next-line
   }, [swapFormState.inToken, swapFormState.outToken]);
 
@@ -288,6 +288,8 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     const blacklisted = !!swapFormState.recipientAddress ? isBlacklisted(swapFormState.recipientAddress) : false;
     setRecipientAddrBlacklisted(blacklisted)
   }, [swapFormState.recipientAddress, isBlacklisted]);
+
+  const errorMessage = useMemo(() => error?.message || errorApproveTx?.message || errorWrap?.message, [error, errorApproveTx, errorWrap]);
 
   const initNewToken = (newTokens: InitTokenProps) => {
     dispatch(actions.Swap.update({
@@ -356,7 +358,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           tokenInID: _inToken!.address,
           tokenOutID: _outToken!.address,
         });
-  
+
         if (rateResult.expectedAmount.isNaN() || rateResult.expectedAmount.isNegative()) {
           isInsufficientReserves = true;
           expectedExchangeRate = BIG_ZERO;
@@ -366,9 +368,9 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
           const expectedAmountUnits = rateResult.expectedAmount.shiftedBy(-dstToken.decimals);
           const srcAmountUnits = srcAmount.shiftedBy(-srcToken.decimals);
           expectedExchangeRate = expectedAmountUnits.div(srcAmountUnits).pow(_exactOf === "in" ? 1 : -1).abs();
-  
+
           expectedSlippage = rateResult.slippage.shiftedBy(-2).toNumber();
-  
+
           dstAmount = rateResult.expectedAmount.shiftedBy(-dstToken?.decimals || 0).decimalPlaces(dstToken?.decimals || 0);
         }
       }
@@ -475,7 +477,7 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
     let { outToken } = swapFormState;
     if (swapFormState.outToken?.address === token.address) {
       if (token.isWzil) {
-        outToken =  tokenState.tokens[ZIL_ADDRESS];
+        outToken = tokenState.tokens[ZIL_ADDRESS];
       } else {
         return;
       }
@@ -522,6 +524,9 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
       const amount: BigNumber = exactOf === "in" ? inAmount.shiftedBy(inToken.decimals) : outAmount.shiftedBy(outToken.decimals);
       if (amount.isNaN() || !amount.isFinite())
         throw new Error("Invalid input amount");
+
+      if ([inToken.address, outToken.address].includes("zil19j33tapjje2xzng7svslnsjjjgge930jx0w09v"))
+        throw new Error("https://x.com/zilliqa/status/1887654021856698625");
 
       const balance: BigNumber = bnOrZero(inToken.balance)
 
@@ -734,11 +739,23 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
             </Box>
           )}
 
-          <Typography className={classes.errorMessage} color="error">{error?.message || errorApproveTx?.message || errorWrap?.message}</Typography>
+          <Typography className={classes.errorMessage} color="error">
+            {errorMessage && (
+              errorMessage?.match(/^https:\/\/\S+$/i) ? (
+                <>
+                Unable to swap.
+                <a target="_blank" rel="noreferrer" href={errorMessage}>More Info</a>
+                </>
+              )
+              : (
+                <>{errorMessage}</>
+              )
+            )}
+          </Typography>
           {swapFormState.isInsufficientReserves && (
             <Typography color="error">Pool reserve is too small to fulfill desired output.</Typography>
           )}
-          
+
           {isWrap ?
             <FancyButton walletRequired
               loading={loadingWrap}
@@ -752,18 +769,18 @@ const Swap: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props: any) => {
               onClick={onWrap}>
               {inToken?.isWzil ? "Unwrap" : "Wrap"}
             </FancyButton>
-           :  <FancyButton walletRequired
-                loading={loading}
-                className={classes.actionButton}
-                showTxApprove={showTxApprove}
-                loadingTxApprove={loadingApproveTx}
-                onClickTxApprove={onApproveTx}
-                variant="contained"
-                color="primary"
-                disabled={!inToken || !outToken || recipientAddrBlacklisted}
-                onClick={onSwap}>
-                Swap
-              </FancyButton>
+            : <FancyButton walletRequired
+              loading={loading}
+              className={classes.actionButton}
+              showTxApprove={showTxApprove}
+              loadingTxApprove={loadingApproveTx}
+              onClickTxApprove={onApproveTx}
+              variant="contained"
+              color="primary"
+              disabled={!inToken || !outToken || recipientAddrBlacklisted}
+              onClick={onSwap}>
+              Swap
+            </FancyButton>
           }
           <SwapDetail token={outToken || undefined} />
         </Box>
