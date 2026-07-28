@@ -1,6 +1,7 @@
 import { Channel, EventChannel, channel, eventChannel } from 'redux-saga'
-import { call, cancelled, CancelledEffect, fork, put, select, take, takeEvery } from 'redux-saga/effects'
+import { call, cancelled, CancelledEffect, delay, fork, put, select, take, takeEvery } from 'redux-saga/effects'
 import { AppState, ObservedTx, TxReceipt, TxStatus, Zilswap } from 'zilswap-sdk'
+import { WHITELISTED_TOKENS } from 'zilswap-sdk/lib/constants'
 import { ZiloAppState } from 'zilswap-sdk/lib/zilo'
 
 import { Blockchain, CarbonSDK, Models } from 'carbon-js-sdk'
@@ -8,7 +9,6 @@ import { blockchainForChainId } from 'carbon-js-sdk/lib/util/blockchain'
 import {
   ConnectedWallet,
   WalletConnectType,
-  connectWalletBoltX,
   connectWalletZilPay,
 } from 'core/wallet'
 import { ZILO_DATA } from 'core/zilo/constants'
@@ -22,13 +22,11 @@ import {
   ZAPStats,
 } from 'core/utilities/zap-stats'
 import { ConnectedBridgeWallet } from 'core/wallet/ConnectedBridgeWallet'
-import { getConnectedBoltX } from 'core/utilities/boltx'
 import { netZilToCarbon, SimpleMap } from 'app/utils'
 import { BridgeableChains, BridgeableToken } from 'app/store/bridge/types'
 import { detachedToast } from 'app/utils/useToaster'
 import {
   BRIDGEABLE_WRAPPED_DENOMS,
-  BoltXNetworkMap,
   RPCEndpoints,
   ZIL_ADDRESS,
   WZIL_TOKEN_CONTRACT,
@@ -51,12 +49,8 @@ const getProviderOrKeyFromWallet = (wallet: ConnectedWallet | null) => {
   switch (wallet.type) {
     case WalletConnectType.PrivateKey:
       return wallet.addressInfo.privateKey
-    case WalletConnectType.Zeeves:
     case WalletConnectType.ZilPay:
-    case WalletConnectType.BoltX:
       return wallet.provider
-    case WalletConnectType.Moonlet:
-      throw new Error('moonlet support under development')
     default:
       throw new Error('unknown wallet connector')
   }
@@ -89,47 +83,6 @@ const zilPayObserver = (zilPay: any) => {
       logger('deregistered zilpay observer')
       accountObserver.unsubscribe()
       networkObserver.unsubscribe()
-    }
-  })
-}
-
-const boltXObserver = (boltX: any) => {
-  return eventChannel<ConnectedWallet>(emitter => {
-    const accountSubscription = async (account: any) => {
-      if (account) {
-        logger(`BoltX account changed to: ${account.bech32}`)
-        const walletResult = await connectWalletBoltX(boltX)
-        if (walletResult?.wallet) {
-          emitter(walletResult.wallet)
-        }
-      } else {
-        logger(`BoltX disconnected`)
-        put(
-          actions.Blockchain.initialize({
-            wallet: null,
-            network: BoltXNetworkMap[boltX.zilliqa.wallet.net],
-          })
-        )
-      }
-    }
-
-    const networkSubscription = async (net: string) => {
-      logger(`BoltX network changed to: ${net}`)
-      const walletResult = await connectWalletBoltX(boltX)
-      if (walletResult?.wallet) {
-        emitter(walletResult.wallet)
-      }
-    }
-
-    const { ACCOUNT_CHANGED, NETWORK_CHANGED } = boltX.zilliqa.wallet.events
-    boltX.zilliqa.wallet.on(ACCOUNT_CHANGED, accountSubscription)
-    boltX.zilliqa.wallet.on(NETWORK_CHANGED, networkSubscription)
-    logger('registered boltX observer')
-
-    return () => {
-      logger('deregistered boltX observer')
-      boltX.zilliqa.wallet.off(ACCOUNT_CHANGED, accountSubscription)
-      boltX.zilliqa.wallet.off(NETWORK_CHANGED, networkSubscription)
     }
   })
 }
@@ -312,19 +265,39 @@ function* initialize(
     const { network: prevNetwork } = getBlockchain(yield select())
 
     logger('init chain zilswap sdk')
+    // Bearby imposes a hard 5-second timeout on every RPC proxied through its
+    // injected `.provider`, which is too short for Zilswap's contract-state
+    // reads. useWalletProviderForReads:false sends reads straight to
+    // rpcEndpoint; signing still goes through the wallet. (This replaces an
+    // earlier Proxy that hid `.provider` — Bearby defines it as a read-only
+    // non-configurable property, so the get trap violated a Proxy invariant
+    // and threw a TypeError in the Zilswap constructor.)
     sdk = new Zilswap(network, providerOrKey ?? undefined, {
       rpcEndpoint: RPCEndpoints[network],
+      useWalletProviderForReads: false,
       deadlineBuffer: 100
     })
 
+    // Retry with backoff, and surface the failure. Previously every error was
+    // swallowed and the loop retried immediately, so an unreachable or
+    // rate-limited RPC left the connect dialog spinning forever with nothing
+    // logged — and hammering the node made the rate limiting worse.
+    let initError: Error | null = null
     for (let attempts = 1; attempts <= 5; ++attempts) {
       try {
         yield call([sdk, sdk.initialize], txObserver(txChannel), observingTxs);
         logger('zilswap sdk initialized', attempts);
+        initError = null
         break;
       } catch (err) {
+        initError = err as Error
+        console.warn(`zilswap sdk init attempt ${attempts}/5 failed`, err)
         yield call([sdk, sdk.teardown])
+        if (attempts < 5) yield delay(1000 * attempts)
       }
+    }
+    if (initError) {
+      throw new Error(`Could not reach the Zilliqa RPC endpoint (${RPCEndpoints[network]}) after 5 attempts. It may be rate limiting this network — wait a minute and try again. Last error: ${initError.message}`)
     }
 
     for (let i = 0; i < ZILO_DATA[network].length; ++i) {
@@ -350,10 +323,14 @@ function* initialize(
       (acc, addr) => {
         const tkn = zilswapTokens[addr]
         const isHuny = tkn.address === 'zil1m3m5jqqcaemtefnlk795qpw59daukra8prc43e'
+        // ZilStream's registry API is offline, so the SDK can no longer mark
+        // tokens registered/whitelisted from it. Fall back to the SDK's own
+        // static whitelist so Core pools and verified badges keep working.
+        const whitelisted = tkn.whitelisted || (WHITELISTED_TOKENS[network] ?? []).includes(tkn.address)
         acc[tkn.address] = {
           initialized: false,
-          registered: tkn.registered,
-          whitelisted: tkn.whitelisted,
+          registered: tkn.registered || whitelisted,
+          whitelisted: whitelisted,
           isWzil: tkn.address === WZIL_TOKEN_CONTRACT[network],
           isZil: tkn.address === ZIL_ADDRESS,
           isZwap: tkn.address === ZWAP_TOKEN_CONTRACT[network],
@@ -552,43 +529,6 @@ function* watchZilPay() {
   }
 }
 
-function* watchBoltX() {
-  let chan
-  while (true) {
-    try {
-      const action: WalletAction = yield take(WalletActionTypes.WALLET_UPDATE)
-      if (action.payload.wallet?.type === WalletConnectType.BoltX) {
-        logger('starting to watch boltx')
-        const boltX = (yield call(getConnectedBoltX)) as unknown as any
-        chan = (yield call(boltXObserver, boltX)) as EventChannel<ConnectedWallet>
-        break
-      }
-    } catch (e) {
-      console.warn('Watch BoltX failed, will automatically retry on reconnect. Error:')
-      console.warn(e)
-    }
-  }
-  try {
-    while (true) {
-      const newWallet = (yield take(chan)) as ConnectedWallet
-      const { wallet: oldWallet } = getWallet(yield select())
-      if (oldWallet?.type !== WalletConnectType.BoltX) continue
-      if (
-        newWallet.addressInfo.bech32 === oldWallet?.addressInfo.bech32 &&
-        newWallet.network === oldWallet.network
-      )
-        continue
-      yield put(
-        actions.Blockchain.initialize({ wallet: newWallet, network: newWallet.network })
-      )
-    }
-  } finally {
-    if ((yield cancelled()) as CancelledEffect) {
-      chan.close()
-    }
-  }
-}
-
 function* watchWeb3() {
   let chan
   while (true) {
@@ -629,7 +569,6 @@ export default function* blockchainSaga() {
   yield fork(watchInitialize)
   yield fork(watchReloadPoolTx)
   yield fork(watchZilPay)
-  yield fork(watchBoltX)
   yield fork(watchWeb3)
   yield put(actions.Blockchain.ready())
 }

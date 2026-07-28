@@ -32,13 +32,8 @@ jobs:
 
       # build code to production file
       - run:
-          name: yarn build according to branch
-          command: |
-            if [ "${CIRCLE_BRANCH}" = "master" ]; then
-              NODE_OPTIONS="--max_old_space_size=7168" REACT_APP_GA_MEASUREMENT_ID="G-XRDECDZHLR" yarn build --transpile-only
-            else
-              NODE_OPTIONS="--max_old_space_size=7168" yarn build --transpile-only
-            fi
+          name: yarn build
+          command: NODE_OPTIONS="--max_old_space_size=7168" yarn build --transpile-only
 
       - persist_to_workspace:
           root: .
@@ -67,39 +62,6 @@ jobs:
           command: |
             gcloud storage cp -R build/* gs://zilswap-webapp-${CIRCLE_BRANCH}/
 
-  deploy-ipfs:
-    docker:
-      - image: cimg/node:16.8.0
-    steps:
-      - attach_workspace:
-          at: .
-
-      - restore_cache:
-          keys:
-            - v1-npm-global
-
-      - run:
-          name: install ipfs-deploy
-          command: NPM_CONFIG_PREFIX=~/.npm-global npm install -g ipfs-deploy
-
-      - save_cache:
-          paths:
-            - ~/.npm-global
-          key: v1-npm-global
-
-      - run:
-          name: deploy to ipfs
-          command: |
-            if [ "${CIRCLE_BRANCH}" = "staging" ]; then
-              IPFS_DEPLOY_CLOUDFLARE__ZONE=zilswap.exchange \
-              IPFS_DEPLOY_CLOUDFLARE__RECORD=_dnslink.staging.zilswap.exchange \
-              ~/.npm-global/bin/ipfs-deploy build/ -d cloudflare -C
-            elif [ "${CIRCLE_BRANCH}" = "master" ]; then
-              IPFS_DEPLOY_CLOUDFLARE__ZONE=zilswap.exchange \
-              IPFS_DEPLOY_CLOUDFLARE__RECORD=_dnslink.zilswap.exchange \
-              ~/.npm-global/bin/ipfs-deploy build/ -d cloudflare -C
-            fi
-
 workflows:
   build-and-deploy:
     jobs:
@@ -111,10 +73,6 @@ workflows:
                 - master
                 - staging
       - deploy-gcp:
-          context: org-switcheo
-          requires:
-            - build
-      - deploy-ipfs:
           context: org-switcheo
           requires:
             - build

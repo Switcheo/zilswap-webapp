@@ -10,19 +10,13 @@ import { createBrowserHistory } from "history";
 import { useSelector } from "react-redux";
 import { renderRoutes } from "react-router-config";
 import { Router } from "react-router-dom";
-import { AppButler, isDebug } from "core/utilities";
+import { AppButler } from "core/utilities";
 import { SnackbarUtilsConfigurator } from "app/utils/useToaster";
-import { GoogleAnalytics, NotificationBar, ScrollReset } from "./components";
+import { NotificationBar, ScrollReset } from "./components";
 import routes from "./routes";
 import { startSagas } from "./saga";
 import { RootState } from "./store/types";
 import { darkTheme, lightTheme } from "./theme";
-
-import "zeeves-auth-sdk-js";
-
-if ((window as any).Zeeves) {
-  (window as any).Zeeves.properties.isDebug = isDebug();
-}
 
 const history = createBrowserHistory();
 const themes: any = {
@@ -53,7 +47,6 @@ const AppContainer: React.FC = () => {
           <MuiPickersUtilsProvider utils={DayJsUtils}>
             <Router history={history}>
               <ScrollReset />
-              <GoogleAnalytics />
               {renderRoutes(routes)}
             </Router>
           </MuiPickersUtilsProvider>

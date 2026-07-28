@@ -14,7 +14,6 @@ const initial_state: WalletState = {
 const logoutRemovedKeys: string[] = [
   LocalStorageKeys.PrivateKey,
   LocalStorageKeys.ZilPayConnected,
-  LocalStorageKeys.ZeevesConnected,
 ];
 
 const reducer = (state: WalletState = initial_state, action: any) => {
@@ -29,18 +28,9 @@ const reducer = (state: WalletState = initial_state, action: any) => {
         case WalletConnectType.PrivateKey:
           localStorage.setItem(LocalStorageKeys.PrivateKey, wallet.addressInfo.privateKey!);
           break;
-        case WalletConnectType.Zeeves:
-          logoutRemovedKeys.forEach(key => localStorage.removeItem(key));
-          localStorage.setItem(LocalStorageKeys.ZeevesConnected, "true");
-          break;
-        case WalletConnectType.BoltX:
-          logoutRemovedKeys.forEach(key => localStorage.removeItem(key));
-          localStorage.setItem(LocalStorageKeys.BoltXConnected, "true");
-          break;
         default:
           localStorage.removeItem(LocalStorageKeys.PrivateKey);
           localStorage.removeItem(LocalStorageKeys.ZilPayConnected);
-          localStorage.removeItem(LocalStorageKeys.BoltXConnected);
       }
       return { ...state, ...payload };
     }

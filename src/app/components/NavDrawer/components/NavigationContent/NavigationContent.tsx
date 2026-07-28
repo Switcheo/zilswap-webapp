@@ -9,11 +9,9 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
-import transakSDK from "@transak/transak-sdk";
 import cls from "classnames";
 import { NavLink as RouterLink } from "react-router-dom";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
-import { TRANSAK_API_KEY } from "app/utils/constants";
 import { AppTheme } from "app/theme/types";
 import * as IconModule from "../icons";
 import { NavigationPageOptions } from "../../types";
@@ -137,36 +135,8 @@ const NavigationContent: React.FC<NavigationContentProps> = (
   const { navigation, secondary, onClose, showDrawer } = props;
   const classes = useStyles();
   const [expand, setExpand] = useState<any>(null);
-  const [widgetOpen, setWidgetOpen] = useState(false);
   const Icon = navigation.icon ? Icons[navigation.icon] : InboxIcon;
 
-  const initWidget = (ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    setWidgetOpen(true);
-    onClose?.(ev);
-
-    let transak = new transakSDK({
-      apiKey:
-        process.env.NODE_ENV === "production"
-          ? TRANSAK_API_KEY.PRODUCTION
-          : TRANSAK_API_KEY.DEVELOPMENT, // Your API Key
-      environment:
-        process.env.NODE_ENV === "production" ? "PRODUCTION" : "STAGING", // STAGING/PRODUCTION
-      defaultCryptoCurrency: "ZIL",
-      walletAddress: "", // Your customer's wallet address
-      themeColor: "0E828A", // App theme color
-      fiatCurrency: "", // INR/GBP
-      email: "", // Your customer's email address
-      redirectURL: "",
-      hostURL: window.location.origin,
-      widgetHeight: "600px",
-      widgetWidth: "450px",
-    });
-
-    transak.init();
-    transak.on(transak.EVENTS?.TRANSAK_WIDGET_CLOSE, () =>
-      setWidgetOpen(false)
-    );
-  };
   const selected = (match: any, location: any) => navigation.href ? (InternalRouteMap[location.pathname] || location.pathname).startsWith(navigation.href!) : false;
 
   if (navigation.external && navigation.href) {
@@ -182,31 +152,6 @@ const NavigationContent: React.FC<NavigationContentProps> = (
           )}
           href={navigation.href}
           target="_blank"
-        >
-          <Icon width="20px" className={cls(classes.icon, {
-            [classes.iconMargin]: showDrawer
-          })} />
-          {showDrawer &&
-            <>{navigation.title}</>
-          }
-        </Button>
-      </ListItem>
-    )
-  }
-
-  if (navigation.purchase) {
-    return (
-      <ListItem className={classes.listItem} disableGutters button>
-        <Button
-          className={cls(
-            classes.buyZil,
-            {
-              [classes.highlightTitle]: navigation.highlight,
-              [classes.secondaryFont]: secondary,
-            },
-            classes.buttonLeaf
-          )}
-          onClick={(ev) => !widgetOpen && initWidget(ev)}
         >
           <Icon width="20px" className={cls(classes.icon, {
             [classes.iconMargin]: showDrawer

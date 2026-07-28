@@ -54,9 +54,7 @@ const NetworkSwitchDialog = (props: any) => {
       }
 
       const getEthWalletName = () => {
-        if (ethWallet?.provider.isBoltX) {
-            return 'BoltX';
-        } else if (ethWallet?.provider.isMetamask) {
+        if (ethWallet?.provider.isMetamask) {
             return 'Metamask';
         }
         return 'Your Wallet';
@@ -64,9 +62,7 @@ const NetworkSwitchDialog = (props: any) => {
 
       const getZilWalletName = () => {
         switch (zilWallet?.type) {
-          case WalletConnectType.Zeeves: return "Zeeves Wallet";
-          case WalletConnectType.ZilPay: return "ZilPay";
-          case WalletConnectType.BoltX: return "BoltX";
+          case WalletConnectType.ZilPay: return "Bearby (ZilPay)";
           default: return "Your Wallet";
         }
       }

@@ -23,9 +23,6 @@ const METAZOA_ENDPOINTS: SimpleMap<string> = {
   [Network.TestNet]: "https://test-api.zolar.io",
 } as const;
 
-const LOCALHOST_ENDPOINT = "http://localhost:8181";
-
-
 export const ARK_CONTRACTS_V1: { [key in Network]: { broker: string, tokenProxy: string } } = {
   [Network.MainNet]: { broker: 'zil1jna6pq6fsjsxdkvkz2wyt6tg80p762neqkz2qh', tokenProxy: 'zil1yrqlm8cxpqt8wq5y6axejvcs2h350ykj9cc758' },
   [Network.TestNet]: { broker: 'zil1nyapz27kck9tteejccfr354tnx89s2sddfzqpl', tokenProxy: 'zil1hfp8fn6026kvel2zc25xztk3lss68nlmqmm2fn' },
@@ -79,13 +76,11 @@ const metazoaApiPaths = {
 };
 
 const getHttpClient = (network: Network) => {
-  const endpoint = process.env.REACT_APP_ARK_API_LOCALHOST === "true" ? LOCALHOST_ENDPOINT : ARK_ENDPOINTS[network];
-  return new HTTP(endpoint, apiPaths);
+  return new HTTP(ARK_ENDPOINTS[network], apiPaths);
 }
 
 const getMetazoaHttpClient = (network: Network) => {
-  const endpoint = process.env.REACT_APP_ARK_API_LOCALHOST === "true" ? LOCALHOST_ENDPOINT : METAZOA_ENDPOINTS[network];
-  return new HTTP(endpoint, metazoaApiPaths);
+  return new HTTP(METAZOA_ENDPOINTS[network], metazoaApiPaths);
 }
 
 export interface ArkContractInfo {

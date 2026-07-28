@@ -1,10 +1,9 @@
-import WalletConnectProvider from '@walletconnect/web3-provider';
-import Fortmatic from "fortmatic";
-import Portis from "@portis/web3";
-import Authereum from "authereum";
-import Torus from "@toruslabs/torus-embed";
-import { ethers } from "ethers";
-import BoltXLogo from "./boltx.svg";
+// NOTE: web3modal is intentionally limited to the locally-injected provider
+// (MetaMask et al). Remote-SDK providers (WalletConnect v1, Portis, Authereum,
+// Fortmatic, Torus) were removed 2026-07: those services are sunset and their
+// runtime domains are dead or of unverified ownership — loading their
+// iframes/scripts would grant attacker-controlled content wallet-level trust.
+// BoltX was removed 2026-07 as the wallet is no longer maintained.
 
 export const providerOptions = {
   injected: {
@@ -14,51 +13,5 @@ export const providerOptions = {
         description: "Connect to your MetaMask Wallet"
     },
     package: null
-  },
-  "custom-boltx": {
-    display: {
-      logo: BoltXLogo,
-      name: "BoltX",
-      description: "Connect to your BoltX Wallet"
-    },
-    package: ethers.providers.Provider,
-    connector: async () => {
-      let provider = null;
-      if (typeof (window as any).boltX !== 'undefined') {
-        provider = (window as any).boltX.ethereum;
-        try {
-          await provider.request({ method: 'eth_requestAccounts' })
-        } catch (error) {
-          throw new Error("User Rejected");
-        }
-      } else {
-        throw new Error("BoltX not found");
-      }
-      return provider;
-    }
-  },
-  walletconnect: {
-    package: WalletConnectProvider,
-    options: {
-        infuraId: process.env.REACT_APP_INFURA_ID
-    }
-  },
-  fortmatic: {
-    package: Fortmatic,
-    options: {
-        key: process.env.REACT_APP_FORTMATIC_KEY
-    }
-  },
-  portis: {
-    package: Portis,
-    options: {
-        id: process.env.REACT_APP_PORTIS_ID
-    }
-  },
-  torus: {
-    package: Torus
-  },
-  authereum: {
-    package: Authereum
   },
 };

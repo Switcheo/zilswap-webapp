@@ -138,7 +138,7 @@ const NetworkSwitchBox = (props: Props) => {
                 Switch to the <span style={{ fontWeight: "bold" }}>{requiredChainName}</span> on <span style={{ fontWeight: "bold" }}>{walletToChange}</span> to start using ZilBridge.
             </Text>
 
-            {requiredChainID && !ethWallet?.provider.isBoltX
+            {requiredChainID
                 ? <Fragment>
                     <Button
                         variant="contained"

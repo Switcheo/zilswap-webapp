@@ -19,8 +19,6 @@ export const LoadingKeys = {
 export const LocalStorageKeys = {
   PrivateKey: "zilswap:private-key",
   ZilPayConnected: "zilswap:zilpay-connected",
-  BoltXConnected: "zilswap:boltx-connected",
-  ZeevesConnected: "zilswap:zeeves-connected",
   Network: "zilswap:network",
   UserTokenList: "zilswap:user-token-list",
   PendingClaimedTxs: "zilswap:pending-claimed-txs",
@@ -42,18 +40,18 @@ export const ZilPayNetworkMap = {
   testnet: Network.TestNet,
 } as { [index: string]: Network };
 
-export const BoltXNetworkMap = {
-  mainnet: Network.MainNet,
-  testnet: Network.TestNet,
-} as { [index: string]: Network };
-
-export const ZeevesNetworkMap = {
-  mainnet: Network.MainNet,
-} as { [index: string]: Network };
-
+// Zilliqa 2.0 retired the legacy testnet host: `dev-api.zilliqa.com` no longer
+// resolves (NXDOMAIN), so every testnet RPC call failed outright.
+//
+// Mainnet deliberately does NOT use api.zilliqa.com. ZQ2 runs a credit-based
+// rate limiter (500 credits/sec) and GetSmartContractSubState costs 80, so
+// that endpoint serves only ~5 substate reads per second — against ~130 pools
+// it answers most of a batch with RPC_RATE_LIMIT and never finishes SDK init.
+// ssn.zilpay.io is an unmetered Zilliqa seed node (and the wallet's own
+// default), measured here at 20/20 substate reads in 710ms.
 export const RPCEndpoints: { [key in Network]: string } = {
-  [Network.MainNet]: 'https://api.zilliqa.com',
-  [Network.TestNet]: 'https://dev-api.zilliqa.com',
+  [Network.MainNet]: 'https://ssn.zilpay.io/api',
+  [Network.TestNet]: 'https://api.zq2-testnet.zilliqa.com',
 };
 
 export const EthRpcUrl = {
@@ -194,11 +192,6 @@ export const TOKEN_SYMBOLS = {
   "ZWBTC": "zWBTC",
   "ZUSDT": "zUSDT",
 } as SimpleMap<string>;
-
-export const TRANSAK_API_KEY = {
-  DEVELOPMENT: process.env.REACT_APP_TRANSAK_DEV,
-  PRODUCTION: process.env.REACT_APP_TRANSAK_PROD,
-}
 
 export const TIME_UNIX_PAIRS: { [interval: string]: number } = {
   'hour': 3600,

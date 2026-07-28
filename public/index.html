@@ -6,6 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#999A28" />
 
+  <!--
+    Content-Security-Policy for a strict, wallet-facing frontend:
+    - script-src is 'self' in production (no third-party or inline scripts;
+      INLINE_RUNTIME_CHUNK=false keeps the webpack runtime out of the HTML).
+      %REACT_APP_CSP_SCRIPT_SRC% / %REACT_APP_CSP_CONNECT_EXTRA% are relaxed
+      only for the CRA dev server via .env.development.
+    - connect-src is an allowlist of first-party APIs, chain RPCs and the
+      Carbon bridge backend (mainnet + testnet). The Zilliqa 1.x hosts
+      dev-api/api-ws/dev-ws.zilliqa.com are gone (NXDOMAIN) post-ZQ2 and are
+      deliberately absent; testnet now uses api.zq2-testnet.zilliqa.com.
+    - img/media allow any https host because ARK NFT assets live on
+      arbitrary domains; scripts and frames stay locked down.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; manifest-src 'self'; script-src %REACT_APP_CSP_SCRIPT_SRC%; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; frame-src 'none'; worker-src 'self' blob:; connect-src 'self' https://ssn.zilpay.io https://api.zilliqa.com https://api.zq2-testnet.zilliqa.com https://stats.zilswap.org https://test-stats.zilswap.org https://api-ark.zilswap.org https://test-api-ark.zilswap.org https://api.zolar.io https://test-api.zolar.io https://*.carbon.network wss://*.carbon.network wss://ws-api.carbon.tech https://*.dem.exchange https://api.zilstream.com https://api.coingecko.com https://eth-mainnet.alchemyapi.io https://eth-goerli.alchemyapi.io https://arb1.arbitrum.io https://rinkeby.arbitrum.io https://bsc-dataseed1.binance.org https://bsc-dataseed2.binance.org https://data-seed-prebsc-1-s1.binance.org:8545 https://polygon-rpc.com https://rpc-mumbai.maticvigil.com https://switcheo-assets.s3.ap-southeast-1.amazonaws.com %REACT_APP_CSP_CONNECT_EXTRA%" />
+
   <meta property="og:title" content="" />
   <meta property="og:url" content="" />
   <meta property="og:description" content="" />
@@ -27,6 +42,11 @@
 </head>
 
 <body>
+  <div style="background:#0d1b24;color:#ffc24d;text-align:center;font:14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:10px 16px;border-bottom:1px solid rgba(255,194,77,.35);">
+    &#9888;&#65039; ZilSwap is no longer actively maintained and is provided as-is
+    &mdash; withdrawing funds to your own wallet is recommended. Never enter your
+    wallet seed phrase or private key: ZilSwap will never ask for them.
+  </div>
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
 </body>

@@ -15,11 +15,6 @@ const navigationConfig: NavigationOptions[] = [{
     href: "/arky",
     icon: "Arky",
   }, {
-    title: "Zolar",
-    href: "https://zolar.io/",
-    icon: "Zolar",
-    external: true,
-  }, {
     title: "ZilBridge",
     href: "/bridge",
     icon: "Bridge",
@@ -41,12 +36,6 @@ const navigationConfig: NavigationOptions[] = [{
       title: "Voting",
       href: "https://vote.zilliqa.com/#/zwap/",
       icon: "HowToVote",
-      external: true,
-      show: true,
-    }, {
-      title: "Forum",
-      href: "https://gov.zilswap.io",
-      icon: "Forum",
       external: true,
       show: true,
     }]
@@ -79,13 +68,6 @@ const navigationConfig: NavigationOptions[] = [{
       external: true,
       show: true,
     }]
-  }, {
-    title: "Buy ZIL",
-    href: "https://transak.com/",
-    icon: "LocalAtm",
-    purchase: true,
-    show: true,
-    highlight: true
   }],
 }];
 

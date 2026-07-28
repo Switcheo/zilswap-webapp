@@ -75,13 +75,29 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
     runConnectTask(async () => {
       if (isLoading) return;
 
-      const zilPay = (window as any).zilPay;
+      // Bearby (formerly ZilPay) injects the Zilliqa provider asynchronously —
+      // poll briefly before concluding it is missing.
+      let zilPay = (window as any).zilPay;
+      for (let i = 0; i < 10 && typeof zilPay === "undefined"; ++i) {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        zilPay = (window as any).zilPay;
+      }
       if (typeof zilPay === "undefined")
-        throw new Error("ZilPay extension not installed");
+        throw new Error(
+          "Bearby (ZilPay) is not active on this page. Check that the extension is installed, unlocked, and allowed on this site: right-click the Bearby toolbar icon → 'This can read and change site data' → 'On all sites', then reload this page.");
 
-      const result = await zilPay.wallet.connect();
-      if (result !== zilPay.wallet.isConnect)
-        throw new Error("ZilPay could not be connected to.");
+      if (!zilPay.wallet.isConnect) {
+        // The wallet's connect prompt can hang indefinitely if its background
+        // service is in a bad state (e.g. RPC_RATE_LIMIT) — time out so the
+        // user gets an actionable error and the button stays usable.
+        const result = await Promise.race([
+          zilPay.wallet.connect(),
+          new Promise((_, reject) => setTimeout(() =>
+            reject(new Error("The wallet did not respond after 60 seconds. If the wallet shows an RPC error, wait a minute (or switch its node under Bearby's network settings) and try again.")), 60000)),
+        ]);
+        if (result !== zilPay.wallet.isConnect)
+          throw new Error("Connection request was rejected in the wallet.");
+      }
 
       const walletResult: ConnectWalletResult = await connectWalletZilPay(zilPay);
       if (walletResult.error)
@@ -107,7 +123,7 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
         <ContrastBox className={classes.container}>
           <Box display="flex" flexDirection="row" justifyContent="space-between">
             {isCheckingZilPay && (
-              <InputLabel>Checking ZilPay Extension</InputLabel>
+              <InputLabel>Checking Bearby (ZilPay) Extension</InputLabel>
             )}
             {errorConnect && (
               <Box>
@@ -116,7 +132,7 @@ const ConnectWalletZilPay: React.FC<ConnectWalletManagerViewProps> = (props: any
                 </InputLabel>
                 <br />
                 <Typography color="textPrimary" variant="body2" align="center">
-                  New to ZilPay? Download it
+                  New to Bearby (formerly ZilPay)? Download it
                   {" "}
                   <Link
                     rel="noopener noreferrer"

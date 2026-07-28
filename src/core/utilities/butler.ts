@@ -1,20 +1,16 @@
 
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { connectWalletBoltX, connectWalletPrivateKey, connectWalletZeeves, connectWalletZilPay } from "core/wallet";
+import { connectWalletPrivateKey, connectWalletZilPay } from "core/wallet";
 import { actions } from "app/store";
 import { BlockchainState, RootState } from "app/store/types";
 import { useAsyncTask, useNetwork } from "app/utils";
 import { LocalStorageKeys } from "app/utils/constants";
 import { logger } from "./logger";
-import { getConnectedZeeves } from "./zeeves";
 import { getConnectedZilPay } from "./zilpay";
-import { getConnectedBoltX } from "./boltx";
 
 const privateKey = localStorage.getItem(LocalStorageKeys.PrivateKey);
 const savedZilpay = localStorage.getItem(LocalStorageKeys.ZilPayConnected);
-const savedBoltX = localStorage.getItem(LocalStorageKeys.BoltXConnected);
-const zeevesConnected = localStorage.getItem(LocalStorageKeys.ZeevesConnected);
 
 /**
  * Mock component to initialize saved wallet on app load.
@@ -42,24 +38,6 @@ export const AppButler: React.FC<{}> = (_props: {}) => {
     dispatch(actions.Blockchain.initialize({ wallet: null, network }));
   };
 
-  const initWithZeeves = async () => {
-    logger("butler", "initWithZeeves");
-    try {
-      const zeeves = await getConnectedZeeves();
-      if (zeeves) {
-        const walletInfo = await connectWalletZeeves(zeeves);
-        if (walletInfo?.wallet) {
-          const { wallet } = walletInfo;
-          const { network } = wallet;
-          dispatch(actions.Blockchain.initialize({ wallet, network }));
-          return
-        }
-      }
-    } catch (e) { }
-
-    dispatch(actions.Blockchain.initialize({ wallet: null, network }));
-  };
-
   const initWithZilPay = async () => {
     logger("butler", "initWithZilPay");
     try {
@@ -82,28 +60,6 @@ export const AppButler: React.FC<{}> = (_props: {}) => {
     dispatch(actions.Blockchain.initialize({ wallet: null, network }));
   };
 
-  const initWithBoltX = async () => {
-    logger("butler", "initWithBoltX");
-    try {
-      const boltX = await getConnectedBoltX();
-      if (boltX) {
-        const walletResult = await connectWalletBoltX(boltX);
-        if (walletResult?.wallet) {
-          const { wallet } = walletResult;
-          const { network } = wallet;
-          dispatch(actions.Blockchain.initialize({ wallet, network }));
-          return
-        }
-        console.warn('Failed to connect BoltX!')
-      }
-      console.warn('Failed to get BoltX!')
-    } catch (e) {
-      console.error(e)
-    }
-
-    dispatch(actions.Blockchain.initialize({ wallet: null, network }));
-  };
-
   const initWithoutWallet = async () => {
     logger("butler", "initWithoutWallet");
     dispatch(actions.Blockchain.initialize({ wallet: null, network }));
@@ -119,10 +75,6 @@ export const AppButler: React.FC<{}> = (_props: {}) => {
         initWithPrivateKey(privateKey);
       } else if (savedZilpay === "true") {
         initWithZilPay();
-      } else if (savedBoltX === "true") {
-        initWithBoltX();
-      } else if (zeevesConnected === 'true') {
-        initWithZeeves();
       } else {
         initWithoutWallet();
       }

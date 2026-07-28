@@ -127,15 +127,7 @@ const NetworkToggle: React.FC<NetworkToggleProps> = (
         dispatch(
           actions.Layout.updateNotification({
             type: "",
-            message: "Please change network using your ZilPay wallet.",
-          })
-        );
-        return;
-      } else if (wallet?.type === WalletConnectType.BoltX) {
-        dispatch(
-          actions.Layout.updateNotification({
-            type: "",
-            message: "Please change network using your BoltX wallet.",
+            message: "Please change network using your Bearby (ZilPay) wallet.",
           })
         );
         return;

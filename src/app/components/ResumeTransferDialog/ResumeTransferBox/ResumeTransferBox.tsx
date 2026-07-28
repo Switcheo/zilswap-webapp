@@ -360,8 +360,15 @@ const ResumeTransferBox = (props: any) => {
                 Resume Transfer
             </Text>
 
-            <Text marginTop={2} marginBottom={2.5} variant="h6" align="center">
+            <Text marginTop={2} variant="h6" align="center">
                 Enter your transfer key and connect your wallet <br /> to resume your paused transfer.
+            </Text>
+
+            <Text className={classes.warning} marginTop={1.5} marginBottom={2.5} variant="body2" align="center">
+                The transfer key is the 12-word phrase ZilBridge generated for this
+                transfer only — it is <strong>not</strong> a wallet seed phrase.
+                Never enter your wallet&apos;s seed phrase or private key here:
+                ZilSwap will never ask for them.
             </Text>
 
             <Box display="flex" justifyContent="space-evenly" mb={1.5}>

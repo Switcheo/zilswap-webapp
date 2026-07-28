@@ -30,20 +30,21 @@ interface Props extends BoxProps {
 }
 
 const initialLimits = {
-  mega: 20,
-  single: 20,
   core: 20,
+  single: 20,
   registered: 40,
   all: 40,
 };
 
-const limitArr = ["mega", "single", "core", "registered", "all"];
+// NOTE: order must match the <Tab> labels below — a removed "Mega Drop" tab
+// previously left these off by one, rendering the wrong list on every tab.
+const limitArr = ["core", "single", "registered", "all"];
 
 const PoolsListing: React.FC<Props> = (props: Props) => {
   const { children, className, ownedLiquidity, ...rest } = props;
   const [limits, setLimits] = useState<SimpleMap<number>>(initialLimits);
   const [searchQuery, setSearchQuery] = useState<string | undefined>();
-  const [tabValue, setTabValue] = useState(ownedLiquidity ? 4 : 0);
+  const [tabValue, setTabValue] = useState(ownedLiquidity ? 3 : 0);
   const tokenState = useSelector<RootState, TokenState>(state => state.token);
   const rewardsState = useSelector<RootState, RewardsState>(state => state.rewards);
   const classes = useStyles();
@@ -62,7 +63,6 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
   const {
     registeredTokens,
     otherTokens,
-    megaDrop,
     singleDrop,
     coreDrop,
   } = React.useMemo(() => {
@@ -171,17 +171,11 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
         if (!tokenReward || tokenReward.length === 0)
           return accum;
 
-        if (tokenReward.length === 1) {
-          accum.singleDrop.push(token)
-        }
-        if (tokenReward.length > 1) {
-          accum.megaDrop.push(token);
-        }
+        accum.singleDrop.push(token)
 
         return accum;
       }, {
         singleDrop: [] as TokenInfo[],
-        megaDrop: [] as TokenInfo[],
         registeredTokens: [] as TokenInfo[],
         otherTokens: [] as TokenInfo[],
         coreDrop: [] as TokenInfo[],
@@ -347,13 +341,13 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
       )}
 
       <Grid container spacing={2}>
-        {tabValue === 0 && megaDrop.slice(0, limits[currentLimit]).map((token) => (
+        {tabValue === 0 && coreDrop.slice(0, limits[currentLimit]).map((token) => (
           <Grid key={token.address} item xs={12} >
             <Hidden smDown>
-              <PoolInfoCard showDropTag={false} token={token} />
+              <PoolInfoCard showCoreTag={false} token={token} />
             </Hidden>
             <Hidden mdUp>
-              <PoolMobileInfoCard showDropTag={false} token={token} />
+              <PoolMobileInfoCard showCoreTag={false} token={token} />
             </Hidden>
           </Grid>
         ))}
@@ -367,17 +361,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
             </Hidden>
           </Grid>
         ))}
-        {tabValue === 2 && coreDrop.slice(0, limits[currentLimit]).map((token) => (
-          <Grid key={token.address} item xs={12} >
-            <Hidden smDown>
-              <PoolInfoCard showCoreTag={false} token={token} />
-            </Hidden>
-            <Hidden mdUp>
-              <PoolMobileInfoCard showCoreTag={false} token={token} />
-            </Hidden>
-          </Grid>
-        ))}
-        {tabValue === 3 && registeredTokens.slice(0, limits[currentLimit]).map((token) => (
+        {tabValue === 2 && registeredTokens.slice(0, limits[currentLimit]).map((token) => (
           <Grid key={token.address} item xs={12} >
             <Hidden smDown>
               <PoolInfoCard token={token} />
@@ -387,7 +371,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
             </Hidden>
           </Grid>
         ))}
-        {tabValue === 4 && allTokens.slice(0, limits[currentLimit]).map((token) => (
+        {tabValue === 3 && allTokens.slice(0, limits[currentLimit]).map((token) => (
           <Grid key={token.address} item xs={12} >
             <Hidden smDown>
               <PoolInfoCard token={token} />
@@ -398,7 +382,7 @@ const PoolsListing: React.FC<Props> = (props: Props) => {
           </Grid>
         ))}
 
-        {([megaDrop, singleDrop, coreDrop, registeredTokens, allTokens][tabValue].length > limits[currentLimit]) && (
+        {([coreDrop, singleDrop, registeredTokens, allTokens][tabValue].length > limits[currentLimit]) && (
           <Box width="100%" display="flex" justifyContent="center" justifySelf="center" marginY={4} marginX={1}>
             <Button
               variant="contained"

@@ -132,12 +132,8 @@ const ConnectedWalletBox = (props: any) => {
     switch (wallet?.type) {
       case WalletConnectType.PrivateKey:
         return 'Private Key';
-      case WalletConnectType.Zeeves:
-        return 'Zeeves Wallet';
       case WalletConnectType.ZilPay:
-        return 'ZilPay';
-      case WalletConnectType.BoltX:
-        return 'BoltX';
+        return 'Bearby (ZilPay)';
       default:
         return 'Unknown Wallet';
     }
@@ -159,10 +155,7 @@ const ConnectedWalletBox = (props: any) => {
   if (!wallet) return null;
 
   const address = wallet.addressInfo.byte20;
-  const humanAddress =
-    wallet?.type === WalletConnectType.BoltX
-      ? toBech32Address(address)
-      : wallet.addressInfo.bech32;
+  const humanAddress = wallet.addressInfo.bech32;
 
   return (
     <Box display="flex" flexDirection="column" className={cls(classes.root, className)}>

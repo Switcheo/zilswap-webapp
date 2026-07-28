@@ -1,20 +1,8 @@
-import React, {
-  Fragment,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { Fragment } from "react";
 import { Box, Paper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import cls from "classnames";
 import { PaperProps } from "material-ui";
-import { useSelector } from "react-redux";
-import { useRouteMatch } from "react-router-dom";
-import { TokenGraph } from "app/components";
-import {
-  RootState,
-  SwapFormState,
-} from "app/store/types";
 import { AppTheme } from "app/theme/types";
 
 
@@ -132,55 +120,10 @@ const useStyles = makeStyles((theme: AppTheme) => ({
 const MainCard: React.FC<Props> = (props: any) => {
   const { children, className, staticContext, header, wrapperClass, paperClass, ...rest } = props;
   const classes = useStyles();
-  // const isPool = useRouteMatch("/pool");
-  const isSwap = useRouteMatch("/swap");
-  // const layoutState = useSelector<RootState, LayoutState>(
-  //   (state) => state.layout
-  // );
-  const swapState = useSelector<RootState, SwapFormState>(
-    (state) => state.swap
-  );
-  // const poolToken = useSelector<RootState, TokenInfo | null>(
-  //   (state) => state.pool.token
-  // );
-  // const transactionState = useSelector<RootState, TransactionState>(
-  //   (state) => state.transaction
-  // );
-  const boxRef = useRef<HTMLDivElement | null>(null);
-  const [boxHeight, setBoxHeight] = useState<number>(0);
 
-  useEffect(() => {
-    if (boxRef.current?.clientHeight) {
-      setBoxHeight(boxRef.current?.clientHeight || 0);
-    }
-    // eslint-disable-next-line
-  }, [boxRef.current?.clientHeight]);
-
-  // const hasNotification =
-  //   // show new pool warning
-  //   (isPool && poolToken && !poolToken?.pool) ||
-  //   // show liquidity fee (add liquidity incentive) message
-  //   (isPool &&
-  //     !layoutState.liquidityEarnHidden &&
-  //     layoutState.showPoolType === "add") ||
-  //   // show user created token warning for pool
-  //   (isPool && poolToken?.pool && !poolToken?.registered) ||
-  //   // show user created token warning for swap
-  //   (isSwap &&
-  //     ((swapState.inToken && !swapState.inToken.registered) ||
-  //       (swapState.outToken && !swapState.outToken.registered))) ||
-  //   // show generic notification
-  //   !!layoutState.notification ||
-  //   // show confirming tx message
-  //   transactionState.observingTxs.length > 0 ||
-  //   // show confirmed tx message
-  //   transactionState.submittedTxs.length > 0;
-
-  const showGraph = isSwap && (swapState.inToken || swapState.outToken);
-
-  // const closeAdvancedSetting = () => {
-  //   dispatch(actions.Layout.showAdvancedSetting(false));
-  // };
+  // NOTE: the price graph was removed 2026-07 — it depended on ZilStream's
+  // rates API, which is permanently offline, so it only ever flashed a
+  // loading state. The swap card is centered on its own instead.
 
   return (
     <Fragment>
@@ -218,16 +161,9 @@ const MainCard: React.FC<Props> = (props: any) => {
           </Box>
         </Box> */}
         <Box display="flex" justifyContent="center">
-          {showGraph && (
-            <TokenGraph
-              boxHeight={boxHeight}
-              inToken={swapState.inToken}
-              outToken={swapState.outToken}
-            />
-          )}
           <Box className={wrapperClass} width={488}>
             {header && header}
-            <Paper {...{ ref: boxRef }} {...rest} className={cls(classes.card, paperClass)}>
+            <Paper {...rest} className={cls(classes.card, paperClass)}>
               <Box>{children}</Box>
             </Paper>
           </Box>

@@ -13,11 +13,9 @@ import { ConnectOptionType } from "core/wallet";
 import { NotificationBox } from "app/components";
 import { AppTheme } from "app/theme/types";
 import { useSearchParam } from "app/utils";
-import { ReactComponent as BoltXIcon } from "./boltx.svg";
 import { ConnectWalletOption } from "./components";
 import { ReactComponent as PrivateKeyIconDark } from "./private-key-dark.svg";
 import { ReactComponent as PrivateKeyIcon } from "./private-key.svg";
-import { ReactComponent as ZeevesIcon } from "./zeeves.svg";
 import { ReactComponent as ZilPayIcon } from "./zilpay.svg";
 
 export interface ConnectWalletProps {
@@ -83,25 +81,11 @@ const ConnectWallet: React.FC<
     <Box {...rest} className={cls(classes.root, className)}>
       <DialogContent>
         <ConnectWalletOption
-          label="ZilPay"
+          label="Bearby (ZilPay)"
           icon={ZilPayIcon}
           secureLevel={4}
-          buttonText="Connect ZilPay"
+          buttonText="Connect Bearby"
           onSelect={() => onSelectConnectOption("zilpay")}
-        />
-        <ConnectWalletOption
-          label="BoltX"
-          icon={BoltXIcon}
-          secureLevel={4}
-          buttonText="Connect BoltX"
-          onSelect={() => onSelectConnectOption("boltX")}
-        />
-        <ConnectWalletOption
-          label="Zeeves"
-          icon={ZeevesIcon}
-          secureLevel={4}
-          buttonText="Connect Zeeves"
-          onSelect={() => onSelectConnectOption("zeeves")}
         />
         {showPrivateKeyOption && (
           <ConnectWalletOption
@@ -130,8 +114,8 @@ const ConnectWallet: React.FC<
               </strong>
             </Typography>
             <Typography variant="body2" className={classes.notificationMessage}>
-              To access your liquidity pools, please connect to ZilSwap via a
-              ZilPay wallet.
+              To access your liquidity pools, please connect to ZilSwap via the
+              Bearby (formerly ZilPay) wallet.
               <br />
               Click{" "}
               <Link
@@ -153,7 +137,7 @@ const ConnectWallet: React.FC<
           No wallet yet?
           <br />
           <br />
-          Download ZilPay{" "}
+          Download Bearby (formerly ZilPay){" "}
           <Link
             rel="noopener noreferrer"
             target="_blank"
@@ -161,18 +145,8 @@ const ConnectWallet: React.FC<
           >
             here
           </Link>
-          .
-          <br />
-          <br />
-          Or try{" "}
-          <Link
-            rel="noopener noreferrer"
-            target="_blank"
-            href="https://t.me/zilliqawalletbot"
-          >
-            Zeeves
-          </Link>
-          , a Telegram-based wallet.
+          . Only install the wallet from the official Chrome Web Store listing —
+          fake wallet download sites are circulating.
         </Typography>
       </DialogContent>
     </Box>
