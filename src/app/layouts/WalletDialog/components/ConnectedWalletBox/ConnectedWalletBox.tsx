@@ -8,7 +8,6 @@ import {
   useTheme,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { toBech32Address } from '@zilliqa-js/zilliqa';
 import cls from 'classnames';
 import { useDispatch, useSelector } from 'react-redux';
 import { ConnectedWallet, WalletConnectType } from 'core/wallet';

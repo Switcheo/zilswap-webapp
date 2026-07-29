@@ -29,8 +29,7 @@ const reducer = (state: WalletState = initial_state, action: any) => {
           localStorage.setItem(LocalStorageKeys.PrivateKey, wallet.addressInfo.privateKey!);
           break;
         default:
-          localStorage.removeItem(LocalStorageKeys.PrivateKey);
-          localStorage.removeItem(LocalStorageKeys.ZilPayConnected);
+          logoutRemovedKeys.forEach(key => localStorage.removeItem(key));
       }
       return { ...state, ...payload };
     }
