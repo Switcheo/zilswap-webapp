@@ -70,8 +70,11 @@ jobs:
           command: |
             set -euo pipefail
             echo "$CIRCLE_OIDC_TOKEN_V2" > "$HOME/oidc_token.json"
-            cat > "$HOME/gcp-creds.json" <<'EOF'
-            {
+            # NB: written with printf rather than a heredoc on purpose.
+            # CircleCI 2.1 reserves the double-angle-bracket sequence for
+            # parameter interpolation, so a heredoc operator has to be
+            # backslash-escaped in this file and is easy to break again.
+            printf '%s\n' '{
               "universe_domain": "googleapis.com",
               "type": "external_account",
               "audience": "//iam.googleapis.com/projects/290730833389/locations/global/workloadIdentityPools/circleci-pool/providers/circleci-provider",
@@ -82,8 +85,7 @@ jobs:
                 "format": { "type": "text" }
               },
               "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/webapp-ci-worker@cloud-nodes-372902.iam.gserviceaccount.com:generateAccessToken"
-            }
-            EOF
+            }' > "$HOME/gcp-creds.json"
             sed -i.bak "s|TOKEN_PATH_PLACEHOLDER|$HOME/oidc_token.json|" "$HOME/gcp-creds.json"
             gcloud auth login --brief --cred-file="$HOME/gcp-creds.json"
             gcloud config set project cloud-nodes-372902
