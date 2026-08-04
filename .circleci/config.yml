@@ -50,9 +50,11 @@ jobs:
       - attach_workspace:
           at: .
 
-      # DEPRECATED: static service-account key auth. Kept only as a rollback
-      # path while Workload Identity Federation is being verified. The WIF step
-      # below runs after this one and takes over as the active credential.
+      # DEPRECATED: static service-account key auth, best effort only.
+      # The Workload Identity Federation step below runs after this one and is
+      # the credential the deploy actually uses. This key is being retired and
+      # may already be revoked, so neither a missing GCP_SERVICE_KEY nor a
+      # rejected key is allowed to fail the job.
       # Delete this step when the GCP_SERVICE_KEY context variable is removed.
       - run:
           name: activate GCP service account (deprecated static key)
@@ -62,8 +64,13 @@ jobs:
               exit 0
             fi
             echo $GCP_SERVICE_KEY > ${HOME}/gcloud-service-key.json
-            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
-            gcloud config set project $GCP_PROJECT_ID
+            if gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json; then
+              gcloud config set project $GCP_PROJECT_ID
+            else
+              echo "WARNING: static-key auth failed - the key looks revoked."
+              echo "Continuing; the WIF step below provides the deploy credentials."
+            fi
+            exit 0
 
       - run:
           name: Authenticate to GCP via Workload Identity Federation
