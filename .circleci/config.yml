@@ -50,12 +50,44 @@ jobs:
       - attach_workspace:
           at: .
 
+      # DEPRECATED: static service-account key auth. Kept only as a rollback
+      # path while Workload Identity Federation is being verified. The WIF step
+      # below runs after this one and takes over as the active credential.
+      # Delete this step when the GCP_SERVICE_KEY context variable is removed.
       - run:
-          name: activate GCP service account
+          name: activate GCP service account (deprecated static key)
           command: |
+            if [ -z "${GCP_SERVICE_KEY:-}" ]; then
+              echo "GCP_SERVICE_KEY is unset; skipping static-key auth (WIF step below handles auth)."
+              exit 0
+            fi
             echo $GCP_SERVICE_KEY > ${HOME}/gcloud-service-key.json
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GCP_PROJECT_ID
+
+      - run:
+          name: Authenticate to GCP via Workload Identity Federation
+          command: |
+            set -euo pipefail
+            echo "$CIRCLE_OIDC_TOKEN_V2" > "$HOME/oidc_token.json"
+            cat > "$HOME/gcp-creds.json" <<'EOF'
+            {
+              "universe_domain": "googleapis.com",
+              "type": "external_account",
+              "audience": "//iam.googleapis.com/projects/290730833389/locations/global/workloadIdentityPools/circleci-pool/providers/circleci-provider",
+              "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
+              "token_url": "https://sts.googleapis.com/v1/token",
+              "credential_source": {
+                "file": "TOKEN_PATH_PLACEHOLDER",
+                "format": { "type": "text" }
+              },
+              "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/webapp-ci-worker@cloud-nodes-372902.iam.gserviceaccount.com:generateAccessToken"
+            }
+            EOF
+            sed -i.bak "s|TOKEN_PATH_PLACEHOLDER|$HOME/oidc_token.json|" "$HOME/gcp-creds.json"
+            gcloud auth login --brief --cred-file="$HOME/gcp-creds.json"
+            gcloud config set project cloud-nodes-372902
+            gcloud auth list
 
       - run:
           name: deploy to gcp
