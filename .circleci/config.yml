@@ -35,54 +35,8 @@ jobs:
           name: yarn build
           command: NODE_OPTIONS="--max_old_space_size=7168" yarn build --transpile-only
 
-      - persist_to_workspace:
-          root: .
-          paths:
-            - build
-
-  deploy-gcp:
-    docker:
-      - image: cimg/gcp:2023.08
-        auth:
-          username: $DOCKER_HUB_USERNAME
-          password: $DOCKER_HUB_PASSWORD
-    steps:
-      - attach_workspace:
-          at: .
-
-      - run:
-          name: Authenticate to GCP via Workload Identity Federation
-          command: |
-            set -euo pipefail
-            echo "$CIRCLE_OIDC_TOKEN_V2" > "$HOME/oidc_token.json"
-            # NB: written with printf rather than a heredoc on purpose.
-            # CircleCI 2.1 reserves the double-angle-bracket sequence for
-            # parameter interpolation, so a heredoc operator has to be
-            # backslash-escaped in this file and is easy to break again.
-            printf '%s\n' '{
-              "universe_domain": "googleapis.com",
-              "type": "external_account",
-              "audience": "//iam.googleapis.com/projects/290730833389/locations/global/workloadIdentityPools/circleci-pool/providers/circleci-provider",
-              "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
-              "token_url": "https://sts.googleapis.com/v1/token",
-              "credential_source": {
-                "file": "TOKEN_PATH_PLACEHOLDER",
-                "format": { "type": "text" }
-              },
-              "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/webapp-ci-worker@cloud-nodes-372902.iam.gserviceaccount.com:generateAccessToken"
-            }' > "$HOME/gcp-creds.json"
-            sed -i.bak "s|TOKEN_PATH_PLACEHOLDER|$HOME/oidc_token.json|" "$HOME/gcp-creds.json"
-            gcloud auth login --brief --cred-file="$HOME/gcp-creds.json"
-            gcloud config set project cloud-nodes-372902
-            gcloud auth list
-
-      - run:
-          name: deploy to gcp
-          command: |
-            gcloud storage cp -R build/* gs://zilswap-webapp-${CIRCLE_BRANCH}/
-
 workflows:
-  build-and-deploy:
+  build:
     jobs:
       - build:
           context: org-switcheo
@@ -91,7 +45,3 @@ workflows:
               only:
                 - master
                 - staging
-      - deploy-gcp:
-          context: org-switcheo
-          requires:
-            - build
