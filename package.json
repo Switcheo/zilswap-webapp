@@ -18,7 +18,7 @@
     "buffer": "^6.0.3",
     "carbon-js-sdk": "^0.11.4",
     "classnames": "^2.2.6",
-    "crypto-js": "^3.1.9-1",
+    "crypto-js": "^4.2.0",
     "dayjs": "^1.10.4",
     "decimal.js": "^10.2.0",
     "ethers": "^5.6.0",
