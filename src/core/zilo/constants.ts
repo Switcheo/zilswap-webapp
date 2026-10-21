@@ -24,7 +24,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/01-zilstream',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
+        'https://assets.switcheo.network/zilswap/banner-zilstream.png',
       tokenSymbol: 'STREAM',
       tokenName: 'ZilStream',
       tokenDecimals: 8,
@@ -38,7 +38,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/02-zilliqaroyale',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/1ZILO-2-BLOX-banner.png',
+        'https://assets.switcheo.network/zilswap/1ZILO-2-BLOX-banner.png',
       tokenSymbol: 'BLOX',
       tokenName: 'ZilliqaRoyale',
       tokenDecimals: 2,
@@ -53,7 +53,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/03-demons',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-3-DMZ-banner2x.png',
+        'https://assets.switcheo.network/zilswap/ZILO-3-DMZ-banner2x.png',
       tokenSymbol: 'DMZ',
       tokenName: 'DeMons',
       tokenDecimals: 18,
@@ -68,7 +68,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/04-zilchill',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-4-PLAY-banner.png',
+        'https://assets.switcheo.network/zilswap/ZILO-4-PLAY-banner.png',
       tokenSymbol: 'PLAY',
       tokenName: 'ZilChill',
       tokenDecimals: 5,
@@ -83,7 +83,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/05-zilwatch',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-5-ZWT-banner.png',
+        'https://assets.switcheo.network/zilswap/ZILO-5-ZWT-banner.png',
       tokenSymbol: 'ZWT',
       tokenName: 'ZilWatch',
       tokenDecimals: 8,
@@ -98,7 +98,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/06-envizion',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-6-EVZ-banner.png',
+        'https://assets.switcheo.network/zilswap/ZILO-6-EVZ-banner.png',
       tokenSymbol: 'EVZ',
       tokenName: 'EnviZion',
       tokenDecimals: 8,
@@ -113,7 +113,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/zilo-7-metasportz-city-mszc',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-7-MSZC-banner.jpg',
+        'https://assets.switcheo.network/zilswap/ZILO-7-MSZC-banner.jpg',
       tokenSymbol: 'MSZC',
       tokenName: 'MetaSportZ City',
       tokenDecimals: 6,
@@ -133,7 +133,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/01-zilstream',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/banner-zilstream.png',
+        'https://assets.switcheo.network/zilswap/banner-zilstream.png',
       tokenSymbol: 'STREAM',
       tokenName: 'ZilStream',
       tokenDecimals: 8,
@@ -147,7 +147,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/02-zilliqaroyale',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/1ZILO-2-BLOX-banner.png',
+        'https://assets.switcheo.network/zilswap/1ZILO-2-BLOX-banner.png',
       tokenSymbol: 'BLOX',
       tokenName: 'ZilliqaRoyale',
       tokenDecimals: 2,
@@ -162,7 +162,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/03-demons',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-3-DMZ-banner2x.png',
+        'https://assets.switcheo.network/zilswap/ZILO-3-DMZ-banner2x.png',
       tokenSymbol: 'DMZ',
       tokenName: 'DeMons',
       tokenDecimals: 18,
@@ -177,7 +177,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/04-zilchill',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-4-PLAY-banner.png',
+        'https://assets.switcheo.network/zilswap/ZILO-4-PLAY-banner.png',
       tokenSymbol: 'PLAY',
       tokenName: 'ZilChill',
       tokenDecimals: 5,
@@ -192,7 +192,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/05-zilwatch',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-5-ZWT-banner.png',
+        'https://assets.switcheo.network/zilswap/ZILO-5-ZWT-banner.png',
       tokenSymbol: 'ZWT',
       tokenName: 'ZilWatch',
       tokenDecimals: 8,
@@ -207,7 +207,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/06-envizion',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-6-EVZ-banner.png',
+        'https://assets.switcheo.network/zilswap/ZILO-6-EVZ-banner.png',
       tokenSymbol: 'EVZ',
       tokenName: 'EnviZion',
       tokenDecimals: 8,
@@ -222,7 +222,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/zilo-7-metasportz-city-mszc',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-7-MSZC-banner.jpg',
+        'https://assets.switcheo.network/zilswap/ZILO-7-MSZC-banner.jpg',
       tokenSymbol: 'MSZC',
       tokenName: 'MetaSportZ City',
       tokenDecimals: 12,
@@ -239,7 +239,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/zilo-7-metasportz-city-mszc',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-7-MSZC-banner.jpg',
+        'https://assets.switcheo.network/zilswap/ZILO-7-MSZC-banner.jpg',
       tokenSymbol: 'MSZC',
       tokenName: 'MetaSportZ City',
       tokenDecimals: 12,
@@ -256,7 +256,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/zilo-7-metasportz-city-mszc',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-7-MSZC-banner.jpg',
+        'https://assets.switcheo.network/zilswap/ZILO-7-MSZC-banner.jpg',
       tokenSymbol: 'MSZC',
       tokenName: 'MetaSportZ City',
       tokenDecimals: 12,
@@ -274,7 +274,7 @@ export const ZILO_DATA: { [key in Network]: ReadonlyArray<ILOData> } = {
     {
       projectURL: 'https://docs.zilswap.io/zilo/overview/zilo-7-metasportz-city-mszc',
       imageURL:
-        'https://switcheo-assets.s3.ap-southeast-1.amazonaws.com/zilswap/ZILO-7-MSZC-banner.jpg',
+        'https://assets.switcheo.network/zilswap/ZILO-7-MSZC-banner.jpg',
       tokenSymbol: 'MSZC',
       tokenName: 'MetaSportZ City',
       tokenDecimals: 12,
